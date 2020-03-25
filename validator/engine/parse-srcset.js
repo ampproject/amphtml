@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-goog.provide('parse_srcset.SrcsetParsingResult');
-goog.provide('parse_srcset.parseSrcset');
-goog.require('amp.validator.ValidationError');
-goog.require('goog.structs.Set');
+goog.module('parse_srcset');
+const Set = goog.require('goog.structs.Set');
+const {ValidationError} = goog.require('amp.validator.protogenerated');
 
 /**
  * A single source within a srcset.
@@ -26,33 +25,35 @@ goog.require('goog.structs.Set');
  *   widthOrPixelDensity: string
  * }}
  */
-parse_srcset.SrcsetSourceDef;
+const SrcsetSourceDef = function() {};
+exports.SrcsetSourceDef = SrcsetSourceDef;
 
 /**
  * Return value for parseSrcset.
  * @constructor @struct
  */
-parse_srcset.SrcsetParsingResult = function() {
+const SrcsetParsingResult = function() {
   /** @type {boolean} */
   this.success = false;
-  /** @type {!amp.validator.ValidationError.Code} */
-  this.errorCode = amp.validator.ValidationError.Code.UNKNOWN_CODE;
-  /** @type {!Array<!parse_srcset.SrcsetSourceDef>} */
+  /** @type {!ValidationError.Code} */
+  this.errorCode = ValidationError.Code.UNKNOWN_CODE;
+  /** @type {!Array<!SrcsetSourceDef>} */
   this.srcsetImages = [];
 };
+exports.SrcsetParsingResult = SrcsetParsingResult;
 
 /**
  * Parses the text representation of srcset into array of SrcsetSourceDef.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
- * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
+ * See
+ * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  *
  * If parsing fails, returns false in SrcsetParsingResult.status.
  *
  * @param {string} srcset
- * @return {!parse_srcset.SrcsetParsingResult}
- * @export
+ * @return {!SrcsetParsingResult}
  */
-parse_srcset.parseSrcset = function(srcset) {
+const parseSrcset = function(srcset) {
   // Regex for leading spaces, followed by an optional comma and whitespace,
   // followed by an URL*, followed by an optional space, followed by an
   // optional width or pixel density**, followed by spaces, followed by an
@@ -88,10 +89,10 @@ parse_srcset.parseSrcset = function(srcset) {
           '(?:(,)\\s*)?',
       'g');
   let remainingSrcset = srcset;
-  /** @type {!goog.structs.Set<string>} */
-  const seenWidthOrPixelDensity = new goog.structs.Set();
-  /** @type {!parse_srcset.SrcsetParsingResult} */
-  const result = new parse_srcset.SrcsetParsingResult();
+  /** @type {!Set<string>} */
+  const seenWidthOrPixelDensity = new Set();
+  /** @type {!SrcsetParsingResult} */
+  const result = new SrcsetParsingResult();
   const {srcsetImages} = result;
   let source;
   while (source = imageCandidateRegex.exec(srcset)) {
@@ -103,7 +104,7 @@ parse_srcset.parseSrcset = function(srcset) {
     }
     // Duplicate width or pixel density in srcset.
     if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
-      result.errorCode = amp.validator.ValidationError.Code.DUPLICATE_DIMENSION;
+      result.errorCode = ValidationError.Code.DUPLICATE_DIMENSION;
       return result;
     }
     seenWidthOrPixelDensity.add(widthOrPixelDensity);
@@ -115,20 +116,21 @@ parse_srcset.parseSrcset = function(srcset) {
     }
     // More srcset, comma expected as separator for image candidates.
     if (comma === undefined) {
-      result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+      result.errorCode = ValidationError.Code.INVALID_ATTR_VALUE;
       return result;
     }
   }
   // Regex didn't consume all of the srcset string
   if (remainingSrcset !== '') {
-    result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+    result.errorCode = ValidationError.Code.INVALID_ATTR_VALUE;
     return result;
   }
   // Must have at least one image candidate.
   if (srcsetImages.length === 0) {
-    result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+    result.errorCode = ValidationError.Code.INVALID_ATTR_VALUE;
     return result;
   }
   result.success = true;
   return result;
 };
+exports.parseSrcset = parseSrcset;
