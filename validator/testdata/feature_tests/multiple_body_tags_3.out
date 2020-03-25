@@ -51,6 +51,6 @@ feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engi
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
->>       ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
+>>       ^~~~~~~~~
+feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
