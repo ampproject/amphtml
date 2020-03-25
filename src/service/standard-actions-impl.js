@@ -25,6 +25,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isFiniteNumber, toWin} from '../types';
+import {setCookie} from '../cookies.js';
 import {startsWith} from '../string';
 import {tryFocus} from '../dom';
 
@@ -187,6 +188,9 @@ export class StandardActions {
           .catch(reason => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
+
+      case 'setCookie':
+        return this.handleSetCookie_(invocation);
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -439,6 +443,73 @@ export class StandardActions {
       }
     });
 
+    return null;
+  }
+
+  /**
+   * Handles "setCookie" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handleSetCookie_(invocation) {
+    const {args} = invocation;
+
+    // Use RFC 6265 for allowed cookie name and value characters
+
+    const name = user().assertString(
+      args['name'],
+      "Argument 'name' must be a string."
+    );
+    user().assert(
+      /^[a-z0-9!#$%&'*+\-.^_`|~]+$/i.test(args['name']),
+      "Argument 'name' is required and must contain only characters allowed by RFC 6265"
+    );
+
+    const value = user().assertString(
+      args['value'],
+      "Argument 'value' must be a string."
+    );
+    user().assert(
+      /^[a-z0-9!#$%&'()*+\-./:<=>?@[\]^_`{|}~]*$/i.test(args['value']),
+      "Argument 'value' is required and must contain only characters allowed by RFC 6265"
+    );
+
+    let expirationTime;
+    if (args['max-age']) {
+      // Negative numbers are allowed for the purpose of deleting cookies.
+      const maxAge = user().assertNumber(
+        args['max-age'],
+        "Optional argument 'max-age' must contain a number"
+      );
+      expirationTime = Date.now() + maxAge * 1000;
+    }
+
+    const options = {};
+    if (args['domain']) {
+      // Only perform minimal validation (allowed characters) and let browser
+      // make final verdict on validity.
+      user().assert(
+        /^[0-9.\-]+$/i.test(args['domain']),
+        "Optional argument 'domain' contains disallowed characters"
+      );
+      options.domain = args['domain'];
+    }
+    if (args['samesite']) {
+      user().assert(
+        /^(lax|strict)$/.test(args['samesite']),
+        "Optional argument 'samesite' can only have value 'lax' or 'strict'"
+      );
+      options.sameSite = args['samesite'];
+    }
+    if (args['secure']) {
+      options.secure = user().assertBoolean(
+        args['secure'],
+        "Optional argument 'secure' must be a boolean."
+      );
+    }
+
+    setCookie(this.ampdoc.getWin(), name, value, expirationTime, options);
     return null;
   }
 }
