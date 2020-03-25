@@ -385,8 +385,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
+    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
       [DOUBLECLICK_SRA_EXP]: {
         isTrafficEligible: () =>
           !forcedExperimentId &&

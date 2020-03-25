@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-if (isLongTaskApiSupported(self)) {
-  detectLongTasks(self);
-}
-
 /**
  * @param {!Window} win
  */
@@ -64,4 +60,8 @@ function isLongTaskApiSupported(win) {
     !!win.TaskAttributionTiming &&
     'containerName' in win.TaskAttributionTiming.prototype
   );
+}
+
+if (isLongTaskApiSupported(self)) {
+  detectLongTasks(self);
 }
