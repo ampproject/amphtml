@@ -18,8 +18,6 @@ import {Timeago} from '../timeago';
 import {date, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
-// TODO(wassgha): Figure out what to do with JSX
-import {h} from 'preact'; // eslint-disable-line
 import * as Preact from '../../../../src/preact'; // eslint-disable-line
 
 export default {
