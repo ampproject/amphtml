@@ -593,8 +593,16 @@ export class AmpStoryStoreService {
     const params = parseQueryString(this.win_.location.hash);
 
     if (PREVIEW_STATE_PARAM in params) {
-      return {[StateProperty.PREVIEW_STATE]: true};
+      return {
+        [StateProperty.PREVIEW_STATE]: true,
+        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+        [StateProperty.CAN_SHOW_BOOKEND]: false,
+        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+      };
     }
+
     return {};
   }
 }
