@@ -359,7 +359,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_MODE)) {
+    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
       const videos = this.getAllVideos_();
 
       const autoAdvanceAttr =

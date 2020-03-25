@@ -19,11 +19,16 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {parsePreviewMode} from './utils';
+import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+/**
+ * @private @const {string}
+ */
+const PREVIEW_STATE_PARAM = 'previewState';
 
 /**
  * Util function to retrieve the store service. Ensures we can retrieve the
@@ -78,7 +83,6 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
- *    previewMode: boolean,
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -97,6 +101,7 @@ export let InteractiveComponentDef;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
+ *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
@@ -119,9 +124,6 @@ export let State;
 
 /** @const @enum {string} */
 export const StateProperty = {
-  // Preview mode.
-  PREVIEW_MODE: 'previewMode',
-
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
@@ -143,6 +145,8 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
+  // Story preview state.
+  PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
@@ -550,7 +554,7 @@ export class AmpStoryStoreService {
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
-      [StateProperty.PREVIEW_MODE]: false,
+      [StateProperty.PREVIEW_STATE]: false,
     });
   }
 
@@ -586,9 +590,10 @@ export class AmpStoryStoreService {
    * @protected
    */
   getPreviewOverride_() {
-    const previewMode = parsePreviewMode(this.win_.location.hash);
-    if (previewMode) {
-      return {[StateProperty.PREVIEW_MODE]: true};
+    const params = parseQueryString(this.win_.location.hash);
+
+    if (PREVIEW_STATE_PARAM in params) {
+      return {[StateProperty.PREVIEW_STATE]: true};
     }
     return {};
   }
