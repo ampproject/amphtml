@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,23 +37,23 @@ async function storybookAmp() {
 /**
  * Simple wrapper around the storybook start script.
  */
-async function storybookBento() {
+async function storybookPreact() {
   execOrDie(
-    'node_modules/.bin/start-storybook -c ./tools/storybook/bento-env ' +
+    'node_modules/.bin/start-storybook -c ./tools/storybook/preact-env ' +
       storybookArgs
   );
 }
 
 module.exports = {
   storybookAmp,
-  storybookBento,
+  storybookPreact,
 };
 
-storybookBento.description =
+storybookPreact.description =
   'Isolated testing and development for AMP Bento components.';
 storybookAmp.description =
   'Isolated testing and development for AMPHTML components.';
 
-storybookBento.flags = storybookAmp.flags = {
+storybookPreact.flags = storybookAmp.flags = {
   'port': '  Change the port that the storybook dashboard is served from',
 };

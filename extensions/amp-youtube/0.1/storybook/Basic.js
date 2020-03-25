@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {h} from 'preact'; // eslint-disable-line
-
 import {storiesOf} from '@storybook/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import withAmp from '../../../../tools/storybook/amp-env/decorator.js';
+
+// TODO(wassgha): Figure out what to do with JSX
+import {h} from 'preact'; // eslint-disable-line
+import * as Preact from 'src/preact'; // eslint-disable-line
 
 // eslint-disable-next-line
 storiesOf('Youtube', module)

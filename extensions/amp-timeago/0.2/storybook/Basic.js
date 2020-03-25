@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-import {DateDisplay} from '../date-display';
-import {date, withKnobs} from '@storybook/addon-knobs';
+import {Timeago} from '../timeago';
+import {date, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 // TODO(wassgha): Figure out what to do with JSX
 import {h} from 'preact'; // eslint-disable-line
+import * as Preact from 'src/preact'; // eslint-disable-line
 
 export default {
-  title: 'DateDisplay',
-  component: DateDisplay,
+  title: 'Timeago',
+  component: Timeago,
   decorators: [withA11y, withKnobs],
 };
 
 export const _default = () => {
   const dateTime = date('Date/time', new Date());
+  const cutoff = number('Cutoff (seconds)', 0);
+  const cutoffText = text('Cutoff text', 'Time passed!');
   return (
-    <DateDisplay
-      timestampSeconds={dateTime}
-      layout="fixed-height"
-      height="20"
-      render={date => <span>{`The ISO date is ${date.iso}`}</span>}
+    <Timeago
+      datetime={new Date(dateTime).toISOString()}
+      locale="en"
+      cutoff={cutoff}
+      cutoffText={cutoffText}
     />
   );
 };

@@ -16,7 +16,7 @@
 
 // eslint-disable-next-line local/no-module-exports, no-undef
 module.exports = {
-  stories: ['../../../extensions/**/*.*/stories/!(*.amp).stories.js'],
+  stories: ['../../../extensions/**/*.*/storybook/!(*.amp).js'],
   addons: [
     '@storybook/addon-a11y/register',
     '@storybook/addon-viewport/register',

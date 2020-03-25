@@ -32,7 +32,7 @@ const {
 } = require('./build-system/tasks/process-github-issues');
 const {
   storybookAmp,
-  storybookBento,
+  storybookPreact,
 } = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
@@ -160,7 +160,7 @@ createTask('process-github-issues', processGithubIssues);
 createTask('serve', serve);
 createTask('size', size);
 createTask('storybook:amp', storybookAmp);
-createTask('storybook:bento', storybookBento);
+createTask('storybook:preact', storybookPreact);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
