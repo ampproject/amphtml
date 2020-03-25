@@ -50,7 +50,7 @@ module.exports = {
 };
 
 storybookPreact.description =
-  'Isolated testing and development for AMP Bento components.';
+  'Isolated testing and development for AMP Bento components in Preact mode.';
 storybookAmp.description =
   'Isolated testing and development for AMPHTML components.';
 
