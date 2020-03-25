@@ -23,7 +23,7 @@ module.exports = function() {
       Statement(path) {
         const {node} = path;
         const {trailingComments} = node;
-        if (!trailingComments) {
+        if (!trailingComments || trailingComments.length <= 0) {
           return;
         }
 

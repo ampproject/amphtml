@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 'use strict';
-
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
@@ -34,7 +33,7 @@ const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
-const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
+const {postClosureBabel} = require('./post-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -394,7 +393,6 @@ function compile(
       timeInfo.startTime = Date.now();
       return gulp
         .src(gulpSrcs, {base: SRC_TEMP_DIR})
-        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
@@ -416,6 +414,7 @@ function compile(
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
+        .pipe(postClosureBabel(outputDir, options.esmPassCompilation))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }
