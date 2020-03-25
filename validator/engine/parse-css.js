@@ -31,6 +31,7 @@ goog.provide('parse_css.Stylesheet');
 goog.provide('parse_css.TokenStream');
 goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
+goog.provide('parse_css.extractImportantDeclarations');
 goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
 goog.provide('parse_css.parseInlineStyle');
@@ -346,6 +347,10 @@ parse_css.Declaration = class extends parse_css.Rule {
     this.value = [];
     /** @type {boolean} */
     this.important = false;
+    /** @type {number} */
+    this.important_line = -1;
+    /** @type {number} */
+    this.important_col = -1;
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.DECLARATION;
   }
@@ -711,7 +716,8 @@ class Canonicalizer {
     decl.value.push(tokenStream.next().copyPosTo(new parse_css.EOFToken()));
 
     let foundImportant = false;
-    for (let i = decl.value.length - 1; i >= 0; i--) {
+    // The last token is always EOF, so start at the 2nd to last token.
+    for (let i = decl.value.length - 2; i >= 0; i--) {
       if (decl.value[i].tokenType === parse_css.TokenType.WHITESPACE) {
         continue;
       } else if (
@@ -723,8 +729,11 @@ class Canonicalizer {
         foundImportant &&
           decl.value[i].tokenType === parse_css.TokenType.DELIM &&
         /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
-        decl.value.splice(i, decl.value.length);
         decl.important = true;
+        decl.important_line = decl.value[i].line;
+        decl.important_col = decl.value[i].col;
+        // Delete !important and later, but not the EOF token
+        decl.value.splice(i, decl.value.length - i - 1);
         break;
       } else {
         break;
@@ -1068,6 +1077,29 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
 }
 
 /**
+ * Helper class for implementing parse_css::ExtractImportantProperties.
+ * Iterates over all declarations and returns pointers to declarations
+ * that were marked with `!important`.
+ * @private
+ */
+class ImportantPropertyVisitor extends parse_css.RuleVisitor {
+  /**
+   * @param {!Array<!parse_css.Declaration>} important
+   */
+  constructor(important) {
+    super();
+
+    /** @type {!Array<!parse_css.Declaration>} */
+    this.important = important;
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    if (declaration.important) this.important.push(declaration);
+  }
+}
+
+/**
  * Extracts the URLs within the provided stylesheet, emitting them into
  * parsedUrls and errors into errors.
  * @param {!parse_css.Stylesheet} stylesheet
@@ -1083,6 +1115,17 @@ parse_css.extractUrls = function(stylesheet, parsedUrls, errors) {
   if (errorsOldLength !== errors.length) {
     parsedUrls.splice(parsedUrlsOldLength);
   }
+};
+
+/**
+ * Extracts the declarations marked `!important` within within the provided
+ * stylesheet, emitting them into `important`.
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.Declaration>} important
+ */
+parse_css.extractImportantDeclarations = function(stylesheet, important) {
+  const visitor = new ImportantPropertyVisitor(important);
+  stylesheet.accept(visitor);
 };
 
 /**
