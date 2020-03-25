@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.module('parse_srcset.ParseURLTest');
+goog.provide('parse_url.ParseURLTest');
 
-const parse_url = goog.require('parse_url');
+goog.require('parse_url.URL');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -89,7 +89,7 @@ describe('parse_url', () => {
     assertStrictEqual('foo+bar-baz', url.protocol);
   });
 
-  it('parses uncommon protocols, but not parse_url.URLs', () => {
+  it('parses uncommon protocols, but not URLs', () => {
     const urlString = 'whatsapp:i have no idea what this should contain';
     const url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.hasProtocol);
@@ -268,7 +268,7 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
   });
 
-  it('parses relative parse_url.URL with : character', () => {
+  it('parses relative URL with : character', () => {
     const urlString = '/image:foo.jpg-bar';
     const url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.isValid);
@@ -302,4 +302,5 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
     assertStrictEqual('example.com', url.host);
   });
+
 });

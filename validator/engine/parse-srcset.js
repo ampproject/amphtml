@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-goog.module('parse_srcset');
-const Set = goog.require('goog.structs.Set');
-const generated = goog.require('amp.validator.protogenerated');
+goog.provide('parse_srcset.SrcsetParsingResult');
+goog.provide('parse_srcset.parseSrcset');
+goog.require('amp.validator.ValidationError');
+goog.require('goog.structs.Set');
 
 /**
  * A single source within a srcset.
@@ -25,35 +26,33 @@ const generated = goog.require('amp.validator.protogenerated');
  *   widthOrPixelDensity: string
  * }}
  */
-const SrcsetSourceDef = function() {};
-exports.SrcsetSourceDef = SrcsetSourceDef;
+parse_srcset.SrcsetSourceDef;
 
 /**
  * Return value for parseSrcset.
  * @constructor @struct
  */
-const SrcsetParsingResult = function() {
+parse_srcset.SrcsetParsingResult = function() {
   /** @type {boolean} */
   this.success = false;
-  /** @type {!generated.ValidationError.Code} */
-  this.errorCode = generated.ValidationError.Code.UNKNOWN_CODE;
-  /** @type {!Array<!SrcsetSourceDef>} */
+  /** @type {!amp.validator.ValidationError.Code} */
+  this.errorCode = amp.validator.ValidationError.Code.UNKNOWN_CODE;
+  /** @type {!Array<!parse_srcset.SrcsetSourceDef>} */
   this.srcsetImages = [];
 };
-exports.SrcsetParsingResult = SrcsetParsingResult;
 
 /**
  * Parses the text representation of srcset into array of SrcsetSourceDef.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
- * See
- * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
+ * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  *
  * If parsing fails, returns false in SrcsetParsingResult.status.
  *
  * @param {string} srcset
- * @return {!SrcsetParsingResult}
+ * @return {!parse_srcset.SrcsetParsingResult}
+ * @export
  */
-const parseSrcset = function(srcset) {
+parse_srcset.parseSrcset = function(srcset) {
   // Regex for leading spaces, followed by an optional comma and whitespace,
   // followed by an URL*, followed by an optional space, followed by an
   // optional width or pixel density**, followed by spaces, followed by an
@@ -89,10 +88,10 @@ const parseSrcset = function(srcset) {
           '(?:(,)\\s*)?',
       'g');
   let remainingSrcset = srcset;
-  /** @type {!Set<string>} */
-  const seenWidthOrPixelDensity = new Set();
-  /** @type {!SrcsetParsingResult} */
-  const result = new SrcsetParsingResult();
+  /** @type {!goog.structs.Set<string>} */
+  const seenWidthOrPixelDensity = new goog.structs.Set();
+  /** @type {!parse_srcset.SrcsetParsingResult} */
+  const result = new parse_srcset.SrcsetParsingResult();
   const {srcsetImages} = result;
   let source;
   while (source = imageCandidateRegex.exec(srcset)) {
@@ -104,7 +103,7 @@ const parseSrcset = function(srcset) {
     }
     // Duplicate width or pixel density in srcset.
     if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
-      result.errorCode = generated.ValidationError.Code.DUPLICATE_DIMENSION;
+      result.errorCode = amp.validator.ValidationError.Code.DUPLICATE_DIMENSION;
       return result;
     }
     seenWidthOrPixelDensity.add(widthOrPixelDensity);
@@ -116,21 +115,20 @@ const parseSrcset = function(srcset) {
     }
     // More srcset, comma expected as separator for image candidates.
     if (comma === undefined) {
-      result.errorCode = generated.ValidationError.Code.INVALID_ATTR_VALUE;
+      result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
       return result;
     }
   }
   // Regex didn't consume all of the srcset string
   if (remainingSrcset !== '') {
-    result.errorCode = generated.ValidationError.Code.INVALID_ATTR_VALUE;
+    result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
     return result;
   }
   // Must have at least one image candidate.
   if (srcsetImages.length === 0) {
-    result.errorCode = generated.ValidationError.Code.INVALID_ATTR_VALUE;
+    result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
     return result;
   }
   result.success = true;
   return result;
 };
-exports.parseSrcset = parseSrcset;

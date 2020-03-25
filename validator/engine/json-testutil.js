@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.module('json_testutil');
-const asserts = goog.require('goog.asserts');
+goog.provide('json_testutil.defaultCmpFn');
+goog.provide('json_testutil.makeJsonKeyCmpFn');
+goog.provide('json_testutil.renderJSON');
+goog.require('goog.asserts');
 
 /**
  * Helper function for renderJSON below.
@@ -103,7 +105,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       return;
     }
     default:
-      asserts.fail('Unknown type: ' + typeof obj);
+      goog.asserts.fail('Unknown type: ' + typeof obj);
   }
 }
 
@@ -112,16 +114,11 @@ function objToJsonSegments(obj, out, cmpFn) {
  * @param {string} a
  * @param {string} b
  * @return {number} */
-const defaultCmpFn = function(a, b) {
-  if (a < b) {
-    return -1;
-  }
-  if (a > b) {
-    return 1;
-  }
+json_testutil.defaultCmpFn = function(a, b) {
+  if (a < b) {return -1;}
+  if (a > b) {return 1;}
   return 0;
 };
-exports.defaultCmpFn = defaultCmpFn;
 
 
 /**
@@ -132,7 +129,7 @@ exports.defaultCmpFn = defaultCmpFn;
  * @param {!Array<string>} keyOrder
  * @return {function(string, string): number}
  */
-const makeJsonKeyCmpFn = function(keyOrder) {
+json_testutil.makeJsonKeyCmpFn = function(keyOrder) {
   /** @type {!Object<string, number>} */
   const keyPriority = {};
   for (let ii = 0; ii < keyOrder.length; ++ii) {
@@ -154,10 +151,10 @@ const makeJsonKeyCmpFn = function(keyOrder) {
       return keyPriority[a] - keyPriority[b];
     }
 
-    return defaultCmpFn(a, b);
+    return json_testutil.defaultCmpFn(a, b);
   };
 };
-exports.makeJsonKeyCmpFn = makeJsonKeyCmpFn;
+
 
 /**
  * Determines whether the provided string starts with a particular character.
@@ -192,18 +189,14 @@ function endsWithChar(str, ch) {
  * editors. Usually, minor tweaking is sufficient to fit the output
  * onto our 80 column IBM 5081 punch cards.
  * @param {!Object} obj
- * @param {function(string, string):number=} [cmpFn=defaultCmpFn]
+ * @param {function(string, string):number=} [cmpFn=json_testutil.defaultCmpFn]
  * json key comparator
  * @param {number=} [offset=0] Offset number of characters.
  * @return {string}
  */
-const renderJSON = function(obj, cmpFn, offset) {
-  if (cmpFn === undefined) {
-    cmpFn = defaultCmpFn;
-  }
-  if (offset === undefined) {
-    offset = 0;
-  }
+json_testutil.renderJSON = function(obj, cmpFn, offset) {
+  if (cmpFn === undefined) {cmpFn = json_testutil.defaultCmpFn;}
+  if (offset === undefined) {offset = 0;}
   // First, let objToJsonSegments emit the json into
   // segments. Conveniently, special characters such as '{', ',',
   // etc. are - unless inside a string - emitted as individual strings
@@ -253,4 +246,3 @@ const renderJSON = function(obj, cmpFn, offset) {
   // handy for cutting / pasting a region of lines.
   return lines.join('\n') + '\n';
 };
-exports.renderJSON = renderJSON;

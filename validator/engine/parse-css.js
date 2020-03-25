@@ -20,12 +20,33 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
-goog.module('parse_css');
-
-const asserts = goog.require('goog.asserts');
-const generated = goog.require('amp.validator.protogenerated');
-const googString = goog.require('goog.string');
-const tokenize_css = goog.require('tokenize_css');
+goog.provide('parse_css.AtRule');
+goog.provide('parse_css.BlockType');
+goog.provide('parse_css.Declaration');
+goog.provide('parse_css.ParsedCssUrl');
+goog.provide('parse_css.QualifiedRule');
+goog.provide('parse_css.Rule');
+goog.provide('parse_css.RuleVisitor');
+goog.provide('parse_css.Stylesheet');
+goog.provide('parse_css.TokenStream');
+goog.provide('parse_css.extractAFunction');
+goog.provide('parse_css.extractASimpleBlock');
+goog.provide('parse_css.extractImportantDeclarations');
+goog.provide('parse_css.extractUrls');
+goog.provide('parse_css.parseAStylesheet');
+goog.provide('parse_css.parseInlineStyle');
+goog.provide('parse_css.parseMediaQueries');
+goog.provide('parse_css.stripMinMax');
+goog.provide('parse_css.stripVendorPrefix');
+goog.require('amp.validator.ValidationError.Code');
+goog.require('goog.asserts');
+goog.require('goog.string');
+goog.require('parse_css.EOFToken');
+goog.require('parse_css.ErrorToken');
+goog.require('parse_css.TRIVIAL_EOF_TOKEN');
+goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
+goog.require('parse_css.Token');
+goog.require('parse_css.TokenType');
 
 /**
  * @param {!Array<?>} arr
@@ -45,20 +66,19 @@ function arrayToJSON(arr) {
  * move the current position. tokenAt, current, and next inspect tokens
  * at specific points.
  */
-const TokenStream = class {
+parse_css.TokenStream = class {
   /**
-   * @param {!Array<!tokenize_css.Token>} tokens
+   * @param {!Array<!parse_css.Token>} tokens
    */
   constructor(tokens) {
-    asserts.assert(
+    goog.asserts.assert(
         tokens.length > 0,
         'Internal Error: empty TokenStream - must have EOF token');
-    asserts.assert(
-        tokens[tokens.length - 1].tokenType ===
-            tokenize_css.TokenType.EOF_TOKEN,
+    goog.asserts.assert(
+        tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN,
         'Internal Error: TokenStream must end with EOF');
 
-    /** @type {!Array<!tokenize_css.Token>} */
+    /** @type {!Array<!parse_css.Token>} */
     this.tokens = tokens;
     /** @type {number} */
     this.pos = -1;
@@ -68,7 +88,7 @@ const TokenStream = class {
    * Returns the token at an absolute position in the token stream.
    *
    * @param {number} num
-   * @return {!tokenize_css.Token}
+   * @return {!parse_css.Token}
    */
   tokenAt(num) {
     // The last token is guaranteed to be the EOF token (with correct
@@ -80,7 +100,7 @@ const TokenStream = class {
 
   /**
    * Returns the token at the current position in the token stream.
-   * @return {!tokenize_css.Token}
+   * @return {!parse_css.Token}
    */
   current() {
     return this.tokenAt(this.pos);
@@ -88,7 +108,7 @@ const TokenStream = class {
 
   /**
    * Returns the token at the next position in the token stream.
-   * @return {!tokenize_css.Token}
+   * @return {!parse_css.Token}
    */
   next() {
     return this.tokenAt(this.pos + 1);
@@ -106,7 +126,6 @@ const TokenStream = class {
     this.pos--;
   }
 };
-exports.TokenStream = TokenStream;
 
 /**
  * Strips vendor prefixes from identifiers, e.g. property names or names
@@ -114,25 +133,20 @@ exports.TokenStream = TokenStream;
  * @param {string} prefixedString
  * @return {string}
  */
-const stripVendorPrefix = function(prefixedString) {
+parse_css.stripVendorPrefix = function(prefixedString) {
   // Checking for '-' is an optimization.
   if (prefixedString !== '' && prefixedString[0] === '-') {
-    if (googString./*OK*/ startsWith(prefixedString, '-o-')) {
-      return prefixedString.substr('-o-'.length);
-    }
-    if (googString./*OK*/ startsWith(prefixedString, '-moz-')) {
-      return prefixedString.substr('-moz-'.length);
-    }
-    if (googString./*OK*/ startsWith(prefixedString, '-ms-')) {
-      return prefixedString.substr('-ms-'.length);
-    }
-    if (googString./*OK*/ startsWith(prefixedString, '-webkit-')) {
-      return prefixedString.substr('-webkit-'.length);
-    }
+    if (goog.string./*OK*/ startsWith(prefixedString, '-o-'))
+    {return prefixedString.substr('-o-'.length);}
+    if (goog.string./*OK*/ startsWith(prefixedString, '-moz-'))
+    {return prefixedString.substr('-moz-'.length);}
+    if (goog.string./*OK*/ startsWith(prefixedString, '-ms-'))
+    {return prefixedString.substr('-ms-'.length);}
+    if (goog.string./*OK*/ startsWith(prefixedString, '-webkit-'))
+    {return prefixedString.substr('-webkit-'.length);}
   }
   return prefixedString;
 };
-exports.stripVendorPrefix = stripVendorPrefix;
 
 /**
  * Strips 'min-' or 'max-' from the start of a media feature identifier, if
@@ -140,70 +154,69 @@ exports.stripVendorPrefix = stripVendorPrefix;
  * @param {string} prefixedString
  * @return {string}
  */
-const stripMinMax = function(prefixedString) {
-  if (googString./*OK*/ startsWith(prefixedString, 'min-')) {
+parse_css.stripMinMax = function(prefixedString) {
+  if (goog.string./*OK*/ startsWith(prefixedString, 'min-')) {
     return prefixedString.substr('min-'.length);
   }
-  if (googString./*OK*/ startsWith(prefixedString, 'max-')) {
+  if (goog.string./*OK*/ startsWith(prefixedString, 'max-')) {
     return prefixedString.substr('max-'.length);
   }
   return prefixedString;
 };
-exports.stripMinMax = stripMinMax;
 
 /**
- * Returns a Stylesheet object with nested Rules.
+ * Returns a Stylesheet object with nested parse_css.Rules.
  *
  * The top level Rules in a Stylesheet are always a series of
  * QualifiedRule's or AtRule's.
  *
- * @param {!Array<!tokenize_css.Token>} tokenList
- * @param {!Object<string,!BlockType>} atRuleSpec block type rules for
+ * @param {!Array<!parse_css.Token>} tokenList
+ * @param {!Object<string,parse_css.BlockType>} atRuleSpec block type rules for
  * all CSS AT rules this canonicalizer should handle.
- * @param {!BlockType} defaultSpec default block type for types not
+ * @param {parse_css.BlockType} defaultSpec default block type for types not
  * found in atRuleSpec.
- * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the errors.
- * @return {!Stylesheet}
+ * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+ * @return {!parse_css.Stylesheet}
  */
-const parseAStylesheet = function(tokenList, atRuleSpec, defaultSpec, errors) {
+parse_css.parseAStylesheet = function(
+  tokenList, atRuleSpec, defaultSpec, errors) {
   const canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
-  const stylesheet = new Stylesheet();
+  const stylesheet = new parse_css.Stylesheet();
 
   stylesheet.rules =
       canonicalizer.parseAListOfRules(tokenList, /* topLevel */ true, errors);
   tokenList[0].copyPosTo(stylesheet);
-  const eof = /** @type {!tokenize_css.EOFToken} */
+  const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
   stylesheet.eof = eof;
 
   return stylesheet;
 };
-exports.parseAStylesheet = parseAStylesheet;
 
 /**
  * Returns a array of Declaration objects.
  *
- * @param {!Array<!tokenize_css.Token>} tokenList
- * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the errors.
- * @return {!Array<!Declaration>}
+ * @param {!Array<!parse_css.Token>} tokenList
+ * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+ * @return {!Array<!parse_css.Declaration>}
  */
-const parseInlineStyle = function(tokenList, errors) {
-  const canonicalizer = new Canonicalizer({}, BlockType.PARSE_AS_DECLARATIONS);
+parse_css.parseInlineStyle = function(tokenList, errors) {
+  const canonicalizer =
+      new Canonicalizer({}, parse_css.BlockType.PARSE_AS_DECLARATIONS);
   return canonicalizer.parseAListOfDeclarations(tokenList, errors);
 };
-exports.parseInlineStyle = parseInlineStyle;
 
 /**
  * Abstract super class for the parser rules.
  */
-const Rule = class extends tokenize_css.Token {
+parse_css.Rule = class extends parse_css.Token {
   constructor() {
     super();
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.UNKNOWN;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
-  /** @param {!RuleVisitor} visitor */
+  /** @param {!parse_css.RuleVisitor} visitor */
   accept(visitor) {}
 
   /**
@@ -214,17 +227,16 @@ const Rule = class extends tokenize_css.Token {
     return JSON.stringify(this.toJSON(), null, opt_indent);
   }
 };
-exports.Rule = Rule;
 
-const Stylesheet = class extends Rule {
+parse_css.Stylesheet = class extends parse_css.Rule {
   constructor() {
     super();
-    /** @type {!Array<!Rule>} */
+    /** @type {!Array<!parse_css.Rule>} */
     this.rules = [];
-    /** @type {?tokenize_css.EOFToken} */
+    /** @type {?parse_css.EOFToken} */
     this.eof = null;
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.STYLESHEET;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.STYLESHEET;
   }
 
   /** @inheritDoc */
@@ -236,17 +248,15 @@ const Stylesheet = class extends Rule {
     visitor.leaveStylesheet(this);
   }
 };
-exports.Stylesheet = Stylesheet;
-
 /** @inheritDoc */
-Stylesheet.prototype.toJSON = function() {
-  const json = Rule.prototype.toJSON.call(this);
+parse_css.Stylesheet.prototype.toJSON = function() {
+  const json = parse_css.Rule.prototype.toJSON.call(this);
   json['rules'] = arrayToJSON(this.rules);
   json['eof'] = this.eof.toJSON();
   return json;
 };
 
-const AtRule = class extends Rule {
+parse_css.AtRule = class extends parse_css.Rule {
   /**
    * @param {string} name
    */
@@ -254,14 +264,14 @@ const AtRule = class extends Rule {
     super();
     /** @type {string} */
     this.name = name;
-    /** @type {!Array<!tokenize_css.Token>} */
+    /** @type {!Array<!parse_css.Token>} */
     this.prelude = [];
-    /** @type {!Array<!Rule>} */
+    /** @type {!Array<!parse_css.Rule>} */
     this.rules = [];
-    /** @type {!Array<!Declaration>} */
+    /** @type {!Array<!parse_css.Declaration>} */
     this.declarations = [];
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.AT_RULE;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.AT_RULE;
   }
 
   /** @inheritDoc */
@@ -276,11 +286,9 @@ const AtRule = class extends Rule {
     visitor.leaveAtRule(this);
   }
 };
-exports.AtRule = AtRule;
-
 /** @inheritDoc */
-AtRule.prototype.toJSON = function() {
-  const json = Rule.prototype.toJSON.call(this);
+parse_css.AtRule.prototype.toJSON = function() {
+  const json = parse_css.Rule.prototype.toJSON.call(this);
   json['name'] = this.name;
   json['prelude'] = arrayToJSON(this.prelude);
   json['rules'] = arrayToJSON(this.rules);
@@ -288,15 +296,15 @@ AtRule.prototype.toJSON = function() {
   return json;
 };
 
-const QualifiedRule = class extends Rule {
+parse_css.QualifiedRule = class extends parse_css.Rule {
   constructor() {
     super();
-    /** @type {!Array<!tokenize_css.Token>} */
+    /** @type {!Array<!parse_css.Token>} */
     this.prelude = [];
-    /** @type {!Array<!Declaration>} */
+    /** @type {!Array<!parse_css.Declaration>} */
     this.declarations = [];
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.QUALIFIED_RULE;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.QUALIFIED_RULE;
   }
 
   /** @inheritDoc */
@@ -308,30 +316,26 @@ const QualifiedRule = class extends Rule {
     visitor.leaveQualifiedRule(this);
   }
 };
-exports.QualifiedRule = QualifiedRule;
-
 /** @inheritDoc */
-QualifiedRule.prototype.toJSON = function() {
-  const json = Rule.prototype.toJSON.call(this);
+parse_css.QualifiedRule.prototype.toJSON = function() {
+  const json = parse_css.Rule.prototype.toJSON.call(this);
   json['prelude'] = arrayToJSON(this.prelude);
   json['declarations'] = arrayToJSON(this.declarations);
   return json;
 };
 
 /** @return {string} The concatenation of the qualified rule name. */
-QualifiedRule.prototype.ruleName = function() {
+parse_css.QualifiedRule.prototype.ruleName = function() {
   let ruleName = '';
   for (let i = 0; i < this.prelude.length; ++i) {
     const prelude =
-        /** @type {!tokenize_css.IdentToken} */ (this.prelude[i]);
-    if (prelude.value) {
-      ruleName += prelude.value;
-    }
+    /** @type {!parse_css.IdentToken} */ (this.prelude[i]);
+    if (prelude.value) {ruleName += prelude.value;}
   }
   return ruleName;
 };
 
-const Declaration = class extends Rule {
+parse_css.Declaration = class extends parse_css.Rule {
   /**
    * @param {string} name
    */
@@ -339,7 +343,7 @@ const Declaration = class extends Rule {
     super();
     /** @type {string} */
     this.name = name;
-    /** @type {!Array<!tokenize_css.Token>} */
+    /** @type {!Array<!parse_css.Token>} */
     this.value = [];
     /** @type {boolean} */
     this.important = false;
@@ -347,8 +351,8 @@ const Declaration = class extends Rule {
     this.important_line = -1;
     /** @type {number} */
     this.important_col = -1;
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.DECLARATION;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.DECLARATION;
   }
 
   /**
@@ -360,15 +364,13 @@ const Declaration = class extends Rule {
     if (this.value.length === 0) {
       return '';
     }
-    if (this.value[0].tokenType === tokenize_css.TokenType.IDENT) {
-      return /** @type {!tokenize_css.StringValuedToken} */ (this.value[0])
-          .value;
+    if (this.value[0].tokenType === parse_css.TokenType.IDENT) {
+      return /** @type {!parse_css.StringValuedToken} */ (this.value[0]).value;
     }
     if (this.value.length >= 2 &&
-        (this.value[0].tokenType === tokenize_css.TokenType.WHITESPACE) &&
-        this.value[1].tokenType === tokenize_css.TokenType.IDENT) {
-      return /** @type {!tokenize_css.StringValuedToken} */ (this.value[1])
-          .value;
+        (this.value[0].tokenType === parse_css.TokenType.WHITESPACE) &&
+        this.value[1].tokenType === parse_css.TokenType.IDENT) {
+      return /** @type {!parse_css.StringValuedToken} */ (this.value[1]).value;
     }
     return '';
   }
@@ -380,14 +382,13 @@ const Declaration = class extends Rule {
   }
 };
 /** @inheritDoc */
-Declaration.prototype.toJSON = function() {
-  const json = Rule.prototype.toJSON.call(this);
+parse_css.Declaration.prototype.toJSON = function() {
+  const json = parse_css.Rule.prototype.toJSON.call(this);
   json['name'] = this.name;
   json['important'] = this.important;
   json['value'] = arrayToJSON(this.value);
   return json;
 };
-exports.Declaration = Declaration;
 
 /**
  * A visitor for Rule subclasses (StyleSheet, AtRule, QualifiedRule,
@@ -395,40 +396,39 @@ exports.Declaration = Declaration;
  * Visitation order is to call the Visit* method on the current node,
  * then visit the children, then call the Leave* method on the current node.
  */
-const RuleVisitor = class {
+parse_css.RuleVisitor = class {
   constructor() {}
 
-  /** @param {!Stylesheet} stylesheet */
+  /** @param {!parse_css.Stylesheet} stylesheet */
   visitStylesheet(stylesheet) {}
 
-  /** @param {!Stylesheet} stylesheet */
+  /** @param {!parse_css.Stylesheet} stylesheet */
   leaveStylesheet(stylesheet) {}
 
-  /** @param {!AtRule} atRule */
+  /** @param {!parse_css.AtRule} atRule */
   visitAtRule(atRule) {}
 
-  /** @param {!AtRule} atRule */
+  /** @param {!parse_css.AtRule} atRule */
   leaveAtRule(atRule) {}
 
-  /** @param {!QualifiedRule} qualifiedRule */
+  /** @param {!parse_css.QualifiedRule} qualifiedRule */
   visitQualifiedRule(qualifiedRule) {}
 
-  /** @param {!QualifiedRule} qualifiedRule */
+  /** @param {!parse_css.QualifiedRule} qualifiedRule */
   leaveQualifiedRule(qualifiedRule) {}
 
-  /** @param {!Declaration} declaration */
+  /** @param {!parse_css.Declaration} declaration */
   visitDeclaration(declaration) {}
 
-  /** @param {!Declaration} declaration */
+  /** @param {!parse_css.Declaration} declaration */
   leaveDeclaration(declaration) {}
 };
-exports.RuleVisitor = RuleVisitor;
 
 /**
  * Enum describing how to parse the rules inside a CSS AT Rule.
  * @enum {string}
  */
-const BlockType = {
+parse_css.BlockType = {
   // Parse this simple block as a list of rules
   // (Either Qualified Rules or AT Rules)
   'PARSE_AS_RULES': 'PARSE_AS_RULES',
@@ -438,7 +438,6 @@ const BlockType = {
   // in conjunction with a later step emitting an error for this rule.
   'PARSE_AS_IGNORE': 'PARSE_AS_IGNORE',
 };
-exports.BlockType = BlockType;
 
 /**
  * A canonicalizer is created with a specific spec for canonicalizing CSS AT
@@ -447,19 +446,19 @@ exports.BlockType = BlockType;
  */
 class Canonicalizer {
   /**
-   * @param {!Object<string,!BlockType>} atRuleSpec block
+   * @param {!Object<string,parse_css.BlockType>} atRuleSpec block
    * type rules for all CSS AT rules this canonicalizer should handle.
-   * @param {!BlockType} defaultSpec default block type for
+   * @param {parse_css.BlockType} defaultSpec default block type for
    * types not found in atRuleSpec.
    */
   constructor(atRuleSpec, defaultSpec) {
     /**
-     * @type {!Object<string,!BlockType>}
+     * @type {!Object<string,parse_css.BlockType>}
      * @private
      */
     this.atRuleSpec_ = atRuleSpec;
     /**
-     * @type {!BlockType}
+     * @type {parse_css.BlockType}
      * @private
      */
     this.defaultAtRuleSpec_ = defaultSpec;
@@ -467,11 +466,12 @@ class Canonicalizer {
 
   /**
    * Returns a type telling us how to canonicalize a given AT rule's block.
-   * @param {!AtRule} atRule
-   * @return {!BlockType}
+   * @param {!parse_css.AtRule} atRule
+   * @return {!parse_css.BlockType}
    */
   blockTypeFor(atRule) {
-    const maybeBlockType = this.atRuleSpec_[stripVendorPrefix(atRule.name)];
+    const maybeBlockType =
+        this.atRuleSpec_[parse_css.stripVendorPrefix(atRule.name)];
     if (maybeBlockType !== undefined) {
       return maybeBlockType;
     } else {
@@ -480,33 +480,31 @@ class Canonicalizer {
   }
 
   /**
-   * Parses and returns a list of rules, such as at the top level of a
-   * stylesheet. Return list has only QualifiedRule's and AtRule's as top level
-   * elements.
-   * @param {!Array<!tokenize_css.Token>} tokenList
+   * Parses and returns a list of rules, such as at the top level of a stylesheet.
+   * Return list has only QualifiedRule's and AtRule's as top level elements.
+   * @param {!Array<!parse_css.Token>} tokenList
    * @param {boolean} topLevel
-   * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the
-   *     errors.
-   * @return {!Array<!Rule>}
+   * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+   * @return {!Array<!parse_css.Rule>}
    */
   parseAListOfRules(tokenList, topLevel, errors) {
-    const tokenStream = new TokenStream(tokenList);
+    const tokenStream = new parse_css.TokenStream(tokenList);
     const rules = [];
     while (true) {
       tokenStream.consume();
       const current = tokenStream.current().tokenType;
-      if (current === tokenize_css.TokenType.WHITESPACE) {
+      if (current === parse_css.TokenType.WHITESPACE) {
         continue;
-      } else if (current === tokenize_css.TokenType.EOF_TOKEN) {
+      } else if (current === parse_css.TokenType.EOF_TOKEN) {
         return rules;
       } else if (
-          current === tokenize_css.TokenType.CDO ||
-          current === tokenize_css.TokenType.CDC) {
+        current === parse_css.TokenType.CDO ||
+          current === parse_css.TokenType.CDC) {
         if (topLevel) {
           continue;
         }
         this.parseAQualifiedRule(tokenStream, rules, errors);
-      } else if (current === tokenize_css.TokenType.AT_KEYWORD) {
+      } else if (current === parse_css.TokenType.AT_KEYWORD) {
         rules.push(this.parseAnAtRule(tokenStream, errors));
       } else {
         this.parseAQualifiedRule(tokenStream, rules, errors);
@@ -517,60 +515,61 @@ class Canonicalizer {
   /**
    * Parses an At Rule.
    *
-   * @param {!TokenStream} tokenStream
-   * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the
-   *     errors.
-   * @return {!AtRule}
+   * @param {!parse_css.TokenStream} tokenStream
+   * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+   * @return {!parse_css.AtRule}
    */
   parseAnAtRule(tokenStream, errors) {
-    asserts.assert(
-        tokenStream.current().tokenType === tokenize_css.TokenType.AT_KEYWORD,
+    goog.asserts.assert(
+        tokenStream.current().tokenType === parse_css.TokenType.AT_KEYWORD,
         'Internal Error: parseAnAtRule precondition not met');
 
     const startToken =
-        /** @type {!tokenize_css.AtKeywordToken} */ (tokenStream.current());
-    const rule = new AtRule(startToken.value);
+    /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
+    const rule = new parse_css.AtRule(startToken.value);
     startToken.copyPosTo(rule);
 
     while (true) {
       tokenStream.consume();
       const current = tokenStream.current().tokenType;
-      if (current === tokenize_css.TokenType.SEMICOLON ||
-          current === tokenize_css.TokenType.EOF_TOKEN) {
+      if (current === parse_css.TokenType.SEMICOLON ||
+          current === parse_css.TokenType.EOF_TOKEN) {
         rule.prelude.push(tokenStream.current());
         return rule;
       }
-      if (current === tokenize_css.TokenType.OPEN_CURLY) {
+      if (current === parse_css.TokenType.OPEN_CURLY) {
         rule.prelude.push(
-            tokenStream.current().copyPosTo(new tokenize_css.EOFToken()));
+            tokenStream.current().copyPosTo(new parse_css.EOFToken()));
 
-        /** @type {!Array<!tokenize_css.Token>} */
-        const contents = extractASimpleBlock(tokenStream, errors);
+        /** @type {!Array<!parse_css.Token>} */
+        const contents = parse_css.extractASimpleBlock(tokenStream, errors);
 
         switch (this.blockTypeFor(rule)) {
-          case BlockType.PARSE_AS_RULES: {
+          case parse_css.BlockType.PARSE_AS_RULES: {
             rule.rules =
                 this.parseAListOfRules(contents, /* topLevel */ false, errors);
             break;
           }
-          case BlockType.PARSE_AS_DECLARATIONS: {
+          case parse_css.BlockType.PARSE_AS_DECLARATIONS: {
             rule.declarations = this.parseAListOfDeclarations(contents, errors);
             break;
           }
-          case BlockType.PARSE_AS_IGNORE: {
+          case parse_css.BlockType.PARSE_AS_IGNORE: {
             break;
           }
           default: {
-            asserts.fail('Unrecognized blockType ' + this.blockTypeFor(rule));
+            goog.asserts.fail(
+                'Unrecognized blockType ' + this.blockTypeFor(rule));
             break;
           }
         }
         return rule;
       }
-      if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/ 0)) {
-        errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
-      }
+      if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/0))
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
   }
 
@@ -579,96 +578,91 @@ class Canonicalizer {
    * respectively. Rule will include a prelude with the CSS selector (if any)
    * and a list of declarations.
    *
-   * @param {!TokenStream} tokenStream
-   * @param {!Array<!Rule>} rules output array for new rule
-   * @param {!Array<!tokenize_css.ErrorToken>} errors output array for new
-   *     error.
+   * @param {!parse_css.TokenStream} tokenStream
+   * @param {!Array<!parse_css.Rule>} rules output array for new rule
+   * @param {!Array<!parse_css.ErrorToken>} errors output array for new error.
    */
   parseAQualifiedRule(tokenStream, rules, errors) {
-    asserts.assert(
-        tokenStream.current().tokenType !== tokenize_css.TokenType.EOF_TOKEN &&
-            tokenStream.current().tokenType !==
-                tokenize_css.TokenType.AT_KEYWORD,
+    goog.asserts.assert(
+        tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
+            tokenStream.current().tokenType !== parse_css.TokenType.AT_KEYWORD,
         'Internal Error: parseAQualifiedRule precondition not met');
 
-    const rule = tokenStream.current().copyPosTo(new QualifiedRule());
+    const rule = tokenStream.current().copyPosTo(new parse_css.QualifiedRule());
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
       const current = tokenStream.current().tokenType;
-      if (current === tokenize_css.TokenType.EOF_TOKEN) {
-        errors.push(rule.copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code
+      if (current === parse_css.TokenType.EOF_TOKEN) {
+        errors.push(rule.copyPosTo(new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code
                 .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
             ['style'])));
         return;
       }
-      if (current === tokenize_css.TokenType.OPEN_CURLY) {
+      if (current === parse_css.TokenType.OPEN_CURLY) {
         rule.prelude.push(
-            tokenStream.current().copyPosTo(new tokenize_css.EOFToken()));
+            tokenStream.current().copyPosTo(new parse_css.EOFToken()));
 
         // This consumes declarations (ie: "color: red;" ) inside
         // a qualified rule as that rule's value.
         rule.declarations = this.parseAListOfDeclarations(
-            extractASimpleBlock(tokenStream, errors), errors);
+            parse_css.extractASimpleBlock(tokenStream, errors), errors);
 
         rules.push(rule);
         return;
       }
       // This consumes a CSS selector as the rules prelude.
-      if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/ 0)) {
-        errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
-      }
+      if (!consumeAComponentValue(tokenStream, rule.prelude, /*depth*/0))
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
   }
 
   /**
-   * @param {!Array<!tokenize_css.Token>} tokenList
-   * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the
-   *     errors.
-   * @return {!Array<!Declaration>}
+   * @param {!Array<!parse_css.Token>} tokenList
+   * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+   * @return {!Array<!parse_css.Declaration>}
    */
   parseAListOfDeclarations(tokenList, errors) {
-    /** @type {!Array<!Declaration>} */
+    /** @type {!Array<!parse_css.Declaration>} */
     const decls = [];
-    const tokenStream = new TokenStream(tokenList);
+    const tokenStream = new parse_css.TokenStream(tokenList);
     while (true) {
       tokenStream.consume();
       const current = tokenStream.current().tokenType;
-      if (current === tokenize_css.TokenType.WHITESPACE ||
-          current === tokenize_css.TokenType.SEMICOLON) {
+      if (current === parse_css.TokenType.WHITESPACE ||
+          current === parse_css.TokenType.SEMICOLON) {
         continue;
-      } else if (current === tokenize_css.TokenType.EOF_TOKEN) {
+      } else if (current === parse_css.TokenType.EOF_TOKEN) {
         return decls;
-      } else if (current === tokenize_css.TokenType.AT_KEYWORD) {
+      } else if (current === parse_css.TokenType.AT_KEYWORD) {
         // The CSS3 Parsing spec allows for AT rules inside lists of
         // declarations, but our grammar does not so we deviate a tiny bit here.
         // We consume an AT rule, but drop it and instead push an error token.
         const atRule = this.parseAnAtRule(tokenStream, errors);
-        errors.push(atRule.copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+        errors.push(atRule.copyPosTo(new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
             ['style', atRule.name])));
-      } else if (current === tokenize_css.TokenType.IDENT) {
+      } else if (current === parse_css.TokenType.IDENT) {
         this.parseADeclaration(tokenStream, decls, errors);
       } else {
-        errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
+        errors.push(tokenStream.current().copyPosTo(new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
             ['style'])));
         tokenStream.reconsume();
-        while (!(
-            tokenStream.next().tokenType === tokenize_css.TokenType.SEMICOLON ||
-            tokenStream.next().tokenType ===
-                tokenize_css.TokenType.EOF_TOKEN)) {
+        while (
+          !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+              tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
           tokenStream.consume();
           const dummyTokenList = [];
-          if (!consumeAComponentValue(
-                  tokenStream, dummyTokenList, /*depth*/ 0)) {
-            errors.push(
-                tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-                    generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
-                    ['style'])));
-          }
+          if (!consumeAComponentValue(tokenStream, dummyTokenList, /*depth*/0))
+          {errors.push(tokenStream.current().copyPosTo(
+              new parse_css.ErrorToken(
+                  amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+                  ['style'])));}
         }
       }
     }
@@ -676,65 +670,65 @@ class Canonicalizer {
 
   /**
    * Adds one element to either declarations or errors.
-   * @param {!TokenStream} tokenStream
-   * @param {!Array<!Declaration>} declarations output array for
+   * @param {!parse_css.TokenStream} tokenStream
+   * @param {!Array<!parse_css.Declaration>} declarations output array for
    * declarations
-   * @param {!Array<!tokenize_css.ErrorToken>} errors output array for the
-   *     errors.
+   * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
    */
   parseADeclaration(tokenStream, declarations, errors) {
-    asserts.assert(
-        tokenStream.current().tokenType === tokenize_css.TokenType.IDENT,
+    goog.asserts.assert(
+        tokenStream.current().tokenType === parse_css.TokenType.IDENT,
         'Internal Error: parseADeclaration precondition not met');
 
     const startToken =
-        /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
-    const decl = startToken.copyPosTo(new Declaration(startToken.value));
+    /** @type {!parse_css.IdentToken} */ (tokenStream.current());
+    const decl =
+        startToken.copyPosTo(new parse_css.Declaration(startToken.value));
 
-    while (tokenStream.next().tokenType === tokenize_css.TokenType.WHITESPACE) {
+    while (tokenStream.next().tokenType === parse_css.TokenType.WHITESPACE) {
       tokenStream.consume();
     }
 
     tokenStream.consume();
-    if (!(tokenStream.current().tokenType === tokenize_css.TokenType.COLON)) {
-      errors.push(startToken.copyPosTo(new tokenize_css.ErrorToken(
-          generated.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
+    if (!(tokenStream.current().tokenType === parse_css.TokenType.COLON)) {
+      errors.push(startToken.copyPosTo(new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
           ['style'])));
       tokenStream.reconsume();
-      while (!(
-          tokenStream.next().tokenType === tokenize_css.TokenType.SEMICOLON ||
-          tokenStream.next().tokenType === tokenize_css.TokenType.EOF_TOKEN)) {
+      while (
+        !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+            tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
         tokenStream.consume();
       }
       return;
     }
 
     while (
-        !(tokenStream.next().tokenType === tokenize_css.TokenType.SEMICOLON ||
-          tokenStream.next().tokenType === tokenize_css.TokenType.EOF_TOKEN)) {
+      !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+          tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
       tokenStream.consume();
-      if (!consumeAComponentValue(tokenStream, decl.value, /*depth*/ 0)) {
-        errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-            generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
-      }
+      if (!consumeAComponentValue(tokenStream, decl.value, /*depth*/0))
+      {errors.push(tokenStream.current().copyPosTo(
+          new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+              ['style'])));}
     }
-    decl.value.push(tokenStream.next().copyPosTo(new tokenize_css.EOFToken()));
+    decl.value.push(tokenStream.next().copyPosTo(new parse_css.EOFToken()));
 
     let foundImportant = false;
     // The last token is always EOF, so start at the 2nd to last token.
     for (let i = decl.value.length - 2; i >= 0; i--) {
-      if (decl.value[i].tokenType === tokenize_css.TokenType.WHITESPACE) {
+      if (decl.value[i].tokenType === parse_css.TokenType.WHITESPACE) {
         continue;
       } else if (
-          decl.value[i].tokenType === tokenize_css.TokenType.IDENT &&
-          /** @type {!tokenize_css.IdentToken} */
+        decl.value[i].tokenType === parse_css.TokenType.IDENT &&
+          /** @type {parse_css.IdentToken} */
           (decl.value[i]).ASCIIMatch('important')) {
         foundImportant = true;
       } else if (
-          foundImportant &&
-          decl.value[i].tokenType === tokenize_css.TokenType.DELIM &&
-          /** @type {!tokenize_css.DelimToken} */ (decl.value[i]).value ===
-              '!') {
+        foundImportant &&
+          decl.value[i].tokenType === parse_css.TokenType.DELIM &&
+        /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
         decl.important = true;
         decl.important_line = decl.value[i].line;
         decl.important_col = decl.value[i].col;
@@ -756,20 +750,20 @@ const kMaximumCssRecursion = 100;
 /**
  * Consumes one or more tokens from a tokenStream, appending them to a
  * tokenList. If exceeds depth, returns false
- * @param {!TokenStream} tokenStream
- * @param {!Array<!tokenize_css.Token>} tokenList output array for tokens.
+ * @param {!parse_css.TokenStream} tokenStream
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  * @param {number} depth
  * @return {boolean}
  */
 function consumeAComponentValue(tokenStream, tokenList, depth) {
   if (depth > kMaximumCssRecursion) {return false;}
   const current = tokenStream.current().tokenType;
-  if (current === tokenize_css.TokenType.OPEN_CURLY ||
-      current === tokenize_css.TokenType.OPEN_SQUARE ||
-      current === tokenize_css.TokenType.OPEN_PAREN) {
+  if (current === parse_css.TokenType.OPEN_CURLY ||
+      current === parse_css.TokenType.OPEN_SQUARE ||
+      current === parse_css.TokenType.OPEN_PAREN) {
     if (!consumeASimpleBlock(tokenStream, tokenList, depth + 1))
     {return false;}
-  } else if (current === tokenize_css.TokenType.FUNCTION_TOKEN) {
+  } else if (current === parse_css.TokenType.FUNCTION_TOKEN) {
     if (!consumeAFunction(tokenStream, tokenList, depth + 1))
     {return false;}
   } else {
@@ -782,37 +776,37 @@ function consumeAComponentValue(tokenStream, tokenList, depth) {
  * Appends a simple block's contents to a tokenList, consuming from
  * the stream all those tokens that it adds to the tokenList,
  * including the start/end grouping token. If exceeds depth, returns false.
- * @param {!TokenStream} tokenStream
- * @param {!Array<!tokenize_css.Token>} tokenList output array for tokens.
+ * @param {!parse_css.TokenStream} tokenStream
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  * @param {number} depth
  * @return {boolean}
  */
 function consumeASimpleBlock(tokenStream, tokenList, depth) {
   if (depth > kMaximumCssRecursion) {return false;}
   const current = tokenStream.current().tokenType;
-  asserts.assert(
-      (current === tokenize_css.TokenType.OPEN_CURLY ||
-       current === tokenize_css.TokenType.OPEN_SQUARE ||
-       current === tokenize_css.TokenType.OPEN_PAREN),
+  goog.asserts.assert(
+      (current === parse_css.TokenType.OPEN_CURLY ||
+       current === parse_css.TokenType.OPEN_SQUARE ||
+       current === parse_css.TokenType.OPEN_PAREN),
       'Internal Error: consumeASimpleBlock precondition not met');
 
   const startToken =
-      /** @type {!tokenize_css.GroupingToken} */ (tokenStream.current());
+  /** @type {!parse_css.GroupingToken} */ (tokenStream.current());
   const {mirror} = startToken;
 
   tokenList.push(startToken);
   while (true) {
     tokenStream.consume();
     const current = tokenStream.current().tokenType;
-    if (current === tokenize_css.TokenType.EOF_TOKEN) {
+    if (current === parse_css.TokenType.EOF_TOKEN) {
       tokenList.push(tokenStream.current());
       return true;
     } else if (
-        (current === tokenize_css.TokenType.CLOSE_CURLY ||
-         current === tokenize_css.TokenType.CLOSE_SQUARE ||
-         current === tokenize_css.TokenType.CLOSE_PAREN) &&
-        /** @type {!tokenize_css.GroupingToken} */
-        (tokenStream.current()).value === mirror) {
+      (current === parse_css.TokenType.CLOSE_CURLY ||
+         current === parse_css.TokenType.CLOSE_SQUARE ||
+         current === parse_css.TokenType.CLOSE_PAREN) &&
+      /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
+            mirror) {
       tokenList.push(tokenStream.current());
       return true;
     } else {
@@ -825,50 +819,50 @@ function consumeASimpleBlock(tokenStream, tokenList, depth) {
 /**
  * Returns a simple block's contents in tokenStream, excluding the
  * start/end grouping token, and appended with an EOFToken.
- * @param {!TokenStream} tokenStream
- * @param {!Array<!tokenize_css.ErrorToken>} errors
- * @return {!Array<!tokenize_css.Token>}
+ * @param {!parse_css.TokenStream} tokenStream
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ * @return {!Array<!parse_css.Token>}
  */
-const extractASimpleBlock = function(tokenStream, errors) {
-  /** @type {!Array<!tokenize_css.Token>} */
+parse_css.extractASimpleBlock = function(tokenStream, errors) {
+  /** @type {!Array<!parse_css.Token>} */
   const consumedTokens = [];
   if (!consumeASimpleBlock(tokenStream, consumedTokens, /*depth*/0)) {
-    errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-        generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
+    errors.push(tokenStream.current().copyPosTo(
+        new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+            ['style'])));
   }
 
   // A simple block always has a start token (e.g. '{') and
   // either a closing token or EOF token.
-  asserts.assert(consumedTokens.length >= 2);
+  goog.asserts.assert(consumedTokens.length >= 2);
 
   // Exclude the start token. Convert end token to EOF.
   const end = consumedTokens.length - 1;
-  consumedTokens[end] =
-      consumedTokens[end].copyPosTo(new tokenize_css.EOFToken());
+  consumedTokens[end] = consumedTokens[end].copyPosTo(new parse_css.EOFToken());
   return consumedTokens.slice(1);
 };
-exports.extractASimpleBlock = extractASimpleBlock;
 
 /**
  * Appends a function's contents to a tokenList, consuming from the
  * stream all those tokens that it adds to the tokenList, including
  * the function token and end grouping token. If exceeds depth, returns false.
- * @param {!TokenStream} tokenStream
- * @param {!Array<!tokenize_css.Token>} tokenList output array for tokens.
+ * @param {!parse_css.TokenStream} tokenStream
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  * @param {number} depth
  * @return {boolean}
  */
 function consumeAFunction(tokenStream, tokenList, depth) {
   if (depth > kMaximumCssRecursion) {return false;}
-  asserts.assert(
-      tokenStream.current().tokenType === tokenize_css.TokenType.FUNCTION_TOKEN,
+  goog.asserts.assert(
+      tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN,
       'Internal Error: consumeAFunction precondition not met');
   tokenList.push(tokenStream.current());
   while (true) {
     tokenStream.consume();
     const current = tokenStream.current().tokenType;
-    if (current === tokenize_css.TokenType.EOF_TOKEN ||
-        current === tokenize_css.TokenType.CLOSE_PAREN) {
+    if (current === parse_css.TokenType.EOF_TOKEN ||
+        current === parse_css.TokenType.CLOSE_PAREN) {
       tokenList.push(tokenStream.current());
       return true;
     } else {
@@ -882,41 +876,42 @@ function consumeAFunction(tokenStream, tokenList, depth) {
  * Returns a function's contents in tokenList, including the leading
  * FunctionToken, but excluding the trailing CloseParen token and
  * appended with an EOFToken instead.
- * @param {!TokenStream} tokenStream
- * @param {!Array<!tokenize_css.ErrorToken>} errors
- * @return {!Array<!tokenize_css.Token>}
+ * @param {!parse_css.TokenStream} tokenStream
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ * @return {!Array<!parse_css.Token>}
  */
-const extractAFunction = function(tokenStream, errors) {
-  /** @type {!Array<!tokenize_css.Token>} */
+parse_css.extractAFunction = function(tokenStream, errors) {
+  /** @type {!Array<!parse_css.Token>} */
   const consumedTokens = [];
   if (!consumeAFunction(tokenStream, consumedTokens, /*depth*/0)) {
-    errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
-        generated.ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
+    errors.push(tokenStream.current().copyPosTo(
+        new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+            ['style'])));
   }
+
   // A function always has a start FunctionToken and
   // either a CloseParenToken or EOFToken.
-  asserts.assert(consumedTokens.length >= 2);
+  goog.asserts.assert(consumedTokens.length >= 2);
 
   // Convert end token to EOF.
   const end = consumedTokens.length - 1;
-  consumedTokens[end] =
-      consumedTokens[end].copyPosTo(new tokenize_css.EOFToken());
+  consumedTokens[end] = consumedTokens[end].copyPosTo(new parse_css.EOFToken());
   return consumedTokens;
 };
-exports.extractAFunction = extractAFunction;
 
 /**
- * Used by ExtractUrls to return urls it has seen. This represents
+ * Used by parse_css.ExtractUrls to return urls it has seen. This represents
  * URLs in CSS such as url(http://foo.com/) and url("http://bar.com/").
  * For this token, line() and col() indicate the position information
  * of the left-most CSS token that's part of the URL. E.g., this would be
  * the URLToken instance or the FunctionToken instance.
  */
-const ParsedCssUrl = class extends tokenize_css.Token {
+parse_css.ParsedCssUrl = class extends parse_css.Token {
   constructor() {
     super();
-    /** @type {!tokenize_css.TokenType} */
-    this.tokenType = tokenize_css.TokenType.PARSED_CSS_URL;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.PARSED_CSS_URL;
     /**
      * The decoded URL. This string will not contain CSS string escapes,
      * quotes, or similar. Encoding is utf8.
@@ -931,11 +926,9 @@ const ParsedCssUrl = class extends tokenize_css.Token {
     this.atRuleScope = '';
   }
 };
-exports.ParsedCssUrl = ParsedCssUrl;
-
 /** @inheritDoc */
-ParsedCssUrl.prototype.toJSON = function() {
-  const json = tokenize_css.Token.prototype.toJSON.call(this);
+parse_css.ParsedCssUrl.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
   json['utf8Url'] = this.utf8Url;
   json['atRuleScope'] = this.atRuleScope;
   return json;
@@ -945,16 +938,16 @@ ParsedCssUrl.prototype.toJSON = function() {
  * Parses a CSS URL token; typically takes the form "url(http://foo)".
  * Preconditions: tokens[token_idx] is a URL token
  *                and token_idx + 1 is in range.
- * @param {!Array<!tokenize_css.Token>} tokens
+ * @param {!Array<!parse_css.Token>} tokens
  * @param {number} tokenIdx
- * @param {!ParsedCssUrl} parsed
+ * @param {!parse_css.ParsedCssUrl} parsed
  */
 function parseUrlToken(tokens, tokenIdx, parsed) {
-  asserts.assert(tokenIdx + 1 < tokens.length);
+  goog.asserts.assert(tokenIdx + 1 < tokens.length);
   const token = tokens[tokenIdx];
-  asserts.assert(token.tokenType === tokenize_css.TokenType.URL);
+  goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
   token.copyPosTo(parsed);
-  parsed.utf8Url = /** @type {!tokenize_css.URLToken}*/ (token).value;
+  parsed.utf8Url = /** @type {parse_css.URLToken}*/ (token).value;
 }
 
 /**
@@ -963,70 +956,70 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
  * Returns the token_idx past the closing paren, or -1 if parsing fails.
  * Preconditions: tokens[token_idx] is a URL token
  *                and tokens[token_idx]->StringValue() == "url"
- * @param {!Array<!tokenize_css.Token>} tokens
+ * @param {!Array<!parse_css.Token>} tokens
  * @param {number} tokenIdx
- * @param {!ParsedCssUrl} parsed
+ * @param {!parse_css.ParsedCssUrl} parsed
  * @return {number}
  */
 function parseUrlFunction(tokens, tokenIdx, parsed) {
   const token = tokens[tokenIdx];
-  asserts.assert(token.tokenType == tokenize_css.TokenType.FUNCTION_TOKEN);
-  asserts.assert(
-      /** @type {!tokenize_css.FunctionToken} */ (token).value === 'url');
-  asserts.assert(
-      tokens[tokens.length - 1].tokenType === tokenize_css.TokenType.EOF_TOKEN);
+  goog.asserts.assert(token.tokenType == parse_css.TokenType.FUNCTION_TOKEN);
+  goog.asserts.assert(
+      /** @type {parse_css.FunctionToken} */ (token).value === 'url');
+  goog.asserts.assert(
+      tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN);
   token.copyPosTo(parsed);
   ++tokenIdx; // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
-  asserts.assert(tokenIdx < tokens.length);
+  goog.asserts.assert(tokenIdx < tokens.length);
 
   // Consume optional whitespace.
-  while (tokens[tokenIdx].tokenType === tokenize_css.TokenType.WHITESPACE) {
+  while (tokens[tokenIdx].tokenType === parse_css.TokenType.WHITESPACE) {
     ++tokenIdx;
     // Safe: tokens ends w/ EOF_TOKEN.
-    asserts.assert(tokenIdx < tokens.length);
+    goog.asserts.assert(tokenIdx < tokens.length);
   }
 
   // Consume URL.
-  if (tokens[tokenIdx].tokenType !== tokenize_css.TokenType.STRING) {
+  if (tokens[tokenIdx].tokenType !== parse_css.TokenType.STRING) {
     return -1;
   }
   parsed.utf8Url =
-      /** @type {!tokenize_css.StringToken} */ (tokens[tokenIdx]).value;
+    /** @type {parse_css.StringToken} */ (tokens[tokenIdx]).value;
 
   ++tokenIdx;
   // Safe: tokens ends w/ EOF_TOKEN.
-  asserts.assert(tokenIdx < tokens.length);
+  goog.asserts.assert(tokenIdx < tokens.length);
 
   // Consume optional whitespace.
-  while (tokens[tokenIdx].tokenType === tokenize_css.TokenType.WHITESPACE) {
+  while (tokens[tokenIdx].tokenType === parse_css.TokenType.WHITESPACE) {
     ++tokenIdx;
     // Safe: tokens ends w/ EOF_TOKEN.
-    asserts.assert(tokenIdx < tokens.length);
+    goog.asserts.assert(tokenIdx < tokens.length);
   }
 
   // Consume ')'
-  if (tokens[tokenIdx].tokenType !== tokenize_css.TokenType.CLOSE_PAREN) {
+  if (tokens[tokenIdx].tokenType !== parse_css.TokenType.CLOSE_PAREN) {
     return -1;
   }
   return tokenIdx + 1;
 }
 
 /**
- * Helper class for implementing extractUrls.
+ * Helper class for implementing parse_css.extractUrls.
  * @private
  */
-class UrlFunctionVisitor extends RuleVisitor {
+class UrlFunctionVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!Array<!ParsedCssUrl>} parsedUrls
-   * @param {!Array<!tokenize_css.ErrorToken>} errors
+   * @param {!Array<!parse_css.ParsedCssUrl>} parsedUrls
+   * @param {!Array<!parse_css.ErrorToken>} errors
    */
   constructor(parsedUrls, errors) {
     super();
 
-    /** @type {!Array<!ParsedCssUrl>} */
+    /** @type {!Array<!parse_css.ParsedCssUrl>} */
     this.parsedUrls = parsedUrls;
-    /** @type {!Array<!tokenize_css.ErrorToken>} */
+    /** @type {!Array<!parse_css.ErrorToken>} */
     this.errors = errors;
     /** @type {string} */
     this.atRuleScope = '';
@@ -1049,27 +1042,28 @@ class UrlFunctionVisitor extends RuleVisitor {
 
   /** @inheritDoc */
   visitDeclaration(declaration) {
-    asserts.assert(declaration.value.length > 0);
-    asserts.assert(
+    goog.asserts.assert(declaration.value.length > 0);
+    goog.asserts.assert(
         declaration.value[declaration.value.length - 1].tokenType ===
-        tokenize_css.TokenType.EOF_TOKEN);
+        parse_css.TokenType.EOF_TOKEN);
     for (let ii = 0; ii < declaration.value.length - 1;) {
       const token = declaration.value[ii];
-      if (token.tokenType === tokenize_css.TokenType.URL) {
-        const parsedUrl = new ParsedCssUrl();
+      if (token.tokenType === parse_css.TokenType.URL) {
+        const parsedUrl = new parse_css.ParsedCssUrl();
         parseUrlToken(declaration.value, ii, parsedUrl);
         parsedUrl.atRuleScope = this.atRuleScope;
         this.parsedUrls.push(parsedUrl);
         ++ii;
         continue;
       }
-      if (token.tokenType === tokenize_css.TokenType.FUNCTION_TOKEN &&
-          /** @type {!tokenize_css.FunctionToken} */ (token).value === 'url') {
-        const parsedUrl = new ParsedCssUrl();
+      if (token.tokenType === parse_css.TokenType.FUNCTION_TOKEN &&
+      /** @type {!parse_css.FunctionToken} */ (token).value === 'url') {
+        const parsedUrl = new parse_css.ParsedCssUrl();
         ii = parseUrlFunction(declaration.value, ii, parsedUrl);
         if (ii === -1) {
-          this.errors.push(token.copyPosTo(new tokenize_css.ErrorToken(
-              generated.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style'])));
+          this.errors.push(token.copyPosTo(new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
+              ['style'])));
           return;
         }
         parsedUrl.atRuleScope = this.atRuleScope;
@@ -1088,14 +1082,14 @@ class UrlFunctionVisitor extends RuleVisitor {
  * that were marked with `!important`.
  * @private
  */
-class ImportantPropertyVisitor extends RuleVisitor {
+class ImportantPropertyVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!Array<!Declaration>} important
+   * @param {!Array<!parse_css.Declaration>} important
    */
   constructor(important) {
     super();
 
-    /** @type {!Array<!Declaration>} */
+    /** @type {!Array<!parse_css.Declaration>} */
     this.important = important;
   }
 
@@ -1108,11 +1102,11 @@ class ImportantPropertyVisitor extends RuleVisitor {
 /**
  * Extracts the URLs within the provided stylesheet, emitting them into
  * parsedUrls and errors into errors.
- * @param {!Stylesheet} stylesheet
- * @param {!Array<!ParsedCssUrl>} parsedUrls
- * @param {!Array<!tokenize_css.ErrorToken>} errors
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.ParsedCssUrl>} parsedUrls
+ * @param {!Array<!parse_css.ErrorToken>} errors
  */
-const extractUrls = function(stylesheet, parsedUrls, errors) {
+parse_css.extractUrls = function(stylesheet, parsedUrls, errors) {
   const parsedUrlsOldLength = parsedUrls.length;
   const errorsOldLength = errors.length;
   const visitor = new UrlFunctionVisitor(parsedUrls, errors);
@@ -1122,38 +1116,36 @@ const extractUrls = function(stylesheet, parsedUrls, errors) {
     parsedUrls.splice(parsedUrlsOldLength);
   }
 };
-exports.extractUrls = extractUrls;
 
 /**
  * Extracts the declarations marked `!important` within within the provided
  * stylesheet, emitting them into `important`.
- * @param {!Stylesheet} stylesheet
- * @param {!Array<!Declaration>} important
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.Declaration>} important
  */
-const extractImportantDeclarations = function(stylesheet, important) {
+parse_css.extractImportantDeclarations = function(stylesheet, important) {
   const visitor = new ImportantPropertyVisitor(important);
   stylesheet.accept(visitor);
 };
-exports.extractImportantDeclarations = extractImportantDeclarations;
 
 /**
- * Helper class for implementing parseMediaQueries.
+ * Helper class for implementing parse_css.parseMediaQueries.
  * @private
  */
-class MediaQueryVisitor extends RuleVisitor {
+class MediaQueryVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!Array<!tokenize_css.IdentToken>} mediaTypes
-   * @param {!Array<!tokenize_css.IdentToken>} mediaFeatures
-   * @param {!Array<!tokenize_css.ErrorToken>} errors
+   * @param {!Array<!parse_css.IdentToken>} mediaTypes
+   * @param {!Array<!parse_css.IdentToken>} mediaFeatures
+   * @param {!Array<!parse_css.ErrorToken>} errors
    */
   constructor(mediaTypes, mediaFeatures, errors) {
     super();
 
-    /** @type {!Array<!tokenize_css.IdentToken>} */
+    /** @type {!Array<!parse_css.IdentToken>} */
     this.mediaTypes = mediaTypes;
-    /** @type {!Array<!tokenize_css.IdentToken>} */
+    /** @type {!Array<!parse_css.IdentToken>} */
     this.mediaFeatures = mediaFeatures;
-    /** @type {!Array<!tokenize_css.ErrorToken>} */
+    /** @type {!Array<!parse_css.ErrorToken>} */
     this.errors = errors;
   }
 
@@ -1161,32 +1153,31 @@ class MediaQueryVisitor extends RuleVisitor {
   visitAtRule(atRule) {
     if (atRule.name.toLowerCase() !== 'media') {return;}
 
-    const tokenStream = new TokenStream(atRule.prelude);
+    const tokenStream = new parse_css.TokenStream(atRule.prelude);
     tokenStream.consume(); // Advance to first token.
     if (!this.parseAMediaQueryList_(tokenStream)) {
-      this.errors.push(atRule.copyPosTo(new tokenize_css.ErrorToken(
-          generated.ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY,
+      this.errors.push(atRule.copyPosTo(new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY,
           ['style'])));
     }
   }
 
   /**
    * Maybe consume one whitespace token.
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @private
    */
   maybeConsumeAWhitespaceToken_(tokenStream) {
     // While the grammar calls for consuming multiple whitespace tokens,
     // our tokenizer already collapses whitespace so only one token can ever
     // be present.
-    if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
-      tokenStream.consume();
-    }
+    if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE)
+    {tokenStream.consume();}
   }
 
   /**
    * Parse a media query list
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @return {boolean}
    * @private
    */
@@ -1195,20 +1186,20 @@ class MediaQueryVisitor extends RuleVisitor {
     // : S* [media_query [ ',' S* media_query ]* ]?
     // ;
     this.maybeConsumeAWhitespaceToken_(tokenStream);
-    if (tokenStream.current().tokenType !== tokenize_css.TokenType.EOF_TOKEN) {
+    if (tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN) {
       if (!this.parseAMediaQuery_(tokenStream)) {return false;}
-      while (tokenStream.current().tokenType === tokenize_css.TokenType.COMMA) {
+      while (tokenStream.current().tokenType === parse_css.TokenType.COMMA) {
         tokenStream.consume(); // ','
         this.maybeConsumeAWhitespaceToken_(tokenStream);
         if (!this.parseAMediaQuery_(tokenStream)) {return false;}
       }
     }
-    return tokenStream.current().tokenType === tokenize_css.TokenType.EOF_TOKEN;
+    return tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN;
   }
 
   /**
    * Parse a media query
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @return {boolean}
    * @private
    */
@@ -1225,14 +1216,14 @@ class MediaQueryVisitor extends RuleVisitor {
     // This is more convenient because we know that expressions must start with
     // '(', so it's simpler to use as a check to distinguis the expression case
     // from the media type case.
-    if (tokenStream.current().tokenType === tokenize_css.TokenType.OPEN_PAREN) {
+    if (tokenStream.current().tokenType === parse_css.TokenType.OPEN_PAREN) {
       if (!this.parseAMediaExpression_(tokenStream)) {return false;}
     } else {
-      if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
+      if (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
           (
-              /** @type {!tokenize_css.IdentToken} */
-              (tokenStream.current()).ASCIIMatch('only') ||
-              /** @type {!tokenize_css.IdentToken} */
+            /** @type {parse_css.IdentToken} */
+            (tokenStream.current()).ASCIIMatch('only') ||
+              /** @type {parse_css.IdentToken} */
               (tokenStream.current()).ASCIIMatch('not'))) {
         tokenStream.consume(); // 'ONLY' | 'NOT'
       }
@@ -1240,8 +1231,8 @@ class MediaQueryVisitor extends RuleVisitor {
       if (!this.parseAMediaType_(tokenStream)) {return false;}
       this.maybeConsumeAWhitespaceToken_(tokenStream);
     }
-    while (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
-           /** @type {!tokenize_css.IdentToken} */
+    while (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+           /** @type {parse_css.IdentToken} */
            (tokenStream.current()).ASCIIMatch('and')) {
       tokenStream.consume(); // 'AND'
       this.maybeConsumeAWhitespaceToken_(tokenStream);
@@ -1252,16 +1243,16 @@ class MediaQueryVisitor extends RuleVisitor {
 
   /**
    * Parse a media type
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @return {boolean}
    * @private
    */
   parseAMediaType_(tokenStream) {
     // : IDENT
     // ;
-    if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT) {
+    if (tokenStream.current().tokenType === parse_css.TokenType.IDENT) {
       this.mediaTypes.push(
-          /** @type {!tokenize_css.IdentToken} */ (tokenStream.current()));
+          /** @type {!parse_css.IdentToken} */ (tokenStream.current()));
       tokenStream.consume();
       return true;
     }
@@ -1270,21 +1261,20 @@ class MediaQueryVisitor extends RuleVisitor {
 
   /**
    * Parse a media expression
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @return {boolean}
    * @private
    */
   parseAMediaExpression_(tokenStream) {
     //  : '(' S* media_feature S* [ ':' S* expr ]? ')' S*
     //  ;
-    if (tokenStream.current().tokenType !== tokenize_css.TokenType.OPEN_PAREN) {
-      return false;
-    }
+    if (tokenStream.current().tokenType !== parse_css.TokenType.OPEN_PAREN)
+    {return false;}
     tokenStream.consume(); // '('
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     if (!this.parseAMediaFeature_(tokenStream)) {return false;}
     this.maybeConsumeAWhitespaceToken_(tokenStream);
-    if (tokenStream.current().tokenType === tokenize_css.TokenType.COLON) {
+    if (tokenStream.current().tokenType === parse_css.TokenType.COLON) {
       tokenStream.consume(); // '('
       this.maybeConsumeAWhitespaceToken_(tokenStream);
       // The CSS3 grammar at this point just tells us to expect some
@@ -1298,17 +1288,13 @@ class MediaQueryVisitor extends RuleVisitor {
       // "Media features only accept single values: one keyword, one number,
       // or a number with a unit identifier. (The only exceptions are the
       // ‘aspect-ratio’ and ‘device-aspect-ratio’ media features.)
-      while (tokenStream.current().tokenType !==
-                 tokenize_css.TokenType.EOF_TOKEN &&
-             tokenStream.current().tokenType !==
-                 tokenize_css.TokenType.CLOSE_PAREN) {
-        tokenStream.consume();
-      }
+      while (
+        tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
+          tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
+      {tokenStream.consume();}
     }
-    if (tokenStream.current().tokenType !==
-        tokenize_css.TokenType.CLOSE_PAREN) {
-      return false;
-    }
+    if (tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
+    {return false;}
     tokenStream.consume(); // ')'
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     return true;
@@ -1316,16 +1302,16 @@ class MediaQueryVisitor extends RuleVisitor {
 
   /**
    * Parse a media feature
-   * @param {!TokenStream} tokenStream
+   * @param {!parse_css.TokenStream} tokenStream
    * @return {boolean}
    * @private
    */
   parseAMediaFeature_(tokenStream) {
     // : IDENT
     // ;
-    if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT) {
+    if (tokenStream.current().tokenType === parse_css.TokenType.IDENT) {
       this.mediaFeatures.push(
-          /** @type {!tokenize_css.IdentToken} */ (tokenStream.current()));
+          /** @type {!parse_css.IdentToken} */ (tokenStream.current()));
       tokenStream.consume();
       return true;
     }
@@ -1338,14 +1324,13 @@ class MediaQueryVisitor extends RuleVisitor {
  * discovered media types and media features, as well as errors if parsing
  * failed.
  * parsedUrls and errors into errors.
- * @param {!Stylesheet} stylesheet
- * @param {!Array<!tokenize_css.IdentToken>} mediaTypes
- * @param {!Array<!tokenize_css.IdentToken>} mediaFeatures
- * @param {!Array<!tokenize_css.ErrorToken>} errors
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.IdentToken>} mediaTypes
+ * @param {!Array<!parse_css.IdentToken>} mediaFeatures
+ * @param {!Array<!parse_css.ErrorToken>} errors
  */
-const parseMediaQueries = function(
-    stylesheet, mediaTypes, mediaFeatures, errors) {
+parse_css.parseMediaQueries = function(
+  stylesheet, mediaTypes, mediaFeatures, errors) {
   const visitor = new MediaQueryVisitor(mediaTypes, mediaFeatures, errors);
   stylesheet.accept(visitor);
 };
-exports.parseMediaQueries = parseMediaQueries;
