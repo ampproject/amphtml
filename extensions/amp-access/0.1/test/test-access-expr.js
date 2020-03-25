@@ -353,20 +353,20 @@ describe('evaluate', () => {
 
     it('first request should go through', () => {
       evaluator.evaluate('access = true', {access: true});
-      expect(evaluator.eval_.callCount).to.equal(1);
+      expect(evaluator.eval_).calledOnce;
     });
 
     it('should use the cache on subsequent calls for the same expression and data', () => {
       const data = {access: true};
       evaluator.evaluate('access = true', data);
       evaluator.evaluate('access = true', data);
-      expect(evaluator.eval_.callCount).to.equal(1);
+      expect(evaluator.eval_).calledOnce;
     });
 
     it('should not use the cache if the data is referentially unequal', () => {
       evaluator.evaluate('access = true', {access: true});
       evaluator.evaluate('access = true', {access: true});
-      expect(evaluator.eval_.callCount).to.equal(2);
+      expect(evaluator.eval_).calledTwice;
     });
   });
 });
