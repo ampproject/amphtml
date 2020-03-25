@@ -22,7 +22,7 @@ limitations under the License.
 <amp-ad
   width="300"
   height="1"
-  type="vdo"
+  type="vdoai"
   data-unitid="_vdo_ads_player_ai_"
   data-tagname="publisher"
   layout="responsive"
