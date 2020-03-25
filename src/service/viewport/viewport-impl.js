@@ -392,6 +392,9 @@ export class ViewportImpl {
 
   /** @override */
   isDeclaredFixed(element) {
+    if (!this.fixedLayer_) {
+      return false;
+    }
     return this.fixedLayer_.isDeclaredFixed(element);
   }
 
@@ -790,7 +793,7 @@ export class ViewportImpl {
       this.paddingTop_,
       this.binding_.requiresFixedLayerTransfer()
     );
-    this.ampdoc.whenReatdy().then(() => this.fixedLayer_.setup());
+    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
   }
 
   /**
