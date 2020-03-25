@@ -60,12 +60,15 @@ const eventHandlers = {
     ctx.playlistItem = dict(playlistItem)
     ctx.sendCommand_('getPlayedRanges');
   },
-  time: (timeInfo, ctx) => {
-    ctx.currentTime = timeInfo.currentTime;
+  time: (time, ctx) => {
+    ctx.currentTime_ = time.currentTime;
     ctx.sendCommand_('getPlayedRanges');
   }
 }
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpJWPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -115,6 +118,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /** @private {Array<Array>} */
     this.playedRanges_ = [];
+
   }
 
   /**
@@ -124,7 +128,6 @@ class AmpJWPlayer extends AMP.BaseElement {
   onReady_(data) {
     const {element} = this;
 
-    this.apiInstance = data.apiInstance; 
     this.playlistItem = dict(data.playlistItem);
     this.muted_ = !!data.muted;
     Services.videoManagerForDoc(element).register(this);
@@ -157,8 +160,12 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    let reason = 'amp-interaction';
+    if (isAutoplay) {
+      reason = 'auto';
+    }
+    this.sendCommand_('play', { reason });
   }
 
   /** @override */
@@ -182,15 +189,15 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {Event} messageEvent
+   * @param {Event} message
    * @private
    */
-  onMessage_(messageEvent) {
-    if (messageEvent.source != this.iframe_.contentWindow) {
+  onMessage_(message) {
+    if (message.source != this.iframe_.contentWindow) {
       return;
     }
 
-    const messageData = getData(messageEvent); 
+    const messageData = getData(message); 
 
     if (!isJsonOrObj(messageData)) {
       return;
@@ -237,8 +244,6 @@ class AmpJWPlayer extends AMP.BaseElement {
         dict({
           'method': method,
           'optParams': optParams,
-          'player': this.id,
-          'apiInstance': this.apiInstance || null
         })
       ),
       '*'
@@ -257,10 +262,13 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    return {
-      artwork: this.playlistItem.image,
-      title: this.playlistItem.title,
-    };
+    if ('mediaSession' in navigator && window.MediaMetadata && this.playlistItem.meta) {
+      try {
+          return new window.MediaMetadata(this.playlistItem.meta);
+      } catch (error) {
+          // catch error that occurs when mediaSession fails to setup
+      }
+    }
   }
 
   /** @override */
