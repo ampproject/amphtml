@@ -30,7 +30,6 @@ describes.realWin(
   env => {
     let win;
     let element;
-    let observerCallback = () => {};
 
     const getTimeFromShadow = async () => {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
@@ -48,11 +47,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       toggleExperiment(win, 'amp-timeago-v2', true);
-
-      win.IntersectionObserver = (callback, unusedOptions) => {
-        observerCallback = callback;
-        return {observe: () => {}};
-      };
 
       element = win.document.createElement('amp-timeago');
       element.setAttribute('layout', 'fixed');
@@ -89,10 +83,17 @@ describes.realWin(
       date.setSeconds(date.getSeconds() - 10);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
+
+      // Dummy callback should be overwritten
+      let observerCallback;
+      win.IntersectionObserver = (callback, unusedOptions) => {
+        observerCallback = callback;
+        return {observe: () => {}};
+      };
       win.document.body.appendChild(element);
 
       const time = await getTimeFromShadow();
-      await timeout(1000); // wait 1 second
+      await new Promise(res => setTimeout(res, 1000)); // wait 1 second
       expect(time).to.equal('10 seconds ago');
 
       const timeEl = element.shadowRoot.querySelector('time');
