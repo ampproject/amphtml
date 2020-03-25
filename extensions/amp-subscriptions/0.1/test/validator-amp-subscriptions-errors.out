@@ -69,6 +69,12 @@ PASS
 |    </template>
 |    <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
 |      Dialog for non logged in users
+<<<<<<<
+=======
+|    </template>
+|  </body>
+|  </html>
+>>>>>>>
 |    </template>
 |  </body>
 |  </html>
