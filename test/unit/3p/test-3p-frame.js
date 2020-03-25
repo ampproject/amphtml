@@ -57,6 +57,7 @@ describe
         m.parentElement.removeChild(m);
       }
       document.body.removeChild(container);
+      Services.ampdoc(window.document).meta_ = null;
     });
 
     function addCustomBootstrap(url) {
@@ -104,6 +105,9 @@ describe
           width: 100,
           height: 200,
         };
+      };
+      div.getAmpDoc = function() {
+        return Services.ampdoc(window.document);
       };
     }
 
@@ -322,28 +326,34 @@ describe
 
     it('should pick the right bootstrap url for local-dev mode', () => {
       window.__AMP_MODE = {localDev: true};
-      expect(getBootstrapBaseUrl(window)).to.equal(
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
 
     it('should pick the right bootstrap url for testing mode', () => {
       window.__AMP_MODE = {test: true};
-      expect(getBootstrapBaseUrl(window)).to.equal(
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
 
     it('should pick the right bootstrap unique url (prod)', () => {
       window.__AMP_MODE = {};
-      expect(getBootstrapBaseUrl(window)).to.match(
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
       );
     });
 
     it('should return a stable URL in getBootstrapBaseUrl', () => {
       window.__AMP_MODE = {};
-      expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
+        getBootstrapBaseUrl(window, ampdoc)
+      );
     });
 
     it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
@@ -355,7 +365,8 @@ describe
 
     it('should pick the right bootstrap url (custom)', () => {
       addCustomBootstrap('https://example.com/boot/remote.html');
-      expect(getBootstrapBaseUrl(window)).to.equal(
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
         'https://example.com/boot/remote.html?$internalRuntimeVersion$'
       );
     });
@@ -375,25 +386,30 @@ describe
 
     it('should pick the right bootstrap url (custom)', () => {
       addCustomBootstrap('http://example.com/boot/remote.html');
+      const ampdoc = Services.ampdoc(window.document);
       allowConsoleError(() => {
         expect(() => {
-          getBootstrapBaseUrl(window);
-        }).to.throw(/meta source must start with "https/);
+          getBootstrapBaseUrl(window, ampdoc);
+        }).to.throw(
+          /meta\[name="amp-3p-iframe-src"\] source must start with "https/
+        );
       });
     });
 
     it('should pick the right bootstrap url (custom)', () => {
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
+      const ampdoc = Services.ampdoc(window.document);
       allowConsoleError(() => {
         expect(() => {
-          getBootstrapBaseUrl(window, true);
+          getBootstrapBaseUrl(window, ampdoc, true);
         }).to.throw(/must not be on the same origin as the/);
       });
     });
 
     it('should pick default url if custom disabled', () => {
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
-      expect(getBootstrapBaseUrl(window, true, true)).to.equal(
+      const ampdoc = Services.ampdoc(window.document);
+      expect(getBootstrapBaseUrl(window, ampdoc, true, true)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
@@ -516,6 +532,9 @@ describe
           width: 100,
           height: 200,
         };
+      };
+      div.getAmpDoc = function() {
+        return Services.ampdoc(window.document);
       };
 
       container.appendChild(div);

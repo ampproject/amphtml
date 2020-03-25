@@ -175,6 +175,14 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['TAG_ID'],
     disableKeyAppend: true,
   },
+  browsi: {
+    url:
+      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&ul=SCROLL_TOP&pl=PAGE_HEIGHT&bks=BKG_STATE&pk=PUB_KEY&sk=SITE_KEY&h=ATTR(height)&adix=ATTR(data-amp-slot-index)&ref=REFERRER&url=HREF',
+    macros: ['PUB_KEY', 'SITE_KEY'],
+    errorReportingUrl:
+      'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests

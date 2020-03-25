@@ -37,6 +37,13 @@
     "pageview": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
     "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
   },
+  "browsi": {
+    "host": "https://events.browsiprod.com/events/amp",
+    "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
+    "pageview": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&ref=_document_referrer_&sh=_viewport_height_&pl=_scroll_height_&plt=_page_load_time_&clt=_content_load_time_&nt=_nav_type_&eup=",
+    "engagement": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&ul=_scroll_top_&top=_total_engaged_time_",
+    "visibility": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&adix=!index&ex=!elementX&ey=!elementY&ew=!elementWidth&eh=!elementHeight"
+  },
   "burt": {
     "host": "//ignore.c.richmetrics.com/",
     "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id(burt-amp-user-id)_&ui=_client_id(burt-amp-user-id)_&v=amp&ts=_timestamp_&sn=1&",

@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Possible score factors.
- * @const @enum {string}
- */
-export const SubscriptionsScoreFactor = {
-  // User is known to platform and has a form of payment registered
-  IS_READY_TO_PAY: 'isReadyToPay',
-  // Platform supports the current viewer environment
-  SUPPORTS_VIEWER: 'supportsViewer',
-};
+import { getMode } from '../../../../../../../src/mode';
 
-/**
- * All other score factors are ignored if not specifed in the publisher
- * config so adding a default here would be meaningless.
- */
-export const DEFAULT_SCORE_CONFIG = {};
+const test = getMode().test;
+const localDev = getMode().localDev;
+const minified = getMode().minified;
+const development = getMode().development;
+
+function foo() {
+  if (getMode().development == false) {
+    return false;
+  }
+}

@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const findImports = require('find-imports');
+const findImports = require('find-imports-forked');
 const fs = require('fs');
 const globby = require('globby');
 const log = require('fancy-log');

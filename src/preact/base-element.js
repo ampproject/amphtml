@@ -130,6 +130,18 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @protected
+   * @param {!JsonObject} props
+   */
+  mutateProps(props) {
+    this.defaultProps_ = /** @type {!JsonObject} */ ({
+      ...this.defaultProps_,
+      ...props,
+    });
+    this.scheduleRender_();
+  }
+
   /** @private */
   scheduleRender_() {
     if (!this.scheduledRender_) {
