@@ -31,6 +31,8 @@
     foo.amp-class {}
     foo { b: red !important; }
     foo { b: red ! important; }
+    /* This is ok though, since it's a comment: { b: red !important } */
+
     @viewport (mumble mumble) { }
     @media (whatever) { @notallowednested }
 

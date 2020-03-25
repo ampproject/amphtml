@@ -970,6 +970,53 @@ describe('extractUrls', () => {
         parsedUrls);
   });
 
+  // This test verifies that a declaration ending in `!important` is treated by
+  // parsing out the `!important` marker and setting that as a special value in
+  // the declaration. In particular, we are looking for:
+  // 1) rules[0].declarations[0].important is true.
+  // 2) rules[0].declarations[0].value does not contain the tokens corresponding
+  //    to `!important`.
+  it('detects important', () => {
+    const css = 'b { color: red !important }';
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        {
+          'line': 1,
+          'col': 0,
+          'tokenType': 'STYLESHEET',
+          'rules': [{
+            'line': 1,
+            'col': 0,
+            'tokenType': 'QUALIFIED_RULE',
+            'prelude': [
+              {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'b'},
+              {'line': 1, 'col': 1, 'tokenType': 'WHITESPACE'},
+              {'line': 1, 'col': 2, 'tokenType': 'EOF_TOKEN'}
+            ],
+            'declarations': [{
+              'line': 1,
+              'col': 4,
+              'tokenType': 'DECLARATION',
+              'name': 'color',
+              'value': [
+                {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
+                {'line': 1, 'col': 11, 'tokenType': 'IDENT', 'value': 'red'},
+                {'line': 1, 'col': 14, 'tokenType': 'WHITESPACE'},
+                {'line': 1, 'col': 26, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'important': true
+            }]
+          }],
+          'eof': {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}
+        },
+        sheet);
+  });
+
   // This example contains both image urls, other urls (fonts) and
   // segments in between.
   it('handles longer example', () => {

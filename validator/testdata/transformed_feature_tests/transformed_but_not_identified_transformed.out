@@ -49,8 +49,8 @@ transformed_feature_tests/transformed_but_not_identified_transformed.html:32:4 T
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
+transformed_feature_tests/transformed_but_not_identified_transformed.html:35:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
+>>       ^~~~~~~~~
 transformed_feature_tests/transformed_but_not_identified_transformed.html:35:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
 >>       ^~~~~~~~~
 transformed_feature_tests/transformed_but_not_identified_transformed.html:35:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)
->>       ^~~~~~~~~
-transformed_feature_tests/transformed_but_not_identified_transformed.html:35:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites)

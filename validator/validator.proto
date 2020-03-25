@@ -240,7 +240,7 @@ message AtRuleSpec {
   optional MediaQuerySpec media_query_spec = 3;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -259,6 +259,11 @@ message CssSpec {
 
   // Any declaration listed here are allowed.
   repeated string declaration = 7;
+
+  // If fase, declarations tagged with `!important` are considered errors.
+  // Most AMP stylesheets disallow `!important` to reserve this override
+  // for AMP's own styles.
+  optional bool allow_important = 8 [default = false];
 }
 
 // NEXT AVAILABLE TAG: 10
@@ -690,9 +695,7 @@ message ValidatorRules {
 // on this in new code.
 // TODO(#25188): Remove ErrorCategory completely.
 message ErrorCategory {
-  enum Code {
-    UNKNOWN = 0;
-  }
+  enum Code { UNKNOWN = 0; }
 }
 
 // We record validation errors in a structured form, so that they can be

@@ -31,7 +31,7 @@ tags: {  # amp-subscriptions (json)
   spec_name: "amp-subscriptions extension .json script"
   unique: true
   mandatory_parent: "HEAD"
-  requires_extension: "amp-subscriptions"  
+  requires_extension: "amp-subscriptions"
   attrs: {
     name: "id"
     mandatory: true
