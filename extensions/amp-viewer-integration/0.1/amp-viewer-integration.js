@@ -69,9 +69,6 @@ export class AmpViewerIntegration {
      * @private {?HighlightHandler}
      */
     this.highlightHandler_ = null;
-
-    /** @private {?FixedLayer} */
-    this.fixedLayer_ = null;
   }
 
   /**
@@ -283,14 +280,7 @@ export class AmpViewerIntegration {
    */
   initFixedLayer_(ampdoc) {
     const viewport = Services.viewportForDoc(ampdoc);
-    this.fixedLayer_ = new FixedLayer(
-      ampdoc,
-      viewport.vsync_,
-      viewport.binding_.getBorderTop(),
-      viewport.paddingTop_,
-      viewport.binding_.requiresFixedLayerTransfer()
-    );
-    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+    viewport.createFixedLayer(FixedLayer);
   }
 }
 

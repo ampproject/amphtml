@@ -781,6 +781,18 @@ export class ViewportImpl {
     this.fixedLayer_.removeElement(element);
   }
 
+  /** @override */
+  createFixedLayer(constructor) {
+    this.fixedLayer_ = new constructor(
+      this.ampdoc,
+      this.vsync_,
+      this.binding_.getBorderTop(),
+      this.paddingTop_,
+      this.binding_.requiresFixedLayerTransfer()
+    );
+    this.ampdoc.whenReatdy().then(() => this.fixedLayer_.setup());
+  }
+
   /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.

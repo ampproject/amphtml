@@ -316,5 +316,11 @@ export class ViewportInterface extends Disposable {
    * @param {!Element} element
    */
   removeFromFixedLayer(element) {}
+
+  /**
+   * Create fixed layer from constructor (invoked by viewer integration)
+   * @param {function(new:FixedLayer)} constructor
+   */
+  createFixedLayer(constructor) {}
 }
 /* eslint-enable no-unused-vars */
