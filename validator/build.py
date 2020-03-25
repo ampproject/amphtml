@@ -173,6 +173,7 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
+  protoascii_segments.append(open('validator-css.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
