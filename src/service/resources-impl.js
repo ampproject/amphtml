@@ -295,6 +295,7 @@ export class ResourcesImpl {
    * @private
    */
   intersects_(entries) {
+    devAssert(this.intersectionObserver_);
     // TODO(willchou): Remove assert once #27167 is fixed.
     devAssert(this.prerenderSize_ == 1);
     dev().fine(TAG_, 'intersect', entries);
@@ -795,7 +796,8 @@ export class ResourcesImpl {
     }
 
     // Process queued intersections (outside of 1vp) once we're visible.
-    if (!wasVisible && this.visible_) {
+    const becameVisible = !wasVisible && this.visible_;
+    if (this.intersectionObserver_ && becameVisible) {
       dev().fine(TAG_, 'Handling queued intersections...');
       this.intersects_(this.queuedIntersectionEntries_);
       this.queuedIntersectionEntries_.length = 0;
