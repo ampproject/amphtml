@@ -151,7 +151,7 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
-    applied.push([
+    applied.push(localPlugin('config-transformer'), [
       'filter-imports',
       {
         imports: {
