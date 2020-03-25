@@ -85,6 +85,10 @@ async function prCheck(cb) {
     runCheck('gulp check-owners');
   }
 
+  if (buildTargets.has('SERVER')) {
+    runCheck('gulp server-tests');
+  }
+
   if (buildTargets.has('RUNTIME')) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
