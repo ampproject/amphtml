@@ -250,9 +250,7 @@ describe('amp-a4a', () => {
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const safeFrameUrl =
-      'googlesyndication.com/safeframe/' +
-      sfVersion +
-      '/html/container.html';
+      'googlesyndication.com/safeframe/' + sfVersion + '/html/container.html';
     const child = element.querySelector(`iframe[src*="${safeFrameUrl}"][name]`);
     expect(child).to.be.ok;
     const name = child.getAttribute('name');

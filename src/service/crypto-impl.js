@@ -222,8 +222,8 @@ export class Crypto {
   getSecureRandomString() {
     // Support IE 11
     const cryptoLib =
-        /** @type {!webCrypto.Crypto|undefined} */ (
-            window.crypto || window.msCrypto);
+      /** @type {!webCrypto.Crypto|undefined} */ (this.win_.crypto ||
+      this.win_.msCrypto);
     let /** !Array<number>|!Uint8Array */ randomValues;
 
     if (cryptoLib !== undefined) {
@@ -238,12 +238,12 @@ export class Crypto {
     }
 
     let randomSubdomain = '';
-    for (const randomValue of randomValues) {
+    for (const i = 0; i < randomValues.length; i++) {
       // Ensure each byte is represented with two hexadecimal characters.
-      if (randomValue <= 15) {
+      if (randomValues[i] <= 15) {
         randomSubdomain += '0';
       }
-      randomSubdomain += randomValue.toString(16);
+      randomSubdomain += randomValues[i].toString(16);
     }
 
     return randomSubdomain;

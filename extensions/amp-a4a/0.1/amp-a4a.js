@@ -59,13 +59,13 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -253,7 +253,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.creativeBody_ = null;
 
     /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(this.win).getSecureRandomString();
+    this.safeFrameSubdomain_ = Services.cryptoFor(
+      this.win
+    ).getSecureRandomString();
 
     /**
      * Initialize this with the slot width/height attributes, and override

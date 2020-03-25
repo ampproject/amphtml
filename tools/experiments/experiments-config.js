@@ -314,5 +314,5 @@ export const EXPERIMENTS = [
   {
     id: 'random-subdomains-for-safeframe',
     name: 'Enable Random Subdomains for SafeFrame',
-  }
+  },
 ];
