@@ -579,7 +579,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
       default:
