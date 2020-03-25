@@ -33,7 +33,68 @@ let passed = 0;
 let failed = 0;
 
 /**
+ * Extracts the input for a test from its input file.
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+async function getInput(inputFile) {
+  return await fs.promises.readFile(inputFile, 'utf8');
+}
+
+/**
+ * Computes the name of a test from its input file.
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+function getTestName(inputFile) {
+  const testPath = path.relative(transformsDir, inputFile);
+  const transformName = path.dirname(path.dirname(testPath));
+  const testSuffix = path.basename(testPath).replace('-input.html', '');
+  return `${transformName} → ${testSuffix}`;
+}
+
+/**
+ * Extracts the expected output for a test from its output file.
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+async function getExpectedOutput(inputFile) {
+  const expectedOutputFile = inputFile.replace('input.html', 'output.html');
+  return await fs.promises.readFile(expectedOutputFile, 'utf8');
+}
+
+/**
+ * Extracts the JS transform for a test from its transform file.
+ *
+ * @param {string} inputFile
+ * @return {string}
+ */
+async function getTransform(inputFile) {
+  const transformDir = path.dirname(path.dirname(inputFile));
+  const parsed = path.parse(transformDir);
+  const transformPath = path.join(parsed.dir, 'dist', parsed.base);
+  const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
+  // TODO(rsimha): Change require to import when node v14 is the active LTS.
+  return require(transformFile).default;
+}
+
+/**
+ * Computes the output for a test from its transform and input.
+ *
+ * @param {string} transform
+ * @param {string} input
+ * @return {string}
+ */
+async function getOutput(transform, input) {
+  return (await posthtml(transform).process(input)).html;
+}
+
+/**
  * Logs a test error
+ *
  * @param {string} testName
  * @param {Error} err
  */
@@ -51,43 +112,6 @@ function logError(testName, err) {
 }
 
 /**
- * Runs tests for a single input file
- *
- * @return {!ReadableStream}
- */
-function runTest() {
-  return through.obj(async (file, enc, cb) => {
-    const inputFile = file.path;
-    const testName = path
-      .relative(transformsDir, inputFile)
-      .replace('-input.html', '');
-    const outputFile = inputFile.replace('input.html', 'output.html');
-    const dirName = path.dirname(inputFile);
-    const tsTransform = globby.sync(path.resolve(dirName, '*.ts'))[0];
-    const jsTransform = tsTransform
-      .replace('/transforms/', '/transforms/dist/')
-      .replace('.ts', '.js');
-    const input = fs.readFileSync(inputFile, 'utf8');
-    const expected = fs.readFileSync(outputFile, 'utf8');
-    const transform = require(jsTransform).default;
-    const output = (await posthtml(transform).process(input)).html;
-    try {
-      assert.strictEqual(output, expected);
-    } catch (err) {
-      ++failed;
-      logError(testName, err);
-      cb();
-      return;
-    }
-    ++passed;
-    if (!isTravisBuild()) {
-      console.log(green('✔'), 'Passed', cyan(testName));
-    }
-    cb();
-  });
-}
-
-/**
  * Reports total number of passing / failing tests
  */
 function reportResult() {
@@ -102,6 +126,35 @@ function reportResult() {
   } else {
     log(green('SUCCESS:'), result);
   }
+}
+
+/**
+ * Runs the test in a single input file
+ *
+ * @return {!ReadableStream}
+ */
+function runTest() {
+  return through.obj(async (file, enc, cb) => {
+    const inputFile = file.path;
+    const input = await getInput(inputFile);
+    const testName = getTestName(inputFile);
+    const expectedOutput = await getExpectedOutput(inputFile);
+    const transform = await getTransform(inputFile);
+    const output = await getOutput(transform, input);
+    try {
+      assert.strictEqual(output, expectedOutput);
+    } catch (err) {
+      ++failed;
+      logError(testName, err);
+      cb();
+      return;
+    }
+    ++passed;
+    if (!isTravisBuild()) {
+      console.log(green('✔'), 'Passed', cyan(testName));
+    }
+    cb();
+  });
 }
 
 /**
