@@ -189,15 +189,15 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {Event} message
+   * @param {MessageEvent} messageEvent
    * @private
    */
-  onMessage_(message) {
-    if (message.source != this.iframe_.contentWindow) {
+  onMessage_(messageEvent) {
+    if (messageEvent.source != this.iframe_.contentWindow) {
       return;
     }
 
-    const messageData = getData(message); 
+    const messageData = getData(messageEvent); 
 
     if (!isJsonOrObj(messageData)) {
       return;
