@@ -16,13 +16,14 @@
 import '../amp-timeago';
 import {act} from 'react-dom/test-utils';
 import {toggleExperiment} from '../../../../src/experiments';
+import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
-import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-timeago',
   {
     amp: {
+      runtimeOn: true,
       extensions: ['amp-timeago:0.2'],
     },
   },
@@ -31,12 +32,17 @@ describes.realWin(
     let element;
     let observerCallback = () => {};
 
-    const timeout = ms => new Promise(res => setTimeout(res, ms));
-    const getShadow = async () => {
-      await whenUpgradedToCustomElement(element);
-      await element.whenBuilt();
+    const getTimeFromShadow = async () => {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
-      return element.shadowRoot;
+      const shadow = element.shadowRoot;
+      await waitForChildPromise(shadow, shadow => {
+        return shadow.querySelector('time');
+      });
+      const time = shadow.querySelector('time');
+      await waitForChildPromise(time, time => {
+        return time.textContent;
+      });
+      return time.textContent;
     };
 
     beforeEach(() => {
@@ -64,10 +70,8 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       win.document.body.appendChild(element);
-
-      const shadow = await getShadow();
-      const timeElement = shadow.querySelector('time');
-      expect(timeElement.textContent).to.equal('2 days ago');
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('2 days ago');
     });
 
     it('should display original date when older than cutoff', async () => {
@@ -76,10 +80,8 @@ describes.realWin(
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
       win.document.body.appendChild(element);
-
-      const shadowRoot = await getShadow();
-      const timeElement = shadowRoot.querySelector('time');
-      expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('Sunday 1 January 2017');
     });
 
     it('should update fuzzy timestamp on enter viewport', async () => {
@@ -89,15 +91,15 @@ describes.realWin(
       element.textContent = date.toString();
       win.document.body.appendChild(element);
 
-      const shadow = await getShadow();
-      const timeElement = shadow.querySelector('time');
-      await timeout(1000);
-      expect(timeElement.textContent).to.equal('10 seconds ago');
+      const time = await getTimeFromShadow();
+      await timeout(1000); // wait 1 second
+      expect(time).to.equal('10 seconds ago');
 
+      const timeEl = element.shadowRoot.querySelector('time');
       await act(async () => {
-        observerCallback([{target: timeElement, isIntersecting: true}]);
+        observerCallback([{target: timeEl, isIntersecting: true}]);
       });
-      expect(timeElement.textContent).to.equal('11 seconds ago');
+      expect(timeEl.textContent).to.equal('11 seconds ago');
     });
 
     it('should update after mutation of datetime attribute', async () => {
@@ -106,16 +108,13 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       win.document.body.appendChild(element);
-
       date.setDate(date.getDate() + 1);
       element.setAttribute('datetime', date.toString());
       element.mutatedAttributesCallback({
         'datetime': date.toString(),
       });
-
-      const shadow = await getShadow();
-      const timeElement = shadow.querySelector('time');
-      expect(timeElement.textContent).to.equal('1 day ago');
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('1 day ago');
     });
   }
 );
