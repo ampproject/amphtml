@@ -156,7 +156,7 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
       {
         imports: {
           ...esmRemovedImports,
-          ...validTransformedRemovableImports,
+          ...(isForTesting ? {} : validTransformedRemovableImports),
         },
       },
     ]);

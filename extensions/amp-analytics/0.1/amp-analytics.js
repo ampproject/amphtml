@@ -125,6 +125,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    console.log('amp-analytics buildCallback');
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -148,6 +149,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('amp-analytics layoutCallback');
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
     return this.ensureInitialized_();
