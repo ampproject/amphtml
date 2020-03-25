@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.module('parse_srcset.ParseURLTest');
+goog.module('parse_url.ParseURLTest');
 
 const parse_url = goog.require('parse_url');
 
