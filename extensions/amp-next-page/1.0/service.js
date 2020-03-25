@@ -105,8 +105,8 @@ export class NextPageService {
     /** @private {boolean} */
     this.finished_ = false;
 
-    /** @private {boolean} */
-    this.isFetching_ = false;
+    /** @private {?Promise<!Array<!./page.PageMeta>>} */
+    this.remoteFetchingPromise_ = null;
 
     /** @private {?AmpElement} element */
     this.host_ = null;
@@ -858,16 +858,24 @@ export class NextPageService {
    * @private
    */
   getRemotePages_() {
-    if (this.isFetching_ || !this.nextSrc_) {
+    if (!this.nextSrc_) {
       return Promise.resolve([]);
     }
-    this.isFetching_ = true;
-    return batchFetchJsonFor(this.ampdoc_, this.getHost_(), {
-      urlReplacement: UrlReplacementPolicy.ALL,
-      xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
-    })
+
+    if (this.remoteFetchingPromise_) {
+      return /** @type {!Promise<!Array<!./page.PageMeta>} */ (this
+        .remoteFetchingPromise_);
+    }
+
+    this.remoteFetchingPromise_ = batchFetchJsonFor(
+      this.ampdoc_,
+      this.getHost_(),
+      {
+        urlReplacement: UrlReplacementPolicy.ALL,
+        xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
+      }
+    )
       .then(result => {
-        this.isFetching_ = false;
         this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
           this.getHost_().setAttribute('src', this.nextSrc_);
@@ -877,9 +885,11 @@ export class NextPageService {
       .catch(error => {
         user().error(TAG, 'error fetching page list from remote server', error);
         this.nextSrc_ = null;
-        this.isFetching_ = false;
         return [];
       });
+
+    return /** @type {!Promise<!Array<!./page.PageMeta>} */ (this
+      .remoteFetchingPromise_);
   }
 
   /**
