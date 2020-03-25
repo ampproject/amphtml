@@ -15,7 +15,9 @@
  */
 
 import '../amp-jwplayer';
+import { JWPLAYER_EVENTS } from '../amp-jwplayer';
 import {htmlFor} from '../../../../src/static-template';
+import { dev } from '../../../../src/log';
 
 describes.realWin(
   'amp-jwplayer',
@@ -32,83 +34,262 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getjwplayer(attributes) {
-      const jw = doc.createElement('amp-jwplayer');
+    async function getjwplayer(attributes) {
+      const jwp = doc.createElement('amp-jwplayer');
       for (const key in attributes) {
-        jw.setAttribute(key, attributes[key]);
+        jwp.setAttribute(key, attributes[key]);
       }
-      jw.setAttribute('width', '320');
-      jw.setAttribute('height', '180');
-      jw.setAttribute('layout', 'responsive');
       const html = htmlFor(env.win.document);
+
       env.sandbox
-        .stub(env.ampdoc.getHeadNode(), 'querySelector')
-        .withArgs('meta[property="og:title"]')
-        .returns(
-          html`
-            <meta property="og:title" content="title_tag" />
-          `
-        );
-      doc.body.appendChild(jw);
-      return jw.build().then(() => {
-        jw.layoutCallback();
-        return jw;
-      });
+      .stub(env.ampdoc.getHeadNode(), 'querySelector')
+      .withArgs('meta[property="og:title"]')
+      .returns(
+        html`
+          <meta property="og:title" content="title_tag" />
+        `
+      );
+      
+      jwp.setAttribute('width', '320');
+      jwp.setAttribute('height', '180');
+      jwp.setAttribute('layout', 'responsive');
+
+      doc.body.appendChild(jwp);
+      await jwp.build();
+      await jwp.layoutCallback();
+
+      return jwp;
     }
 
-    it('renders', async () => {
-      const jw = await getjwplayer({
-        'data-media-id': 'Wferorsv',
-        'data-player-id': 'sDZEo0ea',
+    describe('rendering', async () => {
+      it('renders', async () => {
+        const jw = await getjwplayer({
+          'data-media-id': 'Wferorsv',
+          'data-player-id': 'sDZEo0ea',
+          'crossorigin': '',
+        });
+        const iframe = jw.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html'
+        );
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html'
-      );
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+
+      it('renders with a playlist', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+        });
+        const iframe = jw.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html'
+        );
+      });
+
+      it('renders with a playlist and parses contextual parameter', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+          'data-content-search': '__CONTEXTUAL__',
+        });
+        const iframe = jw.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag'
+        );
+      });
+      it('renders with a playlist and all parameters', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': '482jsTAr',
+          'data-player-id': 'sDZEo0ea',
+          'data-content-search': 'dog',
+          'data-content-backfill': true,
+        });
+        const iframe = jw.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
+        );
+      });
+    })
+
+    describe('handlers', async () => {
+      let impl;
+      function mockMessage(event, detail) {
+        impl.onMessage_({
+          data: { event,  detail },
+          origin: 'https://ssl.p.jwpcdn.com',
+          source: impl.element.querySelector('iframe').contentWindow,
+        });
+      }
+      beforeEach( async () => {
+        let jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3'
+        });
+        impl = jwp.implementation_;
+      })
+
+      it('supports platform', () => {
+        expect(impl.supportsPlatform()).to.be.true;
+      });
+  
+      it('is interactive', () => {
+        expect(impl.isInteractive()).to.be.true;
+      });
+  
+      it('gets currentTime', () => {
+        expect(impl.getCurrentTime()).to.equal(0);
+        impl.currentTime_ = 10;
+        expect(impl.getCurrentTime()).to.equal(10);
+      });
+  
+      it('gets duration from playlist item', () => {
+        impl.playlistItem = { 
+          duration: 50
+        }
+  
+        expect(impl.getDuration()).to.equal(impl.playlistItem.duration);
+      });
+  
+      it('gets duration when externally set', () => {
+        impl.duration_ = 50
+        impl.playlistItem = { 
+          duration: 0
+        }
+
+        expect(impl.getDuration()).to.equal(impl.duration_);
+      });
+  
+      it('gets played ranges', () => {
+        expect(impl.playedRanges_).to.deep.equal(impl.getPlayedRanges());
+      });
+  
+  
+      it('seeks', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.seekTo(10);
+        expect(spy).to.be.calledWith('seek', 10);
+      });
+  
+      it('plays', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play();
+        expect(spy).to.be.calledWith('play', { reason: 'amp-interaction' });
+      });
+  
+      it('autoplays', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play(true);
+        expect(spy).to.be.calledWith('play', { reason: 'auto' });
+      });
+  
+      it('should pause if the video is playing', () => {
+        env.sandbox.spy(impl, 'pause');
+        impl.pauseCallback();
+        expect(impl.pause.called).to.be.true;
+      });
+  
+      it('can pause', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play(true);
+        expect(spy).to.be.calledWith('play');
+      });
+
+      it('can mute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.mute();
+        expect(impl.sendCommand_).calledWith('setMute', true);
+      })
+
+      it('can unmute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.unmute();
+        expect(impl.sendCommand_).calledWith('setMute', false);
+      })
+
+      describe('message handling', () => {
+        it('returns early if empty message', () => {
+          const spy = env.sandbox.spy(impl, 'onMessage_');
+          impl.onMessage_({});
+          expect(spy).returned(undefined);
+        });
+
+        it('returns early if data isn\'t JSON or object', () => {
+          const spy = env.sandbox.spy(impl, 'onMessage_');
+          impl.onMessage_({ data: 'Hello World'})
+          expect(spy).returned(undefined);
+        });
+
+        it('calls onReady if valid ready message recieved', () => {
+          const spy = env.sandbox.spy(impl, 'onReadyOnce_');
+          const mockItem = {};
+          const detail = { muted: false, playlistItem: mockItem };
+          
+          mockMessage('ready', detail);
+          expect(spy).calledWith(detail);
+        });
+
+        it('updates fullscreen state', () => {
+          mockMessage('fullscreen', { fullscreen: true })
+          expect(impl.fullscreen_).to.be.true;
+          mockMessage('fullscreen', { fullscreen: false })
+          expect(impl.fullscreen_).to.be.false;
+        });
+
+        it('updates duration from meta', () => {
+          mockMessage('meta', { metadataType: 'media', duration: 50 });
+          expect(impl.duration_).to.equal(50);
+        });
+
+        it('updates mute from state', () => {
+          const spy = env.sandbox.spy(impl, 'onToggleMute_');
+          mockMessage('mute', { mute: true });
+          expect(spy).calledWith(true);
+          mockMessage('mute', { mute: false });
+          expect(spy).calledWith(false);
+        });
+
+        it('updates played ranges from state', () => {
+          const mockPlayedRanges = { ranges: [[0, 3.187593]] };
+          mockMessage('playedRanges', mockPlayedRanges)
+          expect(impl.playedRanges_).to.equal(mockPlayedRanges.ranges);
+        });
+
+        it('updates playlist item state', () => {
+          const mockItem = {
+            "title": "test title",
+            "mediaid": "BZ6tc0gy",
+            "image": "http://foo.bar",
+            "duration": 52,
+            "description": "",
+            "file": "http://foo.bar",
+            "meta": {
+              "title": "test title",
+              "artist": "localhost",
+              "album": "",
+              "artwork": [
+                {
+                  "sizes": "",
+                  "src": "http://foo.bar",
+                  "type": ""
+                }
+              ]
+            }
+          }
+          mockMessage('playlistItem', { playlistItem: mockItem })
+          expect(impl.playlistItem).to.equal(mockItem);
+        });
+
+      });
     });
 
-    it('renders with a playlist', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html'
-      );
-    });
-    it('renders with a playlist and parses contextual parameter', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-        'data-content-search': '__CONTEXTUAL__',
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag'
-      );
-    });
-    it('renders with a playlist and all parameters', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-        'data-content-search': 'dog',
-        'data-content-backfill': true,
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
-      );
-    });
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {
         return getjwplayer({
