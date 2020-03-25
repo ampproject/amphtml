@@ -128,6 +128,16 @@ const targetMatchers = {
   'PACKAGE_UPGRADE': file => {
     return file == 'package.json' || file == 'yarn.lock';
   },
+  'SERVER': file => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/serve.js' ||
+      file == 'build-system/tasks/server-tests.js' ||
+      file.startsWith('build-system/server/')
+    );
+  },
   'UNIT_TEST': file => {
     if (isOwnersFile(file)) {
       return false;
@@ -218,8 +228,8 @@ function determineBuildTargets(fileName = 'build-targets.js') {
         .join(', ')
     )
   );
-  // Test the runtime for babel plugin changes.
-  if (buildTargets.has('BABEL_PLUGIN')) {
+  // Test the runtime for babel plugin and server changes.
+  if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
   // Test all targets on Travis during package upgrades.
