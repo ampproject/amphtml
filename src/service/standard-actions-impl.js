@@ -453,7 +453,8 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleSetCookie_(invocation) {
-    const {args} = invocation;
+    const {node, args} = invocation;
+    const win = (node.ownerDocument || node).defaultView;
 
     // Use RFC 6265 for allowed cookie name and value characters
 
@@ -461,8 +462,8 @@ export class StandardActions {
       args['name'],
       "Argument 'name' must be a string."
     );
-    user().assert(
-      /^[a-z0-9!#$%&'*+\-.^_`|~]+$/i.test(args['name']),
+    userAssert(
+      /^[a-z0-9!#$%&'*+\-.^_`|~]+$/i.test(name),
       "Argument 'name' is required and must contain only characters allowed by RFC 6265"
     );
 
@@ -470,33 +471,30 @@ export class StandardActions {
       args['value'],
       "Argument 'value' must be a string."
     );
-    user().assert(
-      /^[a-z0-9!#$%&'()*+\-./:<=>?@[\]^_`{|}~]*$/i.test(args['value']),
+    userAssert(
+      /^[a-z0-9!#$%&'()*+\-./:<=>?@[\]^_`{|}~]*$/i.test(value),
       "Argument 'value' is required and must contain only characters allowed by RFC 6265"
     );
 
-    let expirationTime;
-    if (args['max-age']) {
-      // Negative numbers are allowed for the purpose of deleting cookies.
-      const maxAge = user().assertNumber(
-        args['max-age'],
-        "Optional argument 'max-age' must contain a number"
-      );
-      expirationTime = Date.now() + maxAge * 1000;
-    }
+    // Negative numbers are allowed for the purpose of deleting cookies.
+    const maxAge = user().assertNumber(
+      args['max-age'],
+      "Argument 'max-age' is required and must contain a number"
+    );
+    const expirationTime = Date.now() + maxAge * 1000;
 
     const options = {};
     if (args['domain']) {
       // Only perform minimal validation (allowed characters) and let browser
       // make final verdict on validity.
-      user().assert(
+      userAssert(
         /^[0-9.\-]+$/i.test(args['domain']),
         "Optional argument 'domain' contains disallowed characters"
       );
       options.domain = args['domain'];
     }
     if (args['samesite']) {
-      user().assert(
+      userAssert(
         /^(lax|strict)$/.test(args['samesite']),
         "Optional argument 'samesite' can only have value 'lax' or 'strict'"
       );
@@ -509,7 +507,7 @@ export class StandardActions {
       );
     }
 
-    setCookie(this.ampdoc.getWin(), name, value, expirationTime, options);
+    setCookie(win, name, value, expirationTime, options);
     return null;
   }
 }
