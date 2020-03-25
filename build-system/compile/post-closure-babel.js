@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const conf = require('./build.conf');
