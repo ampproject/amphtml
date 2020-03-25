@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../../src/preact';
 import {Timeago} from '../timeago';
 import {date, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-
-import * as Preact from '../../../../src/preact'; // eslint-disable-line
 
 export default {
   title: 'Timeago',

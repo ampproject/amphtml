@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../src/preact';
 import {makeDecorator} from '@storybook/addons';
 import render from 'preact-render-to-string/jsx';
-
-import * as Preact from '../../../src/preact'; // eslint-disable-line
 
 export default makeDecorator({
   name: 'withAmpDecorator',

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../../src/preact';
 import {DateDisplay} from '../date-display';
 import {date, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-
-import * as Preact from '../../../../src/preact'; // eslint-disable-line
 
 export default {
   title: 'DateDisplay',

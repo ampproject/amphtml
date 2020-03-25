@@ -95,6 +95,7 @@ export let InteractiveComponentDef;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
+ *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
@@ -138,6 +139,8 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
+  // Story preview state.
+  PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
@@ -544,6 +547,7 @@ export class AmpStoryStoreService {
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
+      [StateProperty.PREVIEW_STATE]: false,
     });
   }
 
@@ -568,6 +572,15 @@ export class AmpStoryStoreService {
       case EmbedMode.NO_SHARING:
         return {
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+        };
+      case EmbedMode.PREVIEW:
+        return {
+          [StateProperty.PREVIEW_STATE]: true,
+          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty.CAN_SHOW_BOOKEND]: false,
+          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
       default:
         return {};
