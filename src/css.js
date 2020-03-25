@@ -103,7 +103,11 @@ export function prependSelectorsWith(selector, distribute) {
  * @return {string}
  */
 export function escapeCssSelectorIdent(ident) {
-  return cssEscape(ident);
+  if (IS_ESM) {
+    return CSS.escape(ident);
+  } else {
+    return cssEscape(ident);
+  }
 }
 
 /**
