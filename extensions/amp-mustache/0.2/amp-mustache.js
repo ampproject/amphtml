@@ -20,6 +20,7 @@ import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-mustache';
 
@@ -122,6 +123,15 @@ export class AmpMustache extends BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
+
+    // user().fine(
+    //   TAG,
+    //   'Rendering template',
+    //   this.element,
+    //   'with data',
+    //   mustacheData
+    // );
+
     const html = mustache.render(
       this.template_,
       mustacheData,
