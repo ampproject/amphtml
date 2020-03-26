@@ -22,7 +22,6 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {
   MESSAGE_FIELDS,
-  SAFEFRAME_ORIGIN,
   SERVICE,
   SafeframeHostApi,
   removeSafeframeListener,
@@ -90,7 +89,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     const messageData = {};
     messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
     messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
-    receiveMessage(messageData);
+    receiveMessage(messageData, doubleclickImpl.iframe.contentWindow);
   }
 
   function sendRegisterDoneMessage() {
@@ -103,14 +102,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       initialWidth: '100',
       sentinel: safeframeHost.sentinel_,
     });
-    receiveMessage(message);
+    receiveMessage(message, safeframeHost.iframe_.contentWindow);
   }
 
   // Simulates receiving a post message from the safeframe.
-  function receiveMessage(messageData) {
+  function receiveMessage(messageData, source) {
     const messageEvent = {
       data: JSON.stringify(messageData),
-      origin: SAFEFRAME_ORIGIN,
+      source,
     };
     safeframeListener(messageEvent);
   }
@@ -355,7 +354,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
       const sendMessageStub = env.sandbox./*OK*/ stub(
@@ -407,7 +405,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
       const sendMessageStub = env.sandbox./*OK*/ stub(
@@ -460,7 +457,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
       const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
@@ -498,7 +494,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
       // Scroll 100 px
@@ -753,7 +748,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': true,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(expandMessage);
+      receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
     }
 
     /**
@@ -910,7 +905,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'sentinel': safeframeHost.sentinel_,
       });
       allowConsoleError(() => {
-        receiveMessage(expandMessage);
+        receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
       });
       return Services.timerFor(env.win)
         .promise(100)
@@ -960,7 +955,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': false,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(collapseMessage);
+      receiveMessage(collapseMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should collapse safeframe on amp-ad resize failure', () => {
@@ -1066,7 +1061,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'resize_l': left,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(resizeMessage);
+      receiveMessage(resizeMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should resize safeframe on amp-ad resize success', () => {

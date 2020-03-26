@@ -64,7 +64,7 @@ let EnhancedVariablesV2Def;
 
 /**
  * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @return {PreactDef.Renderable}
  */
 export function DateDisplay(props) {
   const render = props['render'];

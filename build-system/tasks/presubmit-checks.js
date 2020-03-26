@@ -132,6 +132,7 @@ const forbiddenTerms = {
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
+      'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -367,7 +368,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
-      'src/amp-story-player.js',
+      'src/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -400,6 +401,7 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
       'src/service/cid-impl.js',
@@ -954,8 +956,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
   // Functions
-  '\\.changeHeight\\(': bannedTermsHelpString,
-  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.applySize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.expand\\(': bannedTermsHelpString,
@@ -1079,9 +1080,10 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.getTime\\(\\)': {
-    message: 'Unless you do weird date math (whitelist), use Date.now().',
+    message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
+      'extensions/amp-timeago/0.2/timeago.js',
       'build-system/compile/build.conf.js',
     ],
   },

@@ -52,8 +52,9 @@ const RTC_VENDORS = jsonConfiguration({
   // Add vendors here
   ozone: {
     url:
-      'https://elb.the-ozone-project.com/openrtb2/amp?tag_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
+      'https://elb.the-ozone-project.com/openrtb2/amp?tag_id=TAG_ID&placement_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
     macros: [
+      'TAG_ID',
       'PLACEMENT_ID',
       'SITE_ID',
       'PUBLISHER_ID',
@@ -172,6 +173,14 @@ const RTC_VENDORS = jsonConfiguration({
   prebidflux: {
     url: 'https://prebid-server.flux-adserver.com/openrtb2/amp?tag_id=TAG_ID',
     macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  browsi: {
+    url:
+      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&ul=SCROLL_TOP&pl=PAGE_HEIGHT&bks=BKG_STATE&pk=PUB_KEY&sk=SITE_KEY&h=ATTR(height)&adix=ATTR(data-amp-slot-index)&ref=REFERRER&url=HREF',
+    macros: ['PUB_KEY', 'SITE_KEY'],
+    errorReportingUrl:
+      'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
 });

@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import {createElement, useContext, useEffect, useRef} from './index';
+import * as Preact from './index';
 import {dev} from '../log';
 import {getAmpContext} from './context';
 import {matches, toggleAttribute} from '../dom';
 import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
+import {useContext, useEffect, useRef} from './index';
 import {useMountEffect} from './utils';
 
 /**
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
-  const slotProps = {name, ...(props || {})};
-  return createElement(Slot, slotProps);
+  return <Slot {...(props || {})} name={name} />;
 }
 
 /**
  * Slot component.
  *
  * @param {!JsonObject} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());
@@ -152,7 +152,7 @@ export function Slot(props) {
     };
   });
 
-  return createElement('slot', slotProps);
+  return <slot {...slotProps} />;
 }
 
 /**

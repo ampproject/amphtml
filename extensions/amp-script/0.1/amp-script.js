@@ -22,11 +22,11 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
-import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -91,7 +91,7 @@ export class AmpScript extends AMP.BaseElement {
      * If true, most production constraints are disabled including script size,
      * script hash sum for local scripts, etc. Default is false.
      *
-     * Enabled by the "development" attribute which is intentionally invalid.
+     * Enabled by the "data-ampdevmode" attribute which is intentionally invalid.
      *
      * @private {boolean}
      */
@@ -105,16 +105,11 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /*
-     * Development mode is enabled by satisfying two constraints:
-     *   1. Root html element has 'data-ampdevmode'
-     *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
-     */
-    const htmlEl = this.element.ownerDocument.documentElement;
     this.development_ =
-      htmlEl.hasAttribute('data-ampdevmode') &&
-      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-        htmlEl;
+      this.element.hasAttribute('data-ampdevmode') ||
+      this.element.ownerDocument.documentElement.hasAttribute(
+        'data-ampdevmode'
+      );
 
     if (this.development_) {
       user().warn(
@@ -122,13 +117,6 @@ export class AmpScript extends AMP.BaseElement {
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
-      if (this.element.hasAttribute('development')) {
-        user().warn(
-          TAG,
-          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
-          this.element
-        );
-      }
     }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
@@ -575,12 +563,16 @@ export class SanitizerImpl {
     /** @private @const {!Element} */
     this.element_ = ampScript.element;
 
+    registerServiceBuilder(this.win_, 'purifier-inplace', function() {
+      return new Purifier(
+        ampScript.win.document,
+        dict({'IN_PLACE': true}),
+        rewriteAttributeValue
+      );
+    });
+
     /** @private @const {!Purifier} */
-    this.purifier_ = new Purifier(
-      ampScript.win.document,
-      dict({'IN_PLACE': true}),
-      rewriteAttributeValue
-    );
+    this.purifier_ = getService(this.win_, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = this.purifier_.getAllowedTags();

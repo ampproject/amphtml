@@ -29,6 +29,7 @@ const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
+const micromatch = require('micromatch');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -37,11 +38,15 @@ const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  BABEL_SRC_GLOBS,
+  SRC_TEMP_DIR,
+  THIRD_PARTY_TRANSFORM_GLOBS,
+} = require('../compile/sources');
+const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
@@ -100,7 +105,14 @@ const MINIFIED_TARGETS = [
  */
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
-  ignore: devDependencies(), // Ignore devDependencies
+  /**
+   * Ignore devDependencies, except for 'chai-as-promised' which contains ES6 code.
+   * ES6 code is fine for most test environments, but not for integration tests
+   * running on SauceLabs since some older browsers need ES5.
+   */
+  ignore: devDependencies().filter(
+    dep => dep.indexOf('chai-as-promised') === -1
+  ),
 };
 
 /**
@@ -281,59 +293,52 @@ function maybeToEsmName(name) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
+async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
   const minifiedName = maybeToEsmName(options.minifiedName);
-  return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
-    .then(function() {
-      const destPath = path.join(destDir, minifiedName);
-      appendToCompiledFile(srcFilename, destPath);
-      fs.writeFileSync(
-        path.join(destDir, 'version.txt'),
-        internalRuntimeVersion
-      );
-      if (options.latestName) {
-        fs.copySync(
-          destPath,
-          path.join(destDir, maybeToEsmName(options.latestName))
-        );
-      }
-    })
-    .then(() => {
-      let name = minifiedName;
-      if (options.latestName) {
-        name += ` → ${maybeToEsmName(options.latestName)}`;
-      }
-      if (options.singlePassCompilation) {
-        altMainBundles.forEach(bundle => {
-          name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
-        });
-        name += ', and all extensions';
-      }
-      endBuildStep('Minified', name, timeInfo.startTime);
-    })
-    .then(() => {
-      if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
-        return applyAmpConfig(
-          maybeToEsmName(`${destDir}/${minifiedName}`),
-          /* localDev */ !!argv.fortesting
-        );
-      }
-    })
-    .then(() => {
-      if (argv.noconfig || !options.singlePassCompilation) {
-        return;
-      }
-      return Promise.all(
-        altMainBundles.map(({name}) =>
-          applyAmpConfig(
-            maybeToEsmName(`dist/${name}.js`),
-            /* localDev */ !!argv.fortesting
-          )
-        )
-      );
+  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
+
+  const destPath = path.join(destDir, minifiedName);
+  appendToCompiledFile(srcFilename, destPath);
+  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+  if (options.latestName) {
+    fs.copySync(
+      destPath,
+      path.join(destDir, maybeToEsmName(options.latestName))
+    );
+  }
+
+  let name = minifiedName;
+  if (options.latestName) {
+    name += ` → ${maybeToEsmName(options.latestName)}`;
+  }
+  if (options.singlePassCompilation) {
+    altMainBundles.forEach(bundle => {
+      name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
     });
+    name += ', and all extensions';
+  }
+  endBuildStep('Minified', name, timeInfo.startTime);
+
+  if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+    await applyAmpConfig(
+      maybeToEsmName(`${destDir}/${minifiedName}`),
+      /* localDev */ !!argv.fortesting
+    );
+  }
+
+  if (argv.noconfig || !options.singlePassCompilation) {
+    return;
+  }
+  return await Promise.all(
+    altMainBundles.map(({name}) =>
+      applyAmpConfig(
+        maybeToEsmName(`dist/${name}.js`),
+        /* localDev */ !!argv.fortesting
+      )
+    )
+  );
 }
 
 /**
@@ -507,12 +512,12 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileJs(srcDir, srcFilename, destDir, options) {
+async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -704,19 +709,25 @@ function transferSrcsToTempDir(options = {}) {
     colors.cyan(SRC_TEMP_DIR)
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
+  const babelPlugins = conf.plugins({
+    isEsmBuild: options.isEsmBuild,
+    isSinglePass: options.isSinglePass,
+    isForTesting: options.isForTesting,
+    isChecktypes: options.isChecktypes,
+    isPostCompile: false,
+  });
+
   files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+    if (
+      (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
+      !micromatch.isMatch(file, THIRD_PARTY_TRANSFORM_GLOBS)
+    ) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;
     }
 
     const {code} = babel.transformFileSync(file, {
-      plugins: conf.plugins({
-        isEsmBuild: options.isEsmBuild,
-        isSinglePass: options.isSinglePass,
-        isForTesting: options.isForTesting,
-        isChecktypes: options.isChecktypes,
-      }),
+      plugins: babelPlugins,
       retainLines: true,
       compact: false,
     });

@@ -35,7 +35,7 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {WindowInterface} from '../../../src/window-interface';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';

@@ -385,8 +385,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
+    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
       [DOUBLECLICK_SRA_EXP]: {
         isTrafficEligible: () =>
           !forcedExperimentId &&
@@ -448,9 +447,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }
-    const useRemoteHtml = !!this.win.document.querySelector(
-      'meta[name=amp-3p-iframe-src]'
-    );
+    const useRemoteHtml =
+      this.getAmpDoc().getMetaByName('amp-3p-iframe-src') !== null;
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
@@ -744,6 +742,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'data-multi-size-validation': true,
       'data-override-width': true,
       'data-override-height': true,
+      'data-amp-slot-index': true,
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
@@ -1604,13 +1603,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const creativeSize = this.getCreativeSize();
     devAssert(creativeSize, 'this.getCreativeSize returned null');
-    this.safeframeApi_ =
-      this.safeframeApi_ ||
-      new SafeframeHostApi(
+    if (this.isRefreshing) {
+      if (this.safeframeApi_) {
+        this.safeframeApi_.destroy();
+      }
+      this.safeframeApi_ = new SafeframeHostApi(
         this,
         this.isFluidRequest_,
         /** @type {{height, width}} */ (creativeSize)
       );
+    } else {
+      this.safeframeApi_ =
+        this.safeframeApi_ ||
+        new SafeframeHostApi(
+          this,
+          this.isFluidRequest_,
+          /** @type {{height, width}} */ (creativeSize)
+        );
+    }
 
     return this.safeframeApi_.getSafeframeNameAttr();
   }

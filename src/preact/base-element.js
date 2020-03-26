@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import * as Preact from './index';
 import {Deferred} from '../utils/promise';
-import {Fragment, createElement, render} from './index';
 import {Slot, createSlot} from './slot';
+import {WithAmpContext} from './context';
 import {devAssert} from '../log';
 import {matches} from '../dom';
-import {withAmpContext} from './context';
+import {render} from './index';
 
 /**
  * @typedef {{
@@ -129,6 +130,18 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @protected
+   * @param {!JsonObject} props
+   */
+  mutateProps(props) {
+    this.defaultProps_ = /** @type {!JsonObject} */ ({
+      ...this.defaultProps_,
+      ...props,
+    });
+    this.scheduleRender_();
+  }
+
   /** @private */
   scheduleRender_() {
     if (!this.scheduledRender_) {
@@ -141,7 +154,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   unmount_() {
     this.mounted_ = false;
     if (this.container_) {
-      render(createElement(Fragment), this.container_);
+      render(<></>, this.container_);
     }
   }
 
@@ -156,7 +169,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor.children || Ctor.passthrough) {
+      if (Ctor['children'] || Ctor['passthrough']) {
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
@@ -171,9 +184,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
-    const cv = createElement(Ctor.Component, props);
-
-    const v = createElement(withAmpContext, this.context_, cv);
+    const v = (
+      <WithAmpContext {...this.context_}>
+        {Preact.createElement(Ctor['Component'], props)}
+      </WithAmpContext>
+    );
 
     render(v, this.container_);
 
@@ -190,9 +205,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 /**
  * Override to provide the Component definition.
  *
- * @protected {!Preact.FunctionalComponent}
+ * @protected {!PreactDef.FunctionalComponent}
  */
-PreactBaseElement.Component = function() {
+PreactBaseElement['Component'] = function() {
   devAssert(false, 'Must provide Component');
 };
 
@@ -201,7 +216,7 @@ PreactBaseElement.Component = function() {
  *
  * @protected {string}
  */
-PreactBaseElement.className = '';
+PreactBaseElement['className'] = '';
 
 /**
  * Enabling passthrough mode alters the children slotting to use a single
@@ -210,19 +225,19 @@ PreactBaseElement.className = '';
  *
  * @protected {boolean}
  */
-PreactBaseElement.passthrough = false;
+PreactBaseElement['passthrough'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
  *
  * @protected {!Object<string, !AmpElementPropDef>}
  */
-PreactBaseElement.props = {};
+PreactBaseElement['props'] = {};
 
 /**
  * @protected {!Object<string, !ChildDef>|null}
  */
-PreactBaseElement.children = null;
+PreactBaseElement['children'] = null;
 
 /**
  * @param {typeof PreactBaseElement} Ctor
@@ -234,10 +249,10 @@ function collectProps(Ctor, element, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps});
 
   const {
-    className,
-    props: propDefs,
-    passthrough,
-    children: childrenDefs,
+    'className': className,
+    'props': propDefs,
+    'passthrough': passthrough,
+    'children': childrenDefs,
   } = Ctor;
 
   // Class.
@@ -274,7 +289,7 @@ function collectProps(Ctor, element, defaultProps) {
       !childrenDefs,
       'only one of "passthrough" or "children" may be given'
     );
-    props['children'] = [createElement(Slot)];
+    props['children'] = [<Slot />];
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;

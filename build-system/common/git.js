@@ -65,6 +65,17 @@ function shortSha(sha) {
 }
 
 /**
+ * Returns the list of files changed but not committed to the local branch, one
+ * on each line.
+ * @return {!Array<string>}
+ */
+function gitDiffNameOnly() {
+  return getStdout('git diff --name-only')
+    .trim()
+    .split('\n');
+}
+
+/**
  * Returns the list of files changed relative to the branch point off of master,
  * one on each line.
  * @return {!Array<string>}
@@ -211,6 +222,7 @@ module.exports = {
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffFileMaster,
+  gitDiffNameOnly,
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,

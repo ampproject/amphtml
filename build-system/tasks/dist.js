@@ -67,13 +67,14 @@ const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
  * Prints a useful help message prior to the gulp dist task
  */
 function printDistHelp() {
+  let cmd = 'gulp dist';
   if (argv.fortesting) {
-    let cmd = 'gulp dist --fortesting';
-    if (argv.single_pass) {
-      cmd = cmd + ' --single_pass';
-    }
-    printConfigHelp(cmd);
+    cmd = cmd + ' --fortesting';
   }
+  if (argv.single_pass) {
+    cmd = cmd + ' --single_pass';
+  }
+  printConfigHelp(cmd);
   if (argv.single_pass) {
     log(
       green('Building all AMP extensions in'),
@@ -155,6 +156,7 @@ function buildExperiments(options) {
       minify: options.minify || argv.minify,
       includePolyfills: true,
       minifiedName: maybeToEsmName('experiments.js'),
+      esmPassCompilation: argv.esm || false,
     }
   );
 }
@@ -177,6 +179,7 @@ function buildLoginDone(version, options) {
     minify: options.minify || argv.minify,
     minifiedName,
     latestName,
+    esmPassCompilation: argv.esm || false,
     extraGlobs: [
       buildDir + 'amp-login-done-0.1.max.js',
       buildDir + 'amp-login-done-dialog.js',
@@ -201,6 +204,7 @@ async function buildWebPushPublisherFiles(options) {
         watch: options.watch,
         includePolyfills: true,
         minify: options.minify || argv.minify,
+        esmPassCompilation: argv.esm || false,
         minifiedName,
         extraGlobs: [tempBuildDir + '*.js'],
       });
@@ -451,4 +455,6 @@ dist.flags = {
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
+  version_override: '  Override the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };

@@ -817,21 +817,6 @@ export class BaseElement {
   }
 
   /**
-   * Requests the runtime to update the height of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
-   * as soon as possible.
-   * @param {number} newHeight
-   * @public
-   */
-  changeHeight(newHeight) {
-    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
-      this.element,
-      newHeight,
-      /* newWidth */ undefined
-    );
-  }
-
-  /**
    * Collapses the element, setting it to `display: none`, and notifies its
    * owner (if there is one) through {@link collapsedCallback} that the element
    * is no longer visible.
@@ -851,10 +836,25 @@ export class BaseElement {
   }
 
   /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @public
+   */
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
+  }
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -865,7 +865,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       /* newWidth */ undefined
@@ -889,7 +889,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       newWidth,

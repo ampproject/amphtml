@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const {
   checkTypesNailgunPort,
@@ -40,7 +41,7 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-  transferSrcsToTempDir({isChecktypes: true});
+  transferSrcsToTempDir({isChecktypes: true, isEsmBuild: argv.esm || false});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
