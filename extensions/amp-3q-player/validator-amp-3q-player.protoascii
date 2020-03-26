@@ -36,6 +36,26 @@ tags: {  # <amp-3q-player>
     name: "data-id"
     mandatory: true
   }
+  attrs: {
+        name: "key"
+        mandatory: false
+  }
+  attrs: {
+        name: "timestamp"
+        mandatory: false
+  }
+  attrs: {
+        name: "project"
+        mandatory: false
+  }
+  attrs: {
+        name: "datasource"
+        mandatory: false
+  }
+  attrs: {
+        name: "datafield"
+        mandatory: false
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
