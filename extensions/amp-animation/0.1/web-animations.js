@@ -534,7 +534,7 @@ export class MeasureScanner extends Scanner {
         }
         keyframes.push(this.css_.resolveCssMap(frame));
       }
-      for (let  i = 0; i < keyframes.length; i++) {
+      for (let i = 0; i < keyframes.length; i++) {
         const frame = keyframes[i];
         for (const k in ADD_PROPS) {
           if (k in frame) {
