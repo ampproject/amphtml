@@ -113,7 +113,8 @@ function getEpoch(props) {
   } else if (datetime) {
     epoch = Date.parse(datetime);
     if (isNaN(epoch)) {
-      console.error(`Invalid date: ${datetime}`);
+      console /*OK*/
+        .error(`Invalid date: ${datetime}`);
     }
   } else if (timestampMs) {
     epoch = timestampMs;
@@ -122,9 +123,8 @@ function getEpoch(props) {
   }
 
   if (epoch === undefined) {
-    console.error(
-      'One of datetime, timestamp-ms, or timestamp-seconds is required'
-    );
+    console /*OK*/
+      .error('One of datetime, timestamp-ms, or timestamp-seconds is required');
   }
 
   return epoch;
