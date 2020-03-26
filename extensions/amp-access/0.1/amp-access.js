@@ -17,6 +17,7 @@
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
@@ -24,7 +25,6 @@ import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {evaluateAccessExpr} from './access-expr';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -100,6 +100,9 @@ export class AccessService {
 
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
+
+    /** @private {!./access-expr.AmpAccessEvaluator} */
+    this.evaluator_ = new AmpAccessEvaluator();
 
     /** @const */
     this.sources_ = this.parseConfig_();
@@ -452,7 +455,7 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = evaluateAccessExpr(expr, response);
+    const on = this.evaluator_.evaluate(expr, response);
     let renderPromise = null;
     if (on) {
       renderPromise = this.renderTemplates_(element, response);
