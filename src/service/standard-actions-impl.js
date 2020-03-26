@@ -476,7 +476,7 @@ export class StandardActions {
       "Argument 'value' is required and must contain only characters allowed by RFC 6265"
     );
 
-    // Negative numbers are allowed for the purpose of deleting cookies.
+    // Negative numbers are allowed; they result in cookie deletion like zero.
     const maxAge = user().assertNumber(
       args['max-age'],
       "Argument 'max-age' is required and must contain a number"
