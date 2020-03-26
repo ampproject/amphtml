@@ -34,6 +34,11 @@ const {
   storybookAmp,
   storybookPreact,
 } = require('./build-system/tasks/storybook');
+const {
+  validator,
+  validatorJava,
+  validatorWebui,
+} = require('./build-system/tasks/validator');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
@@ -71,11 +76,6 @@ const {size} = require('./build-system/tasks/size');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
-const {
-  validator,
-  validatorJava,
-  validatorWebui,
-} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 

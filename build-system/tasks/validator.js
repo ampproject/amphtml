@@ -39,13 +39,17 @@ async function validatorJava() {
     commands.append('bazel clean');
   }
 
-  execOrDie(commands.concat([
-    'bazel run //:fetchAMPResources',
-    'bazel build //:amphtml_validator_java_proto_lib',
-    'bazel run //:copyValidatorJavaSource',
-    'bazel build //:amphtml_validator_lib',
-    'bazel run //:amphtml_validator_test',
-  ]).join(' && '));
+  execOrDie(
+    commands
+      .concat([
+        'bazel run //:fetchAMPResources',
+        'bazel build //:amphtml_validator_java_proto_lib',
+        'bazel run //:copyValidatorJavaSource',
+        'bazel build //:amphtml_validator_lib',
+        'bazel run //:amphtml_validator_test',
+      ])
+      .join(' && ')
+  );
 }
 
 /**
@@ -66,9 +70,11 @@ validator.flags = {
   'update_tests': '  Updates validation test output files',
 };
 
-validatorJava.description = 'Builds and tests the AMP validator Java implementation.';
+validatorJava.description =
+  'Builds and tests the AMP validator Java implementation.';
 validatorJava.flags = {
-  'clean': '  Cleans the build directories before running Java validator tests.'
+  'clean':
+    '  Cleans the build directories before running Java validator tests.',
 };
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
