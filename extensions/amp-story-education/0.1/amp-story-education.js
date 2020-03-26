@@ -96,7 +96,11 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_.classList.add('i-amphtml-story-education');
     toggle(this.containerEl_, false);
     this.startListening_();
-    createShadowRootWithStyle(this.element, this.containerEl_, CSS);
+    // Extra host to reset inherited styles and further enforce shadow DOM style
+    // scoping using amp-story-shadow-reset.css.
+    const hostEl = this.win.document.createElement('div');
+    this.element.appendChild(hostEl);
+    createShadowRootWithStyle(hostEl, this.containerEl_, CSS);
 
     this.viewer_ = Services.viewerForDoc(this.element);
     const isMobileUI =

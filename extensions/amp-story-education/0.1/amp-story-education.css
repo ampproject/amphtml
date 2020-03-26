@@ -15,6 +15,7 @@
  */
 
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
+@import '../../amp-story/1.0/amp-story-shadow-reset.css';
 
 amp-story-education {
   position: fixed !important;
@@ -32,10 +33,12 @@ amp-story-education {
   height: 100% !important;
   width: 100% !important;
   background: rgba(0, 0, 0, 0.8) !important;
+  color: #FFF !important;
   font-family: 'Open Sans', sans-serif !important;
   font-weight: 400 !important;
   pointer-events: auto !important;
   opacity: 1 !important;
+  text-rendering: geometricPrecision !important;
   transition: opacity 225ms cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
@@ -135,7 +138,7 @@ amp-story-education {
   color: #FFF !important;
   font-size: 16px !important;
   font-weight: 600 !important;
-  line-height: 44px !important;
+  line-height: 43px !important;
 }
 
 @keyframes i-amphtml-tap-outer {
