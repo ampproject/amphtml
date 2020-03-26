@@ -4,7 +4,11 @@
 {
   rules: [
     {
+<<<<<<< HEAD
       owners: [{name: 'dvoytenko'}, {name: 'jpettitt'}],
+=======
+      owners: [{name: 'dvoytenko'}],
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085)
     },
   ],
 }

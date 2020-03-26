@@ -5,12 +5,18 @@
   rules: [
     {
       owners: [
+<<<<<<< HEAD:extensions/amp-story-education/OWNERS
         {
           name: 'gmajoulet',
           notify: true,
         },
         {name: 'newmuis'},
         {name: 'enriqe'},
+=======
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/runtime'},
+        {name: 'ampproject/performance'},
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085):tools/OWNERS
       ],
     },
   ],

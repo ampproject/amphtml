@@ -4,10 +4,14 @@
 {
   rules: [
     {
+<<<<<<< HEAD
       owners: [
         {name: 'ampproject/wg-ads-reviewers'},
         {name: 'ampproject/wg-analytics'},
       ],
+=======
+      owners: [{name: 'zhouyx'}, {name: 'torch2424'}],
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085)
     },
   ],
 }

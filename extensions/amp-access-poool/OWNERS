@@ -4,7 +4,11 @@
 {
   rules: [
     {
+<<<<<<< HEAD:extensions/amp-access-poool/OWNERS
       owners: [{name: 'dackmin'}, {name: 'dvoytenko'}, {name: 'jpettitt'}],
+=======
+      owners: [{name: 'ampproject/a4a'}, {name: 'ampproject/wg-ads'}],
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085):extensions/amp-ad-network-gmossp-impl/OWNERS
     },
   ],
 }

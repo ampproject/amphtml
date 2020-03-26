@@ -10,7 +10,10 @@
         {name: 'dparikh'},
         {name: 'dvoytenko'},
         {name: 'jpettitt'},
+<<<<<<< HEAD
         {name: 'qidonna'},
+=======
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085)
       ],
     },
   ],

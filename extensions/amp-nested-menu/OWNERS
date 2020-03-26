@@ -4,7 +4,11 @@
 {
   rules: [
     {
+<<<<<<< HEAD:extensions/amp-nested-menu/OWNERS
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+=======
+      owners: [{name: 'ampproject/a4a'}, {name: 'szach'}],
+>>>>>>> e231dea6d... 🏗 Enable `gulp prettify` on several non-JS files (and auto-fix them) (#25085):extensions/amp-ad-network-triplelift-impl/OWNERS
     },
   ],
 }
