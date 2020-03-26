@@ -23,6 +23,7 @@ import {
   UIType,
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
+import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
@@ -1149,9 +1150,13 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(
-                  sendMessageStub
-                ).to.be.calledWithExactly('selectDocument', {next: true});
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    next: true,
+                    advancementMode: AdvancementMode.MANUAL_ADVANCE,
+                  }
+                );
                 return true;
               }
               return false;
@@ -1202,9 +1207,13 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(
-                  sendMessageStub
-                ).to.be.calledWithExactly('selectDocument', {previous: true});
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    previous: true,
+                    advancementMode: AdvancementMode.MANUAL_ADVANCE,
+                  }
+                );
                 return true;
               }
               return false;
