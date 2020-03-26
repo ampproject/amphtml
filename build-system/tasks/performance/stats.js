@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * Get the average of an array
+ *
+ * @param {Array<number>} array
+ * @return {number} average
+ */
 const average = array => {
   if (!array || array.length == 0) {
     return 0;
@@ -21,22 +27,39 @@ const average = array => {
   return array.reduce((a, b) => a + b) / array.length;
 };
 
+/**
+ * Sort an array from low to high
+ *
+ * @param {Array<number>} array
+ * @return {Array<number>} array
+ */
 const sort = array => {
-  return array.sort((a, b) => {
-    return a - b;
-  });
+  return array.sort((a, b) => a - b);
 };
 
+/**
+ * Get the median of a sorted array
+ *
+ * @param {Array<number>} array
+ * @return {number} median
+ */
 const median = array => {
   sort(array);
   const {length} = array;
+  const mid = Math.floor(length / 2);
   const isEven = length % 2 == 0;
   if (isEven) {
-    return average([array[length / 2], array[length / 2 + 1]]);
+    return average([array[mid], array[mid - 1]]);
   }
-  return array[length / 2];
+  return array[mid];
 };
 
+/**
+ * Get the median of the lower half of a sorted array
+ *
+ * @param {Array<number>} array
+ * @return {number} q1
+ */
 const q1 = array => {
   sort(array);
   const mid = Math.ceil(array.length / 2);
@@ -44,6 +67,12 @@ const q1 = array => {
   return median(half);
 };
 
+/**
+ * Get the median of the upper half of a sorted array
+ *
+ * @param {Array<number>} array
+ * @return {number} q3
+ */
 const q3 = array => {
   sort(array);
   const mid = Math.ceil(array.length / 2);
@@ -52,30 +81,31 @@ const q3 = array => {
 };
 
 /**
- * Takes two numbers and generates a string representing the difference as
- * a percent for use in printing the results
+ * Get the percentage change between two numbers,
+ * or returns null if invalid
  *
  * @param {number} a
  * @param {number} b
- * @return {string} String representing the change as a percent
+ * @return {number|null} percentage change or null
  */
 function percent(a, b) {
   if (a === 0) {
-    return b === 0 ? 'n/a' : `-${100 - Math.round((a / b) * 100)}`;
+    return b === 0 ? null : Math.round((a / b) * 100) - 100;
   } else {
-    return `${100 - Math.round((b / a) * 100)}%`;
+    return 100 - Math.round((b / a) * 100);
   }
 }
 
 /**
  * Given an array, identify outliers using the Tukey method,
- * and return the average after removing them.
+ * and return the average after removing them, which is
+ * also known as the interquartile mean.
  *
  * @param {Array<*>} results
  * @param {string} metric
  * @return {number}
  */
-function averageNoOutliers(results, metric) {
+function trimmedMean(results, metric) {
   const array = results.map(a => a[metric]);
   const stats = {
     q1: q1(array),
@@ -83,12 +113,12 @@ function averageNoOutliers(results, metric) {
   };
   const lowerFence = stats.q1 - 1.5 * (stats.q3 - stats.q1);
   const upperFence = stats.q3 + 1.5 * (stats.q3 - stats.q1);
-  const arrayNoOutliers = array.filter(a => a >= lowerFence && a <= upperFence);
+  const trimmedArray = array.filter(a => a >= lowerFence && a <= upperFence);
 
-  return Math.round(average(arrayNoOutliers));
+  return Math.round(average(trimmedArray));
 }
 
 module.exports = {
-  averageNoOutliers,
   percent,
+  trimmedMean,
 };

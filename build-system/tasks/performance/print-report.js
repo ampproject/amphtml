@@ -15,8 +15,8 @@
  */
 
 const fs = require('fs');
-const {averageNoOutliers, percent} = require('./stats');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
+const {percent, trimmedMean} = require('./stats');
 
 const HEADER_COLUMN = 22;
 const BODY_COLUMN = 12;
@@ -48,15 +48,16 @@ const headerLines = url => [
  * @return {Array<string>} lines
  */
 function linesForMetric(metric, results) {
-  const control = averageNoOutliers(results[CONTROL], metric);
-  const experiment = averageNoOutliers(results[EXPERIMENT], metric);
+  const control = trimmedMean(results[CONTROL], metric);
+  const experiment = trimmedMean(results[EXPERIMENT], metric);
+  const percentage = percent(control, experiment);
 
   return [
     [
       metric.padEnd(HEADER_COLUMN),
       experiment.toString().padEnd(BODY_COLUMN),
       control.toString().padEnd(BODY_COLUMN),
-      percent(control, experiment),
+      percentage == null ? 'n/a' : `${percentage}%`,
     ].join(' | '),
     `\n${''.padEnd(FULL_TABLE, '-')}\n`,
   ];
@@ -105,8 +106,8 @@ function getReport(urls) {
     const pageMetrics = new PageMetrics(url);
     const metrics = Object.keys(results[CONTROL][0]);
     metrics.forEach(metric => {
-      const control = averageNoOutliers(results[CONTROL], metric);
-      const experiment = averageNoOutliers(results[EXPERIMENT], metric);
+      const control = trimmedMean(results[CONTROL], metric);
+      const experiment = trimmedMean(results[EXPERIMENT], metric);
       pageMetrics.set(metric, experiment, control);
     });
     report.push(pageMetrics);
