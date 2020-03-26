@@ -42,7 +42,7 @@ With the `responsive` layout, the width and height in this should yield correct 
 <table>
   <tr>
     <td width="40%"><strong><strong>Examples</strong></td>
-    <td>The sdnPlayoutId from 3Q SDN.</td>
+    <td>The dataid from 3Q SDN.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay (optional)</strong></td>

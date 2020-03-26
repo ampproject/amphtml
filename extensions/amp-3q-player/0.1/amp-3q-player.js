@@ -32,6 +32,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {addParamToUrl} from "../../../src/url";
 
 const TAG = 'amp-3q-player';
 
@@ -86,17 +87,35 @@ class Amp3QPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(el).register(this);
   }
 
+  /** private */
+  generateIframeSrc() {
+
+    let iframeSrc = 'https://playout.3qsdn.com/';
+
+    if(this.element.getAttribute(`data-datasource`)) {
+
+        iframeSrc += 'config_by_metadata/' +
+            this.element.getAttribute(`data-project`) + '/' +
+            this.element.getAttribute(`data-datafield`) + '/' +
+            encodeURIComponent(dev().assertString(this.dataId)) +
+            // Autoplay is handled by VideoManager
+            '?autoplay=false&amp=true';
+
+    } else {
+
+        iframeSrc += this.dataId +
+            // Autoplay is handled by VideoManager
+            '?autoplay=false&amp=true';
+    }
+
+    return iframeSrc;
+
+  }
+
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(
-      this,
-      'https://playout.3qsdn.com/' +
-        encodeURIComponent(dev().assertString(this.dataId)) +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true'
-    );
 
-    this.iframe_ = iframe;
+    this.iframe_ = this.generateIframeSrc();
 
     this.unlistenMessage_ = listen(
       this.win,
