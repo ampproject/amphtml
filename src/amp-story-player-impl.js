@@ -75,13 +75,13 @@ export class AmpStoryPlayer extends HTMLElement {
   }
 
   /**
-   * @param {!Window} win
+   * Player is appended in the document.
    */
-  init(win) {
+  connectedCallback() {
     console./*OK*/ assert(this.childElementCount > 0, 'Missing configuration.');
 
     /** @private {!Window} */
-    this.win_ = win;
+    this.win_ = self;
 
     /** @private {!Array<!Element>} */
     this.iframes_ = [];
@@ -90,7 +90,7 @@ export class AmpStoryPlayer extends HTMLElement {
     this.element_ = this;
 
     /** @private {!Document} */
-    this.doc_ = win.document;
+    this.doc_ = this.win_.document;
 
     /** @private {!Element} */
     this.cachedA_ = this.doc_.createElement('a');

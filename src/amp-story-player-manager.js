@@ -99,7 +99,6 @@ export class AmpStoryPlayerManager {
     const players = doc.getElementsByTagName('amp-story-player');
     for (let i = 0; i < players.length; i++) {
       const player = players[i];
-      player.init(this.win_);
       player.buildCallback();
       this.layoutPlayer_(player);
     }
