@@ -20,6 +20,7 @@ import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
+import {dev} from '../../../src/log';
 
 const TAG = 'amp-mustache';
 
@@ -66,7 +67,11 @@ export class AmpMustache extends BaseTemplate {
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    try {
+      mustache.parse(this.template_, /* tags */ undefined);
+    } catch (err) {
+      dev().error(TAG, err.message, this.element);
+    }
   }
 
   /**
