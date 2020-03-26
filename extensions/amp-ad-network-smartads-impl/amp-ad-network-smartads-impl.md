@@ -20,7 +20,7 @@ SmartAds implementation of AMP Ad tag which requests early by XHR and renders na
 
 <table>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
+    <td class="col-fourty" width="50%"><strong>Availability</strong></td>
     <td>In Development</td>
   </tr>
   <tr>
