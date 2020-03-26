@@ -19,7 +19,7 @@ const babel = require('@babel/core');
 const conf = require('./build.conf');
 const fs = require('fs-extra');
 const path = require('path');
-const resorcery = require('@jridgewell/resorcery');
+const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 
@@ -101,7 +101,7 @@ exports.postClosureBabel = function(directory, isEsmBuild) {
       sourceMaps: true,
       inputSourceMap: false,
     });
-    let remapped = resorcery(
+    let remapped = remapping(
       babelMap,
       returnMapFirst(map),
       !argv.full_sourcemaps
@@ -110,8 +110,8 @@ exports.postClosureBabel = function(directory, isEsmBuild) {
     const {compressed, terserMap} = terserMinify(code);
     file.contents = Buffer.from(compressed, 'utf-8');
 
-    // TODO: Resorcery should support a chain, instead of multiple invocations.
-    remapped = resorcery(
+    // TODO: Remapping should support a chain, instead of multiple invocations.
+    remapped = remapping(
       terserMap,
       returnMapFirst(remapped),
       !argv.full_sourcemaps
