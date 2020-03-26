@@ -664,6 +664,60 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(keyframes).to.deep.equal([{opacity: '0'}, {opacity: '1'}]);
   });
 
+  it('should parse object keyframe with vendor prefixes', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: {
+        'clip-path': ['A', 'B'],
+      },
+    })[0];
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes['clip-path'])).to.be.true;
+    expect(keyframes['clip-path']).to.deep.equal(['A', 'B']);
+    // WebKit version as well.
+    expect(isArray(keyframes['-webkit-clip-path'])).to.be.true;
+    expect(keyframes['-webkit-clip-path']).to.deep.equal(['A', 'B']);
+  });
+
+  it('should parse object keyframe with vendor prefixes in camel-case', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: {
+        'clipPath': ['A', 'B'],
+      },
+    })[0];
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes['clipPath'])).to.be.true;
+    expect(keyframes['clipPath']).to.deep.equal(['A', 'B']);
+    // WebKit version as well.
+    expect(isArray(keyframes['-webkit-clip-path'])).to.be.true;
+    expect(keyframes['-webkit-clip-path']).to.deep.equal(['A', 'B']);
+  });
+
+  it('should parse array keyframe with vendor prefixes', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: [{'clip-path': 'A'}, {'clip-path': 'B'}],
+    })[0];
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {'clip-path': 'A', '-webkit-clip-path': 'A'},
+      {'clip-path': 'B', '-webkit-clip-path': 'B'},
+    ]);
+  });
+
+  it('should parse array keyframe with vendor prefixes in camel-case', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: [{'clipPath': 'A'}, {'clipPath': 'B'}],
+    })[0];
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {'clipPath': 'A', '-webkit-clip-path': 'A'},
+      {'clipPath': 'B', '-webkit-clip-path': 'B'},
+    ]);
+  });
+
   it('should parse width/height functions', () => {
     target2.style.width = '11px';
     target2.style.height = '22px';
