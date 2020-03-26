@@ -241,18 +241,6 @@ describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
     binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
   });
-
-  it('should reset overscroll on X-axis', () => {
-    win.scrollTo(1, 0);
-    expect(win.pageXOffset).to.equal(1);
-    return new Promise(resolve => {
-      win.addEventListener('scroll', () => {
-        if (win.pageXOffset == 0) {
-          resolve();
-        }
-      });
-    });
-  });
 });
 
 describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
