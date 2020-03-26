@@ -2,19 +2,9 @@
 
 ## Explainer
 
-ES Modules or ECMAScript Modules (sometimes shortened to "ESM") is a collection
-of features in modern JavaScript such as support for importing and exporting
-variables, functions, etc. from one module to another. When a browser supports
-ECMAScript Modules this also means that it supports features that were
-implemented before ECMAScript modules such as native Promises, async/await,
-css variables, custom elements, window.fetch, let/const,
-arrow functions, and Shadow DOM. This allows us to remove polyfills and use
-modern JavaScript syntax which is usually terser than ES5 which in turn will
-impact the size of the JavaScript we serve to the client.
+ES Modules is an official, standardized module system for JavaScript. However, on the AMP Project and for many in the wider web community, they are also an inflection point for supported JavaScript features from user-agents that is declarative and well known. When a browser supports ES Modules we can infer it also supports other modern features that were implemented before ES Modules were introduced. These include classes, promises, async/await, css variables, custom elements, window.fetch, let/const, arrow functions, and Shadow DOM. Like others, we're using this signal to remove polyfills and leverage modern JavaScript syntax more closely mirroring our authored source. Even better, this output is significantly terser than our previous output (which was compiled to ~ECMAScript 5) and helps improve performance for all AMP Documents.
 
-The module/nomodule pattern as it is called is a way to load the new modern
-"module" build of the AMP runtime in a way were there would still be a fallback
-"nomodule" build if the browser does not support ES Modules.
+The [module/nomodule pattern](https://philipwalton.com/articles/deploying-es2015-code-in-production-today/) is a way to load the modern "module" build of the AMP runtime in a way were there would still be a fallback "nomodule" build if the browser does not support ES Modules.
 
 The HTML markup would look like:
 
@@ -52,20 +42,17 @@ Summary:
 - ❌ pre-2018 browsers do double fetches
 - ❌❌ latest Edge does triple fetch (2x module + 1x nomodule)
 
-The Google AMP Cache currently only applies the module/nomodule pattern to
-Google Chrome, Microsoft Edge, Safari >= 11, and Firefox >= 60.
+The AMP Project recommends applying the module/nomodule pattern for Google Chrome, Microsoft Edge >= 79, Safari >= 11, and Firefox >= 60.
 
-We currently do not recomment applying the module/nomodule pattern to browsers
-that double or triple fetch (denoted by ❌ in the table above) in environments
-like AMP for Ads.
+For other user-agents, we recommend sticking with the traditional single script loading model as part of our standard boilerplate.
+
+Specifically, this will help avoid the double or triple fetching issues (denoted by an ❌in the table above).
 
 ## High Level Detailed Difference in Output
 
-We use the [babel preset-modules plugin](https://github.com/babel/preset-modules)
-to support module builds.
+We use the [babel preset-env plugin](https://babeljs.io/blog/2020/03/16/7.9.0) with `{bugfixes: true}` enabled to support module builds.
 
-At a high level we we try and preserve and not transpile the following in the
-AMP source:
+At a high level we now avoid compiling the following in the AMP "module" output:
 - classes
 - arrow functions
 - async/await
@@ -81,8 +68,8 @@ We Also remove the following polyfills:
 - Object.values
 - Promises
 - Array.includes
+- CSS.escape()
 
 ## Report a bug
 
 [File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.md&title=) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
-
