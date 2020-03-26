@@ -29,8 +29,8 @@ const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
 const pkgUp = require('pkg-up');
+const remapping = require('@ampproject/remapping');
 const rename = require('gulp-rename');
-const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
 const terser = require('terser');
 const through = require('through2');
@@ -568,7 +568,7 @@ function wrapMainBinaries() {
         hires: true,
         source: path,
       });
-      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
       fs.writeFileSync(path, s.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     } else {
@@ -579,7 +579,7 @@ function wrapMainBinaries() {
       bundle.addSource(s);
       bundle.append(suffix);
       const map = bundle.generateDecodedMap({hires: true});
-      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
       fs.writeFileSync(path, bundle.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     }
@@ -646,7 +646,7 @@ function postPrepend(extension, prependContents) {
     }
     bundle.addSource(suffix);
     const map = bundle.generateDecodedMap({hires: true});
-    const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+    const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
@@ -734,7 +734,7 @@ function eliminateIntermediateBundles() {
         sourceMaps: true,
         inputSourceMap: false,
       });
-      let remapped = resorcery(
+      let remapped = remapping(
         babelMap,
         returnMapFirst(map),
         !argv.full_sourcemaps
@@ -754,9 +754,8 @@ function eliminateIntermediateBundles() {
         sourceMap: true,
       });
 
-      // TODO: Resorcery should support a chain, instead of having to call
-      // multiple times.
-      remapped = resorcery(
+      // TODO: Remapping should support a chain, instead of having to call multiple times.
+      remapped = remapping(
         terserMap,
         returnMapFirst(remapped),
         !argv.full_sourcemaps
