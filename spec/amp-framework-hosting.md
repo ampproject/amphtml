@@ -37,15 +37,15 @@ It is not necessary to modify `cdnProxyRegex`, which helps AMP pages identify wh
 Build an AMP release with
 
 ```
-gulp dist --config=<config> --version=<version>
+gulp dist
 ```
 
-where
+The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
+
+If you have advanced hosting capabilities or would like to customize the versioning system, you may be interested in flags `--config=<config>` and `--version_override=<version>`, where...
 
 - `<config>` is one of `canary` or `prod`, indicating whether the build is meant to be served as a canary release or a production release, respectively. When the `--config` flag is omitted, the build system defaults to `prod`.
-- `<version>` is the version you are assigning to the build. When the `--version` flag is omitted, the build system defaults to the commit time of the last commit in the active branch: `TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`. Note that the version specified here is not the "runtime version" (RTV), which contains both the config and the version. The runtime version is discussed in more detail in section [Serve the framework](#serve-the-framework).
-
-The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
+- `<version>` is the version you want to assign to the build. When the `--version_override` flag is omitted, the build system defaults to the commit time of the last commit in the active branch and appends a trailing zero: `TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S` with `0` appended. Note that the version specified here is not the "runtime version" (RTV), which contains both the config and the version. The runtime version is discussed in more detail in section [Serve the framework](#serve-the-framework).
 
 ### Option 2: Copy the framework from cdn.ampproject.org
 
@@ -234,6 +234,7 @@ In addition to following [TLS best practices](https://infosec.mozilla.org/guidel
   - `/amp_preconnect_polyfill_404_or_other_error_expected._Do_not_worry_about_it` - `text/html`
 
   A complete list of files in each AMP release can be found in `files.txt`, for example `https://cdn.ampproject.org/files.txt`.
+
 - `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active. Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
   - Versioned URL example: `cdn.ampproject.org` sets a 1 year client cache time on resources served under `cdn.ampproject.org/rtv/<rtv>`: `cache-control: public, max-age=31536000`.
   - Versionless URL example: `cdn.ampproject.org` sets a 50 minute client cache time for resources served from versionless URLs, but also allows a long 2 week stale-while-revalidate time in the event that versionless URLs experience an outage: `cache-control: private, max-age=3000, stale-while-revalidate=1206600`.
