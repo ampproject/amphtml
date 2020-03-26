@@ -347,26 +347,17 @@ describe('evaluate', () => {
   });
 
   describe('caching', () => {
-    beforeEach(() => {
-      window.sandbox.spy(evaluator, 'eval_');
-    });
-
-    it('first request should go through', () => {
-      evaluator.evaluate('access = true', {access: true});
-      expect(evaluator.eval_).calledOnce;
-    });
-
     it('should use the cache on subsequent calls for the same expression and data', () => {
       const data = {access: true};
-      evaluator.evaluate('access = true', data);
-      evaluator.evaluate('access = true', data);
-      expect(evaluator.eval_).calledOnce;
+      const result1 = evaluator.evaluate('access = true', data);
+      const result2 = evaluator.evaluate('access = true', data);
+      expect(result1).equal(result2);
     });
 
     it('should not use the cache if the data is referentially unequal', () => {
-      evaluator.evaluate('access = true', {access: true});
-      evaluator.evaluate('access = true', {access: true});
-      expect(evaluator.eval_).calledTwice;
+      const result1 = evaluator.evaluate('access = true', {access: true});
+      const result2 = evaluator.evaluate('access = true', {access: true});
+      expect(result1).not.equal(result2);
     });
   });
 });
