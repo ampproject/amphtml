@@ -32,6 +32,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {addParamToUrl} from "../../../src/url";
 
 const TAG = 'amp-3q-player';
 
@@ -89,6 +90,12 @@ class Amp3QPlayer extends AMP.BaseElement {
   /** private */
   generateIframeSrc() {
 
+    const explicitParamsAttributes = [
+        'key',
+        'timestamp',
+        'controls'
+    ];
+
     let iframeSrc = 'https://playout.3qsdn.com/';
 
     if(this.element.getAttribute(`data-datasource`)) {
@@ -106,6 +113,13 @@ class Amp3QPlayer extends AMP.BaseElement {
             // Autoplay is handled by VideoManager
             '?autoplay=false&amp=true';
     }
+
+    explicitParamsAttributes.forEach(explicitParam => {
+        const val = this.element.getAttribute(`data-${explicitParam}`);
+        if (val) {
+            iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+        }
+    });
 
     return iframeSrc;
 
