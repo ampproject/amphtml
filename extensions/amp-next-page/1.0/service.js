@@ -105,6 +105,9 @@ export class NextPageService {
     /** @private {boolean} */
     this.finished_ = false;
 
+    /** @private {?Promise<!Array<!./page.PageMeta>>} */
+    this.remoteFetchingPromise_ = null;
+
     /** @private {?AmpElement} element */
     this.host_ = null;
 
@@ -858,10 +861,20 @@ export class NextPageService {
     if (!this.nextSrc_) {
       return Promise.resolve([]);
     }
-    return batchFetchJsonFor(this.ampdoc_, this.getHost_(), {
-      urlReplacement: UrlReplacementPolicy.ALL,
-      xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
-    })
+
+    if (this.remoteFetchingPromise_) {
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
+        .remoteFetchingPromise_);
+    }
+
+    this.remoteFetchingPromise_ = batchFetchJsonFor(
+      this.ampdoc_,
+      this.getHost_(),
+      {
+        urlReplacement: UrlReplacementPolicy.ALL,
+        xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
+      }
+    )
       .then(result => {
         this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
@@ -869,9 +882,14 @@ export class NextPageService {
         }
         return result['pages'] || [];
       })
-      .catch(error =>
-        user().error(TAG, 'error fetching page list from remote server', error)
-      );
+      .catch(error => {
+        user().error(TAG, 'error fetching page list from remote server', error);
+        this.nextSrc_ = null;
+        return [];
+      });
+
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
+      .remoteFetchingPromise_);
   }
 
   /**
