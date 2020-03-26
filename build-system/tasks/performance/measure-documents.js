@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
@@ -34,8 +33,6 @@ let puppeteer;
 function requirePuppeteer_() {
   puppeteer = require('puppeteer');
 }
-
-const TIMEOUT_MS = argv.set_timeout || 2000;
 
 /**
  * Setup measurement on page before navigating to the URL. Performance
@@ -209,9 +206,10 @@ function writeMetrics(url, version, metrics) {
  * @param {string} url
  * @param {string} version "control" or "experiment"
  * @param {Object} options
+ * @param {number} timeout
  * @return {Promise}
  */
-async function measureDocument(url, version, {headless}) {
+async function measureDocument(url, version, {headless}, timeout) {
   const browser = await puppeteer.launch({
     headless,
     args: [
@@ -245,7 +243,7 @@ async function measureDocument(url, version, {headless}) {
   }
 
   let metrics = await readMetrics(page);
-  await delay(TIMEOUT_MS);
+  await delay(timeout);
   metrics = addAnalyticsMetric(startTime, endTime, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
@@ -257,10 +255,10 @@ async function measureDocument(url, version, {headless}) {
  * performance metrics to results.json in this directory.
  *
  * @param {Array<string>} urls
- * @param {{headless:boolean, runs:number}} options
+ * @param {{headless:boolean, runs:number, timeout:number}} options
  * @return {Promise} Fulfills when all URLs have been measured
  */
-async function measureDocuments(urls, {headless, runs}) {
+async function measureDocuments(urls, {headless, runs, timeout}) {
   requirePuppeteer_();
 
   try {
@@ -270,8 +268,8 @@ async function measureDocuments(urls, {headless, runs}) {
   // Make an array of tasks to be executed
   const tasks = urls.flatMap(url =>
     Array.from({length: runs}).flatMap(() => [
-      measureDocument.bind(null, url, CONTROL, {headless}),
-      measureDocument.bind(null, url, EXPERIMENT, {headless}),
+      measureDocument.bind(null, url, CONTROL, {headless}, timeout),
+      measureDocument.bind(null, url, EXPERIMENT, {headless}, timeout),
     ])
   );
 

@@ -1,5 +1,6 @@
 {
   "headless": true,
   "runs": 100,
+  "timeout": 2000,
   "urls": []
 }

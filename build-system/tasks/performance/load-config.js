@@ -22,13 +22,16 @@ const PATH = './config.json';
 
 /**
  * Loads test config from ./config.json
- * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>}}
+ * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>, timeout:number}}
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
   const config = JSON.parse(file);
   if (argv.url) {
     config.urls = [argv.url];
+  }
+  if (argv.timeout) {
+    config.timeout = argv.timeout;
   }
   if (config.urls.length < 1) {
     throw new Error('No URLs found in config.');
