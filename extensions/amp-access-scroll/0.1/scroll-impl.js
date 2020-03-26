@@ -181,7 +181,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
 
           const config = this.accessSource_.getAdapterConfig();
           addAnalytics(this.ampdoc, config);
-          if (response['features'] && response['features']['readDepth']) {
+          if (response['features'] && response['features']['d']) {
             new ReadDepthTracker(
               this.ampdoc,
               this.accessSource_,
