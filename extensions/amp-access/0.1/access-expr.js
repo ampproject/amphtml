@@ -56,8 +56,8 @@ export class AmpAccessEvaluator {
     /** @type {Object<string, boolean>} */
     this.cache = null;
 
-    /** @type {JsonObject} */
-    this.lastData = null;
+    /** @private @type {JsonObject} */
+    this.lastData_ = null;
   }
 
   /**
@@ -69,8 +69,8 @@ export class AmpAccessEvaluator {
    * @return {boolean}
    */
   evaluate(expr, data) {
-    if (this.lastData !== data) {
-      this.lastData = data;
+    if (this.lastData_ !== data) {
+      this.lastData_ = data;
       this.cache = map();
     }
 
