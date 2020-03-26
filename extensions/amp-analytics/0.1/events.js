@@ -1488,7 +1488,7 @@ export class VisibilityTracker extends EventTracker {
             return visibilityManager.listenRoot(
               visibilitySpec,
               this.getReadyPromise(
-                this.getWaitForSpecForRootSelector_(waitForSpec, selector)
+                waitForSpec || (selector ? 'ini-load' : null)
               ),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(
@@ -1508,9 +1508,8 @@ export class VisibilityTracker extends EventTracker {
       // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      const selectors = Array.isArray(selector)
-        ? selector.filter((val, index) => selectors.indexOf(val) === index)
-        : [selector];
+      const selectors = Array.isArray(selector) ? selector : [selector];
+      this.assertUniqueSelectors_(selectors);
       this.root
         .getAmpElements(
           context.parentElement || context,
@@ -1548,6 +1547,21 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
+  }
+
+  /**
+   * Assert that the selectors are all unique
+   * @param {!Array<string>} selectors
+   */
+  assertUniqueSelectors_(selectors) {
+    const filtered = selectors.filter(
+      (val, index) => selectors.indexOf(val) === index
+    );
+    userAssert(
+      selectors.length === filtered.length,
+      'Cannot have duplicate selectors in selectors list: %s',
+      selectors
+    );
   }
 
   /**
@@ -1645,18 +1659,6 @@ export class VisibilityTracker extends EventTracker {
    */
   supportsPageHide_() {
     return 'onpagehide' in this.root.ampdoc.win;
-  }
-
-  /**
-   * Selector being null is special case just like :host and :root.
-   * If it's null, then don't wait for anything, otherwise
-   * wait for the AMP element's load.
-   * @param {string|undefined} waitForSpec
-   * @param {string|undefined} selector
-   * @return {string|undefined}
-   */
-  getWaitForSpecForRootSelector_(waitForSpec, selector) {
-    return waitForSpec || (selector ? 'ini-load' : null);
   }
 
   /**
