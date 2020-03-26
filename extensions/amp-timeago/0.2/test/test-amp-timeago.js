@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import '../amp-timeago';
-import {act} from 'react-dom/test-utils';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
@@ -76,31 +75,6 @@ describes.realWin(
       win.document.body.appendChild(element);
       const time = await getTimeFromShadow();
       expect(time).to.equal('Sunday 1 January 2017');
-    });
-
-    it('should update fuzzy timestamp on enter viewport', async () => {
-      const date = new Date();
-      date.setSeconds(date.getSeconds() - 10);
-      element.setAttribute('datetime', date.toISOString());
-      element.textContent = date.toString();
-
-      // Dummy callback should be overwritten
-      let observerCallback;
-      win.IntersectionObserver = (callback, unusedOptions) => {
-        observerCallback = callback;
-        return {observe: () => {}};
-      };
-      win.document.body.appendChild(element);
-
-      const time = await getTimeFromShadow();
-      await new Promise(res => setTimeout(res, 1000)); // wait 1 second
-      expect(time).to.equal('10 seconds ago');
-
-      const timeEl = element.shadowRoot.querySelector('time');
-      await act(async () => {
-        observerCallback([{target: timeEl, isIntersecting: true}]);
-      });
-      expect(timeEl.textContent).to.equal('11 seconds ago');
     });
 
     it('should update after mutation of datetime attribute', async () => {
