@@ -991,7 +991,7 @@ Change the `width` and `height` using the `[width]` and `[height]` attributes.
 
 **Accessibility states and properties**
 
-Use to dynamically update information available to assistive technologies, such as screen readers. [All `[aria-*]`](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties) and only [specific `[data-*]`](#amp-component-specific-attributes) attributes are bindable.
+Use to dynamically update information available to assistive technologies, such as screen readers. [All `[aria-*]` attributes](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties) are bindable.
 
 **AMP Component specific and HTML attributes**
 
