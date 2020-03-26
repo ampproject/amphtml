@@ -271,8 +271,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
 
-    /** @private {boolean} */
-    this.mediaPoolHasRegisteredMedia_ = false;
+    /** @private {?Promise} */
+    this.registerAllMediaPromise_ = null;
 
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = deferred.promise;
@@ -1070,13 +1070,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   registerAllMedia_() {
-    if (this.mediaPoolHasRegisteredMedia_) {
-      return Promise.resolve();
-    }
-    this.mediaPoolHasRegisteredMedia_ = true;
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.registerMedia_(mediaPool, mediaEl);
-    });
+    this.registerAllMediaPromise_ =
+      this.registerAllMediaPromise_ ||
+      this.whenAllMediaElements_((mediaPool, mediaEl) => {
+        this.registerMedia_(mediaPool, mediaEl);
+      });
+    return this.registerAllMediaPromise_;
   }
 
   /**

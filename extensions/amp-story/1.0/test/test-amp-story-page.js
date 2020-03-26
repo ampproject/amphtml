@@ -107,7 +107,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start the advancement when state becomes active', async () => {
-    page.mediaPoolHasRegisteredMedia_ = true;
+    page.registerAllMediaPromise_ = Promise.resolve();
     page.buildCallback();
     const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
