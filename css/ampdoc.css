@@ -77,17 +77,6 @@ html.i-amphtml-fie > body {
 }
 
 /**
- * iOS jitters when body overflows. See b/149328043. Notice that the min-height
- * essentially cancels `height: auto` from above.
- */
-html.i-amphtml-singledoc.i-amphtml-iframed:not(.i-amphtml-ios-embed):not([amp4ads]) > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-  min-height: calc(100vh - var(--i-amphtml-padding-top, 0px));
-}
-
-
-/**
  * The `position: relative` is necessary to ensure that `paddingTop` can be
  * applied to a document to offset the header height, and it doesn't missplace
  * `position: absolute` elements.
