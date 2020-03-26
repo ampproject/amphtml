@@ -6,7 +6,8 @@
     }
   },
   "extraUrlParams": {
-    "isAmp": 1
+    "isAmp": 1,
+    "amp-viewer": "${viewer}"
   },
   "triggers": {
     "wePageviewTrigger": {
