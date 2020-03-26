@@ -28,7 +28,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('Subscription offers should render correctly', async () => {
+    it.skip('Subscription offers should render correctly', async () => {
       const btn = await controller.findElement('#swg_button');
       // Wait for button to be rendered and ready to click
       await expect(controller.getElementRect(btn)).to.include({
