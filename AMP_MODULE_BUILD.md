@@ -26,15 +26,16 @@ additional request and might not be OK with the double fetching.
 
 The Original documentation/source for the table and summary below can be found [here](https://gist.github.com/jakub-g/5fc11af85a061ca29cc84892f1059fec).
 
-|IE/Edge|Firefox|Chrome|Safari |fetches module|fetches nomodule|executes|    |
-|:-----:|:-----:|:----:|:-----:|:------------:|:--------------:|:------:|----|
-|  15-  |  59-  |  55- |10.0-  |      v       |        v       |nomodule|❌  |
-|  16   |       |      |10.1/3 |      v       |        v       |module  |❌  |
-| 17-18 |       |      |       |  double!     |        v       |module  |❌❌|
-|       |       |56-60 |       |              |        v       |nomodule|✅  |
-|       |  60+  |  61+ |11.0+* |      v       |                |module  |✅  |
+| IE/Edge | Firefox | Chrome | Safari  | fetches module | fetches nomodule | executes |      |
+| :-----: | :-----: | :----: | :-----: | :------------: | :--------------: | :------: | ---- |
+|   15-   |   59-   |  55-   |  10.0-  |       v        |        v         | nomodule | ❌   |
+|   16    |         |        | 10.1/3  |       v        |        v         |  module  | ❌   |
+|  17-18  |         |        |         |    double!     |        v         |  module  | ❌❌ |
+|         |         | 56-60  |         |                |        v         | nomodule | ✅   |
+|         |   60+   |  61+   | 11.0+\* |       v        |                  |  module  | ✅   |
 
 Summary:
+
 - ✅ no browser does double execution (provided [the Safari hack](https://gist.github.com/samthor/64b114e4a4f539915a95b91ffd340acc))
 - ✅ modern Chrome and Firefox never fetch more than necessary
 - ⚠ Safari <11 may or may not double fetch (even with the hack); it does not on small test pages, but in real complex pages it does (it seems deterministic, but not clear what's the exact trigger)
@@ -53,6 +54,7 @@ Specifically, this will help avoid the double or triple fetching issues (denoted
 We use the [babel preset-env plugin](https://babeljs.io/blog/2020/03/16/7.9.0) with `{bugfixes: true}` enabled to support module builds.
 
 At a high level we now avoid compiling the following in the AMP "module" output:
+
 - classes
 - arrow functions
 - async/await
@@ -60,6 +62,7 @@ At a high level we now avoid compiling the following in the AMP "module" output:
 - Array destructuring
 
 We Also remove the following polyfills:
+
 - document.contains
 - DOMTokenList
 - window.fetch
