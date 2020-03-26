@@ -164,8 +164,13 @@ export class MutatorImpl {
   }
 
   /** @override */
-  mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
+  mutateElement(element, mutator, skipMeasure) {
+    return this.measureMutateElementResources_(
+      element,
+      null,
+      mutator,
+      skipMeasure
+    );
   }
 
   /** @override */
@@ -195,9 +200,15 @@ export class MutatorImpl {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
+   * @param {boolean} skipMeasure
    * @return {!Promise}
    */
-  measureMutateElementResources_(element, measurer, mutator) {
+  measureMutateElementResources_(
+    element,
+    measurer,
+    mutator,
+    skipMeasure = false
+  ) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -220,6 +231,9 @@ export class MutatorImpl {
       },
       mutate: () => {
         mutator();
+        if (skipMeasure) {
+          return;
+        }
 
         // TODO(willchou): IntersectionObserver won't catch size changes,
         // which means layout boxes may be stale. However, always requesting
