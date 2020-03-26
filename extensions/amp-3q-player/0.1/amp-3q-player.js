@@ -17,11 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {
-  createFrameFor,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
+import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
@@ -32,7 +28,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {addParamToUrl} from "../../../src/url";
+import {objOrParseJson, redispatch} from '../../../src/iframe-video';
 
 const TAG = 'amp-3q-player';
 
@@ -89,45 +85,39 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** private */
   generateIframeSrc() {
-
-    const explicitParamsAttributes = [
-        'key',
-        'timestamp',
-        'controls'
-    ];
+    const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
 
-    if(this.element.getAttribute(`data-datasource`)) {
-
-        iframeSrc += 'config_by_metadata/' +
-            this.element.getAttribute(`data-project`) + '/' +
-            this.element.getAttribute(`data-datafield`) + '/' +
-            encodeURIComponent(dev().assertString(this.dataId)) +
-            // Autoplay is handled by VideoManager
-            '?autoplay=false&amp=true';
-
+    if (this.element.getAttribute(`data-datasource`)) {
+      iframeSrc +=
+        'config_by_metadata/' +
+        this.element.getAttribute(`data-project`) +
+        '/' +
+        this.element.getAttribute(`data-datafield`) +
+        '/' +
+        encodeURIComponent(dev().assertString(this.dataId)) +
+        // Autoplay is handled by VideoManager
+        '?autoplay=false&amp=true';
     } else {
-
-        iframeSrc += this.dataId +
-            // Autoplay is handled by VideoManager
-            '?autoplay=false&amp=true';
+      iframeSrc +=
+        this.dataId +
+        // Autoplay is handled by VideoManager
+        '?autoplay=false&amp=true';
     }
 
     explicitParamsAttributes.forEach(explicitParam => {
-        const val = this.element.getAttribute(`data-${explicitParam}`);
-        if (val) {
-            iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-        }
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
 
     return iframeSrc;
-
   }
 
   /** @override */
   layoutCallback() {
-
     this.iframe_ = this.generateIframeSrc();
 
     this.unlistenMessage_ = listen(
