@@ -45,10 +45,10 @@ const {
   handleSinglePassCompilerError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
+const {preClosureBabel} = require('./pre-closure-babel');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
-const {SRC_TEMP_DIR} = require('../compile/sources');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
@@ -164,7 +164,7 @@ exports.getBundleFlags = function(g) {
     .forEach(function(pkg) {
       g.bundles[mainBundle].modules.push(pkg);
       fs.outputFileSync(
-        `${g.tmp}/${pkg}`,
+        pkg,
         JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
       );
     });
@@ -185,7 +185,7 @@ exports.getBundleFlags = function(g) {
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     bundle.modules.forEach(function(js) {
-      srcs.push(`${g.tmp}/${js}`);
+      srcs.push(js);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -265,7 +265,6 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
 
@@ -296,7 +295,6 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: SRC_TEMP_DIR,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -308,10 +306,17 @@ exports.getGraph = function(entryModules, config) {
   });
 
   config.babel = config.babel || {};
+  const babelPlugins = conf
+    .plugins({
+      isEsmBuild: !!argv.esm,
+      isSinglePass: true,
+      isForTesting: !!argv.fortesting,
+    })
+    .concat(['transform-es2015-modules-commonjs']);
 
   // Use browserify with babel to learn about deps.
   const b = browserify(entryModules, {
-    basedir: SRC_TEMP_DIR,
+    basedir: '.',
     browserField: 'module',
     debug: true,
     deps: true,
@@ -323,7 +328,7 @@ exports.getGraph = function(entryModules, config) {
     .transform(babelify, {
       compact: false,
       cwd: process.cwd(),
-      plugins: ['transform-es2015-modules-commonjs'],
+      plugins: babelPlugins,
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
@@ -346,13 +351,13 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(path.relative(SRC_TEMP_DIR, row.id))
+            exports.maybeAddDotJs(path.relative('.', row.id))
           );
           topo.addNode(id, id);
           const deps = Object.keys(row.deps)
             .sort()
             .map(dep => {
-              dep = unifyPath(path.relative(SRC_TEMP_DIR, row.deps[dep]));
+              dep = unifyPath(path.relative('.', row.deps[dep]));
               if (dep.startsWith('node_modules/')) {
                 const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
                 const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
@@ -680,7 +685,8 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
-      .src(srcs, {base: SRC_TEMP_DIR})
+      .src(srcs, {base: '.'})
+      .pipe(preClosureBabel())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {

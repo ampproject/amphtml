@@ -31,7 +31,6 @@ const {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
-  transferSrcsToTempDir,
 } = require('./helpers');
 const {
   createCtrlcHandler,
@@ -101,12 +100,6 @@ async function dist() {
   await prebuild();
   await compileCss();
   await compileJison();
-
-  transferSrcsToTempDir({
-    isForTesting: !!argv.fortesting,
-    isEsmBuild: !!argv.esm,
-    isSinglePass: !!argv.single_pass,
-  });
 
   await copyCss();
   await copyParsers();
