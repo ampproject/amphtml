@@ -78,6 +78,10 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
     <td width="40%"><strong>data-action (required)</strong></td>
     <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>global [optional]</strong></td>
+    <td>Include this optional attribute to change the endpoint from which the iframe loads the reCAPTCHA api script.  More info can be found here: <a href="https://developers.google.com/recaptcha/docs/faq#can-i-use-recaptcha-globally">reCAPTCHA FAQ</a>.</td>
+  </tr>
 </table>
 
 ## Validation

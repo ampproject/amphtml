@@ -122,6 +122,24 @@ describes.realWin(
       }
     );
 
+    it(
+      'should not allow elements to register,' +
+        ' if they do not all or none pass in the global attribute',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService.register(fakeSitekey, true).then(() => {
+          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+          expect(recaptchaService.iframe_).to.be.ok;
+
+          return recaptchaService.register(fakeSitekey, false).catch(err => {
+            expect(err).to.be.ok;
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
+        });
+      }
+    );
+
     it('should return when the iframe is loaded and ready', () => {
       expect(recaptchaService.registeredElementCount_).to.be.equal(0);
       return recaptchaService.register(fakeSitekey).then(() => {
