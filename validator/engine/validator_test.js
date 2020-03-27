@@ -1326,6 +1326,7 @@ describe('ValidatorRulesMakeSense', () => {
       // Working Group, @wg-amp4email.
       const approvedAmp4EmailExtensions = {
         'AMP-ACCORDION': ['0.1'],
+        'AMP-AUTOCOMPLETE': ['0.1'],
         'AMP-ANIM': ['0.1'],
         'AMP-BIND-MACRO': ['0.1'],
         'AMP-CAROUSEL': ['0.1'],
