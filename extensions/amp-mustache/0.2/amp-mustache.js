@@ -19,6 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
@@ -66,7 +67,11 @@ export class AmpMustache extends BaseTemplate {
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    try {
+      mustache.parse(this.template_, /* tags */ undefined);
+    } catch (err) {
+      user().error(TAG, err.message, this.element);
+    }
   }
 
   /**
