@@ -1415,7 +1415,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
 
 ### Debugging State
 
-Use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console. To make this work, you need to enable the [development mode](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/#browser-developer-console).
 
 ### Expression grammar
 
