@@ -931,15 +931,9 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-selector',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-selector',
-    version: '0.2',
-    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
