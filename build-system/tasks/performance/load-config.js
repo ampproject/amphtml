@@ -22,7 +22,7 @@ const PATH = './config.json';
 
 /**
  * Loads test config from ./config.json
- * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>, timeout:number}}
+ * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>, handlers:Object}}
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
@@ -30,9 +30,13 @@ function loadConfig() {
   if (argv.url) {
     config.urls = [argv.url];
   }
-  if (argv.timeout) {
-    config.timeout = argv.timeout;
-  }
+  config.urls = Object.keys(config.handlers).reduce(
+    (prev, curr) =>
+      config.handlers[curr].urls.length
+        ? prev.concat(config.handlers[curr].urls)
+        : prev,
+    config.urls
+  );
   if (config.urls.length < 1) {
     throw new Error('No URLs found in config.');
   }

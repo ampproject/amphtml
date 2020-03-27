@@ -119,6 +119,30 @@ function getFile(filePath) {
   return Promise.resolve(fs.readFileSync(fromPath));
 }
 
+/**
+ * Helper method to return the handler details associated
+ * with the current URL being tested. Returns empty object
+ * if no handler is found.
+ *
+ * @param {string} url
+ * @param {?Object} handlers
+ * @return {!Object} Resolves with relative path to file
+ */
+function getHandlerFromUrl(url, handlers) {
+  const details = {};
+  const names = handlers ? Object.keys(handlers) : [];
+  const handlerName = names.find(
+    handlerName => handlers[handlerName].urls.indexOf(url) !== -1
+  );
+
+  return handlerName
+    ? Object.assign(details, {
+        handlerName,
+        'handlerOptions': handlers[handlerName],
+      })
+    : details;
+}
+
 module.exports = {
   CDN_URL,
   ANALYTICS_PARAM,
@@ -131,4 +155,5 @@ module.exports = {
   downloadToDisk,
   urlToCachePath,
   getFile,
+  getHandlerFromUrl,
 };

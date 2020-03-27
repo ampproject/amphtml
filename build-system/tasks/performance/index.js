@@ -29,12 +29,12 @@ const {printReport} = require('./print-report');
  */
 async function performance() {
   installPackages(__dirname);
-  const {headless, runs, urls, timeout} = new loadConfig();
+  const {headless, runs, urls, handlers} = new loadConfig();
   await cacheDocuments(urls);
   await compileScripts(urls);
   await rewriteScriptTags(urls);
   await rewriteAnalyticsTags(urls);
-  await getMetrics(urls, {headless, runs, timeout});
+  await getMetrics(urls, {headless, runs, handlers});
   runTests();
   printReport(urls);
 }
@@ -46,8 +46,6 @@ performance.flags = {
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
   'url': '  Page to test. Overrides urls set in config.json',
-  'set_timeout':
-    '  How long to wait for ads and analytics request. Default is 2000ms.',
 };
 
 module.exports = {

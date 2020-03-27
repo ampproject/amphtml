@@ -25,6 +25,7 @@ const {
   RESULTS_PATH,
   urlToCachePath,
   getFile,
+  getHandlerFromUrl,
 } = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
@@ -106,12 +107,16 @@ async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
 }
 
 /**
- * @param {number} timeout
+ * Add specified timeout by handler
+ * @param {Object} handlerOptions
  * @return {!Promise}
  */
-function delay(timeout) {
+function delayBasedOnHandlerOptions(handlerOptions) {
   return new Promise(resolve => {
-    setTimeout(resolve, timeout);
+    setTimeout(
+      resolve,
+      handlerOptions && handlerOptions.timeout ? handlerOptions.timeout : 0
+    );
   });
 }
 
@@ -164,14 +169,46 @@ const readMetrics = page =>
   });
 
 /**
- * Adds analytics metrics
- *
- * @param {number} startTime
- * @param {?number} endTime
- * @param {object} metrics
- * @return {object}
+ * Create the request handler
+ * @param {Object} handlerOptions
+ * @param {string} handlerName
+ * @param {Puppeteer.page} page
  */
-function addAnalyticsMetric(startTime, endTime, metrics) {
+function setUpRequestHandler(handlerOptions, handlerName, page) {
+  if (handlerName === 'analyticsHandler') {
+    let endTime;
+    Object.assign(handlerOptions, {'startTime': Date.now()});
+    page.on('request', interceptedRequest =>
+      handleAnalyticsRequests(interceptedRequest, analyticsRequestTime => {
+        endTime = endTime ? endTime : analyticsRequestTime;
+        Object.assign(handlerOptions, {endTime});
+      })
+    );
+  }
+}
+
+/**
+ * Return metrics calcaultion based on handler
+ * @param {string} handlerName
+ * @param {Object} handler
+ * @param {Object} metrics
+ * @return {Object}
+ */
+function addHandlerMetric(handlerName, handler, metrics) {
+  if (handlerName === 'analyticsHandler') {
+    return addAnalyticsMetric(handler, metrics);
+  }
+  return metrics;
+}
+
+/**
+ * Adds analytics metrics
+ * @param {Object} handler
+ * @param {Object} metrics
+ * @return {Object}
+ */
+function addAnalyticsMetric(handler, metrics) {
+  const {endTime, startTime} = handler;
   const analyticsRequest = endTime ? endTime - startTime : 0;
   return Object.assign(metrics, {analyticsRequest});
 }
@@ -206,10 +243,10 @@ function writeMetrics(url, version, metrics) {
  * @param {string} url
  * @param {string} version "control" or "experiment"
  * @param {Object} options
- * @param {number} timeout
+ * @param {Object} handlers
  * @return {Promise}
  */
-async function measureDocument(url, version, {headless}, timeout) {
+async function measureDocument(url, version, {headless}, handlers) {
   const browser = await puppeteer.launch({
     headless,
     args: [
@@ -220,31 +257,29 @@ async function measureDocument(url, version, {headless}, timeout) {
   });
 
   const page = await browser.newPage();
+  const {handlerOptions, handlerName} = getHandlerFromUrl(url, handlers);
   await page.setCacheEnabled(false);
-  await page.setRequestInterception(true);
   await setupMeasurement(page);
 
-  let endTime;
-  const startTime = Date.now();
-  page.on('request', interceptedRequest =>
-    handleAnalyticsRequests(interceptedRequest, analyticsRequestTime => {
-      endTime = endTime ? endTime : analyticsRequestTime;
-    })
-  );
+  if (handlerOptions) {
+    await page.setRequestInterception(true);
+    setUpRequestHandler(handlerOptions, handlerName, page);
+  }
 
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
       waitUntil: 'networkidle0',
     });
-  } catch {
+  } catch (e) {
     // site did not load
+    console.log(e);
     await browser.close();
     return;
   }
 
   let metrics = await readMetrics(page);
-  await delay(timeout);
-  metrics = addAnalyticsMetric(startTime, endTime, metrics);
+  await delayBasedOnHandlerOptions(handlerOptions);
+  metrics = addHandlerMetric(handlerName, handlerOptions, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
@@ -255,10 +290,10 @@ async function measureDocument(url, version, {headless}, timeout) {
  * performance metrics to results.json in this directory.
  *
  * @param {Array<string>} urls
- * @param {{headless:boolean, runs:number, timeout:number}} options
+ * @param {{headless:boolean, runs:number, timeout:number, handlers:Object}} options
  * @return {Promise} Fulfills when all URLs have been measured
  */
-async function measureDocuments(urls, {headless, runs, timeout}) {
+async function measureDocuments(urls, {headless, runs, handlers}) {
   requirePuppeteer_();
 
   try {
@@ -268,8 +303,8 @@ async function measureDocuments(urls, {headless, runs, timeout}) {
   // Make an array of tasks to be executed
   const tasks = urls.flatMap(url =>
     Array.from({length: runs}).flatMap(() => [
-      measureDocument.bind(null, url, CONTROL, {headless}, timeout),
-      measureDocument.bind(null, url, EXPERIMENT, {headless}, timeout),
+      measureDocument.bind(null, url, CONTROL, {headless}, handlers),
+      measureDocument.bind(null, url, EXPERIMENT, {headless}, handlers),
     ])
   );
 
