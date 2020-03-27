@@ -271,6 +271,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
 
+    /** @private {?Promise} */
+    this.registerAllMediaPromise_ = null;
+
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = deferred.promise;
 
@@ -495,10 +498,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   resume_() {
-    this.registerAllMedia_();
+    const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      this.advancement_.start();
+      registerAllPromise.then(() => {
+        this.advancement_.start();
+      });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
@@ -1060,14 +1065,17 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Registers all media on this page
+   * Registers all media on this page.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   registerAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.registerMedia_(mediaPool, mediaEl);
-    });
+    this.registerAllMediaPromise_ =
+      this.registerAllMediaPromise_ ||
+      this.whenAllMediaElements_((mediaPool, mediaEl) => {
+        this.registerMedia_(mediaPool, mediaEl);
+      });
+    return this.registerAllMediaPromise_;
   }
 
   /**
