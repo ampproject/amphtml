@@ -23,10 +23,8 @@ import {urls} from '../../../src/config';
 
 describe('3p recaptcha.js', () => {
   it('should require a window.name', () => {
-    allowConsoleError(() => {
-      window.name = undefined;
-      expect(initRecaptcha).to.throw('window');
-    });
+    window.name = undefined;
+    expect(initRecaptcha).to.throw('window');
   });
 
   it('should require a sitekey in the window.name dataObject', () => {
