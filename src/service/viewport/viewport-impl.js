@@ -15,6 +15,7 @@
  */
 
 import {Animation} from '../../animation';
+import {FixedLayer} from '../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -137,6 +138,10 @@ export class ViewportImpl {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
+
+    if (!MOVE_FIXED_LAYER) {
+      this.createFixedLayer(FixedLayer);
+    }
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
