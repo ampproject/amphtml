@@ -443,9 +443,25 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.size_).to.deep.equal(viewportSize);
   });
 
-  it('should pass through size and scroll', () => {
+  it('should pass through size and scroll when embedded', () => {
+    env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+    new ViewportImpl(ampdoc, binding, viewer);
+    expect(viewer.isEmbedded()).to.be.true;
     expect(viewport.getPaddingTop()).to.equal(19);
     expect(updatedPaddingTop).to.equal(19);
+    expect(viewport.getSize().width).to.equal(111);
+    expect(viewport.getSize().height).to.equal(222);
+    expect(viewport.getScrollTop()).to.equal(17);
+    expect(viewport.getRect().left).to.equal(0);
+    expect(viewport.getRect().top).to.equal(17);
+    expect(viewport.getRect().width).to.equal(111);
+    expect(viewport.getRect().height).to.equal(222);
+  });
+
+  it('should pass through size and scroll when not embedded', () => {
+    expect(viewer.isEmbedded()).to.be.false;
+    expect(viewport.getPaddingTop()).to.equal(19);
+    expect(updatedPaddingTop).to.equal(undefined);
     expect(viewport.getSize().width).to.equal(111);
     expect(viewport.getSize().height).to.equal(222);
     expect(viewport.getScrollTop()).to.equal(17);
