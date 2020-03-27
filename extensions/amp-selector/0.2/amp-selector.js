@@ -15,12 +15,17 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -28,26 +33,35 @@ const TAG = 'amp-selector';
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'listbox');
+    }
+    if (this.element.hasAttribute('multiple')) {
+      this.element.setAttribute('aria-multiselectable', 'true');
+    }
+    if (this.element.hasAttribute('disabled')) {
+      this.element.setAttribute('aria-disabled', 'true');
+    }
     const getValueAndChildren = () => {
       const children = [];
-      const optionChildren = this.element.querySelectorAll('[option]');
+      const optionChildren = toArray(this.element.querySelectorAll('[option]'));
+
       const value = [];
-      const getOption = element => {
-        if (element === this.element) {
-          return;
-        }
-        if (element.hasAttribute('option')) {
-          return element.getAttribute('option');
-        }
-        return getOption(element.parentNode);
-      };
-      toArray(optionChildren)
+      optionChildren
         // Skip options that are themselves within an option
-        .filter(child => !getOption(child.parentNode))
+        .filter(child => !this.getOptionElement(child.parentElement))
         .forEach(child => {
           const option = child.getAttribute('option');
+          if (!child.hasAttribute('role')) {
+            child.setAttribute('role', 'option');
+          }
+          const isDisabled = child.hasAttribute('disabled');
+          if (isDisabled) {
+            child.setAttribute('aria-disabled', 'true');
+          }
           const props = {
             option,
+            disabled: isDisabled,
             type: 'Slot',
             retarget: true,
             assignedElements: [child],
@@ -55,7 +69,7 @@ class AmpSelector extends PreactBaseElement {
               // Skip mutations to avoid cycles.
               mu.takeRecords();
             },
-            getOption: e => getOption(e.target),
+            getOption: e => this.getOption(dev().assertElement(e.target)),
           };
           if (child.hasAttribute('selected')) {
             value.push(option);
@@ -78,13 +92,34 @@ class AmpSelector extends PreactBaseElement {
     });
 
     const {value, children} = getValueAndChildren();
+
+    const selectUniqueOption = option => {
+      this.element
+        .querySelectorAll('[selected]')
+        .forEach(selected => selected.removeAttribute('selected'));
+      selectOption(option);
+    };
+    const selectOption = option => {
+      const selector = `[option="${option}"]`;
+      const optionElement = scopedQuerySelector(this.element, selector);
+      if (optionElement.hasAttribute('selected')) {
+        optionElement.removeAttribute('selected');
+        return;
+      }
+      optionElement.setAttribute('selected', '');
+    };
+    const onChange = e => {
+      const {value, option} = e.target;
+      isArray(value) ? selectOption(option) : selectUniqueOption(option);
+      this.mutateProps(dict({'value': value}));
+    };
     return dict({
       // TODO: "options" should be "children",
       // but neither "passthrough" or "children"
       // allow for this kind of intervention yet
       'options': children,
       'value': value,
-      'onChange': event => this.mutateProps({'value': event.target.value}),
+      'onChange': onChange,
     });
   }
 
@@ -95,6 +130,29 @@ class AmpSelector extends PreactBaseElement {
       'expected amp-selector-v2 experiment to be enabled'
     );
     return true;
+  }
+
+  /**
+   * @param {Element=} element
+   * @return {Element|undefined}
+   */
+  getOptionElement(element) {
+    if (!element) {
+      return;
+    }
+    return closestAncestorElementBySelector(element, '[option]');
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {string|undefined}
+   */
+  getOption(element) {
+    const optionElement = this.getOptionElement(element);
+    if (!optionElement || optionElement.hasAttribute('disabled')) {
+      return;
+    }
+    return optionElement.getAttribute('option');
   }
 }
 
@@ -110,9 +168,10 @@ AmpSelector.props = {
   'form': {attr: 'form'},
   'multiple': {attr: 'multiple'},
   'name': {attr: 'name'},
+  'role': {attr: 'role'},
   'keyboardSelectMode': {attr: 'keyboard-select-mode'},
 };
 
 AMP.extension(TAG, '0.2', AMP => {
-  AMP.registerElement(TAG, AmpSelector);
+  AMP.registerElement(TAG, AmpSelector, CSS);
 });

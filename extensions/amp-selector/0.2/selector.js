@@ -40,20 +40,26 @@ const SelectorContext = Preact.createContext({});
  * @return {PreactDef.Renderable}
  */
 export function Selector(props) {
-  const {value, defaultValue} = props;
+  const {
+    'value': value,
+    'defaultValue': defaultValue,
+    'disabled': disabled,
+  } = props;
+  const isMultiple = props['multiple'] !== undefined;
   const [selectedState, setSelectedState] = useState(
     value ? [].concat(value) : defaultValue ? [].concat(defaultValue) : []
   );
   // TBD: controlled values require override of properties.
-  const selected = value ? [].concat(value) : selectedState;
+  const selected = /** @type {!Array} */ (value
+    ? [].concat(value)
+    : selectedState);
   const selectOption = option => {
     if (!option) {
       return;
     }
-    const {onChange} = props;
-    const multiple = props.multiple !== undefined;
+    const {'onChange': onChange} = props;
     let newValue = null;
-    if (multiple) {
+    if (isMultiple) {
       newValue = selected.includes(option)
         ? selected.filter(v => v != option)
         : selected.concat(option);
@@ -63,23 +69,33 @@ export function Selector(props) {
     if (newValue) {
       setSelectedState(newValue);
       if (onChange) {
-        onChange({target: {value: multiple ? newValue : newValue[0]}});
+        onChange({
+          target: {value: isMultiple ? newValue : newValue[0], option},
+        });
       }
     }
   };
 
-  props.tagName = props.tagName || 'div';
-  return (
-    <props.tagName {...props}>
-      <SelectorContext.Provider
-        value={{
-          selected,
-          selectOption,
-        }}
-      >
-        {props.options}
-      </SelectorContext.Provider>
-    </props.tagName>
+  const tag = props['tagName'] || 'div';
+  // TODO: Support '.' access to return <props.tagName ...> in JSX
+  return Preact.createElement(
+    tag,
+    {
+      ...props,
+      role: props['role'] || 'listbox',
+      'aria-multiselectable': isMultiple,
+      'aria-disabled': disabled,
+    },
+    <SelectorContext.Provider
+      value={{
+        selected,
+        selectOption,
+      }}
+    >
+      {/** TODO: Replace options with props.children when
+       * AMP layer supports manipulating 'children' */}
+      {props['options']}
+    </SelectorContext.Provider>
   );
 }
 
@@ -88,11 +104,11 @@ export function Selector(props) {
  * @return {PreactDef.Renderable}
  */
 export function Option(props) {
-  const {option, disabled, style} = props;
+  const {'option': option, 'disabled': disabled, 'style': style} = props;
   const getOption = props['getOption'] || (() => option);
   const selectorContext = Preact.useContext(SelectorContext);
-  const {selected, selectOption} = selectorContext;
-  const isSelected = selected.includes(option);
+  const {'selected': selected, 'selectOption': selectOption} = selectorContext;
+  const isSelected = /** @type {!Array} */ (selected).includes(option);
   const status = disabled
     ? CSS.DISABLED
     : isSelected
@@ -100,11 +116,14 @@ export function Option(props) {
     : CSS.OPTION;
   const optionProps = {
     ...props,
+    'aria-disabled': disabled,
+    role: props['role'] || 'option',
     onClick: e => selectOption(getOption(e)),
     option,
     selected: isSelected,
     style: {...status, ...style},
   };
-  props.tagName = props.type || props.tagName || 'div';
-  return <props.tagName {...optionProps}>{props.children}</props.tagName>;
+  const tag = props['type'] || props['tagName'] || 'div';
+  // TODO: Support '.' access to return <props.tagName ...> in JSX
+  return Preact.createElement(tag, {...optionProps});
 }
