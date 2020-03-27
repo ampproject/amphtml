@@ -24,24 +24,16 @@ limitations under the License.
 
 # amp-next-page
 
-## Behavior
+## Usage
 
-Given a list of pages, `amp-next-page` tries to load them after the current
-document, providing an infinite-scroll type experience.
+The `<amp-next-page>` component loads content pages one after another creating an infinite scroll experience.
 
-Pages should be specified in a JSON config loaded from a remote URL listed in
-the element `src`, or inlined as a `script` element child.
-
-## Version notes
+### Version notes
 
 | Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
 | 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
-
-## Usage
-
-The `<amp-next-page>` component loads content pages one after another creating an infinite scroll experience.
 
 ### Configure and load pages
 
