@@ -157,8 +157,7 @@ describes.realWin(
 
               yield macroTask();
               expect(requestVerifier.hasRequestSent()).to.be.true;
-              let url = requestVerifier.getLastRequestUrl();
-
+              let lastUrl = requestVerifier.getLastRequestUrl();
               const vendorData = VENDOR_REQUESTS[vendor];
               if (!vendorData) {
                 throw new Error(
@@ -167,7 +166,7 @@ describes.realWin(
               }
               const val = vendorData[name];
               if (val == '<ignore for test>') {
-                url = '<ignore for test>';
+                continue;
               }
               if (val == null) {
                 throw new Error(
@@ -175,19 +174,18 @@ describes.realWin(
                     vendor +
                     '.' +
                     name +
-                    ' in vendor-requests.json. Expected value: ' +
-                    url
+                    ' in vendor-requests.json. Last sent out value is: ' +
+                    lastUrl
                 );
               }
-              outputConfig[name] = url;
+              outputConfig[name] = lastUrl;
               // Write this out for easy copy pasting.
-              if (url !== val) {
+              if (!requestVerifier.verifyAndRemoveRequestUrl(val)) {
                 throw new Error(
                   `Vendor ${vendor}, request ${name} doesn't match. ` +
-                    `Expected value ${val}, get value ${url}.`
+                    `Expected value ${val}, last sent out value is ${lastUrl}.`
                 );
               }
-              expect(url).to.equal(val);
             }
             writeOutput(vendor, outputConfig);
           });
