@@ -19,42 +19,50 @@ import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
-let instance = 0;
 
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
-    instance += 1;
     const getValueAndChildren = () => {
       const children = [];
       const optionChildren = this.element.querySelectorAll('[option]');
       const value = [];
-      optionChildren.forEach(child => {
-        // TODO: check that an option is not within another option.
-        const option = child.getAttribute('option');
-        const name = `i-amphtml-selector${instance}-option${option}`;
-        child.setAttribute('slot', name);
-        const props = {
-          option,
-          type: 'Slot',
-          retarget: true,
-          assignedElements: [child],
-          postRender: () => {
-            // Skip mutations to avoid cycles.
-            mu.takeRecords();
-          },
-          name,
-        };
-        if (child.hasAttribute('selected')) {
-          value.push(option);
+      const getOption = element => {
+        if (element === this.element) {
+          return;
         }
-        const optionChild = <Option {...props} />;
-        children.push(optionChild);
-      });
+        if (element.hasAttribute('option')) {
+          return element.getAttribute('option');
+        }
+        return getOption(element.parentNode);
+      };
+      toArray(optionChildren)
+        // Skip options that are themselves within an option
+        .filter(child => !getOption(child.parentNode))
+        .forEach(child => {
+          const option = child.getAttribute('option');
+          const props = {
+            option,
+            type: 'Slot',
+            retarget: true,
+            assignedElements: [child],
+            postRender: () => {
+              // Skip mutations to avoid cycles.
+              mu.takeRecords();
+            },
+            getOption: e => getOption(e.target),
+          };
+          if (child.hasAttribute('selected')) {
+            value.push(option);
+          }
+          const optionChild = <Option {...props} />;
+          children.push(optionChild);
+        });
 
       return {value, children};
     };

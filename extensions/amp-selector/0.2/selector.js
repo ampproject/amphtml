@@ -47,7 +47,9 @@ export function Selector(props) {
   // TBD: controlled values require override of properties.
   const selected = value ? [].concat(value) : selectedState;
   const selectOption = option => {
-    console.log('select', option);
+    if (!option) {
+      return;
+    }
     const {onChange} = props;
     const multiple = props.multiple !== undefined;
     let newValue = null;
@@ -76,7 +78,6 @@ export function Selector(props) {
         }}
       >
         {props.options}
-        {props.children}
       </SelectorContext.Provider>
     </props.tagName>
   );
@@ -88,6 +89,7 @@ export function Selector(props) {
  */
 export function Option(props) {
   const {option, disabled, style} = props;
+  const getOption = props['getOption'] || (() => option);
   const selectorContext = Preact.useContext(SelectorContext);
   const {selected, selectOption} = selectorContext;
   const isSelected = selected.includes(option);
@@ -98,9 +100,9 @@ export function Option(props) {
     : CSS.OPTION;
   const optionProps = {
     ...props,
+    onClick: e => selectOption(getOption(e)),
     option,
     selected: isSelected,
-    onClick: () => selectOption(option),
     style: {...status, ...style},
   };
   props.tagName = props.type || props.tagName || 'div';
