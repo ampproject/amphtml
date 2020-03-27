@@ -157,7 +157,7 @@ describes.realWin(
 
               yield macroTask();
               expect(requestVerifier.hasRequestSent()).to.be.true;
-              let lastUrl = requestVerifier.getLastRequestUrl();
+              const lastUrl = requestVerifier.getLastRequestUrl();
               const vendorData = VENDOR_REQUESTS[vendor];
               if (!vendorData) {
                 throw new Error(
