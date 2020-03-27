@@ -34,6 +34,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
@@ -215,6 +216,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const doc = this.element.ownerDocument;
+    const isEmail = doc && isAmp4Email(doc);
+    userAssert(
+      !isEmail ||
+        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
+      '<amp-autocomplete> is not currently available in AMP4Email.'
+    );
+
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 

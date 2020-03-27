@@ -2,6 +2,7 @@
 $category: dynamic-content
 formats:
   - websites
+  - email
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
@@ -23,6 +24,12 @@ limitations under the License.
 -->
 
 # amp-autocomplete
+
+[filter formats="email"]
+
+Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
+
+[/filter] <!-- formats="email" -->
 
 ## Behavior
 
