@@ -16,28 +16,16 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('@babel/core');
 const conf = require('./build.conf');
+const fs = require('fs');
 const globby = require('globby');
+const gulpBabel = require('gulp-babel');
+const gulpCache = require('gulp-cache');
+const gulpIf = require('gulp-if');
 const path = require('path');
-const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
-
-/**
- * Files on which to run pre-closure babel transforms.
- *
- * @private @const {!Array<string>}
- */
-const filesToTransform = getFilesToTransform();
-
-/**
- * Used to cache babel transforms.
- *
- * @private @const {!Object<string, string>}
- */
-const cachedTransforms = {};
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -60,27 +48,41 @@ function getFilesToTransform() {
  * @return {!Promise}
  */
 function preClosureBabel() {
-  return through.obj((file, enc, next) => {
-    const cachedTransform = cachedTransforms[file.path];
-    if (cachedTransform) {
-      file.contents = Buffer.from(cachedTransform);
-    } else if (filesToTransform.includes(path.relative(ROOT_DIR, file.path))) {
-      const babelPlugins = conf.plugins({
-        isForTesting: !!argv.fortesting,
-        isEsmBuild: !!argv.esm,
-        isSinglePass: !!argv.single_pass,
-        isChecktypes: argv._.includes('check-types'),
-      });
-      const {code} = babel.transformFileSync(file.path, {
-        plugins: babelPlugins,
-        retainLines: true,
-        compact: false,
-      });
-      cachedTransforms[file.path] = code;
-      file.contents = Buffer.from(code);
-    }
-    return next(null, file);
+  const babelPlugins = conf.plugins({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+    isChecktypes: argv._.includes('check-types'),
   });
+
+  const babel = gulpBabel({
+    plugins: babelPlugins,
+    compact: false,
+    retainLines: false,
+  });
+
+  const salt = [
+    fs.readFileSync(require.resolve('./build.conf.js')).toString('hex'),
+    fs.readFileSync('./babel.config.js').toString('hex'),
+    JSON.stringify(argv),
+  ].join(':');
+
+  const filesToTransform = getFilesToTransform();
+  const ifPipe = gulpIf(file => {
+    return filesToTransform.includes(path.relative(ROOT_DIR, file.path));
+  }, babel);
+
+  ifPipe.on('data', () => {
+    ifPipe.emit('gulp-cache:transformed');
+  });
+
+  const cache = gulpCache(ifPipe, {
+    name: 'amp-pre-closure-babel',
+    key(file) {
+      return `${file.path}:${salt}:${file.contents.toString('hex')}`;
+    },
+  });
+  return cache;
 }
 
 module.exports = {
