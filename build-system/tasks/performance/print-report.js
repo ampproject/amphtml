@@ -16,36 +16,11 @@
 
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
+const {percent, trimmedMean} = require('./stats');
 
 const HEADER_COLUMN = 22;
 const BODY_COLUMN = 12;
 const FULL_TABLE = 68;
-
-/**
- * Computes an average for the specified key's values in the array of objects
- *
- * @param {Array<*>} arr
- * @param {string} key
- * @return {number} average
- */
-const average = (arr, key) =>
-  Math.round(arr.reduce((sum, result) => sum + result[key], 0) / arr.length);
-
-/**
- * Takes two numbers and generates a string representing the difference as
- * a percent for use in printing the results
- *
- * @param {number} a
- * @param {number} b
- * @return {string} String representing the change as a percent
- */
-function percent(a, b) {
-  if (a === 0) {
-    return b === 0 ? 'n/a' : `-${100 - Math.round((a / b) * 100)}`;
-  } else {
-    return `${100 - Math.round((b / a) * 100)}%`;
-  }
-}
 
 /**
  * Generates header lines to be printed to the console for url
@@ -73,15 +48,16 @@ const headerLines = url => [
  * @return {Array<string>} lines
  */
 function linesForMetric(metric, results) {
-  const control = average(results[CONTROL], metric);
-  const experiment = average(results[EXPERIMENT], metric);
+  const control = trimmedMean(results[CONTROL], metric);
+  const experiment = trimmedMean(results[EXPERIMENT], metric);
+  const percentage = percent(control, experiment);
 
   return [
     [
       metric.padEnd(HEADER_COLUMN),
       experiment.toString().padEnd(BODY_COLUMN),
       control.toString().padEnd(BODY_COLUMN),
-      percent(control, experiment),
+      percentage == null ? 'n/a' : `${percentage}%`,
     ].join(' | '),
     `\n${''.padEnd(FULL_TABLE, '-')}\n`,
   ];
@@ -123,14 +99,15 @@ class PageMetrics {
  * @return {Array<PageMetrics>} report
  */
 function getReport(urls) {
-  const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
+  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH));
   const report = [];
   urls.forEach(url => {
+    const results = raw[url];
     const pageMetrics = new PageMetrics(url);
-    const metrics = Object.keys(results[url][CONTROL][0]);
+    const metrics = Object.keys(results[CONTROL][0]);
     metrics.forEach(metric => {
-      const control = average(results[url][CONTROL], metric);
-      const experiment = average(results[url][EXPERIMENT], metric);
+      const control = trimmedMean(results[CONTROL], metric);
+      const experiment = trimmedMean(results[EXPERIMENT], metric);
       pageMetrics.set(metric, experiment, control);
     });
     report.push(pageMetrics);
