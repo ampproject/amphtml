@@ -525,6 +525,7 @@ export function getErrorReportData(
   let runtime = '1p';
   if (IS_ESM) {
     runtime = 'esm';
+    data['esm'] = '1';
   } else if (self.context && self.context.location) {
     data['3p'] = '1';
     runtime = '3p';
