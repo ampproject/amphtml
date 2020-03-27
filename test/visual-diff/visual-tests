@@ -210,6 +210,8 @@
       "loading_complete_selectors": ["video.i-amphtml-replaced-content"]
     },
     {
+      // TODO(#27456, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4656426
+      "flaky": true,
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar.amp.html",
       "name": "amp-sidebar",
       "viewport": {"width": 400, "height": 800},
@@ -220,13 +222,18 @@
       "name": "amp-sidebar toolbar > ol",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
-    },{
+    },
+    {
+      // TODO(#27456, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4637948
+      "flaky": true,
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
       "name": "amp-sidebar toolbar > ul",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
     },
     {
+      // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
+      "flaky": true,
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
       "viewport": {
@@ -323,6 +330,8 @@
       ]
     },
     {
+      // TODO(#27185, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
@@ -456,6 +465,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
+      // TODO(#27185, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -553,7 +564,7 @@
       ]
     },
     {
-      // TODO(zombifier): disabled in #21935 because this test is not hermetic.
+      // TODO(#27453, @ampproject/wg-ads): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
@@ -572,7 +583,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
-      // TODO(#21665): Re-enable test.
+      // TODO(#21665, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
@@ -583,7 +594,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
-      // TODO(#22070): Re-enable test.
+      // TODO(#22070, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
@@ -594,7 +605,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
-      // TODO(#22499): Re-enable this test once the animations run.
+      // TODO(#22499, @ampproject/wg-stories): Re-enable this test once the animations run.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
@@ -624,7 +635,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
-      // TODO(#21749): Re-enable test.
+      // TODO(#21749, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
       "name": "amp-story: landscape templates",
@@ -653,6 +664,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
+      // TODO(#27452, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
       "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},
@@ -689,8 +702,8 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
+      // TODO(#22162, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/1828636
       "flaky": true,
-      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
@@ -744,6 +757,8 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
+      // TODO(#27454, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
+      "flaky": true,
       "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
       "name": "amp-mega-menu: template render",
       "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
