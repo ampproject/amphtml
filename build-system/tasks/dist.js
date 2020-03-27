@@ -110,7 +110,7 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(/* watch */ false, /* minify */ true);
   } else {
-    await buildExperiments({minify: true, watch: false});
+    // await buildExperiments({minify: true, watch: false});
     await buildLoginDone('0.1', {minify: true, watch: false});
     await buildWebPushPublisherFiles({minify: true, watch: false});
     await compileAllMinifiedJs();

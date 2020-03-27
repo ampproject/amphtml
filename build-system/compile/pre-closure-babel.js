@@ -51,7 +51,6 @@ function preClosureBabel() {
     fs.readFileSync(require.resolve('./build.conf.js')).toString('hex'),
     fs.readFileSync('./babel.config.js').toString('hex'),
     JSON.stringify(argv),
-    ...filesToTransform,
   ].join(':');
 
   const babelPlugins = conf.plugins({
@@ -94,7 +93,12 @@ function preClosureBabel() {
   const cache = gulpCache(through.obj(transform), {
     name: 'amp-pre-closure-babel',
     key(file) {
-      return `${file.path}:${salt}:${file.contents.toString('hex')}`;
+      return [
+        file.path,
+        filesToTransform.includes(file.relative),
+        salt,
+        file.contents.toString('hex'),
+      ].join(':');
     },
   });
   return cache;
