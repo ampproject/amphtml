@@ -17,13 +17,24 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const conf = require('./build.conf');
-const fs = require('fs');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
-const gulpCache = require('gulp-cache');
-const path = require('path');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+
+/**
+ * Files on which to run pre-closure babel transforms.
+ *
+ * @private @const {!Array<string>}
+ */
+const filesToTransform = getFilesToTransform();
+
+/**
+ * Used to cache babel transforms.
+ *
+ * @private @const {!Object<string, string>}
+ */
+const cachedTransforms = Object.create(null);
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -46,13 +57,6 @@ function getFilesToTransform() {
  * @return {!Promise}
  */
 function preClosureBabel() {
-  const filesToTransform = getFilesToTransform();
-  const salt = [
-    fs.readFileSync(require.resolve('./build.conf.js')).toString('hex'),
-    fs.readFileSync('./babel.config.js').toString('hex'),
-    JSON.stringify(argv),
-  ].join(':');
-
   const babelPlugins = conf.plugins({
     isForTesting: !!argv.fortesting,
     isEsmBuild: !!argv.esm,
@@ -61,13 +65,19 @@ function preClosureBabel() {
   });
   const babel = gulpBabel({
     plugins: babelPlugins,
-    retainLines: false,
+    retainLines: true,
     compact: false,
   });
 
-  function transform(file, enc, next) {
-    if (!filesToTransform.includes(file.relative)) {
+  return through.obj((file, enc, next) => {
+    const {relative, path} = file;
+    if (!filesToTransform.includes(relative)) {
       return next(null, file);
+    }
+
+    const cachedTransform = cachedTransforms[path];
+    if (cachedTransform) {
+      return next(null, cachedTransform.clone());
     }
 
     let data, err;
@@ -86,22 +96,10 @@ function preClosureBabel() {
         return next(err);
       }
 
-      next(null, data);
+      cachedTransforms[path] = data;
+      next(null, data.clone());
     });
-  }
-
-  const cache = gulpCache(through.obj(transform), {
-    name: 'amp-pre-closure-babel',
-    key(file) {
-      return [
-        file.path,
-        filesToTransform.includes(file.relative),
-        salt,
-        file.contents.toString('hex'),
-      ].join(':');
-    },
   });
-  return cache;
 }
 
 module.exports = {
