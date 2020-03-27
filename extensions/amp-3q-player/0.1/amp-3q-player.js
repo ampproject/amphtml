@@ -18,6 +18,11 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl} from '../../../src/url';
+import {
+  createFrameFor,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
   fullscreenEnter,
@@ -28,7 +33,6 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {objOrParseJson, redispatch} from '../../../src/iframe-video';
 
 const TAG = 'amp-3q-player';
 
@@ -84,7 +88,7 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 
   /** private */
-  generateIframeSrc() {
+  generateIframeSrc_() {
     const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
@@ -95,16 +99,13 @@ class Amp3QPlayer extends AMP.BaseElement {
         this.element.getAttribute(`data-project`) +
         '/' +
         this.element.getAttribute(`data-datafield`) +
-        '/' +
-        encodeURIComponent(dev().assertString(this.dataId)) +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true';
-    } else {
-      iframeSrc +=
-        this.dataId +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true';
+        '/';
     }
+
+    iframeSrc +=
+      encodeURIComponent(dev().assertString(this.dataId)) +
+      // Autoplay is handled by VideoManager
+      '?autoplay=false&amp=true';
 
     explicitParamsAttributes.forEach(explicitParam => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
@@ -118,7 +119,9 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.iframe_ = this.generateIframeSrc();
+    const iframe = createFrameFor(this, this.generateIframeSrc_());
+
+    this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
       this.win,
