@@ -225,6 +225,7 @@
     },
     {
       // TODO(#27456, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4637948
+      "flaky": true,
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
       "name": "amp-sidebar toolbar > ul",
       "viewport": {"width": 400, "height": 800},
@@ -329,6 +330,8 @@
       ]
     },
     {
+      // TODO(#27452, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
@@ -661,6 +664,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
+      // TODO(#27452, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
       "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},
@@ -697,8 +702,8 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
-      "flaky": true,
       // TODO(#22162, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/1828636
+      "flaky": true,
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
