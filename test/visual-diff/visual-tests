@@ -465,7 +465,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
-      // TODO(#27452, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
+      // TODO(#27185, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser (desktop)",
