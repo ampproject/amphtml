@@ -21,11 +21,9 @@ const fs = require('fs');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
 const gulpCache = require('gulp-cache');
-const gulpIf = require('gulp-if');
 const path = require('path');
+const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
-
-const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -48,35 +46,52 @@ function getFilesToTransform() {
  * @return {!Promise}
  */
 function preClosureBabel() {
+  const filesToTransform = getFilesToTransform();
+  const salt = [
+    fs.readFileSync(require.resolve('./build.conf.js')).toString('hex'),
+    fs.readFileSync('./babel.config.js').toString('hex'),
+    JSON.stringify(argv),
+    ...filesToTransform,
+  ].join(':');
+
   const babelPlugins = conf.plugins({
     isForTesting: !!argv.fortesting,
     isEsmBuild: !!argv.esm,
     isSinglePass: !!argv.single_pass,
     isChecktypes: argv._.includes('check-types'),
   });
-
   const babel = gulpBabel({
     plugins: babelPlugins,
-    compact: false,
     retainLines: false,
+    compact: false,
   });
 
-  const salt = [
-    fs.readFileSync(require.resolve('./build.conf.js')).toString('hex'),
-    fs.readFileSync('./babel.config.js').toString('hex'),
-    JSON.stringify(argv),
-  ].join(':');
+  function transform(file, enc, next) {
+    if (!filesToTransform.includes(file.relative)) {
+      return next(null, file);
+    }
 
-  const filesToTransform = getFilesToTransform();
-  const ifPipe = gulpIf(file => {
-    return filesToTransform.includes(path.relative(ROOT_DIR, file.path));
-  }, babel);
+    let data, err;
+    function onData(d) {
+      babel.off('error', onError);
+      data = d;
+    }
+    function onError(e) {
+      babel.off('data', onData);
+      err = e;
+    }
+    babel.once('data', onData);
+    babel.once('error', onError);
+    babel.write(file, enc, () => {
+      if (err) {
+        return next(err);
+      }
 
-  ifPipe.on('data', () => {
-    ifPipe.emit('gulp-cache:transformed');
-  });
+      next(null, data);
+    });
+  }
 
-  const cache = gulpCache(ifPipe, {
+  const cache = gulpCache(through.obj(transform), {
     name: 'amp-pre-closure-babel',
     key(file) {
       return `${file.path}:${salt}:${file.contents.toString('hex')}`;
