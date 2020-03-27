@@ -453,8 +453,8 @@ export class Resource {
     this.computeMeasurements_(opt_premeasuredRect);
     const newBox = this.layoutBox_;
 
-    if (opt_premeasuredRect) {
-      devAssert(this.state_ != ResourceState.NOT_BUILT);
+    if (opt_premeasuredRect && this.state_ == ResourceState.NOT_BUILT) {
+      devAssert(false);
     }
 
     // Note that "left" doesn't affect readiness for the layout.
