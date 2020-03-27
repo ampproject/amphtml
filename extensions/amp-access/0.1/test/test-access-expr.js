@@ -347,17 +347,27 @@ describe('evaluate', () => {
   });
 
   describe('caching', () => {
+    class Data {
+      count = 0;
+      get field() {
+        count++;
+        return true;
+      }
+    }
+
     it('should use the cache on subsequent calls for the same expression and data', () => {
-      const data = {access: true};
-      const result1 = evaluator.evaluate('access = true', data);
-      const result2 = evaluator.evaluate('access = true', data);
-      expect(result1).equal(result2);
+      const data = new Data();
+      evaluator.evaluate('obj.field', data);
+      evaluator.evaluate('obj.field', data);
+      expect(data.count).equal(1);
     });
 
     it('should not use the cache if the data is referentially unequal', () => {
-      const result1 = evaluator.evaluate('access = true', {access: true});
-      const result2 = evaluator.evaluate('access = true', {access: true});
-      expect(result1).not.equal(result2);
+      const data1 = new Data();
+      const data2 = new Data();
+      evaluator.evaluate('obj.field', data1);
+      evaluator.evaluate('obj.field', data2);
+      expect(data.count).equal(2);
     });
   });
 });
