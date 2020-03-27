@@ -17,6 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const conf = require('./build.conf');
+const crypto = require('crypto');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
 const through = require('through2');
@@ -34,7 +35,7 @@ const filesToTransform = getFilesToTransform();
  *
  * @private @const {!Object<string, string>}
  */
-const cachedTransforms = Object.create(null);
+const cache = Object.create(null);
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -45,6 +46,16 @@ function getFilesToTransform() {
   return globby
     .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
     .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS));
+}
+
+/**
+ * @param {!Buffer} contents
+ * @return {string}
+ */
+function sha256(contents) {
+  const hash = crypto.createHash('sha256');
+  hash.update(contents);
+  return hash.digest('hex');
 }
 
 /**
@@ -75,9 +86,10 @@ function preClosureBabel() {
       return next(null, file);
     }
 
-    const cachedTransform = cachedTransforms[path];
-    if (cachedTransform) {
-      return next(null, cachedTransform.clone());
+    const hash = sha256(file.contents);
+    const cached = cache[path];
+    if (cached && cached.hash === hash) {
+      return next(null, cached.file.clone());
     }
 
     let data, err;
@@ -96,7 +108,10 @@ function preClosureBabel() {
         return next(err);
       }
 
-      cachedTransforms[path] = data;
+      cache[path] = {
+        file: data,
+        hash,
+      };
       next(null, data.clone());
     });
   });
