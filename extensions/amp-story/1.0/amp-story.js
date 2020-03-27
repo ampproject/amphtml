@@ -914,7 +914,7 @@ export class AmpStory extends AMP.BaseElement {
   buildPaginationButtons_() {
     if (
       this.paginationButtons_ ||
-      this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
+      !this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
     ) {
       return;
     }
