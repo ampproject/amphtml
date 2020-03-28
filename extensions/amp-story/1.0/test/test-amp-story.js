@@ -52,26 +52,30 @@ describes.realWin(
     },
   },
   env => {
-    let win, ampdoc;
+    let ampdoc;
     let element;
     let hasSwipeCapability = false;
     let isEmbedded = false;
     let story;
     let replaceStateStub;
+    let win;
 
     /**
      * @param {number} count
-     * @param {Array<string>=} opt_ids
+     * @param {Array<string>=} ids
      * @return {!Array<!Element>}
      */
-    async function createStoryWithPages(count, opt_ids) {
+    async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
       Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
-          page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+          if (autoAdvance) {
+            page.setAttribute('auto-advance-after', '2s');
+          }
+          page.id = ids && ids[i] ? ids[i] : `-page-${i}`;
           element.appendChild(page);
           return page;
         });
@@ -1155,6 +1159,32 @@ describes.realWin(
                   {
                     next: true,
                     advancementMode: AdvancementMode.MANUAL_ADVANCE,
+                  }
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
+
+          it('should send a message when auto-advancing on last page in viewer', async () => {
+            await createStoryWithPages(1, ['cover'], true /** autoAdvance */);
+            const sendMessageStub = env.sandbox.stub(
+              story.viewerMessagingHandler_,
+              'send'
+            );
+
+            await story.layoutCallback();
+
+            story.activePage_.advancement_.onAdvance();
+
+            await waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    next: true,
+                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
                   }
                 );
                 return true;
