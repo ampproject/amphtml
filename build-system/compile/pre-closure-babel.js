@@ -16,14 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('@babel/core');
 const conf = require('./build.conf');
+const crypto = require('crypto');
 const globby = require('globby');
-const path = require('path');
+const gulpBabel = require('gulp-babel');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
-
-const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Files on which to run pre-closure babel transforms.
@@ -37,7 +35,7 @@ const filesToTransform = getFilesToTransform();
  *
  * @private @const {!Object<string, string>}
  */
-const cachedTransforms = {};
+const cache = Object.create(null);
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -51,6 +49,16 @@ function getFilesToTransform() {
 }
 
 /**
+ * @param {!Buffer} contents
+ * @return {string}
+ */
+function sha256(contents) {
+  const hash = crypto.createHash('sha256');
+  hash.update(contents);
+  return hash.digest('hex');
+}
+
+/**
  * Apply babel transforms prior to closure compiler pass.
  *
  * When a source file is transformed for the first time, it is written to an
@@ -60,26 +68,52 @@ function getFilesToTransform() {
  * @return {!Promise}
  */
 function preClosureBabel() {
+  const babelPlugins = conf.plugins({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+    isChecktypes: argv._.includes('check-types'),
+  });
+  const babel = gulpBabel({
+    plugins: babelPlugins,
+    retainLines: true,
+    compact: false,
+  });
+
   return through.obj((file, enc, next) => {
-    const cachedTransform = cachedTransforms[file.path];
-    if (cachedTransform) {
-      file.contents = Buffer.from(cachedTransform);
-    } else if (filesToTransform.includes(path.relative(ROOT_DIR, file.path))) {
-      const babelPlugins = conf.plugins({
-        isForTesting: !!argv.fortesting,
-        isEsmBuild: !!argv.esm,
-        isSinglePass: !!argv.single_pass,
-        isChecktypes: argv._.includes('check-types'),
-      });
-      const {code} = babel.transformFileSync(file.path, {
-        plugins: babelPlugins,
-        retainLines: true,
-        compact: false,
-      });
-      cachedTransforms[file.path] = code;
-      file.contents = Buffer.from(code);
+    const {relative, path} = file;
+    if (!filesToTransform.includes(relative)) {
+      return next(null, file);
     }
-    return next(null, file);
+
+    const hash = sha256(file.contents);
+    const cached = cache[path];
+    if (cached && cached.hash === hash) {
+      return next(null, cached.file.clone());
+    }
+
+    let data, err;
+    function onData(d) {
+      babel.off('error', onError);
+      data = d;
+    }
+    function onError(e) {
+      babel.off('data', onData);
+      err = e;
+    }
+    babel.once('data', onData);
+    babel.once('error', onError);
+    babel.write(file, enc, () => {
+      if (err) {
+        return next(err);
+      }
+
+      cache[path] = {
+        file: data,
+        hash,
+      };
+      next(null, data.clone());
+    });
   });
 }
 

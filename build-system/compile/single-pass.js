@@ -686,8 +686,8 @@ function compile(flagsArray) {
   return new Promise(function(resolve, reject) {
     gulp
       .src(srcs, {base: '.'})
+      .pipe(sourcemaps.init())
       .pipe(preClosureBabel())
-      .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {
         handleSinglePassCompilerError();

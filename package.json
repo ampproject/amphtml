@@ -94,6 +94,7 @@
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "gulp-ava": "3.0.0",
+    "gulp-babel": "8.0.0",
     "gulp-connect": "5.7.0",
     "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
@@ -181,8 +182,8 @@
     "typescript": "3.8.3",
     "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
-    "vinyl-sourcemaps-apply": "0.2.1",
     "vinyl-source-stream": "2.0.0",
+    "vinyl-sourcemaps-apply": "0.2.1",
     "watchify": "3.11.1"
   },
   "filesize": {
