@@ -32,7 +32,7 @@
 
 amp-consent {
   /* Fixed to make position independent of page other elements. */
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 0;
   overflow: hidden !important;
