@@ -25,7 +25,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
-import {expandLayoutRect, layoutRectLtwh, rectsOverlap} from '../layout-rect';
+import {expandLayoutRect} from '../layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
