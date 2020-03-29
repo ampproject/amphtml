@@ -46,5 +46,3 @@ For semantics of configuration and examples, sign-in and see the [My6sense platf
 - `data-url` : string, non-empty
 - `data-organic-clicks` : string, non-empty
 - `data-paid-clicks` : string, non-empty
-
-
