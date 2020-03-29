@@ -196,17 +196,11 @@ export class ResourcesImpl {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
-    /** @const @private {!Array<!IntersectionObserverEntry>} */
-    this.queuedIntersectionEntries_ = [];
-
-    /** @private {?../layout-rect.LayoutRectDef} */
-    this.viewportRect_ = null;
-
     /**
-     * The same as viewportRect_ but 25% larger.
-     * @private {?../layout-rect.LayoutRectDef}
+     * True if the callback for intersectionObserver_ has fired at least once.
+     * @private {boolean}
      */
-    this.visibleRect_ = null;
+    this.intersectionObserverCallbackFired_ = false;
 
     if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
@@ -301,57 +295,37 @@ export class ResourcesImpl {
     devAssert(this.intersectionObserver_);
     // TODO(willchou): Remove assert once #27167 is fixed.
     devAssert(this.prerenderSize_ == 1);
+
     dev().fine(
       TAG_,
       'intersect',
-      entries.map(e => [e.target, e.isIntersecting])
+      entries
+        .filter(e => e.isIntersecting)
+        .map(e => ({
+          e,
+          r: Resource.forElementOptional(e.target).debugid,
+        })),
+      entries
+        .filter(e => !e.isIntersecting)
+        .map(e => ({
+          e,
+          r: Resource.forElementOptional(e.target).debugid,
+        }))
     );
 
-    if (!this.viewportRect_ || !this.visibleRect_) {
-      const {rootBounds} = entries[0];
-      const vw = rootBounds.width + rootBounds.left * 2;
-      const vh = rootBounds.height + rootBounds.top * 2;
-      this.viewportRect_ = layoutRectLtwh(0, 0, vw, vh);
-      this.visibleRect_ = expandLayoutRect(this.viewportRect_, 0.25, 0.25);
-    }
-
-    // const isPrerender =
-    //   this.ampdoc.getVisibilityState() == VisibilityState.PRERENDER;
-
-    let shouldSchedule = false;
+    this.intersectionObserverCallbackFired_ = true;
 
     entries.forEach(entry => {
       const {boundingClientRect, isIntersecting, target} = entry;
+
+      const r = Resource.forElement(target);
       // Strangely, JSC is missing x/y from typedefs of boundingClientRect
       // despite it being a DOMRectReadOnly (ClientRect) by spec.
-      const clientRect = /** @type {!ClientRect} */ (boundingClientRect);
-
-      // devAssert(target.isUpgraded());
-      const r = Resource.forElement(target);
-
-      if (!this.resources_.includes(r)) {
-        dev().info(TAG_, '  resource missing:', r.debugid);
-        return;
-      }
-
-      r.clientRect = clientRect;
+      r.clientRect = /** @type {!ClientRect} */ (boundingClientRect);
       r.isIntersecting = isIntersecting;
-      shouldSchedule = true;
-
-      // // Only handle 1vp while in prerender mode.
-      // if (
-      //   isPrerender &&
-      //   isIntersecting &&
-      //   !rectsOverlap(clientRect, devAssert(this.viewportRect_))
-      // ) {
-      //   this.queuedIntersectionEntries_.push(entry);
-      //   return;
-      // }
     });
 
-    if (shouldSchedule) {
-      this.schedulePass();
-    }
+    this.schedulePass();
   }
 
   /** @private */
@@ -455,21 +429,7 @@ export class ResourcesImpl {
     this.resources_.push(resource);
 
     if (this.intersectionObserver_) {
-      // applyStaticLayout() actually happens after this function (sync),
-      // so give the browser a chance to layout first by waiting for upgrade.
-      // This results in fresher client rects in the intersection entry.
-      // element
-      //   .whenUpgraded()
-      //   .then(() => {
-      //     return Services.timerFor(this.win).promise(1600);
-      //   })
-      //   .then(() => {
-      // this.observed_ = this.observed_ || [];
-      // if (!this.observed_.includes(element)) {
       this.intersectionObserver_.observe(element);
-      // }
-      // this.observed_.push(element);
-      // });
     } else {
       this.remeasurePass_.schedule(1000);
     }
@@ -736,7 +696,6 @@ export class ResourcesImpl {
       return;
     }
 
-    const wasVisible = this.visible_;
     this.visible_ = this.ampdoc.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
@@ -770,8 +729,6 @@ export class ResourcesImpl {
       );
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
-
-    // this.resources_.forEach(r => this.intersectionObserver_.observe(r.element));
 
     const viewportSize = this.viewport_.getSize();
     dev().fine(
@@ -830,8 +787,9 @@ export class ResourcesImpl {
       this.documentReady_ &&
       this.ampInitialized_ &&
       // With IntersectionObserver, elements are not measured until the first
-      // intersection callback (which is when viewportRect_ is set).
-      (!this.intersectionObserver_ || this.viewportRect_) &&
+      // intersection callback.
+      (!this.intersectionObserver_ ||
+        this.intersectionObserverCallbackFired_) &&
       !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
     ) {
       // This signal mainly signifies that most of elements have been measured
@@ -1243,10 +1201,10 @@ export class ResourcesImpl {
           // If element has owner, do nothing.
           continue;
         }
+        // Difference: we always "measure" given a fresh clientRect, even if
+        // the element has not been built yet.
         const needsMeasure =
-          (r.clientRect && r.getState() == ResourceState.NOT_LAID_OUT) ||
-          this.relayoutAll_ ||
-          r.isMeasureRequested();
+          r.clientRect || this.relayoutAll_ || r.isMeasureRequested();
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(r, r.clientRect);
           r.clientRect = null;
