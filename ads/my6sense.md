@@ -36,14 +36,15 @@ For more information, visit [www.My6sense.com](https://www.My6sense.com).
 
 For semantics of configuration and examples, sign-in and see the [My6sense platform](https://my6sense.com/platform/) or [contact My6sense](https://my6sense.com/contact/).
 
-##Supported parameters:
+## Required parameters:
 
-- `data-widget-key`
-- `data-zone`
-- `data-url`
-- `data-organic-clicks`
-- `data-paid-clicks`
+- `data-widget-key` : string, non-empty
 
-##Required parameters:
+## Optional parameters:
 
-- `data-widget-key`
+- `data-zone` : string, non-empty
+- `data-url` : string, non-empty
+- `data-organic-clicks` : string, non-empty
+- `data-paid-clicks` : string, non-empty
+
+
