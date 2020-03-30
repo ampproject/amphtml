@@ -912,7 +912,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
-    if (this.paginationButtons_) {
+    if (
+      this.paginationButtons_ ||
+      !this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
+    ) {
       return;
     }
 
