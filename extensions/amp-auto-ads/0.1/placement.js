@@ -20,7 +20,6 @@ import {
   cloneLayoutMarginsChangeDef,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -30,18 +29,9 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementLayoutBox} from './utils';
-import {getExperimentBranch} from '../../../src/experiments';
 
 /** @const */
 const TAG = 'amp-auto-ads';
-
-/** @const {!{branch: string, control: string, experiment: string}}
- */
-export const NO_OP_EXP = {
-  branch: 'amp-auto-ads-no-op-experiment',
-  control: '44710302',
-  experiment: '44710303',
-};
 
 /**
  * @typedef {{
@@ -212,13 +202,7 @@ export class Placement {
         this.adElement_ = isResponsiveEnabled
           ? this.createResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
-        const noOpExpBranch = getExperimentBranch(
-          this.ampdoc.win,
-          NO_OP_EXP.branch
-        );
-        if (noOpExpBranch) {
-          addExperimentIdToElement(noOpExpBranch, this.adElement_);
-        }
+
         this.injector_(this.anchorElement_, this.getAdElement());
 
         if (isResponsiveEnabled) {
