@@ -70,20 +70,22 @@ const validTransformedRemovableImports = {
   '../build/ampdoc.css': ['cssText', 'ampDocCss'],
 };
 
-/**
- * @return {string} parse experiment flag from command line arguments
- */
-function getExperimentFlag() {
-  const defineFlag = argv.defineExperimentConstant;
-  if (Array.isArray(defineFlag)) {
-    if (defineFlag.length > 1) {
+const experimentFlag = (function() {
+  const {defineExperimentConstant} = argv;
+  if (Array.isArray(defineExperimentConstant)) {
+    if (defineExperimentConstant.length > 0) {
       throw new Error('Only one defineExperimentConstant flag is allowed');
     } else {
-      return defineFlag[0];
+      return defineExperimentConstant[0];
     }
   }
-  return defineFlag;
-}
+  return defineExperimentConstant;
+})();
+
+const experimentRemovedImports =
+  experimentFlag === 'MOVE_FIXED_LAYER'
+    ? {'./../fixed-layer': ['FixedLayer']}
+    : {'../../../src/service/fixed-layer': ['FixedLayer']};
 
 /**
  * @param {boolean} isEsmBuild a boolean indicating if this build is for ESM output.
@@ -108,8 +110,6 @@ function getReplacePlugin(isEsmBuild) {
 
   const replacements = [createReplacement('IS_ESM', isEsmBuild)];
 
-  // add define flags from arguments
-  const experimentFlag = getExperimentFlag();
   if (experimentFlag) {
     replacements.push(createReplacement(experimentFlag, true));
   }
@@ -182,26 +182,18 @@ function plugins({
   if (isSinglePass) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
-
-  let removedImports = {};
+  let imports = {...experimentRemovedImports};
   if (isEsmBuild) {
-    removedImports = {
+    imports = {
+      ...imports,
       ...esmRemovedImports,
       ...validTransformedRemovableImports,
     };
   }
-  const experimentFlag = getExperimentFlag();
-  const experimentRemovedImports =
-    experimentFlag === 'MOVE_FIXED_LAYER'
-      ? {'./../fixed-layer': ['FixedLayer']}
-      : {'../../../src/service/fixed-layer': ['FixedLayer']};
-  removedImports = {...removedImports, ...experimentRemovedImports};
-  applied.push(['filter-imports', {imports: removedImports}]);
-
+  applied.push(['filter-imports', {imports}]);
   if (isEsmBuild) {
     applied.push(localPlugin('transform-function-declarations'));
   }
-
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));
   } else {
