@@ -73,16 +73,6 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(bodyStyles.overflowY).to.not.equal('hidden');
   });
 
-  it('should override body overflow for iframes', () => {
-    win.document.documentElement.classList.add('i-amphtml-iframed');
-    win.document.documentElement.classList.add('i-amphtml-singledoc');
-    binding = new ViewportBindingNatural_(ampdoc);
-    const bodyStyles = win.getComputedStyle(win.document.body);
-    expect(bodyStyles.position).to.equal('relative');
-    expect(bodyStyles.overflowX).to.equal('hidden');
-    expect(bodyStyles.overflowY).to.not.equal('hidden');
-  });
-
   it('should NOT require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
@@ -250,18 +240,6 @@ describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
     env.sandbox.stub(Services.platformFor(win), 'isIos').returns(true);
     binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
-  });
-
-  it('should reset overscroll on X-axis', () => {
-    win.scrollTo(1, 0);
-    expect(win.pageXOffset).to.equal(1);
-    return new Promise(resolve => {
-      win.addEventListener('scroll', () => {
-        if (win.pageXOffset == 0) {
-          resolve();
-        }
-      });
-    });
   });
 });
 

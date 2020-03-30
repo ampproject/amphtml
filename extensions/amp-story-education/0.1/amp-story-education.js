@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/layout';
@@ -95,10 +96,16 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_.classList.add('i-amphtml-story-education');
     toggle(this.containerEl_, false);
     this.startListening_();
-    createShadowRootWithStyle(this.element, this.containerEl_, CSS);
+    // Extra host to reset inherited styles and further enforce shadow DOM style
+    // scoping using amp-story-shadow-reset.css.
+    const hostEl = this.win.document.createElement('div');
+    this.element.appendChild(hostEl);
+    createShadowRootWithStyle(hostEl, this.containerEl_, CSS);
 
     this.viewer_ = Services.viewerForDoc(this.element);
-    if (this.viewer_.isEmbedded()) {
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    if (this.viewer_.isEmbedded() && isMobileUI) {
       this.maybeShowScreen_(
         Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
         State.NAVIGATION_TAP

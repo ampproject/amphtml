@@ -212,8 +212,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?Element} */
-    this.metaTag_ = null;
+    /** @private {?string} */
+    this.metaContent_ = null;
   }
 
   /**
@@ -257,10 +257,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    this.metaTag_ = this.win.document.head.querySelector(
-      'meta[name=apple-itunes-app]'
-    );
-    if (!this.metaTag_) {
+    this.metaContent_ = this.getAmpDoc().getMetaByName('apple-itunes-app');
+    if (this.metaContent_ === null) {
       this.hide_();
       return;
     }
@@ -272,13 +270,13 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       this.element
     );
 
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
+    this.parseIosMetaContent_(this.metaContent_);
     this.checkIfDismissed_();
   }
 
   /** @override */
   layoutCallback() {
-    if (!this.metaTag_) {
+    if (!this.metaContent_) {
       return Promise.resolve();
     }
 

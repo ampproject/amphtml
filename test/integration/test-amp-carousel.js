@@ -64,6 +64,7 @@ t.run('amp-carousel', function() {
         () => {
           document.body.classList.remove('amp-mode-mouse');
           const amp = document.querySelector('#carousel-1');
+          amp.classList.remove('i-amphtml-carousel-has-controls');
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(document.body).to.not.have.class('amp-mode-mouse');
@@ -123,6 +124,7 @@ t.run('amp-carousel', function() {
         () => {
           document.body.classList.remove('amp-mode-mouse');
           const amp = document.querySelector('#carousel-1');
+          amp.classList.remove('i-amphtml-carousel-has-controls');
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(document.body).to.not.have.class('amp-mode-mouse');
@@ -228,6 +230,7 @@ t.run('amp-carousel', function() {
         () => {
           document.body.classList.remove('amp-mode-mouse');
           const amp = document.querySelector('#carousel-1');
+          amp.classList.remove('i-amphtml-carousel-has-controls');
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(document.body).to.not.have.class('amp-mode-mouse');
@@ -287,6 +290,7 @@ t.run('amp-carousel', function() {
         () => {
           document.body.classList.remove('amp-mode-mouse');
           const amp = document.querySelector('#carousel-1');
+          amp.classList.remove('i-amphtml-carousel-has-controls');
           const prevBtn = amp.querySelector('.amp-carousel-button-prev');
           const nextBtn = amp.querySelector('.amp-carousel-button-next');
           expect(document.body).to.not.have.class('amp-mode-mouse');

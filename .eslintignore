@@ -11,6 +11,7 @@ test/coverage/**
 # Code directories
 build-system/tasks/visual-diff/snippets/*.js
 build-system/babel-plugins/**/fixtures/**/*.js
+build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/server/app-index/test/*.js
 examples/**
 extensions/amp-a4a/0.1/test/testdata/**
