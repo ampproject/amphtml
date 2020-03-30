@@ -553,8 +553,7 @@ export class ResourcesImpl {
       return null;
     }
     this.buildAttemptsCount_++;
-    // With IntersectionObserver, no need to schedule passes after build
-    // since these are handled in the initial intersection callback.
+    // With IntersectionObserver, no need to schedule passes after build.
     if (!schedulePass || this.intersectionObserver_) {
       return promise;
     }
@@ -1311,7 +1310,6 @@ export class ResourcesImpl {
         // scheduleLayoutOrPreload method below.
         // Build all resources visible, measured, and in the viewport.
         if (
-          !this.intersectionObserver_ &&
           !r.isBuilt() &&
           !r.hasOwner() &&
           r.hasBeenMeasured() &&

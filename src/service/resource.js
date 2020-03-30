@@ -210,6 +210,9 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
+
+    /** @const @private {boolean} */
+    this.intersect_ = resources.isIntersectionExperimentOn();
   }
 
   /**
@@ -318,19 +321,39 @@ export class Resource {
     }
     this.isBuilding_ = true;
     return this.element.build().then(
-      () => {
-        this.isBuilding_ = false;
-        this.state_ = ResourceState.NOT_LAID_OUT;
-        // TODO(dvoytenko): merge with the standard BUILT signal.
-        this.element.signals().signal('res-built');
-      },
-      reason => {
-        this.maybeReportErrorOnBuildFailure(reason);
-        this.isBuilding_ = false;
-        this.element.signals().rejectSignal('res-built', reason);
-        throw reason;
-      }
+      () => this.onBuildSuccess_(),
+      reason => this.onBuildFailure_(reason)
     );
+  }
+
+  /**
+   * @private
+   */
+  onBuildSuccess_() {
+    this.isBuilding_ = false;
+    // Typically, build always happens before measure.
+    // With IntersectionObserver, however, measure can precede build,
+    // so check if we're ready for layout (measured and built) here.
+    if (this.intersect_) {
+      this.state_ = this.hasBeenMeasured()
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    } else {
+      this.state_ = ResourceState.NOT_LAID_OUT;
+    }
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    this.element.signals().signal('res-built');
+  }
+
+  /**
+   * @param {*} reason
+   * @private
+   */
+  onBuildFailure_(reason) {
+    this.maybeReportErrorOnBuildFailure(reason);
+    this.isBuilding_ = false;
+    this.element.signals().rejectSignal('res-built', reason);
+    throw reason;
   }
 
   /**
@@ -453,12 +476,9 @@ export class Resource {
     this.computeMeasurements_(opt_premeasuredRect);
     const newBox = this.layoutBox_;
 
-    if (opt_premeasuredRect && this.state_ == ResourceState.NOT_BUILT) {
-      devAssert(false);
-    }
-
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
+
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
       oldBox.top != newBox.top ||
