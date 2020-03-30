@@ -425,8 +425,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
           acceleration: {
             x: event.acceleration.x,
             y: event.acceleration.y,
-            z: event.acceleration.z
-          }
+            z: event.acceleration.z,
+          },
         });
       }
       if (event.accelerationIncludingGravity) {
@@ -434,8 +434,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
           accelerationIncludingGravity: {
             x: event.accelerationIncludingGravity.x,
             y: event.accelerationIncludingGravity.y,
-            z: event.accelerationIncludingGravity.z
-          }
+            z: event.accelerationIncludingGravity.z,
+          },
         });
       }
       if (event.rotationRate) {
@@ -443,8 +443,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
           rotationRate: {
             alpha: event.rotationRate.alpha,
             beta: event.rotationRate.beta,
-            gamma: event.rotationRate.gamma
-          }
+            gamma: event.rotationRate.gamma,
+          },
         });
       }
       this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, payload);
