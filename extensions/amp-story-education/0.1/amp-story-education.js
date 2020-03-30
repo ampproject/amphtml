@@ -157,7 +157,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    if (this.state_ === State.NAVIGATION_TAP) {
+    if (
+      this.state_ === State.NAVIGATION_TAP &&
+      this.viewer_.hasCapability('swipe')
+    ) {
       this.setState_(State.NAVIGATION_SWIPE);
       return;
     }
@@ -204,10 +207,13 @@ export class AmpStoryEducation extends AMP.BaseElement {
       case State.NAVIGATION_TAP:
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'tap');
+        const progressStringId = this.viewer_.hasCapability('swipe')
+          ? LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
         ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          progressStringId
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
