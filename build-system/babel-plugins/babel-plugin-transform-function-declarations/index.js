@@ -91,7 +91,7 @@ module.exports = function({types: t}) {
   };
 
   function createVariableDeclaration(path) {
-    const {params, body, async, id} = t.cloneNode(path.node);
+    const {params, body, async, id, leadingComments} = t.cloneNode(path.node);
     const arrowFunction = t.arrowFunctionExpression(
       params,
       body.body[0].argument,
@@ -101,10 +101,14 @@ module.exports = function({types: t}) {
       t.identifier(id.name),
       arrowFunction
     );
+    const declaration = t.variableDeclaration('let', [declarations]);
+    if (leadingComments) {
+      declaration.leadingComments = leadingComments;
+    }
 
     // Making an existing FunctionDeclaration a let VariableDeclaration is safe.
     // The name was already reserved for the FunctionDeclaration.
-    return t.variableDeclaration('let', [declarations]);
+    return declaration;
   }
 
   return {
@@ -131,15 +135,12 @@ module.exports = function({types: t}) {
             .log(`Success for function ${name}.`);
         }
 
-        const blockStatement = path.findParent(path => path.isBlockStatement());
-        if (blockStatement) {
-          blockStatement.unshiftContainer(
-            'body',
-            createVariableDeclaration(path)
-          );
+        const usableBlock = path.findParent(
+          path => path.isBlockStatement() || path.isProgram()
+        );
+        if (usableBlock) {
+          usableBlock.unshiftContainer('body', createVariableDeclaration(path));
           path.remove();
-        } else if (path.parentPath.isProgram()) {
-          path.replaceWith(createVariableDeclaration(path));
         }
       },
     },
