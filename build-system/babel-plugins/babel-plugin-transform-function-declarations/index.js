@@ -39,21 +39,6 @@ module.exports = function({types: t}) {
       return !body || !body.isReturnStatement();
     },
 
-    // Since we don't know if exported members are 'new'd, bail out on modification.
-    isExported(path) {
-      const parentPath = path.findParent(
-        path =>
-          path.isFunction() ||
-          path.isExportNamedDeclaration() ||
-          path.isExportDefaultDeclaration()
-      );
-
-      if (parentPath && parentPath.isFunction()) {
-        return false;
-      }
-      return parentPath;
-    },
-
     // If the function contains usage of `arguments`, bail out on modification.
     containsArgumentsUsage(path) {
       let containsArgumentsUsage = false;
@@ -82,11 +67,13 @@ module.exports = function({types: t}) {
       return containsThis;
     },
 
-    // If the FunctionDeclaration identifier is newed in the scope of this program, bail out on modification.
-    isNewedInProgramScope(path) {
+    // If the FunctionDeclaration identifier is used a manner besides a CallExpression, bail.
+    referencesAreOnlyPathExpressions(path) {
       const {name} = path.get('id').node;
       const binding = path.scope.getBinding(name);
-      return binding.referencePaths.some(p => p.parentPath.isNewExpression());
+      return !binding.referencePaths.every(p =>
+        p.parentPath.isCallExpression({callee: p.node})
+      );
     },
   };
 
