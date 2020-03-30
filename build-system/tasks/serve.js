@@ -37,6 +37,7 @@ const {logServeMode, setServeMode} = require('../server/app-utils');
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 // Used by new server implementation
+const typescriptBinary = './node_modules/typescript/bin/tsc';
 const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
@@ -117,7 +118,7 @@ async function startServer(
  * Builds the new server by converting typescript transforms to JS
  */
 function buildNewServer() {
-  const buildCmd = `npx typescript -p ${transformsPath}/tsconfig.json`;
+  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
   log(
     green('Building'),
     cyan('AMP Dev Server'),
@@ -202,6 +203,7 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
+  buildNewServer,
   serve,
   doServe,
   startServer,

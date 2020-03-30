@@ -155,7 +155,9 @@ export class ViewportImpl {
       'disableScroll',
       this.disableScrollEventHandler_.bind(this)
     );
-    this.binding_.updatePaddingTop(this.paddingTop_);
+    if (this.viewer_.isEmbedded()) {
+      this.binding_.updatePaddingTop(this.paddingTop_);
+    }
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));

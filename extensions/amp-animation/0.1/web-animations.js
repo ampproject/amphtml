@@ -65,6 +65,16 @@ const SERVICE_PROPS = {
 };
 
 /**
+ * Clip-path is an only CSS property we allow for animation that may require
+ * vendor prefix. And it's always "-webkit". Use a simple map to avoid
+ * expensive lookup for all other properties.
+ */
+const ADD_PROPS = {
+  'clip-path': '-webkit-clip-path',
+  'clipPath': '-webkit-clip-path',
+};
+
+/**
  * The scanner for the `WebAnimationDef` format. It calls the appropriate
  * callbacks based on the discovered animation types.
  * @abstract
@@ -487,6 +497,9 @@ export class MeasureScanner extends Scanner {
           preparedValue = value.map(v => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
+        if (prop in ADD_PROPS) {
+          keyframes[ADD_PROPS[prop]] = preparedValue;
+        }
       }
       return keyframes;
     }
@@ -520,6 +533,14 @@ export class MeasureScanner extends Scanner {
           }
         }
         keyframes.push(this.css_.resolveCssMap(frame));
+      }
+      for (let i = 0; i < keyframes.length; i++) {
+        const frame = keyframes[i];
+        for (const k in ADD_PROPS) {
+          if (k in frame) {
+            frame[ADD_PROPS[k]] = frame[k];
+          }
+        }
       }
       return keyframes;
     }

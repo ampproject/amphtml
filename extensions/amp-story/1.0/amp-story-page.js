@@ -54,6 +54,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {
+  addAttributesToElement,
   childElement,
   closestAncestorElementBySelector,
   isAmpElement,
@@ -128,6 +129,12 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
+
+/** @private @const {string} */
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
+
+/** @private @const {string} */
+const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 
 /**
  * @param {!Element} element
@@ -223,8 +230,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!AdvancementConfig} */
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    /** @private {?AdvancementConfig} */
+    this.advancement_ = null;
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
@@ -263,6 +270,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
+
+    /** @private {?Promise} */
+    this.registerAllMediaPromise_ = null;
 
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = deferred.promise;
@@ -332,6 +342,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
+    this.maybeSetPreviewDuration_();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
       this.next(/* opt_isAutomaticAdvance */ true)
@@ -346,6 +358,25 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setPageDescription_();
+  }
+
+  /** @private */
+  maybeSetPreviewDuration_() {
+    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
+      const videos = this.getAllVideos_();
+
+      const autoAdvanceAttr =
+        videos.length > 0
+          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+
+      addAttributesToElement(
+        this.element,
+        dict({
+          'auto-advance-after': autoAdvanceAttr,
+        })
+      );
+    }
   }
 
   /**
@@ -467,10 +498,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   resume_() {
-    this.registerAllMedia_();
+    const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      this.advancement_.start();
+      registerAllPromise.then(() => {
+        this.advancement_.start();
+      });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
@@ -1032,14 +1065,17 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Registers all media on this page
+   * Registers all media on this page.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   registerAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.registerMedia_(mediaPool, mediaEl);
-    });
+    this.registerAllMediaPromise_ =
+      this.registerAllMediaPromise_ ||
+      this.whenAllMediaElements_((mediaPool, mediaEl) => {
+        this.registerMedia_(mediaPool, mediaEl);
+      });
+    return this.registerAllMediaPromise_;
   }
 
   /**

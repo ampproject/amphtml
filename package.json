@@ -27,14 +27,14 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
-    "@ampproject/filesize": "3.2.0",
+    "@ampproject/filesize": "3.2.1",
+    "@ampproject/remapping": "0.2.0",
     "@babel/core": "7.9.0",
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-transform-react-constant-elements": "7.9.0",
     "@babel/plugin-transform-react-jsx": "7.9.1",
     "@babel/preset-env": "7.9.0",
-    "@jridgewell/resorcery": "0.0.3",
     "@types/minimist": "1.2.0",
     "acorn-globals": "6.0.0",
     "amphtml-validator": "1.0.30",
@@ -94,6 +94,7 @@
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "gulp-ava": "3.0.0",
+    "gulp-babel": "8.0.0",
     "gulp-connect": "5.7.0",
     "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
@@ -157,7 +158,6 @@
     "posthtml": "0.12.0",
     "prettier": "1.19.1",
     "pretty-bytes": "5.3.0",
-    "pumpify": "2.0.1",
     "react": "16.13.1",
     "react-addons-shallow-compare": "15.6.2",
     "react-dom": "16.13.1",
@@ -183,6 +183,7 @@
     "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
+    "vinyl-sourcemaps-apply": "0.2.1",
     "watchify": "3.11.1"
   },
   "filesize": {
