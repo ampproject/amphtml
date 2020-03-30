@@ -124,12 +124,23 @@ module.exports = function({types: t}) {
             return;
           }
         }
+
         if (DEBUG) {
           const {name} = path.node.id;
           console /*OK*/
             .log(`Success for function ${name}.`);
         }
-        path.replaceWith(createVariableDeclaration(path));
+
+        const blockStatement = path.findParent(path => path.isBlockStatement());
+        if (blockStatement) {
+          blockStatement.unshiftContainer(
+            'body',
+            createVariableDeclaration(path)
+          );
+          path.remove();
+        } else if (path.parentPath.isProgram()) {
+          path.replaceWith(createVariableDeclaration(path));
+        }
       },
     },
   };
