@@ -163,6 +163,10 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      this.build();
+    }
+
     /** @private {number} */
     this.priorityOverride_ = -1;
 
