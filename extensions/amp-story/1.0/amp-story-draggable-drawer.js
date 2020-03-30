@@ -85,8 +85,8 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {?Element} */
     this.contentEl_ = null;
 
-    /** @private {?number} Max value in pixels that can be dragged when opening the drawer. */
-    this.dragCap_ = null;
+    /** @private {number} Max value in pixels that can be dragged when opening the drawer. */
+    this.dragCap_ = Infinity;
 
     /** @protected {?Element} */
     this.headerEl_ = null;
@@ -112,8 +112,8 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @private {!Array<function()>} */
     this.touchEventUnlisteners_ = [];
 
-    /** @private {?number} Threshold in pixels above which the drawer opens itself. */
-    this.openThreshold_ = null;
+    /** @private {number} Threshold in pixels above which the drawer opens itself. */
+    this.openThreshold_ = Infinity;
   }
 
   /** @override */
@@ -390,7 +390,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     if (
-      this.openThreshold_ !== null &&
       this.state_ === DrawerState.DRAGGING_TO_OPEN &&
       swipingUp &&
       -deltaY > this.openThreshold_
@@ -422,7 +421,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Sets a swipe threshold in pixels above which the drawer opens itself.
-   * @param {?number} openThreshold
+   * @param {number} openThreshold
    * @protected
    */
   setOpenThreshold_(openThreshold) {
@@ -431,7 +430,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Sets the max value in pixels that can be dragged when opening the drawer.
-   * @param {?number} dragCap
+   * @param {number} dragCap
    * @protected
    */
   setDragCap_(dragCap) {
@@ -453,10 +452,7 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
-        let drag = deltaY;
-        if (this.dragCap_ !== null) {
-          drag = Math.max(deltaY, -this.dragCap_);
-        }
+        const drag = Math.max(deltaY, -this.dragCap_);
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:

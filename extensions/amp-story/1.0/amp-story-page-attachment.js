@@ -58,7 +58,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     /** @private @const {!../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
 
-    /** @private @const {?AttachmentType} */
+    /** @private {?AttachmentType} */
     this.type_ = null;
   }
 
@@ -80,60 +80,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.type_ = href ? AttachmentType.REMOTE : AttachmentType.INLINE;
 
     if (this.type_ === AttachmentType.INLINE) {
-      this.headerEl_.appendChild(
-        htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button"
-              role="button">
-          </span>`
-      );
-      this.headerEl_.appendChild(
-        htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-title"></span>`
-      );
-
-      if (this.element.hasAttribute('data-title')) {
-        this.headerEl_.querySelector(
-          '.i-amphtml-story-page-attachment-title'
-        ).textContent = this.element.getAttribute('data-title');
-      }
-
-      const templateEl = this.element.querySelector(
-        '.i-amphtml-story-draggable-drawer'
-      );
-
-      while (
-        this.element.firstChild &&
-        this.element.firstChild !== templateEl
-      ) {
-        this.contentEl_.appendChild(this.element.firstChild);
-      }
-
-      // Ensures the content of the attachment won't be rendered/loaded until we
-      // actually need it.
-      toggle(dev().assertElement(this.containerEl_), true);
+      this.buildInline_();
     }
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.setDragCap_(48 /* pixels */);
-      this.setOpenThreshold_(150 /* pixels */);
-      this.headerEl_.classList.add(
-        'i-amphtml-story-draggable-drawer-header-attachment-remote'
-      );
-      this.element.classList.add('i-amphtml-story-page-attachment-remote');
-      this.contentEl_.appendChild(
-        htmlFor(this.element)`
-          <div class="i-amphtml-story-page-attachment-remote-content">
-            <span class="i-amphtml-story-page-attachment-remote-domain"></span>
-            <span class="i-amphtml-story-page-attachment-remote-icon"></span>
-          </div>`
-      );
-      const urlService = Services.urlForDoc(this.element);
-      const domain = urlService.getSourceOrigin(
-        this.element.getAttribute('href')
-      );
-      this.contentEl_.querySelector(
-        '.i-amphtml-story-page-attachment-remote-domain'
-      ).textContent = domain;
+      this.buildRemote_();
     }
 
     this.win.addEventListener('pageshow', event => {
@@ -146,6 +97,70 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     });
 
     toggle(this.element, true);
+  }
+
+  /**
+   * Builds inline page attachment's UI.
+   * @private
+   */
+  buildInline_() {
+    this.headerEl_.appendChild(
+      htmlFor(this.element)`
+          <span class="i-amphtml-story-page-attachment-close-button"
+              role="button">
+          </span>`
+    );
+    this.headerEl_.appendChild(
+      htmlFor(this.element)`
+          <span class="i-amphtml-story-page-attachment-title"></span>`
+    );
+
+    if (this.element.hasAttribute('data-title')) {
+      this.headerEl_.querySelector(
+        '.i-amphtml-story-page-attachment-title'
+      ).textContent = this.element.getAttribute('data-title');
+    }
+
+    const templateEl = this.element.querySelector(
+      '.i-amphtml-story-draggable-drawer'
+    );
+
+    while (this.element.firstChild && this.element.firstChild !== templateEl) {
+      this.contentEl_.appendChild(this.element.firstChild);
+    }
+
+    // Ensures the content of the attachment won't be rendered/loaded until we
+    // actually need it.
+    toggle(dev().assertElement(this.containerEl_), true);
+  }
+
+  /**
+   * Builds remote page attachment's UI.
+   * @private
+   */
+  buildRemote_() {
+    this.setDragCap_(48 /* pixels */);
+    this.setOpenThreshold_(150 /* pixels */);
+
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-attachment-remote'
+    );
+    this.element.classList.add('i-amphtml-story-page-attachment-remote');
+    this.contentEl_.appendChild(
+      htmlFor(this.element)`
+          <div class="i-amphtml-story-page-attachment-remote-content">
+            <span class="i-amphtml-story-page-attachment-remote-domain"></span>
+            <span class="i-amphtml-story-page-attachment-remote-icon"></span>
+          </div>`
+    );
+
+    const urlService = Services.urlForDoc(this.element);
+    const domain = urlService.getSourceOrigin(
+      this.element.getAttribute('href')
+    );
+    this.contentEl_.querySelector(
+      '.i-amphtml-story-page-attachment-remote-domain'
+    ).textContent = domain;
   }
 
   /**
@@ -203,7 +218,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
-    if (this.type_ === AttachmentType.INLINE) {
+    // Don't create a new history entry for remote attachment as user is
+    // navigating away.
+    if (this.type_ !== AttachmentType.REMOTE) {
       const currentHistoryState = /** @type {!Object} */ (getState(
         this.win.history
       ));
@@ -240,8 +257,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.mutateElement(() => {
       storyEl.appendChild(animationEl);
     }).then(() => {
-      // Give some time for the 120ms animation to run. The navigation itself
-      // will take some time, depending on the target and network conditions.
+      // Give some time for the 120ms CSS animation to run (cf
+      // amp-story-page-attachment.css). The navigation itself will take some
+      // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
         const navigationService = Services.navigationForDoc(this.getAmpDoc());
         navigationService.navigateTo(
@@ -291,7 +309,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
     if (animationEl) {
       this.mutateElement(() => {
-        removeElement(animationEl);
+        removeElement(dev().assertElement(animationEl));
       });
     }
 
