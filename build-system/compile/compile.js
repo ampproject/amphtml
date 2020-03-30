@@ -367,8 +367,8 @@ function compile(
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
@@ -380,8 +380,8 @@ function compile(
       timeInfo.startTime = Date.now();
       return gulp
         .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
           handleCompilerError(outputFilename);
