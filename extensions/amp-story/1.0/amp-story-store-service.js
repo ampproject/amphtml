@@ -513,6 +513,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
