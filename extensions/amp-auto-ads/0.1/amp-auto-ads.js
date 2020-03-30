@@ -59,7 +59,7 @@ export class AmpAutoAds extends AMP.BaseElement {
       .then(() => {
         return this.getConfig_(adNetwork.getConfigUrl());
       })
-      .then(configObj => {
+      .then((configObj) => {
         if (!configObj) {
           return;
         }
@@ -116,14 +116,14 @@ export class AmpAutoAds extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetchJson(configUrl, xhrInit)
-      .then(res => res.json())
-      .catch(reason => {
+      .then((res) => res.json())
+      .catch((reason) => {
         this.user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
         return null;
       });
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAutoAds);
 });

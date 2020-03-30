@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    [':function > ObjectPattern']: function(node) {
+    [':function > ObjectPattern']: function (node) {
       context.report({
         node,
         message:

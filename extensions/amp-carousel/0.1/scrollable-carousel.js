@@ -63,7 +63,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.setAttribute('tabindex', '-1');
     this.element.appendChild(this.container_);
 
-    this.cells_.forEach(cell => {
+    this.cells_.forEach((cell) => {
       Services.ownersForDoc(this.element).setOwner(cell, this.element);
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
@@ -80,7 +80,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.registerAction(
       'goToSlide',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           const index = parseInt(args['index'], 10);
@@ -135,7 +135,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       const curve = 'ease-in-out';
       Animation.animate(
         this.element,
-        pos => {
+        (pos) => {
           this.container_./*OK*/ scrollLeft = interpolate(pos);
         },
         duration,
@@ -177,7 +177,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       const curve = 'ease-in-out';
       Animation.animate(
         this.element,
-        pos => {
+        (pos) => {
           this.container_./*OK*/ scrollLeft = interpolate(pos);
         },
         duration,
@@ -317,7 +317,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   doLayout_(pos) {
-    this.withinWindow_(pos, cell => {
+    this.withinWindow_(pos, (cell) => {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, cell);
     });
   }
@@ -330,7 +330,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   preloadNext_(pos, dir) {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
-      this.withinWindow_(nextPos, cell => {
+      this.withinWindow_(nextPos, (cell) => {
         Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
       });
     }
@@ -343,7 +343,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   updateInViewport_(newPos, oldPos) {
     const seen = [];
-    this.withinWindow_(newPos, cell => {
+    this.withinWindow_(newPos, (cell) => {
       seen.push(cell);
       Services.ownersForDoc(this.element).updateInViewport(
         this.element,
@@ -352,7 +352,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
       );
     });
     if (oldPos != newPos) {
-      this.withinWindow_(oldPos, cell => {
+      this.withinWindow_(oldPos, (cell) => {
         if (!seen.includes(cell)) {
           const owners = Services.ownersForDoc(this.element);
           owners.updateInViewport(this.element, cell, false);
@@ -383,7 +383,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    listen(this.element, 'touchmove', event => event.stopPropagation(), {
+    listen(this.element, 'touchmove', (event) => event.stopPropagation(), {
       passive: true,
     });
   }

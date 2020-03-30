@@ -69,7 +69,7 @@ export class Actions {
       promises.push(
         this.urlBuilder_
           .buildUrl(this.actionsConfig_[k], /* useAuthData */ true)
-          .then(url => {
+          .then((url) => {
             this.builtActionUrlMap_[k] = url;
           })
       );
@@ -120,7 +120,7 @@ export class Actions {
     this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
-      .then(result => {
+      .then((result) => {
         dev().fine(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
         const query = parseQueryString(result);
@@ -133,7 +133,7 @@ export class Actions {
         }
         return success || !s;
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().fine(TAG, 'Action failed: ', action, reason);
         this.analytics_.actionEvent(LOCAL, action, ActionStatus.FAILED);
         if (this.actionPromise_ == actionPromise) {

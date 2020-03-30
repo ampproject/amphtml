@@ -85,12 +85,12 @@ const TAG = 'media-performance-metrics';
  * @param  {!Window} win
  * @return {!MediaPerformanceMetricsService}
  */
-export const getMediaPerformanceMetricsService = win => {
+export const getMediaPerformanceMetricsService = (win) => {
   let service = Services.mediaPerformanceMetricsService(win);
 
   if (!service) {
     service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', function() {
+    registerServiceBuilder(win, 'media-performance-metrics', function () {
       return service;
     });
   }
@@ -170,7 +170,7 @@ export class MediaPerformanceMetricsService {
       return;
     }
 
-    mediaEntry.unlisteners.forEach(unlisten => unlisten());
+    mediaEntry.unlisteners.forEach((unlisten) => unlisten());
     this.deleteMediaEntry_(media);
 
     switch (mediaEntry.status) {
@@ -331,7 +331,7 @@ export class MediaPerformanceMetricsService {
     if (!media.hasAttribute('src')) {
       errorTarget = lastChildElement(
         media,
-        child => child.tagName === 'SOURCE'
+        (child) => child.tagName === 'SOURCE'
       );
     }
     unlisteners.push(

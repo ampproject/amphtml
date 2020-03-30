@@ -18,7 +18,7 @@
  * @param {!Window} win
  */
 function detectLongTasks(win) {
-  const observer = new win.PerformanceObserver(function(entryList) {
+  const observer = new win.PerformanceObserver(function (entryList) {
     const entries = entryList.getEntries();
     for (let i = 0; i < entries.length; i++) {
       if (

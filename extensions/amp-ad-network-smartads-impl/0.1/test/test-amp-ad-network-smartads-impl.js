@@ -24,7 +24,7 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {smartAdsIsA4AEnabled} from '../../../amp-ad-network-smartads-impl/0.1/smartads-a4a-config';
 
-describes.realWin('smartads-a4a-config', {amp: false}, env => {
+describes.realWin('smartads-a4a-config', {amp: false}, (env) => {
   let win, doc;
   beforeEach(() => {
     win = env.win;
@@ -80,7 +80,7 @@ describes.realWin(
       extensions: ['amp-ad-network-smartads-impl'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let impl;
     let implElem;

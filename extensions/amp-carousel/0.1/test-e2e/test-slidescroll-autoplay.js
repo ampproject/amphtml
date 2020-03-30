@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.1/slidescroll-autoplay.html',
     environments: ['single'],
   },
-  async function(env) {
+  async function (env) {
     let controller;
 
     /**
@@ -30,11 +30,11 @@ describes.endtoend(
      * @return {!Promise}
      */
     function slideChangeEventAfterClicking(opt_selector) {
-      return controller.evaluate(opt_selector => {
-        return new Promise(resolve => {
+      return controller.evaluate((opt_selector) => {
+        return new Promise((resolve) => {
           document.addEventListener(
             'slideChange',
-            e => resolve(e.data),
+            (e) => resolve(e.data),
             {once: true} // Remove listener after first invocation
           );
           if (opt_selector) {
