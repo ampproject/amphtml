@@ -110,7 +110,9 @@ function getReplacePlugin(isEsmBuild) {
 
   // add define flags from arguments
   const experimentFlag = getExperimentFlag();
-  replacements.push(createReplacement(experimentFlag, true));
+  if (experimentFlag) {
+    replacements.push(createReplacement(experimentFlag, true));
+  }
 
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach((experiment) => {
@@ -191,7 +193,7 @@ function plugins({
   const experimentFlag = getExperimentFlag();
   const experimentRemovedImports =
     experimentFlag === 'MOVE_FIXED_LAYER'
-      ? {'../fixed-layer': ['FixedLayer']}
+      ? {'./../fixed-layer': ['FixedLayer']}
       : {'../../../src/service/fixed-layer': ['FixedLayer']};
   removedImports = {...removedImports, ...experimentRemovedImports};
   applied.push(['filter-imports', {imports: removedImports}]);

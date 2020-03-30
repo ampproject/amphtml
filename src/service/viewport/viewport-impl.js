@@ -15,7 +15,7 @@
  */
 
 import {Animation} from '../../animation';
-import {FixedLayer} from '../fixed-layer';
+import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
