@@ -41,10 +41,17 @@ module.exports = function({types: t}) {
 
     // Since we don't know if exported members are 'new'd, bail out on modification.
     isExported(path) {
-      return path.findParent(
+      const parentPath = path.findParent(
         path =>
-          path.isExportNamedDeclaration() || path.isExportDefaultDeclaration()
+          path.isFunction() ||
+          path.isExportNamedDeclaration() ||
+          path.isExportDefaultDeclaration()
       );
+
+      if (parentPath && parentPath.isFunction()) {
+        return false;
+      }
+      return parentPath;
     },
 
     // If the function contains usage of `arguments`, bail out on modification.
