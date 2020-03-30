@@ -1296,6 +1296,24 @@ describes.realWin(
         });
       });
 
+      it('should fire `slideChange` DOM event with high trust when user changes slides', () => {
+        return getAmpSlideScroll(true).then(ampSlideScroll => {
+          let event;
+          win.document.addEventListener('slideChange', e => (event = e));
+          const impl = ampSlideScroll.implementation_;
+
+          impl.goCallback(-1, /* animate */ false);
+          expect(win.document.eventListeners.count('slideChange')).to.equal(1);
+          expect(event.data.index).to.equal(4);
+          expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+
+          impl.goCallback(1, /* animate */ false);
+          expect(win.document.eventListeners.count('slideChange')).to.equal(1);
+          expect(event.data.index).to.equal(0);
+          expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        });
+      });
+
       it('should goToSlide on action', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
