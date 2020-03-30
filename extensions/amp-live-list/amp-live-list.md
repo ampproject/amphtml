@@ -1,3 +1,12 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - stories
+teaser:
+  text: Provides a way to display and update content live.
+---
+
 <!--
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,47 +23,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-live-list"></a> `amp-live-list`
+# amp-live-list
 
-[TOC]
+Warning: Currently, content served via an AMP cache may be slow to receive live updates. Read more [here](https://github.com/ampproject/amphtml/issues/13659)
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>container, fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-    <li><a href="https://ampbyexample.com/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
-    <li><a href="https://ampbyexample.com/samples_templates/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
-    </ul>
-    </td>
-  </tr>
-</table>
+A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.
 
 ## Behavior
 
-`amp-live-list` provides support for content that is updated live on the client,
-so that the user can consume new information as it is available without having
-to refresh or navigate to a different page. The core use case for this component
+`amp-live-list` provides instant content updates from the client.
+Depending on implementation,
+it can update the DOM without user interaction,
+such as refreshing or navigating to a different page.
+The core use case for this component
 is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
 
-To learn how to use `amp-live-list` in a blog, see the [Create a Live Blog](https://www.ampproject.org/docs/get_started/live_blog) tutorial.
+To learn how to use `amp-live-list` in a blog, see the [Create a Live Blog](https://amp.dev/documentation/guides-and-tutorials/develop/live_blog) tutorial.
 
 ## How it works
 
@@ -63,16 +49,20 @@ In the background, while an AMP page using `<amp-live-list>` is displayed on the
 The `amp-live-list` component has 3 sections. We'll refer to these sections as
 "reference points" and they are denoted by an attribute. These reference points must be a direct child of the `amp-live-list` component. The 3 reference points are:
 
-* `update`  (mandatory)
-* `items`  (mandatory)
-* `pagination` (optional)
+- `update` (mandatory)
+- `items` (mandatory)
+- `pagination` (optional)
 
 For more details, see the ["Reference Points"](#reference-points) section below.
 
 Example:
 
 ```html
-<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20">
+<amp-live-list
+  id="my-live-list"
+  data-poll-interval="15000"
+  data-max-items-per-page="20"
+>
   <button update on="tap:my-live-list.update">You have updates!</button>
   <div items></div>
   <!-- pagination is optional -->
@@ -125,7 +115,11 @@ The actual action handler may be at a descendant and does not have to be at the
 Example:
 
 ```html
-<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20">
+<amp-live-list
+  id="my-live-list"
+  data-poll-interval="15000"
+  data-max-items-per-page="20"
+>
   <div update class="outer-container">
     <div class="inner-container">
       <button class="btn" on="tap:my-live-list.update">Click me!</button>
@@ -201,66 +195,72 @@ See the documentation for [Server side filtering](../amp-live-list/amp-live-list
 Usually attribute requirements are only enforced on the actual component but
 because we need to anchor and make decisions on the client, we will also need
 to require an `items` and `update` attribute on a direct child of
-`amp-live-list`.  Children of the `items` reference point will also have
+`amp-live-list`. Children of the `items` reference point will also have
 attribute requirements.
 
 ### Attributes on `amp-live-list`
 
-##### id (Required)
-
-To uniquely identify an amp-live-list (since multiple are allowed on a single
-page).
-
-##### data-poll-interval (Optional)
-
-Time (in milliseconds) interval between checks for new content (15000 ms minimum is
-enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
-minimum.
-
-##### data-max-items-per-page (Required)
-
-Maximum number of child entries. Additional elements are assumed to be on the
-next "page". If the number of children items is greater than the number
-provided on the attribute, the number of children items will be the new
-`data-max-items-per-page`.
-Once the number of live items on an `amp-live-list` is over the
-`data-max-items-per-page` limit items below the viewport will be fully
-removed from the live DOM.
-
-##### disabled (Optional)
-
-No polling will occur. Recommended when not on page 1 (looking at archival data)
-and when the article is no longer fresh and should no longer be updated.
+<table>
+  <tr>
+    <td width="40%"><strong>id (Required)</strong></td>
+    <td>To uniquely identify an amp-live-list (since multiple are allowed on a single
+    page).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-poll-interval (Optional)</strong></td>
+    <td>Time (in milliseconds) interval between checks for new content (15000 ms minimum is
+    enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
+    minimum.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-max-items-per-page (Required)</strong></td>
+    <td>Maximum number of child entries. Additional elements are assumed to be on the
+    next "page". If the number of children items is greater than the number
+    provided on the attribute, the number of children items will be the new
+    `data-max-items-per-page`.
+    Once the number of live items on an `amp-live-list` is over the
+    `data-max-items-per-page` limit items below the viewport will be fully
+    removed from the live DOM.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>disabled (Optional)</strong></td>
+    <td>No polling will occur. Recommended when not on page 1 (looking at archival data)
+    and when the article is no longer fresh and should no longer be updated.</td>
+  </tr>
+</table>
 
 ### Attributes on `items` reference point children
 
-##### id (Required)
-
-The ID of the `items` child must never change.
-
-##### data-sort-time (Required)
-
-Timestamp used for sorting entries. Higher timestamps will be
-inserted before older entries. We recommend using Unix time (the number of
-seconds that have elapsed since Thursday, 1 January 1970).
-
-##### data-update-time (Optional)
-
-Timestamp when the entry was last updated.  Use this attribute to trigger an
-update on an existing item: the client will replace all existing content in
-this item with the new, updated content, without triggering the appearance of
-the update reference point. We recommend using Unix time (the number of seconds
-that have elapsed since Thursday, 1 January 1970).
-
-##### data-tombstone (Optional)
-
-If present, the entry is assumed to be deleted.
-
-##### sort (Optional)
-
-If present and has a value of "ascending" (any other value is currently
-invalid), newer items will be inserted at the bottom of the live-list instead
-of the top.
+<table>
+  <tr>
+    <td width="40%"><strong>id (Required)</strong></td>
+    <td>The ID of the `items` child must never change.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-sort-time (Required)</strong></td>
+    <td>Timestamp used for sorting entries. Higher timestamps will be
+    inserted before older entries. We recommend using Unix time (the number of
+    seconds that have elapsed since Thursday, 1 January 1970).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-update-time (Optional)</strong></td>
+    <td>Timestamp when the entry was last updated.  Use this attribute to trigger an
+    update on an existing item: the client will replace all existing content in
+    this item with the new, updated content, without triggering the appearance of
+    the update reference point. We recommend using Unix time (the number of seconds
+    that have elapsed since Thursday, 1 January 1970).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-tombstone (Optional)</strong></td>
+    <td>If present, the entry is assumed to be deleted.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>sort (Optional)</strong></td>
+    <td>If present and has a value of "ascending" (any other value is currently
+    invalid), newer items will be inserted at the bottom of the live-list instead
+    of the top.</td>
+  </tr>
+</table>
 
 ## Styling
 
@@ -314,6 +314,7 @@ reference point, and you can hook into this class to add transitions.
 (see Examples below)
 
 ## Actions
+
 The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
@@ -337,7 +338,6 @@ The polling interval will also be 16000 and not 20000 milliseconds, as we choose
 the lowest one.
 
 ```html
-
 <style amp-custom>
   amp-live-list > [update] {
     display: none;
@@ -347,7 +347,7 @@ the lowest one.
     position: fixed;
     top: 10px;
     left: 50%;
-    transform: translateX(-50%)
+    transform: translateX(-50%);
   }
 
   .slide.amp-active {
@@ -355,7 +355,7 @@ the lowest one.
     height: 100px;
     max-height: 150px;
     transition-property: height;
-    transition-duration: .2s;
+    transition-duration: 0.2s;
     transition-timing-function: ease-in;
     background: #3f51b5;
   }
@@ -371,7 +371,11 @@ the lowest one.
   }
 </style>
 
-<amp-live-list id="live-list-1" data-poll-interval="16000" data-max-items-per-page="5">
+<amp-live-list
+  id="live-list-1"
+  data-poll-interval="16000"
+  data-max-items-per-page="5"
+>
   <button update id="fixed-button" class="button" on="tap:live-list-1.update">
     new updates on live list 1
   </button>
@@ -379,8 +383,12 @@ the lowest one.
     <div id="live-list-1-item-2" data-sort-time="1462814963592">
       <div class="card">
         <div class="logo">
-          <amp-img src="/examples/img/ampicon.png"
-              layout="fixed" height="50" width="50">
+          <amp-img
+            src="/examples/img/ampicon.png"
+            layout="fixed"
+            height="50"
+            width="50"
+          >
           </amp-img>
         </div>
       </div>
@@ -388,8 +396,12 @@ the lowest one.
     <div id="live-list-1-item-1" data-sort-time="1462814955597">
       <div class="card">
         <div class="logo">
-          <amp-img src="/examples/img/ampicon.png"
-              layout="fixed" height="50" width="50">
+          <amp-img
+            src="/examples/img/ampicon.png"
+            layout="fixed"
+            height="50"
+            width="50"
+          >
           </amp-img>
         </div>
       </div>
@@ -397,7 +409,11 @@ the lowest one.
   </div>
 </amp-live-list>
 
-<amp-live-list id="live-list-2" data-poll-interval="20000" data-max-items-per-page="10">
+<amp-live-list
+  id="live-list-2"
+  data-poll-interval="20000"
+  data-max-items-per-page="10"
+>
   <div update class="slide" on="tap:live-list-2.update">
     new updates on live list 2
   </div>
@@ -409,4 +425,5 @@ the lowest one.
 ```
 
 ## Validation
+
 See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/validator-amp-live-list.protoascii) in the AMP validator specification.

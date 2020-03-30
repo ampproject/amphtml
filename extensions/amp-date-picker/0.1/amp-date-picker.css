@@ -252,73 +252,10 @@ amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.Calen
  * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
  * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
  * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
+ * NOTE: If this is updated, make sure to change DEFAULT_MIN_HEIGHT in amp-date-picker.js
  */
-.DayPicker_transitionContainer {
+.amp-date-picker-resize-bug .DayPicker_transitionContainer {
   min-height: 354px;
   max-width: 100%;
   border-radius: 0;
-}
-
-[data-date-tooltip] {
-  position: relative;
-}
-
-[data-date-tooltip]::before,
-[data-date-tooltip]::after {
-  pointer-events: none;
-  outline: none;
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  margin: 0;
-  padding: 0;
-  opacity: 0;
-  transform: translate(-50%, 12px);
-}
-
-[data-date-tooltip]:hover::before,
-[data-date-tooltip]:hover::after {
-  transition: transform 300ms ease-out, opacity 300ms ease-out;
-}
-
-[data-date-tooltip]::before {
-  content: "";
-  width: 0;
-  height: 0;
-  line-height: 0;
-  border: 5px solid transparent;
-  border-top: 5px solid #000;
-  border-bottom: 0px;
-  overflow: hidden;
-}
-
-[data-date-tooltip]::after {
-  content: attr(data-date-tooltip);
-  width: 85px;
-  margin-bottom: 5px;
-  letter-spacing: normal;
-  text-align: center;
-  text-decoration: none;
-  word-spacing: normal;
-  word-wrap: normal;
-  word-break: normal;
-  line-height: 1.2;
-  font-weight: normal;
-  font-size: 14px;
-  padding: 6px;
-  min-height: 18px;
-  color: #e9e6e6;
-  background-color: #222;
-  border-radius: 3px;
-}
-
-/* Allow keyboard focus to trigger tooltip */
-.CalendarDay_button:focus [data-date-tooltip]::before,
-.CalendarDay_button:focus [data-date-tooltip]::after,
-/* Allow mouse hover to trigger tooltip */
-[data-date-tooltip]:hover::before,
-[data-date-tooltip]:hover::after {
-  transform: translate(-50%, 0);
-  pointer-events: auto;
-  opacity: 1;
 }

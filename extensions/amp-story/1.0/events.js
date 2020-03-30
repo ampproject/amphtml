@@ -16,7 +16,6 @@
 
 import {createCustomEvent} from '../../../src/event-helper';
 
-
 /** @const {!Object<string, string>} */
 export const EventType = {
   // Triggered when the user mutes the story
@@ -34,9 +33,6 @@ export const EventType = {
   // Triggered when the story should switch to the next page
   NEXT_PAGE: 'ampstory:nextpage',
 
-  // Triggered when the story should navigate after a tap on active page.
-  TAP_NAVIGATION: 'ampstory:tapnavigation',
-
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
@@ -47,40 +43,36 @@ export const EventType = {
   // warnings or errors).
   DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
 
-  // Triggered when user clicks on left 25% of the first page
-  SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
+  // Triggered when user clicks on end 75% of the last page
+  NO_NEXT_PAGE: 'ampstory:nonextpage',
+
+  // Triggered when user clicks on start 25% of the first page
+  NO_PREVIOUS_PAGE: 'ampstory:nopreviouspage',
 
   // Triggered when a story has loaded at least its initial set of pages.
   STORY_LOADED: 'ampstory:load',
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
+
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction',
 };
-
-
-/**
- * @param {!EventTarget} source
- * @param {string} eventName
- * @param {boolean=} opt_bubbles
- */
-export function dispatch(source, eventName, opt_bubbles) {
-  const event = new Event(eventName, {bubbles: !!opt_bubbles});
-  if (event.initEvent) {
-    event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
-        /* cancelable */ false);
-  }
-  source.dispatchEvent(event);
-}
-
 
 /**
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object} payload
- * @param {!CustomEventInit=} opt_eventInit
+ * @param {!JsonObject=} payload
+ * @param {!CustomEventInit=} eventInit
  */
-export function dispatchCustom(win, source, eventName, payload, opt_eventInit) {
-  const event = createCustomEvent(win, eventName, payload, opt_eventInit);
+export function dispatch(
+  win,
+  source,
+  eventName,
+  payload = undefined,
+  eventInit = undefined
+) {
+  const event = createCustomEvent(win, eventName, payload, eventInit);
   source.dispatchEvent(event);
 }

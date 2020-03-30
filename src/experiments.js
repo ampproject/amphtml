@@ -21,17 +21,16 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {getCookie, setCookie} from './cookies';
+import {dev, user} from './log';
+import {getMode} from './mode';
+import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
 /** @const {string} */
-const COOKIE_NAME = 'AMP_EXP';
+const TAG = 'EXPERIMENTS';
 
-/** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 180; // 6 month
-
-/** @const {time} */
-const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+/** @const {string} */
+const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
@@ -54,13 +53,14 @@ export function isCanary(win) {
 }
 
 /**
- * Returns binary type, e.g., canary, control, or production.
+ * Returns binary type, e.g., canary, production, control, or rc.
  * @param {!Window} win
  * @return {string}
  */
 export function getBinaryType(win) {
-  return win.AMP_CONFIG && win.AMP_CONFIG.type ?
-    win.AMP_CONFIG.type : 'unknown';
+  return win.AMP_CONFIG && win.AMP_CONFIG.type
+    ? win.AMP_CONFIG.type
+    : 'unknown';
 }
 
 /**
@@ -82,30 +82,44 @@ export function isExperimentOn(win, experimentId) {
  * @param {boolean=} opt_on
  * @param {boolean=} opt_transientExperiment  Whether to toggle the
  *     experiment state "transiently" (i.e., for this page load only) or
- *     durably (by saving the experiment IDs to the cookie after toggling).
+ *     durably (by saving the experiment IDs after toggling).
  *     Default: false (save durably).
  * @return {boolean} New state for experimentId.
  */
-export function toggleExperiment(win, experimentId, opt_on,
-  opt_transientExperiment) {
-  const currentlyOn = isExperimentOn(win, experimentId);
+export function toggleExperiment(
+  win,
+  experimentId,
+  opt_on,
+  opt_transientExperiment
+) {
+  const currentlyOn = isExperimentOn(win, /*OK*/ experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
     toggles[experimentId] = on;
 
     if (!opt_transientExperiment) {
-      const cookieToggles = getExperimentTogglesFromCookie(win);
-      cookieToggles[experimentId] = on;
-      saveExperimentTogglesToCookie(win, cookieToggles);
+      const storedToggles = getExperimentToggles(win);
+      storedToggles[experimentId] = on;
+      saveExperimentToggles(win, storedToggles);
+      // Avoid affecting tests that spy/stub warn().
+      if (!getMode().test) {
+        user().warn(
+          TAG,
+          '"%s" experiment %s for the domain "%s". See: https://amp.dev/documentation/guides-and-tutorials/learn/experimental',
+          experimentId,
+          on ? 'enabled' : 'disabled',
+          win.location.hostname
+        );
+      }
     }
   }
   return on;
 }
 
 /**
- * Calculate whether the experiment is on or off based off of the
- * cookieFlag or the global config frequency given.
+ * Calculate whether the experiment is on or off based off of its default value,
+ * stored overriden value, or the global config frequency given.
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
@@ -126,12 +140,15 @@ export function experimentToggles(win) {
     }
   }
   // Read document level override from meta tag.
-  if (win.AMP_CONFIG
-      && Array.isArray(win.AMP_CONFIG['allow-doc-opt-in'])
-      && win.AMP_CONFIG['allow-doc-opt-in'].length > 0) {
+  if (
+    win.AMP_CONFIG &&
+    Array.isArray(win.AMP_CONFIG['allow-doc-opt-in']) &&
+    win.AMP_CONFIG['allow-doc-opt-in'].length > 0
+  ) {
     const allowed = win.AMP_CONFIG['allow-doc-opt-in'];
-    const meta =
-        win.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    const meta = win.document.head.querySelector(
+      'meta[name="amp-experiments-opt-in"]'
+    );
     if (meta) {
       const optedInExperiments = meta.getAttribute('content').split(',');
       for (let i = 0; i < optedInExperiments.length; i++) {
@@ -142,11 +159,13 @@ export function experimentToggles(win) {
     }
   }
 
-  Object.assign(toggles, getExperimentTogglesFromCookie(win));
+  Object.assign(toggles, getExperimentToggles(win));
 
-  if (win.AMP_CONFIG
-      && Array.isArray(win.AMP_CONFIG['allow-url-opt-in'])
-      && win.AMP_CONFIG['allow-url-opt-in'].length > 0) {
+  if (
+    win.AMP_CONFIG &&
+    Array.isArray(win.AMP_CONFIG['allow-url-opt-in']) &&
+    win.AMP_CONFIG['allow-url-opt-in'].length > 0
+  ) {
     const allowed = win.AMP_CONFIG['allow-url-opt-in'];
     const hash = win.location.originalHash || win.location.hash;
     const params = parseQueryString(hash);
@@ -178,9 +197,16 @@ export function experimentTogglesOrNull(win) {
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
-function getExperimentTogglesFromCookie(win) {
-  const experimentCookie = getCookie(win, COOKIE_NAME);
-  const tokens = experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
+function getExperimentToggles(win) {
+  let experimentsString = '';
+  try {
+    if ('localStorage' in win) {
+      experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
+    }
+  } catch (e) {
+    dev().warn(TAG, 'Failed to retrieve experiments from localStorage.');
+  }
+  const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
 
   const toggles = Object.create(null);
   for (let i = 0; i < tokens.length; i++) {
@@ -193,7 +219,6 @@ function getExperimentTogglesFromCookie(win) {
       toggles[tokens[i]] = true;
     }
   }
-
   return toggles;
 }
 
@@ -202,28 +227,28 @@ function getExperimentTogglesFromCookie(win) {
  * @param {!Window} win
  * @param {!Object<string, boolean>} toggles
  */
-function saveExperimentTogglesToCookie(win, toggles) {
+function saveExperimentToggles(win, toggles) {
   const experimentIds = [];
   for (const experiment in toggles) {
     experimentIds.push((toggles[experiment] === false ? '-' : '') + experiment);
   }
-
-  setCookie(win, COOKIE_NAME, experimentIds.join(','),
-      Date.now() + COOKIE_EXPIRATION_INTERVAL, {
-        // Set explicit domain, so the cookie gets send to sub domains.
-        domain: win.location.hostname,
-        allowOnProxyOrigin: true,
-      });
+  try {
+    if ('localStorage' in win) {
+      win.localStorage.setItem(LOCAL_STORAGE_KEY, experimentIds.join(','));
+    }
+  } catch (e) {
+    user().error(TAG, 'Failed to save experiments to localStorage.');
+  }
 }
 
 /**
- * See getExperimentTogglesFromCookie().
+ * See getExperimentToggles().
  * @param {!Window} win
  * @return {!Object<string, boolean>}
  * @visibleForTesting
  */
-export function getExperimentToglesFromCookieForTesting(win) {
-  return getExperimentTogglesFromCookie(win);
+export function getExperimentTogglesForTesting(win) {
+  return getExperimentToggles(win);
 }
 
 /**
@@ -232,9 +257,7 @@ export function getExperimentToglesFromCookieForTesting(win) {
  * @visibleForTesting
  */
 export function resetExperimentTogglesForTesting(win) {
-  setCookie(win, COOKIE_NAME, '', 0, {
-    domain: win.location.hostname,
-  });
+  saveExperimentToggles(win, {});
   win[TOGGLES_WINDOW_PROPERTY] = null;
 }
 
@@ -282,7 +305,7 @@ function selectRandomItem(arr) {
  *
  * Check whether a given experiment is set using isExperimentOn(win,
  * experimentName) and, if it is on, look for which branch is selected in
- * win.experimentBranches[experimentName].
+ * win.__AMP_EXPERIMENT_BRANCHES[experimentName].
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
@@ -292,35 +315,41 @@ function selectRandomItem(arr) {
  *     branches.
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   const selectedExperiments = {};
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName)) {
+    if (!hasOwn(experiments, experimentName)) {
       continue;
     }
-    if (win.experimentBranches.hasOwnProperty(experimentName)) {
+    if (hasOwn(win.__AMP_EXPERIMENT_BRANCHES, experimentName)) {
       selectedExperiments[experimentName] =
-          win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
       continue;
     }
 
-    if (!experiments[experimentName].isTrafficEligible ||
-        !experiments[experimentName].isTrafficEligible(win)) {
-      win.experimentBranches[experimentName] = null;
+    if (
+      !experiments[experimentName].isTrafficEligible ||
+      !experiments[experimentName].isTrafficEligible(win)
+    ) {
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = null;
       continue;
     }
 
     // If we're in the experiment, but we haven't already forced a specific
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
-    if (!win.experimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
+    if (
+      !win.__AMP_EXPERIMENT_BRANCHES[experimentName] &&
+      isExperimentOn(win, /*OK*/ experimentName)
+    ) {
       const {branches} = experiments[experimentName];
-      win.experimentBranches[experimentName] = selectRandomItem(branches);
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(
+        branches
+      );
       selectedExperiments[experimentName] =
-          win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
     }
   }
   return selectedExperiments;
@@ -336,7 +365,9 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  *     null if experimentName has been tested but no branch was enabled).
  */
 export function getExperimentBranch(win, experimentName) {
-  return win.experimentBranches ? win.experimentBranches[experimentName] : null;
+  return win.__AMP_EXPERIMENT_BRANCHES
+    ? win.__AMP_EXPERIMENT_BRANCHES[experimentName]
+    : null;
 }
 
 /**
@@ -350,7 +381,7 @@ export function getExperimentBranch(win, experimentName) {
  * @visibleForTesting
  */
 export function forceExperimentBranch(win, experimentName, branchId) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   toggleExperiment(win, experimentName, !!branchId, true);
-  win.experimentBranches[experimentName] = branchId;
+  win.__AMP_EXPERIMENT_BRANCHES[experimentName] = branchId;
 }

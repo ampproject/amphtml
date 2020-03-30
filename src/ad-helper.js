@@ -85,7 +85,7 @@ export function getAdContainer(element) {
     let el = element.parentElement;
     while (el && el.tagName != 'BODY') {
       if (CONTAINERS[el.tagName]) {
-        return element[AD_CONTAINER_PROP] = el.tagName;
+        return (element[AD_CONTAINER_PROP] = el.tagName);
       }
       el = el.parentElement;
     }
@@ -108,12 +108,10 @@ export function getAmpAdResourceId(node, topWin) {
     if (frameParent.nodeName == 'AMP-AD') {
       return String(frameParent.getResourceId());
     }
-  } catch (e) {
-  }
+  } catch (e) {}
   // Whether we entered the catch above (e.g. due to attempt to access
   // across xdomain boundary), or failed to enter the if further above, the
   // node is not within a friendly amp-ad tag. So, there is no amp-ad
   // resource ID. How to handle that is up to the caller, but see TODO above.
   return null;
 }
-

@@ -18,11 +18,11 @@ tags: {  # <script custom-element="amp-sticky-ad">
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sticky-ad"
-    allowed_versions: "0.1"
-    allowed_versions: "1.0"
-    allowed_versions: "latest"
-    deprecated_versions: "0.1"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "1.0"
+    version: "latest"
+    deprecated_version: "0.1"
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

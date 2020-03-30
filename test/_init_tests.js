@@ -16,15 +16,17 @@
 
 // This must load before all other tests.
 import '../src/polyfills';
-import 'babel-polyfill';
 import * as describes from '../testing/describes';
+import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
+import {adoptWithMultidocDeps} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
+import {configure as configureEnzyme} from 'enzyme';
 import {
-  adopt,
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/runtime';
+} from '../src/service/core-services';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installYieldIt} from '../testing/yield';
 import {removeElement} from '../src/dom';
@@ -32,20 +34,22 @@ import {
   reportError,
   resetAccumulatedErrorMessagesForTesting,
 } from '../src/error';
-import {
-  resetEvtListenerOptsSupportForTesting,
-} from '../src/event-helper-listen';
+import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
+let that;
 let consoleErrorSandbox;
-let consoleErrorStub;
-let consoleInfoLogWarnSandbox;
 let testName;
 let expectedAsyncErrors;
+let rethrowAsyncSandbox;
+let consoleInfoLogWarnSandbox;
+const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -60,7 +64,8 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adoptWithMultidocDeps(window);
+configureEnzyme({adapter: new PreactEnzyme()});
 
 // Override AMP.extension to buffer extension installers.
 /**
@@ -73,7 +78,6 @@ global.AMP.extension = function(name, version, installer) {
   describes.bufferExtension(`${name}:${version}`, installer);
 };
 
-
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
@@ -85,9 +89,8 @@ window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
  * Example usages:
  * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
  * it.configure().skipEdge().run('Should ...', ...);
-*/
+ */
 class TestConfig {
-
   constructor(runner) {
     this.runner = runner;
     /**
@@ -134,12 +137,6 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipOldChrome() {
-    return this.skip(() => {
-      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
@@ -156,6 +153,18 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
+  skipIfPropertiesObfuscated() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.propertiesObfuscated;
+    });
+  }
+
+  skipSinglePass() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.singlePass;
+    });
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -167,10 +176,6 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
-  }
-
-  ifNewChrome() {
-    return this.ifChrome().skipOldChrome();
   }
 
   ifChrome() {
@@ -206,12 +211,12 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs() {
+  retryOnSaucelabs(times = 4) {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
-      mocha.retries(4);
+      mocha.retries(times);
     });
     return this;
   }
@@ -255,150 +260,155 @@ it.configure = function() {
   return new TestConfig(it);
 };
 
-// Used to check if an unrestored sandbox exists
-const sandboxes = [];
-const {create} = sinon.sandbox;
-sinon.sandbox.create = function(config) {
-  const sandbox = create.call(sinon.sandbox, config);
-  sandboxes.push(sandbox);
+/**
+ * Prints a warning when a console error is detected during a test.
+ * @param {*} messages One or more error messages
+ */
+function printWarning(...messages) {
+  const message = messages.join(' ');
 
-  const {restore} = sandbox;
-  sandbox.restore = function() {
-    const i = sandboxes.indexOf(sandbox);
-    if (i > -1) {
-      sandboxes.splice(i, 1);
-    }
-    return restore.call(sandbox);
-  };
-  return sandbox;
-};
-
-// Used during normal test execution, to detect unexpected console errors.
-function warnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
+  // Match equal strings.
+  if (expectedAsyncErrors.includes(message)) {
+    expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
+    return;
   }
-  expectedAsyncErrors = [];
-  consoleErrorSandbox = sinon.sandbox.create();
-  const originalConsoleError = console/*OK*/.error;
-  setReportError(() => {});
-  consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
-    const message = messages.join(' ');
 
-    // Match equal strings.
-    if (expectedAsyncErrors.includes(message)) {
-      expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
-      return;
-    }
-
-    // Match regex.
-    for (let i = 0; i < expectedAsyncErrors.length; i++) {
-      const expectedError = expectedAsyncErrors[i];
-      if (typeof expectedError != 'string') {
-        if (expectedError.test(message)) {
-          expectedAsyncErrors.splice(i, 1);
-          return;
-        }
+  // Match regex.
+  for (let i = 0; i < expectedAsyncErrors.length; i++) {
+    const expectedError = expectedAsyncErrors[i];
+    if (typeof expectedError != 'string') {
+      if (expectedError.test(message)) {
+        expectedAsyncErrors.splice(i, 1);
+        return;
       }
     }
+  }
 
-    // We're throwing an error. Clean up other expected errors since they will
-    // never appear.
-    expectedAsyncErrors = [];
+  const errorMessage = message.split('\n', 1)[0]; // First line.
+  const helpMessage =
+    '    The test "' +
+    testName +
+    '"' +
+    ' resulted in a call to console.error. (See above line.)\n' +
+    '    ⤷ If the error is not expected, fix the code that generated ' +
+    'the error.\n' +
+    '    ⤷ If the error is expected (and synchronous), use the following ' +
+    'pattern to wrap the test code that generated the error:\n' +
+    "        'allowConsoleError(() => { <code that generated the " +
+    "error> });'\n" +
+    '    ⤷ If the error is expected (and asynchronous), use the ' +
+    'following pattern at the top of the test:\n' +
+    "        'expectAsyncConsoleError(<string or regex>[, <number of" +
+    ' times the error message repeats>]);';
+  originalConsoleError(errorMessage + "'\n" + helpMessage);
+}
 
-    const errorMessage = message.split('\n', 1)[0]; // First line.
-    const {failOnConsoleError} = window.__karma__.config;
-    const terminator = failOnConsoleError ? '\'' : '';
-    const separator = failOnConsoleError ? '\n' : '\'\n';
-    const helpMessage = '    The test "' + testName + '"' +
-        ' resulted in a call to console.error. (See above line.)\n' +
-        '    ⤷ If the error is not expected, fix the code that generated ' +
-            'the error.\n' +
-        '    ⤷ If the error is expected (and synchronous), use the following ' +
-            'pattern to wrap the test code that generated the error:\n' +
-        '        \'allowConsoleError(() => { <code that generated the ' +
-            'error> });\'\n' +
-        '    ⤷ If the error is expected (and asynchronous), use the ' +
-            'following pattern at the top of the test:\n' +
-        '        \'expectAsyncConsoleError(<string or regex>[, number of' +
-        ' times the error message repeats]);' + terminator;
-    // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
-    if (failOnConsoleError) {
-      throw new Error(errorMessage + separator + helpMessage);
-    } else {
-      originalConsoleError(errorMessage + separator + helpMessage);
-    }
-  });
-  this.expectAsyncConsoleError = function(message, repeat = 1) {
+/**
+ * Used during normal test execution, to detect unexpected console errors.
+ */
+function warnForConsoleError() {
+  expectedAsyncErrors = [];
+  consoleErrorSandbox = sinon.createSandbox();
+  const consoleErrorStub = consoleErrorSandbox
+    .stub(console, 'error')
+    .callsFake(printWarning);
+
+  self.expectAsyncConsoleError = function(message, repeat = 1) {
     expectedAsyncErrors.push.apply(
-        expectedAsyncErrors, Array(repeat).fill(message));
+      expectedAsyncErrors,
+      Array(repeat).fill(message)
+    );
   };
-  this.allowConsoleError = function(func) {
-    dontWarnForConsoleError();
+  self.allowConsoleError = function(func) {
+    consoleErrorStub.reset();
+    consoleErrorStub.callsFake(() => {});
     const result = func();
     try {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
       const helpMessage =
-          'The test "' + testName + '" contains an "allowConsoleError" block ' +
-          'that didn\'t result in a call to console.error.';
-      throw new Error(helpMessage);
+        'The test "' +
+        testName +
+        '" contains an "allowConsoleError" block ' +
+        "that didn't result in a call to console.error.";
+      originalConsoleError(helpMessage);
+    } finally {
+      consoleErrorStub.callsFake(printWarning);
     }
-    warnForConsoleError();
     return result;
   };
 }
 
-// Used during sections of tests where an error is expected.
-function dontWarnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
-  }
-  consoleErrorSandbox = sinon.sandbox.create();
-  consoleErrorStub =
-      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
-  setReportError(reportError);
-}
-
-// Used to restore error level logging after each test.
+/**
+ * Used to restore error level logging after each test.
+ */
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
     const helpMessage =
-        'The test "' + testName + '" called "expectAsyncConsoleError", ' +
-        'but there were no call(s) to console.error with these message(s): ' +
-        '"' + expectedAsyncErrors.join('", "') + '"';
-    throw new Error(helpMessage);
+      'The test "' +
+      testName +
+      '" called "expectAsyncConsoleError", ' +
+      'but there were no call(s) to console.error with these message(s): ' +
+      '"' +
+      expectedAsyncErrors.join('", "') +
+      '"';
+    that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
 }
 
-// Used to silence info, log, and warn level logging during each test.
-function stubConsoleInfoLogWarn() {
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
+/**
+ * Used to silence info, log, and warn level logging during each test, unless
+ * verbose mode is enabled.
+ */
+function maybeStubConsoleInfoLogWarn() {
+  const {verboseLogging} = window.__karma__.config;
+  if (!verboseLogging) {
+    consoleInfoLogWarnSandbox = sinon.createSandbox();
+    consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
   }
-  consoleInfoLogWarnSandbox = sinon.sandbox.create();
-  consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
 }
 
-// Used to restore info, log, and warn level logging after each test.
-function restoreConsoleInfoLogWarn() {
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
-  }
+/**
+ * Used to precent asynchronous throwing of errors during each test.
+ */
+function preventAsyncErrorThrows() {
+  self.stubAsyncErrorThrows = function() {
+    rethrowAsyncSandbox = sinon.createSandbox();
+    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
+      const error = log.createErrorVargs.apply(null, args);
+      self.__AMP_REPORT_ERROR(error);
+      throw error;
+    });
+  };
+  self.restoreAsyncErrorThrows = function() {
+    rethrowAsyncSandbox.restore();
+  };
+  setReportError(reportError);
+  stubAsyncErrorThrows();
 }
+
+before(function() {
+  // This is a more robust version of `this.skip()`. See #17245.
+  this.skipTest = function() {
+    if (this._runnable.title != '"before all" hook') {
+      throw new Error('skipTest() can only be called from within before()');
+    }
+    this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
+    this.skip();
+  };
+});
 
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  const {verboseLogging} = window.__karma__.config;
-  if (!verboseLogging) {
-    stubConsoleInfoLogWarn();
-  }
+  window.sandbox = sinon.createSandbox();
+  maybeStubConsoleInfoLogWarn();
+  preventAsyncErrorThrows();
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
@@ -406,26 +416,32 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
-// Global cleanup of tags added during tests. Cool to add more
-// to selector.
+/**
+ * Global cleanup of tags added during tests. Cool to add more to selector.
+ */
 afterEach(function() {
+  that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  window.sandbox.restore();
   restoreConsoleError();
-  restoreConsoleInfoLogWarn();
+  restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
@@ -438,14 +454,15 @@ afterEach(function() {
       removeElement(element);
     } catch (e) {
       // This sometimes fails for unknown reasons.
-      console./*OK*/log(e);
+      console./*OK*/ log(e);
     }
   }
   window.localStorage.clear();
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
+  delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {
     for (let i = initialWindowState.length; i < windowState.length; ++i) {
@@ -462,39 +479,30 @@ afterEach(function() {
       }
     }
   }
-  const forgotGlobal = !!global.sandbox;
-  if (forgotGlobal) {
-    // The error will be thrown later to give possibly other sandboxes a
-    // chance to restore themselves.
-    delete global.sandbox;
-  }
-  if (sandboxes.length > 0) {
-    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
-    throw new Error('You forgot to restore your sandbox!');
-  }
-  if (forgotGlobal) {
-    throw new Error('You forgot to clear global sandbox!');
-  }
   if (!/native/.test(window.setTimeout)) {
-    throw new Error('You likely forgot to restore sinon timers ' +
-        '(installed via sandbox.useFakeTimers).');
+    throw new Error(
+      'You likely forgot to restore sinon timers ' +
+        '(installed via sandbox.useFakeTimers).'
+    );
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
-  setReportError(reportError);
+  cancelTimersForTesting();
 });
+
+chai.use(require('chai-as-promised')); // eslint-disable-line 
 
 chai.Assertion.addMethod('attribute', function(attr) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      obj.hasAttribute(attr),
-      'expected element \'' + tagName + '\' to have attribute #{exp}',
-      'expected element \'' + tagName + '\' to not have attribute #{act}',
-      attr,
-      attr
+    obj.hasAttribute(attr),
+    "expected element '" + tagName + "' to have attribute #{exp}",
+    "expected element '" + tagName + "' to not have attribute #{act}",
+    attr,
+    attr
   );
 });
 
@@ -502,11 +510,11 @@ chai.Assertion.addMethod('class', function(className) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      obj.classList.contains(className),
-      'expected element \'' + tagName + '\' to have class #{exp}',
-      'expected element \'' + tagName + '\' to not have class #{act}',
-      className,
-      className
+    obj.classList.contains(className),
+    "expected element '" + tagName + "' to have class #{exp}",
+    "expected element '" + tagName + "' to not have class #{act}",
+    className,
+    className
   );
 });
 
@@ -518,14 +526,17 @@ chai.Assertion.addProperty('visible', function() {
   const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      visibility === 'visible' && isOpaque,
-      'expected element \'' +
-      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-      'expected element \'' +
-      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+    visibility === 'visible' && isOpaque,
+    "expected element '" +
+      tagName +
+      "' to be #{exp}, got #{act}. with classes: " +
       obj.className,
-      'visible and opaque',
-      `visibility = ${visibility} and opacity = ${opacity}`
+    "expected element '" +
+      tagName +
+      "' not to be #{exp}, got #{act}. with classes: " +
+      obj.className,
+    'visible and opaque',
+    `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 
@@ -536,13 +547,17 @@ chai.Assertion.addProperty('hidden', function() {
   const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      visibility === 'hidden' || parseInt(opacity, 10) == 0,
-      'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-      'expected element \'' +
-        tagName + '\' not to be #{act}. with classes: ' + obj.className,
-      'hidden',
-      visibility
+    visibility === 'hidden' || parseInt(opacity, 10) == 0,
+    "expected element '" +
+      tagName +
+      "' to be #{exp}, got #{act}. with classes: " +
+      obj.className,
+    "expected element '" +
+      tagName +
+      "' not to be #{act}. with classes: " +
+      obj.className,
+    'hidden',
+    visibility
   );
 });
 
@@ -551,11 +566,11 @@ chai.Assertion.addMethod('display', function(display) {
   const value = window.getComputedStyle(obj).getPropertyValue('display');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      value === display,
-      'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
-      'expected element \'' + tagName + '\' not to be #{act}.',
-      display,
-      value
+    value === display,
+    "expected element '" + tagName + "' to be display #{exp}, got #{act}.",
+    "expected element '" + tagName + "' not to be display #{act}.",
+    display,
+    value
   );
 });
 
@@ -564,10 +579,10 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
   const a = stringify(compare);
   const b = stringify(obj);
   this.assert(
-      a == b,
-      'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
-      'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
-      a,
-      b
+    a == b,
+    'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
+    'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
+    a,
+    b
   );
 });

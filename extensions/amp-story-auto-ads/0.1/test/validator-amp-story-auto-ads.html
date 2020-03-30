@@ -31,7 +31,8 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
-  <amp-story standalone>
+  <amp-story standalone poster-portrait-src="portrait.png" poster-landscape-src="landscape.png" poster-square-src="square.png"
+      title="Example" publisher="The AMP Project" publisher-logo-src="amp.png">
     <amp-story-page id="1">
       <amp-story-grid-layer template="horizontal">
       </amp-story-grid-layer>
@@ -39,10 +40,10 @@
     <amp-story-auto-ads>
       <script type="application/json">
       {
-         "ad-attributes": {
-           type: "custom"
-           data-src: "https://adserver.com/getad?slot=abcd1234"
-         }
+        "ad-attributes": {
+          "type": "custom",
+          "data-src": "https://adserver.com/getad?slot=abcd1234"
+        }
       }
       </script>
 

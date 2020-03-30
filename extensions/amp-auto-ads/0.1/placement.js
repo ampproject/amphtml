@@ -14,18 +14,33 @@
  * limitations under the License.
  */
 
+import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {
+  LayoutMarginsChangeDef,
+  cloneLayoutMarginsChangeDef,
+} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {
-  closestByTag,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
+import {getElementLayoutBox} from './utils';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
+/**
+ * @typedef {{
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ *   margins: (LayoutMarginsChangeDef|undefined),
+ * }}
+ */
+let PlacementSizingDef;
 
 /**
  * TODO: Specify this via the configuration.
@@ -59,10 +74,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = [
-  'AMP-SIDEBAR',
-  'AMP-APP-BANNER',
-];
+const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -73,7 +85,9 @@ INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
 };
 INJECTORS[Position.AFTER] = (anchorElement, elementToInject) => {
   anchorElement.parentNode.insertBefore(
-      elementToInject, anchorElement.nextSibling);
+    elementToInject,
+    anchorElement.nextSibling
+  );
 };
 INJECTORS[Position.FIRST_CHILD] = (anchorElement, elementToInject) => {
   anchorElement.insertBefore(elementToInject, anchorElement.firstChild);
@@ -85,20 +99,25 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(ampdoc, resources, anchorElement, position, injector, attributes,
-    opt_margins) {
+  constructor(
+    ampdoc,
+    anchorElement,
+    position,
+    injector,
+    attributes,
+    opt_margins
+  ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -139,10 +158,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return this.resources_.getElementLayoutBox(this.anchorElement_).then(
-        layoutBox => {
-          return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-        });
+    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+    });
   }
 
   /**
@@ -169,29 +187,108 @@ export class Placement {
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
+   * @param {!./ad-network-config.SizeInfoDef} sizing
    * @param {!./ad-tracker.AdTracker} adTracker
+   * @param {boolean} isResponsiveEnabled
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(baseAttributes, adTracker) {
+  placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then(yPosition => {
       return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(baseAttributes);
-        this.injector_(this.anchorElement_, this.adElement_);
-        return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
+        this.adElement_ = isResponsiveEnabled
+          ? this.createResponsiveAdElement_(baseAttributes)
+          : this.createAdElement_(baseAttributes, sizing.width);
+
+        this.injector_(this.anchorElement_, this.getAdElement());
+
+        if (isResponsiveEnabled) {
+          return (
+            whenUpgradedToCustomElement(this.getAdElement())
+              // Responsive ads set their own size when built.
+              .then(() => this.getAdElement().whenBuilt())
+              .then(() => {
+                const resized = !this.getAdElement().classList.contains(
+                  'i-amphtml-layout-awaiting-size'
+                );
+                this.state_ = resized
+                  ? PlacementState.PLACED
+                  : PlacementState.RESIZE_FAILED;
+                return this.state_;
+              })
+          );
+        }
+
+        return this.getPlacementSizing_(sizing).then(placement => {
+          // CustomElement polyfill does not call connectedCallback
+          // synchronously. So we explicitly wait for CustomElement to be
+          // ready.
+          return whenUpgradedToCustomElement(this.getAdElement())
+            .then(() => this.getAdElement().whenBuilt())
             .then(() => {
-              this.state_ = PlacementState.PLACED;
-              return this.state_;
-            }, () => {
-              this.state_ = PlacementState.RESIZE_FAILED;
-              return this.state_;
-            });
+              return this.mutator_.requestChangeSize(
+                this.getAdElement(),
+                placement.height,
+                placement.width,
+                placement.margins
+              );
+            })
+            .then(
+              () => {
+                this.state_ = PlacementState.PLACED;
+                return this.state_;
+              },
+              () => {
+                this.state_ = PlacementState.RESIZE_FAILED;
+                return this.state_;
+              }
+            );
+        });
       });
     });
+  }
+
+  /**
+   * Gets instructions for the placement in terms of height, width and margins.
+   * This is intended to be used for non-responsive auto ads only.
+   * @param {!./ad-network-config.SizeInfoDef} sizing
+   * @return {!Promise<!PlacementSizingDef>}
+   * @private
+   */
+  getPlacementSizing_(sizing) {
+    return Promise.resolve(
+      /** @type {!PlacementSizingDef} */ ({
+        height: sizing.height || TARGET_AD_HEIGHT_PX,
+        margins: this.margins_,
+      })
+    );
+  }
+
+  /**
+   * @param {!JsonObject<string, string>} baseAttributes
+   * @param {number|undefined} width
+   * @return {!Element}
+   * @private
+   */
+  createAdElement_(baseAttributes, width) {
+    const attributes = /** @type {!JsonObject} */ (Object.assign(
+      dict({
+        'layout': width ? 'fixed' : 'fixed-height',
+        'height': '0',
+        'width': width ? width : 'auto',
+        'class': 'i-amphtml-layout-awaiting-size',
+      }),
+      baseAttributes,
+      this.attributes_
+    ));
+    return createElementWithAttributes(
+      this.ampdoc.win.document,
+      'amp-ad',
+      attributes
+    );
   }
 
   /**
@@ -199,17 +296,26 @@ export class Placement {
    * @return {!Element}
    * @private
    */
-  createAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
-      'layout': 'fixed-height',
-      'height': '0',
-      'class': 'i-amphtml-layout-awaiting-size',
-    }), baseAttributes, this.attributes_));
+  createResponsiveAdElement_(baseAttributes) {
+    const attributes = /** @type {!JsonObject} */ (Object.assign(
+      dict({
+        'width': '100vw',
+        'height': '0',
+        'layout': 'fixed',
+        'class': 'i-amphtml-layout-awaiting-size',
+        'data-auto-format': 'rspv',
+        'data-full-width': '',
+      }),
+      baseAttributes,
+      this.attributes_
+    ));
     return createElementWithAttributes(
-        this.ampdoc.win.document, 'amp-ad', attributes);
+      this.ampdoc.win.document,
+      'amp-ad',
+      attributes
+    );
   }
 }
-
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -219,7 +325,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    user().warn(TAG, 'No placements in config');
+    user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
@@ -228,7 +334,6 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
   });
   return placements;
 }
-
 
 /**
  * Validates that the placementObj represents a valid placement and if so
@@ -248,7 +353,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     user().warn(TAG, 'No anchor in placement');
     return;
   }
-  const anchorElements = getAnchorElements(ampdoc.getBody(), anchor);
+  const anchorElements = getAnchorElements(ampdoc.getRootNode(), anchor);
   if (!anchorElements.length) {
     user().warn(TAG, 'No anchor element found');
     return;
@@ -268,23 +373,27 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
-    const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(
+    const attributes = getAttributesFromConfigObj(
+      placementObj,
+      Attributes.BASE_ATTRIBUTES
+    );
+    placements.push(
+      new Placement(
         ampdoc,
-        Services.resourcesForDoc(anchorElement),
         anchorElement,
         placementObj['pos'],
         injector,
         attributes,
-        margins));
+        margins
+      )
+    );
   });
 }
-
 
 /**
  * Looks up the element(s) addresses by the anchorObj.
  *
- * @param {!Element} rootElement
+ * @param {(Document|ShadowRoot|Element)} rootElement
  * @param {!Object} anchorObj
  * @return {!Array<!Element>}
  */
@@ -294,7 +403,9 @@ function getAnchorElements(rootElement, anchorObj) {
     user().warn(TAG, 'No selector in anchor');
     return [];
   }
-  let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
+  let elements = [].slice.call(
+    scopedQuerySelectorAll(rootElement.documentElement || rootElement, selector)
+  );
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {
@@ -322,7 +433,6 @@ function getAnchorElements(rootElement, anchorObj) {
   return elements;
 }
 
-
 /**
  * @param {!Element} anchorElement
  * @param {!Position} position
@@ -330,15 +440,16 @@ function getAnchorElements(rootElement, anchorObj) {
  */
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
-      position == Position.BEFORE || position == Position.AFTER ?
-        anchorElement.parentElement : anchorElement;
+    position == Position.BEFORE || position == Position.AFTER
+      ? anchorElement.parentElement
+      : anchorElement;
   if (!elementToCheckOrNull) {
     user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
   return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
-    if (closestByTag(elementToCheck, tagName)) {
+    if (closestAncestorElementBySelector(elementToCheck, tagName)) {
       user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
       return true;
     }

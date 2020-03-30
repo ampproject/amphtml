@@ -1,0 +1,16 @@
+{
+  "requests": {
+    "host": "https://ibeat.indiatimes.com",
+    "track": "${host}/ping-amp?url=${ampdocUrl}&sid=${clientId(_iibeat_session)}&ua=${userAgent}&ref=${documentReferrer}&at=${incrementalEngagedTime}&tt=${totalTime}&pid=${pageViewId}&d=${d}&ct=${ct}&pt=${pt}&au=${au}&ag=${ag}&aid=${aid}&cn=${canonicalUrl}&ctIds=${ctIds}"
+  },
+  "triggers": {
+    "trackInterval": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 15,
+        "maxTimerLength": 7200
+      },
+      "request": "track"
+    }
+  }
+}

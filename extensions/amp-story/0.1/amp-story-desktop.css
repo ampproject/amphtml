@@ -82,7 +82,7 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page {
-  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
+  transform: scale(1.0) translateX(-200vw) translateY(0%) !important;
   opacity: .05!important;
   transform-origin: left!important;
   border-radius: 16px!important;
@@ -159,11 +159,11 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50vw * 1.1)) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50vw * 1.1)) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page[pre-active] {
@@ -184,7 +184,7 @@ amp-story[standalone][desktop] {
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
+  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
 }
 
 [desktop] > amp-story-page,

@@ -1,0 +1,22 @@
+{
+  "dist/v0.js": {
+    "approvers": ["ampproject/wg-performance", "ampproject/wg-runtime"],
+    "threshold": 0.1
+  },
+  "dist/amp4ads-v0.js": {
+    "approvers": ["ampproject/wg-ads"],
+    "threshold": 0.1
+  },
+  "dist/v0/amp-analytics-0.1.js": {
+    "approvers": ["ampproject/wg-analytics"],
+    "threshold": 0.1
+  },
+  "dist/v0/amp-story-0.1.js": {
+    "approvers": ["ampproject/wg-stories"],
+    "threshold": 0.5
+  },
+  "dist/v0/amp-story-1.0.js": {
+    "approvers": ["ampproject/wg-stories"],
+    "threshold": 0.5
+  }
+}

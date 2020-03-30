@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  loadScript,
-  validateData,
-} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -30,5 +27,13 @@ export function wisteria(global, data) {
   //get canonical url
   const originalUrl = global.context.canonicalUrl;
   validateData(data, ['siteId', 'templateNumber']);
-  loadScript(global, 'https://wisteria-js.excite.co.jp/wisteria.js?site_id=' + data['siteId'] + '&template_no=' + data['templateNumber'] + '&original_url=' + originalUrl);
+  loadScript(
+    global,
+    'https://wisteria-js.excite.co.jp/wisteria.js?site_id=' +
+      data['siteId'] +
+      '&template_no=' +
+      data['templateNumber'] +
+      '&original_url=' +
+      originalUrl
+  );
 }

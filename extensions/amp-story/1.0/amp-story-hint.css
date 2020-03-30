@@ -24,6 +24,7 @@
   top: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
+  z-index: 2 !important;
 }
 
 .i-amphtml-story-hint-container.i-amphtml-hidden {
@@ -44,12 +45,17 @@
 }
 
 .i-amphtml-story-navigation-help-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .prev-page {
+  flex: 1 !important;
+}
+
+[dir=rtl].prev-page {
   flex: 1 !important;
 }
 
@@ -59,6 +65,10 @@
 
 .show-first-page-overlay .prev-page {
   background: linear-gradient(to right, rgba(0,0,0,0.5) , rgba(0,0,0,0)) !important;
+}
+
+[dir=rtl].show-first-page-overlay .prev-page {
+  background: linear-gradient(to left, rgba(0,0,0,0.5) , rgba(0,0,0,0)) !important;
 }
 
 .show-first-page-overlay .next-page {
@@ -75,11 +85,15 @@
 
 .i-amphtml-story-hint-container .next-page {
   flex: 3 !important;
-  border-left: 1px dashed transparent !important;
-  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>')  !important;
-  border-image-slice: 33% 33%  !important;
-  border-image-repeat: repeat  !important;
-  border-image-width: 14px !important;
+  background-image: linear-gradient(#e0d5d5 60%, rgba(255,255,255,0) 0%) !important;
+  background-position: left !important;
+  background-size: 1px 15px !important;
+  background-repeat: repeat-y !important;
+}
+
+[dir=rtl].i-amphtml-story-hint-container .next-page {
+  border-left: none !important;
+  background-position: right !important;
 }
 
 .show-navigation-overlay .i-amphtml-story-navigation-help-overlay,
@@ -97,6 +111,10 @@
   width: 30px !important;
   height: 30px !important;
   display: inline-block !important;
+}
+
+[dir=rtl].show-navigation-overlay .prev-page .i-amphtml-story-hint-tap-button-icon:before {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="#000000"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button {
@@ -148,9 +166,13 @@
   display: inline-block !important;
 }
 
+[dir=rtl] .next-page .i-amphtml-story-hint-tap-button-icon:after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="#000000"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
 .i-amphtml-story-hint-placeholder {
   top: 50% !important;
-  position: absolute;
+  position: absolute !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -162,6 +184,8 @@
   font-family: 'Roboto-Medium', sans-serif !important;
   margin-top: 24px !important;
   text-align: center !important;
+  word-break: break-word !important;
+  padding: 0 6px !important;
 }
 
 @keyframes expandingBubble {

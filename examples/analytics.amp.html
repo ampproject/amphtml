@@ -29,6 +29,24 @@
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "endpoint": "/analytics/no-referrer"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "endpoint"
+        }
+      },
+      "transport": {
+        "referrerPolicy": "no-referrer"
+      }
+    }
+  </script>
+</amp-analytics>
 <amp-analytics id="analytics1">
 <script type="application/json">
 {

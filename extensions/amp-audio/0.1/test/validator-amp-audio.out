@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,12 +34,25 @@ PASS
 |        <p>Your browser doesn’t support HTML5 audio</p>
 |      </div>
 |      <source type="audio/mpeg" src="foo.mp3">
-|        <source type="audio/ogg" src="foo.ogg">
+|      <source type="audio/ogg" src="foo.ogg">
 |    </amp-audio>
-|  
+|
 |    <!-- test controlslist attr, which is often provided in camelCase -->
 |    <amp-audio width="400" height="300"
 |               controlsList="nofullscreen nodownload noremoteplayback foobar">
 |    </amp-audio>
+|
+|    <!-- Valid: Media Session attributes -->
+|    <amp-audio width="400" height="300"
+|               title="Hello" artist="World" artwork="example.jpg">
+|    </amp-audio>
+|
+|    <!-- Valid: Most attributes are bindable -->
+|    <amp-audio width="400" height="300"
+|               [title]="Hello" [artist]="World" [artwork]="example.jpg">
+|    </amp-audio>
+|
+|    <!-- Valid: empty sizes attribute is layout fixed -->
+|    <amp-audio src=lemur.png sizes=""></amp-audio>
 |  </body>
 |  </html>

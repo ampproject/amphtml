@@ -1,0 +1,59 @@
+diff --git a/third_party/inputmask/inputmask.dependencyLib.js b/third_party/inputmask/inputmask.dependencyLib.js
+index c115c3192..a6980ea95 100755
+--- a/third_party/inputmask/inputmask.dependencyLib.js
++++ b/third_party/inputmask/inputmask.dependencyLib.js
+@@ -6,16 +6,7 @@
+ * Version: 4.0.4
+ */
+ 
+-(function(factory) {
+-    if (typeof define === "function" && define.amd) {
+-        define([ "../global/window" ], factory);
+-    } else if (typeof exports === "object") {
+-        module.exports = factory(require("../global/window"));
+-    } else {
+-        window.dependencyLib = factory(window);
+-    }
+-})(function(window) {
+-    var document = window.document;
++export function factory(window, document) {
+     function indexOf(list, elem) {
+         var i = 0, len = list.length;
+         for (;i < len; i++) {
+@@ -298,4 +289,4 @@
+         DependencyLib.Event.prototype = window.Event.prototype;
+     }
+     return DependencyLib;
+-});
+\ No newline at end of file
++}
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index 5df89531f..06f0e1a95 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -6,16 +6,8 @@
+ * Version: 4.0.4
+ */
+ 
+-(function(factory) {
+-    if (typeof define === "function" && define.amd) {
+-        define([ "./dependencyLibs/inputmask.dependencyLib", "./global/window" ], factory);
+-    } else if (typeof exports === "object") {
+-        module.exports = factory(require("./dependencyLibs/inputmask.dependencyLib"), require("./global/window"));
+-    } else {
+-        window.Inputmask = factory(window.dependencyLib || jQuery, window);
+-    }
+-})(function($, window, undefined) {
+-    var document = window.document, ua = navigator.userAgent, ie = ua.indexOf("MSIE ") > 0 || ua.indexOf("Trident/") > 0, mobile = isInputEventSupported("touchstart"), iemobile = /iemobile/i.test(ua), iphone = /iphone/i.test(ua) && !iemobile;
++export function factory($, window, document, undefined) {
++    var ua = navigator.userAgent, ie = ua.indexOf("MSIE ") > 0 || ua.indexOf("Trident/") > 0, mobile = isInputEventSupported("touchstart"), iemobile = /iemobile/i.test(ua), iphone = /iphone/i.test(ua) && !iemobile;
+     function Inputmask(alias, options, internal) {
+         if (!(this instanceof Inputmask)) {
+             return new Inputmask(alias, options, internal);
+@@ -2742,4 +2734,4 @@
+         }
+     }
+     return Inputmask;
+-});
+\ No newline at end of file
++}

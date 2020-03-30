@@ -22,8 +22,8 @@ tags: {  # amp-slides
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-slides"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: NONE
     deprecated_allow_duplicates: true
   }

@@ -15,7 +15,7 @@
  */
 
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 
 export class RefreshIntersectionObserverWrapper {
   /**
@@ -26,12 +26,13 @@ export class RefreshIntersectionObserverWrapper {
    * @param {Object} config
    */
   constructor(callback, baseElement, config) {
-
     /**
      * @private @const {!IntersectionObserverPolyfill}
      */
     this.intersectionObserver_ = new IntersectionObserverPolyfill(
-        callback, config);
+      callback,
+      config
+    );
 
     /**
      * Stores elements and their original viewportCallback functions so that
@@ -40,7 +41,7 @@ export class RefreshIntersectionObserverWrapper {
      */
     this.viewportCallbacks_ = {};
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = baseElement.getViewport();
 
     /**
@@ -60,7 +61,7 @@ export class RefreshIntersectionObserverWrapper {
     // DATA_MANAGER_ID_NAME, but unfortunately, it can't be imported without
     // creating a cyclical dependency.
     const refreshId = element.getAttribute('data-amp-ad-refresh-id');
-    dev().assert(refreshId, 'observe invoked on element without refresh id');
+    devAssert(refreshId, 'observe invoked on element without refresh id');
 
     if (!this.viewportCallbacks_[refreshId]) {
       const viewportCallback = element.viewportCallback.bind(element);

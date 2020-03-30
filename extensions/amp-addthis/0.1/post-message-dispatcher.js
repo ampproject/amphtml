@@ -22,10 +22,18 @@ import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 
 export class PostMessageDispatcher {
+  /**
+   * Creates an instance of PostMessageDispatcher.
+   */
   constructor() {
     this.listeners_ = {};
   }
 
+  /**
+   * Adds event listener.
+   * @param {string} eventType
+   * @param {!Function} listener
+   */
   on(eventType, listener) {
     if (!this.listeners_[eventType]) {
       this.listeners_[eventType] = [];
@@ -33,7 +41,11 @@ export class PostMessageDispatcher {
     this.listeners_[eventType].push(listener);
   }
 
-  /** @private */
+  /**
+   * @param {string} eventType
+   * @param {!JsonObject} eventData
+   * @private
+   */
   emit_(eventType, eventData) {
     if (!this.listeners_[eventType]) {
       return;
@@ -43,13 +55,15 @@ export class PostMessageDispatcher {
 
   /**
    * Utility method to parse out the data from the supplied `postMessage` event.
+   * @param {!Event} event
+   * @return {?JsonObject|undefined}
    * @private
    */
   getMessageData_(event) {
     const data = getData(event);
 
     if (isObject(data)) {
-      return data;
+      return /** @type {!JsonObject} */ (data);
     }
 
     if (typeof data === 'string' && startsWith(data, '{')) {
@@ -62,6 +76,7 @@ export class PostMessageDispatcher {
   /**
    * Handles messages posted from amp-addthis iframes, ensuring the correct
    * origin, etc.
+   * @param {!Event} event
    */
   handleAddThisMessage(event) {
     if (event.origin !== ORIGIN || !getData(event)) {
@@ -70,16 +85,19 @@ export class PostMessageDispatcher {
 
     const data = this.getMessageData_(event) || {};
 
-    switch (data.event) {
+    switch (data['event']) {
       case CONFIGURATION_EVENT: {
         this.emit_(
-            CONFIGURATION_EVENT,
-            Object.assign({}, data, {source: event.source})
+          CONFIGURATION_EVENT,
+          /** @type {!JsonObject} */ ({
+            ...data,
+            'source': event.source,
+          })
         );
         break;
       }
       case SHARE_EVENT: {
-        this.emit_(SHARE_EVENT, data);
+        this.emit_(SHARE_EVENT, /** @type {!JsonObject} */ (data));
         break;
       }
     }

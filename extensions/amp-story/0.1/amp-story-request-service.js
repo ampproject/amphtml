@@ -15,13 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
-
 
 /**
  * Service to send XHRs.
@@ -65,14 +63,13 @@ export class AmpStoryRequestService {
 
     const rawUrl = this.storyElement_.getAttribute(attributeName);
     const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => this.xhr_.fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response');
-          return response.json();
-        });
+    return Services.urlReplacementsForDoc(this.storyElement_)
+      .expandUrlAsync(user().assertString(rawUrl))
+      .then(url => this.xhr_.fetchJson(url, opts))
+      .then(response => {
+        userAssert(response.ok, 'Invalid HTTP response');
+        return response.json();
+      });
   }
 }

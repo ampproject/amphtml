@@ -45,6 +45,7 @@ function addCanonicalLinkTag(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function createContainer(global, data) {
   // add canonical link tag
@@ -73,17 +74,23 @@ function createContainer(global, data) {
 
   setStyles(container, {
     width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'block',
   });
 
   return container;
 }
 
+/**
+ * @param {*} global
+ * @param {*} accountId
+ * @return {!Function}
+ */
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
   return function() {
+    context.onResizeDenied(function(requestedHeight, requestedWidth) {
+      context.requestResize(requestedWidth, requestedHeight);
+    });
     global.BeOpinionSDK.init({
       account: accountId,
       onContentReceive: function(hasContent) {
@@ -95,8 +102,7 @@ function getBeOpinionAsyncInit(global, accountId) {
       },
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
-        const boundingClientRect = c./*REVIEW*/getBoundingClientRect();
-        context.onResizeDenied(context.requestResize.bind(context));
+        const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });

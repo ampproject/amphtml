@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+@import './amp-story-shadow-reset.css';
+
 .i-amphtml-story-no-rotation-overlay {
   position: absolute !important;
   z-index: 200000!important; /** unsupported-browser-overlay - 1 */
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 20px !important;
   font-weight: 700 !important;
-  line-height: 1.5;
-  padding: 32px;
+  line-height: 1.5 !important;
+  padding: 32px !important;
   background-color: #000 !important;
   color: #fff!important;
   top:0 !important;
@@ -31,6 +34,10 @@
   justify-content: center !important;
   text-align: center !important;
   display: none !important;
+}
+
+.i-amphtml-story-no-rotation-overlay .i-amphtml-story-overlay-text {
+  color: #fff !important;
 }
 
 .i-amphtml-story-landscape.i-amphtml-story-no-rotation-overlay {

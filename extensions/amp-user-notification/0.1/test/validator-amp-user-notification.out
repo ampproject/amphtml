@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,7 +70,7 @@ FAIL
 |    <!-- Example of non nodisplay layout type -->
 |    <amp-user-notification
 >>   ^~~~~~~~~
-amp-user-notification/0.1/test/validator-amp-user-notification.html:70:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/components/amp-user-notification) [AMP_LAYOUT_PROBLEM]
+amp-user-notification/0.1/test/validator-amp-user-notification.html:70:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://amp.dev/documentation/components/amp-user-notification)
 |        layout=container
 |        id="amp-user-notification1"
 |        data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP"

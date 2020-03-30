@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {extractKeyframes} from '../keyframes-extractor';
+import {extractKeyframes} from '../parsers/keyframes-extractor';
 import {poll} from '../../../../testing/iframe';
-
 
 describes.realWin('extractKeyframes', {amp: 1}, env => {
   let win, doc;
@@ -44,10 +43,12 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
   }
 
   function keyframesCss(name, css) {
-    return keyframesCssWithVendor(name, css, '') +
-        keyframesCssWithVendor(name, css, '-webkit-') +
-        keyframesCssWithVendor(name, css, '-moz-') +
-        keyframesCssWithVendor(name, css, '-ms-');
+    return (
+      keyframesCssWithVendor(name, css, '') +
+      keyframesCssWithVendor(name, css, '-webkit-') +
+      keyframesCssWithVendor(name, css, '-moz-') +
+      keyframesCssWithVendor(name, css, '-ms-')
+    );
   }
 
   function keyframesCssWithVendor(name, css, prefix) {
@@ -74,11 +75,12 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
     });
 
     it('should find simplest keyframes in amp-custom', () => {
-      const kf1 = keyframesCss('anim1',
-          'from{opacity: 0; visibility: hidden}' +
-          ' to{opacity: 1; visibility: visible}');
-      const kf2 = keyframesCss('anim2',
-          'from{opacity: 0} to{opacity: 0.5}');
+      const kf1 = keyframesCss(
+        'anim1',
+        'from{opacity: 0; visibility: hidden}' +
+          ' to{opacity: 1; visibility: visible}'
+      );
+      const kf2 = keyframesCss('anim2', 'from{opacity: 0} to{opacity: 0.5}');
       return createStyle({'amp-custom': ''}, kf1 + kf2).then(() => {
         expect(extractKeyframes(doc, 'anim1')).to.jsonEqual([
           {offset: 0, opacity: '0', visibility: 'hidden'},
@@ -92,11 +94,12 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
     });
 
     it('should find simplest keyframes in amp-keyframes', () => {
-      const kf1 = keyframesCss('anim1',
-          'from{opacity: 0; visibility: hidden}' +
-          ' to{opacity: 1; visibility: visible}');
-      const kf2 = keyframesCss('anim2',
-          'from{opacity: 0} to{opacity: 0.5}');
+      const kf1 = keyframesCss(
+        'anim1',
+        'from{opacity: 0; visibility: hidden}' +
+          ' to{opacity: 1; visibility: visible}'
+      );
+      const kf2 = keyframesCss('anim2', 'from{opacity: 0} to{opacity: 0.5}');
       return createStyle({'amp-keyframes': ''}, kf1 + kf2).then(() => {
         expect(extractKeyframes(doc, 'anim1')).to.jsonEqual([
           {offset: 0, opacity: '0', visibility: 'hidden'},
@@ -110,47 +113,49 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
     });
 
     it('should replace easing property', () => {
-      const css = 'from{opacity: 0; animation-timing-function: ease}' +
-          ' to{opacity: 1}';
-      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
-          .then(() => {
-            const keyframes = extractKeyframes(doc, 'anim1');
-            expect(keyframes).to.jsonEqual([
-              {offset: 0, opacity: '0', easing: 'ease'},
-              {offset: 1, opacity: '1'},
-            ]);
-          });
+      const css =
+        'from{opacity: 0; animation-timing-function: ease} to{opacity: 1}';
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css)).then(
+        () => {
+          const keyframes = extractKeyframes(doc, 'anim1');
+          expect(keyframes).to.jsonEqual([
+            {offset: 0, opacity: '0', easing: 'ease'},
+            {offset: 1, opacity: '1'},
+          ]);
+        }
+      );
     });
 
     it('should remove vendor prefixes', () => {
-      const css = 'to{' +
-          '-webkit-transform: translateX(10px);' +
-          '-moz-transform: translateX(10px);' +
-          '-ms-transform: translateX(10px);' +
-          'transform: translateX(10px);' +
-          '}';
-      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
-          .then(() => {
-            const keyframes = extractKeyframes(doc, 'anim1');
-            expect(keyframes).to.jsonEqual([
-              {offset: 1, transform: 'translateX(10px)'},
-            ]);
-          });
+      const css =
+        'to{' +
+        '-webkit-transform: translateX(10px);' +
+        '-moz-transform: translateX(10px);' +
+        '-ms-transform: translateX(10px);' +
+        'transform: translateX(10px);' +
+        '}';
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css)).then(
+        () => {
+          const keyframes = extractKeyframes(doc, 'anim1');
+          expect(keyframes).to.jsonEqual([
+            {offset: 1, transform: 'translateX(10px)'},
+          ]);
+        }
+      );
     });
 
     it('should support different offsets', () => {
-      const css = '0%{opacity: 0}' +
-          ' 25%{opacity: 0.5}' +
-          ' 100%{opacity: 1}';
-      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
-          .then(() => {
-            const keyframes = extractKeyframes(doc, 'anim1');
-            expect(keyframes).to.jsonEqual([
-              {offset: 0, opacity: '0'},
-              {offset: 0.25, opacity: '0.5'},
-              {offset: 1, opacity: '1'},
-            ]);
-          });
+      const css = '0%{opacity: 0} 25%{opacity: 0.5} 100%{opacity: 1}';
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css)).then(
+        () => {
+          const keyframes = extractKeyframes(doc, 'anim1');
+          expect(keyframes).to.jsonEqual([
+            {offset: 0, opacity: '0'},
+            {offset: 0.25, opacity: '0.5'},
+            {offset: 1, opacity: '1'},
+          ]);
+        }
+      );
     });
 
     it('should select the latest keyframes', () => {
@@ -159,12 +164,14 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       const css3 = 'from{opacity: 0} to{opacity: 0.3}';
       const css4 = 'from{opacity: 0} to{opacity: 0.4}';
       return Promise.all([
-        createStyle({'amp-custom': ''},
-            keyframesCss('anim1', css1) +
-            keyframesCss('anim1', css2)),
-        createStyle({'amp-custom': ''},
-            keyframesCss('anim1', css3) +
-            keyframesCss('anim1', css4)),
+        createStyle(
+          {'amp-custom': ''},
+          keyframesCss('anim1', css1) + keyframesCss('anim1', css2)
+        ),
+        createStyle(
+          {'amp-custom': ''},
+          keyframesCss('anim1', css3) + keyframesCss('anim1', css4)
+        ),
       ]).then(() => {
         const keyframes = extractKeyframes(doc, 'anim1');
         expect(keyframes).to.jsonEqual([

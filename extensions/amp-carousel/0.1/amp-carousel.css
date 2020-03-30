@@ -48,6 +48,7 @@ amp-carousel {
 }
 
 amp-carousel[controls] .amp-carousel-button,
+amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
 .amp-mode-mouse .amp-carousel-button {
   opacity: 1;
   visibility: visible;
@@ -90,6 +91,17 @@ amp-carousel .amp-carousel-button.amp-disabled {
   visibility: hidden;
 }
 
+amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-prev,
+amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-next {
+  opacity: 0;
+  /**
+   * Note, screen readers can still activate the buttons when hide buttons is
+   * specified, even though we have `pointer-events: none`.
+   */
+  pointer-events: none;
+  visibility: visible !important;
+}
+
 /* Begin SlideScroll */
 .i-amphtml-slidescroll {
 }
@@ -105,18 +117,28 @@ amp-carousel .amp-carousel-button.amp-disabled {
   top: 0;
   width: 100% !important;
   scroll-snap-type: x mandatory !important;
-  /**
-   * Hide the scrollbar by tucking it under some padding
-   * which gets cut off as it overflows the parent.
-   * The exact size of the padding does not matter as long as it is
-   * larger than the height of the scrollbar. 20px is large enough to cover
-   * both desktop and mobile scrolbar sizes in different browsers.
-   * This relies on content box-sizing, although that's the default
-   * we still ensure it does not get overwritten.
+  /*
+   * Hide scrollbars, with three different methods:
+   *
+   * 1. scrollbar-width
+   *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+   *    scrollbars as well
+   * 2. ::-webkit-scrollbar
+   * 3. Using padding to push scrollbar outside of the overflow
+   *
+   * The last method has side-effect of having the bottom of the slides being
+   * cut-off, since the height (or width) of the scrollbar is included when
+   * calculating the 100% height (or width) of the slide.
    */
+  scrollbar-width: none; /* Firefox */
   padding-bottom: 20px !important;
   box-sizing: content-box !important;
   -webkit-overflow-scrolling: touch !important;
+}
+
+/* Chrome, Safari */
+.i-amphtml-slides-container::-webkit-scrollbar {
+  display: none !important;
 }
 
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
@@ -131,7 +153,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   height: 100% !important;
   justify-content: center !important;
   position: relative !important;
-  scroll-snap-align: center !important;
+  scroll-snap-align: start !important;
   width: 100% !important;
 }
 
@@ -152,7 +174,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex: 0 0 1px !important;
   height: 100% !important;
   position: relative !important;
-  scroll-snap-align: center !important;
+  scroll-snap-align: start !important;
   width: 1px !important;
 }
 

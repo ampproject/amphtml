@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-other';
 
-
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
@@ -33,12 +31,12 @@ export class AccessOtherAdapter {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
+    /** @const @protected {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private {?JsonObject} */
     this.authorizationResponse_ =
-        configJson['authorizationFallbackResponse'] || null;
+      configJson['authorizationFallbackResponse'] || null;
 
     /** @const @private {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location);
@@ -55,15 +53,15 @@ export class AccessOtherAdapter {
   isAuthorizationEnabled() {
     // The `type=other` is allowed to use the authorization fallback, but
     // only if it's not on `cdn.ampproject.org`.
-    return (!!this.authorizationResponse_ && !this.isProxyOrigin_);
+    return !!this.authorizationResponse_ && !this.isProxyOrigin_;
   }
 
   /** @override */
   authorize() {
     dev().fine(TAG, 'Use the authorization fallback for type=other');
     // Disallow authorization for proxy origin (`cdn.ampproject.org`).
-    dev().assert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
-    const response = dev().assert(this.authorizationResponse_);
+    devAssert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
+    const response = devAssert(this.authorizationResponse_);
     return Promise.resolve(response);
   }
 

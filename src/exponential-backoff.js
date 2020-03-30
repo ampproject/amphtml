@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @param {number=} opt_base Exponential base. Defaults to 2.
  * @return {function(function()): number} Function that when invoked will
@@ -54,9 +53,9 @@ export function exponentialBackoffClock(opt_base) {
  * @return {number}
  */
 export function getJitter(wait, opt_perc) {
-  opt_perc = opt_perc || .3;
+  opt_perc = opt_perc || 0.3;
   let jitter = wait * opt_perc * Math.random();
-  if (Math.random() > .5) {
+  if (Math.random() > 0.5) {
     jitter *= -1;
   }
   return jitter;

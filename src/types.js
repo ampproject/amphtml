@@ -42,14 +42,7 @@ export function isArray(value) {
  * @template T
  */
 export function toArray(arrayLike) {
-  if (!arrayLike) {
-    return [];
-  }
-  const array = new Array(arrayLike.length);
-  for (let i = 0; i < arrayLike.length; i++) {
-    array[i] = arrayLike[i];
-  }
-  return array;
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
 }
 
 /**
@@ -69,7 +62,7 @@ export function isObject(value) {
  * @return {boolean}
  */
 export function isFiniteNumber(value) {
-  return (typeof value === 'number' && isFinite(value));
+  return typeof value === 'number' && isFinite(value);
 }
 
 /**
@@ -102,4 +95,3 @@ export function isEnumValue(enumObj, s) {
 export function toWin(winOrNull) {
   return /** @type {!Window} */ (winOrNull);
 }
-

@@ -67,10 +67,10 @@ export function isShadowDomSupported() {
  */
 export function isShadowCssSupported() {
   if (shadowCssSupported === undefined) {
-    shadowCssSupported = isShadowDomSupported() && (
-      isNative(Element.prototype.attachShadow) ||
-      isNative(Element.prototype.createShadowRoot)
-    );
+    shadowCssSupported =
+      isShadowDomSupported() &&
+      (isNative(Element.prototype.attachShadow) ||
+        isNative(Element.prototype.createShadowRoot));
   }
   return shadowCssSupported;
 }
@@ -78,7 +78,7 @@ export function isShadowCssSupported() {
 /**
  * Returns `true` if the passed function is native to the browser, and is not
  * polyfilled
- * @param {function()|undefined} func A function that is attatched to a JS
+ * @param {Function|undefined} func A function that is attatched to a JS
  * object.
  * @return {boolean}
  */
@@ -88,17 +88,24 @@ function isNative(func) {
 
 /**
  * Returns the supported version of Shadow DOM spec.
- * @param {Function=} opt_elementClass optional for testing
+ * @param {?typeof Element=} opt_elementClass optional for testing
  * @return {ShadowDomVersion}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
-    shadowDomSupportedVersion =
-        getShadowDomVersion(opt_elementClass || Element);
+    shadowDomSupportedVersion = getShadowDomVersion(
+      opt_elementClass || Element
+    );
   }
   return shadowDomSupportedVersion;
 }
 
+/**
+ * Returns shadow dom version.
+ *
+ * @param {?typeof Element=} element
+ * @return {ShadowDomVersion}
+ */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
     return ShadowDomVersion.V1;

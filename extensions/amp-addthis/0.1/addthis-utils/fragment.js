@@ -19,8 +19,8 @@ const RE_ADDTHIS_FRAGMENT = /^\.[a-z0-9\-_]{11}(\.[a-z0-9_]+)?$/i;
 
 /**
  * Fetches the fragment if it is in the style of a modern AddThis fragment.
- * @param url
- * @return (string|undefined)
+ * @param {string} url
+ * @return {string|undefined}
  */
 const getModernFragment = url => {
   let frag = url.split('#').pop();
@@ -38,7 +38,7 @@ const getModernFragment = url => {
 
 /**
  * Returns true if AddThis share fragment exists on URL
- * @param url
+ * @param {string} url
  * @return {boolean}
  */
 const isAddthisFragment = url => {
@@ -75,7 +75,10 @@ export const clearOurFragment = url => {
 export const getFragmentId = url => {
   const fragment = getModernFragment(url);
   if (fragment) {
-    return fragment.split('.').slice(1).shift();
+    return fragment
+      .split('.')
+      .slice(1)
+      .shift();
   } else {
     return undefined;
   }
@@ -89,7 +92,10 @@ export const getFragmentId = url => {
 export const getServiceFromUrlFragment = url => {
   const fragment = getModernFragment(url);
   if (fragment) {
-    return fragment.split('.').slice(2).shift();
+    return fragment
+      .split('.')
+      .slice(2)
+      .shift();
   } else {
     return undefined;
   }

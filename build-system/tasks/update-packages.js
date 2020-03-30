@@ -17,11 +17,25 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const {exec, getStderr} = require('../exec');
+const {exec, execOrDie, getStderr} = require('../common/exec');
+const {isTravisBuild} = require('../common/travis');
 
 const yarnExecutable = 'npx yarn';
+
+/**
+ * Writes the given contents to the patched file if updated
+ * @param {string} patchedName Name of patched file
+ * @param {string} file Contents to write
+ */
+function writeIfUpdated(patchedName, file) {
+  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
+    fs.writeFileSync(patchedName, file);
+    if (!isTravisBuild()) {
+      log(colors.green('Patched'), colors.cyan(patchedName));
+    }
+  }
+}
 
 /**
  * Patches Web Animations API by wrapping its body into `install` function.
@@ -30,42 +44,36 @@ const yarnExecutable = 'npx yarn';
  */
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  if (fs.existsSync(patchedName)) {
-    return;
-  }
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
-  // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file.replace(/requestAnimationFrame/g, function(a, b) {
-        if (file.charAt(b - 1) == '.') {
-          return a;
-        }
-        return 'window.' + a;
-      }) +
-      '\n' +
-      '}\n';
-  fs.writeFileSync(patchedName, file);
-  if (!process.env.TRAVIS) {
-    log(colors.green('Patched'), colors.cyan(patchedName));
-  }
-}
+  const patchedName =
+    'node_modules/web-animations-js/web-animations.install.js';
+  let file = fs
+    .readFileSync('node_modules/web-animations-js/web-animations.min.js')
+    .toString();
+  // Replace |requestAnimationFrame| with |window|.
+  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+    if (file.charAt(b - 1) == '.') {
+      return a;
+    }
+    return 'window.' + a;
+  });
+  // Fix web-animations-js code that violates strict mode.
+  // See https://github.com/ampproject/amphtml/issues/18612 and
+  // https://github.com/web-animations/web-animations-js/issues/46
+  file = file.replace(/b.true=a/g, 'b?b.true=a:true');
 
-/**
- * Installs custom lint rules in build-system/eslint-rules to node_modules.
- */
-function installCustomEslintRules() {
-  const customRuleDir = 'build-system/eslint-rules';
-  const customRuleName = 'eslint-plugin-amphtml-internal';
-  exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
-  if (!process.env.TRAVIS) {
-    log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
-  }
+  // Fix web-animations-js code that attempts to write a read-only property.
+  // See https://github.com/ampproject/amphtml/issues/19783 and
+  // https://github.com/web-animations/web-animations-js/issues/160
+  file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
+
+  // Wrap the contents inside the install function.
+  file =
+    'export function installWebAnimations(window) {\n' +
+    'var document = window.document;\n' +
+    file +
+    '\n' +
+    '}\n';
+  writeIfUpdated(patchedName, file);
 }
 
 /**
@@ -74,16 +82,37 @@ function installCustomEslintRules() {
 function runYarnCheck() {
   const integrityCmd = yarnExecutable + ' check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    log(colors.yellow('WARNING:'), 'The packages in',
-        colors.cyan('node_modules'), 'do not match',
-        colors.cyan('package.json.'));
+    log(
+      colors.yellow('WARNING:'),
+      'The packages in',
+      colors.cyan('node_modules'),
+      'do not match',
+      colors.cyan('package.json.')
+    );
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    exec(yarnExecutable);
+    /**
+     * NOTE: executing yarn with --production=false prevents having
+     * NODE_ENV=production variable set which forces yarn to not install
+     * devDependencies. This usually breaks gulp for example.
+     */
+    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
   } else {
-    log(colors.green('All packages in'),
-        colors.cyan('node_modules'), colors.green('are up to date.'));
+    log(
+      colors.green('All packages in'),
+      colors.cyan('node_modules'),
+      colors.green('are up to date.')
+    );
+  }
+}
+
+/**
+ * Used as a pre-requisite by several gulp tasks.
+ */
+function maybeUpdatePackages() {
+  if (!isTravisBuild()) {
+    updatePackages();
   }
 }
 
@@ -91,16 +120,17 @@ function runYarnCheck() {
  * Installs custom lint rules, updates node_modules (for local dev), and patches
  * web-animations-js if necessary.
  */
-function updatePackages() {
-  installCustomEslintRules();
-  if (!process.env.TRAVIS) {
+async function updatePackages() {
+  if (!isTravisBuild()) {
     runYarnCheck();
   }
   patchWebAnimations();
 }
 
-gulp.task(
-    'update-packages',
-    'Runs yarn if node_modules is out of date, and patches web-animations-js',
-    updatePackages
-);
+module.exports = {
+  maybeUpdatePackages,
+  updatePackages,
+};
+
+updatePackages.description =
+  'Runs yarn if node_modules is out of date, and applies custom patches';

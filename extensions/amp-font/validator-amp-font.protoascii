@@ -17,13 +17,13 @@
 tags: {  # amp-font
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-font"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +31,7 @@ tags: {  # amp-font
 tags: {  # <amp-font>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-FONT"
   requires_extension: "amp-font"
   attrs: {

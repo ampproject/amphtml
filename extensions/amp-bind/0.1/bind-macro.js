@@ -21,7 +21,7 @@ import {BindExpression} from './bind-expression';
  */
 export class BindMacro {
   /**
-   * @param {!./amp-bind-macro.AmpBindMacroDef} data
+   * @param {!BindMacroDef} data
    * @param {!Object<string, !BindMacro>} referableMacros
    */
   constructor(data, referableMacros) {
@@ -29,22 +29,24 @@ export class BindMacro {
     this.argumentNames_ = data.argumentNames || [];
 
     /** @const @private {!BindExpression} */
-    this.expression_ =
-        new BindExpression(data.expressionString, referableMacros);
+    this.expression_ = new BindExpression(
+      data.expressionString,
+      referableMacros
+    );
   }
 
   /**
-   * @param {!Object} state
+   * @param {!JsonObject} scope
    * @param {!Array} args
    * @throws {Error} On illegal function invocation.
-   * @return {./bind-expression.BindExpressionResultDef}
+   * @return {BindExpressionResultDef}
    */
-  evaluate(state, args) {
-    const scope = Object.assign({}, state);
+  evaluate(scope, args) {
+    const copy = /** @type {!JsonObject} */ ({...scope});
     for (let i = 0; i < this.argumentNames_.length; i++) {
-      scope[this.argumentNames_[i]] = args[i];
+      copy[this.argumentNames_[i]] = args[i];
     }
-    return this.expression_.evaluate(scope);
+    return this.expression_.evaluate(copy);
   }
 
   /**

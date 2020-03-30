@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
+import {HostServices} from '../../../src/inabox/host-services';
+import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
+import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
-  VisibilityManagerForDoc,
-  VisibilityManagerForEmbed,
-} from './visibility-manager';
-import {
-  closestBySelector,
+  closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {provideVisibilityManager} from './visibility-manager';
 import {tryResolve} from '../../../src/utils/promise';
-import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
+import {whenContentIniLoad} from '../../../src/ini-load';
 
-const TAG = 'amp-analytics';
-
+const TAG = 'amp-analytics/analytics-root';
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
  * an arbitrary AMP element.
  *
- * TODO(dvoytenko): consider moving this concept into core as `AmpRoot`
- * interface that will be implemented by `AmpDoc` and `FriendlyIframeEmbed`.
+ * TODO(#22733): merge analytics root properties into ampdoc.
  *
  * @implements {../../../src/service.Disposable}
  * @abstract
@@ -47,20 +45,58 @@ const TAG = 'amp-analytics';
 export class AnalyticsRoot {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {?AnalyticsRoot} parent
    */
-  constructor(ampdoc, parent) {
+  constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
-
-    /** @const */
-    this.parent = parent;
 
     /** @const */
     this.trackers_ = map();
 
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
+
+    /** @private {?./scroll-manager.ScrollManager} */
+    this.scrollManager_ = null;
+
+    /** @private {?Promise} */
+    this.usingHostAPIPromise_ = null;
+
+    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
+    this.hostVisibilityService_ = null;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  isUsingHostAPI() {
+    if (this.usingHostAPIPromise_) {
+      return this.usingHostAPIPromise_;
+    }
+    if (!HostServices.isAvailable(this.ampdoc)) {
+      this.usingHostAPIPromise_ = Promise.resolve(false);
+    } else {
+      // TODO: Using the visibility service and apply it for all tracking types
+      const promise = HostServices.visibilityForDoc(this.ampdoc);
+      this.usingHostAPIPromise_ = promise
+        .then(visibilityService => {
+          this.hostVisibilityService_ = visibilityService;
+          return true;
+        })
+        .catch(error => {
+          dev().fine(
+            TAG,
+            'VisibilityServiceError - fallback=' + error.fallback
+          );
+          if (error.fallback) {
+            // Do not use HostAPI, fallback to original implementation.
+            return false;
+          }
+          // Cannot fallback, service error. Throw user error.
+          throw user().createError('Host Visibility Service Error');
+        });
+    }
+    return this.usingHostAPIPromise_;
   }
 
   /** @override */
@@ -71,6 +107,9 @@ export class AnalyticsRoot {
     }
     if (this.visibilityManager_) {
       this.visibilityManager_.dispose();
+    }
+    if (this.scrollManager_) {
+      this.scrollManager_.dispose();
     }
   }
 
@@ -84,14 +123,14 @@ export class AnalyticsRoot {
   /**
    * The root node the analytics is scoped to.
    *
-   * @return {!Document|!ShadowRoot|!Element}
+   * @return {!Document|!ShadowRoot}
    * @abstract
    */
   getRoot() {}
 
   /**
    * The viewer of analytics root
-   * @return {!../../../src/service/viewer-impl.Viewer}
+   * @return {!../../../src/service/viewer-interface.ViewerInterface}
    */
   getViewer() {
     return Services.viewerForDoc(this.ampdoc);
@@ -104,7 +143,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -146,7 +189,7 @@ export class AnalyticsRoot {
    * Returns the tracker for the specified name and list of allowed types.
    *
    * @param {string} name
-   * @param {!Object<string, function(new:./events.EventTracker)>} whitelist
+   * @param {!Object<string, typeof ./events.EventTracker>} whitelist
    * @return {?./events.EventTracker}
    */
   getTrackerForWhitelist(name, whitelist) {
@@ -162,7 +205,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {typeof ./events.CustomEventTracker|typeof ./events.ClickEventTracker|typeof ./events.ScrollEventTracker|typeof ./events.SignalTracker|typeof ./events.IniLoadTracker|typeof ./events.VideoEventTracker|typeof ./events.VideoEventTracker|typeof ./events.VisibilityTracker|typeof ./events.AmpStoryEventTracker} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -201,8 +244,12 @@ export class AnalyticsRoot {
     }
     if (selector == ':host') {
       return new Promise(resolve => {
-        resolve(user().assertElement(
-            this.getHostElement(), `Element "${selector}" not found`));
+        resolve(
+          user().assertElement(
+            this.getHostElement(),
+            `Element "${selector}" not found`
+          )
+        );
       });
     }
 
@@ -215,12 +262,12 @@ export class AnalyticsRoot {
         if (selectionMethod == 'scope') {
           found = scopedQuerySelector(context, selector);
         } else if (selectionMethod == 'closest') {
-          found = closestBySelector(context, selector);
+          found = closestAncestorElementBySelector(context, selector);
         } else {
           found = this.getRoot().querySelector(selector);
         }
       } catch (e) {
-        user().assert(false, `Invalid query selector ${selector}`);
+        userAssert(false, `Invalid query selector ${selector}`);
       }
 
       // DOM search can "look" outside the boundaries of the root, thus make
@@ -228,8 +275,7 @@ export class AnalyticsRoot {
       if (found && this.contains(found)) {
         result = found;
       }
-      return user().assertElement(
-          result, `Element "${selector}" not found`);
+      return user().assertElement(result, `Element "${selector}" not found`);
     });
   }
 
@@ -241,13 +287,16 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod) {
+  getAmpElement(context, selector, selectionMethod, opt_multiSelectorOn) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      user().assert(
-          element.classList.contains('i-amphtml-element'),
-          'Element "%s" is required to be an AMP element', selector);
+      userAssert(
+        element.classList.contains('i-amphtml-element'),
+        'Element "%s" is required to be an AMP element',
+        selector
+      );
       return element;
     });
   }
@@ -265,8 +314,7 @@ export class AnalyticsRoot {
    *   `'closest'` and `'scope'`.
    * @return {function(!Event)}
    */
-  createSelectiveListener(
-    listener, context, selector, selectionMethod = null) {
+  createSelectiveListener(listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
@@ -276,18 +324,20 @@ export class AnalyticsRoot {
 
       // Navigate up the DOM tree to find the actual target.
       const rootElement = this.getRootElement();
-      const isSelectAny = (selector == '*');
-      const isSelectRoot = (selector == ':root');
+      const isSelectAny = selector == '*';
+      const isSelectRoot = selector == ':root';
       let {target} = event;
       while (target) {
-
         // Target must be contained by this root.
         if (!this.contains(target)) {
           break;
         }
         // `:scope` context must contain the target.
-        if (selectionMethod == 'scope' &&
-            !isSelectRoot && !context.contains(target)) {
+        if (
+          selectionMethod == 'scope' &&
+          !isSelectRoot &&
+          !context.contains(target)
+        ) {
           break;
         }
         // `closest()` target must contain the conext.
@@ -298,9 +348,11 @@ export class AnalyticsRoot {
         }
 
         // Check if the target matches the selector.
-        if (isSelectAny ||
-            isSelectRoot && target == rootElement ||
-            matchesNoInline(target, selector)) {
+        if (
+          isSelectAny ||
+          (isSelectRoot && target == rootElement) ||
+          tryMatches_(target, selector)
+        ) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one
           // ancestor matches the selector.
@@ -324,23 +376,41 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
+   *
+   * The caller needs to make sure to call getVisibilityManager after
+   * usingHostAPIPromise has resolved
    * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
-      this.visibilityManager_ = this.createVisibilityManager();
+      if (this.hostVisibilityService_) {
+        // If there is hostAPI (hostAPI never exist with the FIE case)
+        this.visibilityManager_ = new VisibilityManagerForMApp(
+          this.ampdoc,
+          this.hostVisibilityService_
+        );
+      } else {
+        this.visibilityManager_ = provideVisibilityManager(this.getRoot());
+      }
     }
     return this.visibilityManager_;
   }
 
   /**
-   * @return {!./visibility-manager.VisibilityManager}
-   * @protected
-   * @abstract
+   *  Returns the Scroll Managet corresponding to this analytics root.
+   * The Scroll Manager is created lazily as needed, and will handle
+   * calling all handlers for a scroll event.
+   * @return {!./scroll-manager.ScrollManager}
    */
-  createVisibilityManager() {}
-}
+  getScrollManager() {
+    // TODO (zhouyx@): Disallow scroll trigger with host API
+    if (!this.scrollManager_) {
+      this.scrollManager_ = new ScrollManager(this);
+    }
 
+    return this.scrollManager_;
+  }
+}
 
 /**
  * The implementation of the analytics root for an ampdoc.
@@ -350,7 +420,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    super(ampdoc, /* parent */ null);
+    super(ampdoc);
   }
 
   /** @override */
@@ -397,25 +467,19 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
     }
     return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
-
-  /** @override */
-  createVisibilityManager() {
-    return new VisibilityManagerForDoc(this.ampdoc);
-  }
 }
-
 
 /**
  * The implementation of the analytics root for FIE.
+ * TODO(#22733): merge into AnalyticsRoot once ampdoc-fie is launched.
  */
 export class EmbedAnalyticsRoot extends AnalyticsRoot {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} embed
-   * @param {?AnalyticsRoot} parent
    */
-  constructor(ampdoc, embed, parent) {
-    super(ampdoc, parent);
+  constructor(ampdoc, embed) {
+    super(ampdoc);
     /** @const */
     this.embed = embed;
   }
@@ -449,22 +513,15 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   whenIniLoaded() {
     return this.embed.whenIniLoaded();
   }
-
-  /** @override */
-  createVisibilityManager() {
-    return new VisibilityManagerForEmbed(
-        this.parent.getVisibilityManager(),
-        this.embed);
-  }
 }
-
 
 /**
  * @param  {!Element} el
  * @param  {string} selector
  * @return {boolean}
+ * @noinline
  */
-function matchesNoInline(el, selector) {
+function tryMatches_(el, selector) {
   try {
     return matches(el, selector);
   } catch (e) {

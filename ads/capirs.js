@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -62,25 +61,27 @@ export function capirs(global, data) {
         const reportId = 'capirs-' + banner['banner_id'];
         global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: global.context.noContentAvailable,
+      unexist: function() {
+        global.context.noContentAvailable();
+      },
     },
   };
 
-  loadScript(global, '//ssp.rambler.ru/lpdid.js');
   loadScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} banner
+ * @return {*} TODO(#23582): Specify return type
  */
 function getWidth(global, banner) {
   let width;
 
   if (isResponsiveAd(banner)) {
     width = Math.max(
-        global.document.documentElement./*OK*/clientWidth,
-        global.window./*OK*/innerWidth || 0
+      global.document.documentElement./*OK*/ clientWidth,
+      global.window./*OK*/ innerWidth || 0
     );
   } else {
     width = banner.width;

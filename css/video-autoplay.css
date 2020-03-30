@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 i-amphtml-video-mask {
+  display: block;
   z-index: 1;
 }
 
@@ -33,13 +34,14 @@ i-amphtml-video-mask {
   display: none;
 }
 
-[controls] .amp-video-eq,
+amp-video[controls] .amp-video-eq,
+.i-amphtml-video-interface:not(amp-video) .amp-video-eq,
 amp-story .amp-video-eq {
   display: flex;
 }
 
 [noaudio] .amp-video-eq {
-  display: none;
+  display: none !important;
 }
 
 .amp-video-eq {

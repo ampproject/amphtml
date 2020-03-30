@@ -19,7 +19,7 @@
  * Loading indicator.
  * Hide when `i-amphtml-subs-loading` class is not set.
  */
-html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
+body:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
   display: none !important;
 }
 
@@ -28,7 +28,7 @@ html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
  * Content section.
  * Hide when not known or denied.
  */
-html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
+body:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
   display: none !important;
 }
 
@@ -37,7 +37,7 @@ html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
  * Content-not-granted section.
  * Hide when not known or granted.
  */
-html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
+body:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
   display: none !important;
 }
 
@@ -46,8 +46,8 @@ html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"]
  * Actions sections.
  * Hide when not known or delegated.
  */
-html.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
-html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
+body.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
+body.i-amphtml-subs-delegated [subscriptions-section="actions"] {
   display: none !important;
 }
 
@@ -57,7 +57,7 @@ html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
  */
 
 /** Hide actions until state is known. */
-html.i-amphtml-subs-grant-unk [subscriptions-action] {
+body.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
@@ -75,7 +75,7 @@ amp-subscriptions-dialog {
   left: 0 !important;
   margin-left: 0 !important;
   width: 100% !important;
-  z-index: 2147483641;  /* Behind lightbox if available. */
+  z-index: 2147483641 !important;  /* Paywall is behind iframes from swg.js */
   max-height: 90vh;
   box-sizing: border-box;
   opacity: 1;
@@ -103,7 +103,7 @@ amp-subscriptions-dialog {
   cursor: pointer;
 }
 
-html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+body:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   display: none;
 }
 

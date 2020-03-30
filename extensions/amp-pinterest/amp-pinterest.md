@@ -1,3 +1,11 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a Pinterest widget, Save button, or Follow button.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors.
 
@@ -14,43 +22,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name=”amp-pinterest”></a> `amp-pinterest`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Pinterest widget, Pin It button, or Follow button.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
-  </tr>
-</table>
-
-[TOC]
+# amp-pinterest
 
 ## Examples
 
-Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Follow button.
+Use the `amp-pinterest` component to display a Save button, Pin widget, or Follow button.
 
-**Example: Pin It button**
+**Example: Save button**
 
 ```html
 <amp-pinterest
-  height=20
-  width=40
+  height="20"
+  width="40"
   data-do="buttonPin"
   data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
   data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
-  data-description="Next stop: Pinterest">
+  data-description="Next stop: Pinterest"
+>
 </amp-pinterest>
 ```
 
@@ -58,10 +46,11 @@ Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Fol
 
 ```html
 <amp-pinterest
-  width=245
-  height=330
+  width="245"
+  height="330"
   data-do="embedPin"
-  data-url="https://www.pinterest.com/pin/99360735500167749/">
+  data-url="https://www.pinterest.com/pin/99360735500167749/"
+>
 </amp-pinterest>
 ```
 
@@ -69,15 +58,16 @@ Use the `amp-pinterest` component to display a Pin It button, Pin widget, or Fol
 
 ```html
 <amp-pinterest
-    height=20
-    width=94
-    data-do="buttonFollow"
-    data-href="https://www.pinterest.com/kentbrew/"
-    data-label="Kent Brewster">
+  height="20"
+  width="94"
+  data-do="buttonFollow"
+  data-href="https://www.pinterest.com/kentbrew/"
+  data-label="Kent Brewster"
+>
 </amp-pinterest>
 ```
 
-## Pin It Button
+## Save Button
 
 ##### data-do (required)
 
@@ -85,17 +75,17 @@ Must be set to `buttonPin`.
 
 ##### data-url (required)
 
-Contains the fully-qualified URL intended to be pinned or re-made into a widget.
+Contains the fully-qualified URL intended to be saved as a pin or re-made into a widget.
 
 ##### data-media (required)
 
-Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
+Contains the fully-qualified URL of the image intended to be saved as a pin. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
 
 ##### data-description (required)
 
 Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
-### Sizing the Pin It button
+### Sizing the Save button
 
 Default small rectangular button:
 

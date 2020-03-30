@@ -18,8 +18,8 @@ tags: {  # amp-auto-ads
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-auto-ads"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -33,5 +33,5 @@ tags: {  # <amp-auto-ads>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-auto-ads"
+  spec_url: "https://amp.dev/documentation/components/amp-auto-ads"
 }

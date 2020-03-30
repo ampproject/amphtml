@@ -27,8 +27,9 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -51,10 +52,11 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
  * (e.g. [align-content], [align-items], ...)
  * @private @const {string}
  */
-const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
-    Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
-        .map(key => `[${key}]`)
-        .join(',');
+const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
+  SUPPORTED_CSS_GRID_ATTRIBUTES
+)
+  .map(key => `[${key}]`)
+  .join(',');
 
 /**
  * The attribute name for grid layer templates.
@@ -81,11 +83,21 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
-    /** @private @const {boolean} Only prerender if child of the first page. */
-    this.prerenderAllowed_ = matches(this.element,
-        'amp-story-page:first-of-type amp-story-grid-layer');
+    /** @private {boolean} */
+    this.prerenderAllowed_ = false;
+
+    /** @private {?{horiz: number, vert: number}} */
+    this.aspectRatio_ = null;
   }
 
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender if child of the first page.
+    this.prerenderAllowed_ = matches(
+      this.element,
+      'amp-story-page:first-of-type amp-story-grid-layer'
+    );
+  }
 
   /** @override */
   buildCallback() {
@@ -93,14 +105,55 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
+    this.initializeListeners_();
   }
-
 
   /** @override */
   prerenderAllowed() {
     return this.prerenderAllowed_;
   }
 
+  /** @private */
+  initializeListeners_() {
+    const aspectRatio = this.element.getAttribute('aspect-ratio');
+    if (aspectRatio) {
+      const aspectRatioSplits = aspectRatio.split(':');
+      const horiz = parseInt(aspectRatioSplits[0], 10);
+      const vert = parseInt(aspectRatioSplits[1], 10);
+      if (horiz > 0 && vert > 0) {
+        this.aspectRatio_ = {horiz, vert};
+        const storeService = getStoreService(this.win);
+        storeService.subscribe(
+          StateProperty.PAGE_SIZE,
+          this.updatePageSize_.bind(this),
+          true /* callToInitialize */
+        );
+      }
+    }
+  }
+
+  /**
+   * @param {?{width: number, height: number}} pageSize
+   * @private
+   */
+  updatePageSize_(pageSize) {
+    if (!pageSize) {
+      return;
+    }
+    const {width: vw, height: vh} = pageSize;
+    const {horiz, vert} = this.aspectRatio_;
+    const width = Math.min(vw, (vh * horiz) / vert);
+    const height = Math.min(vh, (vw * vert) / horiz);
+    if (width > 0 && height > 0) {
+      this.getVsync().mutate(() => {
+        this.element.classList.add('i-amphtml-story-grid-template-aspect');
+        setStyles(this.element, {
+          '--i-amphtml-story-layer-width': px(width),
+          '--i-amphtml-story-layer-height': px(height),
+        });
+      });
+    }
+  }
 
   /**
    * Applies internal CSS class names for the template attribute, so that styles
@@ -117,15 +170,16 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     }
   }
 
-
   /**
    * Copies the whitelisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
   setDescendentCssGridStyles_() {
-    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
-        SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
+    const elementsToUpgradeStyles = scopedQuerySelectorAll(
+      this.element,
+      SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
+    );
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
@@ -141,7 +195,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.setCssGridStyles_(this.element);
   }
 
-
   /**
    * Copies the values of an element's attributes to its styles, if the
    * attributes/properties are in the whitelist.
@@ -150,14 +203,16 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    *     its attributes.
    */
   setCssGridStyles_(element) {
+    const styles = {};
     for (let i = element.attributes.length - 1; i >= 0; i--) {
       const attribute = element.attributes[i];
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
-        setStyle(element, propertyName, attribute.value);
+        styles[propertyName] = attribute.value;
         element.removeAttribute(attributeName);
       }
     }
+    setStyles(element, assertDoesNotContainDisplay(styles));
   }
 }

@@ -22,6 +22,7 @@
  *   const { x: { y } } = obj.prop;
  * Good:
  *   const { y } = obj.prop.x;
+ * @return {!Object}
  */
 module.exports = function(context) {
   return {

@@ -1,0 +1,13 @@
+diff --git a/third_party/inputmask/inputmask.date.extensions.js b/third_party/inputmask/inputmask.date.extensions.js
+index b6e823315..33d1e7da8 100755
+--- a/third_party/inputmask/inputmask.date.extensions.js
++++ b/third_party/inputmask/inputmask.date.extensions.js
+@@ -78,7 +78,7 @@ export function factory(Inputmask) {
+         return opts.tokenizer;
+     }
+     function isValidDate(dateParts, currentResult) {
+-        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
++        return !isFinite(dateParts.rawday) || dateParts.day == "29" && !isFinite(dateParts.rawyear) || dateParts.rawyear < 1000 || new Date(dateParts.date.getFullYear(), isFinite(dateParts.rawmonth) ? dateParts.month : dateParts.date.getMonth() + 1, 0).getDate() >= dateParts.day ? currentResult : false;
+     }
+     function isDateInRange(dateParts, opts) {
+         var result = true;

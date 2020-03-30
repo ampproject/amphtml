@@ -21,16 +21,15 @@
  *   Apache License.
  */
 
-goog.provide('amp.htmlparser.HtmlParserTest');
-goog.require('amp.htmlparser.HtmlParser');
-goog.require('amp.htmlparser.HtmlSaxHandler');
-goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
+goog.module('amp.htmlparser.HtmlParserTest');
 
+const {DocLocator, HtmlSaxHandler, HtmlSaxHandlerWithLocation} = goog.require('amp.htmlparser.interface');
+const {HtmlParser} = goog.require('amp.htmlparser');
 
 /**
  * @private
  */
-class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
+class LoggingHandler extends HtmlSaxHandler {
   constructor() {
     super();
     this.log = [];
@@ -95,19 +94,27 @@ class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
 describe('HtmlParser', () => {
   it('parses basic text', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, 'hello world');
 
     expect(handler.log).toEqual([
-      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'pcdata("hello world")', 'endTag(BODY)', 'effectiveBodyTag([])',
+      'startDoc()',
+      'startTag(HTML,[])',
+      'startTag(HEAD,[])',
+      'endTag(HEAD)',
+      'markManufacturedBody()',
+      'startTag(BODY,[])',
+      'pcdata("hello world")',
+      'endTag(BODY)',
+      'endTag(HTML)',
+      'effectiveBodyTag([])',
       'endDoc()',
     ]);
   });
 
   it('parses image tag', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<img src="hello.gif">');
 
     expect(handler.log).toEqual([
@@ -119,7 +126,7 @@ describe('HtmlParser', () => {
 
   it('parses tags inside tags', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<div><span>hello world</span></div>');
 
     expect(handler.log).toEqual([
@@ -132,7 +139,7 @@ describe('HtmlParser', () => {
 
   it('parses tag with multiple attrs', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<img src="hello.gif" width="400px">');
 
     expect(handler.log).toEqual([
@@ -144,7 +151,7 @@ describe('HtmlParser', () => {
 
   it('parses tag with duplicate attrs', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<a class=foo class=bar>');
 
     expect(handler.log).toEqual([
@@ -156,7 +163,7 @@ describe('HtmlParser', () => {
 
   it('parses tag with boolean attr', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
 
     expect(handler.log).toEqual([
@@ -168,7 +175,7 @@ describe('HtmlParser', () => {
 
   it('parses unclosed tag', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<span>');
 
     expect(handler.log).toEqual([
@@ -180,7 +187,7 @@ describe('HtmlParser', () => {
 
   it('parses style tag', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<span style="background-color: black;"></span>');
 
     expect(handler.log).toEqual([
@@ -192,7 +199,7 @@ describe('HtmlParser', () => {
 
   it('parses cdata', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<script><![CDATA[alert("hey");]]><\/script>');
 
     expect(handler.log).toEqual([
@@ -204,7 +211,7 @@ describe('HtmlParser', () => {
 
   it('parses several tags on the same level', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<img><p>hello<img><div/></p>');
 
     expect(handler.log).toEqual([
@@ -217,7 +224,7 @@ describe('HtmlParser', () => {
 
   it('will not hold state between two parse calls', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<div/>');
     parser.parse(handler, '<div/>');
 
@@ -232,7 +239,7 @@ describe('HtmlParser', () => {
 
   it('skips over comments', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<div><!-- this is a comment --></div>');
 
     expect(handler.log).toEqual([
@@ -244,7 +251,7 @@ describe('HtmlParser', () => {
 
   it('processes unknown or custom tags', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(
         handler, '<a-tag><more-tags>' +
             '<custom foo="Hello">world.</more-tags></a-tag>');
@@ -260,7 +267,7 @@ describe('HtmlParser', () => {
 
   it('parses oddly formatted attributes', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<a href="foo.html""></a>');
 
@@ -274,7 +281,7 @@ describe('HtmlParser', () => {
   // See https://www.w3.org/TR/html-markup/p.html for the logic.
   it('closes <p> tags with omitted </p> tags implicitly', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<p>I am not closed!<p>I am closed!</p>');
 
@@ -289,7 +296,7 @@ describe('HtmlParser', () => {
   // See https://www.w3.org/TR/html-markup/dd.html for the logic.
   it('closes <dd> and <dt> with omitted </dd> and </dt> implicitly', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<dl><dd><dd><dt><dd></dl>');
 
@@ -305,7 +312,7 @@ describe('HtmlParser', () => {
   // See https://www.w3.org/TR/html-markup/li.html for the logic.
   it('closes <li> tags with omitted </li> tags implicitly', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<ul><li><li></ul>');
 
@@ -319,7 +326,7 @@ describe('HtmlParser', () => {
 
   it('reports attributes on the effective body tag', () => {
     const handler = new LoggingHandler();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<body foo=bar><body baz=bang><body foo=poo>');
 
     expect(handler.log).toEqual([
@@ -332,11 +339,10 @@ describe('HtmlParser', () => {
 /**
  * @private
  */
-class LoggingHandlerWithLocation extends
-  amp.htmlparser.HtmlSaxHandlerWithLocation {
+class LoggingHandlerWithLocation extends HtmlSaxHandlerWithLocation {
   constructor() {
     super();
-    /** @type {amp.htmlparser.DocLocator} */
+    /** @type {?DocLocator} */
     this.locator = null;
     /** @type {!Array<string>} */
     this.log = [];
@@ -423,7 +429,7 @@ describe('HtmlParser with location', () => {
 
   it('reports line and column', () => {
     const handler = new LoggingHandlerWithLocation();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(
         handler, '<html>\n' +
             '  <body>\n' +
@@ -451,7 +457,7 @@ describe('HtmlParser with location', () => {
     // produce a DOM which has the div outside the custom - because
     // the div closes the p whereas the a-custom remains inside.
     const handler = new LoggingHandlerWithLocation();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(
         handler, '<html>\n' +
             '  <body>\n' +
@@ -492,7 +498,7 @@ describe('HtmlParser with location', () => {
   // that the cdata contains newlines etc.
   it('tracks line and column past complex cdata sections', () => {
     const handler = new LoggingHandlerWithLocation();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(
         handler, '<html>\n' +
             '<body>\n' +
@@ -537,10 +543,10 @@ describe('HtmlParser with location', () => {
   it('Supports Turkish UTF8 İ character in body', () => {
     // A Javascript string with this character in it has .length 1, but
     // when .toLowerCase()'d it becomes length 2, which would throw off
-    // the bookkeeping in htmlparser.js. Hence, amp.htmlparser.toLowerCase
+    // the bookkeeping in js. Hence, amp.toLowerCase
     // works around the problem.
     const handler = new LoggingHandlerWithLocation();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(
         handler, '<!doctype html>\n' +
             '<html amp lang="tr">\n' +
@@ -585,7 +591,7 @@ describe('HtmlParser with location', () => {
 
   it('Supports SVG with self-closed tags', () => {
     const handler = new LoggingHandlerWithLocation();
-    const parser = new amp.htmlparser.HtmlParser();
+    const parser = new HtmlParser();
     parser.parse(handler, '<html><body><svg><foo/></svg></body></html>');
 
     expect(handler.log).toEqual([

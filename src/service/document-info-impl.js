@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {getSourceUrl, parseUrlDeprecated} from '../url';
+import {
+  getProxyServingType,
+  getSourceUrl,
+  parseQueryString,
+  parseUrlDeprecated,
+} from '../url';
+
+import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -24,34 +31,37 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
- *     - url: The doc's url.
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *     - pageViewId64: Id for this page view. High entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
- *     - metaTags: A map object of meta tag's name (key) and corresponding
- *       contents (value).
+ *     - viewport: The global doc's viewport.
+ *     - replaceParams: A map object of extra query string parameter names (key)
+ *       to corresponding values, used for custom analytics.
+ *       Null if not applicable.
  *
  * @typedef {{
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
- *   metaTags: !Object<string, string|!Array<string>>,
+ *   viewport: ?string,
+ *   replaceParams: ?Object<string, string|!Array<string>>
  * }}
  */
 export let DocumentInfoDef;
 
-
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
-
 
 export class DocInfo {
   /**
@@ -62,6 +72,8 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
+    /** @private {?Promise<string>} */
+    this.pageViewId64_ = null;
   }
 
   /** @return {!DocumentInfoDef} */
@@ -73,8 +85,7 @@ export class DocInfo {
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
     const rootNode = ampdoc.getRootNode();
-    let canonicalUrl = rootNode && rootNode.AMP
-        && rootNode.AMP.canonicalUrl;
+    let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');
       canonicalUrl = canonicalTag
@@ -83,21 +94,31 @@ export class DocInfo {
     }
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
-    const metaTags = getMetaTags(ampdoc.win.document);
+    const viewport = getViewport(ampdoc.win.document);
+    const replaceParams = getReplaceParams(ampdoc);
 
-    return this.info_ = {
+    return (this.info_ = {
       /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
       },
       canonicalUrl,
       pageViewId,
+      get pageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.pageViewId64_) {
+          this.pageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.pageViewId64_;
+      },
       linkRels,
-      metaTags,
-    };
+      viewport,
+      replaceParams,
+    });
   }
 }
-
 
 /**
  * Returns a relatively low entropy random string.
@@ -150,34 +171,35 @@ function getLinkRels(doc) {
 }
 
 /**
- * Returns a map object of meta tags in document head.
- * Key is the meta name, value is a list of corresponding content values.
+ * Returns the viewport of the document. Note that this is the viewport of the
+ * host document for AmpDocShadow instances.
  * @param {!Document} doc
- * @return {!JsonObject<string, string|!Array<string>>}
+ * @return {?string}
  */
-function getMetaTags(doc) {
-  const metaTags = map();
-  if (doc.head) {
-    const metas = doc.head.querySelectorAll('meta[name]');
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const content = meta.getAttribute('content');
-      const name = meta.getAttribute('name');
-      if (!name || !content) {
-        continue;
-      }
+function getViewport(doc) {
+  const viewportEl = doc.head.querySelector('meta[name="viewport"]');
+  return viewportEl ? viewportEl.getAttribute('content') : null;
+}
 
-      let value = metaTags[name];
-      if (value) {
-        // Change to array if more than one content for the same name
-        if (!isArray(value)) {
-          value = metaTags[name] = [value];
-        }
-        value.push(content);
-      } else {
-        metaTags[name] = content;
-      }
-    }
+/**
+ * Attempts to retrieve extra parameters from the "amp_r" query param,
+ * returning null if invalid.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {?JsonObject<string, string|!Array<string>>}
+ */
+function getReplaceParams(ampdoc) {
+  // The "amp_r" parameter is only supported for ads.
+  if (
+    !ampdoc.isSingleDoc() ||
+    getProxyServingType(ampdoc.win.location.href) != 'a'
+  ) {
+    return null;
   }
-  return metaTags;
+  const url = parseUrlDeprecated(ampdoc.win.location.href);
+  const replaceRaw = parseQueryString(url.search)['amp_r'];
+  if (replaceRaw === undefined) {
+    // Differentiate the case between empty replace params and invalid result
+    return null;
+  }
+  return parseQueryString(replaceRaw);
 }

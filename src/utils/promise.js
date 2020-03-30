@@ -36,13 +36,16 @@
  * @template T
  */
 export class Deferred {
+  /**
+   * Creates an instance of Deferred.
+   */
   constructor() {
     let resolve, reject;
 
     /**
      * @const {!Promise<T>}
      */
-    this.promise = new /*OK*/Promise((res, rej) => {
+    this.promise = new /*OK*/ Promise((res, rej) => {
       resolve = res;
       reject = rej;
     });
@@ -64,7 +67,7 @@ export class Deferred {
  * If fn sync throws, it will cause the promise to reject.
  *
  * @param {function():T} fn
- * @return !Promise<T>
+ * @return {!Promise<T>}
  * @template T
  */
 export function tryResolve(fn) {
@@ -156,17 +159,20 @@ export class LastAddedResolver {
    */
   add(promise) {
     const countAtAdd = ++this.count_;
-    Promise.resolve(promise).then(result => {
-      if (this.count_ === countAtAdd) {
-        this.resolve_(result);
+    Promise.resolve(promise).then(
+      result => {
+        if (this.count_ === countAtAdd) {
+          this.resolve_(result);
+        }
+      },
+      error => {
+        // Don't follow behavior of Promise.all and Promise.race error so that
+        // this will only reject when most recently added promise fails.
+        if (this.count_ === countAtAdd) {
+          this.reject_(error);
+        }
       }
-    }, error => {
-      // Don't follow behavior of Promise.all and Promise.race error so that
-      // this will only reject when most recently added promise fails.
-      if (this.count_ === countAtAdd) {
-        this.reject_(error);
-      }
-    });
+    );
     return this.promise_;
   }
 

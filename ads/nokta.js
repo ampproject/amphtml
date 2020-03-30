@@ -27,5 +27,8 @@ export function nokta(global, data) {
   global.zone = data.zone;
   global.iwidth = data.width;
   global.iheight = data.height;
-  writeScript(global, 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js');
+  writeScript(
+    global,
+    'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js'
+  );
 }

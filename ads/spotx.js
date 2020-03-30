@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {startsWith} from '../src/string';
 import {validateData} from '../3p/3p';
 
@@ -31,12 +32,12 @@ export function spotx(global, data) {
 
   data['spotx_content_width'] = data.spotx_content_width || data.width;
   data['spotx_content_height'] = data.spotx_content_height || data.height;
-  data['spotx_content_page_url'] = global.context.location.href ||
-      global.context.sourceUrl;
+  data['spotx_content_page_url'] =
+    global.context.location.href || global.context.sourceUrl;
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {
-    if (data.hasOwnProperty(key) && startsWith(key, 'spotx_')) {
+    if (hasOwn(data, key) && startsWith(key, 'spotx_')) {
       script.setAttribute(`data-${key}`, data[key]);
     }
   }

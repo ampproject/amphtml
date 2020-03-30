@@ -21,7 +21,6 @@ import {assertHttpsUrl} from '../../../src/url';
  */
 const BACKGROUND_AUDIO_ELEMENT_CLASS_NAME = 'i-amphtml-story-background-audio';
 
-
 /**
  * Adds support for the background-audio property on the specified element.
  * @param {!Element} element The element to upgrade with support for background
@@ -34,8 +33,10 @@ export function upgradeBackgroundAudio(element) {
   }
 
   const audioEl = element.ownerDocument.createElement('audio');
-  const audioSrc =
-      assertHttpsUrl(element.getAttribute('background-audio'), element);
+  const audioSrc = assertHttpsUrl(
+    element.getAttribute('background-audio'),
+    element
+  );
   audioEl.setAttribute('src', audioSrc);
   audioEl.setAttribute('preload', 'auto');
   audioEl.setAttribute('loop', '');

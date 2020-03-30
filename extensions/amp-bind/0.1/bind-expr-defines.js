@@ -81,4 +81,3 @@ export const AstNodeType = {
  * @typedef {(boolean|string|number|null)}
  */
 export let AstNodeValue;
-

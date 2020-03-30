@@ -21,7 +21,6 @@ import {validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function medyanet(global, data) {
   validateData(data, ['slot', 'domain']);
 
@@ -47,8 +46,8 @@ function medyanetAds(global, data) {
   f.setAttribute('allowfullscreen', 'true');
   f.setAttribute('scrolling', 'no');
   setStyles(f, {
-    border: '0 none transparent' ,
-    position: 'relative' ,
+    border: '0 none transparent',
+    position: 'relative',
   });
   f.onload = function() {
     window.context.renderStart();

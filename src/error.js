@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {AmpEvents} from './amp-events';
 import {Services} from './services';
 import {
@@ -24,15 +23,13 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
+import {dict} from './utils/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
-import {
-  isLoadErrorMessage,
-} from './event-helper';
+import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
-import {makeBodyVisible} from './style-installer';
+import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -47,6 +44,10 @@ const CANCELLED = 'CANCELLED';
  */
 const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
 
+/**
+ * @const {string}
+ */
+const ABORTED = 'AbortError';
 
 /**
  * The threshold for errors throttled because nothing can be done about
@@ -62,14 +63,13 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
  */
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
-
 /**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
-let accumulatedErrorMessages = self.AMPErrors || [];
+let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
-self.AMPErrors = accumulatedErrorMessages;
+self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements
@@ -126,9 +126,13 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && !!win && isUserErrorMessage(error.message)
-      && !isUserErrorEmbed(error.message)) {
-    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  if (
+    error &&
+    !!win &&
+    isUserErrorMessage(error.message) &&
+    !isUserErrorEmbed(error.message)
+  ) {
+    reportErrorToAnalytics(/** @type {!Error} */ (error), win);
   }
 }
 
@@ -149,7 +153,7 @@ export function reportError(error, opt_associatedElement) {
     let isValidError;
     if (error) {
       if (error.message !== undefined) {
-        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
+        error = duplicateErrorIfNecessary(/** @type {!Error} */ (error));
         isValidError = true;
       } else {
         const origError = error;
@@ -163,7 +167,8 @@ export function reportError(error, opt_associatedElement) {
     if (!isValidError && getMode().localDev && !getMode().test) {
       setTimeout(function() {
         const rethrow = new Error(
-            '_reported_ Error reported incorrectly: ' + error);
+          '_reported_ Error reported incorrectly: ' + error
+        );
         throw rethrow;
       });
     }
@@ -185,7 +190,7 @@ export function reportError(error, opt_associatedElement) {
 
     // Report to console.
     if (self.console) {
-      const output = (console.error || console.log);
+      const output = console.error || console.log;
       if (error.messageArray) {
         output.apply(console, error.messageArray);
       } else {
@@ -204,8 +209,14 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
-        undefined, error);
+    onError['call'](
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      error
+    );
   } catch (errorReportingError) {
     setTimeout(function() {
       throw errorReportingError;
@@ -264,17 +275,19 @@ export function isBlockedByConsent(errorOrMessage) {
   return false;
 }
 
-
 /**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = /** @type {!Function} */ (reportErrorToServer);
+  win.onerror = /** @type {!Function} */ (onError);
   win.addEventListener('unhandledrejection', event => {
-    if (event.reason &&
+    if (
+      event.reason &&
       (event.reason.message === CANCELLED ||
-      event.reason.message === BLOCK_BY_CONSENT)) {
+        event.reason.message === BLOCK_BY_CONSENT ||
+        event.reason.message === ABORTED)
+    ) {
       event.preventDefault();
       return;
     }
@@ -291,10 +304,10 @@ export function installErrorReporting(win) {
  * @param {*|undefined} error
  * @this {!Window|undefined}
  */
-function reportErrorToServer(message, filename, line, col, error) {
+function onError(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
-    makeBodyVisible(this.document);
+    makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
@@ -311,19 +324,47 @@ function reportErrorToServer(message, filename, line, col, error) {
     // due to buggy browser extensions may be helpful to notify authors.
     return;
   }
-  const data = getErrorReportData(message, filename, line, col, error,
-      hasNonAmpJs);
+  const data = getErrorReportData(
+    message,
+    filename,
+    line,
+    col,
+    error,
+    hasNonAmpJs
+  );
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
     reportingBackoff(() => {
+      try {
+        return reportErrorToServerOrViewer(
+          this,
+          /** @type {!JsonObject} */ (data)
+        ).catch(() => {
+          // catch async errors to avoid recursive errors.
+        });
+      } catch (e) {
+        // catch async errors to avoid recursive errors.
+      }
+    });
+  }
+}
+
+/**
+ * Passes the given error data to either server or viewer.
+ * @param {!Window} win
+ * @param {!JsonObject} data Data from `getErrorReportData`.
+ * @return {Promise<undefined>}
+ */
+export function reportErrorToServerOrViewer(win, data) {
+  // Report the error to viewer if it has the capability. The data passed
+  // to the viewer is exactly the same as the data passed to the server
+  // below.
+  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+    if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
-    });
-  }
+    }
+  });
 }
 
 /**
@@ -345,25 +386,63 @@ export function maybeReportErrorToViewer(win, data) {
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve(false);
   }
-  const ampdocSingle = ampdocService.getAmpDoc();
+  const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve(false);
   }
-
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-
   return viewer.isTrustedViewer().then(viewerTrusted => {
     if (!viewerTrusted) {
       return false;
     }
-    viewer.sendMessage('error', data);
+    viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
+}
+
+/**
+ * Strips down the error reporting data to a minimal set
+ * to be sent to the viewer.
+ * @param {!JsonObject} errorReportData
+ * @return {!JsonObject}
+ * @visibleForTesting
+ */
+export function errorReportingDataForViewer(errorReportData) {
+  return dict({
+    'm': errorReportData['m'], // message
+    'a': errorReportData['a'], // isUserError
+    's': errorReportData['s'], // error stack
+    'el': errorReportData['el'], // tagName
+    'ex': errorReportData['ex'], // expected error?
+    'v': errorReportData['v'], // runtime
+    'jse': errorReportData['jse'], // detectedJsEngine
+  });
+}
+
+/**
+ * @param {string|undefined}  message
+ * @param {*|undefined} error
+ * @return {string}
+ */
+function buildErrorMessage_(message, error) {
+  if (error) {
+    if (error.message) {
+      message = error.message;
+    } else {
+      // This should never be a string, but sometimes it is.
+      message = String(error);
+    }
+  }
+  if (!message) {
+    message = 'Unknown error';
+  }
+
+  return message;
 }
 
 /**
@@ -377,29 +456,22 @@ export function maybeReportErrorToViewer(win, data) {
  * @return {!JsonObject|undefined} The data to post
  * visibleForTesting
  */
-export function getErrorReportData(message, filename, line, col, error,
-  hasNonAmpJs) {
-  let expected = false;
-  if (error) {
-    if (error.message) {
-      message = error.message;
-    } else {
-      // This should never be a string, but sometimes it is.
-      message = String(error);
-    }
-    // An "expected" error is still an error, i.e. some features are disabled
-    // or not functioning fully because of it. However, it's an expected
-    // error. E.g. as is the case with some browser API missing (storage).
-    // Thus, the error can be classified differently by log aggregators.
-    // The main goal is to monitor that an "expected" error doesn't deteriorate
-    // over time. It's impossible to completely eliminate it.
-    if (error.expected) {
-      expected = true;
-    }
-  }
-  if (!message) {
-    message = 'Unknown error';
-  }
+export function getErrorReportData(
+  message,
+  filename,
+  line,
+  col,
+  error,
+  hasNonAmpJs
+) {
+  message = buildErrorMessage_(message, error);
+  // An "expected" error is still an error, i.e. some features are disabled
+  // or not functioning fully because of it. However, it's an expected
+  // error. E.g. as is the case with some browser API missing (storage).
+  // Thus, the error can be classified differently by log aggregators.
+  // The main goal is to monitor that an "expected" error doesn't deteriorate
+  // over time. It's impossible to completely eliminate it.
+  let expected = !!(error && error.expected);
   if (/_reported_/.test(message)) {
     return;
   }
@@ -407,13 +479,20 @@ export function getErrorReportData(message, filename, line, col, error,
     return;
   }
 
+  const detachedWindow = !(self && self.window);
   const throttleBase = Math.random();
+
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
-  if (isLoadErrorMessage(message) ||
+  if (
+    isLoadErrorMessage(message) ||
     // See https://github.com/ampproject/amphtml/issues/7353
     // for context.
-    message == 'Script error.') {
+    message == 'Script error.' ||
+    // Window has become detached, really anything can happen
+    // at this point.
+    detachedWindow
+  ) {
     expected = true;
 
     if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
@@ -441,15 +520,29 @@ export function getErrorReportData(message, filename, line, col, error,
   // Errors are tagged with "ex" ("expected") label to allow loggers to
   // classify these errors as benchmarks and not exceptions.
   data['ex'] = expected ? '1' : '0';
+  data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (self.context && self.context.location) {
+  if (IS_ESM) {
+    runtime = 'esm';
+    data['esm'] = '1';
+  } else if (self.context && self.context.location) {
     data['3p'] = '1';
     runtime = '3p';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
+
+  if (getMode().singlePassType) {
+    data['spt'] = getMode().singlePassType;
+  }
+
   data['rt'] = runtime;
+
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.
@@ -507,13 +600,16 @@ export function getErrorReportData(message, filename, line, col, error,
       data['s'] = error.stack;
     }
 
-    error.message += ' _reported_';
+    // TODO(jridgewell, #18574); Make sure error is always an object.
+    if (error.message) {
+      error.message += ' _reported_';
+    }
   } else {
     data['f'] = filename || '';
     data['l'] = line || '';
     data['c'] = col || '';
   }
-  data['r'] = self.document.referrer;
+  data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
@@ -530,6 +626,9 @@ export function getErrorReportData(message, filename, line, col, error,
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
+  if (!win.document) {
+    return false;
+  }
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
     if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
@@ -539,6 +638,9 @@ export function detectNonAmpJs(win) {
   return false;
 }
 
+/**
+ * Resets accumulated error messages for testing
+ */
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
 }
@@ -598,11 +700,13 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  if (isExperimentOn(win, 'user-error-reporting')) {
-    const vars = {
+  // Currently this can only be executed in a single-doc mode. Otherwise,
+  // it's not clear which ampdoc the event would belong too.
+  if (Services.ampdocServiceFor(win).isSingleDoc()) {
+    const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
-    };
+    });
     triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
   }
 }
@@ -613,6 +717,8 @@ export function reportErrorToAnalytics(error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  const root = Services.ampdocServiceFor(win)
+    .getSingleDoc()
+    .getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

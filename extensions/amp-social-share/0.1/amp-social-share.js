@@ -15,20 +15,18 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {openWindowDialog} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
+const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -41,7 +39,7 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?string} */
@@ -59,11 +57,16 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-    const typeAttr = user().assert(element.getAttribute('type'),
-        'The type attribute is required. %s', element);
-    user().assert(!/\s/.test(typeAttr),
-        'Space characters are not allowed in type attribute value. %s',
-        element);
+    const typeAttr = userAssert(
+      element.getAttribute('type'),
+      'The type attribute is required. %s',
+      element
+    );
+    userAssert(
+      !/\s/.test(typeAttr),
+      'Space characters are not allowed in type attribute value. %s',
+      element
+    );
 
     this.platform_ = Services.platformFor(this.win);
     this.viewer_ = Services.viewerForDoc(element);
@@ -71,29 +74,44 @@ class AmpSocialShare extends AMP.BaseElement {
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!this.systemShareSupported_()) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     } else {
       // Hide/ignore non-system component if system share wants to be unique
-      const systemOnly = this.systemShareSupported_() &&
+      const systemOnly =
+        this.systemShareSupported_() &&
         !!this.win.document.querySelectorAll(
-            'amp-social-share[type=system][data-mode=replace]').length;
+          'amp-social-share[type=system][data-mode=replace]'
+        ).length;
       if (systemOnly) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     }
     const typeConfig = getSocialConfig(typeAttr) || dict();
-    this.shareEndpoint_ = user().assert(
-        element.getAttribute('data-share-endpoint') ||
+    if (typeConfig['obsolete']) {
+      toggle(element, false);
+      user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
+      return;
+    }
+    this.shareEndpoint_ = userAssert(
+      element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
-        'The data-share-endpoint attribute is required. %s', element);
-    Object.assign(this.params_, typeConfig['defaultParams'],
-        getDataParamsFromAttributes(element));
+      'The data-share-endpoint attribute is required. %s',
+      element
+    );
+    Object.assign(
+      this.params_,
+      typeConfig['defaultParams'],
+      getDataParamsFromAttributes(element)
+    );
 
-    const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
+    const hrefWithVars = addParamsToUrl(
+      dev().assertString(this.shareEndpoint_),
+      this.params_
+    );
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
@@ -109,10 +127,12 @@ class AmpSocialShare extends AMP.BaseElement {
       const {protocol} = Services.urlForDoc(element).parse(href);
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
-      const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && (isMailTo || isSms))
-        ? '_top' : (this.element.hasAttribute('data-target') ?
-          this.element.getAttribute('data-target') : '_blank');
+      this.target_ =
+        this.platform_.isIos() && (isMailTo || isSms)
+          ? '_top'
+          : this.element.hasAttribute('data-target')
+          ? this.element.getAttribute('data-target')
+          : '_blank';
       if (isSms) {
         // http://stackoverflow.com/a/19126326
         // This code path seems to be stable for both iOS and Android.
@@ -135,8 +155,8 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }
@@ -152,12 +172,11 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleActivation_() {
-    user().assert(this.href_ && this.target_, 'Clicked before href is set.');
+    userAssert(this.href_ && this.target_, 'Clicked before href is set.');
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      dev().assert(navigator.share !== undefined,
-          'navigator.share disappeared.');
+      devAssert(navigator.share !== undefined, 'navigator.share disappeared.');
       // navigator.share() fails 'gulp check-types' validation on Travis
       navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
     } else {
@@ -166,14 +185,17 @@ class AmpSocialShare extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   systemShareSupported_() {
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
-    const isChromeWebview = this.viewer_.isWebviewEmbedded() &&
-        this.platform_.isChrome();
+    const isChromeWebview =
+      this.viewer_.isWebviewEmbedded() && this.platform_.isChrome();
 
-    return ('share' in navigator) && !isChromeWebview;
+    return 'share' in navigator && !isChromeWebview;
   }
 }
 

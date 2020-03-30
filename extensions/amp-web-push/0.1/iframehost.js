@@ -15,7 +15,7 @@
  */
 
 import {loadPromise} from '../../../src/event-helper';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method
@@ -62,7 +62,7 @@ export class IFrameHost {
   load() {
     return this.ampdoc_.whenReady().then(() => {
       this.domElement_ = this.ampdoc_.win.document.createElement('iframe');
-      setStyle(this.domElement_, 'display', 'none');
+      toggle(this.domElement_, false);
       this.domElement_.sandbox = 'allow-same-origin allow-scripts';
       this.domElement_.src = this.url_;
 

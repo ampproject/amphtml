@@ -22,8 +22,8 @@ describes.realWin('validation-bubble', {amp: true}, env => {
     const document = ampdoc.getRootNode();
 
     new ValidationBubble(ampdoc);
-    expect(document.querySelector('.i-amphtml-validation-bubble'))
-        .to.not.be.null;
+    expect(document.querySelector('.i-amphtml-validation-bubble')).to.not.be
+      .null;
   });
 
   it('should show and hide bubble', () => {
@@ -53,11 +53,10 @@ describes.realWin('validation-bubble', {amp: true}, env => {
     bubble.show(targetEl, 'Hello World');
     expect(bubbleEl).to.not.be.null;
     expect(bubbleEl.textContent).to.equal('Hello World');
-    expect(bubbleEl.style.display).to.equal('block');
     expect(bubbleEl.style.top).to.equal('290px');
     expect(bubbleEl.style.left).to.equal('500px');
 
     bubble.hide();
-    expect(bubbleEl.style.display).to.equal('none');
+    expect(bubbleEl).to.have.display('none');
   });
 });

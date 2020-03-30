@@ -26,13 +26,15 @@ on how to get required ad tag or placement keys.
 Uses fixed size by the given `width` and `height`.
 
 ```html
-<amp-ad type="aduptech"
-    layout="fixed"
-    width="500"
-    height="200"
-    data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
-    data-query="reisen;mallorca;spanien"
-    data-adtest="1">
+<amp-ad
+  type="aduptech"
+  layout="fixed"
+  width="500"
+  height="200"
+  data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
+  data-query="reisen;mallorca;spanien"
+  data-adtest="1"
+>
 </amp-ad>
 ```
 
@@ -42,19 +44,21 @@ Uses available space of parent html container.
 
 ```html
 <style amp-custom>
-    #aduptech-container {
-        width:350px;
-        height:300px;
-        position:relative;
-    }
+  #aduptech-container {
+    width: 350px;
+    height: 300px;
+    position: relative;
+  }
 </style>
 <div id="aduptech-container">
-    <amp-ad type="aduptech"
-        layout="fill"
-        data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
-        data-query="reisen;mallorca;spanien"
-        data-adtest="1">
-    </amp-ad>
+  <amp-ad
+    type="aduptech"
+    layout="fill"
+    data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
+    data-query="reisen;mallorca;spanien"
+    data-adtest="1"
+  >
+  </amp-ad>
 </div>
 ```
 
@@ -63,12 +67,14 @@ Uses available space of parent html container.
 Uses available width and the given `height`.
 
 ```html
-<amp-ad type="aduptech"
-    layout="fixed-height"
-    height="100"
-    data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
-    data-query="reisen;mallorca;spanien"
-    data-adtest="1">
+<amp-ad
+  type="aduptech"
+  layout="fixed-height"
+  height="100"
+  data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
+  data-query="reisen;mallorca;spanien"
+  data-adtest="1"
+>
 </amp-ad>
 ```
 
@@ -77,13 +83,15 @@ Uses available width and the given `height`.
 Uses available space but respecting aspect ratio by given `width` and `height` (for example 10:3).
 
 ```html
-<amp-ad type="aduptech"
-    layout="responsive"
-    width="10"
-    height="3"
-    data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
-    data-query="reisen;mallorca;spanien"
-    data-adtest="1">
+<amp-ad
+  type="aduptech"
+  layout="responsive"
+  width="10"
+  height="3"
+  data-placementkey="ae7906d535ce47fbb29fc5f45ef910b4"
+  data-query="reisen;mallorca;spanien"
+  data-adtest="1"
+>
 </amp-ad>
 ```
 
@@ -91,13 +99,13 @@ Uses available space but respecting aspect ratio by given `width` and `height` (
 
 ### Required parameters
 
-* ```data-placementkey```
+- `data-placementkey`
 
 ### Optional parameters
 
-* ```data-query```
-* ```data-mincpc```
-* ```data-adtest```
+- `data-query`
+- `data-mincpc`
+- `data-adtest`
 
 ## Design/Layout
 

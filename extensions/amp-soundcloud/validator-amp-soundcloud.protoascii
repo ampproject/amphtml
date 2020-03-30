@@ -19,9 +19,9 @@ tags: {  # amp-soundcloud
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-soundcloud"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -50,10 +50,17 @@ tags: {  # <amp-soundcloud>
   }
   attrs: {
     name: "data-visual"
-    value_regex: "true|false"
+    value_casei: "false"
+    value_casei: "true"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
   }
 }

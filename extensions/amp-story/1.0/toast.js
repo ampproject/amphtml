@@ -15,11 +15,16 @@
  */
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-
+import {toWin} from '../../../src/types';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';
 
+/**
+ * The 'alert' role assertively announces toast content to screen readers.
+ * @private @const {string}
+ * */
+const TOAST_ROLE = 'alert';
 
 /**
  * Should be higher than total animation time.
@@ -27,19 +32,26 @@ const TOAST_CLASSNAME = 'i-amphtml-story-toast';
  */
 const TOAST_VISIBLE_TIME_MS = 2600;
 
-
 /**
  * UI notifications service, displaying a message to the user for a limited
  * amount of time.
  */
 export class Toast {
   /**
-   * @param {!Window} win
+   * @param {!Element} storyEl
    * @param {!Node|string} childNodeOrText
    */
-  static show(win, childNodeOrText) {
-    const toast = createElementWithAttributes(win.document, 'div',
-        /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
+  static show(storyEl, childNodeOrText) {
+    const win = toWin(storyEl.ownerDocument.defaultView);
+
+    const toast = createElementWithAttributes(
+      win.document,
+      'div',
+      /** @type {!JsonObject} */ ({
+        'class': TOAST_CLASSNAME,
+        'role': TOAST_ROLE,
+      })
+    );
 
     if (typeof childNodeOrText == 'string') {
       toast.textContent = childNodeOrText;
@@ -47,9 +59,11 @@ export class Toast {
       toast.appendChild(childNodeOrText);
     }
 
-    win.document.body.appendChild(toast);
+    storyEl.appendChild(toast);
 
-    Services.timerFor(win)
-        .delay(() => removeElement(toast), TOAST_VISIBLE_TIME_MS);
+    Services.timerFor(win).delay(
+      () => removeElement(toast),
+      TOAST_VISIBLE_TIME_MS
+    );
   }
 }

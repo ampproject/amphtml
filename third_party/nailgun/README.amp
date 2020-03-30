@@ -1,0 +1,15 @@
+URL: https://github.com/facebook/nailgun
+License: Apache license, version 2.0
+License File: https://github.com/facebook/nailgun/blob/master/LICENSE.txt
+
+Description:
+Nailgun is a client, protocol, and server for running Java programs from the command line without incurring the JVM startup overhead.
+
+The AMP Project uses a custom version of closure compiler available at build-system/runner/dist/runner.jar. The compiler binary is launched several dozen times during the default multi-pass minification process (gulp dist). In order to speed this up, we use nailgun to launch a reusable instance of closure compiler.
+
+Files in this directory (copied from https://github.com/facebook/nailgun/releases/tag/nailgun-all-v1.0.0):
+- nailgun-server.jar (copied from nailgun-server-1.0.0-SNAPSHOT.jar)
+- nailgun-runner (copied from ng.py)
+
+Local Modifications:
+None.

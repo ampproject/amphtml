@@ -25,15 +25,18 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="sovrn"
-    data-width="300"
-    data-height="250"
-    data-u="useridgoeshere"
-    data-iid="informerIDgoeshere"
-    data-aid="affiliateIDgoeshere"
-    data-tf="true"
-    data-z="zoneIDgoeshere">
+<amp-ad
+  width="300"
+  height="250"
+  type="sovrn"
+  data-width="300"
+  data-height="250"
+  data-u="useridgoeshere"
+  data-iid="informerIDgoeshere"
+  data-aid="affiliateIDgoeshere"
+  data-tf="true"
+  data-z="zoneIDgoeshere"
+>
 </amp-ad>
 ```
 

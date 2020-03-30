@@ -22,7 +22,6 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {
   MESSAGE_FIELDS,
-  SAFEFRAME_ORIGIN,
   SERVICE,
   SafeframeHostApi,
   removeSafeframeListener,
@@ -46,11 +45,9 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-
 describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   let doubleclickImpl;
   let ampAd;
-  let sandbox;
   let safeframeHost;
   let doc;
   const safeframeChannel = '61393';
@@ -58,8 +55,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   const ampAdWidth = 300;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     doc = env.win.document;
     setup(ampAdHeight, ampAdWidth, ampAdHeight, ampAdWidth);
   });
@@ -80,8 +76,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       width: creativeWidth,
       height: creativeHeight,
     };
-    safeframeHost = new SafeframeHostApi(
-        doubleclickImpl, false, creativeSize);
+    safeframeHost = new SafeframeHostApi(doubleclickImpl, false, creativeSize);
     doubleclickImpl.upgradeCallback();
     doubleclickImpl.layoutCallback();
   }
@@ -94,7 +89,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     const messageData = {};
     messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
     messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
-    receiveMessage(messageData);
+    receiveMessage(messageData, doubleclickImpl.iframe.contentWindow);
   }
 
   function sendRegisterDoneMessage() {
@@ -107,14 +102,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       initialWidth: '100',
       sentinel: safeframeHost.sentinel_,
     });
-    receiveMessage(message);
+    receiveMessage(message, safeframeHost.iframe_.contentWindow);
   }
 
   // Simulates receiving a post message from the safeframe.
-  function receiveMessage(messageData) {
+  function receiveMessage(messageData, source) {
     const messageEvent = {
       data: JSON.stringify(messageData),
-      origin: SAFEFRAME_ORIGIN,
+      source,
     };
     safeframeListener(messageEvent);
   }
@@ -124,10 +119,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      const connectMessagingChannelSpy = sandbox.spy(
-          safeframeHost, 'connectMessagingChannel');
-      const postMessageStub = sandbox./*OK*/stub(
-          safeframeMock.contentWindow, 'postMessage');
+      const connectMessagingChannelSpy = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'connectMessagingChannel'
+      );
+      const postMessageStub = env.sandbox./*OK*/ stub(
+        safeframeMock.contentWindow,
+        'postMessage'
+      );
       sendSetupMessage();
 
       // Verify that the channel was set up
@@ -138,59 +137,102 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const firstPostMessageArgs = postMessageStub.firstCall.args;
       let connectMessage = JSON.parse(firstPostMessageArgs[0]);
       let payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
-      expect(payload).to.deep.equal({'c': safeframeChannel,
-        'message': 'connect'});
+      expect(payload).to.deep.equal({
+        'c': safeframeChannel,
+        'message': 'connect',
+      });
       expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(safeframeChannel);
       expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
-          doubleclickImpl.sentinel);
+        doubleclickImpl.sentinel
+      );
       expect(connectMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY]).to.equal(
-          safeframeHost.endpointIdentity_);
+        safeframeHost.endpointIdentity_
+      );
 
       // Verify that the initial geometry update was sent
-      return Services.timerFor(env.win).promise(500).then(() => {
-        const secondPostMessageArgs = postMessageStub.secondCall.args;
-        connectMessage = JSON.parse(secondPostMessageArgs[0]);
-        expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(
-            safeframeChannel);
-        expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
-            doubleclickImpl.sentinel);
-        expect(connectMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY]).to.equal(
-            safeframeHost.endpointIdentity_);
-        payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
-        expect(Object.keys(payload)).to.deep.equal(['newGeometry', 'uid']);
-        expect(Object.keys(JSON.parse(payload['newGeometry']))).to.deep.equal([
-          'windowCoords_t', 'windowCoords_r', 'windowCoords_b',
-          'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-          'frameCoords_b', 'frameCoords_l',
-          'posCoords_t', 'posCoords_b', 'posCoords_r', 'posCoords_l',
-          'styleZIndex',
-          'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
-          'allowedExpansion_l', 'yInView', 'xInView',
-        ]);
-      });
+      return Services.timerFor(env.win)
+        .promise(500)
+        .then(() => {
+          const secondPostMessageArgs = postMessageStub.secondCall.args;
+          connectMessage = JSON.parse(secondPostMessageArgs[0]);
+          expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(
+            safeframeChannel
+          );
+          expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
+            doubleclickImpl.sentinel
+          );
+          expect(connectMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY]).to.equal(
+            safeframeHost.endpointIdentity_
+          );
+          payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
+          expect(Object.keys(payload)).to.deep.equal(['newGeometry', 'uid']);
+          expect(
+            Object.keys(JSON.parse(payload['newGeometry']))
+          ).to.deep.equal([
+            'windowCoords_t',
+            'windowCoords_r',
+            'windowCoords_b',
+            'windowCoords_l',
+            'frameCoords_t',
+            'frameCoords_r',
+            'frameCoords_b',
+            'frameCoords_l',
+            'posCoords_t',
+            'posCoords_b',
+            'posCoords_r',
+            'posCoords_l',
+            'styleZIndex',
+            'allowedExpansion_r',
+            'allowedExpansion_b',
+            'allowedExpansion_t',
+            'allowedExpansion_l',
+            'yInView',
+            'xInView',
+          ]);
+        });
     });
   });
 
   describe('getSafeframeNameAttr', () => {
     it('should return name attributes', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const attrs = safeframeHost.getSafeframeNameAttr();
-      expect(Object.keys(attrs)).to.deep.equal(
-          ['uid', 'hostPeerName', 'initialGeometry', 'permissions',
-            'metadata', 'reportCreativeGeometry', 'isDifferentSourceWindow',
-            'sentinel']);
+      expect(Object.keys(attrs)).to.deep.equal([
+        'uid',
+        'hostPeerName',
+        'initialGeometry',
+        'permissions',
+        'metadata',
+        'reportCreativeGeometry',
+        'isDifferentSourceWindow',
+        'sentinel',
+      ]);
 
       // Check the geometry
       const initialGeometry = JSON.parse(attrs['initialGeometry']);
-      expect(Object.keys(initialGeometry)).to.deep.equal(
-          ['windowCoords_t', 'windowCoords_r', 'windowCoords_b',
-            'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-            'frameCoords_b', 'frameCoords_l', 'posCoords_t',
-            'posCoords_b', 'posCoords_r', 'posCoords_l', 'styleZIndex',
-            'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
-            'allowedExpansion_l', 'yInView', 'xInView']);
+      expect(Object.keys(initialGeometry)).to.deep.equal([
+        'windowCoords_t',
+        'windowCoords_r',
+        'windowCoords_b',
+        'windowCoords_l',
+        'frameCoords_t',
+        'frameCoords_r',
+        'frameCoords_b',
+        'frameCoords_l',
+        'posCoords_t',
+        'posCoords_b',
+        'posCoords_r',
+        'posCoords_l',
+        'styleZIndex',
+        'allowedExpansion_r',
+        'allowedExpansion_b',
+        'allowedExpansion_t',
+        'allowedExpansion_l',
+        'yInView',
+        'xInView',
+      ]);
       Object.keys(initialGeometry).forEach(key => {
         if (key != 'styleZIndex') {
           expect(typeof initialGeometry[key]).to.equal('number');
@@ -220,7 +262,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should not pass canonicalUrl if referrer policy same-origin', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const meta = env.win.document.createElement('meta');
@@ -240,7 +282,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should not pass canonicalUrl if referrer policy no-referrer', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const meta = env.win.document.createElement('meta');
@@ -260,7 +302,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should pass canonicalUrl domain if referrer policy origin', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical/foo?bleh',
       });
       const meta = env.win.document.createElement('meta');
@@ -283,44 +325,49 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getCurrentGeometry', () => {
     beforeEach(() => {
-      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 500,
       });
     });
 
     it('should get current geometry when safeframe fills amp-ad', () => {
-      sandbox./*OK*/stub(safeframeHost.baseInstance_,
-          'getPageLayoutBox').returns({
-        top: 0,
-        left: 0,
-        right: 300,
-        bottom: 250,
-      });
+      env.sandbox
+        ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
+        .returns({
+          top: 0,
+          left: 0,
+          right: 300,
+          bottom: 250,
+        });
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {
         'class': 'safeframe',
       });
       // Set the size of the safeframe to be the same as its containing
       // amp-ad element
       const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
-          '{height:250px!important;' +
-          'width:300px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
+      css.innerHTML =
+        '.safeframe' +
+        '{height:250px!important;' +
+        'width:300px!important;' +
+        'background-color:blue!important;' +
+        'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.updateGeometry_();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        const payload = sendMessageStub.firstCall.args[0];
-        const messageType = sendMessageStub.firstCall.args[1];
-        expect(payload['newGeometry']).to.equal(
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          const payload = sendMessageStub.firstCall.args[0];
+          const messageType = sendMessageStub.firstCall.args[1];
+          expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
               '"frameCoords_b":250,"frameCoords_l":0,' +
@@ -328,44 +375,50 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
               '"posCoords_l":0,"styleZIndex":"",' +
               '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
-              '"xInView":1}');
-        expect(payload['uid']).to.equal(safeframeHost.uid_);
-        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
-      });
+              '"xInView":1}'
+          );
+          expect(payload['uid']).to.equal(safeframeHost.uid_);
+          expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+        });
     });
 
     it('should get geometry when safeframe does not fill amp-ad', () => {
-      sandbox./*OK*/stub(safeframeHost.baseInstance_,
-          'getPageLayoutBox').returns({
-        top: 0,
-        left: 0,
-        right: 50,
-        bottom: 50,
-      });
+      env.sandbox
+        ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
+        .returns({
+          top: 0,
+          left: 0,
+          right: 50,
+          bottom: 50,
+        });
       // In this case, the safeframe is smaller than its containing
       // amp-ad element.
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {
         'class': 'safeframe',
       });
       const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
-          '{height:10px!important;' +
-          'width:10px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
+      css.innerHTML =
+        '.safeframe' +
+        '{height:10px!important;' +
+        'width:10px!important;' +
+        'background-color:blue!important;' +
+        'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.updateGeometry_();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        const payload = sendMessageStub.firstCall.args[0];
-        const messageType = sendMessageStub.firstCall.args[1];
-        expect(payload['newGeometry']).to.equal(
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          const payload = sendMessageStub.firstCall.args[0];
+          const messageType = sendMessageStub.firstCall.args[1];
+          expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":10,' +
               '"frameCoords_b":10,"frameCoords_l":0,' +
@@ -373,91 +426,102 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
               '"posCoords_l":0,"styleZIndex":"",' +
               '"allowedExpansion_r":490,"allowedExpansion_b":990,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
-              '"xInView":1}');
-        expect(payload['uid']).to.equal(safeframeHost.uid_);
-        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
-      });
+              '"xInView":1}'
+          );
+          expect(payload['uid']).to.equal(safeframeHost.uid_);
+          expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+        });
     });
 
-
     it('should handle cancellation', () => {
-      sandbox./*OK*/stub(safeframeHost.baseInstance_,
-          'getPageLayoutBox').returns({
-        top: 0,
-        left: 0,
-        right: 50,
-        bottom: 50,
-      });
+      expectAsyncConsoleError(/cancellation/i, 1);
+      env.sandbox
+        ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
+        .returns({
+          top: 0,
+          left: 0,
+          right: 50,
+          bottom: 50,
+        });
       // In this case, the safeframe is smaller than its containing
       // amp-ad element.
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {
         'class': 'safeframe',
       });
       const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
+      css.innerHTML =
+        '.safeframe' +
         '{height:10px!important;' +
-          'width:10px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
+        'width:10px!important;' +
+        'background-color:blue!important;' +
+        'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.updateGeometry_();
       safeframeHost.baseInstance_.promiseId_++;
-      return Services.timerFor(env.win).promise(1000).then(() => {
-        expect(sendMessageStub).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(1000)
+        .then(() => {
+          expect(sendMessageStub).to.not.be.called;
+        });
     });
 
     it('should get geometry when scrolled', () => {
-
-      sandbox./*OK*/stub(safeframeHost.baseInstance_,
-          'getPageLayoutBox').returns({
-        top: 0,
-        left: 0,
-        right: 50,
-        bottom: 50,
-      });
+      env.sandbox
+        ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
+        .returns({
+          top: 0,
+          left: 0,
+          right: 50,
+          bottom: 50,
+        });
       // In this case, the safeframe is smaller than its containing
       // amp-ad element.
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {
         'class': 'safeframe',
       });
       const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
-          '{height:100px!important;' +
-          'width:100px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
+      css.innerHTML =
+        '.safeframe' +
+        '{height:100px!important;' +
+        'width:100px!important;' +
+        'background-color:blue!important;' +
+        'display:block!important;}';
       doc.head.appendChild(css);
       ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
       // Scroll 100 px
       safeframeHost.viewport_.setScrollTop(50);
 
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.updateGeometry_();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        const payload = sendMessageStub.firstCall.args[0];
-        const messageType = sendMessageStub.firstCall.args[1];
-        expect(payload['newGeometry']).to.equal(
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          const payload = sendMessageStub.firstCall.args[0];
+          const messageType = sendMessageStub.firstCall.args[1];
+          expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":100,' +
               '"frameCoords_b":100,"frameCoords_l":0,"posCoords_t":-50,' +
               '"posCoords_b":50,"posCoords_r":100,"posCoords_l":0,' +
               '"styleZIndex":"","allowedExpansion_r":400,' +
               '"allowedExpansion_b":900,"allowedExpansion_t":0,' +
-              '"allowedExpansion_l":0,"yInView":0.5,"xInView":1}');
-        expect(payload['uid']).to.equal(safeframeHost.uid_);
-        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
-      });
+              '"allowedExpansion_l":0,"yInView":0.5,"xInView":1}'
+          );
+          expect(payload['uid']).to.equal(safeframeHost.uid_);
+          expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+        });
     });
   });
 
@@ -467,51 +531,63 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
 
-      const onScrollStub = sandbox./*OK*/stub(
-          safeframeHost.viewport_, 'onScroll');
-      const onChangedStub = sandbox./*OK*/stub(
-          safeframeHost.viewport_, 'onChanged');
+      const onScrollStub = env.sandbox./*OK*/ stub(
+        safeframeHost.viewport_,
+        'onScroll'
+      );
+      const onChangedStub = env.sandbox./*OK*/ stub(
+        safeframeHost.viewport_,
+        'onChanged'
+      );
 
       safeframeMock.contentWindow.postMessage = () => {};
       sendSetupMessage();
       const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
       const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
-      const sendMessageStub = sandbox./*OK*/spy(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'sendMessage_'
+      );
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendMessageStub).to.be.calledTwice;
-        const payload = sendMessageStub.secondCall.args[0];
-        const messageType = sendMessageStub.secondCall.args[1];
-        expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
-            safeframeHost.currentGeometry_);
-        expect(payload['uid']).to.equal(safeframeHost.uid_);
-        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
-        return Services.timerFor(env.win).promise(1000).then(() => {
-          expect(sendMessageStub).to.be.calledThrice;
-          const payload = sendMessageStub.thirdCall.args[0];
-          const messageType = sendMessageStub.thirdCall.args[1];
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendMessageStub).to.be.calledTwice;
+          const payload = sendMessageStub.secondCall.args[0];
+          const messageType = sendMessageStub.secondCall.args[1];
           expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
-              safeframeHost.currentGeometry_);
+            safeframeHost.currentGeometry_
+          );
           expect(payload['uid']).to.equal(safeframeHost.uid_);
           expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+          return Services.timerFor(env.win)
+            .promise(1000)
+            .then(() => {
+              expect(sendMessageStub).to.be.calledThrice;
+              const payload = sendMessageStub.thirdCall.args[0];
+              const messageType = sendMessageStub.thirdCall.args[1];
+              expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
+                safeframeHost.currentGeometry_
+              );
+              expect(payload['uid']).to.equal(safeframeHost.uid_);
+              expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+            });
         });
-      });
-
     });
   });
 
   describe('formatGeom', () => {
     it('should build proper geometry update', () => {
-      sandbox./*OK*/stub(safeframeHost.baseInstance_,
-          'getPageLayoutBox').returns({
-        top: 200,
-        left: 100,
-        right: 400,
-        bottom: 800,
-      });
+      env.sandbox
+        ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
+        .returns({
+          top: 200,
+          left: 100,
+          right: 400,
+          bottom: 800,
+        });
       const iframeBox = {
         top: 300,
         left: 200,
@@ -520,63 +596,83 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         width: 300,
         height: 700,
       };
-      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         width: 500,
         height: 1000,
       });
       const expectedParsedSfGU = {
-        'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
-        'windowCoords_l': 0, 'frameCoords_t': 300, 'frameCoords_r': 500,
-        'frameCoords_b': 1000, 'frameCoords_l': 200,
-        'posCoords_b': 1000, 'posCoords_l': 200, 'posCoords_r': 500,
-        'posCoords_t': 300, 'styleZIndex': '',
-        'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
-        'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
+        'windowCoords_t': 0,
+        'windowCoords_r': 500,
+        'windowCoords_b': 1000,
+        'windowCoords_l': 0,
+        'frameCoords_t': 300,
+        'frameCoords_r': 500,
+        'frameCoords_b': 1000,
+        'frameCoords_l': 200,
+        'posCoords_b': 1000,
+        'posCoords_l': 200,
+        'posCoords_r': 500,
+        'posCoords_t': 300,
+        'styleZIndex': '',
+        'allowedExpansion_r': 200,
+        'allowedExpansion_b': 300,
+        'allowedExpansion_t': 0,
+        'allowedExpansion_l': 0,
+        'yInView': 1,
         'xInView': 1,
       };
-      const safeframeGeometryUpdate = safeframeHost.formatGeom_(
-          iframeBox);
+      const safeframeGeometryUpdate = safeframeHost.formatGeom_(iframeBox);
       const parsedSfGU = JSON.parse(safeframeGeometryUpdate);
       expect(parsedSfGU).to.deep.equal(expectedParsedSfGU);
       expect(safeframeHost.currentGeometry_).to.deep.equal(expectedParsedSfGU);
-
     });
   });
 
   describe('sendResizeResponse', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.sendResizeResponse(true, SERVICE.COLLAPSE_REQUEST);
       safeframeHost.baseInstance_.promiseId_++;
-      return Services.timerFor(env.win).promise(0).then(() => {
-        expect(sendMessageStub).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(0)
+        .then(() => {
+          expect(sendMessageStub).to.not.be.called;
+        });
     });
   });
 
   describe('resizeAmpAdAndSafeframe', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
-      safeframeHost.resizeAmpAdAndSafeframe(
-          100, 100, SERVICE.COLLAPSE_REQUEST);
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
+      safeframeHost.resizeAmpAdAndSafeframe(100, 100, SERVICE.COLLAPSE_REQUEST);
       safeframeHost.baseInstance_.promiseId_++;
-      return Services.timerFor(env.win).promise(0).then(() => {
-        expect(sendMessageStub).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(0)
+        .then(() => {
+          expect(sendMessageStub).to.not.be.called;
+        });
     });
   });
 
   describe('handleFluidMessage', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ stub(
+        safeframeHost,
+        'sendMessage_'
+      );
       safeframeHost.handleFluidMessage_({height: 10});
       safeframeHost.baseInstance_.promiseId_++;
-      return Services.timerFor(env.win).promise(0).then(() => {
-        expect(sendMessageStub).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(0)
+        .then(() => {
+          expect(sendMessageStub).to.not.be.called;
+        });
     });
   });
 
@@ -591,13 +687,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     function setupForResize() {
-      sandbox.restore();
+      env.sandbox.restore();
       const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
-          '{height:50px!important;' +
-          'width:50px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
+      css.innerHTML =
+        '.safeframe' +
+        '{height:50px!important;' +
+        'width:50px!important;' +
+        'background-color:blue!important;' +
+        'display:block!important;}';
       doc.head.appendChild(css);
       safeframeMock = createElementWithAttributes(doc, 'iframe', {
         height: 50,
@@ -605,19 +702,27 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeSafeframeSpy = sandbox.spy(
-          safeframeHost, 'resizeSafeframe');
-      sendResizeResponseSpy = sandbox.spy(
-          safeframeHost, 'sendResizeResponse');
-      resizeAmpAdAndSafeframeSpy = sandbox.spy(
-          safeframeHost, 'resizeAmpAdAndSafeframe');
+      resizeSafeframeSpy = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'resizeSafeframe'
+      );
+      sendResizeResponseSpy = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'sendResizeResponse'
+      );
+      resizeAmpAdAndSafeframeSpy = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'resizeAmpAdAndSafeframe'
+      );
       safeframeHost.initialHeight_ = ampAdHeight;
       safeframeHost.initialWidth_ = ampAdWidth;
       sendSetupMessage();
       sendRegisterDoneMessage();
-      attemptChangeSizeStub = sandbox.stub(
-          doubleclickImpl, 'attemptChangeSize');
-      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
+      attemptChangeSizeStub = env.sandbox.stub(
+        doubleclickImpl,
+        'attemptChangeSize'
+      );
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 1000,
       });
@@ -626,6 +731,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
     /**
      * Send a message requesting an expand.
+     * @param {number} height
+     * @param {number} width
      */
     function sendExpandMessage(height, width) {
       const expandMessage = {};
@@ -641,7 +748,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': true,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(expandMessage);
+      receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
     }
 
     /**
@@ -656,15 +763,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
-        expect(safeframeMock.style.height).to.equal('300px');
-        expect(safeframeMock.style.width).to.equal('350px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.EXPAND_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(resizeSafeframeSpy).to.be.calledOnce;
+          expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
+          expect(safeframeMock.style.height).to.equal('300px');
+          expect(safeframeMock.style.width).to.equal('350px');
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            true,
+            SERVICE.EXPAND_RESPONSE
+          );
+          expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+        });
     });
 
     /**
@@ -686,15 +797,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
-        expect(safeframeMock.style.height).to.equal('300px');
-        expect(safeframeMock.style.width).to.equal('350px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.EXPAND_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(resizeSafeframeSpy).to.be.calledOnce;
+          expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
+          expect(safeframeMock.style.height).to.equal('300px');
+          expect(safeframeMock.style.width).to.equal('350px');
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            true,
+            SERVICE.EXPAND_RESPONSE
+          );
+          expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+        });
     });
 
     /**
@@ -703,31 +818,38 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * using element.attemptChangeSize. If that succeeds, then we also
      * resize the safeframe.
      */
-    it('expand_request should succeed if expanding past amp-ad bounds and' +
-       ' does not create reflow', () => {
-      const expandWidthBy = 550;
-      const expandHeightBy = 600;
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // Resize the ampAd to simulate a success.
-      const then = f => {
-        ampAd.style.height = '850px';
-        ampAd.style.width = '850px';
-        f();
-        return {'catch': () => {}};
-      };
-      attemptChangeSizeStub.returns({then});
-      sendExpandMessage(expandHeightBy, expandWidthBy);
+    it(
+      'expand_request should succeed if expanding past amp-ad bounds and' +
+        ' does not create reflow',
+      () => {
+        const expandWidthBy = 550;
+        const expandHeightBy = 600;
+        // Sneaky hack to do a synchronous mock of attemptChangeSize
+        // Resize the ampAd to simulate a success.
+        const then = f => {
+          ampAd.style.height = '850px';
+          ampAd.style.width = '850px';
+          f();
+          return {'catch': () => {}};
+        };
+        attemptChangeSizeStub.returns({then});
+        sendExpandMessage(expandHeightBy, expandWidthBy);
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(850, 850);
-        expect(safeframeMock.style.height).to.equal('850px');
-        expect(safeframeMock.style.width).to.equal('850px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.EXPAND_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-      });
-    });
+        return Services.timerFor(env.win)
+          .promise(100)
+          .then(() => {
+            expect(resizeSafeframeSpy).to.be.calledOnce;
+            expect(resizeSafeframeSpy).to.be.calledWith(850, 850);
+            expect(safeframeMock.style.height).to.equal('850px');
+            expect(safeframeMock.style.width).to.equal('850px');
+            expect(sendResizeResponseSpy).to.be.calledWith(
+              true,
+              SERVICE.EXPAND_RESPONSE
+            );
+            expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+          });
+      }
+    );
 
     /**
      * If the safeframed creative asks to resize outside the bounds of
@@ -738,10 +860,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     it('resizeAmpAdAndSafeframe should send error on rejection', () => {
       attemptChangeSizeStub.rejects();
       safeframeHost.resizeAmpAdAndSafeframe(550, 550, SERVICE.EXPAND_RESPONSE);
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.EXPAND_RESPONSE);
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            false,
+            SERVICE.EXPAND_RESPONSE
+          );
+        });
     });
 
     /**
@@ -750,10 +876,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request fails if expanding larger than viewport', () => {
       sendExpandMessage(5000, 5000);
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.EXPAND_RESPONSE);
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            false,
+            SERVICE.EXPAND_RESPONSE
+          );
+        });
     });
 
     /**
@@ -775,12 +905,16 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'sentinel': safeframeHost.sentinel_,
       });
       allowConsoleError(() => {
-        receiveMessage(expandMessage);
+        receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
       });
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.EXPAND_RESPONSE);
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            false,
+            SERVICE.EXPAND_RESPONSE
+          );
+        });
     });
 
     /**
@@ -788,21 +922,28 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * try to expand that element, and in this test it fails. Thus, we also
      * fail resizing the safeframe.
      */
-    it('expand_request should fail if expanding past amp-ad bounds and would ' +
-       'create reflow', () => {
-      attemptChangeSizeStub.rejects();
+    it(
+      'expand_request should fail if expanding past amp-ad bounds and would ' +
+        'create reflow',
+      () => {
+        attemptChangeSizeStub.rejects();
 
-      sendExpandMessage(550, 550);
+        sendExpandMessage(550, 550);
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.not.be.called;
-        expect(safeframeMock.height).to.equal('50');
-        expect(safeframeMock.width).to.equal('50');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.EXPAND_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-      });
-    });
+        return Services.timerFor(env.win)
+          .promise(100)
+          .then(() => {
+            expect(resizeSafeframeSpy).to.not.be.called;
+            expect(safeframeMock.height).to.equal('50');
+            expect(safeframeMock.width).to.equal('50');
+            expect(sendResizeResponseSpy).to.be.calledWith(
+              false,
+              SERVICE.EXPAND_RESPONSE
+            );
+            expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+          });
+      }
+    );
 
     function sendCollapseMessage() {
       const collapseMessage = {};
@@ -814,7 +955,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': false,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(collapseMessage);
+      receiveMessage(collapseMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should collapse safeframe on amp-ad resize failure', () => {
@@ -826,15 +967,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.rejects();
       sendCollapseMessage();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
-        expect(safeframeMock.style.height).to.equal('250px');
-        expect(safeframeMock.style.width).to.equal('300px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.COLLAPSE_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(resizeSafeframeSpy).to.be.calledOnce;
+          expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+          expect(safeframeMock.style.height).to.equal('250px');
+          expect(safeframeMock.style.width).to.equal('300px');
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            true,
+            SERVICE.COLLAPSE_RESPONSE
+          );
+          expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+        });
     });
 
     it('should collapse safeframe on amp-ad resize success', () => {
@@ -854,40 +999,54 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
-        expect(safeframeMock.style.height).to.equal('250px');
-        expect(safeframeMock.style.width).to.equal('300px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.COLLAPSE_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(resizeSafeframeSpy).to.be.calledOnce;
+          expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+          expect(safeframeMock.style.height).to.equal('250px');
+          expect(safeframeMock.style.width).to.equal('300px');
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            true,
+            SERVICE.COLLAPSE_RESPONSE
+          );
+          expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+        });
     });
 
     it('should send collapse failure message if already collapsed', () => {
       safeframeHost.isCollapsed_ = true;
       sendCollapseMessage();
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.COLLAPSE_RESPONSE);
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            false,
+            SERVICE.COLLAPSE_RESPONSE
+          );
+        });
     });
 
     it('should send collapse failure message if not registered', () => {
       safeframeHost.isCollapsed_ = false;
       safeframeHost.isRegistered_ = false;
       sendCollapseMessage();
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.COLLAPSE_RESPONSE);
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            false,
+            SERVICE.COLLAPSE_RESPONSE
+          );
+        });
     });
 
     /**
      * Send a message requesting a resize.
-     * @param {number} height Pixels to resize height by.
-     * @param {number} width Pixels to resize width by.
+     * @param {number} top
+     * @param {number} bottom
+     * @param {number} left
+     * @param {number} right
      */
     function sendResizeMessage(top, bottom, left, right) {
       const resizeMessage = {};
@@ -902,7 +1061,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'resize_l': left,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(resizeMessage);
+      receiveMessage(resizeMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should resize safeframe on amp-ad resize success', () => {
@@ -918,15 +1077,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.returns({then});
       sendResizeMessage(-5, -5, -5, -5);
 
-      return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(240, 290);
-        expect(safeframeMock.style.height).to.equal('240px');
-        expect(safeframeMock.style.width).to.equal('290px');
-        expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.RESIZE_RESPONSE);
-        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-      });
+      return Services.timerFor(env.win)
+        .promise(100)
+        .then(() => {
+          expect(resizeSafeframeSpy).to.be.calledOnce;
+          expect(resizeSafeframeSpy).to.be.calledWith(240, 290);
+          expect(safeframeMock.style.height).to.equal('240px');
+          expect(safeframeMock.style.width).to.equal('290px');
+          expect(sendResizeResponseSpy).to.be.calledWith(
+            true,
+            SERVICE.RESIZE_RESPONSE
+          );
+          expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+        });
     });
   });
 });

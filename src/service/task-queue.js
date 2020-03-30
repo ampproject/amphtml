@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-
+import {devAssert} from '../log';
 
 /**
  * The internal structure for the task.
@@ -37,15 +36,15 @@ export let TaskDef;
  */
 let PeekStateDef;
 
-
-
 /**
  * A scheduling queue for Resources.
  *
  * @package
  */
 export class TaskQueue {
-
+  /**
+   * Creates an instance of TaskQueue.
+   */
   constructor() {
     /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];
@@ -99,8 +98,7 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    dev().assert(
-        !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    devAssert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = Date.now();

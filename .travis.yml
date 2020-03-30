@@ -1,73 +1,119 @@
 language: node_js
-sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
-dist: trusty
+dist: xenial
 node_js:
-  - "lts/*"
+  - 'lts/*'
 python:
-  - "2.7"
+  - '2.7'
 notifications:
   email:
     recipients:
       - amp-build-cop@grotations.appspotmail.com
     on_success: change
     on_failure: change
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome-stable
-  - export DISPLAY=:99.0
-  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
-  - sh -e /etc/init.d/xvfb start
-before_script:
+  # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
+  - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+  - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
   - pip install --user protobuf
-  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper
-  - chromedriver-update 2.35
-  - chromedriver -v
-script: node build-system/pr-check.js
-after_script:
-  - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
   only:
     - master
     - release
     - canary
     - /^amp-release-.*$/
-    - /^greenkeeper/.*$/
 addons:
+  apt:
+    packages:
+      # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
+      - expect-dev
+      - google-cloud-sdk
+      - openssl
+      - protobuf-compiler
   chrome: stable
   hosts:
     - ads.localhost
     - iframe.localhost
+    # CURLs amp subdomain for the amp-recaptcha-input integration test. The hash
+    # is the CURLS subdomain for localhost:9876
+    - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
-  apt:
-    packages:
-      - protobuf-compiler
-      - python-protobuf
-matrix:
+stages:
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = push
+jobs:
   include:
-    # For non-greenkeeper branches, use the normal environment.
-    - if: NOT branch =~ ^greenkeeper/.*$
-      env: BUILD_SHARD="unit_tests"
-    - if: NOT branch =~ ^greenkeeper/.*$
-      env: BUILD_SHARD="integration_tests"
-    # For greenkeeper branches, add a secure GH token for the lockfile upload.
-    - if: branch =~ ^greenkeeper/.*$
+    - stage: build
+      name: 'Build'
+      script:
+        - unbuffer node build-system/pr-check/build.js
+    - stage: build
+      name: 'Checks'
+      script:
+        - unbuffer node build-system/pr-check/checks.js
+    - stage: build
+      name: 'Validator Tests'
+      script:
+        - unbuffer node build-system/pr-check/validator-tests.js
+    - stage: build
+      name: 'Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: test
+      name: 'Single Pass Tests'
+      script:
+        - unbuffer node build-system/pr-check/single-pass-tests.js
+    - stage: test
+      name: 'Visual Diff Tests'
+      script:
+        - unbuffer node build-system/pr-check/visual-diff-tests.js
       env:
-        # BUILD_SHARD="unit_tests" GH_TOKEN=[secure]
-        secure: "vDfldX3uQ6Y5hG7RY4DGwm28TFTOhRjn2stwWxl6CCN0Dys6qLCm9z6aexZBnarOqoZRjX/MSaV57VSOMAZuvs4sJiR8jpEK3j8ZKYPsgw50HzkuzMT9365atDy2weCs0NniIXMk2X6pHr4VIXjdr07CWCrT31BJVCixAfPIIdTF3IAjrxSws/9SXHa2oWrFDrwJEmASQsDQ79uGKyvid+q5G9mYrpp9oT7nkDZTV2EwdHfIWWQ1xFq2ZFep9UjNmlVRYfGJLIg9LdfgnyY2qQKODGFiwHN3fY14A6PCm4kRHebwGqjL5TKrMSeexdpjDiAp80BAnlsN9eRk0lM+thoUfRlHi6LLAUGp7rR4+j1m/nyhhgQ1BLEHo6oUVZGpd733IqgRufIcxWQl3hImpysldfwR72oGFq0eZBrJa5yJbo1Qc89trS3Jpd5O9NLkvH4gaBrvrE6zJq8KfrAFvqvOINOyvJfQSVOOQkEbc/vUx1X2fEB/rFRnb+hNVR8gPvjlBCiYW2JqdtiUwqMjUHhmQwQkWXrAxGnf4XXCjXmpKl6XDeeVzMaaNNuZFn1F9bm8giA66UcRDvsi5tw7eR5HHEfyt1WBwByFopp6hwioy9symoCdsW+hUKLCBo1mo1cJ273I21z45jagPcgI99jlgAqnlHQ76/aUqtvRvro="
-    - if: branch =~ ^greenkeeper/.*$
+        - CACHE_NAME=VISUALDIFFJOB
+    - stage: test
+      name: 'Local Tests'
+      script:
+        - unbuffer node build-system/pr-check/local-tests.js
+    - stage: test
+      name: 'Remote (Sauce Labs) Tests'
+      script:
+        - unbuffer node build-system/pr-check/remote-tests.js
+      after_script:
+        - build-system/sauce_connect/stop_sauce_connect.sh
+        - ps -ef
+    - stage: test
+      name: 'End to End Tests'
+      script:
+        - unbuffer node build-system/pr-check/e2e-tests.js
       env:
-        # BUILD_SHARD="integration_tests" GH_TOKEN=[secure]
-        secure: "juB/a5PPXjd3DtE0XzGTBG+QV14z3NNFiw+bUoGpc6/OzvN3e7ZhHOpzNV/MoIzHZXm4Rj4fwoehS4zRx034ecS1o9vfWM1Yw6yWXMKI5oDxB4xPWY1G+WAIXCWJnDzaETTLrjcGZ3ENr4XkPFAD7a7w45Uxqg37T8xUgT6OJwj0uTumeJdy9oj6VI9OycOD4C5xBcB3X7vkxsnc59sUmyPZYodQIVpzX/g6Ofvc0ofQaheHKfsZUZKWIEv7hvR1pxoLQOxMnue+mr43pOLe6CBgWIo2TBHz5t5pp3IMKewvAcavdnMjsC8phMk/rqXd42DmvR9SDIiTDio2FmPaQHRry2+asPAQarXDPFXnepQ2Od+e0AhmCLl01+wkQ5zEmDNWORPLqBDjJ1urq7DuTif77hKk/eeHyaBKGQGV1qQO1h/4Qh7rw8NsgzztqmfE6lCi1ZoWl56OJs1KZU3WltQmtYJ2xDN6h/UCK3YKC8rpVCRd0ed9Ftu7HZyRPiCUBwqQ24Fz1aZ1KzDS2Ig5NUaHS0U3JgDO9xojGeG2K7As0Ik0WeoLwf9h3PDWTAv8f4WhQbDCkZ/CTLi+RrkmsV+lrYF+TZ17l0X7fDIhLbULaK4Y1/kK7VWAT6chVQ8zFL8H1ahcGmSwzJ3n1qPbeHRyFpcvFMuIXJgjUoEQEz4="
+        - CACHE_NAME=E2EJOB
+    - stage: experiment
+      name: 'Experiment A Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+      cache: false
+    - stage: experiment
+      name: 'Experiment B Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+      cache: false
+    - stage: experiment
+      name: 'Experiment C Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+      cache: false
+before_cache:
+  # do not store cache for pr builds or experiment stage builds
+  - if [[ $TRAVIS_EVENT_TYPE == pull_request ]] || [[ $TRAVIS_BUILD_STAGE_NAME == experiment ]]; then exit $TRAVIS_TEST_RESULT ; fi
 cache:
-  yarn: true
   directories:
     - node_modules
+    - build-system/tasks/e2e/node_modules
+    - build-system/tasks/visual-diff/node_modules
+    - sauce_connect
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - .gem
-  pip: true
-  bundler: true
+  yarn: true

@@ -17,12 +17,36 @@
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
-
   /**
    * @param {./amp-subscriptions.SubscriptionService} subscriptionService
    */
   constructor(subscriptionService) {
     this.subscriptionService_ = subscriptionService;
+  }
+
+  /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
+  }
+
+  /**
+   * Returns the singleton Dialog instance
+   * @return {!./dialog.Dialog}
+   */
+  getDialog() {
+    return this.subscriptionService_.getDialog();
+  }
+
+  /**
+   * Returns the encrypted document key for the specified service.
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
   }
 
   /**
@@ -40,6 +64,14 @@ export class ServiceAdapter {
    */
   getReaderId(serviceId) {
     return this.subscriptionService_.getReaderId(serviceId);
+  }
+
+  /**
+   * gets Score factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.subscriptionService_.getScoreFactorStates();
   }
 
   /**
@@ -69,24 +101,19 @@ export class ServiceAdapter {
    * @param {?JsonObject} options
    */
   decorateServiceAction(element, serviceId, action, options) {
-    this.subscriptionService_.decorateServiceAction(element, serviceId,
-        action, options);
+    this.subscriptionService_.decorateServiceAction(
+      element,
+      serviceId,
+      action,
+      options
+    );
   }
 
   /**
    * Reauthorize platforms
-   * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
-  reAuthorizePlatform(subscriptionPlatform) {
-    this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
-  }
-
-  /**
-   * Returns the singleton Dialog instance
-   * @return {!./dialog.Dialog}
-   */
-  getDialog() {
-    return this.subscriptionService_.getDialog();
+  resetPlatforms() {
+    this.subscriptionService_.resetPlatforms();
   }
 
   /**
@@ -99,8 +126,11 @@ export class ServiceAdapter {
   }
 }
 
-/** @package @VisibleForTesting */
+/**
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getPageConfigForTesting() {
   return PageConfig;
 }
-

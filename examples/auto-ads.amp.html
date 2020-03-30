@@ -11,11 +11,11 @@
     <style>
 
       body {
-        font-family: Arial;  
+        font-family: Arial;
       }
 
       header {
-        margin-bottom: 15px;  
+        margin-bottom: 15px;
       }
 
       h1 {
@@ -27,13 +27,21 @@
         font-weight: normal;
       }
 
+      /* Shifting page content to the left to verify that the ad unit is still
+       * displayed correctly with no shift, occupying exactly the full width
+       * of the viewport.
+       */
+      .with-left-margin {
+        margin-left: 15px;
+      }
+
       .main-content p {
         margin: 20px 30px;
         font-size: 14px;
       }
 
       .main-content amp-img {
-         margin: 20px 0px;  
+         margin: 20px 0px;
       }
 
       #footer {
@@ -43,7 +51,7 @@
         font-size: 12px;
         color: #fff;
         text-align: center;
-        line-height: 30px; 
+        line-height: 30px;
       }
 
     </style>
@@ -54,22 +62,24 @@
       <amp-img layout="responsive" id="header-img" src="img/hero@2x.jpg" width="1200" height="900"></amp-img>
     </header>
     <h1>Title of Page</h1>
-    <div class="main-content">
-      <p>
-        Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
-      </p>
-      <p>
-        Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
-      </p>
-      <p>
-        Essent signiferumque necessitatibus in mea. Sit minim petentium dissentiunt ei, ius inimicus mnesarchum ut. Errem maiestatis cu nec, dolor nusquam interesset ut qui. Mea in eripuit blandit complectitur. An eos recteque adversarium.
-      </p>
-      <p>
-        Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
-      </p>
-      <p>
-        Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
-      </p>
+    <div class="with-left-margin">
+      <div class="main-content">
+        <p>
+          Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
+        </p>
+        <p>
+          Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
+        </p>
+        <p>
+          Essent signiferumque necessitatibus in mea. Sit minim petentium dissentiunt ei, ius inimicus mnesarchum ut. Errem maiestatis cu nec, dolor nusquam interesset ut qui. Mea in eripuit blandit complectitur. An eos recteque adversarium.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, has te dico epicuri, ad sumo constituam cum. Vix rebum partem graecis in, id legimus lobortis expetendis per. Zril tritani principes has in. Sea ei exerci ridens vituperatoribus. Id inermis invenire mei, ei iudico epicuri mea. Ad eos debet perfecto volutpat, suas error usu ut, est everti comprehensam no.
+        </p>
+        <p>
+          Dolor numquam consulatu ne cum, ei sed essent appellantur, eam et appetere partiendo. Vim mucius vituperatoribus ut. Consul virtute eum id, has no postulant dissentiet. Errem tibique copiosae ut has, ut labore nemore assentior per.
+        </p>
+      </div>
     </div>
     <div id="footer">Powered by AMP</div>
   </body>
