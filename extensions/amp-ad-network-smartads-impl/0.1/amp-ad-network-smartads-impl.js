@@ -54,6 +54,6 @@ export class AmpAdNetworkSmartAdsImpl extends AmpA4A {
   }
 }
 
-AMP.extension('amp-ad-network-smartads-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-smartads-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-smartads-impl', AmpAdNetworkSmartAdsImpl);
 });

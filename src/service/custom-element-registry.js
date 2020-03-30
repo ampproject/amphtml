@@ -100,7 +100,7 @@ function tryUpgradeElement_(element, toClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach(name => {
+  extensions.forEach((name) => {
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
   });

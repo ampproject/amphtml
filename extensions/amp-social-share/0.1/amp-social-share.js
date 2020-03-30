@@ -115,13 +115,13 @@ class AmpSocialShare extends AMP.BaseElement {
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
-      bindingVars.forEach(name => {
+      bindingVars.forEach((name) => {
         const bindingName = name.toUpperCase();
         bindings[bindingName] = this.params_[name];
       });
     }
 
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((href) => {
       this.href_ = href;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
       const {protocol} = Services.urlForDoc(element).parse(href);
@@ -199,6 +199,6 @@ class AmpSocialShare extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-social-share', '0.1', AMP => {
+AMP.extension('amp-social-share', '0.1', (AMP) => {
   AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
 });

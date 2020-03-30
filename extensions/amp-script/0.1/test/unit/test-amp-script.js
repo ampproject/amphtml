@@ -29,7 +29,7 @@ import {
 } from '../../../../../src/service';
 import {user} from '../../../../../src/log';
 
-describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
+describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
   let script;
   let service;
@@ -63,7 +63,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   function stubFetch(url, headers, text, responseUrl) {
     xhr.fetchText.withArgs(url).resolves({
       headers: {
-        get: h => headers[h],
+        get: (h) => headers[h],
       },
       text: () => Promise.resolve(text),
       url: responseUrl || url,
@@ -250,7 +250,7 @@ describes.repeated(
           ampdoc: variant.ampdoc,
         },
       },
-      env => {
+      (env) => {
         let crypto;
         let service;
 

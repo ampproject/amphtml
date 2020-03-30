@@ -48,7 +48,7 @@ export const DrawerState = {
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplateEl = element => {
+const getTemplateEl = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-draggable-drawer">
       <div class="i-amphtml-story-draggable-drawer-container">
@@ -62,7 +62,7 @@ const getTemplateEl = element => {
  * @param {!Element} element
  * @return {!Element}
  */
-const getHeaderEl = element => {
+const getHeaderEl = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-draggable-drawer-header"></div>`;
 };
@@ -169,7 +169,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -221,7 +221,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   stopListeningForTouchEvents_() {
-    this.touchEventUnlisteners_.forEach(fn => fn());
+    this.touchEventUnlisteners_.forEach((fn) => fn());
     this.touchEventUnlisteners_ = [];
   }
 
@@ -394,7 +394,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   isDrawerContentDescendant_(element) {
     return !!closest(
       element,
-      el => {
+      (el) => {
         return el.classList.contains(
           'i-amphtml-story-draggable-drawer-content'
         );

@@ -52,7 +52,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function(
+exports.closureCompile = async function (
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -61,7 +61,7 @@ exports.closureCompile = async function(
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     function start() {
       inProgress++;
       compile(
@@ -71,12 +71,12 @@ exports.closureCompile = async function(
         options,
         timeInfo
       ).then(
-        function() {
+        function () {
           inProgress--;
           next();
           resolve();
         },
-        reason => reject(reason)
+        (reason) => reject(reason)
       );
     }
     function next() {
@@ -170,7 +170,7 @@ function compile(
     );
   }
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!(entryModuleFilenames instanceof Array)) {
       entryModuleFilenames = [entryModuleFilenames];
     }
@@ -193,7 +193,7 @@ function compile(
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
-    entryModuleFilenames.forEach(function(filename) {
+    entryModuleFilenames.forEach(function (filename) {
       if (!filename.includes('extensions/')) {
         return;
       }
@@ -216,7 +216,7 @@ function compile(
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
       const polyfills = fs.readdirSync('src/polyfills');
-      const polyfillsShadowList = polyfills.filter(p => {
+      const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
         return p !== 'custom-elements.js';
       });
@@ -227,7 +227,7 @@ function compile(
         'src/polyfills/custom-elements.js',
         'build/fake-polyfills/**/*.js'
       );
-      polyfillsShadowList.forEach(polyfillFile => {
+      polyfillsShadowList.forEach((polyfillFile) => {
         srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync(
           'build/fake-polyfills/src/polyfills/' + polyfillFile,
@@ -255,7 +255,7 @@ function compile(
       // Don't include externs.
       '!**/*.extern.js'
     );
-    unneededFiles.forEach(function(fake) {
+    unneededFiles.forEach(function (fake) {
       if (!fs.existsSync(fake)) {
         fs.writeFileSync(
           fake,
@@ -351,10 +351,10 @@ function compile(
     }
 
     const compilerOptionsArray = [];
-    Object.keys(compilerOptions).forEach(function(option) {
+    Object.keys(compilerOptions).forEach(function (option) {
       const value = compilerOptions[option];
       if (value instanceof Array) {
-        value.forEach(function(item) {
+        value.forEach(function (item) {
           compilerOptionsArray.push('--' + option + '=' + item);
         });
       } else {
@@ -371,9 +371,9 @@ function compile(
         .src(srcs, {base: '.'})
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .on('error', err => handlePreClosureError(err, outputFilename))
+        .on('error', (err) => handlePreClosureError(err, outputFilename))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
-        .on('error', err => handleTypeCheckError(err))
+        .on('error', (err) => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
     } else {
@@ -382,11 +382,11 @@ function compile(
         .src(srcs, {base: '.'})
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .on('error', err =>
+        .on('error', (err) =>
           handlePreClosureError(err, outputFilename, options, resolve)
         )
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
-        .on('error', err =>
+        .on('error', (err) =>
           handleCompilerError(err, outputFilename, options, resolve)
         )
         .pipe(rename(outputFilename))

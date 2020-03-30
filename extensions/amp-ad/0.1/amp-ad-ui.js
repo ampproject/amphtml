@@ -83,7 +83,7 @@ export class AmpAdUIHandler {
       );
       const flyingCarpetElement = flyingCarpetElements[0];
 
-      flyingCarpetElement.getImpl().then(implementation => {
+      flyingCarpetElement.getImpl().then((implementation) => {
         const children = implementation.getChildren();
 
         if (children.length === 1 && children[0] === this.element_) {

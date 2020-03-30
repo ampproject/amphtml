@@ -38,18 +38,18 @@ describes.sandboxed('shadow-embed', {}, () => {
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1].forEach(
-    scenario => {
+    (scenario) => {
       describe('shadow APIs', () => {
         let hostElement;
 
-        beforeEach(function() {
+        beforeEach(function () {
           hostElement = document.createElement('div');
           setShadowDomSupportedVersionForTesting(scenario);
           setShadowCssSupportedForTesting(undefined);
         });
 
-        describe(scenario, function() {
-          before(function() {
+        describe(scenario, function () {
+          before(function () {
             if (
               scenario == ShadowDomVersion.V0 &&
               !Element.prototype.createShadowRoot
@@ -321,7 +321,7 @@ describes.sandboxed('shadow-embed', {}, () => {
         },
         document: {
           implementation: {
-            createHTMLDocument: type => {
+            createHTMLDocument: (type) => {
               createHTMLDocumentSpy(type);
               return {
                 open: () => {},
