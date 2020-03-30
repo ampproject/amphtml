@@ -214,7 +214,10 @@ export class Resource {
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
 
-    /** @private {?ClientRect} */
+    /**
+     * A client rect that was "premeasured" by an IntersectionObserver.
+     * @private {?ClientRect}
+     */
     this.premeasuredRect_ = null;
   }
 
@@ -428,6 +431,8 @@ export class Resource {
   }
 
   /**
+   * Stores a client rect that was "premeasured" by an IntersectionObserver.
+   * Should only be used in IntersectionObserver mode.
    * @param {!ClientRect} clientRect
    */
   premeasure(clientRect) {
@@ -439,7 +444,7 @@ export class Resource {
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
    * @param {boolean} usePremeasuredRect If true, consumes the previously
-   *    premeasured ClientRect instead of calling getBoundingClientRect.
+   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
   measure(usePremeasuredRect = false) {
     // Check if the element is ready to be measured.
@@ -473,7 +478,7 @@ export class Resource {
 
     const oldBox = this.layoutBox_;
     if (usePremeasuredRect) {
-      this.computeMeasurements_(this.premeasuredRect_);
+      this.computeMeasurements_(devAssert(this.premeasuredRect_));
       this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();

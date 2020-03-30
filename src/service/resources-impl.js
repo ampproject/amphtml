@@ -270,7 +270,7 @@ export class ResourcesImpl {
     this.rebuildDomWhenReady_();
 
     if (
-      !this.intersectionObserver &&
+      !this.intersectionObserver_ &&
       isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')
     ) {
       /** @private @const */
@@ -1105,13 +1105,13 @@ export class ResourcesImpl {
    * Always returns true unless the resource was previously displayed but is
    * not displayed now (i.e. the resource should be unloaded).
    * @param {!Resource} r
-   * @param {!ClientRect=} opt_premeasuredRect
+   * @param {boolean} usePremeasuredRect
    * @return {boolean}
    * @private
    */
-  measureResource_(r, opt_premeasuredRect) {
+  measureResource_(r, usePremeasuredRect = false) {
     const wasDisplayed = r.isDisplayed();
-    r.measure(opt_premeasuredRect);
+    r.measure(usePremeasuredRect);
     return !(wasDisplayed && !r.isDisplayed());
   }
 
@@ -1207,7 +1207,7 @@ export class ResourcesImpl {
           );
           if (!isDisplayed) {
             devAssert(
-              r.getState() != Resource.NOT_BUILT,
+              r.getState() != ResourceState.NOT_BUILT,
               'Should not unload unbuilt elements.'
             );
             if (!toUnload) {
