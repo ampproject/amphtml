@@ -163,15 +163,6 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
-    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
-      dev().fine(TAG, 'BUILD RACE!');
-      // this.isBuilding_ = true;
-      // element.whenBuilt().then(
-      //   () => this.onBuildSuccess_(),
-      //   reason => this.onBuildFailure_(reason)
-      // );
-    }
-
     /** @private {number} */
     this.priorityOverride_ = -1;
 
@@ -222,6 +213,9 @@ export class Resource {
 
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
+
+    /** @private {?ClientRect} */
+    this.premeasuredRect_ = null;
   }
 
   /**
@@ -330,39 +324,27 @@ export class Resource {
     }
     this.isBuilding_ = true;
     return this.element.build().then(
-      () => this.onBuildSuccess_(),
-      reason => this.onBuildFailure_(reason)
+      () => {
+        this.isBuilding_ = false;
+        // With IntersectionObserver, measure can happen before build
+        // so check if we're "ready for layout" (measured and built) here.
+        if (this.intersect_) {
+          this.state_ = this.hasBeenMeasured()
+            ? ResourceState.READY_FOR_LAYOUT
+            : ResourceState.NOT_LAID_OUT;
+        } else {
+          this.state_ = ResourceState.NOT_LAID_OUT;
+        }
+        // TODO(dvoytenko): merge with the standard BUILT signal.
+        this.element.signals().signal('res-built');
+      },
+      reason => {
+        this.maybeReportErrorOnBuildFailure(reason);
+        this.isBuilding_ = false;
+        this.element.signals().rejectSignal('res-built', reason);
+        throw reason;
+      }
     );
-  }
-
-  /**
-   * @private
-   */
-  onBuildSuccess_() {
-    this.isBuilding_ = false;
-    // Typically, build always happens before measure.
-    // With IntersectionObserver, however, measure can precede build,
-    // so check if we're ready for layout (measured and built) here.
-    if (this.intersect_) {
-      this.state_ = this.hasBeenMeasured()
-        ? ResourceState.READY_FOR_LAYOUT
-        : ResourceState.NOT_LAID_OUT;
-    } else {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
-    // TODO(dvoytenko): merge with the standard BUILT signal.
-    this.element.signals().signal('res-built');
-  }
-
-  /**
-   * @param {*} reason
-   * @private
-   */
-  onBuildFailure_(reason) {
-    this.maybeReportErrorOnBuildFailure(reason);
-    this.isBuilding_ = false;
-    this.element.signals().rejectSignal('res-built', reason);
-    throw reason;
   }
 
   /**
@@ -446,12 +428,20 @@ export class Resource {
   }
 
   /**
+   * @param {!ClientRect} clientRect
+   */
+  premeasure(clientRect) {
+    devAssert(this.intersect_);
+    this.premeasuredRect_ = clientRect;
+  }
+
+  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   * @param {boolean} usePremeasuredRect If true, consumes the previously
    *    premeasured ClientRect instead of calling getBoundingClientRect.
    */
-  measure(opt_premeasuredRect) {
+  measure(usePremeasuredRect = false) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -482,12 +472,16 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.computeMeasurements_(opt_premeasuredRect);
+    if (usePremeasuredRect) {
+      this.computeMeasurements_(this.premeasuredRect_);
+      this.premeasuredRect_ = null;
+    } else {
+      this.computeMeasurements_();
+    }
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
-
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
       oldBox.top != newBox.top ||
@@ -594,6 +588,14 @@ export class Resource {
    */
   hasBeenMeasured() {
     return !!this.initialLayoutBox_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasBeenPremeasured() {
+    devAssert(this.intersect_);
+    return !!this.premeasuredRect_;
   }
 
   /**

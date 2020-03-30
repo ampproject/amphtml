@@ -26,6 +26,7 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
@@ -293,36 +294,29 @@ export class ResourcesImpl {
    */
   intersects_(entries) {
     devAssert(this.intersectionObserver_);
+
     // TODO(willchou): Remove assert once #27167 is fixed.
     devAssert(this.prerenderSize_ == 1);
 
-    dev().fine(
-      TAG_,
-      'intersect',
-      entries
-        .filter(e => e.isIntersecting)
-        .map(e => ({
-          e,
-          r: Resource.forElementOptional(e.target).debugid,
-        })),
-      entries
-        .filter(e => !e.isIntersecting)
-        .map(e => ({
-          e,
-          r: Resource.forElementOptional(e.target).debugid,
-        }))
-    );
+    if (getMode().localDev) {
+      const inside = [];
+      const outside = [];
+      entries.forEach(e => {
+        const r = Resource.forElement(e.target);
+        (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
+      });
+      dev().fine(TAG_, 'intersection', inside, outside);
+    }
 
     this.intersectionObserverCallbackFired_ = true;
 
     entries.forEach(entry => {
-      const {boundingClientRect, isIntersecting, target} = entry;
+      const {boundingClientRect, target} = entry;
 
       const r = Resource.forElement(target);
       // Strangely, JSC is missing x/y from typedefs of boundingClientRect
       // despite it being a DOMRectReadOnly (ClientRect) by spec.
-      r.clientRect = /** @type {!ClientRect} */ (boundingClientRect);
-      r.isIntersecting = isIntersecting;
+      r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
     });
 
     this.schedulePass();
@@ -1173,7 +1167,7 @@ export class ResourcesImpl {
           r,
           /* checkForDupes */ true,
           /* scheduleWhenBuilt */ true,
-          /* ignoreQuota */ r.clientRect
+          /* ignoreQuota */ r.hasBeenPremeasured()
         );
       }
       if (
@@ -1194,20 +1188,28 @@ export class ResourcesImpl {
     // there's no way to optimize this. All reads happen here.
     let toUnload;
     if (this.intersectionObserver_) {
+      // The IntersectionObserver variant for phase 2 is just a simplification
+      // that ignores `relayoutTop` and `elementsThatScrolled`.
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.hasOwner()) {
-          // If element has owner, do nothing.
           continue;
         }
-        // Difference: we always "measure" given a fresh clientRect, even if
-        // the element has not been built yet.
+        // Difference: if we have a "premeasured" client rect, consume it
+        // as the element's new measurements even if the element isn't built.
+        const premeasured = r.hasBeenPremeasured();
         const needsMeasure =
-          r.clientRect || this.relayoutAll_ || r.isMeasureRequested();
+          premeasured || this.relayoutAll_ || r.isMeasureRequested();
         if (needsMeasure) {
-          const isDisplayed = this.measureResource_(r, r.clientRect);
-          r.clientRect = null;
+          const isDisplayed = this.measureResource_(
+            r,
+            /* usePremeasuredRect */ premeasured
+          );
           if (!isDisplayed) {
+            devAssert(
+              r.getState() != Resource.NOT_BUILT,
+              'Should not unload unbuilt elements.'
+            );
             if (!toUnload) {
               toUnload = [];
             }
