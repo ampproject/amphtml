@@ -38,7 +38,7 @@ function getBodymovinAnimationSdk(global, renderer, cb) {
     renderer === 'svg'
       ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
       : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
-  loadScript(global, scriptToLoad, function() {
+  loadScript(global, scriptToLoad, function () {
     cb(global.bodymovin);
   });
 }
@@ -83,7 +83,7 @@ export function bodymovinanimation(global) {
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
   const renderer = dataReceived['renderer'];
-  getBodymovinAnimationSdk(global, renderer, function(bodymovin) {
+  getBodymovinAnimationSdk(global, renderer, function (bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer,

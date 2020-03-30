@@ -66,7 +66,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
      * @return {undefined}
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -302,6 +302,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpRedBullPlayer);
 });

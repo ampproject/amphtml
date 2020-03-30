@@ -47,14 +47,14 @@ async function checkTypes() {
     './ads/inabox/inabox-host.js',
     './src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function(key) {
+  const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
   });
   const extensionSrcs = extensionValues
-    .filter(function(extension) {
+    .filter(function (extension) {
       return !extension.noTypeCheck;
     })
-    .map(function(extension) {
+    .map(function (extension) {
       return (
         './extensions/' +
         extension.name +

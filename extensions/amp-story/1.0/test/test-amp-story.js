@@ -51,7 +51,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let ampdoc;
     let element;
     let hasSwipeCapability = false;
@@ -123,25 +123,22 @@ describes.realWin(
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
-      env.sandbox
-        .stub(viewer, 'isEmbedded')
-        .withArgs()
-        .returns(isEmbedded);
+      env.sandbox.stub(viewer, 'isEmbedded').withArgs().returns(isEmbedded);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };
       });
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function() {
+      registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function() {
+      registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
 
@@ -166,7 +163,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
 
@@ -224,7 +221,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
 
@@ -241,7 +238,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
       const oldPage = pages[0];
@@ -271,7 +268,7 @@ describes.realWin(
       // Stubbing because we need to assert synchronously
       env.sandbox
         .stub(element.implementation_, 'mutateElement')
-        .callsFake(mutator => {
+        .callsFake((mutator) => {
           mutator();
           return Promise.resolve();
         });
@@ -383,7 +380,7 @@ describes.realWin(
         .then(() => {
           expect(bookendXhr).to.have.been.calledOnce;
         })
-        .catch(error => {
+        .catch((error) => {
           expect(error).to.be.undefined;
         });
     });
@@ -504,7 +501,7 @@ describes.realWin(
       story.landscapeOrientationMedia_ = {matches: true};
       story.element.setAttribute('standalone', '');
       story.element.setAttribute('supports-landscape', '');
-      env.sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
+      env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
 
       story.buildCallback();
 
@@ -529,7 +526,7 @@ describes.realWin(
       ]);
 
       const pages = story.element.querySelectorAll('amp-story-page');
-      const pageIds = Array.prototype.map.call(pages, page => page.id);
+      const pageIds = Array.prototype.map.call(pages, (page) => page.id);
       expect(pageIds).to.deep.equal([
         'cover',
         'page-1',
@@ -618,7 +615,7 @@ describes.realWin(
         // In a real scenario, promise is resolved when the user accepted or
         // rejected the consent.
         let resolver;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolver = resolve;
         });
 
@@ -1367,7 +1364,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1399,7 +1396,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1433,7 +1430,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1462,7 +1459,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1519,7 +1516,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')

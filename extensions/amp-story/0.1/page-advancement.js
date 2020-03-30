@@ -133,21 +133,21 @@ export class AdvancementConfig {
   /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
-    this.progressListeners_.forEach(progressListener => {
+    this.progressListeners_.forEach((progressListener) => {
       progressListener(progress);
     });
   }
 
   /** @protected */
   onAdvance() {
-    this.advanceListeners_.forEach(advanceListener => {
+    this.advanceListeners_.forEach((advanceListener) => {
       advanceListener();
     });
   }
 
   /** @protected */
   onPrevious() {
-    this.previousListeners_.forEach(previousListener => {
+    this.previousListeners_.forEach((previousListener) => {
       previousListener();
     });
   }
@@ -157,7 +157,7 @@ export class AdvancementConfig {
    * @protected
    */
   onTapNavigation(navigationDirection) {
-    this.tapNavigationListeners_.forEach(navigationListener => {
+    this.tapNavigationListeners_.forEach((navigationListener) => {
       navigationListener(navigationDirection);
     });
   }
@@ -176,7 +176,7 @@ export class AdvancementConfig {
       new ManualAdvancement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-    ].filter(x => x !== null);
+    ].filter((x) => x !== null);
 
     if (supportedAdvancementModes.length === 0) {
       return new AdvancementConfig();
@@ -209,28 +209,28 @@ class MultipleAdvancementConfig extends AdvancementConfig {
 
   /** @override */
   addProgressListener(progressListener) {
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.addProgressListener(progressListener);
     });
   }
 
   /** @override */
   addOnTapNavigationListener(onTapNavigationListener) {
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.addOnTapNavigationListener(onTapNavigationListener);
     });
   }
 
   /** @override */
   addAdvanceListener(advanceListener) {
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.addAdvanceListener(advanceListener);
     });
   }
 
   /** @override */
   addPreviousListener(previousListener) {
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.addPreviousListener(previousListener);
     });
   }
@@ -238,7 +238,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.start();
     });
   }
@@ -246,7 +246,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
-    this.advancementModes_.forEach(advancementMode => {
+    this.advancementModes_.forEach((advancementMode) => {
       advancementMode.stop();
     });
   }
@@ -300,7 +300,7 @@ class ManualAdvancement extends AdvancementConfig {
   isNavigationalClick_(e) {
     return !closest(
       dev().assertElement(e.target),
-      el => {
+      (el) => {
         return hasTapAction(el);
       },
       /* opt_stopAt */ this.element_
@@ -316,7 +316,7 @@ class ManualAdvancement extends AdvancementConfig {
   isProtectedTarget_(event) {
     return !!closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         return PROTECTED_ELEMENTS[el.tagName];
       },
       /* opt_stopAt */ this.element_
@@ -560,7 +560,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @private */
   startVideoInterfaceElement_() {
-    this.element_.getImpl().then(video => {
+    this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
 

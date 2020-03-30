@@ -104,7 +104,7 @@ const BABELIFY_GLOBAL_TRANSFORM = {
    * running on SauceLabs since some older browsers need ES5.
    */
   ignore: devDependencies().filter(
-    dep => dep.indexOf('chai-as-promised') === -1
+    (dep) => dep.indexOf('chai-as-promised') === -1
   ),
 };
 
@@ -150,14 +150,14 @@ function doBuildJs(jsBundles, name, extraOptions) {
 async function bootstrapThirdPartyFrames(watch, minify) {
   const startTime = Date.now();
   const promises = [];
-  thirdPartyFrames.forEach(frameObject => {
+  thirdPartyFrames.forEach((frameObject) => {
     promises.push(
       thirdPartyBootstrap(frameObject.max, frameObject.min, minify)
     );
   });
   if (watch) {
-    thirdPartyFrames.forEach(frameObject => {
-      gulpWatch(frameObject.max, function() {
+    thirdPartyFrames.forEach((frameObject) => {
+      gulpWatch(frameObject.max, function () {
         thirdPartyBootstrap(frameObject.max, frameObject.min, minify);
       });
     });
@@ -279,7 +279,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    gulpWatch(entryPoint, async function() {
+    gulpWatch(entryPoint, async function () {
       const compileComplete = await doCompileMinifiedJs(
         /* continueOnError */ true
       );
@@ -314,7 +314,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       name += ` → ${maybeToEsmName(options.latestName)}`;
     }
     if (options.singlePassCompilation) {
-      altMainBundles.forEach(bundle => {
+      altMainBundles.forEach((bundle) => {
         name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
       });
       name += ', and all extensions';
@@ -395,7 +395,7 @@ function devDependencies() {
   const file = fs.readFileSync('package.json', 'utf8');
   const packageJson = JSON.parse(file);
   const devDependencies = Object.keys(packageJson['devDependencies']);
-  return devDependencies.map(p => `./node_modules/${p}`);
+  return devDependencies.map((p) => `./node_modules/${p}`);
 }
 
 /**
@@ -448,7 +448,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       bundler
         .bundle()
         .once('readable', () => (startTime = Date.now()))
-        .on('error', err =>
+        .on('error', (err) =>
           handleBundleError(err, continueOnError, destFilename)
         )
         .pipe(source(srcFilename))
@@ -628,7 +628,7 @@ async function applyAmpConfig(targetFile, localDev) {
  */
 function concatFilesToString(files) {
   return files
-    .map(function(filePath) {
+    .map(function (filePath) {
       return fs.readFileSync(filePath, 'utf8');
     })
     .join(MODULE_SEPARATOR);
@@ -662,7 +662,7 @@ function thirdPartyBootstrap(input, outputName, minify) {
   return toPromise(
     file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
-      .on('end', function() {
+      .on('end', function () {
         const aliasToLatestBuild = 'dist.3p/current-min';
         if (fs.existsSync(aliasToLatestBuild)) {
           fs.unlinkSync(aliasToLatestBuild);
@@ -698,7 +698,7 @@ function mkdirSync(path) {
  * @return {Promise}
  */
 function toPromise(readable) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
 }

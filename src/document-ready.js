@@ -71,7 +71,7 @@ function onDocumentState(doc, stateFn, callback) {
  * @return {!Promise<!Document>}
  */
 export function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -82,7 +82,7 @@ export function whenDocumentReady(doc) {
  * @return {!Promise<!Document>}
  */
 export function whenDocumentComplete(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentState(doc, isDocumentComplete, resolve);
   });
 }

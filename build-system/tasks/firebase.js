@@ -43,8 +43,8 @@ async function copyAndReplaceUrls(src, dest) {
   // Recursively gets all the files within the directory and its children.
   const files = await walk(dest);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replaceUrls(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replaceUrls(file));
   await Promise.all(promises);
 }
 

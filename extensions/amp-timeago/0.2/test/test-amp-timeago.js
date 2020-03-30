@@ -26,18 +26,18 @@ describes.realWin(
       extensions: ['amp-timeago:0.2'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 
     const getTimeFromShadow = async () => {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, shadow => {
+      await waitForChildPromise(shadow, (shadow) => {
         return shadow.querySelector('time');
       });
       const time = shadow.querySelector('time');
-      await waitForChildPromise(time, time => {
+      await waitForChildPromise(time, (time) => {
         return time.textContent;
       });
       return time.textContent;

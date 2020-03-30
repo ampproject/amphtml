@@ -481,13 +481,13 @@ function createBaseCustomElementClass(win) {
           resolve(this.implementation_.buildCallback());
         } else {
           Services.consentPolicyServiceForDocOrNull(this)
-            .then(policy => {
+            .then((policy) => {
               if (!policy) {
                 return true;
               }
               return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
             })
-            .then(shouldUnblock => {
+            .then((shouldUnblock) => {
               if (shouldUnblock) {
                 resolve(this.implementation_.buildCallback());
               } else {
@@ -520,7 +520,7 @@ function createBaseCustomElementClass(win) {
             }
           }
         },
-        reason => {
+        (reason) => {
           this.signals_.rejectSignal(
             CommonSignals.BUILT,
             /** @type {!Error} */ (reason)
@@ -890,10 +890,10 @@ function createBaseCustomElementClass(win) {
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
         res
-          .then(upgrade => {
+          .then((upgrade) => {
             this.completeUpgrade_(upgrade || impl, startTime);
           })
-          .catch(reason => {
+          .catch((reason) => {
             this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
             rethrowAsync(reason);
           });
@@ -1179,7 +1179,7 @@ function createBaseCustomElementClass(win) {
             this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
           }
         },
-        reason => {
+        (reason) => {
           // add layoutCount_ by 1 despite load fails or not
           if (isLoadEvent) {
             this.signals_.rejectSignal(
@@ -1441,7 +1441,7 @@ function createBaseCustomElementClass(win) {
       this.actionQueue_ = null;
 
       // Notice, the actions are currently not de-duped.
-      actionQueue.forEach(invocation => {
+      actionQueue.forEach((invocation) => {
         this.executionAction_(invocation, true);
       });
     }
@@ -1498,7 +1498,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     getRealChildNodes() {
-      return dom.childNodes(this, node => !isInternalOrServiceNode(node));
+      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
     }
 
     /**
@@ -1510,7 +1510,7 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(
         this,
-        element => !isInternalOrServiceNode(element)
+        (element) => !isInternalOrServiceNode(element)
       );
     }
 
@@ -1520,7 +1520,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, el => {
+      return dom.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
           // Blacklist elements that has a native placeholder property
@@ -1541,9 +1541,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          dev()
-            .assertElement(placeholder)
-            .classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
