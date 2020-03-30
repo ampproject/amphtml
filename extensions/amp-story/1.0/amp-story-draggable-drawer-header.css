@@ -61,8 +61,9 @@
 
 /** Overrides. */
 
-.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title {
-  color: #fff !important;
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title,
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
+  color: #9AA0A6 !important;
 }
 
 .i-amphtml-story-draggable-drawer-header-bookend {
