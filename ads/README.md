@@ -113,8 +113,8 @@ The API allows you to specify a callback that fires with change records when AMP
 _Example usage_:
 
 ```javascript
-window.context.observeIntersection(function(changes) {
-  changes.forEach(function(c) {
+window.context.observeIntersection(function (changes) {
+  changes.forEach(function (c) {
     console.info('Height of intersection', c.intersectionRect.height);
   });
 });
@@ -125,8 +125,8 @@ window.context.observeIntersection(function(changes) {
 _Example usage_
 
 ```javascript
-var unlisten = window.context.observeIntersection(function(changes) {
-  changes.forEach(function(c) {
+var unlisten = window.context.observeIntersection(function (changes) {
+  changes.forEach(function (c) {
     console.info('Height of intersection', c.intersectionRect.height);
   });
 });
@@ -169,7 +169,7 @@ The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOver
 _Example:_
 
 ```javascript
-var unlisten = window.context.onResizeSuccess(function(
+var unlisten = window.context.onResizeSuccess(function (
   requestedHeight,
   requestedWidth
 ) {
@@ -178,7 +178,7 @@ var unlisten = window.context.onResizeSuccess(function(
   // check which size change the request corresponds to.
 });
 
-var unlisten = window.context.onResizeDenied(function(
+var unlisten = window.context.onResizeDenied(function (
   requestedHeight,
   requestedWidth
 ) {

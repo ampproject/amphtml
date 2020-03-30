@@ -24,7 +24,7 @@ You may save the following example into a file, e.g., `demo.js`.
 'use strict';
 var amphtmlValidator = require('amphtml-validator');
 
-amphtmlValidator.getInstance().then(function(validator) {
+amphtmlValidator.getInstance().then(function (validator) {
   var result = validator.validateString('<html>Hello, world.</html>');
   (result.status === 'PASS' ? console.log : console.error)(result.status);
   for (var ii = 0; ii < result.errors.length; ii++) {

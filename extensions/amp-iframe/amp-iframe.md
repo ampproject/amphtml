@@ -212,7 +212,7 @@ The iframe can listen to an `intersection` message from the parent window to rec
 _Example: iframe `send-intersections` request_
 
 ```javascript
-window.addEventListener('message', function(event) {
+window.addEventListener('message', function (event) {
   if (
     event.source != window.parent ||
     event.origin == window.location.origin ||
@@ -222,7 +222,7 @@ window.addEventListener('message', function(event) {
   ) {
     return;
   }
-  event.data.changes.forEach(function(change) {
+  event.data.changes.forEach(function (change) {
     console.log(change);
   });
 });

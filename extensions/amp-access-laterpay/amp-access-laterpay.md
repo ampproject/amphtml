@@ -272,12 +272,9 @@ When using it with LaterPay and an existing paywall integration, the necessary c
       "namespace": "laterpay"
     },
     {
-      "authorization":
-          "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
-      "pingback":
-          "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
-      "login":
-          "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
+      "authorization": "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
+      "pingback": "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
+      "login": "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
       "authorizationFallbackResponse": {"error": true},
       "namespace": "publishername"
     }

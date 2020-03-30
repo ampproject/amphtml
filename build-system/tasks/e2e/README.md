@@ -67,7 +67,7 @@ describes.endtoend(
     // By default, E2E tests run in all three environments
     // environments: ['single', 'viewer-demo', 'shadow-demo']
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

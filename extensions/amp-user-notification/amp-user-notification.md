@@ -110,9 +110,9 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "waldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "waldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>
@@ -142,9 +142,9 @@ In this example user in Mexico would not trigger the notification, but a user in
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "whereIsWaldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "whereIsWaldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>

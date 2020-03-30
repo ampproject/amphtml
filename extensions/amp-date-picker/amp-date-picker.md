@@ -485,9 +485,7 @@ _Example: Markup using the `src` attribute_
   layout="fixed-height"
   height="360"
 >
-  <template type="amp-mustache" date-template id="my-template-id"
-    >⚡️</template
-  >
+  <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
   <template type="amp-mustache" date-template id="my-second-template-id"
     >🌮</template
   >
@@ -752,9 +750,7 @@ rendered after the calendar view renders for the first time.
 ```html
 <amp-date-picker layout="fixed-height" height="360">
   <!-- Render the "party" emoji on New Years Day 2018 -->
-  <template type="amp-mustache" date-template dates="2018-01-01"
-    >🎉</template
-  >
+  <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
   <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
   <template
     type="amp-mustache"
@@ -767,9 +763,7 @@ rendered after the calendar view renders for the first time.
     <amp-img layout="fixed-height" height="39" src="./example.jpg"></amp-img>
   </template>
   <!-- Renders dates in the two-digit day format -->
-  <template type="amp-mustache" date-template default
-    >{{DD}}</template
-  >
+  <template type="amp-mustache" date-template default>{{DD}}</template>
 </amp-date-picker>
 ```
 
