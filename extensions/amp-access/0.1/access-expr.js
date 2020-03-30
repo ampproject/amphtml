@@ -75,21 +75,9 @@ export class AmpAccessEvaluator {
     }
 
     if (!hasOwn(this.cache, expr)) {
-      this.cache[expr] = this.eval_(expr, data);
+      this.cache[expr] = evaluateAccessExpr(expr, data);
     }
 
     return this.cache[expr];
-  }
-
-  /**
-   * Evaluates access expressions by proxying calls to evaluateAccessExpr.
-   * This function only exists to be spied on.
-   *
-   * @param {string} expr
-   * @param {!JsonObject} data
-   * @return {boolean}
-   */
-  eval_(expr, data) {
-    return evaluateAccessExpr(expr, data);
   }
 }

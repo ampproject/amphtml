@@ -34,7 +34,7 @@ const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
-const {preClosureBabel} = require('./pre-closure-babel');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -367,26 +367,26 @@ function compile(
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .pipe(sourcemaps.init({loadMaps: true}))
+        .on('error', err => handlePreClosureError(err, outputFilename))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
-        .on('error', err => {
-          handleTypeCheckError();
-          reject(err);
-        })
+        .on('error', err => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
     } else {
       timeInfo.startTime = Date.now();
       return gulp
         .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
-        .pipe(sourcemaps.init({loadMaps: true}))
+        .on('error', err =>
+          handlePreClosureError(err, outputFilename, options, resolve)
+        )
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
-        .on('error', err => {
-          handleCompilerError(outputFilename);
-          reject(err);
-        })
+        .on('error', err =>
+          handleCompilerError(err, outputFilename, options, resolve)
+        )
         .pipe(rename(outputFilename))
         .pipe(
           gulpIf(
