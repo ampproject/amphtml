@@ -58,12 +58,15 @@ async function addExtraUrlParams(url, version) {
 }
 
 /**
- * Rewrite script tags for each document downloaded from the urls
- *
- * @param {!Array<string>} urls
+ * Rewrite analytics configs for each document
+ * downloaded from the analytics handler urls
+ * @param {?Object} handlers
  * @return {Promise}
  */
-function rewriteScriptTags(urls) {
+function rewriteAnalyticsConfig(handlers) {
+  const urls =
+    (handlers && handlers.analyticsHandler && handlers.analyticsHandler.urls) ||
+    [];
   return Promise.all(
     urls.flatMap(url => [
       addExtraUrlParams(url, CONTROL),
@@ -72,4 +75,4 @@ function rewriteScriptTags(urls) {
   );
 }
 
-module.exports = rewriteScriptTags;
+module.exports = rewriteAnalyticsConfig;

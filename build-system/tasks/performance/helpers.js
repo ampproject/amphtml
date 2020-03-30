@@ -129,18 +129,16 @@ function getFile(filePath) {
  * @return {!Object} Resolves with relative path to file
  */
 function getHandlerFromUrl(url, handlers) {
-  const details = {};
   const names = handlers ? Object.keys(handlers) : [];
   const handlerName = names.find(
     handlerName => handlers[handlerName].urls.indexOf(url) !== -1
   );
-
   return handlerName
-    ? Object.assign(details, {
+    ? {
         handlerName,
-        'handlerOptions': handlers[handlerName],
-      })
-    : details;
+        'handlerOptions': {...handlers[handlerName]},
+      }
+    : {};
 }
 
 module.exports = {

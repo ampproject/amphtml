@@ -33,7 +33,7 @@ async function performance() {
   await cacheDocuments(urls);
   await compileScripts(urls);
   await rewriteScriptTags(urls);
-  await rewriteAnalyticsTags(urls);
+  await rewriteAnalyticsTags(handlers);
   await getMetrics(urls, {headless, runs, handlers});
   runTests();
   printReport(urls);

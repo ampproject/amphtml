@@ -180,8 +180,10 @@ function setUpRequestHandler(handlerOptions, handlerName, page) {
     Object.assign(handlerOptions, {'startTime': Date.now()});
     page.on('request', interceptedRequest =>
       handleAnalyticsRequests(interceptedRequest, analyticsRequestTime => {
-        endTime = endTime ? endTime : analyticsRequestTime;
-        Object.assign(handlerOptions, {endTime});
+        if (!endTime) {
+          endTime = analyticsRequestTime;
+          Object.assign(handlerOptions, {endTime, 'timeout': 0});
+        }
       })
     );
   }
