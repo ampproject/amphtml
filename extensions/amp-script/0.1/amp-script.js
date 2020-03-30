@@ -669,7 +669,7 @@ export class SanitizerImpl {
     if (!this.allowForms_ && FORM_ELEMENTS.includes(tag)) {
       user().warn(
         TAG,
-        '[amp-script] Form elements (%s) cannot be mutated unless your <amp-script> includes the attribute sandbox="allow-forms".',
+        'Form elements (%s) cannot be mutated unless your <amp-script> includes the attribute sandbox="allow-forms".',
         tag
       );
       return true;
