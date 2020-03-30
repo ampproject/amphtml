@@ -45,7 +45,9 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
+  ? 4
+  : parseInt(argv.closure_concurrency, 10) || 1;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
