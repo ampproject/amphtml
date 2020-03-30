@@ -50,7 +50,7 @@ export class PostMessageDispatcher {
     if (!this.listeners_[eventType]) {
       return;
     }
-    this.listeners_[eventType].forEach(listener => listener(eventData));
+    this.listeners_[eventType].forEach((listener) => listener(eventData));
   }
 
   /**

@@ -191,7 +191,7 @@ describe('alp-handler', () => {
 
   it('should perform special navigation if specially asked for', () => {
     const navigateSpy = window.sandbox.spy();
-    const opt_navigate = val => {
+    const opt_navigate = (val) => {
       navigateSpy();
       expect(val).to.equal(
         'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +

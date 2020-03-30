@@ -100,7 +100,7 @@ function tryUpgradeElement_(element, toClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach(name => {
+  extensions.forEach((name) => {
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
   });
@@ -140,7 +140,7 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win, name);
+  const klass = createCustomElementClass(win);
   win['customElements'].define(name, klass);
 }
 

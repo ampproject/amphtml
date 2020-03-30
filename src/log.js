@@ -130,7 +130,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @param {*} arg
  * @return {string}
  */
-const messageArgToEncodedComponent = arg =>
+const messageArgToEncodedComponent = (arg) =>
   encodeURIComponent(String(elementStringOrPassthru(arg)));
 
 /**
@@ -178,8 +178,8 @@ export class Log {
     this.fetchExternalMessagesOnce_ = once(() => {
       win
         .fetch(externalMessagesSimpleTableUrl())
-        .then(response => response.json(), noop)
-        .then(opt_messages => {
+        .then((response) => response.json(), noop)
+        .then((opt_messages) => {
           if (opt_messages) {
             this.messages_ = /** @type {!JsonObject} */ (opt_messages);
           }
@@ -643,7 +643,7 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-const stringOrElementString = val =>
+const stringOrElementString = (val) =>
   /** @type {string} */ (elementStringOrPassthru(val));
 
 /**
@@ -814,7 +814,7 @@ function getUserLogger(suffix) {
   }
   return new logConstructor(
     self,
-    mode => {
+    (mode) => {
       const logNum = parseInt(mode.log, 10);
       if (mode.development || logNum >= 1) {
         return LogLevel.FINE;
@@ -844,7 +844,7 @@ export function dev() {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return (logs.dev = new logConstructor(self, mode => {
+  return (logs.dev = new logConstructor(self, (mode) => {
     const logNum = parseInt(mode.log, 10);
     if (logNum >= 3) {
       return LogLevel.FINE;

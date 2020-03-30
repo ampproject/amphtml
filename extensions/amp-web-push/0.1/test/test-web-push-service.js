@@ -30,7 +30,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
 
     beforeEach(() => {
@@ -88,7 +88,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should not support HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://site.com/');
       env.sandbox.stub(mode, 'getMode').callsFake(() => {
@@ -109,7 +109,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support localhost HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://localhost/');
       expect(env.ampdoc.win.location.href).to.be.equal('http://localhost/');
@@ -127,7 +127,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support localhost HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:8000/');
       const webPush = new WebPushService(env.ampdoc);
@@ -147,7 +147,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support 127.0.0.1 HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://127.0.0.1/');
       const webPush = new WebPushService(env.ampdoc);
@@ -165,7 +165,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     it('should support 127.0.0.1 HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:9000/');
       const webPush = new WebPushService(env.ampdoc);
@@ -185,7 +185,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
@@ -250,7 +250,7 @@ describes.realWin(
         .then(() => {
           return webPush.queryNotificationPermission();
         })
-        .then(permission => {
+        .then((permission) => {
           expect(permission).to.eq(NotificationPermission.DEFAULT);
         });
     });
@@ -262,7 +262,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
@@ -515,7 +515,7 @@ describes.realWin(
     });
 
     // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
-    it.skip('should forward amp-web-push-subscription-state message to SW', done => {
+    it.skip('should forward amp-web-push-subscription-state message to SW', (done) => {
       let iframeWindowControllerMock = null;
 
       return setupHelperIframe().then(() => {
@@ -537,7 +537,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-subscription-state') {
               done();
             }
@@ -553,7 +553,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
@@ -643,7 +643,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-subscribe') {
               return Promise.resolve();
             }
@@ -718,7 +718,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
@@ -785,7 +785,7 @@ describes.realWin(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
           )
-          .callsFake(message => {
+          .callsFake((message) => {
             if (message.topic === 'amp-web-push-unsubscribe') {
               return Promise.resolve();
             }

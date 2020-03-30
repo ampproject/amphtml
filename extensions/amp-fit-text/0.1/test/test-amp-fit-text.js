@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-fit-text'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,7 +55,7 @@ describes.realWin(
 
     it('renders', () => {
       const text = 'Lorem ipsum';
-      return getFitText(text).then(ft => {
+      return getFitText(text).then((ft) => {
         const content = ft.querySelector('.i-amphtml-fit-text-content');
         expect(content).to.not.equal(null);
         expect(content.textContent).to.equal(text);
@@ -64,7 +64,7 @@ describes.realWin(
   }
 );
 
-describes.realWin('amp-fit-text calculateFontSize', {}, env => {
+describes.realWin('amp-fit-text calculateFontSize', {}, (env) => {
   let win, doc;
   let element;
 
@@ -125,7 +125,7 @@ describes.realWin('amp-fit-text calculateFontSize', {}, env => {
   });
 });
 
-describes.realWin('amp-fit-text updateOverflow', {}, env => {
+describes.realWin('amp-fit-text updateOverflow', {}, (env) => {
   let win, doc;
   let content;
   let classToggles;

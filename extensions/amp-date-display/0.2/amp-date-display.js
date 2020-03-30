@@ -51,7 +51,7 @@ class AmpDateDisplay extends PreactBaseElement {
         const host = this.element;
         const domPromise = templates
           .findAndRenderTemplate(host, data)
-          .then(rendered => {
+          .then((rendered) => {
             const container = document.createElement('div');
             container.appendChild(rendered);
 
@@ -79,13 +79,13 @@ class AmpDateDisplay extends PreactBaseElement {
 }
 
 /** @override */
-AmpDateDisplay.Component = DateDisplay;
+AmpDateDisplay['Component'] = DateDisplay;
 
 /** @override */
-AmpDateDisplay.passthrough = true;
+AmpDateDisplay['passthrough'] = true;
 
 /** @override */
-AmpDateDisplay.props = {
+AmpDateDisplay['props'] = {
   'displayIn': {attr: 'display-in'},
   'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
   'locale': {attr: 'locale'},
@@ -94,6 +94,6 @@ AmpDateDisplay.props = {
   'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
 };
 
-AMP.extension(TAG, '0.2', AMP => {
+AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);
 });

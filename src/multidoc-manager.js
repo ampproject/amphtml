@@ -111,7 +111,7 @@ export class MultidocManager {
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    amp['setVisibilityState'] = function(state) {
+    amp['setVisibilityState'] = function (state) {
       ampdoc.overrideVisibilityState(state);
     };
 
@@ -133,7 +133,7 @@ export class MultidocManager {
      * messages to the viewer.
      * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp['onMessage'] = function(callback) {
+    amp['onMessage'] = function (callback) {
       onMessage = callback;
     };
 
@@ -169,8 +169,8 @@ export class MultidocManager {
      * @param {string} name - Name of state or deep state
      * @return {Promise<*>} - Resolves to a copy of the value of a state
      */
-    amp['getState'] = name => {
-      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+    amp['getState'] = (name) => {
+      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
@@ -183,8 +183,8 @@ export class MultidocManager {
      * @param {(!JsonObject|string)} state - State to be set
      * @return {Promise} - Resolves after state and history have been updated
      */
-    amp['setState'] = state => {
-      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+    amp['setState'] = (state) => {
+      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
@@ -281,7 +281,7 @@ export class MultidocManager {
         let renderStarted = false;
         const writer = createShadowDomWriter(this.win);
         amp['writer'] = writer;
-        writer.onBody(doc => {
+        writer.onBody((doc) => {
           // Install extensions.
           const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
           // Apply all doc extensions.
@@ -310,7 +310,7 @@ export class MultidocManager {
             }, 50);
           }
         });
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           writer.onEnd(() => {
             resolve();
             amp.writer = null;
@@ -478,7 +478,7 @@ export class MultidocManager {
    */
   broadcast_(data, sender) {
     this.purgeShadowRoots_();
-    this.shadowRoots_.forEach(shadowRoot => {
+    this.shadowRoots_.forEach((shadowRoot) => {
       if (shadowRoot == sender) {
         // Don't broadcast to the sender.
         return;
@@ -521,18 +521,20 @@ export class MultidocManager {
     return this.timer_
       .timeoutPromise(
         15, // Delay for queued pass after visibility change is 10ms
-        new this.win.Promise(resolve => {
-          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
-            if (resources) {
-              resources.onNextPass(resolve);
-            } else {
-              resolve();
+        new this.win.Promise((resolve) => {
+          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(
+            (resources) => {
+              if (resources) {
+                resources.onNextPass(resolve);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
         }),
         'Timeout reached waiting for visibility state change callback'
       )
-      .catch(error => {
+      .catch((error) => {
         user().info(TAG, error);
       });
   }
@@ -560,7 +562,7 @@ export class MultidocManager {
 
   /** @private */
   purgeShadowRoots_() {
-    this.shadowRoots_.forEach(shadowRoot => {
+    this.shadowRoots_.forEach((shadowRoot) => {
       // The shadow root has been disconnected. Force it closed.
       if (!shadowRoot.host || !isConnectedNode(shadowRoot.host)) {
         user().warn(TAG, "Shadow doc wasn't previously closed");
