@@ -416,27 +416,36 @@ class AmpDelightPlayer extends AMP.BaseElement {
       });
     };
     const dispatchDeviceMotionEvents = event => {
-      let payload = {
+      const payload = {
         interval: event.interval,
         timeStamp: event.timeStamp,
       };
       if (event.acceleration) {
-        payload.acceleration.x = event.acceleration.x;
-        payload.acceleration.y = event.acceleration.y;
-        payload.acceleration.z = event.acceleration.z;
+        Object.assign(payload, {
+          acceleration: {
+            x: event.acceleration.x,
+            y: event.acceleration.y,
+            z: event.acceleration.z
+          }
+        });
       }
       if (event.accelerationIncludingGravity) {
-        payload.accelerationIncludingGravity.x =
-          event.accelerationIncludingGravity.x;
-        payload.accelerationIncludingGravity.y =
-          event.accelerationIncludingGravity.y;
-        payload.accelerationIncludingGravity.z =
-          event.accelerationIncludingGravity.z;
+        Object.assign(payload, {
+          accelerationIncludingGravity: {
+            x: event.accelerationIncludingGravity.x,
+            y: event.accelerationIncludingGravity.y,
+            z: event.accelerationIncludingGravity.z
+          }
+        });
       }
       if (event.rotationRate) {
-        payload.rotationRate.alpha = event.rotationRate.alpha;
-        payload.rotationRate.beta = event.rotationRate.beta;
-        payload.rotationRate.gamma = event.rotationRate.gamma;
+        Object.assign(payload, {
+          rotationRate: {
+            alpha: event.rotationRate.alpha,
+            beta: event.rotationRate.beta,
+            gamma: event.rotationRate.gamma
+          }
+        });
       }
       this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, payload);
     };
