@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
@@ -64,8 +66,16 @@ export class CookieWriter {
    * @return {!Promise}
    */
   write() {
+
     if (!this.writePromise_) {
-      this.writePromise_ = this.init_();
+      const deferred = new Deferred();
+      const task = () => {
+        this.init_().then(() => {
+          deferred.resolve();
+        });
+      }
+      this.writePromise_ = deferred.promise;
+      chunk(this.element_, task, ChunkPriority.HIGH);
     }
 
     return this.writePromise_;

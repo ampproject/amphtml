@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -65,11 +67,19 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
-
-    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
-      .then(this.processConfigs_.bind(this))
-      .then(this.checkWarningMessage_.bind(this))
-      .then(() => this.config_);
+    const deferred = new Deferred();
+    const task = () => {
+      return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
+        .then(this.processConfigs_.bind(this))
+        .then(this.checkWarningMessage_.bind(this))
+        .then(() => {
+          deferred.resolve();
+        });
+    };
+    chunk(this.element_, task, ChunkPriority.HIGH);
+    return deferred.promise.then(() => {
+      return this.config_;
+    });
   }
 
   /**
@@ -132,9 +142,10 @@ export class AnalyticsConfig {
     if (!remoteConfigUrl || this.isSandbox_) {
       return Promise.resolve();
     }
-    assertHttpsUrl(remoteConfigUrl, this.element_);
+    //assertHttpsUrl(remoteConfigUrl, this.element_);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
+    console.log('remoteUrl is ', remoteConfigUrl);
     const fetchConfig = {};
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
@@ -172,6 +183,7 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
+    console.log('process configs');
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});

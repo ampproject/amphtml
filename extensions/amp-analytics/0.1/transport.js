@@ -84,6 +84,11 @@ export class Transport {
    * @param {boolean} inBatch
    */
   sendRequest(url, segments, inBatch) {
+    if (this.win_['analytics-first'] == 1) {
+      console.log('analytics delay is ', Date.now() - this.win_['analytics-start']);
+      this.win_['analytics-first'] = 0;
+    }
+    url = `https://example.test?${url}`;
     if (!url || segments.length === 0) {
       dev().info(TAG_, 'Empty request not sent: ', url);
       return;
