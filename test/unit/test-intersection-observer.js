@@ -324,11 +324,7 @@ describe('IntersectionObserver', () => {
     }
   }
 
-  const ElementClass = createAmpElementForTesting(
-    window,
-    'amp-int',
-    TestElement
-  );
+  const ElementClass = createAmpElementForTesting(window, TestElement);
   customElements.define('amp-int', ElementClass);
 
   const iframeSrc =

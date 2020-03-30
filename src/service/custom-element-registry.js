@@ -140,7 +140,7 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win, name);
+  const klass = createCustomElementClass(win);
   win['customElements'].define(name, klass);
 }
 
