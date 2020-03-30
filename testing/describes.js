@@ -931,7 +931,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementForTesting(win, name).prototype;
+  const proto = createAmpElementForTesting(win).prototype;
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;
