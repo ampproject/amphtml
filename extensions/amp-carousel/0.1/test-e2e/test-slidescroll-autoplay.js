@@ -24,51 +24,47 @@ describes.endtoend(
   async function(env) {
     let controller;
 
+    /**
+     * Attach an event listener to page to capture the 'slideChange' event.
+     * If given a selector, click on it to fire the event being listened for.
+     * @return {!Promise}
+     */
+    function slideChangeEventAfterClicking(opt_selector) {
+      return controller.evaluate(opt_selector => {
+        return new Promise(resolve => {
+          document.addEventListener(
+            'slideChange',
+            e => resolve(e.data),
+            {once: true} // Remove listener after first invocation
+          );
+          if (opt_selector) {
+            document.querySelector(opt_selector).click();
+          }
+        });
+      }, opt_selector);
+    }
+
     beforeEach(async () => {
       controller = env.controller;
     });
 
     it('should fire low trust event for autoplay advance', async () => {
       for (let i = 0; i < 3; i++) {
-        const actionTrust = await controller.evaluate(() => {
-          return new Promise(resolve => {
-            document.addEventListener('slideChange', function forwardEvent(e) {
-              // Listen once
-              document.removeEventListener('slideChange', forwardEvent);
-              resolve(e.data.actionTrust);
-            });
-          });
-        });
-        await expect(actionTrust).to.equal(1); // ActionTrust.LOW
+        const event = await slideChangeEventAfterClicking(/* autoplay */);
+        await expect(event.actionTrust).to.equal(1); // ActionTrust.LOW
       }
     });
 
     it('should fire high trust event on user interaction', async () => {
-      const actionTrust = await controller.evaluate(() => {
-        return new Promise(resolve => {
-          document.addEventListener('slideChange', function forwardEvent(e) {
-            // Listen once
-            document.removeEventListener('slideChange', forwardEvent);
-            resolve(e.data.actionTrust);
-          });
-          document.querySelector('.amp-carousel-button-next').click();
-        });
-      });
-      await expect(actionTrust).to.equal(3); // ActionTrust.HIGH
+      const event = await slideChangeEventAfterClicking(
+        '.amp-carousel-button-next'
+      );
+      await expect(event.actionTrust).to.equal(3); // ActionTrust.HIGH
     });
 
     it('should fire high trust event on user interaction through amp-bind', async () => {
-      const actionTrust = await controller.evaluate(() => {
-        return new Promise(resolve => {
-          document.addEventListener('slideChange', function forwardEvent(e) {
-            // Listen once
-            document.removeEventListener('slideChange', forwardEvent);
-            resolve(e.data.actionTrust);
-          });
-          document.querySelector('#go-to-last').click();
-        });
-      });
-      await expect(actionTrust).to.equal(3); // ActionTrust.HIGH
+      const event = await slideChangeEventAfterClicking('#go-to-last');
+      await expect(event.actionTrust).to.equal(3); // ActionTrust.HIGH
     });
   }
 );
