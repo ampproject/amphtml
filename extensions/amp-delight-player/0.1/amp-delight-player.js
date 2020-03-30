@@ -416,7 +416,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       });
     };
     const dispatchDeviceMotionEvents = event => {
-      const payload = {
+      let payload = {
         interval: event.interval,
         timeStamp: event.timeStamp,
       };
