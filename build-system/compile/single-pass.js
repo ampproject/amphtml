@@ -45,7 +45,7 @@ const {
   handleSinglePassCompilerError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
-const {preClosureBabel} = require('./pre-closure-babel');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -688,11 +688,9 @@ function compile(flagsArray) {
       .src(srcs, {base: '.'})
       .pipe(sourcemaps.init())
       .pipe(preClosureBabel())
+      .on('error', err => handlePreClosureError(err))
       .pipe(gulpClosureCompile(flagsArray))
-      .on('error', err => {
-        handleSinglePassCompilerError();
-        reject(err);
-      })
+      .on('error', err => handleSinglePassCompilerError(err))
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
       .pipe(sourcemaps.write('.'))
