@@ -1751,9 +1751,13 @@ function createBaseCustomElementClass(win) {
             const loadingContainer = this.loadingContainer_;
             this.loadingContainer_ = null;
             this.loadingElement_ = null;
-            this.mutateOrInvoke_(() => {
-              dom.removeElement(loadingContainer);
-            });
+            this.mutateOrInvoke_(
+              () => {
+                dom.removeElement(loadingContainer);
+              },
+              undefined,
+              true
+            );
           }
         },
         undefined,
