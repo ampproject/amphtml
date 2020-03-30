@@ -154,7 +154,7 @@ You can track this event using the following code snippet:
   <script type="application/json">
     {
       "requests": {
-        "open": "https://foo.com/open",
+        "open": "https://foo.com/open"
       },
       "triggers": {
         "trackLightboxOpened": {
@@ -178,7 +178,7 @@ You can track this event using the following code snippet:
   <script type="application/json">
     {
       "requests": {
-        "thumb": "https://foo.com/thumb",
+        "thumb": "https://foo.com/thumb"
       },
       "triggers": {
         "trackThumbnailsViewToggled": {

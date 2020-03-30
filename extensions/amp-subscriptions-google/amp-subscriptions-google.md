@@ -106,10 +106,10 @@ Where `data` matches the [entitlements response](https://github.com/subscription
     {
       "services": [
         {
-           // Local service configuration
+          // Local service configuration
           "authorizationUrl": "https://...",
           "pingbackUrl": "https://...",
-          "actions":{
+          "actions": {
             "login": "https://...",
             "subscribe": "https://..."
           }

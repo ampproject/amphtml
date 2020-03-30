@@ -112,7 +112,7 @@ class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-my-element', '0.1', AMP => {
+AMP.extension('amp-my-element', '0.1', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
@@ -288,7 +288,7 @@ AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.extension('amp-carousel', '0.1', AMP => {
+AMP.extension('amp-carousel', '0.1', (AMP) => {
   AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 });
 ```
@@ -361,7 +361,7 @@ owners.
 ```javascript
 this.cells_ = this.getRealChildren();
 
-this.cells_.forEach(cell => {
+this.cells_.forEach((cell) => {
   Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);

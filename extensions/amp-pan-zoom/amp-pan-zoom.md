@@ -118,9 +118,7 @@ Assuming that there is an `<amp-pan-zoom>` component with the id `pan-zoom` on t
 The following public CSS classes are exposed to allow customization for the zoom buttons:
 
 ```css
-.amp-pan-zoom-button
-.amp-pan-zoom-in-icon
-.amp-pan-zoom-out-icon
+.amp-pan-zoom-button .amp-pan-zoom-in-icon .amp-pan-zoom-out-icon;
 ```
 
 Use `.amp-pan-zoom-button` to customize the dimensions, positioning, background-color, border-radius of all buttons.

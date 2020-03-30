@@ -44,7 +44,10 @@
       "nice": true
     }
   ],
-  "axes": [{"type": "x", "scale": "x"}, {"type": "y", "scale": "y"}],
+  "axes": [
+    {"type": "x", "scale": "x"},
+    {"type": "y", "scale": "y"}
+  ],
   "marks": [
     {
       "type": "rect",

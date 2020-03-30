@@ -66,7 +66,7 @@ the page.
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-      {
+    {
       "duration": "3s",
       "fill": "both",
       "direction": "alternate",
@@ -74,8 +74,8 @@ the page.
         {
           "selector": "#clock-scene .clock-hand",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
           ]
         }
       ]
@@ -136,7 +136,7 @@ as clock becomes less than 50% visible.
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-      {
+    {
       "duration": "3s",
       "fill": "both",
       "direction": "alternate",
@@ -144,8 +144,8 @@ as clock becomes less than 50% visible.
         {
           "selector": "#clock-scene .clock-hand",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
           ]
         }
       ]

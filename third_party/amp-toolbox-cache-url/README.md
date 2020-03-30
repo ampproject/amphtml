@@ -33,7 +33,7 @@ const ampToolboxCacheUrl = window.AmpToolboxCacheUrl;
 // Get an AMP Cache URL from a cache domain, and a canonical URL
 ampToolboxCacheUrl
   .createCacheUrl('cdn.ampproject.org', 'https://www.example.com')
-  .then(cacheUrl => {
+  .then((cacheUrl) => {
     // This would log:
     // 'https://www-example-com.cdn.ampproject.org/c/s/www.example.com/'
     console.log(cacheUrl);
@@ -42,7 +42,7 @@ ampToolboxCacheUrl
 // Transform a canonical URL to an AMP Cache subdomain
 ampToolboxCacheUrl
   .createCurlsSubdomain('https://www.example.com')
-  .then(curlsSubdomain => {
+  .then((curlsSubdomain) => {
     // This would log:
     // 'www-example-com'
     console.log(curlsSubdomain);

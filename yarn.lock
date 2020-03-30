@@ -8077,14 +8077,13 @@ gulp-nop@0.0.3:
     gulp-util "~2.2.14"
     through "~2.3.4"
 
-gulp-prettier@2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/gulp-prettier/-/gulp-prettier-2.3.0.tgz#143a5d75ee6a79e5c647b108c6a28ce7d26e3edd"
-  integrity sha512-3byhZ6+tT3uqZUmIuhNs+upiUiwTtZXQ5vD/rrXq+ZypYyYlCIGGmSYq7wDc0uTJyGhHtYNTJ97ix2hI747zyg==
+gulp-prettier@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-prettier/-/gulp-prettier-3.0.0.tgz#21c7de272fc7528168af6086e8edae6a645168a8"
+  integrity sha512-vZFyC1F+7EjuI2WDUOcbPt9o3ZjdqjFMjr8a9Yk2K8EmNhP1w6X01QAkv5Ym3dsHCBsBA4AEFcYds2vOTSgx0A==
   dependencies:
     plugin-error "^1.0.1"
-    prettier "^1.5.3"
-    safe-buffer "^5.1.2"
+    prettier "^2.0.0"
     through2 "^3.0.0"
 
 gulp-regexp-sourcemaps@1.0.1:
@@ -12947,10 +12946,10 @@ prettier@1.19.1:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
   integrity sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==
 
-prettier@^1.5.3:
-  version "1.18.2"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
-  integrity sha512-OeHeMc0JhFE9idD4ZdtNibzY0+TPHSpSSb9h8FqtP+YnoZZ1sl8Vc9b1sasjfymH3SonAF4QcA2+mzHPhMvIiw==
+prettier@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.1.tgz#3f00ac71263be34684b2b2c8d7e7f63737592dac"
+  integrity sha512-piXGBcY1zoFOG0MvHpNE5reAGseLmaCRifQ/fmfF49BcYkInEs/naD/unxGNAeOKFA5+JxVrPyMvMlpzcd20UA==
 
 pretty-bytes@5.3.0:
   version "5.3.0"
