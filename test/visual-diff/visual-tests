@@ -702,8 +702,6 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
-      // TODO(#22162, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/1828636
-      "flaky": true,
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
