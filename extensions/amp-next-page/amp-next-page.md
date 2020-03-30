@@ -315,7 +315,7 @@ The `src` attribute is a required attribute, unless the `<amp-next-page>` compon
 
 ### `max-pages` (optional)
 
-The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, <amp-next-page> displays the recommendation box. The default is `Infinity`.
+The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, `<amp-next-page>` displays the recommendation box. The default is `Infinity`.
 
 ### `deep-parsing` (optional)
 
