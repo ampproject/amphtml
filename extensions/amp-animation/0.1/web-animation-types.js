@@ -192,6 +192,8 @@ const WHITELISTED_RPOPS = {
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,
+  'clip-path': true,
+  'clipPath': true,
 };
 
 /**

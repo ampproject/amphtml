@@ -31,9 +31,10 @@ const {
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
-const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
+const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -45,17 +46,6 @@ let inProgress = 0;
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
-
-/**
- * Prefixes the tmp directory if we need to shadow files that have been
- * preprocessed by babel in the `dist` task.
- *
- * @param {!Array<string>} paths
- * @return {!Array<string>}
- */
-function convertPathsToTmpRoot(paths) {
-  return paths.map(path => path.replace(/^(!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
-}
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -358,8 +348,6 @@ function compile(
       delete compilerOptions.define;
     }
 
-    compilerOptions.js_module_root.push(SRC_TEMP_DIR);
-
     const compilerOptionsArray = [];
     Object.keys(compilerOptions).forEach(function(option) {
       const value = compilerOptions[option];
@@ -376,29 +364,29 @@ function compile(
       }
     });
 
-    const gulpSrcs = convertPathsToTmpRoot(srcs);
-
     if (options.typeCheckOnly) {
       return gulp
-        .src(gulpSrcs, {base: SRC_TEMP_DIR})
-        .pipe(sourcemaps.init({loadMaps: true}))
+        .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
+        .pipe(preClosureBabel())
+        .on('error', err => handlePreClosureError(err, outputFilename))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
-        .on('error', err => {
-          handleTypeCheckError();
-          reject(err);
-        })
+        .on('error', err => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
     } else {
       timeInfo.startTime = Date.now();
       return gulp
-        .src(gulpSrcs, {base: SRC_TEMP_DIR})
-        .pipe(sourcemaps.init({loadMaps: true}))
+        .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
+        .pipe(preClosureBabel())
+        .on('error', err =>
+          handlePreClosureError(err, outputFilename, options, resolve)
+        )
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
-        .on('error', err => {
-          handleCompilerError(outputFilename);
-          reject(err);
-        })
+        .on('error', err =>
+          handleCompilerError(err, outputFilename, options, resolve)
+        )
         .pipe(rename(outputFilename))
         .pipe(
           gulpIf(
