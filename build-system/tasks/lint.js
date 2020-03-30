@@ -68,13 +68,13 @@ function runLinter(stream, options) {
   return stream
     .pipe(eslint(options))
     .pipe(
-      eslint.formatEach('stylish', function(msg) {
+      eslint.formatEach('stylish', function (msg) {
         logOnSameLine(msg.replace(`${rootDir}/`, '').trim() + '\n');
       })
     )
     .pipe(eslintIfFixed(rootDir))
     .pipe(
-      eslint.result(function(result) {
+      eslint.result(function (result) {
         const relativePath = path.relative(rootDir, result.filePath);
         if (!isTravisBuild()) {
           logOnSameLine(colors.green('Linted: ') + relativePath);
@@ -90,7 +90,7 @@ function runLinter(stream, options) {
       })
     )
     .pipe(
-      eslint.results(function(results) {
+      eslint.results(function (results) {
         if (results.errorCount == 0 && results.warningCount == 0) {
           if (!isTravisBuild()) {
             logOnSameLine(
@@ -136,7 +136,7 @@ function runLinter(stream, options) {
         }
         if (options.fix && Object.keys(fixedFiles).length > 0) {
           log(colors.green('INFO: ') + 'Summary of fixes:');
-          Object.keys(fixedFiles).forEach(file => {
+          Object.keys(fixedFiles).forEach((file) => {
             log(fixedFiles[file] + colors.cyan(file));
           });
         }
@@ -153,7 +153,7 @@ function runLinter(stream, options) {
  */
 function eslintRulesChanged() {
   return (
-    gitDiffNameOnlyMaster().filter(function(file) {
+    gitDiffNameOnlyMaster().filter(function (file) {
       return (
         path.basename(file).includes('.eslintrc') ||
         path.dirname(file) === 'build-system/eslint-rules'
@@ -172,7 +172,7 @@ function getFilesToLint(files) {
   const filesToLint = globby.sync(files, {gitignore: true});
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
-    filesToLint.forEach(file => {
+    filesToLint.forEach((file) => {
       log(colors.cyan(file));
     });
   }

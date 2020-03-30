@@ -229,7 +229,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.registerAction(
       'goToSlide',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.goToSlide(args['index'], ActionTrust.HIGH);
@@ -565,9 +565,7 @@ export class AmpSlideScroll extends BaseSlides {
     const count = String(this.noOfSlides_);
     return (
       ' ' +
-      this.getButtonSuffixFormat_()
-        .replace('%s', index)
-        .replace('%s', count)
+      this.getButtonSuffixFormat_().replace('%s', index).replace('%s', count)
     );
   }
 
@@ -843,7 +841,7 @@ export class AmpSlideScroll extends BaseSlides {
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(
       slidesContainer,
-      pos => {
+      (pos) => {
         this.slidesContainer_./*OK*/ scrollLeft = interpolate(pos);
       },
       duration,
@@ -859,7 +857,7 @@ export class AmpSlideScroll extends BaseSlides {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    listen(this.element, 'touchmove', event => event.stopPropagation(), {
+    listen(this.element, 'touchmove', (event) => event.stopPropagation(), {
       passive: true,
     });
   }

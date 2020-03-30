@@ -25,7 +25,7 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-education', {amp: true}, env => {
+describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;
   let hasSwipeCap;
   let storeService;
@@ -37,12 +37,12 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     win = env.win;
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -57,7 +57,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     viewer = Services.viewerForDoc(storyEducation.element);
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
     env.sandbox.stub(viewer, 'hasCapability').callsFake(() => hasSwipeCap);
-    env.sandbox.stub(storyEducation, 'mutateElement').callsFake(fn => fn());
+    env.sandbox.stub(storyEducation, 'mutateElement').callsFake((fn) => fn());
   });
 
   it('should render', () => {

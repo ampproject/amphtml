@@ -205,7 +205,7 @@ describe('SizeList select', () => {
     ]);
     expect(
       sizeList.select({
-        matchMedia: mq => {
+        matchMedia: (mq) => {
           if (mq == 'media2') {
             return {matches: true};
           }
@@ -224,7 +224,7 @@ describe('SizeList select', () => {
     ]);
     expect(
       sizeList.select({
-        matchMedia: mq => {
+        matchMedia: (mq) => {
           if (mq == 'media1' || mq == 'media2') {
             return {matches: true};
           }

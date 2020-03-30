@@ -185,6 +185,6 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-jwplayer', '0.1', AMP => {
+AMP.extension('amp-jwplayer', '0.1', (AMP) => {
   AMP.registerElement('amp-jwplayer', AmpJWPlayer);
 });

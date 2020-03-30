@@ -83,7 +83,7 @@ class AmpFacebook extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
@@ -152,6 +152,6 @@ class AmpFacebook extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook', '0.1', AMP => {
+AMP.extension('amp-facebook', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook', AmpFacebook);
 });

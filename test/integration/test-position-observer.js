@@ -19,7 +19,7 @@ import {poll} from '../../testing/iframe';
 //TODO(aghassemi,#10878): Run in all platforms.
 //TODO(aghasemi, #10877): in-a-box, FIE integration tests.
 const config = describe.configure().ifChrome();
-config.run('amp-position-observer', function() {
+config.run('amp-position-observer', function () {
   this.timeout(100000);
 
   const css = `
@@ -81,7 +81,7 @@ config.run('amp-position-observer', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       it('runs animation with scroll', () => {
         // Not visible yet, opacity = 0;
         expect(getOpacity(env.win)).to.equal(0);
@@ -151,7 +151,7 @@ config.run('amp-position-observer', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       // TODO(#18657, aghassemi): Fails due to timeout.
       it.skip('plays/pauses animation scene based on visibility', () => {
         // Not visible yet, opacity = 0;

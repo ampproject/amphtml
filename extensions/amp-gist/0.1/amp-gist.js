@@ -68,7 +68,7 @@ export class AmpGist extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
@@ -91,6 +91,6 @@ export class AmpGist extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-gist', '0.1', AMP => {
+AMP.extension('amp-gist', '0.1', (AMP) => {
   AMP.registerElement('amp-gist', AmpGist);
 });

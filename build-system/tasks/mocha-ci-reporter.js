@@ -29,19 +29,19 @@ function ciReporter(runner) {
   Base.call(this, runner);
   const self = this;
 
-  runner.on('pass', function() {
+  runner.on('pass', function () {
     process.stdout.write(Base.color('green', symbols.success));
   });
 
-  runner.on('pending', function() {
+  runner.on('pending', function () {
     process.stdout.write(Base.color('bright yellow', symbols.info));
   });
 
-  runner.on('fail', function() {
+  runner.on('fail', function () {
     process.stdout.write(Base.color('fail', symbols.error));
   });
 
-  runner.on('end', function() {
+  runner.on('end', function () {
     epilogue();
   });
 

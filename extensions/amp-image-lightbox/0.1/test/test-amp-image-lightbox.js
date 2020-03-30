@@ -30,7 +30,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -49,7 +49,7 @@ describes.realWin(
     }
 
     it('should not render if not activated', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const container = lightbox.querySelector(
           '.i-amphtml-image-lightbox-container'
         );
@@ -58,7 +58,7 @@ describes.realWin(
     });
 
     it('should render correctly', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         const noop = () => {};
         impl.getViewport = () => {
@@ -110,7 +110,7 @@ describes.realWin(
     });
 
     it('should activate all steps', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         const viewportOnChanged = env.sandbox.spy();
         const enterLightboxMode = env.sandbox.spy();
@@ -149,7 +149,7 @@ describes.realWin(
     });
 
     it('should deactivate all steps', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         impl.active_ = true;
         impl.historyId_ = 11;
@@ -180,7 +180,7 @@ describes.realWin(
     });
 
     it('should close on ESC', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         const setupCloseSpy = env.sandbox.spy(impl, 'close');
         const nullAddEventListenerSpy = env.sandbox
@@ -225,7 +225,7 @@ describes.realWin(
 
     // Accessibility
     it('should return focus to source element after close', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         impl.enter_ = () => {};
         impl.getHistory_ = () => {
@@ -256,7 +256,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let clock;
     let lightbox;
@@ -267,7 +267,7 @@ describes.realWin(
     const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: name => {
+      getAttribute: (name) => {
         if (name == 'src') {
           return 'image1';
         }
@@ -433,7 +433,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lightbox;
     let lightboxMock;

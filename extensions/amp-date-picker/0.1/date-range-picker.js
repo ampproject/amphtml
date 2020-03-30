@@ -37,17 +37,17 @@ function createDateRangePickerBase() {
   const defaultProps = dict({
     'startDate': null, // TODO: use null
     'endDate': null, // TODO: use null
-    'onDatesChange': function() {},
+    'onDatesChange': function () {},
 
     'focusedInput': null,
-    'onFocusChange': function() {},
-    'onClose': function() {},
+    'onFocusChange': function () {},
+    'onClose': function () {},
 
     'keepOpenOnDateSelect': false,
     'minimumNights': 1,
-    'isOutsideRange': function() {},
-    'isDayBlocked': function() {},
-    'isDayHighlighted': function() {},
+    'isOutsideRange': function () {},
+    'isDayBlocked': function () {},
+    'isDayHighlighted': function () {},
 
     // DayPicker props
     'renderMonth': null,
@@ -62,9 +62,9 @@ function createDateRangePickerBase() {
     'navPrev': null,
     'navNext': null,
 
-    'onPrevMonthClick': function() {},
-    'onNextMonthClick': function() {},
-    'onOutsideClick': function() {},
+    'onPrevMonthClick': function () {},
+    'onNextMonthClick': function () {},
+    'onOutsideClick': function () {},
 
     'renderDay': null,
     'renderCalendarInfo': null,
@@ -74,7 +74,7 @@ function createDateRangePickerBase() {
     'transitionDuration': undefined,
 
     // accessibility
-    'onBlur': function() {},
+    'onBlur': function () {},
     'isFocused': false,
     'showKeyboardShortcuts': false,
 

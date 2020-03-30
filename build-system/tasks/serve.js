@@ -98,7 +98,7 @@ async function startServer(
   }
 
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
   setServeMode(modeOptions);

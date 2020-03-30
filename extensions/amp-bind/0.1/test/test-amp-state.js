@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-bind:0.1'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
 
@@ -96,7 +96,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
@@ -127,7 +127,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(actions.trigger).to.have.been.calledWithExactly(
         element,
@@ -166,7 +166,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // One call from build(), one call from "refresh" action.
       expect(ampState.fetch_).to.have.been.calledTwice;
@@ -183,7 +183,7 @@ describes.realWin(
       );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.not.have.been.called;
     });
@@ -205,7 +205,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
@@ -243,7 +243,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.called;
       expect(bind.setState).calledWithMatch(
@@ -265,7 +265,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(

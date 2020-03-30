@@ -374,7 +374,7 @@ export class SafeframeHostApi {
     }
     this.viewport_
       .getClientRectAsync(this.iframe_)
-      .then(iframeBox => {
+      .then((iframeBox) => {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
@@ -385,7 +385,7 @@ export class SafeframeHostApi {
           SERVICE.GEOMETRY_UPDATE
         );
       })
-      .catch(err => dev().error(TAG, err));
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -611,7 +611,7 @@ export class SafeframeHostApi {
   handleSizeChange(height, width, messageType, optIsCollapse) {
     return this.viewport_
       .getClientRectAsync(this.baseInstance_.element)
-      .then(box => {
+      .then((box) => {
         if (!optIsCollapse && width <= box.width && height <= box.height) {
           this.resizeSafeframe(height, width, messageType);
         } else {
@@ -664,7 +664,7 @@ export class SafeframeHostApi {
     }
     this.viewport_
       .getClientRectAsync(this.iframe_)
-      .then(iframeBox => {
+      .then((iframeBox) => {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
@@ -681,7 +681,7 @@ export class SafeframeHostApi {
           messageType
         );
       })
-      .catch(err => dev().error(TAG, err));
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -726,7 +726,7 @@ export class SafeframeHostApi {
           }
         }
       )
-      .catch(err => {
+      .catch((err) => {
         if (err.message == 'CANCELLED') {
           dev().error(TAG, err);
           return;
@@ -752,7 +752,7 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => {
+      .catch((err) => {
         user().warn(TAG, err);
         const {width, height} = this.baseInstance_.getSlotSize();
         if (width && height) {

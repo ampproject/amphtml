@@ -24,7 +24,7 @@ describes.endtoend(
     browsers: ['chrome', 'firefox'],
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 

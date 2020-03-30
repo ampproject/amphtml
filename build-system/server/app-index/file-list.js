@@ -26,7 +26,7 @@ const {KeyValueOptions} = require('./form');
 const examplesPathRegex = /^\/examples\//;
 const htmlDocRegex = /\.html$/;
 
-const endpoint = q => appendQueryParamsToUrl('/dashboard/api/listing', q);
+const endpoint = (q) => appendQueryParamsToUrl('/dashboard/api/listing', q);
 
 const selectModeStateId = 'documentMode';
 const selectModeStateKey = 'selectModePrefix';
@@ -126,7 +126,7 @@ const FileListHeading = ({basepath, selectModePrefix}) => html`
   </div>
 `;
 
-const wrapFileList = rendered => html`
+const wrapFileList = (rendered) => html`
   <div class="file-list-container">
     <div class="wrap">
       ${rendered}
@@ -157,7 +157,7 @@ const FileList = ({basepath, fileSet, selectModePrefix}) =>
 
           <div placeholder>
             <div role="list">
-              ${joinFragments(fileSet, name =>
+              ${joinFragments(fileSet, (name) =>
                 PlaceholderFileListItem({
                   name,
                   href: maybePrefixExampleDocHref(

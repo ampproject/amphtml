@@ -31,7 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
       defaultPrevented: false,
       type: 'click',
     };
-    event.preventDefault = function() {
+    event.preventDefault = function () {
       event.defaultPrevented = true;
     };
   });
@@ -44,7 +44,7 @@ describes.sandboxed('Navigation', {}, () => {
       },
       amp: true,
     },
-    env => {
+    (env) => {
       let win, doc;
       let handler;
       let decorationSpy;
@@ -76,7 +76,7 @@ describes.sandboxed('Navigation', {}, () => {
           'handleCustomProtocolClick_'
         );
 
-        win.open = function() {};
+        win.open = function () {};
         winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });
@@ -181,11 +181,11 @@ describes.sandboxed('Navigation', {}, () => {
       describe('anchor mutators', () => {
         it('should not throw error if priority is already in use', () => {
           const priority = 10;
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '?am=1';
           }, priority);
           expect(() =>
-            handler.registerAnchorMutator(element => {
+            handler.registerAnchorMutator((element) => {
               element.href += '?am=2';
             }, priority)
           ).to.not.throw();
@@ -194,20 +194,20 @@ describes.sandboxed('Navigation', {}, () => {
         it('should execute in order', () => {
           anchor.href = 'https://www.testing-1-2-3.org';
           let transformedHref;
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&second=2';
             transformedHref = element.href;
           }, 2);
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&first=1';
             transformedHref = element.href;
           }, 1);
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '?third=3';
             transformedHref = element.href;
           }, 3);
           // If using a same priority, the order of registration is respected.
-          handler.registerAnchorMutator(element => {
+          handler.registerAnchorMutator((element) => {
             element.href += '&third=3-1';
             transformedHref = element.href;
           }, 3);
@@ -287,14 +287,14 @@ describes.sandboxed('Navigation', {}, () => {
           win.location.href = originLocation;
         });
 
-        it('should decorate for page w/ ga tag', function*() {
+        it('should decorate for page w/ ga tag', function* () {
           handler.isEmbed_ = false;
           yield macroTask();
           handler.handle_(event);
           expect(decorationSpy).to.be.calledOnce;
         });
 
-        it('should not decorate for page w/o ga tag', function*() {
+        it('should not decorate for page w/o ga tag', function* () {
           handler.isEmbed_ = false;
           const ga = win.document.getElementsByTagName('amp-analytics');
           ga[0].parentNode.removeChild(ga[0]);
@@ -521,7 +521,7 @@ describes.sandboxed('Navigation', {}, () => {
           return replaceStateForTargetPromise
             .then(() => {
               expect(scrollIntoViewStub).to.have.callCount(1);
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 setTimeout(resolve, 2);
               });
             })
@@ -641,7 +641,7 @@ describes.sandboxed('Navigation', {}, () => {
             'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
           const urlService = Services.urlForDoc(doc.documentElement);
 
-          env.sandbox.stub(urlService, 'getSourceUrl').callsFake(url => {
+          env.sandbox.stub(urlService, 'getSourceUrl').callsFake((url) => {
             expect(url).to.equal('abc.html');
             return 'https://www.pub.com/dir/abc.html';
           });
@@ -709,7 +709,7 @@ describes.sandboxed('Navigation', {}, () => {
         ampdoc: 'fie',
       },
     },
-    env => {
+    (env) => {
       // TODO(dvoytenko, #11827): Make this test work on Safari.
       describe
         .configure()
@@ -831,7 +831,7 @@ describes.sandboxed('Navigation', {}, () => {
   );
 });
 
-describes.realWin('anchor-click-interceptor', {amp: true}, env => {
+describes.realWin('anchor-click-interceptor', {amp: true}, (env) => {
   let doc;
   let ampdoc;
 

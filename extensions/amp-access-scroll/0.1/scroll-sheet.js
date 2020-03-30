@@ -48,7 +48,7 @@ export class Sheet extends ScrollComponent {
     switch (action['_scramp']) {
       case 'au':
         changed = this.updateHorizontalLayout(action);
-        ['open', 'url', 'title'].forEach(key => {
+        ['open', 'url', 'title'].forEach((key) => {
           if (hasOwn(action, key) && action[key] !== this.state_[key]) {
             this.state_[key] = action[key];
             changed = true;
@@ -56,7 +56,7 @@ export class Sheet extends ScrollComponent {
         });
         break;
       case 'st':
-        ['revealed'].forEach(key => {
+        ['revealed'].forEach((key) => {
           if (hasOwn(action, key) && action[key] !== this.state_[key]) {
             this.state_[key] = action[key];
             changed = true;

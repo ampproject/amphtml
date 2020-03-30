@@ -17,9 +17,9 @@
 
 const path = require('path');
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    MemberExpression: function(node) {
+    MemberExpression: function (node) {
       const filePath = context.getFilename();
       const filename = path.basename(filePath);
       // Ignore specific js files.

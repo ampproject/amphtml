@@ -473,10 +473,10 @@ export class ConsentUI {
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
-    return consentStatePromise.then(consentStateManager => {
+    return consentStatePromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
-        .then(consentInfo => {
+        .then((consentInfo) => {
           return dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
@@ -513,7 +513,7 @@ export class ConsentUI {
 
     const iframePromise = this.getClientInfoPromise_(
       isActionPromptTrigger
-    ).then(clientInfo => {
+    ).then((clientInfo) => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
       insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);

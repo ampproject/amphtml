@@ -204,7 +204,7 @@ class AmpAddThis extends AMP.BaseElement {
       ampDoc
         .whenFirstVisible()
         .then(() => viewer.getReferrerUrl())
-        .then(referrer => {
+        .then((referrer) => {
           this.referrer_ = referrer;
 
           callLojson({
@@ -360,7 +360,7 @@ class AmpAddThis extends AMP.BaseElement {
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
-    SHARE_CONFIG_KEYS.map(key => {
+    SHARE_CONFIG_KEYS.map((key) => {
       const value = this.element.getAttribute(`data-${key}`);
       if (value) {
         params[key] = value;
@@ -437,7 +437,7 @@ class AmpAddThis extends AMP.BaseElement {
     listen(ampDoc.win, 'message', pmHandler);
 
     // Trigger "pjson" call when a share occurs.
-    postMessageDispatcher.on(SHARE_EVENT, data =>
+    postMessageDispatcher.on(SHARE_EVENT, (data) =>
       callPjson({
         data,
         loc,
@@ -458,6 +458,6 @@ class AmpAddThis extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-addthis', '0.1', AMP => {
+AMP.extension('amp-addthis', '0.1', (AMP) => {
   AMP.registerElement('amp-addthis', AmpAddThis, CSS);
 });

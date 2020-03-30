@@ -82,7 +82,7 @@ class AmpTwitter extends AMP.BaseElement {
     listenFor(
       iframe,
       MessageType.EMBED_SIZE,
-      data => {
+      (data) => {
         this.updateForSuccessState_(data['height']);
       },
       /* opt_is3P */ true
@@ -207,6 +207,6 @@ class AmpTwitter extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-twitter', '0.1', AMP => {
+AMP.extension('amp-twitter', '0.1', (AMP) => {
   AMP.registerElement('amp-twitter', AmpTwitter);
 });

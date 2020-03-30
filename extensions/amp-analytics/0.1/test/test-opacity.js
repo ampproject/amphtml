@@ -16,7 +16,7 @@
 
 import {getMinOpacity} from '../opacity';
 
-describes.realWin('getMinOpacity', {amp: true}, env => {
+describes.realWin('getMinOpacity', {amp: true}, (env) => {
   let win;
   let ampElement;
   let doc;

@@ -20,7 +20,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 describes.realWin(
   'amp-analytics.iframe-transport-message-queue',
   {amp: true},
-  env => {
+  (env) => {
     let frame;
     let queue;
 

@@ -20,7 +20,7 @@ import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 const BOX = layoutRectLtwh(1, 5, 10, 10);
 
-describes.realWin('amp-auto-ads utils', {amp: true}, env => {
+describes.realWin('amp-auto-ads utils', {amp: true}, (env) => {
   let win;
   let element;
   let measureStub;
@@ -37,7 +37,7 @@ describes.realWin('amp-auto-ads utils', {amp: true}, env => {
       const viewport = Services.viewportForDoc(element);
       measureStub = env.sandbox
         .stub(viewport, 'getLayoutRect')
-        .callsFake(el => {
+        .callsFake((el) => {
           if (el === element) {
             return BOX;
           }
@@ -52,14 +52,14 @@ describes.realWin('amp-auto-ads utils', {amp: true}, env => {
       const resources = Services.resourcesForDoc(element);
       resources.add(element);
       return getElementLayoutBox(element)
-        .then(layoutBox => {
+        .then((layoutBox) => {
           expect(layoutBox).to.eql(BOX);
           expect(measureStub).to.be.calledOnce;
         })
         .then(() => {
           return getElementLayoutBox(element);
         })
-        .then(layoutBox => {
+        .then((layoutBox) => {
           expect(layoutBox).to.eql(BOX);
           expect(measureStub).to.be.calledOnce;
         });

@@ -30,7 +30,7 @@ describes.endtoend(
     // TODO(sparhami) Make other environments work too
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;

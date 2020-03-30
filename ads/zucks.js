@@ -23,7 +23,7 @@ import {loadScript, validateData, writeScript} from '../3p/3p';
 export function zucks(global, data) {
   validateData(data, ['frameId']);
   if (data['adtype'] === 'zoe') {
-    loadScript(global, 'https://j.zoe.zucks.net/zoe.min.js', function() {
+    loadScript(global, 'https://j.zoe.zucks.net/zoe.min.js', function () {
       const frameId = data['frameId'];
       const elementId = 'zucks-widget-parent';
 

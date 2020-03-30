@@ -26,7 +26,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let varSource;
     beforeEach(() => {
       varSource = new VariableSource(env.ampdoc);
@@ -52,7 +52,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -69,7 +69,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -88,7 +88,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -106,7 +106,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('baz');
         });
     });
@@ -125,7 +125,7 @@ describes.fakeWin(
           ampdoc: 'single',
         },
       },
-      env => {
+      (env) => {
         let variableSource;
         beforeEach(() => {
           env.sandbox.stub(env.ampdoc, 'getMeta').returns({
@@ -142,7 +142,7 @@ describes.fakeWin(
           return variableSource
             .get('ABCD')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('abcd');
             });
         });
@@ -155,7 +155,7 @@ describes.fakeWin(
           return variableSource
             .get('RANDOM')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('0.1234');
             });
         });
@@ -175,12 +175,12 @@ describes.fakeWin(
       return variableSource
         .get('RANDOM')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('0.1234');
         });
     });
 
-    describes.fakeWin('getTimingData', {}, env => {
+    describes.fakeWin('getTimingData', {}, (env) => {
       let win;
 
       beforeEach(() => {
@@ -199,7 +199,7 @@ describes.fakeWin(
         expect(win.eventListeners.count('load')).to.equal(1);
         win.performance.timing.loadEventStart = 12;
         win.eventListeners.fire({type: 'load'});
-        return p.then(value => {
+        return p.then((value) => {
           expect(value).to.equal(11);
         });
       });

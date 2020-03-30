@@ -49,13 +49,13 @@ export class ViewerForTesting {
     this.iframe.setAttribute('scrolling', 'yes');
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeReceivedResolve_ = resolve;
     });
 
     /** @private @const {!Promise} */
-    this.documentLoadedPromise_ = new Promise(resolve => {
+    this.documentLoadedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.documentLoadedResolve_ = resolve;
     });
@@ -92,7 +92,7 @@ export class ViewerForTesting {
     // a notification that a document was loaded.
     window.addEventListener(
       'message',
-      e => {
+      (e) => {
         this.log('message received', e, e.data);
         const target = this.iframe.contentWindow;
         const targetOrigin = this.frameOrigin_;

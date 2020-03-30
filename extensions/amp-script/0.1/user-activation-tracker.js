@@ -43,7 +43,7 @@ export class UserActivationTracker {
     /** @private {boolean} */
     this.inLongTask_ = false;
 
-    ACTIVATION_EVENTS.forEach(type => {
+    ACTIVATION_EVENTS.forEach((type) => {
       this.root_.addEventListener(
         type,
         this.boundActivated_,
@@ -54,7 +54,7 @@ export class UserActivationTracker {
 
   /** @override */
   dispose() {
-    ACTIVATION_EVENTS.forEach(type => {
+    ACTIVATION_EVENTS.forEach((type) => {
       this.root_.removeEventListener(
         type,
         this.boundActivated_,

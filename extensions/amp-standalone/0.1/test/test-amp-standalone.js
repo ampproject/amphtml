@@ -16,7 +16,7 @@
 
 import {StandaloneService} from '../amp-standalone';
 
-describes.sandboxed('amp-standalone', {}, env => {
+describes.sandboxed('amp-standalone', {}, (env) => {
   let fakeAmpdoc;
 
   beforeEach(() => {

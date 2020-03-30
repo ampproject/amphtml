@@ -83,17 +83,15 @@ function swap(a, b) {
  * @return {!Element}
  * @private
  */
-const renderDockedOverlay = html =>
-  html`
-    <div class="i-amphtml-video-docked-overlay" hidden></div>
-  `;
+const renderDockedOverlay = (html) =>
+  html` <div class="i-amphtml-video-docked-overlay" hidden></div> `;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const renderControls = html =>
+const renderControls = (html) =>
   html`
     <div class="amp-video-docked-controls" hidden>
       <div
@@ -171,7 +169,7 @@ export class Controls {
     this.overlay = renderDockedOverlay(html);
 
     const refs = htmlRefs(this.container);
-    const assertRef = ref => dev().assertElement(refs[ref]);
+    const assertRef = (ref) => dev().assertElement(refs[ref]);
 
     /** @private @const {!Element} */
     this.dismissButton_ = assertRef('dismissButton');
@@ -266,7 +264,7 @@ export class Controls {
   useControlSet_(setName) {
     const activeClassname = `amp-video-docked-control-set-${setName}`;
 
-    iterateCursor(this.controlSets_, controlSet => {
+    iterateCursor(this.controlSets_, (controlSet) => {
       toggle(controlSet, controlSet.classList.contains(activeClassname));
     });
   }
@@ -475,7 +473,7 @@ export class Controls {
 
   /** @private */
   hideOnTapOutside_() {
-    listen(this.ampdoc_.getRootNode(), 'mousedown', e => {
+    listen(this.ampdoc_.getRootNode(), 'mousedown', (e) => {
       if (this.isControlsTarget_(dev().assertElement(e.target))) {
         return;
       }
@@ -527,7 +525,7 @@ export class Controls {
       this.show_();
     });
 
-    this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', e => {
+    this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', (e) => {
       devAssert(this.area_);
 
       const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));

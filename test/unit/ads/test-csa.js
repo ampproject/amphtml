@@ -48,11 +48,11 @@ function getAds(type) {
   }
 }
 
-describes.fakeWin('amp-ad-csa-impl', {}, env => {
+describes.fakeWin('amp-ad-csa-impl', {}, (env) => {
   let win;
 
   beforeEach(() => {
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise(true).then((iframe) => {
       win = iframe.win;
       win.context = {
         initialIntersection: {
@@ -92,7 +92,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
       env.sandbox.stub(_3p, 'loadScript').callsFake((global, url, callback) => {
         callback();
       });
-      win._googCsa = function() {};
+      win._googCsa = function () {};
       googCsaSpy = env.sandbox.stub(win, '_googCsa');
     });
 
@@ -280,7 +280,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
 
       // Set up stubs and spys
       const noAdsSpy = env.sandbox.stub(win.context, 'noContentAvailable');
-      win._googCsa = function() {};
+      win._googCsa = function () {};
       const _googCsaSpy = env.sandbox.stub(win, '_googCsa').callsFake(() => {});
 
       // Ads don't load but there is backfill

@@ -210,6 +210,6 @@ class AmpMegaphone extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-megaphone', '0.1', AMP => {
+AMP.extension('amp-megaphone', '0.1', (AMP) => {
   AMP.registerElement('amp-megaphone', AmpMegaphone);
 });

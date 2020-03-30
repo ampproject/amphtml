@@ -68,9 +68,9 @@ export function createShadowRoot(hostElement) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
-        get: function() {
+        get: function () {
           const items = [];
-          iterateCursor(shadowRoot.childNodes, child => {
+          iterateCursor(shadowRoot.childNodes, (child) => {
             if (child.tagName === 'STYLE') {
               items.push(child.sheet);
             }
@@ -91,7 +91,7 @@ export function createShadowRoot(hostElement) {
     shadowRoot.host.classList.add(rootId);
 
     // CSS isolation.
-    installCssTransformer(shadowRoot, css => {
+    installCssTransformer(shadowRoot, (css) => {
       return transformShadowCss(shadowRoot, css);
     });
   }
@@ -133,7 +133,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.host = hostElement;
 
   // `getElementById` is resolved via `querySelector('#id')`.
-  shadowRoot.getElementById = function(id) {
+  shadowRoot.getElementById = function (id) {
     const escapedId = escapeCssSelectorIdent(id);
     return /** @type {HTMLElement|null} */ (shadowRoot./*OK*/ querySelector(
       `#${escapedId}`
@@ -146,7 +146,7 @@ function createShadowRootPolyfill(hostElement) {
       if (!doc.styleSheets) {
         return [];
       }
-      return toArray(doc.styleSheets).filter(styleSheet =>
+      return toArray(doc.styleSheets).filter((styleSheet) =>
         shadowRoot.contains(styleSheet.ownerNode)
       );
     },
@@ -166,7 +166,7 @@ export function getShadowRootNode(node) {
     return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
   }
   // Polyfill shadow root lookup.
-  return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
+  return /** @type {?ShadowRoot} */ (closestNode(node, (n) => isShadowRoot(n)));
 }
 
 /**

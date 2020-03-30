@@ -16,7 +16,7 @@
 
 import {Messenger} from '../iframe-api/messenger';
 
-describes.fakeWin('Messenger', {}, env => {
+describes.fakeWin('Messenger', {}, (env) => {
   let win;
 
   beforeEach(() => {
@@ -155,7 +155,7 @@ describes.fakeWin('Messenger', {}, env => {
           payload: {result: {a: 2}},
         },
       });
-      return promise.then(result => {
+      return promise.then((result) => {
         expect(result).to.deep.equal({a: 2});
       });
     });
@@ -212,7 +212,7 @@ describes.fakeWin('Messenger', {}, env => {
         () => {
           throw new Error('must have failed');
         },
-        reason => {
+        (reason) => {
           expect(() => {
             throw reason;
           }).to.throw(/intentional/);
@@ -231,7 +231,7 @@ describes.fakeWin('Messenger', {}, env => {
           .stub(messenger, 'handleCommand_')
           .callsFake(() => handlerResponse);
         let sendResolver;
-        sendPromise = new Promise(resolve => {
+        sendPromise = new Promise((resolve) => {
           sendResolver = resolve;
         });
         sendStub = env.sandbox.stub(messenger, 'sendCommand_').callsFake(() => {

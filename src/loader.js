@@ -52,7 +52,7 @@ export function createLoaderElement(
   // service is ready.
   const loaderRoot = element.ownerDocument.createElement('div');
 
-  getLoaderServicePromise(ampDoc, element).then(loaderService => {
+  getLoaderServicePromise(ampDoc, element).then((loaderService) => {
     const endTime = Date.now();
     const initDelay = endTime - startTime;
 

@@ -120,6 +120,6 @@ class AmpIzlesene extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-izlesene', '0.1', AMP => {
+AMP.extension('amp-izlesene', '0.1', (AMP) => {
   AMP.registerElement('amp-izlesene', AmpIzlesene);
 });

@@ -93,7 +93,7 @@ export class FrameOverlayManager {
           callback(this.collapsedRect_);
         }
       },
-      collapsedRect => {
+      (collapsedRect) => {
         this.collapsedRect_ = collapsedRect;
 
         if (this.viewportChangedSinceExpand_) {

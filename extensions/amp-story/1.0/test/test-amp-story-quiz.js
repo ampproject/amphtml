@@ -98,7 +98,7 @@ const getMockReactionData = () => {
  *
  * @param {Array<number>} responseCounts
  */
-const generateResponseDataFor = responseCounts => {
+const generateResponseDataFor = (responseCounts) => {
   const response = {
     totalResponseCount: responseCounts.reduce((a, b) => a + b, 0),
     hasUserResponded: false,
@@ -121,7 +121,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let win;
     let ampStoryQuiz;
     let storyEl;
@@ -144,12 +144,12 @@ describes.realWin(
       requestService = getRequestService(win, ampStoryQuizEl);
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function() {
+      registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function() {
+      registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
 
@@ -163,7 +163,7 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
 
-      env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake(fn => fn());
+      env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
 
     it('should take the html and reformat it', () => {

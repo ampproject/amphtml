@@ -36,7 +36,7 @@ import {
 } from '../../src/experiments';
 import {user, userAssert} from '../../src/log';
 
-describes.fakeWin('installErrorReporting', {}, env => {
+describes.fakeWin('installErrorReporting', {}, (env) => {
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;
@@ -716,7 +716,7 @@ describe('getErrorReportData', () => {
       scripts = [];
       win = {
         document: {
-          querySelectorAll: selector => {
+          querySelectorAll: (selector) => {
             expect(selector).to.equal('script[src]');
             return scripts;
           },
@@ -760,7 +760,7 @@ describe('getErrorReportData', () => {
   });
 });
 
-describes.sandboxed('reportError', {}, env => {
+describes.sandboxed('reportError', {}, (env) => {
   let clock;
 
   beforeEach(() => {
@@ -882,7 +882,7 @@ describe.configure().run('detectJsEngineFromStack', () => {
     });
 });
 
-describes.fakeWin('user error reporting', {amp: true}, env => {
+describes.fakeWin('user error reporting', {amp: true}, (env) => {
   let win;
   const error = new Error('ERROR', 'user error');
   let analyticsEventSpy;

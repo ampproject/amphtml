@@ -24,7 +24,7 @@ export function adservsolutions(global, data) {
   validateData(data, [], ['client', 'zid']);
   global['ABNS'] =
     global['ABNS'] ||
-    function() {
+    function () {
       (global['ABNSl'] = global['ABNSl'] || []).push(arguments);
     };
   global['ABNSh'] = data.client;

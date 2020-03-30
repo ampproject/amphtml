@@ -302,13 +302,13 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.root_.addEventListener('click', event => {
+      this.root_.addEventListener('click', (event) => {
         if (!event.defaultPrevented) {
           const element = dev().assertElement(event.target);
           this.trigger(element, name, event, ActionTrust.HIGH);
         }
       });
-      this.root_.addEventListener('keydown', event => {
+      this.root_.addEventListener('keydown', (event) => {
         const {key, target} = event;
         const element = dev().assertElement(target);
         if (key == Keys.ENTER || key == Keys.SPACE) {
@@ -332,14 +332,14 @@ export class ActionService {
         }
       });
     } else if (name == 'submit') {
-      this.root_.addEventListener(name, event => {
+      this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
         // For get requests, the delegating to the viewer needs to happen
         // before this.
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
-      this.root_.addEventListener(name, event => {
+      this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
         this.addTargetPropertiesAsDetail_(event);
         this.trigger(element, name, event, ActionTrust.HIGH);
@@ -347,7 +347,7 @@ export class ActionService {
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(
         this.ampdoc.win,
-        event => {
+        (event) => {
           const target = dev().assertElement(event.target);
           this.trigger(
             target,
@@ -359,7 +359,7 @@ export class ActionService {
         DEFAULT_DEBOUNCE_WAIT
       );
 
-      this.root_.addEventListener('input', event => {
+      this.root_.addEventListener('input', (event) => {
         // Create a DeferredEvent to avoid races where the browser cleans up
         // the event object before the async debounced function is called.
         const deferredEvent = new DeferredEvent(event);
@@ -369,7 +369,7 @@ export class ActionService {
     } else if (name == 'input-throttled') {
       const throttledInput = throttle(
         this.ampdoc.win,
-        event => {
+        (event) => {
           const target = dev().assertElement(event.target);
           this.trigger(
             target,
@@ -381,13 +381,13 @@ export class ActionService {
         DEFAULT_THROTTLE_INTERVAL
       );
 
-      this.root_.addEventListener('input', event => {
+      this.root_.addEventListener('input', (event) => {
         const deferredEvent = new DeferredEvent(event);
         this.addTargetPropertiesAsDetail_(deferredEvent);
         throttledInput(deferredEvent);
       });
     } else if (name == 'valid' || name == 'invalid') {
-      this.root_.addEventListener(name, event => {
+      this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
@@ -481,7 +481,7 @@ export class ActionService {
       // Invoke and clear all queued invocations now handler is installed.
       Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
-        queuedInvocations.forEach(invocation => {
+        queuedInvocations.forEach((invocation) => {
           try {
             handler(invocation);
           } catch (e) {
@@ -517,7 +517,7 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(action => {
+    return action.actionInfos.some((action) => {
       const {target} = action;
       return !!this.getActionNode_(target);
     });
@@ -542,7 +542,7 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(actionInfo => {
+    return action.actionInfos.some((actionInfo) => {
       const {target} = actionInfo;
       return this.getActionNode_(target) == targetElement;
     });
@@ -603,7 +603,7 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     /** @type {?Promise} */
     let currentPromise = null;
-    action.actionInfos.forEach(actionInfo => {
+    action.actionInfos.forEach((actionInfo) => {
       const {target, args, method, str} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
@@ -816,8 +816,8 @@ export class ActionService {
         .split(',')
         // Turn an empty string whitelist into an empty array, otherwise the
         // parse error in the mapper below would trigger.
-        .filter(action => action)
-        .map(action => {
+        .filter((action) => action)
+        .map((action) => {
           const parts = action.split('.');
           if (parts.length < 2) {
             this.error_(`Invalid action whitelist entry: ${action}.`);
@@ -828,7 +828,7 @@ export class ActionService {
           return {tagOrTarget, method};
         })
         // Filter out undefined elements because of the parse error above.
-        .filter(action => action)
+        .filter((action) => action)
     );
   }
 
@@ -897,7 +897,7 @@ function isActionWhitelisted(invocation, whitelist) {
   }
   const lcMethod = method.toLowerCase();
   const lcTagOrTarget = tagOrTarget.toLowerCase();
-  return whitelist.some(w => {
+  return whitelist.some((w) => {
     if (
       w.tagOrTarget.toLowerCase() === lcTagOrTarget ||
       w.tagOrTarget === '*'
@@ -1126,7 +1126,7 @@ function argValueForTokens(tokens) {
   } else if (tokens.length == 1) {
     return /** @type {(boolean|number|string)} */ (tokens[0].value);
   } else {
-    const values = tokens.map(token => token.value);
+    const values = tokens.map((token) => token.value);
     const expression = values.join('.');
     return /** @type {ActionInfoArgExpressionDef} */ ({expression});
   }
@@ -1152,7 +1152,7 @@ export function dereferenceArgsVariables(args, event, opt_args) {
     }
   }
   const applied = map();
-  Object.keys(args).forEach(key => {
+  Object.keys(args).forEach((key) => {
     let value = args[key];
     // Only JSON expression strings that contain dereferences (e.g. `foo.bar`)
     // are processed as ActionInfoArgExpressionDef. We also support

@@ -29,7 +29,7 @@ describes.endtoend(
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

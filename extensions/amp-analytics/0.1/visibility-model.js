@@ -207,7 +207,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;

@@ -343,7 +343,7 @@ export class DomWriterBulk {
  */
 export function removeNoScriptElements(parent) {
   const noscriptElements = childElementsByTag(parent, 'noscript');
-  iterateCursor(noscriptElements, element => {
+  iterateCursor(noscriptElements, (element) => {
     removeElement(element);
   });
 }

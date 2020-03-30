@@ -46,7 +46,7 @@ export function installAutoLightboxExtension(ampdoc) {
   chunk(
     ampdoc,
     () => {
-      isStoryDocument(ampdoc).then(isStory => {
+      isStoryDocument(ampdoc).then((isStory) => {
         // Do not enable on amp-story documents.
         if (isStory) {
           return;

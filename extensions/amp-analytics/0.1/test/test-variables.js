@@ -30,7 +30,7 @@ import {
 
 const fakeElement = document.documentElement;
 
-describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let variables;
 
   beforeEach(() => {
@@ -252,7 +252,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
+  describes.fakeWin('macros', {amp: true}, (env) => {
     let doc;
     let win;
     let urlReplacementService;

@@ -36,7 +36,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = cmd => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);

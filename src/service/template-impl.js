@@ -157,7 +157,7 @@ export class Templates {
    * @return {!Promise<!Element>}
    */
   setHtmlForTemplate(templateElement, html) {
-    return this.getImplementation_(templateElement).then(impl => {
+    return this.getImplementation_(templateElement).then((impl) => {
       return this.setHtml_(impl, html);
     });
   }
@@ -169,7 +169,7 @@ export class Templates {
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
-    return this.getImplementation_(templateElement).then(impl => {
+    return this.getImplementation_(templateElement).then((impl) => {
       return this.render_(impl, data);
     });
   }
@@ -185,8 +185,8 @@ export class Templates {
     if (array.length == 0) {
       return Promise.resolve([]);
     }
-    return this.getImplementation_(templateElement).then(impl => {
-      return array.map(item => {
+    return this.getImplementation_(templateElement).then((impl) => {
+      return array.map((item) => {
         return this.render_(impl, item);
       });
     });
@@ -324,11 +324,13 @@ export class Templates {
       return promise;
     }
 
-    promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = (element[PROP_] = new templateClass(element, this.win_));
-      delete element[PROP_PROMISE_];
-      return impl;
-    });
+    promise = this.waitForTemplateClass_(element, type).then(
+      (templateClass) => {
+        const impl = (element[PROP_] = new templateClass(element, this.win_));
+        delete element[PROP_PROMISE_];
+        return impl;
+      }
+    );
     element[PROP_PROMISE_] = promise;
     return promise;
   }

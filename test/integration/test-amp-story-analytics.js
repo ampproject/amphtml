@@ -17,11 +17,7 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-const config = describe
-  .configure()
-  .skipEdge()
-  .skipSafari()
-  .skipSinglePass();
+const config = describe.configure().skipEdge().skipSafari().skipSinglePass();
 
 config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
@@ -135,7 +131,7 @@ config.run('amp-story analytics', () => {
     </amp-analytics>`,
       extensions,
     },
-    env => {
+    (env) => {
       let browser;
       let clickAndWait;
       let clickAtPosition;
@@ -143,7 +139,7 @@ config.run('amp-story analytics', () => {
 
       beforeEach(async () => {
         browser = new BrowserController(env.win);
-        clickAndWait = async selector => {
+        clickAndWait = async (selector) => {
           browser.click(selector);
           await browser.wait(1000);
         };
@@ -281,7 +277,7 @@ config.run('amp-story analytics', () => {
     </amp-analytics>`,
       extensions,
     },
-    env => {
+    (env) => {
       let browser;
       let clickAtPosition;
       let doc;

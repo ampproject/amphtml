@@ -42,6 +42,6 @@ export class AmpViewerGpayButton extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-viewer-gpay-button', '0.1', AMP => {
+AMP.extension('amp-viewer-gpay-button', '0.1', (AMP) => {
   AMP.registerElement('amp-viewer-gpay-button', AmpViewerGpayButton);
 });

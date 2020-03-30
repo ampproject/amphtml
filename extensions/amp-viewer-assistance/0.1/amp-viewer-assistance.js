@@ -54,11 +54,14 @@ export class AmpViewerAssistance {
     this.assistanceElement_ = dev().assertElement(assistanceElement);
 
     /** @const @private {JsonObject|null|undefined} */
-    this.configJson_ = tryParseJson(this.assistanceElement_.textContent, e => {
-      throw user().createError(
-        'Failed to parse "amp-viewer-assistance" JSON: ' + e
-      );
-    });
+    this.configJson_ = tryParseJson(
+      this.assistanceElement_.textContent,
+      (e) => {
+        throw user().createError(
+          'Failed to parse "amp-viewer-assistance" JSON: ' + e
+        );
+      }
+    );
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
@@ -80,10 +83,10 @@ export class AmpViewerAssistance {
     if (method == 'updateActionState') {
       if (invocation.satisfiesTrust(ActionTrust.LOW)) {
         this.validateAndTransformUpdateArgs_(args)
-          .then(args => {
+          .then((args) => {
             return this.viewer_./*OK*/ sendMessageAwaitResponse(method, args);
           })
-          .catch(err => {
+          .catch((err) => {
             user().error(TAG, err.toString());
           });
       }
@@ -105,7 +108,7 @@ export class AmpViewerAssistance {
       user().error(TAG, 'Could not find #amp-viewer-assistance element.');
       return this;
     }
-    return this.viewer_.isTrustedViewer().then(isTrustedViewer => {
+    return this.viewer_.isTrustedViewer().then((isTrustedViewer) => {
       if (
         !isTrustedViewer &&
         !isExperimentOn(this.ampdoc_.win, 'amp-viewer-assistance-untrusted')
@@ -147,7 +150,7 @@ export class AmpViewerAssistance {
           'providers': [GSI_TOKEN_PROVIDER],
         })
       )
-      .then(token => {
+      .then((token) => {
         this.setIdTokenStatus_(Boolean(!!token));
         return token;
       })
@@ -167,7 +170,7 @@ export class AmpViewerAssistance {
           'providers': [GSI_TOKEN_PROVIDER],
         })
       )
-      .then(token => {
+      .then((token) => {
         user().info(TAG, 'Token: ' + token);
         if (token) {
           this.setIdTokenStatus_(/*available=*/ true);
@@ -207,7 +210,7 @@ export class AmpViewerAssistance {
     } else if (error) {
       // Must transform 'error' Response object
       if (error && typeof error.text === 'function') {
-        return error.text().then(errorMessage => {
+        return error.text().then((errorMessage) => {
           return dict({
             'update': {
               'actionStatus': 'FAILED_ACTION_STATUS',
@@ -274,8 +277,8 @@ export class AmpViewerAssistance {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('amp-viewer-assistance', function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc('amp-viewer-assistance', function (ampdoc) {
     return new AmpViewerAssistance(ampdoc).start_();
   });
 });

@@ -23,7 +23,7 @@ describe('Caja-based', () => {
   beforeEach(() => {
     html = document.createElement('html');
     const documentEl = {documentElement: html};
-    sanitize = html => sanitizeHtml(html, documentEl);
+    sanitize = (html) => sanitizeHtml(html, documentEl);
   });
 
   runSanitizerTests();

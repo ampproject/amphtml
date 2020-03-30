@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-ima-video'],
     },
   },
-  env => {
+  (env) => {
     const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
     const adTagUrl =
       'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=';
@@ -43,11 +43,11 @@ describes.realWin(
 
     function getVideoPlayerMock() {
       return {
-        load: function() {},
-        addEventListener: function() {},
-        removeEventListener: function() {},
-        play: function() {},
-        pause: function() {},
+        load: function () {},
+        addEventListener: function () {},
+        removeEventListener: function () {},
+        play: function () {},
+        pause: function () {},
         muted: false,
         played: {
           length: 0,
@@ -299,7 +299,7 @@ describes.realWin(
       const mockGlobal = {};
       mockGlobal.google = {};
       mockGlobal.google.ima = {};
-      mockGlobal.google.ima.AdsRenderingSettings = function() {
+      mockGlobal.google.ima.AdsRenderingSettings = function () {
         return mockAdsRenderingSettings;
       };
       mockGlobal.google.ima.AdErrorEvent = {};
@@ -358,7 +358,7 @@ describes.realWin(
       const mockGlobal = {};
       mockGlobal.google = {};
       mockGlobal.google.ima = {};
-      mockGlobal.google.ima.AdsRenderingSettings = function() {
+      mockGlobal.google.ima.AdsRenderingSettings = function () {
         return mockAdsRenderingSettings;
       };
       mockGlobal.google.ima.AdErrorEvent = {};
@@ -1200,7 +1200,7 @@ describes.realWin(
     });
 
     const hoverEventsToTest = ['click', 'mousemove'];
-    hoverEventsToTest.forEach(hoverEvent => {
+    hoverEventsToTest.forEach((hoverEvent) => {
       it(
         `shows controls on ${hoverEvent} (hover)` +
           ' while playing after hidden',
@@ -1247,7 +1247,7 @@ describes.realWin(
         }
       );
 
-      it(`throttles ${hoverEvent} (hover) for showing controls`, async function() {
+      it(`throttles ${hoverEvent} (hover) for showing controls`, async function () {
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);

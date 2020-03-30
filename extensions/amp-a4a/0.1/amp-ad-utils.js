@@ -127,7 +127,7 @@ export function getAmpAdMetadata(creative) {
       if (!isArray(metaData.customStylesheets)) {
         throw new Error(errorMsg);
       }
-      metaData.customStylesheets.forEach(stylesheet => {
+      metaData.customStylesheets.forEach((stylesheet) => {
         if (
           !isObject(stylesheet) ||
           !stylesheet['href'] ||

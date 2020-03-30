@@ -26,7 +26,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 
-describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
+describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   let viewport;
@@ -120,7 +120,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
   it('should provide the correct rect for ini-load for inabox', () => {
     win.__AMP_MODE = {runtime: 'inabox'};
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};
       }
@@ -188,11 +188,11 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     beforeEach(() => {
       getTestPromise = (promise, result) => {
         return promise
-          .then(element => {
+          .then((element) => {
             expect(result).to.not.be.null;
             expect(element).to.equal(result);
           })
-          .catch(error => {
+          .catch((error) => {
             expect(error).to.match(new RegExp(result));
           });
       };
@@ -335,20 +335,20 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
     it('should find an AMP element for AMP search', () => {
       child.classList.add('i-amphtml-element');
-      return root.getAmpElement(body, '#child').then(element => {
+      return root.getAmpElement(body, '#child').then((element) => {
         expect(element).to.equal(child);
       });
     });
 
     it('should allow not-found element for AMP search', () => {
-      return root.getAmpElement(body, '#unknown').catch(error => {
+      return root.getAmpElement(body, '#unknown').catch((error) => {
         expect(error).to.match(/Element "#unknown" not found/);
       });
     });
 
     it('should fail if the found element is not AMP for AMP search', () => {
       child.classList.remove('i-amphtml-element');
-      return root.getAmpElement(body, '#child').catch(error => {
+      return root.getAmpElement(body, '#child').catch((error) => {
         expect(error).to.match(/required to be an AMP element/);
       });
     });
@@ -461,7 +461,7 @@ describes.realWin(
   {
     amp: {ampdoc: 'fie'},
   },
-  env => {
+  (env) => {
     let win;
     let embed;
     let ampdoc;
@@ -590,7 +590,7 @@ describes.realWin(
 
       afterEach(() => {
         // Tests happen here.
-        return Promise.all(getElementTestInstances.promises).then(values => {
+        return Promise.all(getElementTestInstances.promises).then((values) => {
           for (let i = 0; i < values.length; i++) {
             expect(values[i]).to.equal(getElementTestInstances.results[i]);
           }

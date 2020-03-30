@@ -26,23 +26,23 @@ export function relap(global, data) {
   const urlParam = data['url'] || window.context.canonicalUrl;
 
   if (data['version'] === 'v7') {
-    window.onRelapAPIReady = function(relapAPI) {
+    window.onRelapAPIReady = function (relapAPI) {
       relapAPI['init']({
         token: data['token'],
         url: urlParam,
       });
     };
 
-    window.onRelapAPIInit = function(relapAPI) {
+    window.onRelapAPIInit = function (relapAPI) {
       relapAPI['addWidget']({
         cfgId: data['anchorid'],
         anchorEl: global.document.getElementById('c'),
         position: 'append',
         events: {
-          onReady: function() {
+          onReady: function () {
             window.context.renderStart();
           },
-          onNoContent: function() {
+          onNoContent: function () {
             window.context.noContentAvailable();
           },
         },
@@ -51,11 +51,11 @@ export function relap(global, data) {
 
     loadScript(global, 'https://relap.io/v7/relap.js');
   } else {
-    window.relapV6WidgetReady = function() {
+    window.relapV6WidgetReady = function () {
       window.context.renderStart();
     };
 
-    window.relapV6WidgetNoSimilarPages = function() {
+    window.relapV6WidgetNoSimilarPages = function () {
       window.context.noContentAvailable();
     };
 

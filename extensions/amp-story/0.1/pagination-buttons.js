@@ -103,7 +103,7 @@ class PaginationButton {
 
     this.element.classList.add(initialState.className);
 
-    this.element.addEventListener('click', e => this.onClick_(e));
+    this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;

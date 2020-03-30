@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-reach-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -53,7 +53,7 @@ describes.realWin(
     it('renders', () => {
       return getReach({
         'data-embed-id': 'default',
-      }).then(reach => {
+      }).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -69,7 +69,7 @@ describes.realWin(
           'data-embed-id': 'default',
         },
         true
-      ).then(reach => {
+      ).then((reach) => {
         const iframe = reach.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);

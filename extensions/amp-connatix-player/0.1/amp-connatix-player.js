@@ -66,7 +66,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @private
    */
   bindToPlayerCommands_() {
-    this.win.addEventListener('message', e => {
+    this.win.addEventListener('message', (e) => {
       if (!this.iframe_ || e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
@@ -166,6 +166,6 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-connatix-player', '0.1', AMP => {
+AMP.extension('amp-connatix-player', '0.1', (AMP) => {
   AMP.registerElement('amp-connatix-player', AmpConnatixPlayer);
 });

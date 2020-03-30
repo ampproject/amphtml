@@ -24,7 +24,7 @@ const {resolve, dirname} = require('path');
 let shouldResolveDevelopmentMode = true;
 
 // This plugin is not executed when AMP is building resources in isForTesting mode.
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   let getModeFound = false;
   return {
     pre() {
@@ -39,7 +39,7 @@ module.exports = function({types: t}) {
         if (!source.value.endsWith('/mode')) {
           return;
         }
-        specifiers.forEach(specifier => {
+        specifiers.forEach((specifier) => {
           if (specifier.imported && specifier.imported.name === 'getMode') {
             const filepath = resolve(
               dirname(state.file.opts.filename),

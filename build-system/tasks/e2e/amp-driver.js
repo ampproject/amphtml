@@ -45,7 +45,7 @@ const EnvironmentBehaviorMap = {
     ready(controller) {
       return controller
         .findElement('#AMP_DOC_dynamic[data-loaded]')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -90,7 +90,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('amp-ad > iframe')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -102,7 +102,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -114,7 +114,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -126,7 +126,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -156,7 +156,7 @@ class AmpDriver {
   async toggleExperiment(name, toggle) {
     await this.controller_.evaluate(
       (name, toggle) => {
-        (window.AMP = window.AMP || []).push(AMP => {
+        (window.AMP = window.AMP || []).push((AMP) => {
           AMP.toggleExperiment(name, toggle);
         });
       },

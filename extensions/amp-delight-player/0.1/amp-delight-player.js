@@ -167,7 +167,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     iframe.setAttribute('allow', 'vr');
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleDelightMessage_(event);
     });
 
@@ -357,7 +357,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   sendCommand_(type, payload = {}) {
-    this.playerReadyPromise_.then(iframe => {
+    this.playerReadyPromise_.then((iframe) => {
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow./*OK*/ postMessage(
           JSON.stringify(/** @type {JsonObject} */ ({type, payload})),
@@ -406,7 +406,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         orientation,
       });
     };
-    const dispatchDeviceOrientationEvents = event => {
+    const dispatchDeviceOrientationEvents = (event) => {
       this.sendCommand_(DelightEvent.WINDOW_DEVICEORIENTATION, {
         alpha: event.alpha,
         beta: event.beta,
@@ -415,7 +415,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         timeStamp: event.timeStamp,
       });
     };
-    const dispatchDeviceMotionEvents = event => {
+    const dispatchDeviceMotionEvents = (event) => {
       this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, {
         acceleration: {
           x: event.acceleration.x,
@@ -589,6 +589,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDelightPlayer, CSS);
 });

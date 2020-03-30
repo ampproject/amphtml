@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-describe.skip('alt nameframe', function() {
+describe.skip('alt nameframe', function () {
   describes.sandboxed('alt nameframe', {}, () => {
-    describes.realWin('nameframe', {allowExternalResources: true}, env => {
+    describes.realWin('nameframe', {allowExternalResources: true}, (env) => {
       let fixture;
       let win;
       let doc;
@@ -42,8 +42,8 @@ describe.skip('alt nameframe', function() {
                     </html>`,
         });
         doc.body.appendChild(iframe);
-        return new Promise(resolve => {
-          win.addEventListener('message', content => {
+        return new Promise((resolve) => {
+          win.addEventListener('message', (content) => {
             messageContent = content;
             resolve();
           });
@@ -52,19 +52,19 @@ describe.skip('alt nameframe', function() {
         });
       });
 
-      it('should fail if JSON is not paresable', done => {
+      it('should fail if JSON is not paresable', (done) => {
         iframe.name = 'not valid JSON';
         expectNoContent(win, done);
         doc.body.appendChild(iframe);
       });
 
-      it('should fail if JSON is valid, but missing creative field', done => {
+      it('should fail if JSON is valid, but missing creative field', (done) => {
         iframe.name = JSON.stringify({fnord: 'some meaningless data'});
         expectNoContent(win, done);
         doc.body.appendChild(iframe);
       });
 
-      it('should fail if JSON is missing altogether', done => {
+      it('should fail if JSON is missing altogether', (done) => {
         iframe.name = null;
         expectNoContent(win, done);
         doc.body.appendChild(iframe);
@@ -74,7 +74,7 @@ describe.skip('alt nameframe', function() {
 });
 
 function expectNoContent(win, done) {
-  win.addEventListener('message', content => {
+  win.addEventListener('message', (content) => {
     expect(content.data).to.have.property('type');
     expect(content.data.type).to.equal('no-content');
     done();

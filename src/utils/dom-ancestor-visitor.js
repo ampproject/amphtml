@@ -56,7 +56,7 @@ export class DomAncestorVisitor {
    * @private
    */
   getActiveVisitors_() {
-    return this.visitors_.filter(visitor => !visitor.complete);
+    return this.visitors_.filter((visitor) => !visitor.complete);
   }
 
   /**
@@ -78,12 +78,12 @@ export class DomAncestorVisitor {
     let visitors = [];
     while (el && (visitors = this.getActiveVisitors_()).length) {
       const style = computedStyle(this.win_, el);
-      visitors.forEach(visitor =>
+      visitors.forEach((visitor) =>
         visitor.callback(dev().assertElement(el), style)
       );
       el = el.parentElement;
     }
-    this.visitors_.forEach(visitor => (visitor.complete = true));
+    this.visitors_.forEach((visitor) => (visitor.complete = true));
   }
 }
 

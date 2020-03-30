@@ -31,7 +31,7 @@ export function bringhub(global, data) {
   writeScript(
     global,
     `https://static.bh-cdn.com/msf/amp-loader.js?v=${Date.now()}`,
-    function() {
+    function () {
       loadScript(
         global,
         `https://static.bh-cdn.com/msf/amp-widget.js?v=${global._bringhub.hash}`

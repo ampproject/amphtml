@@ -159,7 +159,7 @@ export class LoginDoneDialog {
       // target can be '*'.
       const target = '*';
 
-      unlisten = listen(this.win, 'message', e => {
+      unlisten = listen(this.win, 'message', (e) => {
         if (!e.data || e.data.sentinel != 'amp') {
           return;
         }
@@ -184,7 +184,7 @@ export class LoginDoneDialog {
       () => {
         unlisten();
       },
-      error => {
+      (error) => {
         unlisten();
         throw error;
       }

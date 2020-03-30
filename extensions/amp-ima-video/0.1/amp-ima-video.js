@@ -106,7 +106,7 @@ class AmpImaVideo extends AMP.BaseElement {
     );
     if (childElements.length > 0) {
       const children = [];
-      childElements.forEach(child => {
+      childElements.forEach((child) => {
         // Save the first source and first track to preconnect.
         if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
           this.preconnectSource_ = child.src;
@@ -171,7 +171,7 @@ class AmpImaVideo extends AMP.BaseElement {
     const consentPromise = consentPolicyId
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
-    return consentPromise.then(initialConsentState => {
+    return consentPromise.then((initialConsentState) => {
       const iframe = getIframe(
         win,
         element,
@@ -192,7 +192,7 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_ = deferred.promise;
       this.playerReadyResolver_ = deferred.resolve;
 
-      this.unlistenMessage_ = listen(this.win, 'message', e =>
+      this.unlistenMessage_ = listen(this.win, 'message', (e) =>
         this.handlePlayerMessage_(/** @type {!Event} */ (e))
       );
 
@@ -397,6 +397,6 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpImaVideo);
 });

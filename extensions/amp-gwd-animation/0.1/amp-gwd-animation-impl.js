@@ -302,7 +302,7 @@ export class AmpGwdRuntimeService {
     // Reset other animation state on the page and all descendants.
     [pageEl]
       .concat(toArray(pageEl.querySelectorAll('*')))
-      .forEach(el => this.resetAnimatedElement_(el));
+      .forEach((el) => this.resetAnimatedElement_(el));
   }
 
   /**

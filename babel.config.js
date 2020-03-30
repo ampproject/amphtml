@@ -33,7 +33,7 @@ const isClosureCompiler =
   argv._.includes('dist') || argv._.includes('check-types');
 const {esm} = argv;
 
-const targets = esm => {
+const targets = (esm) => {
   if (esm) {
     return {'esmodules': true};
   }
@@ -45,7 +45,7 @@ const targets = esm => {
   return {'browsers': ['Last 2 versions']};
 };
 
-const plugins = esm => {
+const plugins = (esm) => {
   const leadingComments =
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments';
   const reactConstantElements =
@@ -77,7 +77,7 @@ const plugins = esm => {
   ];
 };
 
-const presets = esm => {
+const presets = (esm) => {
   if (esm) {
     return [
       [
@@ -104,7 +104,7 @@ const presets = esm => {
 };
 
 // eslint-disable-next-line local/no-module-exports
-module.exports = function(api) {
+module.exports = function (api) {
   api.cache(true);
   // Closure Compiler builds do not use any of the default settings below until its
   // an esm build. (Both Multipass and Singlepass)

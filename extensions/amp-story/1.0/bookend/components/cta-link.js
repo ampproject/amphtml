@@ -60,7 +60,7 @@ export class CtaLinkComponent {
         'inside it.'
     );
 
-    links.forEach(ctaLink => {
+    links.forEach((ctaLink) => {
       userAssert(
         'text' in ctaLink && 'url' in ctaLink,
         'Links in CTA link component must contain `text` field and a `url`.'
@@ -100,7 +100,7 @@ export class CtaLinkComponent {
         <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText"></div>
       </a>
     `;
-    ctaLinksData['links'].forEach(currentLink => {
+    ctaLinksData['links'].forEach((currentLink) => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(
         el,

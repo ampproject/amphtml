@@ -93,7 +93,7 @@ function checkFlags(name, taskFunc) {
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
-  usedFlags.forEach(flag => {
+  usedFlags.forEach((flag) => {
     if (!validFlags.includes(flag)) {
       invalidFlags.push(`--${flag}`);
     }
@@ -108,7 +108,7 @@ function checkFlags(name, taskFunc) {
     log('For detailed usage information, run', cyan('gulp help') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
-      validFlags.forEach(key => {
+      validFlags.forEach((key) => {
         log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
       });
     }

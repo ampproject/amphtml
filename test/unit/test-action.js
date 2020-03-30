@@ -659,7 +659,7 @@ describes.sandboxed('Action hasAction', {}, () => {
   });
 });
 
-describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
+describes.fakeWin('Action hasResolvableAction', {amp: true}, (env) => {
   let action;
   let html;
 
@@ -668,27 +668,17 @@ describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
     action = new ActionService(env.ampdoc, env.win.document);
 
     // Insert element for valid actions to be resolved.
-    env.win.document.body.appendChild(
-      html`
-        <div id="valid-target"></div>
-      `
-    );
+    env.win.document.body.appendChild(html` <div id="valid-target"></div> `);
   });
 
   it('returns true if the target element exists (single)', () => {
-    const element = html`
-      <div on="event1: valid-target"></div>
-    `;
+    const element = html` <div on="event1: valid-target"></div> `;
     expect(action.hasResolvableAction(element, 'event1')).to.equal(true);
   });
 
   it('returns true if the target element exists (action up the tree)', () => {
-    const wrapper = html`
-      <div on="event1: valid-target"></div>
-    `;
-    const child = html`
-      <div></div>
-    `;
+    const wrapper = html` <div on="event1: valid-target"></div> `;
+    const child = html` <div></div> `;
     wrapper.appendChild(child);
     expect(action.hasResolvableAction(child, 'event1')).to.equal(true);
   });
@@ -701,9 +691,7 @@ describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
   });
 
   it('returns false if the target element does not exist (one)', () => {
-    const element = html`
-      <div on="event1: i-do-not-exist"></div>
-    `;
+    const element = html` <div on="event1: i-do-not-exist"></div> `;
     expect(action.hasResolvableAction(element, 'event1')).to.equal(false);
   });
 
@@ -715,14 +703,12 @@ describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
   });
 
   it('returns false if target element does not have the target action', () => {
-    const element = html`
-      <div on="event1: valid-target"></div>
-    `;
+    const element = html` <div on="event1: valid-target"></div> `;
     expect(action.hasResolvableAction(element, 'event2')).to.equal(false);
   });
 });
 
-describes.sandboxed('Action method', {}, env => {
+describes.sandboxed('Action method', {}, (env) => {
   let action;
   let getDefaultActionAlias;
   let id;
@@ -906,7 +892,7 @@ describes.sandboxed('Action method', {}, env => {
   });
 });
 
-describes.sandboxed('installActionHandler', {}, env => {
+describes.sandboxed('installActionHandler', {}, (env) => {
   let action;
 
   beforeEach(() => {
@@ -962,7 +948,7 @@ describes.sandboxed('installActionHandler', {}, env => {
   });
 });
 
-describes.sandboxed('Multiple handlers action method', {}, env => {
+describes.sandboxed('Multiple handlers action method', {}, (env) => {
   let action;
   let getDefaultActionAlias;
   let onEnqueue1, onEnqueue2;
@@ -1013,14 +999,14 @@ describes.sandboxed('Multiple handlers action method', {}, env => {
 
   it('should chain asynchronous actions', () => {
     let resolveAbc;
-    const promiseAbc = new Promise(resolve => {
+    const promiseAbc = new Promise((resolve) => {
       resolveAbc = resolve;
     });
     const abc = env.sandbox.stub().returns(promiseAbc);
     action.addGlobalTarget('ABC', abc);
 
     let resolveXyz;
-    const promiseXyz = new Promise(resolve => {
+    const promiseXyz = new Promise((resolve) => {
       resolveXyz = resolve;
     });
     const xyz = env.sandbox.stub().returns(promiseXyz);
@@ -1042,7 +1028,7 @@ describes.sandboxed('Multiple handlers action method', {}, env => {
 
     // Invocation of chained actions are branched on promiseAbc/promiseXyz,
     // so wait for macro-task to ensure all queued promises are resolved.
-    const macroTask = () => new Promise(resolve => setTimeout(resolve, 0));
+    const macroTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     resolveAbc();
     return macroTask()
@@ -1064,7 +1050,7 @@ describes.sandboxed('Multiple handlers action method', {}, env => {
   });
 });
 
-describes.sandboxed('Action interceptor', {}, env => {
+describes.sandboxed('Action interceptor', {}, (env) => {
   let clock;
   let action;
   let target;
@@ -1200,7 +1186,7 @@ describes.sandboxed('Action interceptor', {}, env => {
   });
 });
 
-describes.sandboxed('Action common handler', {}, env => {
+describes.sandboxed('Action common handler', {}, (env) => {
   let action;
   let target;
 
@@ -1209,7 +1195,7 @@ describes.sandboxed('Action common handler', {}, env => {
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
-    action.vsync_ = {mutate: callback => callback()};
+    action.vsync_ = {mutate: (callback) => callback()};
   });
 
   it('should execute actions registered', () => {
@@ -1283,7 +1269,7 @@ describes.sandboxed('Action common handler', {}, env => {
   });
 });
 
-describes.sandboxed('Action global target', {}, env => {
+describes.sandboxed('Action global target', {}, (env) => {
   let action;
 
   beforeEach(() => {
@@ -1341,7 +1327,7 @@ describes.sandboxed('Action global target', {}, env => {
   });
 });
 
-describes.fakeWin('Core events', {amp: true}, env => {
+describes.fakeWin('Core events', {amp: true}, (env) => {
   let window;
   let document;
   let action;
@@ -1365,7 +1351,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         }
       });
     });
-    action.vsync_ = {mutate: callback => callback()};
+    action.vsync_ = {mutate: (callback) => callback()};
   });
 
   it('should trigger tap event on click', () => {
@@ -1504,7 +1490,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       element,
       'change',
       env.sandbox.match(
-        object => object.detail.checked && object.detail.value == 'foo'
+        (object) => object.detail.checked && object.detail.value == 'foo'
       )
     );
   });
@@ -1521,7 +1507,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      env.sandbox.match(e => {
+      env.sandbox.match((e) => {
         const {min, max, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
@@ -1540,7 +1526,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      env.sandbox.match(e => e.detail.value == 'foo')
+      env.sandbox.match((e) => e.detail.value == 'foo')
     );
   });
 
@@ -1557,7 +1543,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      env.sandbox.match(object => {
+      env.sandbox.match((object) => {
         const {detail} = object;
         return detail.value == 'qux';
       })
@@ -1574,7 +1560,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      env.sandbox.match(object => {
+      env.sandbox.match((object) => {
         const {detail} = object;
         return detail.value == 'foo';
       })
@@ -1596,7 +1582,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
         element,
         'input-debounced',
-        env.sandbox.match(event => {
+        env.sandbox.match((event) => {
           const {value} = event.target;
           return value == 'foo bar baz';
         })
@@ -1619,7 +1605,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
         element,
         'input-throttled',
-        env.sandbox.match(event => {
+        env.sandbox.match((event) => {
           const {value} = event.target;
           return value == 'foo bar baz';
         })
@@ -1639,7 +1625,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       }
     });
 
-    it('should replace functions with throws', function*() {
+    it('should replace functions with throws', function* () {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
       const deferredEvent = new DeferredEvent(event);
       const errorText = 'cannot access native event functions';
@@ -1672,7 +1658,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let action;
     let target;
     let spy;

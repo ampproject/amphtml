@@ -149,7 +149,7 @@ export class Messenger {
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
     let resolver = null;
-    const promise = new Promise(resolve => {
+    const promise = new Promise((resolve) => {
       resolver = resolve;
     });
     this.waiting_[rsvpId] = {
@@ -217,12 +217,12 @@ export class Messenger {
     const result = this.handleCommand_(rsvpId, cmd, payload);
     if (rsvp) {
       Promise.resolve(result).then(
-        result => {
+        (result) => {
           this.sendCommand_(rsvpId, 'rsvp', {
             'result': result,
           });
         },
-        reason => {
+        (reason) => {
           this.sendCommand_(rsvpId, 'rsvp', {
             'error': String(reason),
           });

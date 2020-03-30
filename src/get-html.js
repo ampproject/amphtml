@@ -76,7 +76,7 @@ export function getHtml(win, selector, attrs) {
  */
 function appendToResult(node, attrs, result) {
   const stack = [node];
-  const allowedAttrs = attrs.filter(attr => {
+  const allowedAttrs = attrs.filter((attr) => {
     return allowedAttributes.includes(attr);
   });
 
@@ -122,7 +122,7 @@ function isApplicableNode(node) {
 function appendOpenTag(node, attrs, result) {
   result.push(`<${node.tagName.toLowerCase()}`);
 
-  attrs.forEach(function(attr) {
+  attrs.forEach(function (attr) {
     if (node.hasAttribute(attr)) {
       result.push(` ${attr}="${node.getAttribute(attr)}"`);
     }

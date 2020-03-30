@@ -23,7 +23,7 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
-describes.realWin('BaseElement', {amp: true}, env => {
+describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;
   let customElement;
   let element;
@@ -163,7 +163,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.executeAction(
       {
         method: 'foo',
-        satisfiesTrust: t => t == minTrust,
+        satisfiesTrust: (t) => t == minTrust,
       },
       null,
       false

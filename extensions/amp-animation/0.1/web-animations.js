@@ -192,7 +192,7 @@ export class Builder {
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
   createRunner(spec, opt_args, opt_positionObserverData = null) {
-    return this.resolveRequests([], spec, opt_args).then(requests => {
+    return this.resolveRequests([], spec, opt_args).then((requests) => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
@@ -409,7 +409,7 @@ export class MeasureScanner extends Scanner {
       animationElement.tagName == 'AMP-ANIMATION',
       `Element is not an animation: "${spec.animation}"`
     );
-    const otherSpecPromise = animationElement.getImpl().then(impl => {
+    const otherSpecPromise = animationElement.getImpl().then((impl) => {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
@@ -420,7 +420,7 @@ export class MeasureScanner extends Scanner {
         timing_: timing,
       } = this;
       const promise = otherSpecPromise
-        .then(otherSpec => {
+        .then((otherSpec) => {
           if (!otherSpec) {
             return;
           }
@@ -434,8 +434,8 @@ export class MeasureScanner extends Scanner {
             timing
           );
         })
-        .then(requests => {
-          requests.forEach(request => this.requests_.push(request));
+        .then((requests) => {
+          requests.forEach((request) => this.requests_.push(request));
         });
       this.deps_.push(promise);
     });
@@ -494,7 +494,7 @@ export class MeasureScanner extends Scanner {
           const toValue = isArray(value) ? value[0] : value;
           preparedValue = [fromValue, this.css_.resolveCss(toValue)];
         } else {
-          preparedValue = value.map(v => this.css_.resolveCss(v));
+          preparedValue = value.map((v) => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
         if (prop in ADD_PROPS) {
@@ -642,7 +642,7 @@ export class MeasureScanner extends Scanner {
     } else if (this.target_) {
       targets = [this.target_];
     }
-    targets.forEach(target => this.builder_.requireLayout(target));
+    targets.forEach((target) => this.builder_.requireLayout(target));
     return targets;
   }
 
@@ -657,7 +657,7 @@ export class MeasureScanner extends Scanner {
       return spec;
     }
     const result = map(spec);
-    spec.subtargets.forEach(subtargetSpec => {
+    spec.subtargets.forEach((subtargetSpec) => {
       const matcher = this.getMatcher_(subtargetSpec);
       if (matcher(target, index)) {
         Object.assign(result, subtargetSpec);
@@ -688,7 +688,7 @@ export class MeasureScanner extends Scanner {
     } else {
       // Match by selector, e.g. `:nth-child(2n+1)`.
       const specSelector = /** @type {string} */ (spec.selector);
-      matcher = target => {
+      matcher = (target) => {
         try {
           return matches(target, specSelector);
         } catch (e) {

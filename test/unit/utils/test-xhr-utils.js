@@ -24,7 +24,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 
-describes.sandboxed('utils/xhr-utils', {}, env => {
+describes.sandboxed('utils/xhr-utils', {}, (env) => {
   describe('setupAMPCors', () => {
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
@@ -104,7 +104,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       init = {};
       input = 'https://sample.com';
       viewer = {
-        hasCapability: unusedParam => true,
+        hasCapability: (unusedParam) => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: env.sandbox
           .stub()
@@ -131,7 +131,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should not intercept if viewer can not intercept', async () => {
-      viewer.hasCapability = unusedParam => false;
+      viewer.hasCapability = (unusedParam) => false;
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
@@ -214,7 +214,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
   describe('getViewerAuthTokenIfAvailable', () => {
     it('should return undefined if crossorigin attr is not present', () => {
       const el = document.createElement('html');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
+      return getViewerAuthTokenIfAvailable(el).then((token) => {
         expect(token).to.equal(undefined);
       });
     });
@@ -225,7 +225,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       () => {
         const el = document.createElement('html');
         el.setAttribute('crossorigin', '');
-        return getViewerAuthTokenIfAvailable(el).then(token => {
+        return getViewerAuthTokenIfAvailable(el).then((token) => {
           expect(token).to.be.undefined;
         });
       }
@@ -239,7 +239,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
       const el = document.createElement('html');
       el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
+      return getViewerAuthTokenIfAvailable(el).then((token) => {
         expect(token).to.equal('idToken');
       });
     });
@@ -252,7 +252,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
       const el = document.createElement('html');
       el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
+      return getViewerAuthTokenIfAvailable(el).then((token) => {
         expect(token).to.equal('');
       });
     });
@@ -268,7 +268,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         );
         const el = document.createElement('html');
         el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-        return getViewerAuthTokenIfAvailable(el).then(token => {
+        return getViewerAuthTokenIfAvailable(el).then((token) => {
           expect(token).to.equal('');
         });
       }
@@ -287,7 +287,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
       return getViewerAuthTokenIfAvailable(el).then(
         undefined,
-        e => expect(e).to.not.be.undefined
+        (e) => expect(e).to.not.be.undefined
       );
     });
   });

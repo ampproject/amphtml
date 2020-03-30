@@ -41,7 +41,7 @@ async function prCheck(cb) {
     cb(err);
   };
 
-  const runCheck = cmd => {
+  const runCheck = (cmd) => {
     const {status} = timedExec(cmd, FILENAME);
     if (status != 0) {
       failTask();

@@ -59,7 +59,7 @@ const evaluators_ = [];
 self.addEventListener('unhandledrejection', errorHandler_);
 self.addEventListener('error', errorHandler_);
 
-self.addEventListener('message', function(event) {
+self.addEventListener('message', function (event) {
   const {
     method,
     args,
@@ -146,7 +146,7 @@ function report_(e) {
       // We don't care about the response.
       mode: 'no-cors',
     })
-  ).catch(reason => {
+  ).catch((reason) => {
     console./*OK*/ error(reason);
   });
 }

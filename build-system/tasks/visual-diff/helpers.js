@@ -42,7 +42,7 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * @return {string}
  */
 function escapeHtml(html) {
-  return html.replace(HTML_ESCAPE_REGEX, c => HTML_ESCAPE_CHARS[c]);
+  return html.replace(HTML_ESCAPE_REGEX, (c) => HTML_ESCAPE_CHARS[c]);
 }
 
 /**
@@ -91,7 +91,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {hidden: true})
       )
     );
@@ -121,7 +121,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector => waitForSelectorExistence(page, selector))
+      selectors.map((selector) => waitForSelectorExistence(page, selector))
     );
   } catch (e) {
     throw new Error(
@@ -137,7 +137,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {visible: true})
       )
     );
@@ -227,7 +227,7 @@ async function waitForElementVisibility(page, selector, options) {
     // to check equality to both waitForVisible and waitForHidden.
     if (
       elementsAreVisible.every(
-        elementIsVisible => elementIsVisible == waitForVisible
+        (elementIsVisible) => elementIsVisible == waitForVisible
       )
     ) {
       return true;

@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStoryCtaLayer;
 

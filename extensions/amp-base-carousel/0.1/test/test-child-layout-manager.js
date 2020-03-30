@@ -23,7 +23,7 @@ import {setInitialDisplay, setStyles} from '../../../../src/style';
  *    rendered.
  */
 function afterRenderPromise() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     requestAnimationFrame(() => {
       setTimeout(resolve);
     });
@@ -37,10 +37,10 @@ function afterRenderPromise() {
  *    become visibile within the root.
  */
 function whenVisiblePromise(el, root) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const io = new IntersectionObserver(
-      entries => {
-        if (entries.some(entry => entry.isIntersecting)) {
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
           resolve();
         }
       },
@@ -68,7 +68,7 @@ async function afterScrollAndIntersectingPromise(el, root) {
   await afterRenderPromise();
 }
 
-describes.realWin('child layout manager', {}, env => {
+describes.realWin('child layout manager', {}, (env) => {
   let win;
   let doc;
   let container;

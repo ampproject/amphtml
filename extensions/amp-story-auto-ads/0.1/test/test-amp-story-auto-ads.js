@@ -45,7 +45,7 @@ describes.realWin(
       extensions: ['amp-story:1.0', 'amp-story-auto-ads'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let adElement;
@@ -60,7 +60,7 @@ describes.realWin(
       doc = win.document;
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };

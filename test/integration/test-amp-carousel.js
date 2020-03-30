@@ -16,12 +16,9 @@
 
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+const t = describe.configure().ifChrome().skipSinglePass(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
 
-t.run('amp-carousel', function() {
+t.run('amp-carousel', function () {
   this.timeout(10000);
   let document;
 
@@ -46,7 +43,7 @@ t.run('amp-carousel', function() {
       body: carouselSingleImage,
       extensions,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();
@@ -106,7 +103,7 @@ t.run('amp-carousel', function() {
       body: carouselMultipleImages,
       extensions,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();
@@ -212,7 +209,7 @@ t.run('amp-carousel', function() {
       body: slidesSingleImage,
       extensions,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();
@@ -272,7 +269,7 @@ t.run('amp-carousel', function() {
       body: slidesMultipleImages,
       extensions,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();
@@ -359,7 +356,7 @@ t.run('amp-carousel', function() {
       body: slidesMultipleImagesControlsLoop,
       extensions,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         document = env.win.document;
         return waitForCarouselLayout();

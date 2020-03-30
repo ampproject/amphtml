@@ -15,12 +15,14 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     Program(node) {
       const {comments} = node;
 
-      const comment = comments.find(c => c.value.includes('SPLIT_SINGLE_PASS'));
+      const comment = comments.find((c) =>
+        c.value.includes('SPLIT_SINGLE_PASS')
+      );
       if (!comment) {
         return;
       }

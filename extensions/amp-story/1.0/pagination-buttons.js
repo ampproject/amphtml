@@ -109,7 +109,7 @@ class PaginationButton {
 
     this.element.classList.add(initialState.className);
 
-    this.element.addEventListener('click', e => this.onClick_(e));
+    this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
@@ -240,13 +240,13 @@ export class PaginationButtons {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      pageIndex => {
+      (pageIndex) => {
         this.onCurrentPageIndexUpdate_(pageIndex);
       }
     );
@@ -268,7 +268,7 @@ export class PaginationButtons {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
@@ -313,7 +313,7 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.hasBookend_().then(hasBookend => {
+      this.hasBookend_().then((hasBookend) => {
         if (!hasBookend) {
           this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
         }

@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amphtml-ads/amp-ad-exit.amp.html',
     environments: 'amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -30,7 +30,7 @@ describes.endtoend(
 
     // Setting the time explicitly to avoid test flakiness.
     async function setTime(epochTime) {
-      await controller.evaluate(time => {
+      await controller.evaluate((time) => {
         window.Date = {
           now: () => time,
         };

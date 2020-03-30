@@ -226,7 +226,7 @@ export class ChildLayoutManager {
     const {win} = this.ampElement_;
 
     this.nearingViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processNearingChanges_(entries),
+      (entries) => this.processNearingChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: `${this.nearbyMarginInPercent_}%`,
@@ -235,7 +235,7 @@ export class ChildLayoutManager {
     );
 
     this.backingAwayViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processBackingAwayChanges_(entries),
+      (entries) => this.processBackingAwayChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: `${this.nearbyMarginInPercent_ + UNLAYOUT_MARGIN}%`,
@@ -244,7 +244,7 @@ export class ChildLayoutManager {
     );
 
     this.inViewportObserver_ = new win.IntersectionObserver(
-      entries => this.processInViewportChanges_(entries),
+      (entries) => this.processInViewportChanges_(entries),
       {
         root: this.intersectionElement_,
         rootMargin: NO_INTERSECTION_MARGIN,
@@ -260,11 +260,11 @@ export class ChildLayoutManager {
    */
   processNearingChanges_(entries) {
     entries
-      .filter(entry => {
+      .filter((entry) => {
         const {isIntersecting} = entry;
         return isIntersecting;
       })
-      .forEach(entry => {
+      .forEach((entry) => {
         const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
@@ -281,11 +281,11 @@ export class ChildLayoutManager {
    */
   processBackingAwayChanges_(entries) {
     entries
-      .filter(entry => {
+      .filter((entry) => {
         const {isIntersecting} = entry;
         return !isIntersecting;
       })
-      .forEach(entry => {
+      .forEach((entry) => {
         const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
@@ -301,7 +301,7 @@ export class ChildLayoutManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   processInViewportChanges_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const {target, isIntersecting} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER

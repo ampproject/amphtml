@@ -30,7 +30,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

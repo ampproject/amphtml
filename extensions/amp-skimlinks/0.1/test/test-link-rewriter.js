@@ -31,7 +31,7 @@ const CLICK_EVENT = {
   type: 'click',
 };
 
-describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
+describes.fakeWin('LinkRewriterManager', {amp: true}, (env) => {
   let rootDocument, linkRewriterManager, win;
   let sendEventHelper, registerLinkRewriterHelper, addPriorityMetaTagHelper;
 
@@ -49,7 +49,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
     linkRewriterManager = new LinkRewriterManager(env.ampdoc);
 
     // Helper functions
-    registerLinkRewriterHelper = vendorName => {
+    registerLinkRewriterHelper = (vendorName) => {
       const linkRewriter = linkRewriterManager.registerLinkRewriter(
         vendorName,
         env.sandbox.stub(),
@@ -65,7 +65,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       rootDocument.dispatchEvent(event);
     };
 
-    addPriorityMetaTagHelper = priorityRule => {
+    addPriorityMetaTagHelper = (priorityRule) => {
       env.sandbox
         .stub(env.ampdoc, 'getMetaByName')
         .withArgs(PRIORITY_META_TAG_NAME)
@@ -433,7 +433,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
   });
 });
 
-describes.fakeWin('Link Rewriter', {amp: true}, env => {
+describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
   let rootDocument;
   let createResolveResponseHelper, createLinkRewriterHelper;
 
@@ -757,7 +757,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       expect(anchor1.getAttribute(ORIGINAL_URL_ATTRIBUTE)).to.equal(initialUrl);
     });
 
-    it('Should restore the original link after the delay', done => {
+    it('Should restore the original link after the delay', (done) => {
       const replacementUrl = 'https://replacementurl.com/';
       linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
       linkRewriter.anchorReplacementCache_.updateReplacementUrls([
@@ -774,7 +774,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
   });
 });
 
-describes.fakeWin('LinkReplacementCache', {amp: true}, env => {
+describes.fakeWin('LinkReplacementCache', {amp: true}, (env) => {
   let rootDocument, cache, anchor1, anchor2, anchor3;
 
   beforeEach(() => {

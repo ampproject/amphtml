@@ -54,7 +54,7 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   SUPPORTED_CSS_GRID_ATTRIBUTES
 )
-  .map(key => `[${key}]`)
+  .map((key) => `[${key}]`)
   .join(',');
 
 /**
@@ -134,7 +134,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
+    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
       this.setCssGridStyles_(element);
     });
   }

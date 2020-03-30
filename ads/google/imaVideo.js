@@ -440,7 +440,7 @@ export function imaVideo(global, data) {
   }
   if (data.childElements) {
     const children = JSON.parse(data.childElements);
-    children.forEach(child => {
+    children.forEach((child) => {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
@@ -510,7 +510,7 @@ export function imaVideo(global, data) {
     'mozfullscreenchange',
     'webkitfullscreenchange',
   ];
-  fullScreenEvents.forEach(fsEvent => {
+  fullScreenEvents.forEach((fsEvent) => {
     global.document.addEventListener(
       fsEvent,
       onFullscreenChange.bind(null, global),
@@ -1328,7 +1328,7 @@ export function showAdControls() {
   const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
   const miniControls = hasMobileStyles && isSkippable;
   // hide non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach(button => {
+  [timeDiv, progressBarWrapperDiv].forEach((button) => {
     setStyle(button, 'display', 'none');
   });
   // set ad control styles
@@ -1337,7 +1337,7 @@ export function showAdControls() {
     'justify-content': 'flex-end',
     'padding': '10px',
   });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
     setStyles(button, {'height': miniControls ? '18px' : '22px'});
   });
   setStyles(muteUnmuteDiv, {'margin-right': '10px'});
@@ -1362,12 +1362,12 @@ export function resetControlsAfterAd() {
     'height': '100px',
     'padding': '60px 10px 10px',
   });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
     setStyles(button, {'height': '30px'});
   });
   setStyles(muteUnmuteDiv, {'margin-right': '20px'});
   // show non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach(button => {
+  [timeDiv, progressBarWrapperDiv].forEach((button) => {
     setStyle(button, 'display', 'block');
   });
 }

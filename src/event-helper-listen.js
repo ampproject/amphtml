@@ -53,7 +53,7 @@ export function internalListenImplementation(
    */
   let wrapped;
 
-  wrapped = event => {
+  wrapped = (event) => {
     try {
       return localListener(event);
     } catch (e) {

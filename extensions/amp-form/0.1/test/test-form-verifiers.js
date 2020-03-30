@@ -20,7 +20,7 @@ import {
   getFormVerifier,
 } from '../form-verifiers';
 
-describes.fakeWin('amp-form async verification', {}, env => {
+describes.fakeWin('amp-form async verification', {}, (env) => {
   function stubValidationMessage(input) {
     env.sandbox.defineProperty(input, 'validationMessage', {
       get() {

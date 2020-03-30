@@ -37,11 +37,11 @@ function measureCLS() {
     return;
   }
   cumulativeLayoutShift = 0;
-  const layoutShiftObserver = new PerformanceObserver(list =>
+  const layoutShiftObserver = new PerformanceObserver((list) =>
     list
       .getEntries()
-      .filter(entry => !entry.hadRecentInput)
-      .forEach(entry => (cumulativeLayoutShift += entry.value))
+      .filter((entry) => !entry.hadRecentInput)
+      .forEach((entry) => (cumulativeLayoutShift += entry.value))
   );
   layoutShiftObserver.observe({type: 'layout-shift', buffered: true});
 }
@@ -52,7 +52,7 @@ function measureLargestContentfulPaint() {
     return;
   }
   largestContentfulPaint = 0;
-  const largestContentfulPaintObserver = new PerformanceObserver(list => {
+  const largestContentfulPaintObserver = new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const entry = entries[entries.length - 1];
     largestContentfulPaint = entry.renderTime || entry.loadTime;
@@ -69,8 +69,8 @@ function measureLongTasks() {
     return;
   }
   longTasks = [];
-  const longTaskObserver = new PerformanceObserver(list =>
-    list.getEntries().forEach(entry => longTasks.push(entry))
+  const longTaskObserver = new PerformanceObserver((list) =>
+    list.getEntries().forEach((entry) => longTasks.push(entry))
   );
   longTaskObserver.observe({entryTypes: ['longtask']});
 }
@@ -82,7 +82,7 @@ function measureTimeToInteractive() {
 function getMaxFirstInputDelay(firstContentfulPaint) {
   let longest = 0;
 
-  longTasks.forEach(longTask => {
+  longTasks.forEach((longTask) => {
     if (
       longTask.startTime > firstContentfulPaint &&
       longTask.duration > longest
@@ -96,7 +96,7 @@ function getMaxFirstInputDelay(firstContentfulPaint) {
 
 function getMetric(name) {
   const entries = performance.getEntries();
-  const entry = entries.find(entry => entry.name === name);
+  const entry = entries.find((entry) => entry.name === name);
   return entry ? entry.startTime : 0;
 }
 
@@ -109,7 +109,7 @@ measureCLS();
 measureTimeToInteractive();
 measureLargestContentfulPaint();
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // Create a container for the metrics that is CSS-isolated from the host page
   const resultContainer = document.createElement('div');
   const shadow = resultContainer.attachShadow({mode: 'open'});

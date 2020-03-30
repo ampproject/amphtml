@@ -53,7 +53,7 @@ export class ScrollComponent {
     this.HOLDBACK_CLASS = 'amp-access-scroll-holdback';
 
     /** @type {Promise<Window>} */
-    this.window = new Promise(resolve => {
+    this.window = new Promise((resolve) => {
       /** @protected */
       this.setWindow_ = resolve;
     });
@@ -74,7 +74,7 @@ export class ScrollComponent {
       attrs
     );
     if (Array.isArray(children)) {
-      children.forEach(c => e.appendChild(c));
+      children.forEach((c) => e.appendChild(c));
     }
     return e;
   }
@@ -121,7 +121,7 @@ export class ScrollComponent {
   updateHorizontalLayout(updates) {
     let changed = false;
     // only update styles already set in the layout, updates in place
-    Object.keys(this.layout_).forEach(key => {
+    Object.keys(this.layout_).forEach((key) => {
       if (!hasOwn(updates, key)) {
         return;
       }

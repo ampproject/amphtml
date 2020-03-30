@@ -149,7 +149,7 @@ function getLinkRels(doc) {
         continue;
       }
 
-      rels.split(/\s+/).forEach(rel => {
+      rels.split(/\s+/).forEach((rel) => {
         if (filteredLinkRels.indexOf(rel) != -1) {
           return;
         }

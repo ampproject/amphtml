@@ -105,7 +105,7 @@ const classifyRating = (rating = '') => {
  * @private
  * @return {Array<string>}
  */
-const extractKeywordsFromContent = content => {
+const extractKeywordsFromContent = (content) => {
   const keywords = [];
   const contentSplit = content.split(',');
   let keywordsSize = 0;
@@ -133,12 +133,8 @@ const extractKeywordsFromContent = content => {
  * @param {string} url
  * @return {string|undefined}
  */
-const getSearchString = url => {
-  const terms = url
-    .split('?')
-    .pop()
-    .toLowerCase()
-    .split('&');
+const getSearchString = (url) => {
+  const terms = url.split('?').pop().toLowerCase().split('&');
   let matches;
 
   for (let i = 0; i < terms.length; i++) {
@@ -205,7 +201,7 @@ export const classifyPage = (pageInfo, metaElements) => {
   let bitmask =
     classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
-  metaElements.forEach(metaElement => {
+  metaElements.forEach((metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
@@ -292,10 +288,10 @@ export const isProductPage = (doc, metaElements) => {
  * @param {Array} metaElements
  * @return {string} csv containing keywords
  */
-export const getKeywordsString = metaElements => {
+export const getKeywordsString = (metaElements) => {
   const keywords = metaElements
-    .filter(meta => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
-    .map(meta => extractKeywordsFromContent(getDetailsForMeta(meta).content))
+    .filter((meta) => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
+    .map((meta) => extractKeywordsFromContent(getDetailsForMeta(meta).content))
     .reduce((kws, subKeywords) => kws.concat(subKeywords), []);
 
   return keywords.join(',');

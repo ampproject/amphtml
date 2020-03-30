@@ -31,12 +31,12 @@ const TAG = 'amp-story';
  * @param  {!Window} win
  * @return {!AmpStoryStoreService}
  */
-export const getStoreService = win => {
+export const getStoreService = (win) => {
   let service = Services.storyStoreService(win);
 
   if (!service) {
     service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return service;
     });
   }
@@ -488,7 +488,7 @@ export class AmpStoryStoreService {
     this.state_ = actions(this.state_, action, data);
 
     let comparisonFn;
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       comparisonFn = stateComparisonFunctions[key];
       if (
         comparisonFn

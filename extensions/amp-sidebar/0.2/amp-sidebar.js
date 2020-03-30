@@ -131,7 +131,7 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
-      cb => this.mutateElement(cb),
+      (cb) => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
       () => this.dismiss_(true, ActionTrust.HIGH)
     );
@@ -169,7 +169,7 @@ export class AmpSidebar extends AMP.BaseElement {
         const toolbarElements = toArray(
           element.querySelectorAll('nav[toolbar]')
         );
-        toolbarElements.forEach(toolbarElement => {
+        toolbarElements.forEach((toolbarElement) => {
           try {
             this.toolbars_.push(new Toolbar(toolbarElement, this));
           } catch (e) {
@@ -196,7 +196,7 @@ export class AmpSidebar extends AMP.BaseElement {
     // Make sidebar programmatically focusable and focus on `open` for a11y.
     element.tabIndex = -1;
 
-    this.documentElement_.addEventListener('keydown', event => {
+    this.documentElement_.addEventListener('keydown', (event) => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
         // Keypress is high trust.
@@ -218,14 +218,14 @@ export class AmpSidebar extends AMP.BaseElement {
     // readers.
     element.appendChild(this.createScreenReaderCloseButton());
 
-    this.registerDefaultAction(invocation => {
+    this.registerDefaultAction((invocation) => {
       const {trust, caller} = invocation;
       this.open_(trust, caller);
     }, 'open');
-    this.registerAction('close', invocation => {
+    this.registerAction('close', (invocation) => {
       this.close_(invocation.trust);
     });
-    this.registerAction('toggle', invocation => {
+    this.registerAction('toggle', (invocation) => {
       const {trust, caller} = invocation;
       if (this.opened_) {
         this.close_(trust);
@@ -236,7 +236,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     element.addEventListener(
       'click',
-      e => {
+      (e) => {
         const target = closestAncestorElementBySelector(
           dev().assertElement(e.target),
           'A'
@@ -347,7 +347,7 @@ export class AmpSidebar extends AMP.BaseElement {
       .whenReady()
       .then(() => {
         // Check our toolbars for changes
-        this.toolbars_.forEach(toolbar => {
+        this.toolbars_.forEach((toolbar) => {
           toolbar.onLayoutChange();
         });
       });
@@ -484,7 +484,7 @@ export class AmpSidebar extends AMP.BaseElement {
     // TODO(#25080): update history manipulation based on resolution of this issue.
     this.getHistory_()
       .push(() => this.close_(trust))
-      .then(historyId => {
+      .then((historyId) => {
         this.historyId_ = historyId;
       });
 
@@ -553,7 +553,7 @@ export class AmpSidebar extends AMP.BaseElement {
       /* shouldNotPreventDefault */ false,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, e => {
+    gestures.onGesture(SwipeXRecognizer, (e) => {
       const {data} = e;
       this.handleSwipe_(data);
     });
@@ -610,10 +610,8 @@ export class AmpSidebar extends AMP.BaseElement {
         // Click gesture is high trust.
         this.close_(ActionTrust.HIGH);
       });
-      this.getAmpDoc()
-        .getBody()
-        .appendChild(mask);
-      mask.addEventListener('touchmove', e => {
+      this.getAmpDoc().getBody().appendChild(mask);
+      mask.addEventListener('touchmove', (e) => {
         e.preventDefault();
       });
       this.setupGestures_(mask);
@@ -626,7 +624,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   fixIosElasticScrollLeak_() {
-    this.element.addEventListener('scroll', e => {
+    this.element.addEventListener('scroll', (e) => {
       if (this.opened_) {
         if (this.element./*OK*/ scrollTop < 1) {
           this.element./*OK*/ scrollTop = 1;
@@ -688,6 +686,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sidebar', '0.2', AMP => {
+AMP.extension('amp-sidebar', '0.2', (AMP) => {
   AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
 });

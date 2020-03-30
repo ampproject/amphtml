@@ -61,7 +61,7 @@ export class AmpShareTracking extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     if (!this.isExperimentOn_()) {
-      registerServiceBuilder(this.win, 'share-tracking', function() {
+      registerServiceBuilder(this.win, 'share-tracking', function () {
         return Promise.reject(user().createError('%s disabled', TAG));
       });
       userAssert(false, '%s experiment is disabled', TAG);
@@ -73,7 +73,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     const shareTrackingFragments = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_(),
-    ]).then(results => {
+    ]).then((results) => {
       const incomingFragment = results[0];
       const outgoingFragment = results[1];
       dev().fine(TAG, 'incomingFragment: ', incomingFragment);
@@ -87,7 +87,7 @@ export class AmpShareTracking extends AMP.BaseElement {
       }
       return {incomingFragment, outgoingFragment};
     });
-    registerServiceBuilder(this.win, 'share-tracking', function() {
+    registerServiceBuilder(this.win, 'share-tracking', function () {
       return shareTrackingFragments;
     });
   }
@@ -98,7 +98,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getIncomingFragment_() {
-    return this.getOriginalViewerFragment_().then(fragment => {
+    return this.getOriginalViewerFragment_().then((fragment) => {
       // The share tracking fragment should be the first parameter and start
       // with dot in the url fragment
       const match = fragment.match(/^\.([^&]*)/);
@@ -114,7 +114,7 @@ export class AmpShareTracking extends AMP.BaseElement {
   getOriginalViewerFragment_() {
     return this.getHistory_()
       .getFragment()
-      .then(fragment => {
+      .then((fragment) => {
         this.originalViewerFragment_ = fragment;
         return fragment;
       });
@@ -149,9 +149,9 @@ export class AmpShareTracking extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetchJson(vendorUrl, postReq)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(
-        json => {
+        (json) => {
           if (json.fragment) {
             return json.fragment;
           }
@@ -164,7 +164,7 @@ export class AmpShareTracking extends AMP.BaseElement {
           );
           return '';
         },
-        err => {
+        (err) => {
           this.user().error(
             TAG,
             'The request to share-tracking endpoint failed:',
@@ -235,6 +235,6 @@ export class AmpShareTracking extends AMP.BaseElement {
 }
 
 // Install the extension.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerElement(TAG, AmpShareTracking);
 });

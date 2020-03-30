@@ -41,7 +41,7 @@ function createButton(win, classNameOrList, handler) {
   button.setAttribute('role', 'button');
 
   if (isArray(classNameOrList)) {
-    classNameOrList.forEach(className => button.classList.add(className));
+    classNameOrList.forEach((className) => button.classList.add(className));
   } else {
     button.classList.add(/** @type {string} */ (classNameOrList));
   }

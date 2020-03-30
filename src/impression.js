@@ -76,7 +76,7 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win)
     .timeoutPromise(TIMEOUT_VALUE, promise, 'TrackImpressionPromise timeout')
-    .catch(error => {
+    .catch((error) => {
       dev().warn('IMPRESSION', error);
     });
 
@@ -84,9 +84,9 @@ export function maybeTrackImpression(win) {
   const isTrustedViewerPromise = viewer.isTrustedViewer();
   const isTrustedReferrerPromise = viewer
     .getReferrerUrl()
-    .then(referrer => isTrustedReferrer(referrer));
+    .then((referrer) => isTrustedReferrer(referrer));
   Promise.all([isTrustedViewerPromise, isTrustedReferrerPromise]).then(
-    results => {
+    (results) => {
       const isTrustedViewer = results[0];
       const isTrustedReferrer = results[1];
       // Enable the feature in the case of trusted viewer,
@@ -153,14 +153,14 @@ function handleReplaceUrl(win) {
   return viewer
     .sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
     .then(
-      response => {
+      (response) => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
           return;
         }
         viewer.replaceUrl(response['replaceUrl'] || null);
       },
-      err => {
+      (err) => {
         dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
       }
     );
@@ -176,7 +176,7 @@ export function isTrustedReferrer(referrer) {
   if (url.protocol != 'https:') {
     return false;
   }
-  return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  return TRUSTED_REFERRER_HOSTS.some((th) => th.test(url.hostname));
 }
 
 /**
@@ -217,10 +217,10 @@ function handleClickUrl(win) {
     .then(() => {
       return invoke(win, dev().assertString(clickUrl));
     })
-    .then(response => {
+    .then((response) => {
       applyResponse(win, response);
     })
-    .catch(err => {
+    .catch((err) => {
       user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
     });
 }
@@ -239,7 +239,7 @@ function invoke(win, clickUrl) {
     .fetchJson(clickUrl, {
       credentials: 'include',
     })
-    .then(res => {
+    .then((res) => {
       // Treat 204 no content response specially
       if (res.status == 204) {
         return null;

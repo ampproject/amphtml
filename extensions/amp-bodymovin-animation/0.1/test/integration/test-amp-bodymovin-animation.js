@@ -17,7 +17,7 @@
 describe
   .configure()
   .ifChrome()
-  .run('amp-bodymovin-animation', function() {
+  .run('amp-bodymovin-animation', function () {
     const extensions = ['amp-bodymovin-animation'];
     const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
@@ -32,7 +32,7 @@ describe
         body: bodymovinBody,
         extensions,
       },
-      unusedEnv => {
+      (unusedEnv) => {
         // TODO(nainar): Add test.
       }
     );
@@ -43,7 +43,7 @@ describe
         body: bodymovinBody,
         extensions,
       },
-      unusedEnv => {
+      (unusedEnv) => {
         // TODO(nainar): Add test.
       }
     );
@@ -63,7 +63,7 @@ describe
         body: bodymovinNoAutoplayBody,
         extensions,
       },
-      unusedEnv => {
+      (unusedEnv) => {
         // TODO(nainar): Add test.
       }
     );
@@ -82,7 +82,7 @@ describe
         body: bodymovinSeekToBody,
         extensions,
       },
-      unusedEnv => {
+      (unusedEnv) => {
         // TODO(nainar): Add test.
       }
     );

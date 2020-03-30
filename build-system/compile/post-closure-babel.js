@@ -42,7 +42,7 @@ function loadSourceMap(file) {
  */
 function returnMapFirst(map) {
   let first = true;
-  return function(file) {
+  return function (file) {
     if (first) {
       first = false;
       return map;
@@ -86,10 +86,10 @@ function terserMinify(code) {
  * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-exports.postClosureBabel = function(directory, isEsmBuild) {
+exports.postClosureBabel = function (directory, isEsmBuild) {
   const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
 
-  return through.obj(function(file, enc, next) {
+  return through.obj(function (file, enc, next) {
     if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
       return next(null, file);
     }

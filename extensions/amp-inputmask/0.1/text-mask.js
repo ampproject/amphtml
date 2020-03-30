@@ -66,8 +66,8 @@ export class TextMask {
 
     this.controller_.mask();
 
-    Services.formSubmitForDoc(element).then(formSubmitService => {
-      formSubmitService.beforeSubmit(e => {
+    Services.formSubmitForDoc(element).then((formSubmitService) => {
+      formSubmitService.beforeSubmit((e) => {
         if (e.form != this.element_.form) {
           return;
         }
@@ -102,7 +102,7 @@ export class TextMask {
 
     if (!this.hiddenInput_) {
       const hiddenName = `${name}-unmasked`;
-      iterateCursor(this.element_.form.elements, element => {
+      iterateCursor(this.element_.form.elements, (element) => {
         const {name} = element;
         if (name == hiddenName && TextMask.isMaskOutputElement(element)) {
           return;

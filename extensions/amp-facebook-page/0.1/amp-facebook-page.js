@@ -79,7 +79,7 @@ class AmpFacebookPage extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.attemptChangeHeight(data['height']).catch(() => {
           /* ignore failures */
         });
@@ -139,6 +139,6 @@ class AmpFacebookPage extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook-page', '0.1', AMP => {
+AMP.extension('amp-facebook-page', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook-page', AmpFacebookPage);
 });

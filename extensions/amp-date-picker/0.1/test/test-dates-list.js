@@ -21,7 +21,7 @@ import {requireExternal} from '../../../../src/module';
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
-  it('should accept date strings', function() {
+  it('should accept date strings', function () {
     this.timeout(3000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';

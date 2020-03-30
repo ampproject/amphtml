@@ -99,7 +99,7 @@ export class HiddenObserver {
     }
     this.observable_ = new Observable();
 
-    const mo = new this.win_.MutationObserver(mutations => {
+    const mo = new this.win_.MutationObserver((mutations) => {
       if (mutations) {
         this.observable_.fire(mutations);
       }

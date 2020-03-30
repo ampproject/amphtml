@@ -20,7 +20,7 @@ import {
   onDocumentFormSubmit_,
 } from '../../src/document-submit';
 
-describes.sandboxed('test-document-submit', {}, env => {
+describes.sandboxed('test-document-submit', {}, (env) => {
   describe('installGlobalSubmitListenerForDoc', () => {
     let ampdoc;
     let headNode;
@@ -38,7 +38,7 @@ describes.sandboxed('test-document-submit', {}, env => {
     /**
      * @param {string} extension
      */
-    const createScript = extension => {
+    const createScript = (extension) => {
       const script = document.createElement('script');
       script.setAttribute(
         'src',
@@ -65,7 +65,7 @@ describes.sandboxed('test-document-submit', {}, env => {
     });
   });
 
-  describes.realWin('onDocumentFormSubmit_', {amp: true}, env => {
+  describes.realWin('onDocumentFormSubmit_', {amp: true}, (env) => {
     let window, document;
     let evt;
     let tgt;

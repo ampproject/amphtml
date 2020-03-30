@@ -66,7 +66,7 @@ async function e2e() {
 
   // set up promise to return to gulp.task()
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
@@ -93,13 +93,13 @@ async function e2e() {
 
     // specify tests to run
     if (argv.files) {
-      glob.sync(argv.files).forEach(file => {
+      glob.sync(argv.files).forEach((file) => {
         delete require.cache[file];
         mocha.addFile(file);
       });
     } else {
-      config.e2eTestPaths.forEach(path => {
-        glob.sync(path).forEach(file => {
+      config.e2eTestPaths.forEach((path) => {
+        glob.sync(path).forEach((file) => {
           delete require.cache[file];
           mocha.addFile(file);
         });
@@ -107,7 +107,7 @@ async function e2e() {
     }
 
     await reportTestStarted();
-    mocha.run(async failures => {
+    mocha.run(async (failures) => {
       // end web server
       cleanUp_();
 
@@ -119,7 +119,7 @@ async function e2e() {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');
-    watcher.on('change', file => {
+    watcher.on('change', (file) => {
       log('Detected a change in', cyan(file));
       log('Running tests...');
       // clear file from node require cache if running test again

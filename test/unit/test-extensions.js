@@ -26,14 +26,14 @@ class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
 
 describes.sandboxed('Extensions', {}, () => {
-  describes.fakeWin('registerExtension', {}, env => {
+  describes.fakeWin('registerExtension', {}, (env) => {
     let win;
     let extensions;
     let timeoutCallback;
 
     beforeEach(() => {
       win = env.win;
-      win.setTimeout = cb => {
+      win.setTimeout = (cb) => {
         timeoutCallback = cb;
       };
       installDocService(win, /* isSingleDoc */ true);
@@ -55,7 +55,7 @@ describes.sandboxed('Extensions', {}, () => {
       let currentHolder;
       extensions.registerExtension(
         'amp-ext',
-        arg => {
+        (arg) => {
           expect(factoryExecuted).to.be.false;
           expect(arg).to.equal(amp);
           expect(extensions.currentExtensionId_).to.equal('amp-ext');
@@ -78,7 +78,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.scriptPresent).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
@@ -96,7 +96,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
 
-      return promise.then(extension => {
+      return promise.then((extension) => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
@@ -128,7 +128,7 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.equal('intentional');
         }
       );
@@ -160,7 +160,7 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.equal('intentional');
         }
       );
@@ -176,14 +176,14 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.match(/^Render timeout/);
         }
       );
     });
 
     it('should add element in registration', () => {
-      const ctor = function() {};
+      const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -191,14 +191,14 @@ describes.sandboxed('Extensions', {}, () => {
         },
         {}
       );
-      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
         expect(extension.elements['e1']).to.exist;
         expect(extension.elements['e1'].implementationClass).to.equal(ctor);
       });
     });
 
     it('should add element out of registration', () => {
-      const ctor = function() {};
+      const ctor = function () {};
       allowConsoleError(() => extensions.addElement('e1', ctor));
       expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
       const unknown = extensions.extensions_['_UNKNOWN_'];
@@ -374,7 +374,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add doc factory in registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -390,7 +390,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add doc factory out of registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       allowConsoleError(() => extensions.addDocFactory(factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
@@ -405,7 +405,7 @@ describes.sandboxed('Extensions', {}, () => {
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
       const factory1 = env.sandbox.spy();
-      const factory2 = function() {
+      const factory2 = function () {
         throw new Error('intentional');
       };
       const factory3 = env.sandbox.spy();
@@ -432,7 +432,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add service factory in registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -451,7 +451,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add service factory out of registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       allowConsoleError(() => extensions.addService('service1', factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
@@ -467,11 +467,11 @@ describes.sandboxed('Extensions', {}, () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory1 = function() {
+      const factory1 = function () {
         factory1Spy();
         return {a: 1};
       };
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         return {a: 2};
       };
@@ -528,11 +528,11 @@ describes.sandboxed('Extensions', {}, () => {
 
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory1 = function() {
+      const factory1 = function () {
         factory1Spy();
         return {a: 1};
       };
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         return {a: 2};
       };
@@ -559,7 +559,7 @@ describes.sandboxed('Extensions', {}, () => {
         .callsFake(() => false);
       const factory1 = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         throw new Error('intentional');
       };
@@ -589,7 +589,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should load extension class via load extension', () => {
-      const ctor = function() {};
+      const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -597,7 +597,7 @@ describes.sandboxed('Extensions', {}, () => {
         },
         {}
       );
-      return extensions.loadElementClass('amp-ext').then(elementClass => {
+      return extensions.loadElementClass('amp-ext').then((elementClass) => {
         expect(elementClass).to.equal(ctor);
       });
     });
@@ -620,9 +620,9 @@ describes.sandboxed('Extensions', {}, () => {
       // Register extension.
       extensions.registerExtension('amp-ext', () => {}, {});
 
-      return reloadPromise.then(reloadedExtension => {
+      return reloadPromise.then((reloadedExtension) => {
         expect(reloadedExtension).to.exist;
-        return initialPromise.then(initialExtension => {
+        return initialPromise.then((initialExtension) => {
           expect(initialExtension).to.equal(reloadedExtension);
           const newScript = win.document.head.querySelector(
             'script[custom-element="amp-ext"]:not([i-amphtml-loaded-new-version])'
@@ -633,7 +633,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 
-  describes.fakeWin('reloadExtension', {}, env => {
+  describes.fakeWin('reloadExtension', {}, (env) => {
     let win;
     let extensions;
 
@@ -748,7 +748,7 @@ describes.sandboxed('Extensions', {}, () => {
       amp: true,
       fakeRegisterElement: true,
     },
-    env => {
+    (env) => {
       let win, doc, extensions;
 
       beforeEach(() => {
@@ -915,7 +915,7 @@ describes.sandboxed('Extensions', {}, () => {
       amp: true,
       fakeRegisterElement: true,
     },
-    env => {
+    (env) => {
       let win, doc, ampdoc, extensions;
 
       beforeEach(() => {
@@ -956,7 +956,7 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             // Main extension with CSS.
             AMP.registerElement('amp-test', AmpTest, 'a{}');
             // Secondary extension w/o CSS.
@@ -1000,11 +1000,11 @@ describes.sandboxed('Extensions', {}, () => {
       it('should install doc services', () => {
         const factory1Spy = env.sandbox.spy();
         const factory2Spy = env.sandbox.spy();
-        const factory1 = function() {
+        const factory1 = function () {
           factory1Spy();
           return {a: 1};
         };
-        const factory2 = function() {
+        const factory2 = function () {
           factory2Spy();
           return {a: 2};
         };
@@ -1030,7 +1030,7 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
           },
@@ -1052,15 +1052,15 @@ describes.sandboxed('Extensions', {}, () => {
         const factory1Spy = env.sandbox.spy();
         const factory2Spy = env.sandbox.spy();
         const factory3Spy = env.sandbox.spy();
-        const factory1 = function() {
+        const factory1 = function () {
           factory1Spy();
           return {a: 1};
         };
-        const factory2 = function() {
+        const factory2 = function () {
           factory2Spy();
           throw new Error('intentional');
         };
-        const factory3 = function() {
+        const factory3 = function () {
           factory3Spy();
           return {a: 3};
         };
@@ -1070,7 +1070,7 @@ describes.sandboxed('Extensions', {}, () => {
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
             AMP.registerServiceForDoc('service3', factory3);

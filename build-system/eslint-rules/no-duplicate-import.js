@@ -32,8 +32,8 @@ module.exports = {
     const imports = new Map();
 
     return {
-      'Program:exit': function() {
-        imports.forEach(imports => {
+      'Program:exit': function () {
+        imports.forEach((imports) => {
           const original = imports[0];
 
           for (let i = 1; i < imports.length; i++) {

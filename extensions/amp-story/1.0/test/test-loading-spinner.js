@@ -15,7 +15,7 @@
  */
 import {LoadingSpinner} from '../loading-spinner';
 
-describes.realWin('loading-spinner', {}, env => {
+describes.realWin('loading-spinner', {}, (env) => {
   let win;
   let loadingSpinner;
 

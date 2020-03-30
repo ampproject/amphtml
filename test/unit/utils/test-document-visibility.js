@@ -21,7 +21,7 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../../../src/utils/document-visibility';
 
-describes.sandboxed('document-visibility', {}, env => {
+describes.sandboxed('document-visibility', {}, (env) => {
   let doc;
 
   beforeEach(() => {

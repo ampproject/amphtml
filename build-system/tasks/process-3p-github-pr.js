@@ -142,11 +142,11 @@ function process3pGithubPr() {
     arrayPromises.push(getIssues(batch));
   }
   return Promise.all(arrayPromises)
-    .then(requests => [].concat.apply([], requests))
-    .then(issues => {
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
       const allIssues = issues;
       const allTasks = [];
-      allIssues.forEach(function(issue) {
+      allIssues.forEach(function (issue) {
         allTasks.push(handleIssue(issue));
       });
       return Promise.all(allTasks);
@@ -157,7 +157,7 @@ function process3pGithubPr() {
 }
 
 function handleIssue(issue) {
-  return isQualifiedPR(issue).then(outcome => {
+  return isQualifiedPR(issue).then((outcome) => {
     return replyToPR(issue, outcome);
   });
 }
@@ -179,7 +179,7 @@ function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const issues = JSON.parse(res.body);
     assert(Array.isArray(issues), 'issues must be an array.');
     return issues;
@@ -197,7 +197,7 @@ function getPullRequestFiles(pr) {
   options.url =
     'https://api.github.com/repos/ampproject/amphtml/pulls/' +
     `${number}/files`;
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const files = JSON.parse(res.body);
     if (!Array.isArray(files)) {
       return null;
@@ -259,7 +259,7 @@ function isQualifiedPR(issue) {
   // get pull request reviewer API is not working as expected. Skip
 
   // Get changed files of this PR
-  return getPullRequestFiles(issue).then(files => {
+  return getPullRequestFiles(issue).then((files) => {
     return analyzeChangedFiles(files);
   });
 }

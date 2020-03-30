@@ -17,7 +17,7 @@
 import * as lolex from 'lolex';
 import {JankMeter} from '../../src/service/jank-meter';
 
-describes.realWin('jank-meter', {}, env => {
+describes.realWin('jank-meter', {}, (env) => {
   let win;
   let clock;
   let meter;

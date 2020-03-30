@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-ad', 'amp-ad-network-fake-impl'],
     },
   },
-  env => {
+  (env) => {
     const title = `<title>Hello, world.</title>`;
     const styleBoilerplate = `<style amp4ads-boilerplate>body{visibility:hidden}</style>`;
     const ampExperiment = `<script async custom-element=amp-experiment src=https://cdn.ampproject.org/v0/amp-experiment-0.1.js></script>`;

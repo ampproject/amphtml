@@ -68,10 +68,10 @@ function findMaxIndexByFilename(rows, predicate) {
  * @param {boolean} mergeNames
  */
 function normalizeRow(rows, minFilename, maxFilename, mergeNames) {
-  const minIndex = findMaxIndexByFilename(rows, function(filename) {
+  const minIndex = findMaxIndexByFilename(rows, function (filename) {
     return filename == minFilename;
   });
-  const maxIndex = findMaxIndexByFilename(rows, function(filename) {
+  const maxIndex = findMaxIndexByFilename(rows, function (filename) {
     return filename == maxFilename;
   });
 
@@ -149,17 +149,15 @@ function normalizeRows(rows) {
  */
 function normalizeExtension(rows, filename) {
   const isMax = /\.max\.js$/.test(filename);
-  const counterpartName = filename.replace(/(v0\/.*?)(\.max)?(\.js)$/, function(
-    full,
-    grp1,
-    grp2,
-    grp3
-  ) {
-    if (isMax) {
-      return grp1 + grp3;
+  const counterpartName = filename.replace(
+    /(v0\/.*?)(\.max)?(\.js)$/,
+    function (full, grp1, grp2, grp3) {
+      if (isMax) {
+        return grp1 + grp3;
+      }
+      return full;
     }
-    return full;
-  });
+  );
 
   if (isMax) {
     normalizeRow(rows, counterpartName, filename, false);

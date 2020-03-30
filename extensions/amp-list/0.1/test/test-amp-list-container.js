@@ -31,7 +31,7 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;

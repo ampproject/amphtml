@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-powr-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -67,7 +67,7 @@ describes.realWin(
         'data-account': '945',
         'data-player': '1',
         'data-video': 'amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -86,7 +86,7 @@ describes.realWin(
           'data-video': 'amp-test-video',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -117,7 +117,7 @@ describes.realWin(
           'data-video': 'amp-test-video',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         const obj = bc.implementation_;
@@ -133,7 +133,7 @@ describes.realWin(
         'data-player': '1',
         'data-video': 'amp-test-video',
         'data-param-foo': 'bar',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         const params = parseUrlDeprecated(iframe.src).search.split('&');
         expect(params).to.contain('foo=bar');
@@ -145,7 +145,7 @@ describes.realWin(
         'data-account': '945',
         'data-player': '1',
         'data-video': 'ZNImchutXk',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.equal(
@@ -175,7 +175,7 @@ describes.realWin(
         'data-player': '1',
         'data-video': 'ZNImchutXk',
         'data-referrer': 'COUNTER',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('referrer=1');
@@ -188,7 +188,7 @@ describes.realWin(
         'data-player': '1',
         'data-video': 'ZNImchutXk',
         'data-param-playsinline': 'false',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('playsinline=true');
@@ -200,7 +200,7 @@ describes.realWin(
         'data-account': '945',
         'data-player': '1',
         'data-video': 'ZNImchutXk',
-      }).then(bc => {
+      }).then((bc) => {
         return Promise.resolve()
           .then(() => {
             const p = listenOncePromise(bc, VideoEvents.LOAD);

@@ -39,7 +39,7 @@ class NetworkLogger {
       .logs()
       .get(logging.Type.PERFORMANCE);
 
-    return entries.filter(entry => {
+    return entries.filter((entry) => {
       const json = JSON.parse(entry.message);
       entry.message = json.message;
       return entry.message.method == networkMethod;
@@ -56,7 +56,7 @@ class NetworkLogger {
       PerformanceMethods.REQUEST_WILL_BE_SENT
     );
     if (url) {
-      return entries.filter(entry => entry.message.params.request.url == url);
+      return entries.filter((entry) => entry.message.params.request.url == url);
     }
     return entries;
   }

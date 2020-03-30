@@ -36,7 +36,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
  * @param {function(!LayoutRectDef, !LayoutRectDef)} onFinish
  * @private
  */
-const expandFrameImpl = function(win, iframe, onFinish) {
+const expandFrameImpl = function (win, iframe, onFinish) {
   restrictedVsync(
     win,
     {
@@ -86,7 +86,7 @@ const expandFrameImpl = function(win, iframe, onFinish) {
  * @param {function(!LayoutRectDef)} onMeasure
  * @private
  */
-const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
+const collapseFrameImpl = function (win, iframe, onFinish, onMeasure) {
   restrictedVsync(win, {
     mutate() {
       collapseFrameUnderVsyncMutate(iframe);

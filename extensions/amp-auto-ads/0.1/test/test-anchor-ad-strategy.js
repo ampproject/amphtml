@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let configObj;
     let attributes;
 
@@ -36,10 +36,7 @@ describes.realWin(
       const viewportMock = env.sandbox.mock(
         Services.viewportForDoc(env.win.document)
       );
-      viewportMock
-        .expects('getWidth')
-        .returns(360)
-        .atLeast(1);
+      viewportMock.expects('getWidth').returns(360).atLeast(1);
 
       configObj = {
         optInStatus: [1],
@@ -62,14 +59,14 @@ describes.realWin(
           configObj
         );
 
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
+        const strategyPromise = anchorAdStrategy.run().then((placed) => {
           expect(placed).to.equal(true);
         });
 
-        const expectPromise = new Promise(resolve => {
+        const expectPromise = new Promise((resolve) => {
           waitForChild(
             env.win.document.body,
-            parent => {
+            (parent) => {
               return parent.firstChild.tagName == 'AMP-STICKY-AD';
             },
             () => {
@@ -98,11 +95,11 @@ describes.realWin(
           configObj
         );
 
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
+        const strategyPromise = anchorAdStrategy.run().then((placed) => {
           expect(placed).to.equal(false);
         });
 
-        const expectPromise = new Promise(resolve => {
+        const expectPromise = new Promise((resolve) => {
           setTimeout(() => {
             expect(
               env.win.document.getElementsByTagName('AMP-STICKY-AD')
@@ -128,11 +125,11 @@ describes.realWin(
           configObj
         );
 
-        const strategyPromise = anchorAdStrategy.run().then(placed => {
+        const strategyPromise = anchorAdStrategy.run().then((placed) => {
           expect(placed).to.equal(false);
         });
 
-        const expectPromise = new Promise(resolve => {
+        const expectPromise = new Promise((resolve) => {
           setTimeout(() => {
             expect(
               env.win.document.getElementsByTagName('AMP-STICKY-AD')

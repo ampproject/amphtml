@@ -37,7 +37,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
@@ -84,7 +84,7 @@ describes.realWin(
 
       storageMock = {
         setNonBoolean: () => {},
-        get: name => {
+        get: (name) => {
           return Promise.resolve(storageValue[name]);
         },
         set: (name, value) => {
@@ -94,14 +94,14 @@ describes.realWin(
       };
 
       resetServiceForTesting(win, 'xhr');
-      registerServiceBuilder(win, 'xhr', function() {
+      registerServiceBuilder(win, 'xhr', function () {
         return xhrServiceMock;
       });
 
       resetServiceForTesting(win, 'geo');
-      registerServiceBuilder(win, 'geo', function() {
+      registerServiceBuilder(win, 'geo', function () {
         return Promise.resolve({
-          isInCountryGroup: group =>
+          isInCountryGroup: (group) =>
             ISOCountryGroups.indexOf(group) >= 0
               ? GEO_IN_GROUP.IN
               : GEO_IN_GROUP.NOT_IN,
@@ -109,7 +109,7 @@ describes.realWin(
       });
 
       resetServiceForTesting(win, 'storage');
-      registerServiceBuilder(win, 'storage', function() {
+      registerServiceBuilder(win, 'storage', function () {
         return Promise.resolve(storageMock);
       });
     });
@@ -219,7 +219,7 @@ describes.realWin(
         await macroTask();
         return ampConsent
           .getConsentRequiredPromiseForTesting()
-          .then(isRequired => {
+          .then((isRequired) => {
             expect(isRequired).to.be.true;
           });
       });
@@ -795,10 +795,10 @@ describes.realWin(
         consentElement.appendChild(postPromptUI);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
-        env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
+        env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake((fn) => {
           fn();
         });
-        env.sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
+        env.sandbox.stub(ampConsent, 'mutateElement').callsFake((fn) => {
           fn();
         });
       });

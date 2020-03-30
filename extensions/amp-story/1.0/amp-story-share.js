@@ -123,7 +123,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params).forEach(field => {
+    Object.keys(opt_params).forEach((field) => {
       if (field === 'provider') {
         return;
       }
@@ -278,7 +278,7 @@ export class ShareWidget {
 
     this.add_(linkShareButton);
 
-    listen(linkShareButton, 'click', e => {
+    listen(linkShareButton, 'click', (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
     });
@@ -291,7 +291,7 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      this.localizationServicePromise_.then(localizationService => {
+      this.localizationServicePromise_.then((localizationService) => {
         devAssert(
           localizationService,
           'Could not retrieve LocalizationService.'
@@ -349,7 +349,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadBookendConfig().then(config => {
+    this.requestService_.loadBookendConfig().then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
@@ -366,7 +366,7 @@ export class ShareWidget {
    * TODO(alanorozco): Set story metadata in share config.
    */
   setProviders_(providers) {
-    providers.forEach(provider => {
+    providers.forEach((provider) => {
       if (isObject(provider)) {
         this.add_(
           buildProvider(
@@ -470,17 +470,17 @@ export class ScrollableShareWidget extends ShareWidget {
       if (this.root./*OK*/ offsetWidth < this.root./*OK*/ scrollWidth) {
         this.root.addEventListener(
           'touchstart',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
         this.root.addEventListener(
           'touchmove',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
         this.root.addEventListener(
           'touchend',
-          event => event.stopPropagation(),
+          (event) => event.stopPropagation(),
           {capture: true}
         );
       }
@@ -503,7 +503,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
     this.vsync_.run(
       {
-        measure: state => {
+        measure: (state) => {
           const containerWidth = this.root./*OK*/ clientWidth;
 
           if (containerWidth == this.containerWidth_) {
@@ -547,7 +547,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
           this.containerWidth_ = containerWidth;
         },
-        mutate: state => {
+        mutate: (state) => {
           if (state.noop) {
             return;
           }
@@ -571,10 +571,8 @@ export class ScrollableShareWidget extends ShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-      dev()
-        .assertElement(this.root)
-        .querySelectorAll('li'),
-      el => !!el.firstElementChild
+      dev().assertElement(this.root).querySelectorAll('li'),
+      (el) => !!el.firstElementChild
     );
   }
 

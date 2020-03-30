@@ -18,7 +18,7 @@ import {assertConfig} from '../config';
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describe('amp-next-page config', () => {
-  describes.sandboxed('assertConfig', {}, env => {
+  describes.sandboxed('assertConfig', {}, (env) => {
     const documentUrl = 'https://example.com/parent';
     const documentUrlCdn =
       'https://example-com.cdn.ampproject.org/c/s/example.com/parent';

@@ -89,7 +89,7 @@ describe('Types', () => {
     };
 
     it('should return true for valid enum values', () => {
-      ['x', 'y', 'z'].forEach(value => {
+      ['x', 'y', 'z'].forEach((value) => {
         expect(types.isEnumValue(enumObj, value), 'enum value = ' + value).to.be
           .true;
       });
@@ -108,7 +108,7 @@ describe('Types', () => {
         /x/,
         /y/,
         42,
-      ].forEach(value => {
+      ].forEach((value) => {
         expect(types.isEnumValue(enumObj, value), 'enum value = ' + value).to.be
           .false;
       });

@@ -27,15 +27,15 @@ export function factory(Inputmask) {
   Inputmask.extendAliases(
     dict({
       'payment-card': {
-        'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
+        'postValidation': (buffer) => /[\s\d]+/.test(buffer.join('')),
         /**
          * @param {!JsonObject} opts
          * @return {*} TODO(#23582): Specify return type
          */
-        'mask': function(opts) {
+        'mask': function (opts) {
           opts['definitions'] = dict({
             'x': {
-              'validator': function(chrs, buffer) {
+              'validator': function (chrs, buffer) {
                 const val = buffer.buffer.join('') + chrs;
                 const valExp2 = new RegExp('\\d\\d');
                 const regextest = valExp2.test(val);
@@ -44,7 +44,7 @@ export function factory(Inputmask) {
               'cardinality': 2,
             },
             'y': {
-              'validator': function(chrs, buffer) {
+              'validator': function (chrs, buffer) {
                 const val = buffer.buffer.join('') + chrs;
                 const valExp2 = /3(4|7)/;
                 const regextest = valExp2.test(val);

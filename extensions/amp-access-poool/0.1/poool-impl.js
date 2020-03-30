@@ -107,10 +107,10 @@ export class PooolVendor {
    */
   authorize() {
     return this.getPooolAccess_().then(
-      response => {
+      (response) => {
         return {access: response.access};
       },
-      err => {
+      (err) => {
         if (!err || !err.response) {
           throw err;
         }
@@ -163,14 +163,14 @@ export class PooolVendor {
     const url = addParamToUrl(this.accessUrl_, 'iid', this.itemID_);
     const urlPromise = this.accessSource_.buildUrl(url, false);
     return urlPromise
-      .then(url => {
+      .then((url) => {
         return this.accessSource_.getLoginUrl(url);
       })
-      .then(url => {
+      .then((url) => {
         dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url))
-          .then(res => res.json());
+          .then((res) => res.json());
       });
   }
 
@@ -210,7 +210,7 @@ export class PooolVendor {
       false
     );
 
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
       listenFor(this.iframe_, 'resize', this.onResize_.bind(this));

@@ -29,7 +29,7 @@ describes.realWin(
       extensions: ['amp-nested-menu'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let clock;
 
@@ -50,7 +50,7 @@ describes.realWin(
       element.appendChild(ul);
       doc.body.appendChild(element);
 
-      [1, 2, 3, 4].forEach(i => {
+      [1, 2, 3, 4].forEach((i) => {
         const item = htmlFor(doc)`
           <li>
             <button amp-nested-submenu-open></button>

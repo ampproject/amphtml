@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-gfycat'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -60,7 +60,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
+      return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -73,7 +73,7 @@ describes.realWin(
     it('renders responsively', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         responsive: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -82,7 +82,7 @@ describes.realWin(
     it('noautoplay', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         noautoplay: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -92,7 +92,7 @@ describes.realWin(
     });
 
     it('should forward events from gfycat player to the amp element', () => {
-      return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
+      return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         return Promise.resolve()
           .then(() => {
@@ -127,7 +127,7 @@ describes.realWin(
     it('renders placeholder with an alt', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         withAlt: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const placeHolder = gfycat.querySelector('amp-img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(
@@ -138,7 +138,7 @@ describes.realWin(
     it('renders placeholder with an aria-label', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         withAria: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const placeHolder = gfycat.querySelector('amp-img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(

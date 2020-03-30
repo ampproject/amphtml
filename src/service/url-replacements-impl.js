@@ -125,7 +125,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Provides a counter starting at 1 per given scope.
     const counterStore = Object.create(null);
-    this.set('COUNTER', scope => {
+    this.set('COUNTER', (scope) => {
       return (counterStore[scope] = (counterStore[scope] | 0) + 1);
     });
 
@@ -165,7 +165,7 @@ export class GlobalVariableSource extends VariableSource {
       /** @type {AsyncResolverDef} */ (() => {
         return Services.viewerForDoc(this.ampdoc)
           .getReferrerUrl()
-          .then(referrer => {
+          .then((referrer) => {
             if (!referrer) {
               return null;
             }
@@ -271,7 +271,7 @@ export class GlobalVariableSource extends VariableSource {
     // requested using the async method.
     this.setBoth(
       'CLIENT_ID',
-      scope => {
+      (scope) => {
         if (!clientIds) {
           return null;
         }
@@ -290,13 +290,13 @@ export class GlobalVariableSource extends VariableSource {
         // assume consent is given by default.
         if (opt_userNotificationId) {
           consent = Services.userNotificationManagerForDoc(element).then(
-            service => {
+            (service) => {
               return service.get(opt_userNotificationId);
             }
           );
         }
         return Services.cidForDoc(this.ampdoc)
-          .then(cid => {
+          .then((cid) => {
             return cid.get(
               {
                 /** @type {string} */ scope,
@@ -306,7 +306,7 @@ export class GlobalVariableSource extends VariableSource {
               consent
             );
           })
-          .then(cid => {
+          .then((cid) => {
             if (!clientIds) {
               clientIds = Object.create(null);
             }
@@ -337,8 +337,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns assigned variant name for the given experiment.
     this.setAsync(
       'VARIANT',
-      /** @type {AsyncResolverDef} */ (experiment => {
-        return this.getVariantsValue_(variants => {
+      /** @type {AsyncResolverDef} */ ((experiment) => {
+        return this.getVariantsValue_((variants) => {
           const variant = variants[/** @type {string} */ (experiment)];
           userAssert(
             variant !== undefined,
@@ -355,7 +355,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync(
       'VARIANTS',
       /** @type {AsyncResolverDef} */ (() => {
-        return this.getVariantsValue_(variants => {
+        return this.getVariantsValue_((variants) => {
           const experiments = [];
           for (const experiment in variants) {
             const variant = variants[experiment];
@@ -371,8 +371,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns assigned geo value for geoType or all groups.
     this.setAsync(
       'AMP_GEO',
-      /** @type {AsyncResolverDef} */ (geoType => {
-        return this.getGeo_(geos => {
+      /** @type {AsyncResolverDef} */ ((geoType) => {
+        return this.getGeo_((geos) => {
           if (geoType) {
             userAssert(
               geoType === 'ISOCountry',
@@ -391,7 +391,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync(
       'SHARE_TRACKING_INCOMING',
       /** @type {AsyncResolverDef} */ (() => {
-        return this.getShareTrackingValue_(fragments => {
+        return this.getShareTrackingValue_((fragments) => {
           return fragments.incomingFragment;
         }, 'SHARE_TRACKING_INCOMING');
       })
@@ -401,7 +401,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync(
       'SHARE_TRACKING_OUTGOING',
       /** @type {AsyncResolverDef} */ (() => {
-        return this.getShareTrackingValue_(fragments => {
+        return this.getShareTrackingValue_((fragments) => {
           return fragments.outgoingFragment;
         }, 'SHARE_TRACKING_OUTGOING');
       })
@@ -521,7 +521,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync(
       'ACCESS_READER_ID',
       /** @type {AsyncResolverDef} */ (() => {
-        return this.getAccessValue_(accessService => {
+        return this.getAccessValue_((accessService) => {
           return accessService.getAccessReaderId();
         }, 'ACCESS_READER_ID');
       })
@@ -530,12 +530,12 @@ export class GlobalVariableSource extends VariableSource {
     // Access: data from the authorization response.
     this.setAsync(
       'AUTHDATA',
-      /** @type {AsyncResolverDef} */ (field => {
+      /** @type {AsyncResolverDef} */ ((field) => {
         userAssert(
           field,
           'The first argument to AUTHDATA, the field, is required'
         );
-        return this.getAccessValue_(accessService => {
+        return this.getAccessValue_((accessService) => {
           return accessService.getAuthdataField(field);
         }, 'AUTHDATA');
       })
@@ -545,14 +545,14 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('VIEWER', () => {
       return Services.viewerForDoc(this.ampdoc)
         .getViewerOrigin()
-        .then(viewer => {
+        .then((viewer) => {
           return viewer == undefined ? '' : viewer;
         });
     });
 
     // Returns the total engaged time since the content became viewable.
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return Services.activityForDoc(element).then(activity => {
+      return Services.activityForDoc(element).then((activity) => {
         return activity.getTotalEngagedTime();
       });
     });
@@ -560,7 +560,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the incremental engaged time since the last push under the
     // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
-      return Services.activityForDoc(element).then(activity => {
+      return Services.activityForDoc(element).then((activity) => {
         return activity.getIncrementalEngagedTime(
           /** @type {string} */ (name),
           reset !== 'false'
@@ -615,12 +615,12 @@ export class GlobalVariableSource extends VariableSource {
       );
     });
 
-    this.setAsync('AMP_STATE', key => {
+    this.setAsync('AMP_STATE', (key) => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
       const root = this.ampdoc.getRootNode();
-      const element =
-        /** @type {!Element|!ShadowRoot} */ (root.documentElement || root);
-      return Services.bindForDocOrNull(element).then(bind => {
+      const element = /** @type {!Element|!ShadowRoot} */ (root.documentElement ||
+        root);
+      return Services.bindForDocOrNull(element).then((bind) => {
         if (!bind) {
           return '';
         }
@@ -666,9 +666,8 @@ export class GlobalVariableSource extends VariableSource {
     return Promise.all([
       Services.accessServiceForDocOrNull(element),
       Services.subscriptionsServiceForDocOrNull(element),
-    ]).then(services => {
-      const service =
-        /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
+    ]).then((services) => {
+      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
         services[1]);
       if (!service) {
         // Access/subscriptions service is not installed.
@@ -739,7 +738,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   getVariantsValue_(getter, expr) {
     return Services.variantsForDocOrNull(this.ampdoc.getHeadNode())
-      .then(variants => {
+      .then((variants) => {
         userAssert(
           variants,
           'To use variable %s, amp-experiment should be configured',
@@ -747,7 +746,7 @@ export class GlobalVariableSource extends VariableSource {
         );
         return variants.getVariants();
       })
-      .then(variantsMap => getter(variantsMap));
+      .then((variantsMap) => getter(variantsMap));
   }
 
   /**
@@ -760,7 +759,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   getGeo_(getter, expr) {
     const element = this.ampdoc.getHeadNode();
-    return Services.geoForDocOrNull(element).then(geo => {
+    return Services.geoForDocOrNull(element).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
@@ -780,7 +779,7 @@ export class GlobalVariableSource extends VariableSource {
         this.ampdoc.win
       );
     }
-    return this.shareTrackingFragments_.then(fragments => {
+    return this.shareTrackingFragments_.then((fragments) => {
       userAssert(
         fragments,
         'To use variable %s, amp-share-tracking should be configured',
@@ -896,7 +895,7 @@ export class UrlReplacements {
       opt_noEncode
     )
       ./*OK*/ expand(url)
-      .then(replacement => this.ensureProtocolMatches_(url, replacement)));
+      .then((replacement) => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -955,7 +954,7 @@ export class UrlReplacements {
     if (opt_sync) {
       return (element.value = result);
     }
-    return result.then(newValue => {
+    return result.then((newValue) => {
       element.value = newValue;
       return newValue;
     });
@@ -977,7 +976,7 @@ export class UrlReplacements {
     whitelist
       .trim()
       .split(/\s+/)
-      .forEach(replacement => {
+      .forEach((replacement) => {
         if (
           !opt_supportedReplacement ||
           hasOwn(opt_supportedReplacement, replacement)
@@ -1144,7 +1143,7 @@ export class UrlReplacements {
     const macroNames = new Expander(this.variableSource_).getMacroNames(url);
     const whitelist = this.getWhitelistForElement_(element);
     if (whitelist) {
-      return macroNames.filter(v => !whitelist[v]);
+      return macroNames.filter((v) => !whitelist[v]);
     } else {
       // All vars are unwhitelisted if the element has no whitelist.
       return macroNames;
@@ -1199,7 +1198,7 @@ export function extractClientIdFromGaCookie(gaCookie) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installUrlReplacementsServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'url-replace', function(doc) {
+  registerServiceBuilderForDoc(ampdoc, 'url-replace', function (doc) {
     return new UrlReplacements(doc, new GlobalVariableSource(doc));
   });
 }

@@ -18,7 +18,7 @@ import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
-describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
+describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =
     'https://adserver-com.cdn.ampproject.org/ad/s/' +
     'adserver.com/amp_template_1';
@@ -53,7 +53,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
       );
     return ampAdTemplateHelper
       .fetch(canonicalUrl)
-      .then(fetchedTemplate => expect(fetchedTemplate).to.equal(template));
+      .then((fetchedTemplate) => expect(fetchedTemplate).to.equal(template));
   });
 
   it('should use CDN url if one is supplied', () => {
@@ -76,10 +76,12 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {
     parentDiv./*OK*/ innerHTML =
       '<template type="amp-mustache"><p>{{foo}}</p></template>';
     doc.body.appendChild(parentDiv);
-    return ampAdTemplateHelper.render({foo: 'bar'}, parentDiv).then(result => {
-      expect(result).to.not.be.null;
-      expect(result./*OK*/ innerHTML).to.equal('bar');
-    });
+    return ampAdTemplateHelper
+      .render({foo: 'bar'}, parentDiv)
+      .then((result) => {
+        expect(result).to.not.be.null;
+        expect(result./*OK*/ innerHTML).to.equal('bar');
+      });
   });
 
   it('should insert analytics component', () => {

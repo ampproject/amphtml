@@ -30,7 +30,7 @@ describes.realWin(
       extensions: ['amp-mustache:0.2', 'amp-date-display:0.2'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let clock;

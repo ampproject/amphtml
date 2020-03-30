@@ -69,7 +69,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.adReadyPromise_ = whenUpgradedToCustomElement(
       dev().assertElement(this.ad_)
     )
-      .then(ad => {
+      .then((ad) => {
         return ad.whenBuilt();
       })
       .then(() => {
@@ -186,7 +186,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
       ad.whenBuilt().then(this.layoutAd_.bind(this));
     });
   }
@@ -278,6 +278,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sticky-ad', '1.0', AMP => {
+AMP.extension('amp-sticky-ad', '1.0', (AMP) => {
   AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
 });

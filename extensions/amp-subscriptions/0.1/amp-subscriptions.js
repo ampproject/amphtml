@@ -159,22 +159,22 @@ export class SubscriptionService {
       );
 
       const serviceIds = this.platformConfig_['services'].map(
-        service => service['serviceId'] || 'local'
+        (service) => service['serviceId'] || 'local'
       );
 
       this.initializePlatformStore_(serviceIds);
 
-      this.platformConfig_['services'].forEach(service => {
+      this.platformConfig_['services'].forEach((service) => {
         this.initializeLocalPlatforms_(service);
       });
 
       this.platformStore_
         .getAvailablePlatforms()
-        .forEach(subscriptionPlatform => {
+        .forEach((subscriptionPlatform) => {
           this.fetchEntitlements_(subscriptionPlatform);
         });
 
-      isStoryDocument(this.ampdoc_).then(isStory => {
+      isStoryDocument(this.ampdoc_).then((isStory) => {
         // Delegates the platform selection and activation call if is story.
         this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
       });
@@ -211,7 +211,7 @@ export class SubscriptionService {
 
         return this.platformStore_.getEntitlementPromiseFor('local');
       })
-      .then(entitlement => getValueForExpr(entitlement.json(), field));
+      .then((entitlement) => getValueForExpr(entitlement.json(), field));
   }
 
   /**
@@ -254,7 +254,7 @@ export class SubscriptionService {
       // rotation.
       const scope =
         'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
-      readerId = this.cid_.then(cid =>
+      readerId = this.cid_.then((cid) =>
         cid.get({scope, createCookieIfNotPresent: true}, consent)
       );
       this.readerIdPromiseMap_[serviceId] = readerId;
@@ -283,7 +283,7 @@ export class SubscriptionService {
         return; // External platforms should not register if viewer provides auth
       }
       const matchedServices = this.platformConfig_['services'].filter(
-        service => (service.serviceId || 'local') === serviceId
+        (service) => (service.serviceId || 'local') === serviceId
       );
 
       const matchedServiceConfig = userAssert(
@@ -331,7 +331,7 @@ export class SubscriptionService {
 
     this.platformStore_
       .getAvailablePlatforms()
-      .forEach(subscriptionPlatform => {
+      .forEach((subscriptionPlatform) => {
         this.fetchEntitlements_(subscriptionPlatform);
       });
     this.subscriptionAnalytics_.serviceEvent(
@@ -362,8 +362,8 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId) {
-    return new Promise(resolve => {
-      this.platformStore_.onPlatformResolves(serviceId, platform => {
+    return new Promise((resolve) => {
+      this.platformStore_.onPlatformResolves(serviceId, (platform) => {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
@@ -389,7 +389,7 @@ export class SubscriptionService {
    * @param {?JsonObject} options
    */
   decorateServiceAction(element, serviceId, action, options) {
-    this.platformStore_.onPlatformResolves(serviceId, platform => {
+    this.platformStore_.onPlatformResolves(serviceId, (platform) => {
       devAssert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });
@@ -406,7 +406,7 @@ export class SubscriptionService {
       this.initialized_ = Promise.all([
         this.getPlatformConfig_(),
         pageConfigResolver.resolveConfig(),
-      ]).then(promiseValues => {
+      ]).then((promiseValues) => {
         /** @type {!JsonObject} */
         this.platformConfig_ = promiseValues[0];
         /** @type {!PageConfig} */
@@ -438,8 +438,8 @@ export class SubscriptionService {
    * @private
    */
   getPlatformConfig_() {
-    return new Promise(resolve => {
-      const rawContent = tryParseJson(this.configElement_.textContent, e => {
+    return new Promise((resolve) => {
+      const rawContent = tryParseJson(this.configElement_.textContent, (e) => {
         throw user().createError(
           'Failed to parse "amp-subscriptions" JSON: ',
           e
@@ -495,7 +495,7 @@ export class SubscriptionService {
    * @private
    */
   getEntitlements_(platform) {
-    return platform.getEntitlements().then(entitlements => {
+    return platform.getEntitlements().then((entitlements) => {
       if (
         entitlements &&
         entitlements.granted &&
@@ -531,7 +531,7 @@ export class SubscriptionService {
     return visiblePromise.then(() =>
       this.timer_
         .timeoutPromise(timeout, this.getEntitlements_(subscriptionPlatform))
-        .then(entitlement => {
+        .then((entitlement) => {
           entitlement =
             entitlement ||
             Entitlement.empty(subscriptionPlatform.getServiceId());
@@ -541,7 +541,7 @@ export class SubscriptionService {
           );
           return entitlement;
         })
-        .catch(reason => {
+        .catch((reason) => {
           const serviceId = subscriptionPlatform.getServiceId();
           this.platformStore_.reportPlatformFailureAndFallback(serviceId);
           throw user().createError(
@@ -575,7 +575,7 @@ export class SubscriptionService {
     const origin = getWinOrigin(this.ampdoc_.win);
     this.initializePlatformStore_(serviceIds);
 
-    this.platformConfig_['services'].forEach(service => {
+    this.platformConfig_['services'].forEach((service) => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
           this.ampdoc_,
@@ -585,7 +585,7 @@ export class SubscriptionService {
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
         this.getEntitlements_(viewerPlatform)
-          .then(entitlement => {
+          .then((entitlement) => {
             devAssert(entitlement, 'Entitlement is null');
             // Viewer authorization is redirected to use local platform instead.
             this.resolveEntitlementsToStore_(
@@ -593,7 +593,7 @@ export class SubscriptionService {
               /** @type {!./entitlement.Entitlement}*/ (entitlement)
             );
           })
-          .catch(reason => {
+          .catch((reason) => {
             this.platformStore_.reportPlatformFailureAndFallback('local');
             dev().error(TAG, 'Viewer auth failed:', reason);
           });
@@ -607,7 +607,7 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
-    this.platformStore_.getGrantStatus().then(grantState => {
+    this.platformStore_.getGrantStatus().then((grantState) => {
       this.processGrantState_(grantState);
       this.performPingback_();
     });
@@ -628,7 +628,7 @@ export class SubscriptionService {
       this.platformStore_.getGrantEntitlement(),
     ]);
 
-    return requireValuesPromise.then(resolvedValues => {
+    return requireValuesPromise.then((resolvedValues) => {
       const selectedPlatform = resolvedValues[1];
       const grantEntitlement = resolvedValues[2];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
@@ -681,11 +681,11 @@ export class SubscriptionService {
           return this.platformStore_
             .getGrantEntitlement()
             .then(
-              grantStateEntitlement =>
+              (grantStateEntitlement) =>
                 grantStateEntitlement || Entitlement.empty('local')
             );
         })
-        .then(resolveEntitlements => {
+        .then((resolveEntitlements) => {
           if (localPlatform.isPingbackEnabled()) {
             localPlatform.pingback(resolveEntitlements);
           }
@@ -729,8 +729,8 @@ export function getPageConfigClassForTesting() {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('subscriptions', function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc('subscriptions', function (ampdoc) {
     return new SubscriptionService(ampdoc).start();
   });
 });

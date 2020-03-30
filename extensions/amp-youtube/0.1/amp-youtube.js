@@ -286,7 +286,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenLooping_ = listen(
         this.element,
         VideoEvents.ENDED,
-        unusedEvent => this.play(false /** unusedIsAutoplay */)
+        (unusedEvent) => this.play(false /** unusedIsAutoplay */)
       );
     }
 
@@ -661,6 +661,6 @@ class AmpYoutube extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpYoutube);
 });

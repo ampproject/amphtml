@@ -17,7 +17,7 @@
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {macroTask} from '../../../testing/yield';
 
-describes.fakeWin('DomTransformStream', {amp: true}, env => {
+describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {
     await macroTask();
     env.flushVsync();

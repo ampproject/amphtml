@@ -24,7 +24,7 @@ import {Services} from './services';
  * @param {!JsonObject=} opt_vars A map of vars and their values.
  */
 export function triggerAnalyticsEvent(target, eventType, opt_vars) {
-  Services.analyticsForDocOrNull(target).then(analytics => {
+  Services.analyticsForDocOrNull(target).then((analytics) => {
     if (!analytics) {
       return;
     }

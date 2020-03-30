@@ -294,12 +294,12 @@ export class VariableSource {
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
-      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+      keys = keys.filter((key) => this.getUrlMacroWhitelist_().includes(key));
     }
     // If a whitelist is passed into the call to GlobalVariableSource.expand_
     // then we only resolve values contained in the whitelist.
     if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
+      keys = keys.filter((key) => opt_whiteList[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -310,7 +310,7 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     // Keys that start with a `$` need to be escaped so that they do not
     // interfere with the regex that is constructed.
-    const escaped = keys.map(key => {
+    const escaped = keys.map((key) => {
       if (key[0] === '$') {
         return '\\' + key;
       }
@@ -350,7 +350,9 @@ export class VariableSource {
      * The whitelist of variables allowed for variable substitution.
      * @private {?Array<string>}
      */
-    this.variableWhitelist_ = meta.split(',').map(variable => variable.trim());
+    this.variableWhitelist_ = meta
+      .split(',')
+      .map((variable) => variable.trim());
     return this.variableWhitelist_;
   }
 }

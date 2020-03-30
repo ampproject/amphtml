@@ -162,7 +162,7 @@ export class ViewportWarningLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.DESKTOP_STATE,
-      isDesktop => {
+      (isDesktop) => {
         this.onDesktopStateUpdate_(isDesktop);
       },
       true /** callToInitialize */
@@ -170,7 +170,7 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(
       StateProperty.LANDSCAPE_STATE,
-      isLandscape => {
+      (isLandscape) => {
         this.onLandscapeStateUpdate_(isLandscape);
       },
       true /** callToInitialize */

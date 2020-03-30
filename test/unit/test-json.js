@@ -158,7 +158,7 @@ describe('json', () => {
       expect(onFailedCalled).to.be.false;
 
       const invalidJson = '{"key": "val';
-      tryParseJson(invalidJson, err => {
+      tryParseJson(invalidJson, (err) => {
         onFailedCalled = true;
         expect(err).to.exist;
       });

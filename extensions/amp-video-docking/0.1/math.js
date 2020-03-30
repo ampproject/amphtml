@@ -162,11 +162,11 @@ export function topCornerRect(
  * @param {!AmpElement} element
  * @return {boolean}
  */
-export const isVisibleBySize = element =>
+export const isVisibleBySize = (element) =>
   isSizedRect(element.getPageLayoutBox());
 
 /**
  * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
  * @return {boolean}
  */
-export const isSizedRect = rect => rect.width > 0 && rect.height > 0;
+export const isSizedRect = (rect) => rect.width > 0 && rect.height > 0;

@@ -65,7 +65,7 @@ function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
   }
   const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
-  return exec(`git checkout ${branch} ${filename}`).catch(function(e) {
+  return exec(`git checkout ${branch} ${filename}`).catch(function (e) {
     // This means the files don't exist in master. Assume that it exists
     // in the current branch.
     if (/did not match any file/.test(e.message)) {
@@ -140,7 +140,7 @@ function applyConfig(
         fs.promises.readFile(target),
       ]);
     })
-    .then(files => {
+    .then((files) => {
       let configJson;
       try {
         configJson = JSON.parse(files[0].toString());
@@ -158,7 +158,7 @@ function applyConfig(
       const configString = JSON.stringify(configJson);
       return prependConfig(configString, targetString);
     })
-    .then(fileString => {
+    .then((fileString) => {
       sanityCheck(fileString);
       return writeTarget(target, fileString, argv.dryrun);
     })
@@ -210,7 +210,7 @@ function enableLocalDev(config, target, configJson) {
  * @return {!Promise}
  */
 function removeConfig(target) {
-  return fs.promises.readFile(target).then(file => {
+  return fs.promises.readFile(target).then((file) => {
     let contents = file.toString();
     if (numConfigs(contents) == 0) {
       return Promise.resolve();

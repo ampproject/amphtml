@@ -41,7 +41,7 @@ describes.realWin(
       extensions: [],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lastSizeChangeAttempt;
     let element;
@@ -66,7 +66,7 @@ describes.realWin(
       };
       const storage = await Services.storageForDoc(doc);
       storageContent = {};
-      env.sandbox.stub(storage, 'get').callsFake(key => {
+      env.sandbox.stub(storage, 'get').callsFake((key) => {
         return Promise.resolve(storageContent[key]);
       });
       env.sandbox.stub(storage, 'set').callsFake((key, value) => {

@@ -21,7 +21,7 @@ import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
 
-describes.realWin('AnalyticsConfig', {amp: false}, env => {
+describes.realWin('AnalyticsConfig', {amp: false}, (env) => {
   let win;
   let doc;
   const vendorName = 'test-vendor';
@@ -34,7 +34,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     win = env.win;
     doc = win.document;
     xhrStub = stubXhr();
-    xhrStub.callsFake(url => {
+    xhrStub.callsFake((url) => {
       if (url.indexOf(`${vendorName}.json`) >= 0) {
         return Promise.resolve({
           json: () => fakeVendorJson,
@@ -62,7 +62,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const element = getAnalyticsTag({}, {'type': vendorName});
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'test1': {
             origin: 'https://example.test',
@@ -89,7 +89,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const element = getAnalyticsTag({}, {'type': vendorName});
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'test1': {
             origin: 'https://nested.com',
@@ -111,7 +111,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const element = getAnalyticsTag({}, {'type': vendorName});
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'test1': {
             origin: '',
@@ -133,7 +133,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const element = getAnalyticsTag({}, {'type': vendorName});
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'test1': {
             origin: undefined,
@@ -158,7 +158,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'foo': {
             baseUrl: 'https://example.test/${bar}',
@@ -200,7 +200,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'foo': {
             'baseUrl': 'https://example.test/${bar}',
@@ -248,7 +248,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'foo': {
             'baseUrl': 'https://example.test/${bar}',
@@ -286,7 +286,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         }
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']).to.deep.equal({
           'foo': {
             'baseUrl': 'https://example.test/remote',
@@ -303,7 +303,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   });
 
   describe('mergeObjects', () => {
-    it('merges objects correctly', function() {
+    it('merges objects correctly', function () {
       expect(mergeObjects({}, {})).to.deep.equal({});
       expect(mergeObjects(map({'a': 0}), map({'b': 1}))).to.deep.equal(
         map({'a': 0, 'b': 1})
@@ -356,7 +356,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         optout: true,
       };
       const element = getAnalyticsTag({}, {'type': vendorName});
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['optout']).to.be.true;
       });
     });
@@ -388,7 +388,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
       const element = getAnalyticsTag({}, {'type': vendorName});
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['triggers']).to.deep.equal({
           'pageview': {
             'on': 'visible',
@@ -430,7 +430,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
       const element = getAnalyticsTag({}, {'type': vendorName});
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['transport']).to.deep.equal({
           image: false,
           xhrpost: false,
@@ -506,7 +506,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         }
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -529,7 +529,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         }
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['vars']['title']).to.equal('local');
       });
     });
@@ -551,7 +551,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         }
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(xhrStub).to.be.calledWith('/remote', {
           credentials: 'include',
         });
@@ -581,7 +581,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']['foo']).to.deep.equal({
           baseUrl: '/rewriter',
         });
@@ -771,7 +771,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName, 'config': '//remote'}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//remote'},
@@ -800,7 +800,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': vendorName}
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']['foo']).to.deep.equal({
           baseUrl: '//inlined',
         });
@@ -819,7 +819,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       });
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(config['requests']['foo']).to.deep.equal({
           baseUrl: '//inlined',
         });
@@ -867,7 +867,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       const usrObj = user();
       const spy = env.sandbox.spy(usrObj, 'warn');
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(spy).callCount(1);
         expect(spy).to.have.been.calledWith(
           'AmpAnalytics analyticsId',
@@ -896,7 +896,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       const usrObj = user();
       const spy = env.sandbox.spy(usrObj, 'warn');
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(spy).callCount(1);
         expect(spy).to.have.been.calledWith(
           'AmpAnalytics analyticsId',
@@ -928,7 +928,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         })
       );
 
-      return new AnalyticsConfig(element).loadConfig().then(config => {
+      return new AnalyticsConfig(element).loadConfig().then((config) => {
         expect(spy).callCount(1);
         expect(spy).to.have.been.calledWith(
           'AmpAnalytics analyticsId',
@@ -975,7 +975,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     ).returns(macros);
 
     env.sandbox.stub(Services, 'urlReplacementsForDoc').returns({
-      'expandUrlAsync': url => Promise.resolve(url),
+      'expandUrlAsync': (url) => Promise.resolve(url),
       'expandStringAsync': expandStringStub,
     });
 

@@ -32,7 +32,7 @@ export function getJsonLd(root) {
   }
 
   return (
-    tryParseJson(scriptTag.textContent, e => {
+    tryParseJson(scriptTag.textContent, (e) => {
       user().error(TAG, 'Failed to parse ld+json. Is it valid JSON?', e);
     }) || null
   );

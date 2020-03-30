@@ -38,7 +38,7 @@ const TAG = 'amp-story-education';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildNavigationEl = element => {
+const buildNavigationEl = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-education-navigation">
@@ -131,23 +131,23 @@ export class AmpStoryEducation extends AMP.BaseElement {
     // Prevent touchevents from being forwarded through viewer messaging.
     this.containerEl_.addEventListener(
       'touchstart',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
     this.containerEl_.addEventListener(
       'touchmove',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
     this.containerEl_.addEventListener(
       'touchend',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => this.onRtlStateUpdate_(rtlState),
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
       true /** callToInitialize */
     );
   }
@@ -293,7 +293,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
             'canShowScreens',
             dict({'screens': [{'screen': screen}]})
           )
-          .then(response => {
+          .then((response) => {
             const shouldShow = !!(
               response &&
               response['screens'] &&
@@ -308,6 +308,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-story-education', '0.1', AMP => {
+AMP.extension('amp-story-education', '0.1', (AMP) => {
   AMP.registerElement('amp-story-education', AmpStoryEducation, CSS);
 });

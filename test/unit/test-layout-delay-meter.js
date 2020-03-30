@@ -27,7 +27,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let win;
     let meter;
     let tickSpy;

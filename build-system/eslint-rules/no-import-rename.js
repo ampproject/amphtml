@@ -49,7 +49,7 @@ const imports = {
   'src/log': ['user', 'dev'],
 };
 
-module.exports = function(context) {
+module.exports = function (context) {
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;
     const {name} = imported;

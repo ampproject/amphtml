@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let ampdoc;
 
@@ -158,7 +158,7 @@ describes.realWin(
 
         return applyExperiment.applyExperimentToVariant
           .apply(null, params)
-          .catch(err => {
+          .catch((err) => {
             expect(err).to.match(/Max number of mutations/);
           });
       }
@@ -182,7 +182,7 @@ describes.realWin(
 
         return applyExperiment.applyExperimentToVariant
           .apply(null, params)
-          .catch(err => {
+          .catch((err) => {
             expect(err).to.match(/Max number of mutations/);
           });
       }

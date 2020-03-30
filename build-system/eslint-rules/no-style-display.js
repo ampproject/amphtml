@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   const setStyleCall = 'CallExpression[callee.name=setStyle]';
   const setStylesCall =
     'CallExpression[callee.name=setStyles], CallExpression[callee.name=setImportantStyles]';
@@ -28,7 +28,7 @@ module.exports = function(context) {
   ].join('\n\t');
 
   return {
-    [setStyleCall]: function(node) {
+    [setStyleCall]: function (node) {
       const filePath = context.getFilename();
       if (filePath.endsWith('src/style.js')) {
         return;
@@ -65,7 +65,7 @@ module.exports = function(context) {
       }
     },
 
-    [setStylesCall]: function(node) {
+    [setStylesCall]: function (node) {
       const callName = node.callee.name;
       const arg = node.arguments[1];
 
@@ -113,7 +113,7 @@ module.exports = function(context) {
       }
     },
 
-    [resetStylesCall]: function(node) {
+    [resetStylesCall]: function (node) {
       const arg = node.arguments[1];
 
       if (!arg) {

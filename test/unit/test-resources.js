@@ -471,7 +471,7 @@ describes.fakeWin(
     },
     amp: true,
   },
-  env => {
+  (env) => {
     let win;
     let clock;
     let resources;
@@ -594,7 +594,7 @@ describes.fakeWin(
   }
 );
 
-describes.realWin('Resources discoverWork', {amp: true}, env => {
+describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
@@ -655,7 +655,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resources.pass_.schedule = () => {};
     viewportMock = env.sandbox.mock(resources.viewport_);
 
-    env.sandbox.stub(env.win, 'getComputedStyle').callsFake(el => {
+    env.sandbox.stub(env.win, 'getComputedStyle').callsFake((el) => {
       return el.fakeComputedStyle
         ? el.fakeComputedStyle
         : window.getComputedStyle(el);
@@ -665,8 +665,8 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
-      mutate: callback => callback(),
-      measurePromise: callback => Promise.resolve(callback()),
+      mutate: (callback) => callback(),
+      measurePromise: (callback) => Promise.resolve(callback()),
     };
   });
 
@@ -842,11 +842,11 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resources.visible_ = true;
     // Don't resolve layout - immulating DOM being removed and load
     // promise not resolving.
-    resource2.layoutCallback = new Promise(unusedResolve => {});
+    resource2.layoutCallback = new Promise((unusedResolve) => {});
     resource2.unlayoutCallback = () => true;
     resource2.prerenderAllowed = () => false;
 
-    resource1.layoutCallback = new Promise(unusedResolve => {});
+    resource1.layoutCallback = new Promise((unusedResolve) => {});
     resource1.unlayoutCallback = () => true;
 
     env.sandbox
@@ -1195,7 +1195,7 @@ describes.realWin(
       runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win;
     let resources;
     let viewerSendMessageStub, viewportContentHeightChangedStub;
@@ -1211,7 +1211,7 @@ describes.realWin(
         resources.viewport_,
         'contentHeightChanged'
       );
-      env.sandbox.stub(resources.vsync_, 'run').callsFake(task => {
+      env.sandbox.stub(resources.vsync_, 'run').callsFake((task) => {
         task.measure({});
       });
     });
@@ -1274,7 +1274,7 @@ describes.realWin(
   }
 );
 
-describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
+describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
   let resources;
   let parent;
   let parentResource;

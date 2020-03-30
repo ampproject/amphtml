@@ -42,14 +42,15 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier.purifyHtml(html).innerHTML;
+      purify = (html) => purifier.purifyHtml(html).innerHTML;
 
       /**
        * Helper that calls purifyTagsForTripleMustache().
        * @param {string} html
        * @return {string}
        */
-      purifyTripleMustache = html => purifier.purifyTagsForTripleMustache(html);
+      purifyTripleMustache = (html) =>
+        purifier.purifyTagsForTripleMustache(html);
     });
 
     describe('sanitizer tests', () => {
@@ -749,7 +750,7 @@ describe
       html = document.createElement('html');
       const doc = {
         documentElement: html,
-        createElement: tagName => document.createElement(tagName),
+        createElement: (tagName) => document.createElement(tagName),
       };
 
       const purifier = () => new Purifier(doc);
@@ -759,7 +760,7 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier().purifyHtml(html).innerHTML;
+      purify = (html) => purifier().purifyHtml(html).innerHTML;
     });
 
     describe('AMP formats', () => {

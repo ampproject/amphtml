@@ -18,7 +18,7 @@ import {createPointerEvent} from '../../../../../testing/test-helper';
 
 const t = describe.configure().ifChrome();
 
-t.run('amp-image-slider', function() {
+t.run('amp-image-slider', function () {
   this.timeout(20000);
   const DEFAULT_TIMEOUT = 1600;
 
@@ -72,7 +72,7 @@ t.run('amp-image-slider', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       let doc;
       let observer;
@@ -796,7 +796,7 @@ t.run('amp-image-slider', function() {
 
       // Wait for certain ms
       function timeout(ms) {
-        return new Promise(resolve => win.setTimeout(resolve, ms));
+        return new Promise((resolve) => win.setTimeout(resolve, ms));
       }
 
       // Preparing necessary information before tests
@@ -906,8 +906,9 @@ t.run('amp-image-slider', function() {
         );
         const sliderHeights = slider1.offsetHeight + slider2.offsetHeight;
         // 10 times viewport height + 2 slider height, ensure slider is out
-        doc.querySelector('#pad').style.height = `${sliderHeights +
-          10 * viewportHeight}px`;
+        doc.querySelector('#pad').style.height = `${
+          sliderHeights + 10 * viewportHeight
+        }px`;
       }
 
       // A collection of convenient event calls
@@ -970,7 +971,7 @@ t.run('amp-image-slider', function() {
       // Rejects if timeout
       function startObserver(target, cb, opt_errorMessage) {
         return new Promise((resolve, reject) => {
-          observer = new win.MutationObserver(mutationList => {
+          observer = new win.MutationObserver((mutationList) => {
             if (cb(mutationList)) {
               cleanupObserver();
               resolve();

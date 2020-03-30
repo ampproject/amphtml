@@ -30,7 +30,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document;
     let ampdoc;
     let element;
@@ -180,7 +180,7 @@ describes.fakeWin(
       class Vendor1 {}
       const vendor1 = new Vendor1();
       source.getAdapter().registerVendor(vendor1);
-      return source.adapter_.vendorPromise_.then(vendor => {
+      return source.adapter_.vendorPromise_.then((vendor) => {
         expect(vendor).to.equal(vendor1);
       });
     });
@@ -261,7 +261,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement, elementOn, elementOff, elementError;
@@ -308,7 +308,7 @@ describes.fakeWin(
 
       env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
-      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function () {});
 
       service = new AccessService(ampdoc);
       service.viewer_ = {
@@ -332,10 +332,10 @@ describes.fakeWin(
           return Promise.resolve();
         });
       service.vsync_ = {
-        mutate: callback => {
+        mutate: (callback) => {
           callback();
         },
-        mutatePromise: callback => {
+        mutatePromise: (callback) => {
           callback();
           return Promise.resolve();
         },
@@ -525,7 +525,7 @@ describes.fakeWin(
 
     it('should run authorization for broadcast events on same origin', () => {
       let broadcastHandler;
-      env.sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {
+      env.sandbox.stub(service.viewer_, 'onBroadcast').callsFake((handler) => {
         broadcastHandler = handler;
       });
       service.runAuthorization_ = env.sandbox.spy();
@@ -556,7 +556,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let configElement, elementOn, elementOff;
     let templatesMock;
@@ -601,7 +601,7 @@ describes.fakeWin(
           return Promise.resolve();
         });
       service.vsync_ = {
-        mutatePromise: callback => {
+        mutatePromise: (callback) => {
           callback();
           return Promise.resolve();
         },
@@ -713,7 +713,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement;
@@ -752,7 +752,7 @@ describes.fakeWin(
       visibilityChanged = new Observable();
       env.sandbox
         .stub(ampdoc, 'onVisibilityChanged')
-        .callsFake(callback => visibilityChanged.add(callback));
+        .callsFake((callback) => visibilityChanged.add(callback));
 
       service = new AccessService(ampdoc);
 
@@ -772,7 +772,7 @@ describes.fakeWin(
       service.analyticsEvent_ = env.sandbox.spy();
       service.sources_[0].analyticsEvent_ = env.sandbox.spy();
       win.docState_ = {
-        onReady: callback => callback(),
+        onReady: (callback) => callback(),
       };
 
       service.viewer_ = {
@@ -781,7 +781,7 @@ describes.fakeWin(
 
       scrolled = new Observable();
       service.viewport_ = {
-        onScroll: callback => scrolled.add(callback),
+        onScroll: (callback) => scrolled.add(callback),
       };
 
       // Emulate first authorization complete.
@@ -883,7 +883,7 @@ describes.fakeWin(
     it('should wait for last authorization completion', () => {
       expect(service.lastAuthorizationPromises_).to.exist;
       let lastAuthorizationResolver;
-      service.lastAuthorizationPromises_ = new Promise(resolve => {
+      service.lastAuthorizationPromises_ = new Promise((resolve) => {
         lastAuthorizationResolver = resolve;
       });
       const triggerStart = 1; // First event is "access-authorization-received".
@@ -935,7 +935,7 @@ describes.fakeWin(
 
     it('should schedule "viewed" monitoring only once', () => {
       const timeToView = 2000;
-      service.whenViewed_ = ttv => {
+      service.whenViewed_ = (ttv) => {
         expect(ttv).to.equal(timeToView);
         return Promise.resolve();
       };
@@ -987,7 +987,7 @@ describes.fakeWin(
           () => 'SUCCESS',
           () => 'ERROR'
         )
-        .then(result => {
+        .then((result) => {
           expect(result).to.equal('ERROR');
           expect(service.reportViewToServer_).to.have.not.been.called;
           expect(service.reportViewPromise_).to.not.exist;
@@ -1008,9 +1008,9 @@ describes.fakeWin(
         })
         .then(
           () => 'SUCCESS',
-          reason => reason
+          (reason) => reason
         )
-        .then(result => {
+        .then((result) => {
           expect(result).to.equal('SUCCESS');
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(service.reportViewPromise_).to.exist;
@@ -1048,11 +1048,11 @@ describes.fakeWin(
           () => {
             return 'SUCCESS';
           },
-          error => {
+          (error) => {
             return 'ERROR ' + error;
           }
         )
-        .then(result => {
+        .then((result) => {
           expect(result).to.equal('SUCCESS');
           expect(service.sources_[0].analyticsEvent_).to.have.been.calledWith(
             'access-pingback-sent'
@@ -1073,11 +1073,11 @@ describes.fakeWin(
           () => {
             return 'SUCCESS';
           },
-          error => {
+          (error) => {
             return 'ERROR ' + error;
           }
         )
-        .then(result => {
+        .then((result) => {
           expect(result).to.match(/ERROR/);
           expect(
             service.sources_[0].analyticsEvent_
@@ -1121,7 +1121,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let configElement;
     let serviceMock;
@@ -1149,7 +1149,7 @@ describes.fakeWin(
       document.documentElement.classList.remove('amp-access-error');
 
       env.sandbox.stub(ampdoc, 'isVisible').returns(true);
-      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function () {});
 
       service = new AccessService(ampdoc);
 
@@ -1177,10 +1177,7 @@ describes.fakeWin(
     });
 
     it('should intercept global action to refresh', () => {
-      serviceMock
-        .expects('runAuthorization_')
-        .withExactArgs()
-        .once();
+      serviceMock.expects('runAuthorization_').withExactArgs().once();
       const event = {preventDefault: env.sandbox.spy()};
       const invocation = {
         method: 'refresh',
@@ -1203,7 +1200,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement;
@@ -1235,7 +1232,7 @@ describes.fakeWin(
       document.documentElement.classList.remove('amp-access-error');
 
       env.sandbox.stub(ampdoc, 'isVisible').returns(true);
-      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function () {});
 
       service = new AccessService(ampdoc);
 
@@ -1265,10 +1262,7 @@ describes.fakeWin(
     });
 
     it('should intercept global action to login', () => {
-      serviceMock
-        .expects('loginWithType_')
-        .withExactArgs('')
-        .once();
+      serviceMock.expects('loginWithType_').withExactArgs('').once();
       const event = {preventDefault: env.sandbox.spy()};
       const invocation = {method: 'login', event, satisfiesTrust: () => false};
       service.handleAction_(invocation);
@@ -1280,10 +1274,7 @@ describes.fakeWin(
     });
 
     it('should intercept global action to login-other', () => {
-      serviceMock
-        .expects('loginWithType_')
-        .withExactArgs('other')
-        .once();
+      serviceMock.expects('loginWithType_').withExactArgs('other').once();
       const event = {preventDefault: env.sandbox.spy()};
       const invocation = {
         method: 'login-other',
@@ -1307,7 +1298,7 @@ describes.fakeWin(
         )
         .returns(Promise.resolve('reader1'))
         .once();
-      return service.sources_[0].buildLoginUrls_().then(urls => {
+      return service.sources_[0].buildLoginUrls_().then((urls) => {
         const {url} = urls[0];
         expect(url).to.equal('https://acme.com/l?rid=reader1');
         expect(service.sources_[0].loginUrlMap_['']).to.equal(url);
@@ -1328,7 +1319,7 @@ describes.fakeWin(
         )
         .returns(Promise.resolve('reader1'))
         .atLeast(1);
-      return source.buildLoginUrls_().then(urls => {
+      return source.buildLoginUrls_().then((urls) => {
         expect(urls).to.have.length(2);
         let l1, l2;
         if (urls[0].type == 'login1') {
@@ -1367,7 +1358,7 @@ describes.fakeWin(
         )
         .returns(Promise.resolve('reader1'))
         .once();
-      return source.buildLoginUrls_().then(urls => {
+      return source.buildLoginUrls_().then((urls) => {
         const {url} = urls[0];
         expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
         expect(source.loginUrlMap_['']).to.equal(url);
@@ -1501,7 +1492,7 @@ describes.fakeWin(
           () => 'S',
           () => 'ERROR'
         )
-        .then(result => {
+        .then((result) => {
           expect(result).to.equal('ERROR');
           expect(source.loginPromise_).to.not.exist;
           expect(service.runAuthorization_).to.have.not.been.called;
@@ -1588,7 +1579,7 @@ describes.fakeWin(
           () => 'SUCCESS',
           () => 'ERROR'
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('ERROR');
           expect(source.loginPromise_).to.equal(p3);
         });
@@ -1622,7 +1613,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let configElement;
     let service;
@@ -1673,7 +1664,7 @@ describes.fakeWin(
     });
 
     it('should return reader id', () => {
-      return service.getAccessReaderId().then(readerId => {
+      return service.getAccessReaderId().then((readerId) => {
         expect(readerId).to.equal('reader1');
       });
     });
@@ -1686,7 +1677,7 @@ describes.fakeWin(
         service.getAuthdataField('other'),
         service.getAuthdataField('child.other'),
         service.getAuthdataField('zero'),
-      ]).then(res => {
+      ]).then((res) => {
         expect(res[0]).to.equal(3);
         expect(res[1]).to.equal('premium');
         expect(res[2]).to.be.null;
@@ -1697,7 +1688,7 @@ describes.fakeWin(
 
     it('should wait the first authorization for authdata', () => {
       let viewsValue;
-      const promise = service.getAuthdataField('views').then(res => {
+      const promise = service.getAuthdataField('views').then((res) => {
         viewsValue = res;
       });
       return Promise.resolve()
@@ -1714,11 +1705,11 @@ describes.fakeWin(
 
     it('should wait the latest authorization for authdata if started', () => {
       let resolver;
-      service.lastAuthorizationPromises_ = new Promise(resolve => {
+      service.lastAuthorizationPromises_ = new Promise((resolve) => {
         resolver = resolve;
       });
       let viewsValue;
-      const promise = service.getAuthdataField('views').then(res => {
+      const promise = service.getAuthdataField('views').then((res) => {
         viewsValue = res;
       });
       return Promise.resolve()
@@ -1746,7 +1737,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement, elementOnBeer, elementOnBeerOrDonuts, elementError;
@@ -1837,10 +1828,10 @@ describes.fakeWin(
           return Promise.resolve();
         });
       service.vsync_ = {
-        mutate: callback => {
+        mutate: (callback) => {
           callback();
         },
-        mutatePromise: callback => {
+        mutatePromise: (callback) => {
           callback();
           return Promise.resolve();
         },
@@ -1940,7 +1931,7 @@ describes.fakeWin(
         service.getAuthdataField('garbage'),
         service.getAuthdataField('donuts.garbage'),
         service.getAuthdataField('garbage.garbage'),
-      ]).then(res => {
+      ]).then((res) => {
         expect(res[0]).to.be.null;
         expect(res[1]).to.equal(true);
         expect(res[2]).to.be.null;

@@ -38,7 +38,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describes.sandboxed('IntersectionObserverApi', {}, env => {
+describes.sandboxed('IntersectionObserverApi', {}, (env) => {
   let onScrollSpy;
   let onChangeSpy;
   let testDoc;
@@ -106,7 +106,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
       element: testEle,
       getVsync: () => {
         return {
-          measure: func => {
+          measure: (func) => {
             func();
           },
         };
@@ -189,7 +189,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
   });
 });
 
-describes.sandboxed('getIntersectionChangeEntry', {}, env => {
+describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(performance, 'now').callsFake(() => 100);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
@@ -240,7 +240,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, env => {
   });
 });
 
-describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
+describes.sandboxed('IntersectionObserverPolyfill', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(performance, 'now').callsFake(() => 100);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
@@ -348,7 +348,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       });
       env.sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
         return {
-          onNextPass: callback => {
+          onNextPass: (callback) => {
             callback();
           },
         };

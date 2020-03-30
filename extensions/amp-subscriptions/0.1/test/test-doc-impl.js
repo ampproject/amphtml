@@ -16,7 +16,7 @@
 
 import {DocImpl} from '../doc-impl';
 
-describes.realWin('DocImpl', {amp: true}, env => {
+describes.realWin('DocImpl', {amp: true}, (env) => {
   let ampdoc;
   let configDoc;
 

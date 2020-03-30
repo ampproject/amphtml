@@ -45,7 +45,7 @@ describe('Math.sign', () => {
 
   it('returns NaN for non-numbers', () => {
     expect(sign({})).to.deep.equal(NaN);
-    expect(sign(function() {})).to.deep.equal(NaN);
+    expect(sign(function () {})).to.deep.equal(NaN);
     expect(sign('test1')).to.deep.equal(NaN);
     expect(sign('1test')).to.deep.equal(NaN);
   });

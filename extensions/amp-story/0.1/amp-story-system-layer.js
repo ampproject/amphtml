@@ -204,7 +204,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -218,13 +218,13 @@ export class SystemLayer {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -232,7 +232,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.DESKTOP_STATE,
-      isDesktop => {
+      (isDesktop) => {
         this.onDesktopStateUpdate_(isDesktop);
       },
       true /** callToInitialize */
@@ -240,7 +240,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.HAS_AUDIO_STATE,
-      hasAudio => {
+      (hasAudio) => {
         this.onHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
@@ -248,7 +248,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
-      isMuted => {
+      (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
       true /** callToInitialize */
@@ -256,7 +256,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      index => {
+      (index) => {
         this.onPageIndexUpdate_(index);
       },
       true /** callToInitialize */
@@ -425,7 +425,7 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
     });
   }
 

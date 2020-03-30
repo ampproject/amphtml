@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-instagram'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,7 +55,7 @@ describes.realWin(
       );
       visibilityPromise.returns(
         opt_visibilityPromise ||
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolve();
           })
       );
@@ -128,7 +128,7 @@ describes.realWin(
 
     it('only sets src on placeholder after prerender', async () => {
       let becomeVisible;
-      const visible = new Promise(resolve => (becomeVisible = resolve));
+      const visible = new Promise((resolve) => (becomeVisible = resolve));
       const ins = await getIns(
         'fBwFP',
         undefined,
@@ -145,18 +145,18 @@ describes.realWin(
     });
 
     it('builds a placeholder image without inserting iframe', async () => {
-      return getIns('fBwFP', true, ins => {
+      return getIns('fBwFP', true, (ins) => {
         const placeholder = ins.querySelector('[placeholder]');
         const iframe = ins.querySelector('iframe');
         expect(iframe).to.be.null;
         expect(placeholder).to.not.have.display('');
         testImage(placeholder.querySelector('img'));
-      }).then(ins => {
+      }).then((ins) => {
         const placeholder = ins.querySelector('[placeholder]');
         const iframe = ins.querySelector('iframe');
         ins.getVsync = () => {
           return {
-            mutate: fn => fn(),
+            mutate: (fn) => fn(),
           };
         };
         testIframe(iframe);

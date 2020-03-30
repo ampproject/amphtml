@@ -145,7 +145,7 @@ export class IntersectionObserverApi {
     );
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(
-      entries => {
+      (entries) => {
         // Remove target info from cross origin iframe.
         for (let i = 0; i < entries.length; i++) {
           delete entries[i]['target'];

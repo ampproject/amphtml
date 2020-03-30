@@ -30,7 +30,7 @@ export function readmo(global, data) {
 
   global.publisherUrl = data.url;
 
-  Object.keys(data).forEach(property => {
+  Object.keys(data).forEach((property) => {
     config[property] = data[property];
   });
 

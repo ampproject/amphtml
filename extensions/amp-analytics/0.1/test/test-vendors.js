@@ -58,7 +58,7 @@ describes.realWin.skip(
       extensions: ['amp-analytics'],
     },
   },
-  function(env) {
+  function (env) {
     let win, doc;
     let requestVerifier;
     let elementMacros;
@@ -130,7 +130,7 @@ describes.realWin.skip(
           delete AnalyticsConfig[vendor];
           continue;
         }
-        describe('analytics vendor: ' + vendor, function() {
+        describe('analytics vendor: ' + vendor, function () {
           beforeEach(() => {
             // Remove all the triggers to prevent unwanted requests, for instance
             // one from a "visible" trigger. Those unwanted requests are a source
@@ -144,7 +144,7 @@ describes.realWin.skip(
               'should produce request: ' +
                 name +
                 '. If this test fails update vendor-requests.json',
-              function*() {
+              function* () {
                 const urlReplacements = Services.urlReplacementsForDoc(
                   doc.documentElement
                 );
@@ -153,7 +153,7 @@ describes.realWin.skip(
                 );
                 window.sandbox
                   .stub(urlReplacements.getVariableSource(), 'get')
-                  .callsFake(function(name) {
+                  .callsFake(function (name) {
                     expect(this.replacements_).to.have.property(name);
                     const defaultValue = `_${name.toLowerCase()}_`;
                     return {
@@ -163,7 +163,7 @@ describes.realWin.skip(
 
                 window.sandbox
                   .stub(ExpansionOptions.prototype, 'getVar')
-                  .callsFake(function(name) {
+                  .callsFake(function (name) {
                     let val = this.vars[name];
                     if (val == null || val == '') {
                       val = '!' + name;
@@ -179,7 +179,7 @@ describes.realWin.skip(
 
                 window.sandbox
                   .stub(variableService, 'getMacros')
-                  .callsFake(function() {
+                  .callsFake(function () {
                     // Add all the macros in amp-analytics
                     const merged = {...this.macros_, ...elementMacros};
 

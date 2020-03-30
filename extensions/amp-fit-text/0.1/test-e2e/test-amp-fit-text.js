@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amp-fit-text/amp-fit-text.html',
     environments: 'ampdoc-amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

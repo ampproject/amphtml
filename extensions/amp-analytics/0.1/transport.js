@@ -316,7 +316,7 @@ export class Transport {
  */
 function cacheFuncResult(func) {
   const cachedValue = {};
-  return arg => {
+  return (arg) => {
     const key = String(arg);
     if (cachedValue[key] === undefined) {
       cachedValue[key] = func(arg);

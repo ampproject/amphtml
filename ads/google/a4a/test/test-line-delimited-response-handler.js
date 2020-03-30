@@ -30,7 +30,7 @@ describe('#line-delimited-response-handler', () => {
    */
   function generateResponseFormat() {
     let slotDataString = '';
-    slotData.forEach(slot => {
+    slotData.forEach((slot) => {
       // TODO: escape creative returns
       const creative = slot.creative
         .replace(/\\/g, '\\\\')
@@ -45,7 +45,7 @@ describe('#line-delimited-response-handler', () => {
     // Streamed response calls chunk handlers after returning so need to
     // wait on chunks.
     let chunkResolver;
-    const chunkPromise = new Promise(resolver => (chunkResolver = resolver));
+    const chunkPromise = new Promise((resolver) => (chunkResolver = resolver));
     const chunkHandlerWrapper = (creative, metaData) => {
       chunkHandlerStub(creative, metaData);
       if (chunkHandlerStub.callCount == slotData.length) {
@@ -67,20 +67,20 @@ describe('#line-delimited-response-handler', () => {
       // Could have duplicate responses so need to iterate and get counts.
       // TODO: can't use objects as keys :(
       const calls = {};
-      slotData.forEach(slot => {
-        const normalizedHeaderNames = Object.keys(slot.headers).map(s => [
+      slotData.forEach((slot) => {
+        const normalizedHeaderNames = Object.keys(slot.headers).map((s) => [
           s.toLowerCase(),
           s,
         ]);
         slot.normalizedHeaders = {};
         normalizedHeaderNames.forEach(
-          namePair =>
+          (namePair) =>
             (slot.normalizedHeaders[namePair[0]] = slot.headers[namePair[1]])
         );
         const key = slot.creative + JSON.stringify(slot.normalizedHeaders);
         calls[key] ? calls[key]++ : (calls[key] = 1);
       });
-      slotData.forEach(slot => {
+      slotData.forEach((slot) => {
         expect(
           chunkHandlerStub.withArgs(slot.creative, slot.normalizedHeaders)
             .callCount

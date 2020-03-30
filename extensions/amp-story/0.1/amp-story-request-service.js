@@ -66,8 +66,8 @@ export class AmpStoryRequestService {
 
     return Services.urlReplacementsForDoc(this.storyElement_)
       .expandUrlAsync(user().assertString(rawUrl))
-      .then(url => this.xhr_.fetchJson(url, opts))
-      .then(response => {
+      .then((url) => this.xhr_.fetchJson(url, opts))
+      .then((response) => {
         userAssert(response.ok, 'Invalid HTTP response');
         return response.json();
       });

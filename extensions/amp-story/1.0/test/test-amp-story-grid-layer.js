@@ -23,7 +23,7 @@ import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-grid-layer', {amp: true}, env => {
+describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;
   let element;
   let gridLayerEl;
@@ -36,7 +36,7 @@ describes.realWin('amp-story-grid-layer', {amp: true}, env => {
 
     env.sandbox
       .stub(Services, 'vsyncFor')
-      .callsFake(() => ({mutate: task => task()}));
+      .callsFake(() => ({mutate: (task) => task()}));
 
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
@@ -47,16 +47,16 @@ describes.realWin('amp-story-grid-layer', {amp: true}, env => {
     };
 
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
-    registerServiceBuilder(win, 'performance', function() {
+    registerServiceBuilder(win, 'performance', function () {
       return {
         isPerformanceTrackingOn: () => false,
       };
@@ -73,7 +73,7 @@ describes.realWin('amp-story-grid-layer', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    env.sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
+    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
 
     grid = new AmpStoryGridLayer(gridLayerEl);
   });

@@ -48,7 +48,7 @@ describe('canonicalizeString', () => {
   });
 });
 
-describes.realWin('findSentences', {}, env => {
+describes.realWin('findSentences', {}, (env) => {
   let win, document;
   beforeEach(() => {
     win = env.win;
@@ -240,7 +240,7 @@ describes.realWin('findSentences', {}, env => {
   });
 });
 
-describes.realWin('TextScanner', {}, env => {
+describes.realWin('TextScanner', {}, (env) => {
   let win, root;
   beforeEach(() => {
     win = env.win;
@@ -306,7 +306,7 @@ describes.realWin('TextScanner', {}, env => {
   });
 });
 
-describes.realWin('markTextRangeList', {}, env => {
+describes.realWin('markTextRangeList', {}, (env) => {
   let win, document;
   beforeEach(() => {
     win = env.win;

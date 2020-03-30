@@ -16,7 +16,7 @@
 
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 
-describes.fakeWin('DetachedDomStream', {amp: true}, env => {
+describes.fakeWin('DetachedDomStream', {amp: true}, (env) => {
   let win;
   let chunkSpy;
   let endSpy;

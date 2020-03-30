@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, input;
 
     beforeEach(() => {
@@ -46,7 +46,7 @@ describes.realWin(
 
     describe('Single binding', () => {
       let binding;
-      const getBindingSingle = attributes =>
+      const getBindingSingle = (attributes) =>
         new AutocompleteBindingSingle(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
@@ -130,7 +130,7 @@ describes.realWin(
 
     describe('Inline binding', () => {
       let pre, userInput, match, binding;
-      const getBindingInline = attributes =>
+      const getBindingInline = (attributes) =>
         new AutocompleteBindingInline(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {

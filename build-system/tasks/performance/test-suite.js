@@ -25,7 +25,7 @@ const THRESHOLD = argv.threshold ? argv.threshold + 1 : DEFAULT_THRESHOLD;
 const {urls} = new loadConfig();
 const reports = getReport(urls);
 
-reports.forEach(report => {
+reports.forEach((report) => {
   describe(`${report.url}`, () => {
     report.metrics.forEach(({experiment, control}, name) => {
       it(`${name}`, () => {
