@@ -20,8 +20,11 @@ const conf = require('./build.conf');
 const crypto = require('crypto');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
+const log = require('fancy-log');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const {EventEmitter} = require('events');
+const {red, cyan} = require('ansi-colors');
 
 /**
  * Files on which to run pre-closure babel transforms.
@@ -117,6 +120,33 @@ function preClosureBabel() {
   });
 }
 
+/**
+ * Handles a pre-closure babel error. Optionally doesn't emit a fatal error when
+ * compilation fails and signals the error so subsequent operations can be
+ * skipped (used in watch mode).
+ *
+ * @param {Error} err
+ * @param {string} outputFilename
+ * @param {?Object} options
+ * @param {?Function} resolve
+ */
+function handlePreClosureError(err, outputFilename, options, resolve) {
+  log(red('ERROR:'), err.message, '\n');
+  const reasonMessage = `Could not compile ${cyan(outputFilename)}`;
+  if (options && options.continueOnError) {
+    log(red('ERROR:'), reasonMessage);
+    options.errored = true;
+    if (resolve) {
+      resolve();
+    }
+  } else {
+    const reason = new Error(reasonMessage);
+    reason.showStack = false;
+    new EventEmitter().emit('error', reason);
+  }
+}
+
 module.exports = {
+  handlePreClosureError,
   preClosureBabel,
 };

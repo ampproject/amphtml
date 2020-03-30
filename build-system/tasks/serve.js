@@ -24,11 +24,17 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
+  distNailgunPort,
+  startNailgunServer,
+  stopNailgunServer,
+} = require('./nailgun');
+const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
+const {cleanupBuildDir} = require('../compile/compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {exec} = require('../common/exec');
@@ -112,6 +118,11 @@ async function startServer(
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
   logServeMode();
+
+  if (lazyBuild && argv.compiled) {
+    cleanupBuildDir();
+    await startNailgunServer(distNailgunPort, /* detached */ false);
+  }
 }
 
 /**
@@ -146,7 +157,10 @@ function resetServerFiles() {
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
+  if (lazyBuild && argv.compiled) {
+    await stopNailgunServer(distNailgunPort);
+  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -157,8 +171,8 @@ function stopServer() {
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
-  stopServer();
+async function restartServer() {
+  await stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();
@@ -192,7 +206,9 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, restartServer);
+  watch(serverFiles, async () => {
+    await restartServer();
+  });
   if (argv.new_server) {
     buildNewServer();
   }
