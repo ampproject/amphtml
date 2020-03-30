@@ -1313,7 +1313,13 @@ export class AmpStory extends AMP.BaseElement {
    */
   onNoNextPage_() {
     if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
-      this.viewerMessagingHandler_.send('selectDocument', dict({'next': true}));
+      const advancementMode = this.storeService_.get(
+        StateProperty.ADVANCEMENT_MODE
+      );
+      this.viewerMessagingHandler_.send(
+        'selectDocument',
+        dict({'next': true, 'advancementMode': advancementMode})
+      );
       return;
     }
 
@@ -1342,9 +1348,12 @@ export class AmpStory extends AMP.BaseElement {
    */
   onNoPreviousPage_() {
     if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
+      const advancementMode = this.storeService_.get(
+        StateProperty.ADVANCEMENT_MODE
+      );
       this.viewerMessagingHandler_.send(
         'selectDocument',
-        dict({'previous': true})
+        dict({'previous': true, 'advancementMode': advancementMode})
       );
       return;
     }
@@ -1359,17 +1368,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   performTapNavigation_(direction) {
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.MANUAL_ADVANCE
+    );
+
     if (
       this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
     ) {
       this.next_();
       return;
     }
-
-    this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
-      AdvancementMode.MANUAL_ADVANCE
-    );
 
     if (direction === TapNavigationDirection.NEXT) {
       this.next_();

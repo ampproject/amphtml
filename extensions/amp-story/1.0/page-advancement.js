@@ -756,11 +756,11 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_TIME
     );
+    super.onAdvance();
   }
 
   /**
@@ -1031,11 +1031,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_MEDIA
     );
+    super.onAdvance();
   }
 
   /**
