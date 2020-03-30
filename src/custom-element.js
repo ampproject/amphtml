@@ -1729,32 +1729,36 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      this.mutateOrInvoke_(() => {
-        let state = this.loadingState_;
-        // Repeat "loading enabled" check because it could have changed while
-        // waiting for vsync.
-        if (state && !force && !this.isLoadingEnabled_()) {
-          state = false;
-        }
-        if (state) {
-          this.prepareLoading_();
-        }
-        if (!this.loadingContainer_) {
-          return;
-        }
+      this.mutateOrInvoke_(
+        () => {
+          let state = this.loadingState_;
+          // Repeat "loading enabled" check because it could have changed while
+          // waiting for vsync.
+          if (state && !force && !this.isLoadingEnabled_()) {
+            state = false;
+          }
+          if (state) {
+            this.prepareLoading_();
+          }
+          if (!this.loadingContainer_) {
+            return;
+          }
 
-        this.loadingContainer_.classList.toggle('amp-hidden', !state);
-        this.loadingElement_.classList.toggle('amp-active', state);
+          this.loadingContainer_.classList.toggle('amp-hidden', !state);
+          this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && cleanup && !this.implementation_.isLoadingReused()) {
-          const loadingContainer = this.loadingContainer_;
-          this.loadingContainer_ = null;
-          this.loadingElement_ = null;
-          this.mutateOrInvoke_(() => {
-            dom.removeElement(loadingContainer);
-          });
-        }
-      });
+          if (!state && cleanup && !this.implementation_.isLoadingReused()) {
+            const loadingContainer = this.loadingContainer_;
+            this.loadingContainer_ = null;
+            this.loadingElement_ = null;
+            this.mutateOrInvoke_(() => {
+              dom.removeElement(loadingContainer);
+            });
+          }
+        },
+        undefined,
+        /* skipMeasure */ true
+      );
     }
 
     /**
@@ -1834,12 +1838,14 @@ function createBaseCustomElementClass(win) {
      *
      * @param {function()} mutator
      * @param {?Element=} opt_element
+     * @param {boolean=} opt_skipMeasure
      */
-    mutateOrInvoke_(mutator, opt_element) {
+    mutateOrInvoke_(mutator, opt_element, opt_skipMeasure = false) {
       if (this.ampdoc_) {
         Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
           opt_element || this,
-          mutator
+          mutator,
+          opt_skipMeasure
         );
       } else {
         mutator();
