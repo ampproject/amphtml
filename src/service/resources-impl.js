@@ -1163,12 +1163,7 @@ export class ResourcesImpl {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
-        this.buildOrScheduleBuildForResource_(
-          r,
-          /* checkForDupes */ true,
-          /* scheduleWhenBuilt */ true,
-          /* ignoreQuota */ r.hasBeenPremeasured()
-        );
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (
         relayoutAll ||
