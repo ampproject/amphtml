@@ -134,6 +134,7 @@ module.exports = {
 
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };
