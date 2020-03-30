@@ -163,6 +163,15 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      dev().fine(TAG, 'BUILD RACE!');
+      // this.isBuilding_ = true;
+      // element.whenBuilt().then(
+      //   () => this.onBuildSuccess_(),
+      //   reason => this.onBuildFailure_(reason)
+      // );
+    }
+
     /** @private {number} */
     this.priorityOverride_ = -1;
 
