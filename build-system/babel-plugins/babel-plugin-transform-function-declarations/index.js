@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const DEBUG = true;
+const DEBUG = false;
 
 // Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
 // See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
