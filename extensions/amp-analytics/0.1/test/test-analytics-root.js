@@ -335,19 +335,19 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
     it('should find an AMP element for AMP search', async () => {
       child.classList.add('i-amphtml-element');
-      const elements = await root.getAmpElementOrElements(body, '#child');
-      expect(elements[0]).to.equal(child);
+      const element = await root.getAmpElement(body, '#child');
+      expect(element).to.equal(child);
     });
 
     it('should allow not-found element for AMP search', async () => {
-      await root.getAmpElementOrElements(body, '#unknown').catch(error => {
+      await root.getAmpElement(body, '#unknown').catch(error => {
         expect(error).to.match(/Element "#unknown" not found/);
       });
     });
 
     it('should fail if the found element is not AMP for AMP search', async () => {
       child.classList.remove('i-amphtml-element');
-      await root.getAmpElementOrElements(body, '#child').catch(error => {
+      await root.getAmpElement(body, '#child').catch(error => {
         expect(error).to.match(/required to be an AMP element/);
       });
     });
@@ -355,84 +355,43 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     describe('get amp elements', () => {
       let child2;
       let elements;
-      let error;
 
       beforeEach(() => {
-        error = false;
         child2 = win.document.createElement('child');
         body.appendChild(child2);
         child.classList.add('i-amphtml-element');
         child2.classList.add('i-amphtml-element');
       });
 
-      afterEach(() => {
-        if (!error) {
-          expect(elements).to.contain(child);
-          expect(elements).to.contain(child2);
-          expect(elements.length).to.equal(2);
-        }
-      });
-
-      it('should find elements by ID', async () => {
-        child.id = 'myId';
-        child2.id = 'myId';
-        elements = await root.getAmpElementOrElements(
-          body,
-          '#myId',
-          null,
-          true
-        );
-      });
-
-      it('should find element by class', async () => {
-        child.classList.add('myClass');
-        child2.classList.add('myClass');
-        elements = await root.getAmpElementOrElements(
-          body,
-          '.myClass',
-          null,
-          true
-        );
-      });
-
-      it('should find element by tag name', async () => {
-        elements = await root.getAmpElementOrElements(
-          body,
-          'child',
-          null,
-          true
-        );
-      });
-
-      it('should find element by selector', async () => {
+      it('should find all elements by selector', async () => {
         child.id = 'myId';
         child2.id = 'myId';
         child.classList.add('myClass');
         child2.classList.add('myClass');
-        elements = await root.getAmpElementOrElements(
+        elements = await root.getAmpElements(
           body,
-          '#myId.myClass',
+          ['#myId.myClass'],
           null,
           true
         );
+        expect(elements).to.contain(child);
+        expect(elements).to.contain(child2);
+        expect(elements.length).to.equal(2);
       });
 
       it('should allow not-found element for AMP search', async () => {
-        error = true;
-        await root
-          .getAmpElementOrElements(body, '#unknown', null, true)
-          .catch(error => {
-            expect(error).to.match(/Element "#unknown" not found/);
-          });
+        expectAsyncConsoleError(/Element "#unknown" not found/, 1);
+        await expect(
+          root.getAmpElements(body, ['#unknown'], null, true)
+        ).to.be.rejectedWith(/Element "#unknown" not found​​​/);
       });
 
       it('should fail if the found element is not AMP for AMP search', async () => {
-        error = true;
-        await root
-          .getAmpElementOrElements(body, '#child', null, true)
-          .catch(error => {
-            expect(error).to.match(/required to be an AMP element/);
-          });
+        expectAsyncConsoleError(/required to be an AMP element/, 1);
+        child.classList.remove('i-amphtml-element');
+        await expect(
+          root.getAmpElements(body, ['#child'], null, true)
+        ).to.be.rejectedWith(/required to be an AMP element/);
       });
     });
   });
@@ -721,6 +680,49 @@ describes.realWin(
         addTestInstance(root.getElement(target, '.target'), target);
         addTestInstance(root.getElement(child, '.target'), target);
         addTestInstance(root.getElement(other, '.target'), target);
+      });
+    });
+
+    describe('get amp elements', () => {
+      let child2;
+      let elements;
+
+      beforeEach(() => {
+        child2 = win.document.createElement('child');
+        body.appendChild(child2);
+        child.classList.add('i-amphtml-element');
+        child2.classList.add('i-amphtml-element');
+      });
+
+      it('should find all elements by selector', async () => {
+        child.id = 'myId';
+        child2.id = 'myId';
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        elements = await root.getAmpElements(
+          body,
+          ['#myId.myClass'],
+          null,
+          true
+        );
+        expect(elements).to.contain(child);
+        expect(elements).to.contain(child2);
+        expect(elements.length).to.equal(2);
+      });
+
+      it('should allow not-found element for AMP search', async () => {
+        expectAsyncConsoleError(/Element "#unknown" not found/, 1);
+        await expect(
+          root.getAmpElements(body, ['#unknown'], null, true)
+        ).to.be.rejectedWith(/Element "#unknown" not found​​​/);
+      });
+
+      it('should fail if the found element is not AMP for AMP search', async () => {
+        expectAsyncConsoleError(/required to be an AMP element/, 1);
+        child.classList.remove('i-amphtml-element');
+        await expect(
+          root.getAmpElements(body, ['#child'], null, true)
+        ).to.be.rejectedWith(/required to be an AMP element/);
       });
     });
 

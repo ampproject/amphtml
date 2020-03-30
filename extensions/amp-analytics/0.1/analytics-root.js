@@ -280,25 +280,31 @@ export class AnalyticsRoot {
   }
 
   /**
-   * @param {string} selector DOM query selector.
+   * @param {!Array<string>} selectors Array of DOM query selectors.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByQuerySelectorAll_(selector) {
+  getElementsByQuerySelectorAll_(selectors) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
-      let foundElements;
-      try {
-        foundElements = this.getRoot().querySelectorAll(selector);
-      } catch (e) {
-        userAssert(false, `Invalid query selector ${selector}`);
-      }
-      const elements = [];
-      for (let i = 0; i < foundElements.length; i++) {
-        if (this.contains(foundElements[i])) {
-          elements.push(foundElements[i]);
+      let elements = [];
+      for (let i = 0; i < selectors.length; i++) {
+        let nodeList;
+        const elementArray = [];
+        const selector = selectors[i];
+        try {
+          nodeList = this.getRoot().querySelectorAll(selector);
+        } catch {
+          userAssert(false, `Invalid query selector ${selector}`);
         }
+        for (let j = 0; j < nodeList.length; j++) {
+          if (this.contains(nodeList[j])) {
+            elementArray.push(nodeList[j]);
+          }
+        }
+        userAssert(elementArray.length, `Element "${selector}" not found`);
+        this.verifyAmpElements_(elementArray, selector);
+        elements = elements.concat(elementArray);
       }
-      userAssert(elements.length, `Element "${selector}" not found`);
       return elements;
     });
   }
@@ -338,24 +344,9 @@ export class AnalyticsRoot {
         !selectionMethod,
         'Cannot have selectionMethod defined with an array selector.'
       );
-      const elementsListsPromise = [];
-      for (let i = 0; i < selectors.length; i++) {
-        elementsListsPromise.push(
-          this.getElementsByQuerySelectorAll_(selectors[i])
-        );
-      }
-      return Promise.all(elementsListsPromise).then(elementsLists => {
-        const uniqueElements = [];
-        for (let i = 0; i < elementsLists.length; i++) {
-          this.verifyAmpElements_(elementsLists[i], selectors[i]);
-          for (let j = 0; j < elementsLists[i].length; j++) {
-            if (uniqueElements.indexOf(elementsLists[i][j]) === -1) {
-              uniqueElements.push(elementsLists[i][j]);
-            }
-          }
-        }
-        return uniqueElements;
-      });
+      return this.getElementsByQuerySelectorAll_(selectors).then(elements =>
+        elements.filter((element, index) => elements.indexOf(element) === index)
+      );
     }
     return this.getAmpElement(
       context,
