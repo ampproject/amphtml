@@ -200,7 +200,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     return (this.iframePromise_ = this.loadPromise(iframe).then(
-      function() {
+      function () {
         this.iframeLoaded_ = true;
         this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
           () => {
@@ -263,7 +263,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @param {Function} handler
    */
   listenToPlaybuzzItemMessage_(messageName, handler) {
-    const unlisten = events.listen(this.win, 'message', event =>
+    const unlisten = events.listen(this.win, 'message', (event) =>
       utils.handleMessageByName(this.iframe_, event, messageName, handler)
     );
     this.unlisteners_.push(unlisten);
@@ -321,7 +321,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -333,6 +333,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-playbuzz', '0.1', AMP => {
+AMP.extension('amp-playbuzz', '0.1', (AMP) => {
   AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
 });

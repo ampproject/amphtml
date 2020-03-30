@@ -19,7 +19,7 @@ import {IFRAME_IDX} from '../../src/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
-describes.realWin('AmpStoryPlayer', {amp: false}, env => {
+describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let url;

@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-pinterest'],
     },
   },
-  env => {
+  (env) => {
     function widgetURL(pinID) {
       return (
         'begin:https://widgets.pinterest.com/v3/pidgets/pins/info/?pin_ids=' +
@@ -76,7 +76,7 @@ describes.realWin(
         'http://www.flickr.com/photos/kentbrew/6851755809/',
         'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
         'Next stop: Pinterest'
-      ).then(pin => {
+      ).then((pin) => {
         const a = pin.querySelector('a');
         const href = a.href.replace(/&guid=\w+/, '');
         expect(a).to.not.be.null;
@@ -209,7 +209,7 @@ describes.realWin(
             },
           ],
         }
-      ).then(pin => {
+      ).then((pin) => {
         const img = pin.querySelector('img');
         expect(img.getAttribute('alt')).to.equal(
           'Hands making heart over Pinterest logo'
@@ -336,7 +336,7 @@ describes.realWin(
             'id': '228065168607834583',
           },
         ],
-      }).then(pin => {
+      }).then((pin) => {
         const img = pin.querySelector('img');
         expect(img.getAttribute('alt')).to.equal(
           'End of the line Riding the ' +
@@ -439,7 +439,7 @@ describes.realWin(
             'id': '445786063109072175',
           },
         ],
-      }).then(pin => {
+      }).then((pin) => {
         const img = pin.querySelector('img');
         expect(img.getAttribute('alt')).to.be.null;
       });

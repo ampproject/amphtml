@@ -111,7 +111,7 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
   };
   const pluginOptions = {
     platform: ['java'], // Override the binary used by closure compiler
-    logger: errors => (compilerErrors = errors), // Capture compiler errors
+    logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
   if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {

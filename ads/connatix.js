@@ -38,7 +38,7 @@ export function connatix(global, data) {
 
   window.addEventListener(
     'connatix_no_content',
-    function() {
+    function () {
       window.context.noContentAvailable();
     },
     false

@@ -28,6 +28,6 @@ class CarouselSelector extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-carousel', '0.1', AMP => {
+AMP.extension('amp-carousel', '0.1', (AMP) => {
   AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 });

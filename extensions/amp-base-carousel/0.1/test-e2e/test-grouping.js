@@ -28,7 +28,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     const slideWidth = pageWidth / 2;
     let controller;
 
@@ -36,7 +36,7 @@ describes.endtoend(
       return controller.getElementRect(el);
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       controller = env.controller;
       this.timeout(3 * 1000);
     });

@@ -16,7 +16,7 @@
 import {Services} from '../../src/services';
 import {fetchDocument} from '../../src/document-fetcher';
 
-describes.realWin('DocumentFetcher', {amp: true}, function(env) {
+describes.realWin('DocumentFetcher', {amp: true}, function (env) {
   let xhrCreated;
   let ampdocServiceForStub;
   let ampdocViewerStub;
@@ -24,7 +24,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
   this.timeout(5000);
   function setupMockXhr() {
     const mockXhr = env.sandbox.useFakeXMLHttpRequest();
-    xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
+    xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
   }
   beforeEach(() => {
     ampdocServiceForStub = env.sandbox.stub(Services, 'ampdocServiceFor');
@@ -44,11 +44,11 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
     });
 
     it('should be able to fetch a document', () => {
-      const promise = fetchDocument(win, '/index.html').then(doc => {
+      const promise = fetchDocument(win, '/index.html').then((doc) => {
         expect(doc.nodeType).to.equal(9);
         expect(doc.firstChild.textContent).to.equals('Foo');
       });
-      xhrCreated.then(xhr => {
+      xhrCreated.then((xhr) => {
         expect(xhr.requestHeaders['Accept']).to.equal('text/html');
         xhr.respond(
           200,
@@ -63,7 +63,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
     });
     it('should mark 400 as not retriable', () => {
       const promise = fetchDocument(win, '/index.html');
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           400,
           {
@@ -72,14 +72,14 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
           '<html></html>'
         )
       );
-      return promise.catch(e => {
+      return promise.catch((e) => {
         expect(e.retriable).to.be.equal(false);
         expect(e.retriable).to.not.equal(true);
       });
     });
     it('should mark 415 as retriable', () => {
       const promise = fetchDocument(win, '/index.html');
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           415,
           {
@@ -88,14 +88,14 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
           '<html></html>'
         )
       );
-      return promise.catch(e => {
+      return promise.catch((e) => {
         expect(e.retriable).to.exist;
         expect(e.retriable).to.be.true;
       });
     });
     it('should mark 500 as retriable', () => {
       const promise = fetchDocument(win, '/index.html');
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           415,
           {
@@ -104,14 +104,14 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
           '<html></html>'
         )
       );
-      return promise.catch(e => {
+      return promise.catch((e) => {
         expect(e.retriable).to.exist;
         expect(e.retriable).to.be.true;
       });
     });
     it('should error on non truthy responseXML', () => {
       const promise = fetchDocument(win, '/index.html');
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           200,
           {
@@ -120,7 +120,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
           '{"hello": "world"}'
         )
       );
-      return promise.catch(e => {
+      return promise.catch((e) => {
         expect(e.message).to.contain('responseXML should exist');
       });
     });
@@ -180,7 +180,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
       return fetchDocument(
         interceptionEnabledWin,
         'https://www.some-url.org/some-resource/'
-      ).then(doc => {
+      ).then((doc) => {
         expect(doc)
           .to.have.nested.property('body.textContent')
           .that.equals('Foo');

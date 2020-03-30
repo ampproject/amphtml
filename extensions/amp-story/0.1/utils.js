@@ -145,7 +145,7 @@ export function getTextColorForRGB(rgb) {
   const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  const getLinearRGBValue = x => {
+  const getLinearRGBValue = (x) => {
     // 8bit to sRGB.
     x /= 255;
 

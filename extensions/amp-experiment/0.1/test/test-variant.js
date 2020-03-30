@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
 import {allocateVariant} from '../variant';
 
-describes.sandboxed('allocateVariant', {}, env => {
+describes.sandboxed('allocateVariant', {}, (env) => {
   let fakeHead;
   let fakeWin;
   let ampdoc;
@@ -55,12 +55,9 @@ describes.sandboxed('allocateVariant', {}, env => {
       );
 
     uniformStub = env.sandbox.stub();
-    env.sandbox
-      .stub(Services, 'cryptoFor')
-      .withArgs(fakeWin)
-      .returns({
-        uniform: uniformStub,
-      });
+    env.sandbox.stub(Services, 'cryptoFor').withArgs(fakeWin).returns({
+      uniform: uniformStub,
+    });
 
     getNotificationStub = env.sandbox.stub();
     env.sandbox
@@ -72,10 +69,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    env.sandbox
-      .stub(Services, 'viewerForDoc')
-      .withArgs(ampdoc)
-      .returns({});
+    env.sandbox.stub(Services, 'viewerForDoc').withArgs(ampdoc).returns({});
 
     env.sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
     getParamStub = env.sandbox.stub(ampdoc, 'getParam').returns(null);

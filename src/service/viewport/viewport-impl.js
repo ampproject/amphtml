@@ -197,7 +197,7 @@ export class ViewportImpl {
         Object.defineProperty(win, 'scrollTo', {
           value: (x, y) => this.setScrollTop(y),
         });
-        ['pageYOffset', 'scrollY'].forEach(prop => {
+        ['pageYOffset', 'scrollY'].forEach((prop) => {
           Object.defineProperty(win, prop, {
             get: () => this.getScrollTop(),
           });
@@ -270,7 +270,7 @@ export class ViewportImpl {
 
   /** @override */
   updatePaddingBottom(paddingBottom) {
-    this.ampdoc.waitForBodyOpen().then(body => {
+    this.ampdoc.waitForBodyOpen().then((body) => {
       setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
@@ -386,7 +386,7 @@ export class ViewportImpl {
       });
     }
 
-    return Promise.all([local, root]).then(values => {
+    return Promise.all([local, root]).then((values) => {
       const l = values[0];
       const r = values[1];
       if (!r) {
@@ -408,7 +408,7 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.scrollIntoViewInternal_(element, parent)
     );
   }
@@ -423,7 +423,7 @@ export class ViewportImpl {
       Math.max(0, elementTop - this.paddingTop_)
     );
 
-    newScrollTopPromise.then(newScrollTop =>
+    newScrollTopPromise.then((newScrollTop) =>
       this.setElementScrollTop_(parent, newScrollTop)
     );
   }
@@ -435,7 +435,7 @@ export class ViewportImpl {
       "Curve without duration doesn't make sense."
     );
 
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.animateScrollWithinParent(
         element,
         parent,
@@ -472,7 +472,7 @@ export class ViewportImpl {
         break;
     }
 
-    return this.getElementScrollTop_(parent).then(curScrollTop => {
+    return this.getElementScrollTop_(parent).then((curScrollTop) => {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       const newScrollTop = Math.max(0, calculatedScrollTop);
       if (newScrollTop == curScrollTop) {
@@ -512,7 +512,7 @@ export class ViewportImpl {
     const interpolate = numeric(curScrollTop, newScrollTop);
     return Animation.animate(
       parent,
-      position => {
+      (position) => {
         this.setElementScrollTop_(parent, interpolate(position));
       },
       duration,
@@ -893,7 +893,7 @@ export class ViewportImpl {
     const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
     return Animation.animate(
       this.ampdoc.getRootNode(),
-      time => {
+      (time) => {
         const p = tr(time);
         this.fixedLayer_.transformMutate(`translateY(${p}px)`);
       },

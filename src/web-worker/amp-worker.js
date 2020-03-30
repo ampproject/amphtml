@@ -101,8 +101,8 @@ class AmpWorker {
         ampCors: false,
         bypassInterceptorForDev: getMode().localDev,
       })
-      .then(res => res.text())
-      .then(text => {
+      .then((res) => res.text())
+      .then((text) => {
         // Workaround since Worker constructor only accepts same origin URLs.
         const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
           type: 'text/javascript',

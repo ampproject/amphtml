@@ -322,7 +322,7 @@ class Chunks {
       'i-amphtml-no-boilerplate'
     );
 
-    this.win_.addEventListener('message', e => {
+    this.win_.addEventListener('message', (e) => {
       if (getData(e) == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }

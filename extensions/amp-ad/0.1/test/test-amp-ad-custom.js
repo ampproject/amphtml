@@ -19,7 +19,7 @@ import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes, removeChildren} from '../../../../src/dom';
 
-describes.realWin('Amp custom ad', {amp: true}, env => {
+describes.realWin('Amp custom ad', {amp: true}, (env) => {
   let win;
   let doc;
 
@@ -200,7 +200,7 @@ describe.skip('#getLayoutPriority', () => {
         ampdoc: 'shadow',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 0', () => {
         const adElement = getCustomAd(
           env.win.document,
@@ -221,7 +221,7 @@ describe.skip('#getLayoutPriority', () => {
         ampdoc: 'single',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 0', () => {
         const adElement = getCustomAd(
           env.win.document,

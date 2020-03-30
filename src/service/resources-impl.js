@@ -202,10 +202,9 @@ export class ResourcesImpl {
       // Classic IntersectionObserver doesn't support viewport tracking and
       // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
       // supports it via {root: document}, which throws on other browsers.
-      const root =
-        /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-          ? /** @type {*} */ (this.win.document)
-          : null);
+      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
+        ? /** @type {*} */ (this.win.document)
+        : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
           this.intersects_.bind(this),
@@ -228,7 +227,7 @@ export class ResourcesImpl {
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
-    this.viewport_.onChanged(event => {
+    this.viewport_.onChanged((event) => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
@@ -253,7 +252,7 @@ export class ResourcesImpl {
       this.schedulePass();
     });
 
-    this.viewer_.onRuntimeState(state => {
+    this.viewer_.onRuntimeState((state) => {
       dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
@@ -270,7 +269,7 @@ export class ResourcesImpl {
 
     if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
       /** @private @const */
-      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 250);
+      this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
       listen(this.win.document, 'scroll', this.throttledScroll_, {
         capture: true,
@@ -294,7 +293,7 @@ export class ResourcesImpl {
 
     const toUnload = [];
 
-    const promises = entries.map(entry => {
+    const promises = entries.map((entry) => {
       const {boundingClientRect, isIntersecting, target, rootBounds} = entry;
 
       // Strangely, JSC is missing x/y from typedefs of boundingClientRect and
@@ -625,7 +624,7 @@ export class ResourcesImpl {
     }
     return promise.then(
       () => this.schedulePass(),
-      error => {
+      (error) => {
         // Build failed: remove the resource. No other state changes are
         // needed.
         this.removeResource_(resource);
@@ -678,7 +677,7 @@ export class ResourcesImpl {
     resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
-    this.queue_.forEach(task => {
+    this.queue_.forEach((task) => {
       if (task.resource == resource) {
         task.priority = newLayoutPriority;
       }
@@ -1032,7 +1031,7 @@ export class ResourcesImpl {
           // schedule a size change.
           this.vsync_.run(
             {
-              measure: state => {
+              measure: (state) => {
                 state.resize = false;
                 const parent = resource.element.parentElement;
                 if (!parent) {
@@ -1053,7 +1052,7 @@ export class ResourcesImpl {
                 }
                 state.resize = true;
               },
-              mutate: state => {
+              mutate: (state) => {
                 if (state.resize) {
                   request.resource.changeSize(
                     request.newHeight,
@@ -1113,13 +1112,13 @@ export class ResourcesImpl {
       if (scrollAdjSet.length > 0) {
         this.vsync_.run(
           {
-            measure: state => {
+            measure: (state) => {
               state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
-            mutate: state => {
+            mutate: (state) => {
               let minTop = -1;
-              scrollAdjSet.forEach(request => {
+              scrollAdjSet.forEach((request) => {
                 const box = request.resource.getLayoutBox();
                 minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
                 request.resource.changeSize(
@@ -1193,7 +1192,7 @@ export class ResourcesImpl {
   unloadResources_(resources) {
     if (resources.length) {
       this.vsync_.mutate(() => {
-        resources.forEach(r => {
+        resources.forEach((r) => {
           r.unload();
           this.cleanupTasks_(r);
         });
@@ -1638,7 +1637,7 @@ export class ResourcesImpl {
     }
 
     let timeout = 0;
-    this.exec_.forEach(other => {
+    this.exec_.forEach((other) => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
       const penalty = Math.max(
@@ -1864,17 +1863,17 @@ export class ResourcesImpl {
     };
     const noop = () => {};
     const pause = () => {
-      this.resources_.forEach(r => r.pause());
+      this.resources_.forEach((r) => r.pause());
     };
     const unload = () => {
-      this.resources_.forEach(r => {
+      this.resources_.forEach((r) => {
         r.unload();
         this.cleanupTasks_(r);
       });
       this.unselectText_();
     };
     const resume = () => {
-      this.resources_.forEach(r => r.resume());
+      this.resources_.forEach((r) => r.resume());
       doWork();
     };
 
@@ -1931,13 +1930,13 @@ export class ResourcesImpl {
       // for layout again later on.
       // TODO(mkhatib): Think about how this might affect preload tasks once the
       // prerender change is in.
-      this.queue_.purge(task => {
+      this.queue_.purge((task) => {
         return task.resource == resource;
       });
-      this.exec_.purge(task => {
+      this.exec_.purge((task) => {
         return task.resource == resource;
       });
-      remove(this.requestsChangeSize_, request => {
+      remove(this.requestsChangeSize_, (request) => {
         return request.resource === resource;
       });
     }

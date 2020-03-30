@@ -29,7 +29,7 @@ export function kiosked(global, data) {
   }
   window.addEventListener(
     'kioskedAdRender',
-    function() {
+    function () {
       global.context.renderStart();
     },
     false
@@ -37,7 +37,7 @@ export function kiosked(global, data) {
 
   window.addEventListener(
     'kioskedAdNoFill',
-    function() {
+    function () {
       global.context.noContentAvailable();
     },
     false

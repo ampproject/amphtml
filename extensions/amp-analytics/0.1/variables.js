@@ -191,11 +191,11 @@ export class VariableService {
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
-    this.register_('$TRIM', value => value.trim());
-    this.register_('$TOLOWERCASE', value => value.toLowerCase());
-    this.register_('$TOUPPERCASE', value => value.toUpperCase());
-    this.register_('$NOT', value => String(!value));
-    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$TRIM', (value) => value.trim());
+    this.register_('$TOLOWERCASE', (value) => value.toLowerCase());
+    this.register_('$TOUPPERCASE', (value) => value.toUpperCase());
+    this.register_('$NOT', (value) => String(!value));
+    this.register_('$BASE64', (value) => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
       stringToBool(value) ? thenValue : elseValue
@@ -255,7 +255,7 @@ export class VariableService {
    */
   getMacros(element) {
     const elementMacros = {
-      'COOKIE': name =>
+      'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
@@ -338,10 +338,10 @@ export class VariableService {
       const urlReplacements = Services.urlReplacementsForDoc(element);
 
       return Promise.resolve(value)
-        .then(value => {
+        .then((value) => {
           if (isArray(value)) {
             return Promise.all(
-              value.map(item =>
+              value.map((item) =>
                 urlReplacements.expandStringAsync(item, bindings, opt_whitelist)
               )
             );
@@ -352,7 +352,7 @@ export class VariableService {
             opt_whitelist
           );
         })
-        .then(value => {
+        .then((value) => {
           if (!options.noEncode) {
             value = encodeVars(/** @type {string|?Array<string>} */ (value));
           }
@@ -472,7 +472,7 @@ export function getNameArgsForTesting(key) {
  * @return {!Promise<?string>}
  */
 function getConsentStateStr(element) {
-  return getConsentPolicyState(element).then(consent => {
+  return getConsentPolicyState(element).then((consent) => {
     if (!consent) {
       return null;
     }

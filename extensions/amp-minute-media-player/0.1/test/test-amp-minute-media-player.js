@@ -33,7 +33,7 @@ describes.realWin(
       extensions: ['amp-minute-media-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

@@ -92,10 +92,10 @@ export class AmpTruncateText extends AMP.BaseElement {
     }
 
     this.setupActions_();
-    this.collapsedSlot_.addEventListener('click', event => {
+    this.collapsedSlot_.addEventListener('click', (event) => {
       this.maybeExpand_(event);
     });
-    this.expandedSlot_.addEventListener('click', event => {
+    this.expandedSlot_.addEventListener('click', (event) => {
       this.maybeCollapse_(event);
     });
   }
@@ -129,16 +129,19 @@ export class AmpTruncateText extends AMP.BaseElement {
       '.i-amphtml-truncate-persistent-slot'
     );
 
-    iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), el => {
+    iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), (el) => {
       this.collapsedSlot_.appendChild(el);
     });
-    iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), el => {
+    iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), (el) => {
       this.expandedSlot_.appendChild(el);
     });
-    iterateCursor(this.element.querySelectorAll('[slot="persistent"]'), el => {
-      this.persistentSlot_.appendChild(el);
-    });
-    this.getRealChildNodes().forEach(node => {
+    iterateCursor(
+      this.element.querySelectorAll('[slot="persistent"]'),
+      (el) => {
+        this.persistentSlot_.appendChild(el);
+      }
+    );
+    this.getRealChildNodes().forEach((node) => {
       defaultSlot.appendChild(node);
     });
 
@@ -293,6 +296,6 @@ export class AmpTruncateText extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-truncate-text', '0.1', AMP => {
+AMP.extension('amp-truncate-text', '0.1', (AMP) => {
   AMP.registerElement('amp-truncate-text', AmpTruncateText, CSS);
 });

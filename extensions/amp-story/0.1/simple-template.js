@@ -58,7 +58,7 @@ export function renderAsElement(doc, elementDef) {
  */
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
-  elementsDef.forEach(elementDef =>
+  elementsDef.forEach((elementDef) =>
     fragment.appendChild(renderSingle(doc, elementDef))
   );
   return fragment;
@@ -76,12 +76,17 @@ function renderSingle(doc, elementDef) {
 
   if (elementDef.localizedStringId) {
     const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNullV01(win).then(localizationService => {
-      devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      el.textContent = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-      );
-    });
+    Services.localizationServiceForOrNullV01(win).then(
+      (localizationService) => {
+        devAssert(
+          localizationService,
+          'Could not retrieve LocalizationService.'
+        );
+        el.textContent = localizationService.getLocalizedString(
+          /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+        );
+      }
+    );
   }
 
   if (elementDef.unlocalizedString) {

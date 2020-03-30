@@ -42,7 +42,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     sandbox.stub(_3p, 'computeInMasterFrame').callsFake(noop);
     sandbox.stub(_3p, 'loadScript').callsFake(noop);
 
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise(true).then((iframe) => {
       // Simulate the iframe that ssp will be called inside.
       win = iframe.win;
       win.context = {

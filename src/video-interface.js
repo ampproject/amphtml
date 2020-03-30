@@ -551,7 +551,7 @@ export const VideoServiceSignals = {
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
-  whenUpgradedToCustomElement(dev().assertElement(video)).then(el => {
+  whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
     el.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
   });
 }

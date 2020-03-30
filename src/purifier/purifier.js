@@ -140,7 +140,7 @@ export class Purifier {
     // Sanitize dummy markup so that the hook is invoked.
     const p = this.doc_.createElement('p');
     this.domPurify_.sanitize(p);
-    Object.keys(BLACKLISTED_TAGS).forEach(tag => {
+    Object.keys(BLACKLISTED_TAGS).forEach((tag) => {
       allowedTags[tag] = false;
     });
     // Pops the last hook added.
@@ -268,11 +268,11 @@ export class Purifier {
     /**
      * @param {!Node} unusedNode
      */
-    const afterSanitizeElements = unusedNode => {
+    const afterSanitizeElements = (unusedNode) => {
       // DOMPurify doesn't have a attribute-specific tag whitelist API and
       // `allowedTags` has a per-invocation scope, so we need to undo
       // changes after sanitizing elements.
-      allowedTagsChanges.forEach(tag => {
+      allowedTagsChanges.forEach((tag) => {
         delete allowedTags[tag];
       });
       allowedTagsChanges.length = 0;
@@ -375,13 +375,13 @@ export class Purifier {
      * @param {!Element} element
      * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
      */
-    const afterSanitizeAttributes = element => {
+    const afterSanitizeAttributes = (element) => {
       markElementForDiffing(element, () => String(this.keyCounter_++));
 
       // DOMPurify doesn't have a tag-specific attribute whitelist API and
       // `allowedAttributes` has a per-invocation scope, so we need to undo
       // changes after sanitizing attributes.
-      allowedAttributesChanges.forEach(attr => {
+      allowedAttributesChanges.forEach((attr) => {
         delete allowedAttributes[attr];
       });
       allowedAttributesChanges.length = 0;
@@ -389,7 +389,7 @@ export class Purifier {
       // Only allow relative references in <use>.
       const tagName = element.nodeName.toLowerCase();
       if (tagName === 'use') {
-        ['href', 'xlink:href'].forEach(attr => {
+        ['href', 'xlink:href'].forEach((attr) => {
           if (
             element.hasAttribute(attr) &&
             !startsWith(element.getAttribute(attr), '#')
@@ -430,7 +430,7 @@ export class Purifier {
       }
     };
 
-    const afterSanitizeElements = unusedNode => {
+    const afterSanitizeElements = (unusedNode) => {
       // DOMPurify doesn't have an required-attribute tag whitelist API and
       // `allowedTags` has a per-invocation scope, so we need to remove
       // required-attribute tags after sanitizing each element.

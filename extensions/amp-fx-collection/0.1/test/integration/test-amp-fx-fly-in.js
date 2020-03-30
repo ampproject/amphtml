@@ -16,7 +16,7 @@
 
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
-describe.skip('amp-fx-collection', function() {
+describe.skip('amp-fx-collection', function () {
   const css = `
     .spacer {
       height: 100vh;
@@ -54,7 +54,7 @@ describe.skip('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -92,7 +92,7 @@ describe.skip('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -130,7 +130,7 @@ describe.skip('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -164,5 +164,5 @@ function getViewportHeight(win) {
 }
 
 function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -20,7 +20,7 @@
  * @param {Array<number>} array
  * @return {number} average
  */
-const average = array => {
+const average = (array) => {
   if (!array || array.length == 0) {
     return 0;
   }
@@ -33,7 +33,7 @@ const average = array => {
  * @param {Array<number>} array
  * @return {Array<number>} array
  */
-const sort = array => {
+const sort = (array) => {
   return array.sort((a, b) => a - b);
 };
 
@@ -43,7 +43,7 @@ const sort = array => {
  * @param {Array<number>} array
  * @return {number} median
  */
-const median = array => {
+const median = (array) => {
   sort(array);
   const {length} = array;
   const mid = Math.floor(length / 2);
@@ -60,7 +60,7 @@ const median = array => {
  * @param {Array<number>} array
  * @return {number} q1
  */
-const q1 = array => {
+const q1 = (array) => {
   sort(array);
   const mid = Math.ceil(array.length / 2);
   const half = array.slice(0, mid);
@@ -73,7 +73,7 @@ const q1 = array => {
  * @param {Array<number>} array
  * @return {number} q3
  */
-const q3 = array => {
+const q3 = (array) => {
   sort(array);
   const mid = Math.ceil(array.length / 2);
   const half = array.slice(mid);
@@ -106,14 +106,14 @@ function percent(a, b) {
  * @return {number}
  */
 function trimmedMean(results, metric) {
-  const array = results.map(a => a[metric]);
+  const array = results.map((a) => a[metric]);
   const stats = {
     q1: q1(array),
     q3: q3(array),
   };
   const lowerFence = stats.q1 - 1.5 * (stats.q3 - stats.q1);
   const upperFence = stats.q3 + 1.5 * (stats.q3 - stats.q1);
-  const trimmedArray = array.filter(a => a >= lowerFence && a <= upperFence);
+  const trimmedArray = array.filter((a) => a >= lowerFence && a <= upperFence);
 
   return Math.round(average(trimmedArray));
 }

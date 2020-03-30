@@ -51,7 +51,7 @@ export function uzou(global, data) {
     ),
     referer: widgetParams['referer'] || global.context.referrer,
   };
-  ['adServerHost', 'akamaiHost', 'iframeSrcPath'].forEach(function(elem) {
+  ['adServerHost', 'akamaiHost', 'iframeSrcPath'].forEach(function (elem) {
     if (widgetParams[elem]) {
       uzouInjector[elem] = widgetParams[elem];
     }
@@ -69,7 +69,7 @@ export function uzou(global, data) {
  * @return {*} TODO(#23582): Specify return type
  */
 function fixedEncodeURIComponent(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
     return '%' + c.charCodeAt(0).toString(16);
   });
 }

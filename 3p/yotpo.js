@@ -28,10 +28,10 @@ function getContainerScript(global, scriptSource, cb) {
     delete global.Yotpo.widgets['testimonials'];
     const yotpoWidget =
       typeof global.yotpo === 'undefined' ? undefined : global.yotpo;
-    yotpoWidget.on('CssReady', function() {
+    yotpoWidget.on('CssReady', function () {
       cb(yotpoWidget, 'cssLoaded');
     });
-    yotpoWidget.on('BatchReady', function() {
+    yotpoWidget.on('BatchReady', function () {
       cb(yotpoWidget, 'batchLoaded');
     });
   });

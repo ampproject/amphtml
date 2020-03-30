@@ -17,7 +17,7 @@
 import {adplugg} from '../../../ads/adplugg';
 import {createIframePromise} from '../../../testing/iframe';
 
-describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
+describes.fakeWin('amp-ad-adplugg-impl', {}, (env) => {
   let win;
   let testData;
 
@@ -26,7 +26,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
    */
   beforeEach(() => {
     // Set up our test sandbox.
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise(true).then((iframe) => {
       // Simulate the iframe that adplugg will be called inside.
       win = iframe.win;
       win.context = {
@@ -104,8 +104,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
       // Set up mocks, spys, etc.
       const renderStartSpy = env.sandbox.stub(win.context, 'renderStart');
       win.AdPlugg = {
-        push: function() {},
-        on: function() {},
+        push: function () {},
+        on: function () {},
       };
       const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
       const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');
@@ -154,8 +154,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
         'noContentAvailable'
       );
       win.AdPlugg = {
-        push: function() {},
-        on: function() {},
+        push: function () {},
+        on: function () {},
       };
       const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
       const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');

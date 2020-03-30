@@ -143,13 +143,13 @@ describes.sandboxed('FixedLayer', {}, () => {
           ],
         },
       ],
-      querySelectorAll: selector => {
+      querySelectorAll: (selector) => {
         if (!allRules[selector]) {
           return null;
         }
         return allRules[selector].elements;
       },
-      contains: elem => {
+      contains: (elem) => {
         return !!elem.parentElement;
       },
       defaultView: {
@@ -157,14 +157,14 @@ describes.sandboxed('FixedLayer', {}, () => {
         clearTimeout: window.clearTimeout,
         Promise: window.Promise,
         MutationObserver: FakeMutationObserver,
-        getComputedStyle: elem => {
+        getComputedStyle: (elem) => {
           return elem.computedStyle;
         },
         navigator: window.navigator,
         location: window.location,
         cookie: '',
       },
-      createElement: name => {
+      createElement: (name) => {
         return createElement(name);
       },
       documentElement: docElem,
@@ -184,11 +184,11 @@ describes.sandboxed('FixedLayer', {}, () => {
 
     vsyncTasks = [];
     vsyncApi = {
-      runPromise: task => {
+      runPromise: (task) => {
         vsyncTasks.push(task);
         return Promise.resolve();
       },
-      mutate: mutator => {
+      mutate: (mutator) => {
         vsyncTasks.push({mutate: mutator});
       },
     };
@@ -197,7 +197,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   class FakeAttributes {
     constructor() {
       const attrs = [];
-      attrs.setNamedItem = function({name, value}) {
+      attrs.setNamedItem = function ({name, value}) {
         for (let i = 0; i < this.length; i++) {
           if (this[i].name === name) {
             this[i].value = value;
@@ -327,7 +327,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         transition: '',
       },
       matches: () => true,
-      compareDocumentPosition: other => {
+      compareDocumentPosition: (other) => {
         if (other.id > id) {
           return Node.DOCUMENT_POSITION_FOLLOWING;
         }
@@ -380,11 +380,11 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
       },
       attributes: new FakeAttributes(),
-      appendChild: child => {
+      appendChild: (child) => {
         child.parentElement = elem;
         children.push(child);
       },
-      removeChild: child => {
+      removeChild: (child) => {
         const index = children.indexOf(child);
         if (index != -1) {
           children.splice(index, 1);
@@ -1205,7 +1205,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          window.sandbox.stub(timer, 'delay').callsFake(callback => {
+          window.sandbox.stub(timer, 'delay').callsFake((callback) => {
             callback();
           });
           return mutationObserver
@@ -1616,7 +1616,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        window.sandbox.stub(timer, 'delay').callsFake(callback => {
+        window.sandbox.stub(timer, 'delay').callsFake((callback) => {
           callback();
         });
         return mutationObserver
@@ -1724,11 +1724,11 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
 
     const vsyncTasks = [];
     vsyncApi = {
-      runPromise: task => {
+      runPromise: (task) => {
         vsyncTasks.push(task);
         return Promise.resolve();
       },
-      mutate: mutator => {
+      mutate: (mutator) => {
         vsyncTasks.push({mutate: mutator});
       },
     };
@@ -1794,11 +1794,11 @@ describes.sandboxed(
 
       const vsyncTasks = [];
       vsyncApi = {
-        runPromise: task => {
+        runPromise: (task) => {
           vsyncTasks.push(task);
           return Promise.resolve();
         },
-        mutate: mutator => {
+        mutate: (mutator) => {
           vsyncTasks.push({mutate: mutator});
         },
       };

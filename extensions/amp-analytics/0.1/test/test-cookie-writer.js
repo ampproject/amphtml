@@ -30,7 +30,7 @@ describes.realWin(
     amp: true,
     runtimeOn: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let setCookieSpy;
@@ -207,7 +207,7 @@ describes.realWin(
   }
 );
 
-describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
+describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
   let win;
   let clock;
   let doc;

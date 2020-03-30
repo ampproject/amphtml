@@ -217,7 +217,7 @@ export class AmpGeo extends AMP.BaseElement {
 
     return this.mode_ !== mode.GEO_API
       ? Promise.resolve()
-      : this.fetchCountry_().then(country => {
+      : this.fetchCountry_().then((country) => {
           if (country) {
             this.country_ = country;
           } else {
@@ -299,8 +299,8 @@ export class AmpGeo extends AMP.BaseElement {
             method: 'GET',
             credentials: 'omit',
           })
-          .then(res => res.json())
-          .then(json => {
+          .then((res) => res.json())
+          .then((json) => {
             if (!/^[a-z]{2}$/i.test(json['country'])) {
               user().error(
                 TAG,
@@ -310,13 +310,13 @@ export class AmpGeo extends AMP.BaseElement {
             }
             return json['country'].toLowerCase();
           })
-          .catch(reason => {
+          .catch((reason) => {
             user().error(TAG, 'XHR country request failed', reason);
             return null;
           }),
         `Timeout (${API_TIMEOUT} sec) reached waiting for API response`
       )
-      .catch(error => {
+      .catch((error) => {
         user().error(TAG, error);
         return null;
       });
@@ -328,10 +328,9 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups =
-      /** @type {!Object<string, !Array<string>>} */ (config[
-        'ISOCountryGroups'
-      ]);
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */ (config[
+      'ISOCountryGroups'
+    ]);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
@@ -339,7 +338,7 @@ export class AmpGeo extends AMP.BaseElement {
         `${errorPrefix} must be an object`
       );
       this.definedGroups_ = Object.keys(ISOCountryGroups);
-      this.definedGroups_.forEach(group => {
+      this.definedGroups_.forEach((group) => {
         this.assertWithErrorReturn_(
           /^[a-z]+[a-z0-9]*$/i.test(group) && !/^amp/.test(group),
           `${errorPrefix}[${group}] name is invalid`
@@ -378,7 +377,7 @@ export class AmpGeo extends AMP.BaseElement {
         countries.push(country);
         return countries;
       }, [])
-      .map(c => c.toLowerCase());
+      .map((c) => c.toLowerCase());
     return expandedGroup.includes(this.country_);
   }
 
@@ -418,10 +417,10 @@ export class AmpGeo extends AMP.BaseElement {
     return ampdoc
       .whenReady()
       .then(() => ampdoc.waitForBodyOpen())
-      .then(body => {
+      .then((body) => {
         return self.findCountry_(ampdoc).then(() => body);
       })
-      .then(body => {
+      .then((body) => {
         self.matchCountryGroups_(config);
 
         let classesToRemove = [];
@@ -435,7 +434,7 @@ export class AmpGeo extends AMP.BaseElement {
             // Build the AMP State, add classes
             states.ISOCountry = self.country_;
 
-            const classesToAdd = self.matchedGroups_.map(group => {
+            const classesToAdd = self.matchedGroups_.map((group) => {
               states[group] = true;
               return GROUP_PREFIX + group;
             });
@@ -458,12 +457,12 @@ export class AmpGeo extends AMP.BaseElement {
               const {classList} = body;
               // Always remove the pending class
               classesToRemove.push('amp-geo-pending');
-              classesToRemove.forEach(toRemove => {
+              classesToRemove.forEach((toRemove) => {
                 /** @type {!DOMTokenList} */ (classList).remove(toRemove);
               });
 
               // add the new classes to <body>
-              classesToAdd.forEach(toAdd => classList.add(toAdd));
+              classesToAdd.forEach((toAdd) => classList.add(toAdd));
 
               // Only include amp state if user requests it to
               // avoid validator issue with missing amp-bind js
@@ -510,7 +509,7 @@ export class AmpGeo extends AMP.BaseElement {
 
     // If any of the group are missing it's an error
     if (
-      targets.filter(group => {
+      targets.filter((group) => {
         return this.definedGroups_.indexOf(group) >= 0;
       }).length !== targets.length
     ) {
@@ -519,7 +518,7 @@ export class AmpGeo extends AMP.BaseElement {
 
     // If any of the groups match it's a match
     if (
-      targets.filter(group => {
+      targets.filter((group) => {
         return this.matchedGroups_.indexOf(group) >= 0;
       }).length > 0
     ) {
@@ -538,10 +537,10 @@ export class AmpGeo extends AMP.BaseElement {
 /** singleton */
 let geoDeferred = null;
 
-AMP.extension('amp-geo', '0.1', AMP => {
+AMP.extension('amp-geo', '0.1', (AMP) => {
   geoDeferred = new Deferred();
   AMP.registerElement(TAG, AmpGeo);
-  AMP.registerServiceForDoc(SERVICE_TAG, function() {
+  AMP.registerServiceForDoc(SERVICE_TAG, function () {
     return geoDeferred.promise;
   });
 });

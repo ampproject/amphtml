@@ -40,7 +40,7 @@ describes.fakeWin(
   {
     location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
   },
-  env => {
+  (env) => {
     let win;
     let clock;
     let ampdocService;
@@ -145,19 +145,19 @@ describes.fakeWin(
       let progress = '';
       const queueExtensions = win.AMP;
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '1';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '2';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '3';
         })
@@ -170,7 +170,7 @@ describes.fakeWin(
           expect(queueExtensions).to.have.length(0);
           expect(progress).to.equal('123');
           win.AMP.push(
-            regularExtension(amp => {
+            regularExtension((amp) => {
               expect(amp).to.equal(win.AMP);
               progress += '4';
             })
@@ -181,7 +181,7 @@ describes.fakeWin(
         .then(() => {
           expect(progress).to.equal('1234');
           win.AMP.push(
-            regularExtension(amp => {
+            regularExtension((amp) => {
               expect(amp).to.equal(win.AMP);
               progress += '5';
             })
@@ -232,20 +232,20 @@ describes.fakeWin(
       toggleExperiment(win, 'pump-early-frame', true);
       let progress = '';
       const queueExtensions = win.AMP;
-      const highPriority = regularExtension(amp => {
+      const highPriority = regularExtension((amp) => {
         expect(amp).to.equal(win.AMP);
         progress += 'high';
       });
       highPriority.p = 'high';
       win.AMP.push(highPriority);
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '1';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '2';
         })
@@ -254,7 +254,7 @@ describes.fakeWin(
         progress += 'function';
       });
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '3';
         })
@@ -275,7 +275,7 @@ describes.fakeWin(
           expect(progress).to.equal('highfunction');
           // New extension arrives before inital ran.
           win.AMP.push(
-            regularExtension(amp => {
+            regularExtension((amp) => {
               expect(amp).to.equal(win.AMP);
               progress += '4';
             })
@@ -289,7 +289,7 @@ describes.fakeWin(
         .then(() => {
           expect(progress).to.equal('highfunction1234');
           win.AMP.push(
-            regularExtension(amp => {
+            regularExtension((amp) => {
               expect(amp).to.equal(win.AMP);
               progress += '5';
             })
@@ -309,14 +309,14 @@ describes.fakeWin(
       const queueExtensions = win.AMP;
 
       // Queue mode.
-      win.AMP.push(amp => {
+      win.AMP.push((amp) => {
         expect(amp).to.equal(win.AMP);
         progress += '1';
       });
       win.AMP.push({
         n: 'ext2',
         p: 'high',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'HIGH';
         },
@@ -340,7 +340,7 @@ describes.fakeWin(
           expect(progress).to.equal('1HIGH');
           win.AMP.push({
             n: 'ext1',
-            f: amp => {
+            f: (amp) => {
               expect(amp).to.equal(win.AMP);
               progress += 'A';
             },
@@ -359,7 +359,7 @@ describes.fakeWin(
 
       win.AMP.push({
         n: 'ext2',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'C';
         },
@@ -367,7 +367,7 @@ describes.fakeWin(
       });
       win.AMP.push({
         n: 'ext1',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'A';
         },
@@ -376,7 +376,7 @@ describes.fakeWin(
 
       win.AMP.push({
         n: '_base_ext',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'B';
         },
@@ -412,7 +412,7 @@ describes.fakeWin(
       const queueExtensions = win.AMP;
       win.AMP.push({
         n: 'ext1',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'A';
         },
@@ -421,7 +421,7 @@ describes.fakeWin(
 
       win.AMP.push({
         n: '_base_ext2',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'B';
         },
@@ -430,7 +430,7 @@ describes.fakeWin(
 
       win.AMP.push({
         n: '_base_ext1',
-        f: amp => {
+        f: (amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'C';
         },
@@ -469,9 +469,9 @@ describes.fakeWin(
       });
     });
 
-    it('should wait for body before processing extensions', function*() {
+    it('should wait for body before processing extensions', function* () {
       let bodyResolver;
-      const bodyPromise = new Promise(resolve => {
+      const bodyPromise = new Promise((resolve) => {
         bodyResolver = resolve;
       });
       env.sandbox
@@ -488,19 +488,19 @@ describes.fakeWin(
       let progress = '';
       const queueExtensions = win.AMP;
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '1';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '2';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '3';
         })
@@ -514,7 +514,7 @@ describes.fakeWin(
 
       // Add one more
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '4';
         })
@@ -533,7 +533,7 @@ describes.fakeWin(
       expect(queueExtensions).to.have.length(0);
     });
 
-    it('should load correct extension version', function*() {
+    it('should load correct extension version', function* () {
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
@@ -551,7 +551,7 @@ describes.fakeWin(
       const s3 = addExisting(5);
 
       let bodyResolver;
-      const bodyPromise = new Promise(resolve => {
+      const bodyPromise = new Promise((resolve) => {
         bodyResolver = resolve;
       });
       env.sandbox
@@ -568,19 +568,19 @@ describes.fakeWin(
       let progress = '';
       const queueExtensions = win.AMP;
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '1';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'not expected 1';
         }, 'version123')
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '3';
         })
@@ -594,13 +594,13 @@ describes.fakeWin(
 
       // Add one more
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '4';
         })
       );
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += 'not expected 2';
         }, 'version123')
@@ -608,7 +608,7 @@ describes.fakeWin(
       // Add legacy element (5) and eagarly ask for its load as ElementStub does.
       Services.extensionsFor(win).preloadExtension('amp-test-element5', false);
       win.AMP.push(
-        regularExtension(amp => {
+        regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
           progress += '5';
         }, 'version123')
@@ -652,7 +652,7 @@ describes.fakeWin(
       );
     });
 
-    it('should be robust against errors in early extensions', function*() {
+    it('should be robust against errors in early extensions', function* () {
       let progress = '';
       win.AMP.push(
         regularExtension(() => {
@@ -700,7 +700,7 @@ describes.fakeWin(
         expect(win.AMP.attachShadowDocAsStream).to.not.exist;
       });
 
-      it('should register element without CSS', function*() {
+      it('should register element without CSS', function* () {
         const ampdoc = ampdocService.getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         const installStylesStub = env.sandbox.stub(
@@ -711,7 +711,7 @@ describes.fakeWin(
         ampdoc.declareExtension('amp-ext');
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
         });
@@ -740,7 +740,7 @@ describes.fakeWin(
         ]);
       });
 
-      it('should register element with CSS', function*() {
+      it('should register element with CSS', function* () {
         const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
@@ -753,7 +753,7 @@ describes.fakeWin(
         ampdoc.declareExtension('amp-ext');
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
         });
@@ -791,17 +791,14 @@ describes.fakeWin(
         ]);
       });
 
-      it('should register doc-service as ctor and install imm', function*() {
+      it('should register doc-service as ctor and install imm', function* () {
         class Service1 {}
         const ampdoc = new AmpDocSingle(win);
         ampdoc.declareExtension('amp-ext');
-        ampdocServiceMock
-          .expects('getAmpDoc')
-          .returns(ampdoc)
-          .atLeast(1);
+        ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
         });
@@ -819,7 +816,7 @@ describes.fakeWin(
         yield getServicePromise(win, 'service1');
       });
 
-      it('should register doc-service factory and install', function*() {
+      it('should register doc-service factory and install', function* () {
         let count = 0;
         function factory() {
           count++;
@@ -827,13 +824,10 @@ describes.fakeWin(
         }
         const ampdoc = new AmpDocSingle(win);
         ampdoc.declareExtension('amp-ext');
-        ampdocServiceMock
-          .expects('getAmpDoc')
-          .returns(ampdoc)
-          .atLeast(1);
+        ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
         });
@@ -875,7 +869,7 @@ describes.fakeWin(
         expect(win.AMP.viewport).to.not.exist;
       });
 
-      it('should register element without CSS', function*() {
+      it('should register element without CSS', function* () {
         const servicePromise = getServicePromise(win, 'amp-ext');
         const installStylesStub = env.sandbox.stub(
           styles,
@@ -884,7 +878,7 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
         });
@@ -920,7 +914,7 @@ describes.fakeWin(
         ]);
       });
 
-      it('should register element with CSS', function*() {
+      it('should register element with CSS', function* () {
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
         const installStylesStub = env.sandbox
@@ -931,7 +925,7 @@ describes.fakeWin(
 
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
         });
@@ -977,11 +971,11 @@ describes.fakeWin(
         ]);
       });
 
-      it('should register doc-service as ctor and defer install', function*() {
+      it('should register doc-service as ctor and defer install', function* () {
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
         });
@@ -1011,7 +1005,7 @@ describes.realWin(
   {
     amp: {ampdoc: 'multi'},
   },
-  env => {
+  (env) => {
     let win;
     let extensions;
     let extensionsMock;
@@ -1052,7 +1046,7 @@ describes.realWin(
             expect(shadowRoot).to.equal(getShadowRoot(hostElement));
             return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
           });
-        env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+        env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake((node) => {
           expect(node).to.equal(getShadowRoot(hostElement));
           return ampdoc;
         });
@@ -1085,7 +1079,7 @@ describes.realWin(
         class Service1 {}
         win.AMP.push({
           n: 'amp-ext',
-          f: amp => {
+          f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
         });
@@ -1257,7 +1251,7 @@ describes.realWin(
           .returns(
             Promise.resolve({
               elements: {
-                'amp-ext1': function() {},
+                'amp-ext1': function () {},
               },
             })
           )
@@ -1279,7 +1273,7 @@ describes.realWin(
           .returns(
             Promise.resolve({
               elements: {
-                'amp-ext1': function() {},
+                'amp-ext1': function () {},
               },
             })
           )
@@ -1421,7 +1415,7 @@ describes.realWin(
               expect(shadowRoot).to.equal(getShadowRoot(hostElement));
               return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
             });
-          env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+          env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake((node) => {
             expect(node).to.equal(getShadowRoot(hostElement));
             return ampdoc;
           });
@@ -1457,7 +1451,7 @@ describes.realWin(
           class Service1 {}
           win.AMP.push({
             n: 'amp-ext',
-            f: amp => {
+            f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },
           });
@@ -1666,7 +1660,7 @@ describes.realWin(
             .returns(
               Promise.resolve({
                 elements: {
-                  'amp-ext1': function() {},
+                  'amp-ext1': function () {},
                 },
               })
             )
@@ -1832,14 +1826,14 @@ describes.realWin(
             .expects('installShadowDoc')
             .withArgs(
               docUrl,
-              env.sandbox.match(arg => arg == getShadowRoot(hostElement))
+              env.sandbox.match((arg) => arg == getShadowRoot(hostElement))
             )
             .returns(ampdoc)
             .atLeast(0);
           ampdocServiceMock
             .expects('getAmpDoc')
             .withExactArgs(
-              env.sandbox.match(arg => arg == getShadowRoot(hostElement))
+              env.sandbox.match((arg) => arg == getShadowRoot(hostElement))
             )
             .returns(ampdoc)
             .atLeast(0);
@@ -1849,7 +1843,7 @@ describes.realWin(
           const broadcastReceived = env.sandbox.spy();
           viewer.onBroadcast(broadcastReceived);
           const onMessage = env.sandbox.stub();
-          amp.onMessage(function(eventType, data) {
+          amp.onMessage(function (eventType, data) {
             if (eventType == 'ignore') {
               return Promise.resolve();
             }

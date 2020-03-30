@@ -87,7 +87,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     return this.ampDoc_
       .waitForBodyOpen()
       .then(() => this.viewer_.getReferrerUrl())
-      .then(referrer => {
+      .then((referrer) => {
         this.referrer_ = referrer;
         this.startSkimcore_();
       });
@@ -165,7 +165,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     const linkRewriter = this.linkRewriterService_.registerLinkRewriter(
       SKIMLINKS_REWRITER_ID,
-      anchorList => {
+      (anchorList) => {
         return this.affiliateLinkResolver_.resolveUnknownAnchors(anchorList);
       },
       options
@@ -177,7 +177,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
       [linkRewriterEvents.CLICK]: this.onClick_.bind(this),
     };
 
-    linkRewriter.events.add(event => {
+    linkRewriter.events.add((event) => {
       const handler = eventHandlers[event.type];
       if (handler) {
         handler(event.eventData);
@@ -233,6 +233,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-skimlinks', '0.1', AMP => {
+AMP.extension('amp-skimlinks', '0.1', (AMP) => {
   AMP.registerElement('amp-skimlinks', AmpSkimlinks);
 });

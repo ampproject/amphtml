@@ -19,7 +19,7 @@ const m = require('./');
 const test = require('ava');
 
 /*eslint "max-len": 0*/
-test('sync - parse size.txt', t => {
+test('sync - parse size.txt', (t) => {
   t.plan(2);
   const sizeFiles = [
     `  max    |    min    |    gzip   |    brotli    | file
@@ -45,7 +45,7 @@ test('sync - parse size.txt', t => {
   ]);
 });
 
-test('sync - parse table typedef', t => {
+test('sync - parse table typedef', (t) => {
   t.plan(1);
   const dateTimes = ['"0"', '"1"', '"2"'];
   const tables = [

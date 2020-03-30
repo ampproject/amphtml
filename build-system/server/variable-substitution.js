@@ -56,7 +56,7 @@ function runVariableSubstitution(req, res) {
   variables = variables || {};
   // Don't include the incremented number sent in to make a new request
   const testParameters = Object.keys(req.query)
-    .map(value => {
+    .map((value) => {
       return `${value}=${req.query[value]}`;
     })
     .slice(1)

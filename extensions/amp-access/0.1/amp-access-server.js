@@ -133,7 +133,7 @@ export class AccessServerAdapter {
       /* useAuthData */ false
     );
     return varsPromise
-      .then(vars => {
+      .then((vars) => {
         const requestVars = {};
         for (const k in vars) {
           if (vars[k] != null) {
@@ -159,7 +159,7 @@ export class AccessServerAdapter {
           })
         );
       })
-      .then(responseDoc => {
+      .then((responseDoc) => {
         dev().fine(TAG, 'Authorization response: ', responseDoc);
         const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),

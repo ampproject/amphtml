@@ -33,7 +33,7 @@ export function getScopeElements(ampDoc, configOpts) {
     selection = doc.querySelectorAll(cssSelector);
   }
 
-  iterateCursor(selection, element => {
+  iterateCursor(selection, (element) => {
     if (hasAttributeValues(element, configOpts)) {
       filteredSelection.push(element);
     }
@@ -54,7 +54,7 @@ function hasAttributeValues(htmlElement, configOpts) {
   const anchorAttr = configOpts.attribute;
   const attrKeys = Object.keys(anchorAttr);
 
-  return attrKeys.every(key => {
+  return attrKeys.every((key) => {
     const reg = new RegExp(anchorAttr[key]);
 
     return reg.test(htmlElement.getAttribute(key));

@@ -27,7 +27,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let timer;
     let ampdoc;
 

@@ -69,7 +69,7 @@ describe
 
     function setupElementFunctions(div) {
       const {innerWidth: width, innerHeight: height} = window;
-      div.getIntersectionChangeEntry = function() {
+      div.getIntersectionChangeEntry = function () {
         return {
           time: 1234567888,
           rootBounds: {
@@ -98,7 +98,7 @@ describe
           },
         };
       };
-      div.getPageLayoutBox = function() {
+      div.getPageLayoutBox = function () {
         return {
           left: 0,
           top: 0,
@@ -106,7 +106,7 @@ describe
           height: 200,
         };
       };
-      div.getAmpDoc = function() {
+      div.getAmpDoc = function () {
         return Services.ampdoc(window.document);
       };
     }
@@ -317,7 +317,7 @@ describe
 
     it('should not set sandbox with failing feature detection', () => {
       const iframe = document.createElement('iframe');
-      iframe.sandbox.supports = function(flag) {
+      iframe.sandbox.supports = function (flag) {
         return flag != 'allow-top-navigation-by-user-activation';
       };
       applySandbox(iframe);
@@ -513,7 +513,7 @@ describe
       div.setAttribute('type', '_ping_');
       div.setAttribute('width', 100);
       div.setAttribute('height', 200);
-      div.getIntersectionChangeEntry = function() {
+      div.getIntersectionChangeEntry = function () {
         return {
           left: 0,
           top: 0,
@@ -525,7 +525,7 @@ describe
           y: 0,
         };
       };
-      div.getPageLayoutBox = function() {
+      div.getPageLayoutBox = function () {
         return {
           left: 0,
           top: 0,
@@ -533,7 +533,7 @@ describe
           height: 200,
         };
       };
-      div.getAmpDoc = function() {
+      div.getAmpDoc = function () {
         return Services.ampdoc(window.document);
       };
 

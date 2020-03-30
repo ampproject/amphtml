@@ -123,9 +123,9 @@ export function getFlexibleAdSlotData(win, element) {
   let slotWidth = -1;
   let parentWidth = -1;
   let parentStyle = null;
-  const setFws = val => (fwSignal = val);
-  const setMsz = val => (slotWidth = val);
-  const setPsz = val => (parentWidth = val);
+  const setFws = (val) => (fwSignal = val);
+  const setMsz = (val) => (slotWidth = val);
+  const setPsz = (val) => (parentWidth = val);
   new DomAncestorVisitor(win)
     .addVisitor(getElementWidthVisitor(setMsz), 1 /* maxDepth */)
     .addVisitor(getElementWidthVisitor(setPsz), 100 /* maxDepth */)

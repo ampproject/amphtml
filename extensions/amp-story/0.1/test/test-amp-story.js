@@ -24,7 +24,7 @@ import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
+const IDENTITY_FN = (x) => x;
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
@@ -36,7 +36,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;
@@ -94,7 +94,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization-v01', function() {
+      registerServiceBuilder(win, 'localization-v01', function () {
         return localizationService;
       });
 
@@ -129,11 +129,11 @@ describes.realWin(
           const pageElements = story.element.getElementsByTagName(
             'amp-story-page'
           );
-          const pages = Array.from(pageElements).map(el => el.getImpl());
+          const pages = Array.from(pageElements).map((el) => el.getImpl());
 
           return Promise.all(pages);
         })
-        .then(pages => {
+        .then((pages) => {
           // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             i === 0
@@ -256,10 +256,7 @@ describes.realWin(
       appendEmptyPage(element, /* opt_active */ true);
 
       env.sandbox.stub(impl, 'getPageCount').returns(count);
-      env.sandbox
-        .stub(impl, 'getPageIndex')
-        .withArgs(page)
-        .returns(index);
+      env.sandbox.stub(impl, 'getPageIndex').withArgs(page).returns(index);
 
       impl.switchTo_(page);
 
@@ -304,7 +301,7 @@ describes.realWin(
       // Stubbing because we need to assert synchronously
       env.sandbox
         .stub(element.implementation_, 'mutateElement')
-        .callsFake(mutator => {
+        .callsFake((mutator) => {
           mutator();
           return Promise.resolve();
         });
@@ -432,7 +429,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;

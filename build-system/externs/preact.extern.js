@@ -27,23 +27,23 @@ PreactDef.FunctionalComponent;
 /**
  * @interface
  */
-PreactDef.VNode = function() {};
+PreactDef.VNode = function () {};
 
 /**
  * @interface
  */
-PreactDef.Context = function() {};
+PreactDef.Context = function () {};
 
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-PreactDef.Context.prototype.Provider = function(props) {};
+PreactDef.Context.prototype.Provider = function (props) {};
 
 /**
  * @interface
  */
-PreactDef.Context.prototype.Consumer = function() {};
+PreactDef.Context.prototype.Consumer = function () {};
 
 /**
  * @typedef {string|number|boolean|null|undefined}

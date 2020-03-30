@@ -28,7 +28,7 @@ import {Services} from './services';
  */
 export function getConsentPolicyState(element, policyId = 'default') {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -46,7 +46,7 @@ export function getConsentPolicyState(element, policyId = 'default') {
  */
 export function getConsentPolicySharedData(element, policyId) {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -67,7 +67,7 @@ export function getConsentPolicySharedData(element, policyId) {
 export function getConsentPolicyInfo(element, policyId) {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }

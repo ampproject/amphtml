@@ -25,7 +25,7 @@ import {
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {macroTask} from '../../../../testing/yield';
 
-describes.realWin('concurrent-load', {}, env => {
+describes.realWin('concurrent-load', {}, (env) => {
   describe('getAmpAdRenderOutsideViewport', () => {
     it(
       'should return null if ' +
@@ -89,7 +89,7 @@ describes.realWin('concurrent-load', {}, env => {
       clock.uninstall();
     });
 
-    it('should throttle ad loading one per second', function*() {
+    it('should throttle ad loading one per second', function* () {
       expect(is3pThrottled(win)).to.be.false;
       incrementLoadingAds(win);
       expect(is3pThrottled(win)).to.be.true;
@@ -101,12 +101,12 @@ describes.realWin('concurrent-load', {}, env => {
       expect(is3pThrottled(win)).to.be.false;
     });
 
-    it('should throttle ad one a time', function*() {
+    it('should throttle ad one a time', function* () {
       expect(is3pThrottled(win)).to.be.false;
       let resolver;
       incrementLoadingAds(
         win,
-        new Promise(res => {
+        new Promise((res) => {
           resolver = res;
         })
       );

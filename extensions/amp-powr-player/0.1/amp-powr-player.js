@@ -120,7 +120,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', e =>
+    this.unlistenMessage_ = listen(this.win, 'message', (e) =>
       this.handlePlayerMessage_(e)
     );
 
@@ -443,6 +443,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpPowrPlayer);
 });

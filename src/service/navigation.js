@@ -137,11 +137,10 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ =
-      /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-      Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
+      .nodeType == Node.DOCUMENT_NODE
+      ? this.rootNode_.documentElement
+      : this.rootNode_);
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -149,7 +148,7 @@ export class Navigation {
     this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
-    shouldAppendExtraParams(this.ampdoc).then(res => {
+    shouldAppendExtraParams(this.ampdoc).then((res) => {
       this.appendExtraParams_ = res;
     });
 
@@ -337,7 +336,7 @@ export class Navigation {
       return meta
         .getAttribute('content')
         .split(',')
-        .map(s => s.trim());
+        .map((s) => s.trim());
     }
     return [];
   }
@@ -422,7 +421,7 @@ export class Navigation {
    * @param {!Event} e
    */
   applyAnchorMutators_(element, e) {
-    this.anchorMutators_.forEach(anchorMutator => {
+    this.anchorMutators_.forEach((anchorMutator) => {
       anchorMutator(element, e);
     });
   }
@@ -433,7 +432,7 @@ export class Navigation {
    * @return {string}
    */
   applyNavigateToMutators_(url) {
-    this.navigateToMutators_.forEach(mutator => {
+    this.navigateToMutators_.forEach((mutator) => {
       url = mutator(url);
     });
     return url;
@@ -515,7 +514,7 @@ export class Navigation {
     const relations = element
       .getAttribute('rel')
       .split(' ')
-      .map(s => s.trim());
+      .map((s) => s.trim());
     if (!relations.includes('amphtml')) {
       return false;
     }

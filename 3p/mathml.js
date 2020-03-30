@@ -29,7 +29,7 @@ import {writeScript} from './3p';
  * @param {function(*)} cb
  */
 function getMathmlJs(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
+  writeScript(global, scriptSource, function () {
     cb(global.MathJax);
   });
 }
@@ -48,7 +48,7 @@ export function mathml(global, data) {
   getMathmlJs(
     global,
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML',
-    mathjax => {
+    (mathjax) => {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
@@ -60,7 +60,7 @@ export function mathml(global, data) {
       mathjax.Hub.Config({
         showMathMenu: false,
       });
-      mathjax.Hub.Queue(function() {
+      mathjax.Hub.Queue(function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         // Remove built in mathjax margins.
         let display = document.getElementsByClassName('MJXc-display');

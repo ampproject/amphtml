@@ -34,7 +34,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let timer;
     let ampdoc;
     let win;
@@ -48,7 +48,7 @@ describes.realWin(
         win = env.win;
       });
 
-      [true, false].forEach(disableImmediate => {
+      [true, false].forEach((disableImmediate) => {
         it(
           'should create analytics element if analytics is installed, ' +
             `disableImmediate ${disableImmediate}`,
@@ -269,7 +269,7 @@ describes.realWin(
         return buildPromise;
       });
 
-      it('replace eventType with new name', function*() {
+      it('replace eventType with new name', function* () {
         parentEle.layoutCallback();
         yield macroTask();
         const element = parentEle.querySelector('amp-analytics');
@@ -291,7 +291,7 @@ describes.realWin(
         );
       });
 
-      it('trigger event with new name', function*() {
+      it('trigger event with new name', function* () {
         const id = parentEle.getResourceId();
         reporter.trigger('test');
         yield macroTask();
@@ -301,7 +301,7 @@ describes.realWin(
         );
       });
 
-      it('should not trigger not added event', function*() {
+      it('should not trigger not added event', function* () {
         try {
           reporter.trigger('fake');
         } catch (e) {
@@ -338,7 +338,7 @@ describes.realWin(
 
       describe('parent does NOT relayout, call in buildCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -353,7 +353,7 @@ describes.realWin(
           return parentEle.build();
         });
 
-        it('should insert analytics after LOAD_START', function*() {
+        it('should insert analytics after LOAD_START', function* () {
           resolver(config);
           yield macroTask();
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
@@ -363,7 +363,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
         });
 
-        it('should insert analytics when config arrives late', function*() {
+        it('should insert analytics when config arrives late', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
@@ -372,7 +372,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
         });
 
-        it('should remove analytics after UNLOAD', function*() {
+        it('should remove analytics after UNLOAD', function* () {
           resolver(config);
           parentEle.layoutCallback();
           yield macroTask();
@@ -382,7 +382,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
         });
 
-        it('should NOT insert analytics after UNLOAD', function*() {
+        it('should NOT insert analytics after UNLOAD', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           parentEle.unlayoutCallback();
@@ -395,7 +395,7 @@ describes.realWin(
 
       describe('parent does NOT relayout, call in layoutCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -411,7 +411,7 @@ describes.realWin(
           return parentEle.build();
         });
 
-        it('should insert and remove analytics', function*() {
+        it('should insert and remove analytics', function* () {
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
           parentEle.layoutCallback();
           yield macroTask();
@@ -427,7 +427,7 @@ describes.realWin(
 
       describe('parent relayout, call in buildCallback', () => {
         beforeEach(() => {
-          const promise = new Promise(resolve => {
+          const promise = new Promise((resolve) => {
             resolver = resolve;
           });
           class TestElement extends BaseElement {
@@ -445,7 +445,7 @@ describes.realWin(
           return parentEle.build();
         });
 
-        it('should NOT insert analytics when relayout', function*() {
+        it('should NOT insert analytics when relayout', function* () {
           resolver(config);
           parentEle.layoutCallback();
           yield macroTask();
@@ -458,7 +458,7 @@ describes.realWin(
           expect(parentEle.querySelector('amp-analytics')).to.be.null;
         });
 
-        it('should NOT insert when config arrives at relayout', function*() {
+        it('should NOT insert when config arrives at relayout', function* () {
           parentEle.layoutCallback();
           parentEle.unlayoutCallback();
           yield macroTask();
@@ -475,7 +475,7 @@ describes.realWin(
         beforeEach(() => {
           class TestElement extends BaseElement {
             layoutCallback() {
-              const promise = new Promise(resolve => {
+              const promise = new Promise((resolve) => {
                 resolver = resolve;
               });
               useAnalyticsInSandbox(this.element, promise);
@@ -492,7 +492,7 @@ describes.realWin(
           return parentEle.build();
         });
 
-        it('should insert analytics when relayout', function*() {
+        it('should insert analytics when relayout', function* () {
           parentEle.layoutCallback();
           resolver(config);
           yield macroTask();
@@ -515,7 +515,7 @@ describes.realWin(
           expect(script.textContent).to.jsonEqual(JSON.stringify(config2));
         });
 
-        it('should only insert with latest config', function*() {
+        it('should only insert with latest config', function* () {
           parentEle.layoutCallback();
           yield macroTask();
           const resolver1 = resolver;

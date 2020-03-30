@@ -36,7 +36,7 @@ describes.repeated(
         'getServiceForDoc'
       );
       getServiceForDocStub.returns({
-        hasCapability: unused => viewerCanRenderTemplates,
+        hasCapability: (unused) => viewerCanRenderTemplates,
       });
     });
 
@@ -58,14 +58,14 @@ describes.repeated(
       template = new AmpMustache(templateElement, window);
       isTemplateTypeScript = templateType == 'script';
       isTemplateType = templateType == 'template';
-      textContentSetup = contents => {
+      textContentSetup = (contents) => {
         if (isTemplateType) {
           templateElement.content.textContent = contents;
         } else if (isTemplateTypeScript) {
           templateElement.textContent = contents;
         }
       };
-      innerHtmlSetup = html => {
+      innerHtmlSetup = (html) => {
         if (isTemplateType) {
           templateElement./*OK*/ innerHTML = html;
         } else if (isTemplateTypeScript) {

@@ -62,7 +62,7 @@ describes.repeated(
           ampdoc: variant.ampdoc,
         },
       },
-      env => {
+      (env) => {
         let fontloader;
         let setupFontCheckSpy;
         let setupFontLoadSpy;
@@ -235,7 +235,7 @@ describes.repeated(
             .load(FONT_CONFIG, 3000)
             .then(() => {
               const comparators = fontloader.createFontComparators_();
-              expect(comparators.some(c => c.compare())).to.be.true;
+              expect(comparators.some((c) => c.compare())).to.be.true;
             })
             .catch(() => {
               assert.fail('Font load failed');

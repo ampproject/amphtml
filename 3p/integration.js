@@ -638,7 +638,7 @@ export function draw3p(win, data, configCallback) {
     win.context.tagName
   );
   if (configCallback) {
-    configCallback(data, data => {
+    configCallback(data, (data) => {
       userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -659,7 +659,7 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(
+window.draw3p = function (
   opt_configCallback,
   opt_allowed3pTypes,
   opt_allowedEmbeddingOrigins

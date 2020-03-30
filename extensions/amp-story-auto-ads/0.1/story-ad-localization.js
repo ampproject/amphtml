@@ -99,7 +99,7 @@ export class StoryAdLocalization {
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,
-      s => `[${s} one two]`
+      (s) => `[${s} one two]`
     );
 
     this.localizationService_

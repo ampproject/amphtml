@@ -70,9 +70,7 @@ function shortSha(sha) {
  * @return {!Array<string>}
  */
 function gitDiffNameOnly() {
-  return getStdout('git diff --name-only')
-    .trim()
-    .split('\n');
+  return getStdout('git diff --name-only').trim().split('\n');
 }
 
 /**
@@ -82,9 +80,7 @@ function gitDiffNameOnly() {
  */
 function gitDiffNameOnlyMaster() {
   const masterBaseline = gitMasterBaseline();
-  return getStdout(`git diff --name-only ${masterBaseline}`)
-    .trim()
-    .split('\n');
+  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
 }
 
 /**

@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-kaltura-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,7 +55,7 @@ describes.realWin(
         'data-partner': '1281471',
         'data-entryid': '1_3ts1ms9c',
         'data-uiconf': '33502051',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -73,7 +73,7 @@ describes.realWin(
           'data-uiconf': '33502051',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -83,7 +83,7 @@ describes.realWin(
     it('requires data-account', () => {
       return allowConsoleError(() => {
         return getKaltura({})
-          .then(kp => {
+          .then((kp) => {
             kp.build();
           })
           .should.eventually.be.rejectedWith(
@@ -98,7 +98,7 @@ describes.realWin(
         'data-entryid': '1_3ts1ms9c',
         'data-uiconf': '33502051',
         'data-param-my-param': 'hello world',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe.src).to.contain('flashvars%5BmyParam%5D=hello%20world');
       });
@@ -110,7 +110,7 @@ describes.realWin(
           'data-partner': '1281471',
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -129,7 +129,7 @@ describes.realWin(
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
           'aria-label': 'great video',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.hasAttribute('placeholder')).to.be.true;

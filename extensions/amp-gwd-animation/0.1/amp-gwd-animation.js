@@ -222,7 +222,7 @@ export class GwdAnimation extends AMP.BaseElement {
     );
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const actionArgs = argPaths.map(argPath =>
+    const actionArgs = argPaths.map((argPath) =>
       getValueForExpr(invocation, argPath)
     );
 
@@ -302,7 +302,7 @@ export function addAction(context, target, event, actionStr) {
   actionService.setActions(target, newActionsStr);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

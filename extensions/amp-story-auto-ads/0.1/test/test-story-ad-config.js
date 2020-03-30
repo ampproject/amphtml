@@ -17,7 +17,7 @@
 import {StoryAdConfig} from '../story-ad-config';
 import {createStoryAdElementAndConfig} from './story-mock';
 
-describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
+describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
   let win;
   let doc;
 

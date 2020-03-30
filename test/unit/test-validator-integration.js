@@ -21,7 +21,7 @@ import * as eventHelper from '../../src/event-helper';
 import * as mode from '../../src/mode';
 import {loadScript, maybeValidate} from '../../src/validator-integration';
 
-describes.fakeWin('validator-integration', {}, env => {
+describes.fakeWin('validator-integration', {}, (env) => {
   let loadScriptStub;
   let modeStub;
   let win;
@@ -65,7 +65,7 @@ describes.fakeWin('validator-integration', {}, env => {
       loadScript(win.document, 'http://example.com');
 
       expect(loadScriptStub).calledWith(
-        env.sandbox.match(el => el.getAttribute('nonce') === '123')
+        env.sandbox.match((el) => el.getAttribute('nonce') === '123')
       );
     });
   });

@@ -313,7 +313,7 @@ export class SwipeToDismiss {
     this.preventScrollUnlistener_ = listen(
       dev().assertElement(this.swipeElement_),
       'scroll',
-      event => {
+      (event) => {
         event.stopPropagation();
       },
       {

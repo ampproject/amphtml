@@ -84,7 +84,7 @@ function queryXpath(xpathString, context) {
   const xpathIterator = createXpathIterator(
     evaluate(xpathString, fakeDocument, null, XPathResult.ANY_TYPE)
   );
-  const elements = [...xpathIterator].map(node => {
+  const elements = [...xpathIterator].map((node) => {
     const testId = getData(node);
     const selector = `[${TEST_ID_ATTRIBUTE}="${testId}"]`;
     return context./*OK*/ querySelector(selector);

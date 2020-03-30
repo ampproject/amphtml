@@ -324,7 +324,7 @@ export class Resource {
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
-      reason => {
+      (reason) => {
         this.maybeReportErrorOnBuildFailure(reason);
         this.isBuilding_ = false;
         this.element.signals().rejectSignal('res-built', reason);
@@ -874,7 +874,7 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(
       () => this.layoutComplete_(true),
-      reason => this.layoutComplete_(false, reason)
+      (reason) => this.layoutComplete_(false, reason)
     );
     return this.layoutPromise_;
   }

@@ -123,6 +123,6 @@ class AmpSoundcloud extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-soundcloud', '0.1', AMP => {
+AMP.extension('amp-soundcloud', '0.1', (AMP) => {
   AMP.registerElement('amp-soundcloud', AmpSoundcloud);
 });

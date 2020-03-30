@@ -60,7 +60,7 @@ module.exports = {
           const ancestors = context.getAncestors();
           const program = ancestors[0];
           let firstImport = program.body.find(
-            node => node.type === 'ImportDeclaration'
+            (node) => node.type === 'ImportDeclaration'
           );
           if (!firstImport) {
             firstImport = ancestors[1];

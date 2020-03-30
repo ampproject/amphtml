@@ -20,7 +20,7 @@ describes.endtoend(
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-video/autoplay.html',
     environments: 'amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

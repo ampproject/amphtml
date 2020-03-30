@@ -215,7 +215,7 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return /** @type {function(!VsyncStateDef=)} */ (opt_state => {
+    return /** @type {function(!VsyncStateDef=)} */ ((opt_state) => {
       this.run(task, opt_state);
     });
   }
@@ -261,7 +261,7 @@ export class Vsync {
    * @template TYPE
    */
   measurePromise(measurer) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.measure(() => {
         resolve(measurer());
       });
@@ -331,7 +331,7 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ (opt_state => {
+    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
       return this.runAnim(contextNode, task, opt_state);
     });
   }
@@ -358,7 +358,7 @@ export class Vsync {
       const startTime = Date.now();
       let prevTime = 0;
       const task = this.createAnimTask(contextNode, {
-        mutate: state => {
+        mutate: (state) => {
           const timeSinceStart = Date.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
@@ -446,7 +446,7 @@ export class Vsync {
       return raf.bind(this.win);
     }
     let lastTime = 0;
-    return fn => {
+    return (fn) => {
       const now = Date.now();
       // By default we take 16ms between frames, but if the last frame is say
       // 10ms ago, we only want to wait 6ms.

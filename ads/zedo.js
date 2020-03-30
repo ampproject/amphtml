@@ -31,7 +31,7 @@ export function zedo(global, data) {
   loadScript(global, 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js', () => {
     const {ZGTag} = global;
     const charset = data.charset || '';
-    const callback = data.callback || function() {};
+    const callback = data.callback || function () {};
     const geckoTag = new ZGTag(
       data.superId,
       data.network,

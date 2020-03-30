@@ -59,13 +59,13 @@ describe('LoginDoneDialog', () => {
       clearInterval: (callback, t) => window.clearInterval(callback, t),
       document: {
         documentElement: document.createElement('div'),
-        getElementById: id => {
+        getElementById: (id) => {
           if (id == 'closeButton') {
             return closeButton;
           }
           return null;
         },
-        querySelector: sel => {
+        querySelector: (sel) => {
           if (sel == '[lang="unk"]') {
             return null;
           }
@@ -160,7 +160,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match(arg => {
+          window.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -178,9 +178,9 @@ describe('LoginDoneDialog', () => {
         })
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(messageListener).to.not.exist;
         });
@@ -194,9 +194,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -214,9 +214,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -233,9 +233,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -253,9 +253,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -298,9 +298,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.match(/No opener or return location available/);
           expect(messageListener).to.not.exist;
         });
@@ -310,7 +310,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match(arg => {
+          window.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -328,9 +328,9 @@ describe('LoginDoneDialog', () => {
         })
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.match(/Timed out/);
           expect(messageListener).to.not.exist;
         });

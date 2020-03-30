@@ -32,7 +32,7 @@ describes.repeated(
           extensions: ['amp-font'],
         },
       },
-      function(env) {
+      function (env) {
         let ampdoc, doc, root, body;
 
         beforeEach(() => {
@@ -63,7 +63,7 @@ describes.repeated(
             .then(() => font);
         }
 
-        it('should timeout while loading custom font', function() {
+        it('should timeout while loading custom font', function () {
           env.sandbox
             .stub(FontLoader.prototype, 'load')
             .returns(Promise.reject('mock rejection'));
@@ -73,7 +73,7 @@ describes.repeated(
           });
         });
 
-        it('should load custom font', function() {
+        it('should load custom font', function () {
           env.sandbox
             .stub(FontLoader.prototype, 'load')
             .returns(Promise.resolve());

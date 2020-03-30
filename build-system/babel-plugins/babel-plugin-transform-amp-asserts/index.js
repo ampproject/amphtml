@@ -35,7 +35,7 @@ const REMOVABLE = {
   user: ['fine'],
 };
 
-module.exports = function(babel) {
+module.exports = function (babel) {
   const {types: t, template} = babel;
 
   /**
@@ -44,7 +44,7 @@ module.exports = function(babel) {
    * @return {boolean}
    */
   function isRemovableMethod(path, names) {
-    return names.some(name => {
+    return names.some((name) => {
       return path.isIdentifier({name});
     });
   }

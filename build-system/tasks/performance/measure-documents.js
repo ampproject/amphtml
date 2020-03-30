@@ -38,28 +38,28 @@ function requirePuppeteer_() {
  * @param {Puppeteer.page} page
  * @return {Promise} Resolves when script is evaluated
  */
-const setupMeasurement = page =>
+const setupMeasurement = (page) =>
   page.evaluateOnNewDocument(() => {
     window.longTasks = [];
     window.cumulativeLayoutShift = 0;
     window.measureStarted = Date.now();
     window.largestContentfulPaint = 0;
 
-    const longTaskObserver = new PerformanceObserver(list =>
-      list.getEntries().forEach(entry => window.longTasks.push(entry))
+    const longTaskObserver = new PerformanceObserver((list) =>
+      list.getEntries().forEach((entry) => window.longTasks.push(entry))
     );
 
     longTaskObserver.observe({entryTypes: ['longtask']});
 
-    const layoutShiftObserver = new PerformanceObserver(list =>
+    const layoutShiftObserver = new PerformanceObserver((list) =>
       list
         .getEntries()
-        .forEach(entry => (window.cumulativeLayoutShift += entry.value))
+        .forEach((entry) => (window.cumulativeLayoutShift += entry.value))
     );
 
     layoutShiftObserver.observe({entryTypes: ['layout-shift']});
 
-    const largestContentfulPaintObserver = new PerformanceObserver(list => {
+    const largestContentfulPaintObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       const entry = entries[entries.length - 1];
       window.largestContentfulPaint = entry.renderTime || entry.loadTime;
@@ -76,12 +76,12 @@ const setupMeasurement = page =>
  * @param {Puppeteer.page} page
  * @return {Promise<object>} Resolves with page load metrics
  */
-const readMetrics = page =>
+const readMetrics = (page) =>
   page.evaluate(() => {
     const entries = performance.getEntries();
 
     function getMetric(name) {
-      const entry = entries.find(entry => entry.name === name);
+      const entry = entries.find((entry) => entry.name === name);
       return entry ? entry.startTime : 0;
     }
 
@@ -91,7 +91,7 @@ const readMetrics = page =>
     function getMaxFirstInputDelay() {
       let longest = 0;
 
-      window.longTasks.forEach(longTask => {
+      window.longTasks.forEach((longTask) => {
         if (
           longTask.startTime > firstContentfulPaint &&
           longTask.duration > longest
@@ -195,7 +195,7 @@ async function measureDocuments(urls, {headless, runs}) {
   } catch {} // file does not exist (first run)
 
   // Make an array of tasks to be executed
-  const tasks = urls.flatMap(url =>
+  const tasks = urls.flatMap((url) =>
     Array.from({length: runs}).flatMap(() => [
       measureDocument.bind(null, url, CONTROL, {headless}),
       measureDocument.bind(null, url, EXPERIMENT, {headless}),

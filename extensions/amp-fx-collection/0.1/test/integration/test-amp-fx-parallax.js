@@ -15,7 +15,7 @@
  */
 
 const config = describe.configure().ifChrome();
-config.run('amp-fx-collection', function() {
+config.run('amp-fx-collection', function () {
   const css = `
     .spacer {
       height: 100vh;
@@ -49,7 +49,7 @@ config.run('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -83,7 +83,7 @@ config.run('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -117,7 +117,7 @@ config.run('amp-fx-collection', function() {
       css,
       extensions,
     },
-    env => {
+    (env) => {
       let win;
       beforeEach(() => {
         win = env.win;
@@ -146,5 +146,5 @@ function getViewportHeight(win) {
 }
 
 function timeout(ms) {
-  return () => new Promise(resolve => setTimeout(resolve, ms));
+  return () => new Promise((resolve) => setTimeout(resolve, ms));
 }

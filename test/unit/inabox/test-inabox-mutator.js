@@ -16,7 +16,7 @@
 import {InaboxMutator} from '../../../src/inabox/inabox-mutator';
 import {Services} from '../../../src/services';
 
-describes.realWin('inabox-mutator', {amp: true}, env => {
+describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;
   let resource;
   let element;
@@ -26,7 +26,7 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     element = env.win.document.createElement('div');
 
     const resources = Services.resourcesForDoc(env.ampdoc);
-    env.sandbox.stub(resources, 'getResourceForElement').callsFake(el => {
+    env.sandbox.stub(resources, 'getResourceForElement').callsFake((el) => {
       expect(el).to.equal(element);
       return resource;
     });

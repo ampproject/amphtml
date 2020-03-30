@@ -43,7 +43,7 @@ export class AdsenseSharedState {
    * */
   addNewSlot(format, id, client, slotname) {
     const result = {pv: 2, prevFmts: '', prevSlotnames: ''};
-    this.previousSlots_.forEach(slot => {
+    this.previousSlots_.forEach((slot) => {
       devAssert(slot.id != id);
       result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
       if (slot.slotname) {
@@ -63,7 +63,7 @@ export class AdsenseSharedState {
    * @param {string} id The ID of the slot to be removed.
    */
   removeSlot(id) {
-    this.previousSlots_ = this.previousSlots_.filter(slot => {
+    this.previousSlots_ = this.previousSlots_.filter((slot) => {
       return slot.id != id;
     });
   }

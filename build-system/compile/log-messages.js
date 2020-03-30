@@ -45,7 +45,7 @@ async function formatExtractedMessages() {
   return Promise.all(
     Object.entries(formats).map(async ([path, format]) => {
       const formatted = {};
-      items.forEach(item => (formatted[item.id] = format(item)));
+      items.forEach((item) => (formatted[item.id] = format(item)));
       await fs.outputJson(path, formatted);
       log('Formatted', cyan(path));
     })

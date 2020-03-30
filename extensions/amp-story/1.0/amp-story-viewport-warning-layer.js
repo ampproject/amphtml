@@ -41,7 +41,7 @@ const RESIZE_THROTTLE_MS = 300;
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = element => {
+const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="
         i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
@@ -149,7 +149,7 @@ export class ViewportWarningLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -157,7 +157,7 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(
       StateProperty.VIEWPORT_WARNING_STATE,
-      viewportWarningState => {
+      (viewportWarningState) => {
         this.onViewportWarningStateUpdate_(viewportWarningState);
       },
       true /** callToInitialize */

@@ -21,7 +21,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     describe
       .configure()
       .skipFirefox()
@@ -103,7 +103,7 @@ describes.realWin(
           expect(after.href).to.equal(link.href);
           expect(after.media).to.equal('print');
           after.href = immediatelyLoadingHref('/* make-it-load */');
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             after.addEventListener('load', () => {
               resolve();
             });

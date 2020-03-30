@@ -57,6 +57,6 @@ export class AmpAdNetworkOblivkiImpl extends AmpA4A {
   }
 }
 
-AMP.extension('amp-ad-network-oblivki-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-oblivki-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-oblivki-impl', AmpAdNetworkOblivkiImpl);
 });

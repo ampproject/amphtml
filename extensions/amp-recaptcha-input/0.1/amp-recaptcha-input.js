@@ -76,7 +76,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    return recaptchaServiceForDoc(this.element).then(service => {
+    return recaptchaServiceForDoc(this.element).then((service) => {
       this.recaptchaService_ = service;
 
       return this.mutateElement(() => {
@@ -145,7 +145,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

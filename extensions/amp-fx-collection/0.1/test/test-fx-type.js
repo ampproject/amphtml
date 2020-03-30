@@ -23,25 +23,25 @@ import {
   validFxTypes,
 } from '../fx-type';
 
-describes.fakeWin('amp-fx types', {amp: false}, env => {
+describes.fakeWin('amp-fx types', {amp: false}, (env) => {
   function expectNoFalseDefinitions(objOrDef, id) {
     const msg = `FxBindings: False properties are unnecessary, just remove [${id}]`;
     expect(objOrDef, msg).not.to.be.false;
     if (typeof objOrDef != 'object') {
       return;
     }
-    Object.keys(objOrDef).forEach(key => {
+    Object.keys(objOrDef).forEach((key) => {
       expectNoFalseDefinitions(objOrDef[key], `${id}.${key}`);
     });
   }
 
   describe('FX types definition', () => {
-    const expectedKey = type => type.replace(/\-/g, '_').toUpperCase();
+    const expectedKey = (type) => type.replace(/\-/g, '_').toUpperCase();
 
     it('has matching FxType for each type', () => {
       expect(Object.keys(FxType), 'FxType').to.have.length(validFxTypes.length);
 
-      validFxTypes.forEach(type => {
+      validFxTypes.forEach((type) => {
         expect(FxType).to.include({[expectedKey(type)]: type});
       });
     });
@@ -49,14 +49,14 @@ describes.fakeWin('amp-fx types', {amp: false}, env => {
     it('has matching bindings for each type', () => {
       const typeBindings = Object.keys(FxBindings);
       expect(typeBindings, 'FxBindings').to.have.length(validFxTypes.length);
-      typeBindings.forEach(type => {
+      typeBindings.forEach((type) => {
         expect(FxBindings[type], `FxBindings.${expectedKey(type)}`).not.to.be
           .empty;
       });
     });
 
     it('has no false definitions', () => {
-      Object.keys(FxBindings).forEach(type => {
+      Object.keys(FxBindings).forEach((type) => {
         expectNoFalseDefinitions(
           FxBindings[type],
           `FxBindings.${expectedKey(type)}`
@@ -103,7 +103,7 @@ describes.fakeWin('amp-fx types', {amp: false}, env => {
         ['fly-in-top', 'fade-in'],
         ['fly-in-bottom', 'fly-in-right', 'fade-in-scroll'],
         ['fly-in-top', 'fly-in-left', 'fade-in'],
-      ].forEach(validSet => {
+      ].forEach((validSet) => {
         expect(sanitizeFxTypes(validSet)).to.deep.equal(validSet);
       });
     });
@@ -151,10 +151,7 @@ describes.fakeWin('amp-fx types', {amp: false}, env => {
 
     function randomWhitespace(min = 0) {
       const amount = Math.round(min + Math.random() * 5);
-      return Array(amount)
-        .fill(null)
-        .map(randomWhitespaceChar)
-        .join('');
+      return Array(amount).fill(null).map(randomWhitespaceChar).join('');
     }
 
     function elementWithTypesRandomWhitespace(types) {
@@ -180,7 +177,7 @@ describes.fakeWin('amp-fx types', {amp: false}, env => {
         ['fly-in-top', 'fade-in'],
         ['fly-in-bottom', 'fly-in-right', 'fade-in-scroll'],
         ['fly-in-top', 'fly-in-left', 'fade-in'],
-      ].forEach(validSet => {
+      ].forEach((validSet) => {
         expect(
           getFxTypes(elementWithTypesRandomWhitespace(validSet))
         ).to.deep.equal(validSet);

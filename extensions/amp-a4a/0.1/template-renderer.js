@@ -55,9 +55,8 @@ export class TemplateRenderer extends Renderer {
       size,
       element,
       creativeMetadata
-    ).then(iframe => {
-      const templateData =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+    ).then((iframe) => {
+      const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
@@ -65,7 +64,7 @@ export class TemplateRenderer extends Renderer {
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper
         .render(data, iframe.contentWindow.document.body)
-        .then(renderedElement => {
+        .then((renderedElement) => {
           const {analytics} = templateData;
           if (analytics) {
             templateHelper.insertAnalytics(renderedElement, analytics);

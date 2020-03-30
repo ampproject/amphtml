@@ -28,7 +28,7 @@ import {
 } from '../../src/service/custom-element-registry';
 import {createElementWithAttributes} from '../../src/dom';
 
-describes.realWin('CustomElement register', {amp: true}, env => {
+describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}
 
   let win, doc, ampdoc, extensions;
@@ -177,7 +177,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
         },
         head: {
           nodeType: /* ELEMENT */ 1,
-          querySelectorAll: selector => {
+          querySelectorAll: (selector) => {
             if (selector == 'script[custom-element],script[custom-template]') {
               return elements;
             }
@@ -188,7 +188,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       };
 
       elem1 = {
-        getAttribute: name => {
+        getAttribute: (name) => {
           if (name == 'custom-element') {
             return 'amp-test1';
           }
@@ -203,7 +203,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
           define: env.sandbox.spy(),
         },
         Object: {
-          create: proto => Object.create(proto),
+          create: (proto) => Object.create(proto),
         },
         HTMLElement,
         __AMP_EXTENDED_ELEMENTS: {},
@@ -241,7 +241,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       // Add more elements
       const elem2 = {
-        getAttribute: name => {
+        getAttribute: (name) => {
           if (name == 'custom-element') {
             return 'amp-test2';
           }

@@ -22,7 +22,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story system layer', {amp: true}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   let win;
   let storeService;
   let systemLayer;
@@ -33,12 +33,12 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     win = env.win;
 
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
@@ -53,7 +53,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
     env.sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+      mutate: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win, win.document.body);

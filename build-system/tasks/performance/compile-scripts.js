@@ -26,7 +26,7 @@ const {setExtensionsToBuildFromDocuments} = require('../extension-helpers.js');
  */
 async function compileScripts(urls) {
   if (!argv.nobuild) {
-    const examples = urls.map(url => urlToCachePath(url, EXPERIMENT));
+    const examples = urls.map((url) => urlToCachePath(url, EXPERIMENT));
     setExtensionsToBuildFromDocuments(examples);
     await dist();
   }

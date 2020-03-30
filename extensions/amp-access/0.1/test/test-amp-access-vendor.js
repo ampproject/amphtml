@@ -17,7 +17,7 @@
 import {AccessVendor} from '../access-vendor';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 
-describes.realWin('AccessVendorAdapter', {amp: true}, env => {
+describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
   let ampdoc;
   let validConfig;
 
@@ -57,7 +57,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
       const vendor = {};
       adapter.registerVendor(vendor);
       expect(adapter.vendorResolve_).to.not.exist;
-      return adapter.vendorPromise_.then(v => {
+      return adapter.vendorPromise_.then((v) => {
         expect(v).to.equal(vendor);
       });
     });
@@ -97,7 +97,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
           .withExactArgs()
           .returns(Promise.resolve({access: 'A'}))
           .once();
-        return adapter.authorize().then(response => {
+        return adapter.authorize().then((response) => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
         });
@@ -113,7 +113,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
           () => {
             throw new Error('must never happen');
           },
-          error => {
+          (error) => {
             expect(error).to.match(/intentional/);
           }
         );
@@ -140,7 +140,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
           () => {
             throw new Error('must never happen');
           },
-          error => {
+          (error) => {
             expect(error).to.match(/intentional/);
           }
         );

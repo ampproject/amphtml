@@ -49,7 +49,7 @@ function medyanetAds(global, data) {
     border: '0 none transparent',
     position: 'relative',
   });
-  f.onload = function() {
+  f.onload = function () {
     window.context.renderStart();
   };
   f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=${global.domain}&adunit=${global.adunit}&size=${global.size}`;

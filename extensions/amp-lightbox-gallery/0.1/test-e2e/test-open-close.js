@@ -26,7 +26,7 @@ describes.endtoend(
     // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     function css(handle, name) {

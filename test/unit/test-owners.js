@@ -22,7 +22,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let win, doc;
     let resources;
     let owners;
@@ -85,7 +85,7 @@ describes.realWin(
     }
 
     function setAllResourceState(state) {
-      children.concat([parent]).forEach(element => {
+      children.concat([parent]).forEach((element) => {
         setElementResourceState(element, state);
       });
     }
@@ -199,7 +199,7 @@ describes.realWin(
         );
         let buildResource;
         env.sandbox.stub(resource1, 'whenBuilt').returns(
-          new Promise(resolve => {
+          new Promise((resolve) => {
             buildResource = resolve;
           })
         );
@@ -242,7 +242,7 @@ describes.realWin(
     describe('schedulePreload', () => {
       beforeEach(() => {
         setAllResourceState(ResourceState.NOT_BUILT);
-        [parent, children[1], children[2]].forEach(element => {
+        [parent, children[1], children[2]].forEach((element) => {
           setElementResourceState(element, ResourceState.READY_FOR_LAYOUT);
         });
       });
@@ -303,7 +303,7 @@ describes.realWin(
 
     describe('requireLayout', () => {
       beforeEach(() => {
-        children.concat([parent]).forEach(element => {
+        children.concat([parent]).forEach((element) => {
           const resource = resources.getResourceForElementOptional(element);
           if (!resource) {
             return;

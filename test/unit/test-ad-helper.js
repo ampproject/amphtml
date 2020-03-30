@@ -21,7 +21,7 @@ import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
 describe('ad-helper', () => {
   describe('isAdPositionAllowed function', () => {
     it('should allow position fixed element that is whitelisted', () => {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         const whitelistedElement = iframe.doc.createElement('amp-lightbox');
         whitelistedElement.style.position = 'fixed';
         iframe.doc.body.appendChild(whitelistedElement);
@@ -30,7 +30,7 @@ describe('ad-helper', () => {
     });
 
     it('should allow position fixed element inside whitelisted element', () => {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         const whitelistedElement = iframe.doc.createElement('amp-lightbox');
         whitelistedElement.style.position = 'fixed';
         const childElement = iframe.doc.createElement('div');
@@ -46,7 +46,7 @@ describe('ad-helper', () => {
       'should not allow position fixed element that is non-whitelisted ' +
         'element',
       () => {
-        return createIframePromise().then(iframe => {
+        return createIframePromise().then((iframe) => {
           const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
           nonWhitelistedElement.style.position = 'fixed';
           iframe.doc.body.appendChild(nonWhitelistedElement);
@@ -60,7 +60,7 @@ describe('ad-helper', () => {
       'should not allow position sticky-fixed element that is ' +
         'non-whitelisted element',
       () => {
-        return createIframePromise().then(iframe => {
+        return createIframePromise().then((iframe) => {
           const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
           nonWhitelistedElement.style.position = 'sticky';
           // Check if browser support position:sticky
@@ -79,7 +79,7 @@ describe('ad-helper', () => {
       'should not allow position fixed element inside non-whitelisted ' +
         'element',
       () => {
-        return createIframePromise().then(iframe => {
+        return createIframePromise().then((iframe) => {
           const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
           nonWhitelistedElement.style.position = 'fixed';
           const childElement = iframe.doc.createElement('div');
@@ -96,7 +96,7 @@ describe('ad-helper', () => {
 
   describe('getAdContainer function', () => {
     it('should return null if no container', () => {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         const parentElement = iframe.doc.createElement('div');
         const childElement = iframe.doc.createElement('div');
         parentElement.appendChild(childElement);
@@ -106,7 +106,7 @@ describe('ad-helper', () => {
     });
 
     it('should return the closest container', () => {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         const parentElement = iframe.doc.createElement('amp-lightbox');
         const childElement = iframe.doc.createElement('amp-sticky-ad');
         const childChildElement = iframe.doc.createElement('div');
@@ -120,7 +120,7 @@ describe('ad-helper', () => {
     });
 
     it('should return pre-calculated value', () => {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         const parentElement = iframe.doc.createElement('amp-fx-flying-carpet');
         const childElement = iframe.doc.createElement('amp-sticky-ad');
         parentElement.appendChild(childElement);

@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

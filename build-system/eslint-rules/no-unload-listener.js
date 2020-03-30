@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   const listenMethodNames = [
     'listen',
     'listenPromise',
@@ -23,7 +23,7 @@ module.exports = function(context) {
     'listenOncePromise',
   ];
   const listenCall = listenMethodNames
-    .map(m => `CallExpression[callee.name=${m}]`)
+    .map((m) => `CallExpression[callee.name=${m}]`)
     .join(',');
   const addEventListenerCall =
     'CallExpression[callee.property.name=addEventListener]';
@@ -35,7 +35,7 @@ module.exports = function(context) {
   ].join('\n\t');
 
   return {
-    [call]: function(node) {
+    [call]: function (node) {
       const {callee} = node;
       const {name} = callee;
       const argIndex = name && name.lastIndexOf('listen', 0) == 0 ? 1 : 0;
@@ -45,7 +45,7 @@ module.exports = function(context) {
       }
 
       const comments = context.getCommentsBefore(arg);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }

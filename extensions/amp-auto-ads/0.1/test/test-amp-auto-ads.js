@@ -51,7 +51,7 @@ describes.realWin(
       extensions: ['amp-ad', 'amp-auto-ads'],
     },
   },
-  env => {
+  (env) => {
     const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
     let win;
@@ -86,7 +86,7 @@ describes.realWin(
       const extensions = Services.extensionsFor(win);
       env.sandbox
         .stub(extensions, 'loadElementClass')
-        .returns(Promise.resolve(el => new FakeA4A(el)));
+        .returns(Promise.resolve((el) => new FakeA4A(el)));
 
       const viewportMock = env.sandbox.mock(Services.viewportForDoc(doc));
       viewportMock
@@ -191,7 +191,7 @@ describes.realWin(
 
     it('should wait for viewer visible', () => {
       let resolve;
-      const visible = new Promise(res => {
+      const visible = new Promise((res) => {
         resolve = res;
       });
       whenVisible.returns(visible);
@@ -211,10 +211,10 @@ describes.realWin(
 
     it('should insert three ads on page using config', () => {
       return getAmpAutoAds().then(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           waitForChild(
             anchor4,
-            parent => {
+            (parent) => {
               return parent.childNodes.length > 0;
             },
             () => {
@@ -240,10 +240,10 @@ describes.realWin(
       };
 
       return getAmpAutoAds().then(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           waitForChild(
             anchor4,
-            parent => {
+            (parent) => {
               return parent.childNodes.length > 0;
             },
             () => {
@@ -283,10 +283,10 @@ describes.realWin(
       };
 
       return getAmpAutoAds('doubleclick').then(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           waitForChild(
             anchor4,
-            parent => {
+            (parent) => {
               return parent.childNodes.length > 0;
             },
             () => {
@@ -328,7 +328,7 @@ describes.realWin(
 
     it('should throw an error if no type', () => {
       return allowConsoleError(() => {
-        return getAmpAutoAds('NONE').catch(err => {
+        return getAmpAutoAds('NONE').catch((err) => {
           expect(err.message).to.include('Missing type attribute');
           expect(xhr.fetchJson).not.to.have.been.called;
         });
@@ -337,7 +337,7 @@ describes.realWin(
 
     it('should not try and fetch config if unknown type', () => {
       return allowConsoleError(() => {
-        return getAmpAutoAds('unknowntype').catch(err => {
+        return getAmpAutoAds('unknowntype').catch((err) => {
           expect(err.message).to.include('No AdNetworkConfig for type');
           expect(xhr.fetchJson).not.to.have.been.called;
         });
@@ -347,7 +347,7 @@ describes.realWin(
     it('should not try and fetch config if experiment off', () => {
       return allowConsoleError(() => {
         toggleExperiment(env.win, 'amp-auto-ads', false);
-        return getAmpAutoAds().catch(err => {
+        return getAmpAutoAds().catch((err) => {
           expect(err.message).to.include('Experiment is off');
           expect(xhr.fetchJson).not.to.have.been.called;
         });
@@ -362,10 +362,10 @@ describes.realWin(
       configObj['noConfigReason'] = 'a reason';
 
       return getAmpAutoAds().then(() => {
-        const bannerAdsPromise = new Promise(resolve => {
+        const bannerAdsPromise = new Promise((resolve) => {
           waitForChild(
             anchor4,
-            parent => {
+            (parent) => {
               return parent.childNodes.length > 0;
             },
             () => {
@@ -383,10 +383,10 @@ describes.realWin(
           );
         });
 
-        const anchorAdPromise = new Promise(resolve => {
+        const anchorAdPromise = new Promise((resolve) => {
           waitForChild(
             env.win.document.body,
-            parent => {
+            (parent) => {
               return parent.firstChild.tagName == 'AMP-STICKY-AD';
             },
             () => {
@@ -404,7 +404,7 @@ describes.realWin(
     describe('Anchor Ad', () => {
       it('should not insert anchor ad if not opted in', () => {
         return getAmpAutoAds().then(() => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             setTimeout(() => {
               expect(
                 env.win.document.getElementsByTagName('AMP-STICKY-AD')
@@ -419,10 +419,10 @@ describes.realWin(
         configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
 
         return getAmpAutoAds().then(() => {
-          const bannerAdsPromise = new Promise(resolve => {
+          const bannerAdsPromise = new Promise((resolve) => {
             waitForChild(
               anchor4,
-              parent => {
+              (parent) => {
                 return parent.childNodes.length > 0;
               },
               () => {
@@ -438,10 +438,10 @@ describes.realWin(
             );
           });
 
-          const anchorAdPromise = new Promise(resolve => {
+          const anchorAdPromise = new Promise((resolve) => {
             waitForChild(
               env.win.document.body,
-              parent => {
+              (parent) => {
                 return parent.firstChild.tagName == 'AMP-STICKY-AD';
               },
               () => {
@@ -460,10 +460,10 @@ describes.realWin(
         };
 
         return getAmpAutoAds().then(() => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             waitForChild(
               env.win.document.body,
-              parent => {
+              (parent) => {
                 return parent.firstChild.tagName == 'AMP-STICKY-AD';
               },
               () => {
@@ -481,10 +481,10 @@ describes.realWin(
         };
 
         return getAmpAutoAds().then(() => {
-          const bannerAdsPromise = new Promise(resolve => {
+          const bannerAdsPromise = new Promise((resolve) => {
             waitForChild(
               anchor4,
-              parent => {
+              (parent) => {
                 return parent.childNodes.length > 0;
               },
               () => {
@@ -502,10 +502,10 @@ describes.realWin(
             );
           });
 
-          const anchorAdPromise = new Promise(resolve => {
+          const anchorAdPromise = new Promise((resolve) => {
             waitForChild(
               env.win.document.body,
-              parent => {
+              (parent) => {
                 return parent.firstChild.tagName == 'AMP-STICKY-AD';
               },
               () => {
@@ -524,10 +524,10 @@ describes.realWin(
     describe('ad constraints', () => {
       it('should insert 3 ads when using the default ad contraints', () => {
         return getAmpAutoAds().then(() => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             waitForChild(
               anchor4,
-              parent => {
+              (parent) => {
                 return parent.childNodes.length > 0;
               },
               () => {
@@ -552,10 +552,10 @@ describes.realWin(
         };
 
         return getAmpAutoAds().then(() => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             waitForChild(
               anchor4,
-              parent => {
+              (parent) => {
                 return parent.childNodes.length > 0;
               },
               () => {

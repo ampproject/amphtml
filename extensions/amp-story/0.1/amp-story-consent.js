@@ -111,7 +111,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   attrs: dict({'class': 'i-amphtml-story-consent-vendors'}),
                   children:
                     config.vendors &&
-                    config.vendors.map(vendor => ({
+                    config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
                       children: [],
@@ -248,7 +248,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   initializeListeners_() {
     this.storyConsentEl_.addEventListener(
       'click',
-      event => this.onClick_(event),
+      (event) => this.onClick_(event),
       true /** useCapture */
     );
 

@@ -51,7 +51,7 @@ export function blade(global, data) {
   const ctx = global.context;
 
   const bladeOnLoad = `_bladeOnLoad-${containerId}`;
-  global[bladeOnLoad] = function(error, player) {
+  global[bladeOnLoad] = function (error, player) {
     if (error) {
       global.context.noContentAvailable();
       return;

@@ -37,7 +37,7 @@ describes.realWin(
     },
     mockFetch: false,
   },
-  function(env) {
+  function (env) {
     let win, doc;
     let requestVerifier;
     let elementMacros;
@@ -61,7 +61,7 @@ describes.realWin(
           el.setAttribute('type', vendor);
           doc.body.appendChild(el);
           const analyticsConfig = new AnalyticsConfig(el);
-          return analyticsConfig.loadConfig().then(config => {
+          return analyticsConfig.loadConfig().then((config) => {
             if (
               hasOwn(config, 'transport') &&
               hasOwn(config.transport, 'iframe')
@@ -77,16 +77,16 @@ describes.realWin(
 
     describe('vendor request tests', () => {
       for (const vendor in VENDOR_REQUESTS) {
-        describe('analytics vendor: ' + vendor, function() {
+        describe('analytics vendor: ' + vendor, function () {
           let config;
           let analytics;
-          beforeEach(done => {
+          beforeEach((done) => {
             const urlReplacements = Services.urlReplacementsForDoc(
               doc.documentElement
             );
             window.sandbox
               .stub(urlReplacements.getVariableSource(), 'get')
-              .callsFake(function(name) {
+              .callsFake(function (name) {
                 expect(this.replacements_).to.have.property(name);
                 return {
                   sync: (...args) => mockMacrosBinding(name, args),
@@ -95,7 +95,7 @@ describes.realWin(
 
             window.sandbox
               .stub(ExpansionOptions.prototype, 'getVar')
-              .callsFake(function(name) {
+              .callsFake(function (name) {
                 let val = this.vars[name];
                 if (val == null || val == '') {
                   val = '!' + name;
@@ -114,7 +114,7 @@ describes.realWin(
 
             window.sandbox
               .stub(variableService, 'getMacros')
-              .callsFake(function() {
+              .callsFake(function () {
                 // Add all the macros in amp-analytics
                 const merged = {...this.macros_, ...elementMacros};
 
@@ -128,7 +128,7 @@ describes.realWin(
               });
           });
 
-          it('test requests', function*() {
+          it('test requests', function* () {
             const outputConfig = {};
             if (!config.requests) {
               throw new Error(
@@ -245,7 +245,7 @@ function writeOutput(vendor, output) {
  * @param {!Array<string>} argumentsList
  */
 function mockMacrosBinding(macroName, argumentsList) {
-  let params = argumentsList.filter(val => val !== undefined).join(',');
+  let params = argumentsList.filter((val) => val !== undefined).join(',');
   if (params) {
     params = '(' + params + ')';
   }

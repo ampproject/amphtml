@@ -135,7 +135,7 @@ const redefineInline = (sourceFilename, opts) =>
  * Replaces `configureComponent()` wrapping calls.
  * @return {!Object}
  */
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   function getImportPath(nodes, name) {
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
@@ -161,7 +161,7 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const program = path.findParent(p => t.isProgram(p));
+        const program = path.findParent((p) => t.isProgram(p));
 
         const importPath = getImportPath(program.node.body, importedId.name);
         if (!importPath) {

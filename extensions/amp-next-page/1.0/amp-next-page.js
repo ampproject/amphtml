@@ -43,7 +43,7 @@ export class AmpNextPage extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '1.0', AMP => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerServiceForDoc(SERVICE, NextPageService);
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });

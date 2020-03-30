@@ -42,7 +42,7 @@ import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 
-describes.sandboxed('UrlReplacements', {}, env => {
+describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
   let loadObservable;
   let replacements;
@@ -61,7 +61,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       function getReplacements(opt_options) {
-        return createIframePromise().then(iframe => {
+        return createIframePromise().then((iframe) => {
           ampdoc = iframe.ampdoc;
           iframe.doc.title = 'Pixel Test';
           const link = iframe.doc.createElement('link');
@@ -85,7 +85,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             }
             if (opt_options.withVariant) {
               markElementScheduledForTesting(iframe.win, 'amp-experiment');
-              registerServiceBuilder(iframe.win, 'variant', function() {
+              registerServiceBuilder(iframe.win, 'variant', function () {
                 return {
                   getVariants: () =>
                     Promise.resolve({
@@ -97,7 +97,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             }
             if (opt_options.withShareTracking) {
               markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-              registerServiceBuilder(iframe.win, 'share-tracking', function() {
+              registerServiceBuilder(iframe.win, 'share-tracking', function () {
                 return Promise.resolve({
                   incomingFragment: '12345',
                   outgoingFragment: '54321',
@@ -112,7 +112,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               registerServiceBuilder(
                 iframe.win,
                 'viewer-integration-variable',
-                function() {
+                function () {
                   return Promise.resolve(
                     opt_options.withViewerIntegrationVariableService
                   );
@@ -132,7 +132,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       }
 
       function expandUrlAsync(url, opt_bindings, opt_options) {
-        return getReplacements(opt_options).then(replacements =>
+        return getReplacements(opt_options).then((replacements) =>
           replacements.expandUrlAsync(url, opt_bindings)
         );
       }
@@ -171,7 +171,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             random: () => 0.1234,
           },
           crypto: {
-            getRandomValues: array => {
+            getRandomValues: (array) => {
               array[0] = 1;
               array[1] = 2;
               array[2] = 3;
@@ -182,7 +182,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             'viewport': {obj: {}},
             'cid': {
               promise: Promise.resolve({
-                get: config =>
+                get: (config) =>
                   Promise.resolve('test-cid(' + config.scope + ')'),
               }),
             },
@@ -213,7 +213,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       }
 
       it('limit replacement params size', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           replacements.getVariableSource().initialize();
           const variables = Object.keys(
             replacements.getVariableSource().replacements_
@@ -226,7 +226,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should replace RANDOM', () => {
-        return expandUrlAsync('ord=RANDOM?').then(res => {
+        return expandUrlAsync('ord=RANDOM?').then((res) => {
           expect(res).to.match(/ord=(\d+(\.\d+)?)\?$/);
         });
       });
@@ -234,7 +234,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('should replace COUNTER', () => {
         return expandUrlAsync(
           'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)'
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.equal('1,1,2,2,3');
         });
       });
@@ -242,7 +242,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipFirefox()
         .run('should replace CANONICAL_URL', () => {
-          return expandUrlAsync('?href=CANONICAL_URL').then(res => {
+          return expandUrlAsync('?href=CANONICAL_URL').then((res) => {
             expect(res).to.equal(
               '?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1'
             );
@@ -252,7 +252,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipFirefox()
         .run('should replace CANONICAL_HOST', () => {
-          return expandUrlAsync('?host=CANONICAL_HOST').then(res => {
+          return expandUrlAsync('?host=CANONICAL_HOST').then((res) => {
             expect(res).to.equal('?host=pinterest.com%3A8080');
           });
         });
@@ -260,7 +260,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipFirefox()
         .run('should replace CANONICAL_HOSTNAME', () => {
-          return expandUrlAsync('?host=CANONICAL_HOSTNAME').then(res => {
+          return expandUrlAsync('?host=CANONICAL_HOSTNAME').then((res) => {
             expect(res).to.equal('?host=pinterest.com');
           });
         });
@@ -268,7 +268,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipFirefox()
         .run('should replace CANONICAL_PATH', () => {
-          return expandUrlAsync('?path=CANONICAL_PATH').then(res => {
+          return expandUrlAsync('?path=CANONICAL_PATH').then((res) => {
             expect(res).to.equal('?path=%2Fpin1');
           });
         });
@@ -286,7 +286,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         const windowInterface = mockWindowInterface(env.sandbox);
         windowInterface.getHostname.returns('different.org');
         return getReplacements()
-          .then(replacements => {
+          .then((replacements) => {
             stubServiceForDoc(
               env.sandbox,
               ampdoc,
@@ -295,7 +295,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             ).returns(Promise.resolve('http://example.org/page.html'));
             return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
           })
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?ref=http%3A%2F%2Fexample.org%2Fpage.html');
           });
       });
@@ -307,7 +307,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           const windowInterface = mockWindowInterface(env.sandbox);
           windowInterface.getHostname.returns('example.org');
           return getReplacements()
-            .then(replacements => {
+            .then((replacements) => {
               stubServiceForDoc(
                 env.sandbox,
                 ampdoc,
@@ -316,7 +316,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               ).returns(Promise.resolve('http://example.org/page.html'));
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal('?ref=');
             });
         }
@@ -329,7 +329,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           const windowInterface = mockWindowInterface(env.sandbox);
           windowInterface.getHostname.returns('example.org');
           return getReplacements()
-            .then(replacements => {
+            .then((replacements) => {
               stubServiceForDoc(
                 env.sandbox,
                 ampdoc,
@@ -342,7 +342,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               );
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal('?ref=');
             });
         }
@@ -355,7 +355,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           const windowInterface = mockWindowInterface(env.sandbox);
           windowInterface.getHostname.returns('example.org');
           return getReplacements()
-            .then(replacements => {
+            .then((replacements) => {
               stubServiceForDoc(
                 env.sandbox,
                 ampdoc,
@@ -368,14 +368,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
               );
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal('?ref=');
             });
         }
       );
 
       it('should replace TITLE', () => {
-        return expandUrlAsync('?title=TITLE').then(res => {
+        return expandUrlAsync('?title=TITLE').then((res) => {
           expect(res).to.equal('?title=Pixel%20Test');
         });
       });
@@ -383,14 +383,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('should prefer original title for TITLE', () => {
         return expandUrlAsync('?title=TITLE', /*opt_bindings*/ undefined, {
           withOriginalTitle: true,
-        }).then(res => {
+        }).then((res) => {
           expect(res).to.equal('?title=Original%20Pixel%20Test');
         });
       });
 
       describe('AMPDOC_URL', () => {
         it('should replace AMPDOC_URL', () => {
-          return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
+          return expandUrlAsync('?ref=AMPDOC_URL').then((res) => {
             expect(res).to.not.match(/AMPDOC_URL/);
           });
         });
@@ -402,7 +402,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=AMPDOC_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain(
                 encodeURIComponent(
                   'https://cdn.ampproject.org/a/o.com/foo/?hello=world'
@@ -418,7 +418,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=AMPDOC_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain(
                 encodeURIComponent(
                   'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=world'
@@ -434,7 +434,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=AMPDOC_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain(
                 encodeURIComponent(
                   'https://cdn.ampproject.org/a/o.com/foo/?amp_r=weird'
@@ -450,7 +450,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=AMPDOC_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain(
                 encodeURIComponent(
                   'https://cdn.ampproject.org/a/o.com/foo/?test=case'
@@ -466,7 +466,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=AMPDOC_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain(
                 encodeURIComponent(
                   'https://cdn.ampproject.org/a/o.com/foo/?test=case&a&hello=you&goodnight=moon'
@@ -477,13 +477,13 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should replace AMPDOC_HOST', () => {
-        return expandUrlAsync('?ref=AMPDOC_HOST').then(res => {
+        return expandUrlAsync('?ref=AMPDOC_HOST').then((res) => {
           expect(res).to.not.match(/AMPDOC_HOST/);
         });
       });
 
       it('should replace AMPDOC_HOSTNAME', () => {
-        return expandUrlAsync('?ref=AMPDOC_HOSTNAME').then(res => {
+        return expandUrlAsync('?ref=AMPDOC_HOSTNAME').then((res) => {
           expect(res).to.not.match(/AMPDOC_HOSTNAME/);
         });
       });
@@ -495,14 +495,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated('https://example.com/test');
                 resolve();
               });
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST')
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal(
                 '?url=https%3A%2F%2Fexample.com%2Ftest&host=example.com'
               );
@@ -515,14 +515,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated('https://example.com/test');
                 resolve();
               });
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL&hostname=SOURCE_HOSTNAME')
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal(
                 '?url=https%3A%2F%2Fexample.com%2Ftest&hostname=example.com'
               );
@@ -535,7 +535,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated(
                   'https://example.com?gclid=123456'
                 );
@@ -544,7 +544,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.contain('example.com');
             });
         });
@@ -561,7 +561,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal(
                 '?url=' + encodeURIComponent('http://o.com/foo/?a&hello=world')
               );
@@ -580,7 +580,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal(
                 '?url=' +
                   encodeURIComponent('http://o.com/foo/?a=1&safe=1&hello=world')
@@ -600,7 +600,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?url=SOURCE_URL')
-            .then(res => {
+            .then((res) => {
               expect(res).to.equal(
                 '?url=' + encodeURIComponent('http://o.com/foo/?a')
               );
@@ -609,19 +609,19 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should replace SOURCE_PATH', () => {
-        return expandUrlAsync('?path=SOURCE_PATH').then(res => {
+        return expandUrlAsync('?path=SOURCE_PATH').then((res) => {
           expect(res).to.not.match(/SOURCE_PATH/);
         });
       });
 
       it('should replace PAGE_VIEW_ID', () => {
-        return expandUrlAsync('?pid=PAGE_VIEW_ID').then(res => {
+        return expandUrlAsync('?pid=PAGE_VIEW_ID').then((res) => {
           expect(res).to.match(/pid=\d+/);
         });
       });
 
       it('should replace PAGE_VIEW_ID_64', () => {
-        return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then(res => {
+        return expandUrlAsync('?pid=PAGE_VIEW_ID_64').then((res) => {
           expect(res).to.match(/pid=([a-zA-Z0-9_-]+){10,}/);
         });
       });
@@ -634,20 +634,20 @@ describes.sandboxed('UrlReplacements', {}, env => {
           '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
           /*opt_bindings*/ undefined,
           {withCid: true}
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
       });
 
       it('should allow empty CLIENT_ID', () => {
         return getReplacements()
-          .then(replacements => {
+          .then((replacements) => {
             stubServiceForDoc(env.sandbox, ampdoc, 'cid', 'get').returns(
               Promise.resolve()
             );
             return replacements.expandUrlAsync('?a=CLIENT_ID(_ga)');
           })
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?a=');
           });
       });
@@ -660,7 +660,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           '?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
           /*opt_bindings*/ undefined,
           {withCid: true}
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
       });
@@ -671,7 +671,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           '?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
           /*opt_bindings*/ undefined,
           {withCid: true}
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
         });
       });
@@ -680,13 +680,13 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipSafari()
         .run('should replace CLIENT_ID synchronously when available', () => {
-          return getReplacements({withCid: true}).then(urlReplacements => {
+          return getReplacements({withCid: true}).then((urlReplacements) => {
             setCookie(window, 'url-abc', 'cid-for-abc');
             setCookie(window, 'url-xyz', 'cid-for-xyz');
             // Only requests cid-for-xyz in async path
             return urlReplacements
               .expandUrlAsync('b=CLIENT_ID(url-xyz)')
-              .then(res => {
+              .then((res) => {
                 expect(res).to.equal('b=cid-for-xyz');
               })
               .then(() => {
@@ -711,7 +711,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         );
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?state=AMP_STATE(foo.bar)')
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?state=baz');
           });
       });
@@ -779,13 +779,13 @@ describes.sandboxed('UrlReplacements', {}, env => {
       );
 
       it('should replace TIMESTAMP', () => {
-        return expandUrlAsync('?ts=TIMESTAMP').then(res => {
+        return expandUrlAsync('?ts=TIMESTAMP').then((res) => {
           expect(res).to.match(/ts=\d+/);
         });
       });
 
       it('should replace TIMESTAMP_ISO', () => {
-        return expandUrlAsync('?tsf=TIMESTAMP_ISO').then(res => {
+        return expandUrlAsync('?tsf=TIMESTAMP_ISO').then((res) => {
           expect(res).to.match(/tsf=\d+/);
         });
       });
@@ -799,43 +799,43 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should replace TIMEZONE', () => {
-        return expandUrlAsync('?tz=TIMEZONE').then(res => {
+        return expandUrlAsync('?tz=TIMEZONE').then((res) => {
           expect(res).to.match(/tz=-?\d+/);
         });
       });
 
       it('should replace SCROLL_HEIGHT', () => {
-        return expandUrlAsync('?scrollHeight=SCROLL_HEIGHT').then(res => {
+        return expandUrlAsync('?scrollHeight=SCROLL_HEIGHT').then((res) => {
           expect(res).to.match(/scrollHeight=\d+/);
         });
       });
 
       it('should replace SCREEN_WIDTH', () => {
-        return expandUrlAsync('?sw=SCREEN_WIDTH').then(res => {
+        return expandUrlAsync('?sw=SCREEN_WIDTH').then((res) => {
           expect(res).to.match(/sw=\d+/);
         });
       });
 
       it('should replace SCREEN_HEIGHT', () => {
-        return expandUrlAsync('?sh=SCREEN_HEIGHT').then(res => {
+        return expandUrlAsync('?sh=SCREEN_HEIGHT').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace VIEWPORT_WIDTH', () => {
-        return expandUrlAsync('?vw=VIEWPORT_WIDTH').then(res => {
+        return expandUrlAsync('?vw=VIEWPORT_WIDTH').then((res) => {
           expect(res).to.match(/vw=\d+/);
         });
       });
 
       it('should replace VIEWPORT_HEIGHT', () => {
-        return expandUrlAsync('?vh=VIEWPORT_HEIGHT').then(res => {
+        return expandUrlAsync('?vh=VIEWPORT_HEIGHT').then((res) => {
           expect(res).to.match(/vh=\d+/);
         });
       });
 
       it('should replace PAGE_LOAD_TIME', () => {
-        return expandUrlAsync('?sh=PAGE_LOAD_TIME').then(res => {
+        return expandUrlAsync('?sh=PAGE_LOAD_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
@@ -848,7 +848,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           .expandUrlAsync('PROTOCOL://example.com/?r=RANDOM', {
             'PROTOCOL': Promise.resolve('abc'),
           })
-          .then(expanded => {
+          .then((expanded) => {
             expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
           });
       });
@@ -859,7 +859,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         env.sandbox.stub(ampdoc, 'isVisible').returns(true);
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?sh=BACKGROUND_STATE')
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?sh=0');
           });
       });
@@ -870,7 +870,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         env.sandbox.stub(ampdoc, 'isVisible').returns(false);
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?sh=BACKGROUND_STATE')
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?sh=1');
           });
       });
@@ -889,7 +889,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
 
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?sh=VIDEO_STATE(video,currentTime)')
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?sh=1.5');
           });
       });
@@ -901,10 +901,10 @@ describes.sandboxed('UrlReplacements', {}, env => {
           win = getFakeWindow();
           eventListeners = {};
           win.document.readyState = 'loading';
-          win.document.addEventListener = function(eventType, handler) {
+          win.document.addEventListener = function (eventType, handler) {
             eventListeners[eventType] = handler;
           };
-          win.document.removeEventListener = function(eventType, handler) {
+          win.document.removeEventListener = function (eventType, handler) {
             if (eventListeners[eventType] == handler) {
               delete eventListeners[eventType];
             }
@@ -915,7 +915,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           win.document.readyState = 'complete';
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?sh=PAGE_LOAD_TIME&s')
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=&s/);
             });
         });
@@ -931,14 +931,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
           urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
           win.document.readyState = 'complete';
           loadObservable.fire({type: 'load'});
-          return validMetric.then(res => {
+          return validMetric.then((res) => {
             expect(res).to.match(/sh=9&s/);
           });
         });
       });
 
       it('should replace NAV_REDIRECT_COUNT', () => {
-        return expandUrlAsync('?sh=NAV_REDIRECT_COUNT').then(res => {
+        return expandUrlAsync('?sh=NAV_REDIRECT_COUNT').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
@@ -948,7 +948,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         return expandUrlAsync(
           '?a=NAV_TIMING(navigationStart)' +
             '&b=NAV_TIMING(navigationStart,responseStart)'
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/a=\d+&b=\d+/);
         });
       });
@@ -959,107 +959,107 @@ describes.sandboxed('UrlReplacements', {}, env => {
             '&b=NAV_TIMING(invalid,invalid)' +
             '&c=NAV_TIMING(navigationStart,invalid)' +
             '&d=NAV_TIMING(invalid,responseStart)'
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/a=&b=&c=&d=/);
         });
       });
 
       it('should replace NAV_TYPE', () => {
-        return expandUrlAsync('?sh=NAV_TYPE').then(res => {
+        return expandUrlAsync('?sh=NAV_TYPE').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace DOMAIN_LOOKUP_TIME', () => {
-        return expandUrlAsync('?sh=DOMAIN_LOOKUP_TIME').then(res => {
+        return expandUrlAsync('?sh=DOMAIN_LOOKUP_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace TCP_CONNECT_TIME', () => {
-        return expandUrlAsync('?sh=TCP_CONNECT_TIME').then(res => {
+        return expandUrlAsync('?sh=TCP_CONNECT_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace SERVER_RESPONSE_TIME', () => {
-        return expandUrlAsync('?sh=SERVER_RESPONSE_TIME').then(res => {
+        return expandUrlAsync('?sh=SERVER_RESPONSE_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace PAGE_DOWNLOAD_TIME', () => {
-        return expandUrlAsync('?sh=PAGE_DOWNLOAD_TIME').then(res => {
+        return expandUrlAsync('?sh=PAGE_DOWNLOAD_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       // TODO(cvializ, #12336): unskip
       it.skip('should replace REDIRECT_TIME', () => {
-        return expandUrlAsync('?sh=REDIRECT_TIME').then(res => {
+        return expandUrlAsync('?sh=REDIRECT_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace DOM_INTERACTIVE_TIME', () => {
-        return expandUrlAsync('?sh=DOM_INTERACTIVE_TIME').then(res => {
+        return expandUrlAsync('?sh=DOM_INTERACTIVE_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace CONTENT_LOAD_TIME', () => {
-        return expandUrlAsync('?sh=CONTENT_LOAD_TIME').then(res => {
+        return expandUrlAsync('?sh=CONTENT_LOAD_TIME').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace AVAILABLE_SCREEN_HEIGHT', () => {
-        return expandUrlAsync('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
+        return expandUrlAsync('?sh=AVAILABLE_SCREEN_HEIGHT').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace AVAILABLE_SCREEN_WIDTH', () => {
-        return expandUrlAsync('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
+        return expandUrlAsync('?sh=AVAILABLE_SCREEN_WIDTH').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace SCREEN_COLOR_DEPTH', () => {
-        return expandUrlAsync('?sh=SCREEN_COLOR_DEPTH').then(res => {
+        return expandUrlAsync('?sh=SCREEN_COLOR_DEPTH').then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace BROWSER_LANGUAGE', () => {
-        return expandUrlAsync('?sh=BROWSER_LANGUAGE').then(res => {
+        return expandUrlAsync('?sh=BROWSER_LANGUAGE').then((res) => {
           expect(res).to.match(/sh=\w+/);
         });
       });
 
       it('should replace USER_AGENT', () => {
-        return expandUrlAsync('?sh=USER_AGENT').then(res => {
+        return expandUrlAsync('?sh=USER_AGENT').then((res) => {
           expect(res).to.match(/sh=\w+/);
         });
       });
 
       it('should replace VIEWER with origin', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           env.sandbox
             .stub(viewerService, 'getViewerOrigin')
             .returns(Promise.resolve('https://www.google.com'));
-          return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
+          return replacements.expandUrlAsync('?sh=VIEWER').then((res) => {
             expect(res).to.equal('?sh=https%3A%2F%2Fwww.google.com');
           });
         });
       });
 
       it('should replace VIEWER with empty string', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           env.sandbox
             .stub(viewerService, 'getViewerOrigin')
             .returns(Promise.resolve(''));
-          return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
+          return replacements.expandUrlAsync('?sh=VIEWER').then((res) => {
             expect(res).to.equal('?sh=');
           });
         });
@@ -1070,7 +1070,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           '?sh=TOTAL_ENGAGED_TIME',
           /*opt_bindings*/ undefined,
           {withActivity: true}
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
@@ -1080,13 +1080,13 @@ describes.sandboxed('UrlReplacements', {}, env => {
           '?sh=INCREMENTAL_ENGAGED_TIME',
           /*opt_bindings*/ undefined,
           {withActivity: true}
-        ).then(res => {
+        ).then((res) => {
           expect(res).to.match(/sh=\d+/);
         });
       });
 
       it('should replace AMP_VERSION', () => {
-        return expandUrlAsync('?sh=AMP_VERSION').then(res => {
+        return expandUrlAsync('?sh=AMP_VERSION').then((res) => {
           expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
         });
       });
@@ -1096,7 +1096,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s')
-          .then(res => {
+          .then((res) => {
             expect(res).to.equal('?sh=2&s');
           });
       });
@@ -1112,7 +1112,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           })
         );
         return expandUrlAsync('?geo=AMP_GEO,country=AMP_GEO(ISOCountry)').then(
-          res => {
+          (res) => {
             expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
           }
         );
@@ -1121,7 +1121,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it.configure()
         .skipFirefox()
         .run('should accept $expressions', () => {
-          return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
+          return expandUrlAsync('?href=$CANONICAL_URL').then((res) => {
             expect(res).to.equal(
               '?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1'
             );
@@ -1129,7 +1129,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         });
 
       it('should ignore unknown substitutions', () => {
-        return expandUrlAsync('?a=UNKNOWN').then(res => {
+        return expandUrlAsync('?a=UNKNOWN').then((res) => {
           expect(res).to.equal('?a=UNKNOWN');
         });
       });
@@ -1139,7 +1139,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         .run('should replace several substitutions', () => {
           return expandUrlAsync(
             '?a=UNKNOWN&href=CANONICAL_URL&title=TITLE'
-          ).then(res => {
+          ).then((res) => {
             expect(res).to.equal(
               '?a=UNKNOWN' +
                 '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
@@ -1149,7 +1149,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         });
 
       it('should replace new substitutions', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           replacements.getVariableSource().set('ONE', () => 'a');
           expect(replacements.expandUrlAsync('?a=ONE')).to.eventually.equal(
             '?a=a'
@@ -1201,8 +1201,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should support positional arguments', () => {
-        return getReplacements().then(replacements => {
-          replacements.getVariableSource().set('FN', one => one);
+        return getReplacements().then((replacements) => {
+          replacements.getVariableSource().set('FN', (one) => one);
           return expect(
             replacements.expandUrlAsync('?a=FN(xyz1)')
           ).to.eventually.equal('?a=xyz1');
@@ -1210,7 +1210,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should support multiple positional arguments', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           replacements.getVariableSource().set('FN', (one, two) => {
             return one + '-' + two;
           });
@@ -1221,7 +1221,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should support multiple positional arguments with dots', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           replacements.getVariableSource().set('FN', (one, two) => {
             return one + '-' + two;
           });
@@ -1232,7 +1232,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should support promises as replacements', () => {
-        return getReplacements().then(replacements => {
+        return getReplacements().then((replacements) => {
           replacements
             .getVariableSource()
             .set('P1', () => Promise.resolve('abc '));
@@ -1250,14 +1250,14 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should override an existing binding', () => {
-        return expandUrlAsync('ord=RANDOM?', {'RANDOM': 'abc'}).then(res => {
+        return expandUrlAsync('ord=RANDOM?', {'RANDOM': 'abc'}).then((res) => {
           expect(res).to.match(/ord=abc\?$/);
         });
       });
 
       it('should add an additional binding', () => {
         return expandUrlAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'}).then(
-          res => {
+          (res) => {
             expect(res).to.match(/rid=abc\?$/);
           }
         );
@@ -1265,9 +1265,9 @@ describes.sandboxed('UrlReplacements', {}, env => {
 
       it('should NOT overwrite the cached expression with new bindings', () => {
         return expandUrlAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'}).then(
-          res => {
+          (res) => {
             expect(res).to.match(/rid=abc\?$/);
-            return expandUrlAsync('rid=NONSTANDARD?').then(res => {
+            return expandUrlAsync('rid=NONSTANDARD?').then((res) => {
               expect(res).to.match(/rid=NONSTANDARD\?$/);
             });
           }
@@ -1276,46 +1276,46 @@ describes.sandboxed('UrlReplacements', {}, env => {
 
       it('should expand bindings as functions', () => {
         return expandUrlAsync('rid=FUNC(abc)?', {
-          'FUNC': value => 'func_' + value,
-        }).then(res => {
+          'FUNC': (value) => 'func_' + value,
+        }).then((res) => {
           expect(res).to.match(/rid=func_abc\?$/);
         });
       });
 
       it('should expand bindings as functions with promise', () => {
         return expandUrlAsync('rid=FUNC(abc)?', {
-          'FUNC': value => Promise.resolve('func_' + value),
-        }).then(res => {
+          'FUNC': (value) => Promise.resolve('func_' + value),
+        }).then((res) => {
           expect(res).to.match(/rid=func_abc\?$/);
         });
       });
 
       it('should expand null as empty string', () => {
-        return expandUrlAsync('v=VALUE', {'VALUE': null}).then(res => {
+        return expandUrlAsync('v=VALUE', {'VALUE': null}).then((res) => {
           expect(res).to.equal('v=');
         });
       });
 
       it('should expand undefined as empty string', () => {
-        return expandUrlAsync('v=VALUE', {'VALUE': undefined}).then(res => {
+        return expandUrlAsync('v=VALUE', {'VALUE': undefined}).then((res) => {
           expect(res).to.equal('v=');
         });
       });
 
       it('should expand empty string as empty string', () => {
-        return expandUrlAsync('v=VALUE', {'VALUE': ''}).then(res => {
+        return expandUrlAsync('v=VALUE', {'VALUE': ''}).then((res) => {
           expect(res).to.equal('v=');
         });
       });
 
       it('should expand zero as zero', () => {
-        return expandUrlAsync('v=VALUE', {'VALUE': 0}).then(res => {
+        return expandUrlAsync('v=VALUE', {'VALUE': 0}).then((res) => {
           expect(res).to.equal('v=0');
         });
       });
 
       it('should expand false as false', () => {
-        return expandUrlAsync('v=VALUE', {'VALUE': false}).then(res => {
+        return expandUrlAsync('v=VALUE', {'VALUE': false}).then((res) => {
           expect(res).to.equal('v=false');
         });
       });
@@ -1324,7 +1324,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         // RANDOM is a standard property and we add RANDOM_OTHER.
         return expandUrlAsync('r=RANDOM&ro=RANDOM_OTHER?', {
           'RANDOM_OTHER': 'ABC',
-        }).then(res => {
+        }).then((res) => {
           expect(res).to.match(/r=(\d+(\.\d+)?)&ro=ABC\?$/);
         });
       });
@@ -1333,7 +1333,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         return expandUrlAsync('a=VALUEA&b=VALUEB?', {
           'VALUEA': 'aaa',
           'VALUEB': 'bbb',
-        }).then(res => {
+        }).then((res) => {
           expect(res).to.match(/a=aaa&b=bbb\?$/);
         });
       });
@@ -1347,7 +1347,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated(
                   'https://example.com?query_string_param1=foo'
                 );
@@ -1356,7 +1356,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=foo&s/);
             });
         });
@@ -1371,7 +1371,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=&s/);
             });
         });
@@ -1388,7 +1388,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .expandUrlAsync(
               '?sh=QUERY_PARAM(query_string_param1,default_value)&s'
             )
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=default_value&s/);
             });
         });
@@ -1401,7 +1401,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated(
                   'https://cdn.ampproject.org/a/o.com/foo/?amp_r=x%3Dfoo'
                 );
@@ -1410,7 +1410,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=foo&s/);
             });
         });
@@ -1423,7 +1423,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           env.sandbox
             .stub(trackPromise, 'getTrackImpressionPromise')
             .callsFake(() => {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 win.location = parseUrlDeprecated(
                   'https://cdn.ampproject.org/a/o.com/foo/?x=foo&amp_r=x%3Devil'
                 );
@@ -1432,7 +1432,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             });
           return Services.urlReplacementsForDoc(win.document.documentElement)
             .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
-            .then(res => {
+            .then((res) => {
               expect(res).to.match(/sh=foo&s/);
             });
         });
@@ -1452,7 +1452,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             'FUNC': () => 22,
             'PROMISE': () => Promise.resolve(23),
           })
-          .then(res => {
+          .then((res) => {
             expect(res).to.deep.equal({
               'SOURCE_HOST': 'example.com',
               'QUERY_PARAM(p1)': 'foo',
@@ -1492,7 +1492,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             () => {
               throw new Error('never here');
             },
-            err => {
+            (err) => {
               expect(err.message).to.match(protocolErrorRegex);
             }
           );
@@ -1511,11 +1511,11 @@ describes.sandboxed('UrlReplacements', {}, env => {
             'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
             {
               'CONST': 'ABC',
-              'FUNCT': function(a, b) {
+              'FUNCT': function (a, b) {
                 return a + b;
               },
               // Will ignore promise based result and instead insert empty string.
-              'PROM': function() {
+              'PROM': function () {
                 return Promise.resolve('boo');
               },
             },
@@ -1548,7 +1548,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           expanded = urlReplacements.expandUrlSync(
             'FUNCT://example.com/?r=RANDOM',
             {
-              'FUNCT': function() {
+              'FUNCT': function () {
                 return 'abc';
               },
             }
@@ -1620,7 +1620,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           if (opt_disabled) {
             accessService = null;
           }
-          return createIframePromise().then(iframe => {
+          return createIframePromise().then((iframe) => {
             iframe.doc.title = 'Pixel Test';
             const link = iframe.doc.createElement('link');
             link.setAttribute('href', 'https://pinterest.com/pin1');
@@ -1639,7 +1639,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .expects('getAccessReaderId')
             .returns(Promise.resolve('reader1'))
             .once();
-          return expandUrlAsync('?a=ACCESS_READER_ID').then(res => {
+          return expandUrlAsync('?a=ACCESS_READER_ID').then((res) => {
             expect(res).to.match(/a=reader1/);
             expect(userErrorStub).to.have.not.been.called;
           });
@@ -1651,7 +1651,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .withExactArgs('field1')
             .returns(Promise.resolve('value1'))
             .once();
-          return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
+          return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
             expect(res).to.match(/a=value1/);
             expect(userErrorStub).to.have.not.been.called;
           });
@@ -1662,7 +1662,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           return expandUrlAsync(
             '?a=ACCESS_READER_ID;',
             /* disabled */ true
-          ).then(res => {
+          ).then((res) => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub).to.be.calledOnce;
           });
@@ -1694,7 +1694,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           if (opt_disabled) {
             accessService = null;
           }
-          return createIframePromise().then(iframe => {
+          return createIframePromise().then((iframe) => {
             iframe.doc.title = 'Pixel Test';
             const link = iframe.doc.createElement('link');
             link.setAttribute('href', 'https://pinterest.com/pin1');
@@ -1713,7 +1713,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .expects('getAccessReaderId')
             .returns(Promise.resolve('reader1'))
             .once();
-          return expandUrlAsync('?a=ACCESS_READER_ID').then(res => {
+          return expandUrlAsync('?a=ACCESS_READER_ID').then((res) => {
             expect(res).to.match(/a=reader1/);
             expect(userErrorStub).to.have.not.been.called;
           });
@@ -1725,7 +1725,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .withExactArgs('field1')
             .returns(Promise.resolve('value1'))
             .once();
-          return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
+          return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
             expect(res).to.match(/a=value1/);
             expect(userErrorStub).to.have.not.been.called;
           });
@@ -1736,7 +1736,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           return expandUrlAsync(
             '?a=ACCESS_READER_ID;',
             /* disabled */ true
-          ).then(res => {
+          ).then((res) => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub).to.be.calledOnce;
           });
@@ -1988,7 +1988,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           expanded = urlReplacements.expandStringSync(
             'FUNCT://example.com/?r=RANDOM',
             {
-              'FUNCT': function() {
+              'FUNCT': function () {
                 return 'abc';
               },
             }
@@ -2018,7 +2018,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .expandStringAsync('RANDOM:X:Y', {
               'RANDOM': Promise.resolve('abc'),
             })
-            .then(expanded => {
+            .then((expanded) => {
               expect(expanded).to.equal('abc:X:Y');
             });
         });
@@ -2033,7 +2033,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
             .expandStringAsync('title=TITLE', {
               'TITLE': Promise.resolve('test with spaces'),
             })
-            .then(expanded => {
+            .then((expanded) => {
               expect(expanded).to.equal('title=test with spaces');
             });
         });
@@ -2131,7 +2131,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           input.setAttribute('data-amp-replace', 'RANDOM');
           return urlReplacements
             .expandInputValueAsync(input)
-            .then(expandedValue => {
+            .then((expandedValue) => {
               expect(input['amp-original-value']).to.equal('RANDOM');
               expect(input.value).to.match(/(\d+(\.\d+)?)/);
               expect(expandedValue).to.match(/(\d+(\.\d+)?)/);

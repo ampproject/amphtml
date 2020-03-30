@@ -24,7 +24,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel'],
     environments: ['single'],
   },
-  async function(env) {
+  async function (env) {
     /**
      * A helper function for expecting an error from an async function since we
      * don't have ChaiAsExpected and we cannot wait for errors from

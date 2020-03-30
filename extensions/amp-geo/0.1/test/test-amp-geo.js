@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-geo'],
     },
   },
-  env => {
+  (env) => {
     const expectedState =
       '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line
 
@@ -123,7 +123,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
         expectBodyHasClass(
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
@@ -140,7 +140,7 @@ describes.realWin(
       expectBodyHasClass(['amp-geo-pending'], true);
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
         expectBodyHasClass(['amp-geo-pending'], false);
       });
@@ -181,7 +181,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
         expectBodyHasClass(
@@ -202,7 +202,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('fr');
         expectBodyHasClass(
           ['amp-iso-country-fr', 'amp-geo-group-eea', 'amp-geo-group-myGroup'],
@@ -217,7 +217,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('za');
         expectBodyHasClass(['amp-iso-country-za', 'amp-geo-no-group'], true);
         expectBodyHasClass(
@@ -236,7 +236,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expect(geo.allISOCountryGroups).to.deep.equal(
           Object.keys(config.ISOCountryGroups)
@@ -250,7 +250,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
 
         /* multi group case */
@@ -269,7 +269,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
 
         /* single group case */
@@ -286,7 +286,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
         expectBodyHasClass(
@@ -305,7 +305,7 @@ describes.realWin(
       );
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
         expectBodyHasClass(
@@ -324,7 +324,7 @@ describes.realWin(
       doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
         expectBodyHasClass(
@@ -340,7 +340,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
         expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
         expectBodyHasClass(
@@ -354,7 +354,7 @@ describes.realWin(
       addConfigElement('script');
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
         expect(geo.matchedISOCountryGroups).to.deep.equal(['nafta', 'unknown']);
         expect(geo.allISOCountryGroups).to.deep.equal([
@@ -386,7 +386,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
         expectBodyHasClass(['amp-geo-error'], true);
       });
@@ -401,7 +401,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.not.be.called;
         expect(geo.ISOCountry).to.equal('ca');
       });
@@ -417,7 +417,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.be.called;
         expect(geo.ISOCountry).to.equal('unknown');
       });
@@ -431,7 +431,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.be.called;
         expect(geo.ISOCountry).to.equal('unknown');
       });
@@ -442,7 +442,7 @@ describes.realWin(
       env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       env.sandbox.stub(Services, 'timerFor').returns({
-        timeoutPromise: function(delay, racePromise, msg) {
+        timeoutPromise: function (delay, racePromise, msg) {
           return Promise.race([
             racePromise,
             Promise.reject(user().createError(msg)),
@@ -451,7 +451,7 @@ describes.realWin(
       });
       xhr.fetchJson.resolves({
         json: () =>
-          new Promise(res => {
+          new Promise((res) => {
             setTimeout(() => {
               res(JSON.parse('{"country": "ca"}'));
             }, 10);
@@ -460,7 +460,7 @@ describes.realWin(
       addConfigElement('script');
 
       geo.buildCallback();
-      return Services.geoForDocOrNull(el).then(geo => {
+      return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.be.called;
         expect(geo.ISOCountry).to.equal('unknown');
       });

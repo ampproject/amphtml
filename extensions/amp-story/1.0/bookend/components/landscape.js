@@ -62,12 +62,12 @@ export class LandscapeComponent {
   assertValidity(landscapeJson, element) {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields = !requiredFields.some(
-      field => !(field in landscapeJson)
+      (field) => !(field in landscapeJson)
     );
     userAssert(
       hasAllRequiredFields,
       'Landscape component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
         ' fields, skipping invalid.'
     );
 

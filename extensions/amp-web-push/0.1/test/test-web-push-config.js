@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-web-push'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let webPushConfig = {};
 
@@ -71,7 +71,7 @@ describes.realWin(
 
     function removeAllWebPushConfigElements() {
       const elements = win.document.querySelectorAll(CONFIG_TAG);
-      elements.forEach(element => element.remove());
+      elements.forEach((element) => element.remove());
     }
 
     it('should fail if element does not have correct ID', () => {

@@ -77,6 +77,6 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-reach-player', '0.1', AMP => {
+AMP.extension('amp-reach-player', '0.1', (AMP) => {
   AMP.registerElement('amp-reach-player', AmpReachPlayer);
 });

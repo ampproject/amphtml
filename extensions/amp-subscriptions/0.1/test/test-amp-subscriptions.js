@@ -32,7 +32,7 @@ import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {setTimeout} from 'timers';
 
-describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
+describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let element;
@@ -101,7 +101,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
     env.sandbox
       .stub(PageConfigResolver.prototype, 'resolveConfig')
-      .callsFake(function() {
+      .callsFake(function () {
         configResolver = this;
         return Promise.resolve(pageConfig);
       });
@@ -117,7 +117,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     isStory = false;
     env.sandbox
       .stub(utilsStory, 'isStoryDocument')
-      .returns({then: fn => fn(isStory)});
+      .returns({then: (fn) => fn(isStory)});
   });
 
   it('should call `initialize_` on start', async () => {
@@ -639,10 +639,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(firstVisibleStub).to.be.called;
     });
 
-    it('should report failure if platform timeouts', done => {
+    it('should report failure if platform timeouts', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
-        .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
+        .callsFake(() => new Promise((resolve) => setTimeout(resolve, 8000)));
       const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
@@ -653,7 +653,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     }).timeout(7000);
 
-    it('should report failure if platform reject promise', done => {
+    it('should report failure if platform reject promise', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => Promise.reject());

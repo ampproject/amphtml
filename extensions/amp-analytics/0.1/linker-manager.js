@@ -95,12 +95,12 @@ export class LinkerManager {
       /** @type {!JsonObject} */ (this.config_)
     );
     // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = Object.keys(this.config_).map(name => {
+    this.allLinkerPromises_ = Object.keys(this.config_).map((name) => {
       const ids = this.config_[name]['ids'];
       // Keys for linker data.
       const keys = Object.keys(ids);
       // Expand the value of each key value pair (if necessary).
-      const valuePromises = keys.map(key => {
+      const valuePromises = keys.map((key) => {
         const expansionOptions = new ExpansionOptions(
           this.vars_,
           /* opt_iterations */ undefined,
@@ -109,7 +109,7 @@ export class LinkerManager {
         return this.expandTemplateWithUrlParams_(ids[key], expansionOptions);
       });
 
-      return Promise.all(valuePromises).then(values => {
+      return Promise.all(valuePromises).then((values) => {
         // Rejoin each key with its expanded value.
         const expandedIds = {};
         values.forEach((value, i) => {
@@ -132,7 +132,7 @@ export class LinkerManager {
         element.href = this.applyLinkers_(element.href);
       }, Priority.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
-        url => this.applyLinkers_(url),
+        (url) => this.applyLinkers_(url),
         Priority.ANALYTICS_LINKER
       );
     }
@@ -161,7 +161,7 @@ export class LinkerManager {
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
-    const linkerNames = Object.keys(config).filter(key => {
+    const linkerNames = Object.keys(config).filter((key) => {
       const value = config[key];
       const isLinkerConfig = isObject(value);
       if (!isLinkerConfig) {
@@ -172,7 +172,7 @@ export class LinkerManager {
 
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
-    linkerNames.forEach(name => {
+    linkerNames.forEach((name) => {
       const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
@@ -209,7 +209,7 @@ export class LinkerManager {
     const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
       .expandTemplate(template, expansionOptions, this.element_)
-      .then(expanded => {
+      .then((expanded) => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);
       });
@@ -394,7 +394,7 @@ export class LinkerManager {
       return;
     }
 
-    this.formSubmitService_.then(formService => {
+    this.formSubmitService_.then((formService) => {
       this.formSubmitUnlistener_ = formService.beforeSubmit(
         this.handleFormSubmit_.bind(this)
       );

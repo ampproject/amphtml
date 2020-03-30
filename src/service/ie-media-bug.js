@@ -35,7 +35,7 @@ export function checkAndFix(win, opt_platform) {
   }
 
   // Poll until the expression resolves correctly, but only up to a point.
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     /** @const {number} */
     const endTime = Date.now() + 2000;
     /** @const {number} */

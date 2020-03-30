@@ -55,7 +55,7 @@ export class MutatorImpl {
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
-    this.activeHistory_.onFocus(element => {
+    this.activeHistory_.onFocus((element) => {
       this.checkPendingChangeSize_(element);
     });
 
@@ -86,7 +86,7 @@ export class MutatorImpl {
         opt_newMargins,
         opt_event,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             resolve();
           } else {
@@ -120,7 +120,7 @@ export class MutatorImpl {
         /* newMargin */ undefined,
         /* event */ undefined,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             const resource = Resource.forElement(element);
             resource.completeCollapse();
@@ -295,7 +295,7 @@ export class MutatorImpl {
   checkPendingChangeSize_(element) {
     const resourceElement = closest(
       element,
-      el => !!Resource.forElementOptional(el)
+      (el) => !!Resource.forElementOptional(el)
     );
     if (!resourceElement) {
       return;

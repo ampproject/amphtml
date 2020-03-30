@@ -25,7 +25,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let variableSource;
 
     beforeEach(() => {
@@ -148,13 +148,13 @@ describes.realWin(
         CLIENT_ID: mockClientIdFn, // fn resolving to promise
         CANONICAL_URL: 'www.google.com', // string
         RANDOM: () => 123456, // number
-        TRIM: str => str.trim(), // fn
-        UPPERCASE: str => str.toUpperCase(),
-        LOWERCASE: str => str.toLowerCase(),
+        TRIM: (str) => str.trim(), // fn
+        UPPERCASE: (str) => str.toUpperCase(),
+        LOWERCASE: (str) => str.toLowerCase(),
         CONCAT: (a, b) => a + '-' + b,
         CAT_THREE: (a, b, c) => a + b + c,
         ASYNC: Promise.resolve('hello'),
-        ASYNCFN: arg => Promise.resolve(arg),
+        ASYNCFN: (arg) => Promise.resolve(arg),
         BROKEN: () => undefined,
         TITLE: 'hello world ',
       };
@@ -263,7 +263,7 @@ describes.realWin(
       ];
 
       describe('called asyncronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -295,7 +295,7 @@ describes.realWin(
       });
 
       describe('called synchronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -431,9 +431,9 @@ describes.realWin(
         ];
 
         describe('called asyncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
-            it(description, function*() {
+            it(description, function* () {
               const vars = {};
               new Expander(
                 variableSource,
@@ -446,7 +446,7 @@ describes.realWin(
             });
           });
 
-          it('should handle async functions', function*() {
+          it('should handle async functions', function* () {
             const vars = {};
             const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
             new Expander(
@@ -463,7 +463,7 @@ describes.realWin(
         });
 
         describe('called syncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
             it(description, () => {
               const vars = {};

@@ -27,7 +27,7 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, env => {
+describes.realWin('media-tasks', {}, (env) => {
   let el;
   let vsyncApi;
 
@@ -38,7 +38,7 @@ describes.realWin('media-tasks', {}, env => {
     vsyncApi = {
       mutatePromise: () => {},
     };
-    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
+    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
       callback();
     });
   });
@@ -139,7 +139,7 @@ describes.realWin('media-tasks', {}, env => {
      * @return {!Array<!Element>}
      */
     function getFakeSources(indices) {
-      return indices.map(index => getFakeSource(index));
+      return indices.map((index) => getFakeSource(index));
     }
 
     it('should clear existing src attribute', () => {
@@ -156,7 +156,7 @@ describes.realWin('media-tasks', {}, env => {
 
     it('should clear existing source elements', () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
@@ -185,7 +185,7 @@ describes.realWin('media-tasks', {}, env => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
       const NEW_SRC_ELS = getFakeSources([4, 5, 6]);
 
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 

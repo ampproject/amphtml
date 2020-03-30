@@ -71,7 +71,7 @@ export class SsrTemplateHelper {
    * @return {!Promise}
    */
   assertTrustedViewer(element) {
-    return this.viewer_.isTrustedViewer().then(trusted => {
+    return this.viewer_.isTrustedViewer().then((trusted) => {
       userAssert(
         trusted,
         'Refused to attempt SSR in untrusted viewer: ',

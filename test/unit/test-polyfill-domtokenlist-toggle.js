@@ -26,7 +26,7 @@ describes.fakeWin(
       },
     },
   },
-  env => {
+  (env) => {
     let originalToggle;
     let originalAdd;
     let element;
@@ -72,7 +72,7 @@ describes.fakeWin(
       },
     },
   },
-  env => {
+  (env) => {
     let originalToggle;
     let originalAdd;
     let element;

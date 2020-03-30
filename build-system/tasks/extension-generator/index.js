@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
 function pascalCase(str) {
   return (
     str[0].toUpperCase() +
-    str.slice(1).replace(/-([a-z])/g, function(g) {
+    str.slice(1).replace(/-([a-z])/g, function (g) {
       return g[1].toUpperCase();
     })
   );
@@ -73,7 +73,7 @@ tags: {  # <${name}>
 `;
 }
 
-const getMarkdownDocFile = async name =>
+const getMarkdownDocFile = async (name) =>
   (await fs.readFile(`${__dirname}/extension-doc.template.md`))
     .toString('utf-8')
     .replace(/\\\$category/g, '$category')
@@ -231,7 +231,7 @@ async function makeExtension() {
   const examplesFileValidatorOut = examplesFile
     .trim()
     .split('\n')
-    .map(line => `|  ${line}`)
+    .map((line) => `|  ${line}`)
     .join('\n');
 
   fs.writeFileSync(

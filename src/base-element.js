@@ -675,13 +675,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
         this.element.dispatchCustomEvent(eventType, getData(event) || {});
       })
     );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**

@@ -16,7 +16,7 @@
 
 import {Signals} from '../../../src/utils/signals';
 
-describes.sandboxed('Signals', {}, env => {
+describes.sandboxed('Signals', {}, (env) => {
   let clock;
   let signals;
 
@@ -63,7 +63,7 @@ describes.sandboxed('Signals', {}, env => {
     expect(signals.promiseMap_['sig'].reject).to.be.ok;
     expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     signals.signal('sig', 11);
-    return promise.then(time => {
+    return promise.then((time) => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -79,7 +79,7 @@ describes.sandboxed('Signals', {}, env => {
     expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
     expect(signals.promiseMap_['sig'].reject).to.be.undefined;
     expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
-    return promise.then(time => {
+    return promise.then((time) => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -97,7 +97,7 @@ describes.sandboxed('Signals', {}, env => {
       () => {
         throw new Error('should have failed');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal(error);
         expect(signals.promiseMap_['sig'].promise).to.equal(promise);
         expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -116,7 +116,7 @@ describes.sandboxed('Signals', {}, env => {
       () => {
         throw new Error('should have failed');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal(error);
         expect(signals.promiseMap_['sig'].promise).to.equal(promise);
         expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -177,7 +177,7 @@ describes.sandboxed('Signals', {}, env => {
   });
 });
 
-describes.sandboxed('Signals with zero for tests', {}, env => {
+describes.sandboxed('Signals with zero for tests', {}, (env) => {
   let signals;
 
   beforeEach(() => {

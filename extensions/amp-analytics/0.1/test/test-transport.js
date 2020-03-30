@@ -31,7 +31,7 @@ describes.realWin(
     amp: false,
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let openXhrStub;

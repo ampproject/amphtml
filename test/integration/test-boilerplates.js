@@ -32,7 +32,7 @@ describe
       return createFixtureIframe(
         'test/fixtures/boilerplate-old-opacity.html',
         1000
-      ).then(f => {
+      ).then((f) => {
         fixture = f;
       });
     });
@@ -50,7 +50,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
     return createFixtureIframe(
       'test/fixtures/boilerplate-new-visibility.html',
       10000
-    ).then(f => {
+    ).then((f) => {
       fixture = f;
     });
   });

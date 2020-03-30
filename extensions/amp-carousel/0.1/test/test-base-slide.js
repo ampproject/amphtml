@@ -32,7 +32,7 @@
 
 import {BaseSlides} from '../base-slides';
 
-describes.fakeWin('BaseSlides', {amp: true}, env => {
+describes.fakeWin('BaseSlides', {amp: true}, (env) => {
   let win, doc;
   let buildSlidesSpy;
   let onViewportCallbackSpy;

@@ -85,7 +85,7 @@ describes.sandboxed('amp-date-picker', {}, () => {
     it('should combine with the outer isOutsideRange prop', async () => {
       const {getIsOutsideRange} = withMaximumNights(FakeDatePicker);
       const props = {
-        isOutsideRange: date => moment('2018-01-04').isSame(date),
+        isOutsideRange: (date) => moment('2018-01-04').isSame(date),
         startDate: moment('2018-01-01'),
         endDate: null,
         focusedInput: 'startDate',

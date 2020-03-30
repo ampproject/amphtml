@@ -76,7 +76,7 @@ export class ConfigManager {
     const source = data['source'];
     // Check that the configuration event is coming from an iframe that
     // should be providing configuration information.
-    const isProviderIframe = this.configProviderIframes_.some(iframe => {
+    const isProviderIframe = this.configProviderIframes_.some((iframe) => {
       return iframe.contentWindow === source;
     });
 
@@ -89,7 +89,7 @@ export class ConfigManager {
     pubData.requestStatus = RequestStatus.COMPLETED;
     const {iframeData} = pubData;
 
-    iframeData.forEach(iframeDatum => {
+    iframeData.forEach((iframeDatum) => {
       const {
         iframe,
         widgetId,
@@ -263,13 +263,13 @@ export class ConfigManager {
   unregister(param) {
     const {pubId, iframe} = param;
     this.configProviderIframes_ = this.configProviderIframes_.filter(
-      providerFrame => providerFrame !== iframe
+      (providerFrame) => providerFrame !== iframe
     );
 
     const pubData = this.dataForPubId_[pubId] || {};
 
     if (pubData.iframeData) {
-      pubData.iframeData = pubData.iframeData.filter(iframeDatum => {
+      pubData.iframeData = pubData.iframeData.filter((iframeDatum) => {
         return iframeDatum.iframe !== iframe;
       });
     }

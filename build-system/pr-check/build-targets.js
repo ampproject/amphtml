@@ -40,7 +40,7 @@ function isOwnersFile(file) {
  * A dictionary of functions that match a given file to a given build target.
  */
 const targetMatchers = {
-  'AVA': file => {
+  'AVA': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -51,7 +51,7 @@ const targetMatchers = {
       file.startsWith('build-system/tasks/prepend-global/')
     );
   },
-  'BABEL_PLUGIN': file => {
+  'BABEL_PLUGIN': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -64,7 +64,7 @@ const targetMatchers = {
       file.startsWith('build-system/babel-plugins/')
     );
   },
-  'CACHES_JSON': file => {
+  'CACHES_JSON': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -73,7 +73,7 @@ const targetMatchers = {
       file == 'build-system/global-configs/caches.json'
     );
   },
-  'DEV_DASHBOARD': file => {
+  'DEV_DASHBOARD': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -83,7 +83,7 @@ const targetMatchers = {
       file.startsWith('build-system/server/app-index/')
     );
   },
-  'DOCS': file => {
+  'DOCS': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -92,24 +92,24 @@ const targetMatchers = {
       (path.extname(file) == '.md' && !file.startsWith('examples/'))
     );
   },
-  'E2E_TEST': file => {
+  'E2E_TEST': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return (
       file.startsWith('build-system/tasks/e2e/') ||
-      config.e2eTestPaths.some(pattern => {
+      config.e2eTestPaths.some((pattern) => {
         return minimatch(file, pattern);
       })
     );
   },
-  'FLAG_CONFIG': file => {
+  'FLAG_CONFIG': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return file.startsWith('build-system/global-configs/');
   },
-  'INTEGRATION_TEST': file => {
+  'INTEGRATION_TEST': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -117,18 +117,18 @@ const targetMatchers = {
       file == 'build-system/tasks/integration.js' ||
       (file.startsWith('build-system/tasks/runtime-test/') &&
         !file.endsWith('unit.js')) ||
-      config.integrationTestPaths.some(pattern => {
+      config.integrationTestPaths.some((pattern) => {
         return minimatch(file, pattern);
       })
     );
   },
-  'OWNERS': file => {
+  'OWNERS': (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
-  'PACKAGE_UPGRADE': file => {
+  'PACKAGE_UPGRADE': (file) => {
     return file == 'package.json' || file == 'yarn.lock';
   },
-  'SERVER': file => {
+  'SERVER': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -138,19 +138,19 @@ const targetMatchers = {
       file.startsWith('build-system/server/')
     );
   },
-  'UNIT_TEST': file => {
+  'UNIT_TEST': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return (
       file == 'build-system/tasks/unit.js' ||
       file.startsWith('build-system/tasks/runtime-test/') ||
-      config.unitTestPaths.some(pattern => {
+      config.unitTestPaths.some((pattern) => {
         return minimatch(file, pattern);
       })
     );
   },
-  'VALIDATOR': file => {
+  'VALIDATOR': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -178,13 +178,13 @@ const targetMatchers = {
         name.endsWith('.protoascii'))
     );
   },
-  'VALIDATOR_WEBUI': file => {
+  'VALIDATOR_WEBUI': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return file.startsWith('validator/webui/');
   },
-  'VISUAL_DIFF': file => {
+  'VISUAL_DIFF': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -208,7 +208,7 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   const buildTargets = new Set();
   for (const file of filesChanged) {
     let matched = false;
-    Object.keys(targetMatchers).forEach(target => {
+    Object.keys(targetMatchers).forEach((target) => {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
@@ -222,11 +222,7 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
     `${fileLogPrefix} Detected build targets:`,
-    colors.cyan(
-      Array.from(buildTargets)
-        .sort()
-        .join(', ')
-    )
+    colors.cyan(Array.from(buildTargets).sort().join(', '))
   );
   // Test the runtime for babel plugin and server changes.
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
@@ -235,7 +231,7 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   // Test all targets on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
-    allTargets.forEach(target => buildTargets.add(target));
+    allTargets.forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }

@@ -16,7 +16,7 @@
 
 import {CtaTypes, StoryAdLocalization} from '../story-ad-localization';
 
-describes.realWin('amp-story-auto-ads:localization', {amp: true}, env => {
+describes.realWin('amp-story-auto-ads:localization', {amp: true}, (env) => {
   describe('story ad localization', () => {
     it('registers and returns localized string [es]', () => {
       const {win} = env;

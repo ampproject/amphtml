@@ -25,7 +25,7 @@ describe('3p messaging', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    return createIframePromise(true).then(i => {
+    return createIframePromise(true).then((i) => {
       testWin = i.win;
       testWin.context = {
         location: window.location,
@@ -42,7 +42,7 @@ describe('3p messaging', () => {
 
   it('should receive messages', () => {
     let progress = '';
-    listenParent(testWin, 'test', function(d) {
+    listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);
@@ -56,13 +56,13 @@ describe('3p messaging', () => {
 
   it('should receive more messages', () => {
     let progress = '';
-    listenParent(testWin, 'test', function(d) {
+    listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
-    listenParent(testWin, 'test', function(d) {
+    listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
-    listenParent(testWin, 'test2', function(d) {
+    listenParent(testWin, 'test2', function (d) {
       progress += d.s;
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);
@@ -79,13 +79,13 @@ describe('3p messaging', () => {
 
   it('should support unlisten', () => {
     let progress = '';
-    const unlisten0 = listenParent(testWin, 'test', function(d) {
+    const unlisten0 = listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
-    const unlisten1 = listenParent(testWin, 'test', function(d) {
+    const unlisten1 = listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
-    const unlisten2 = listenParent(testWin, 'test2', function(d) {
+    const unlisten2 = listenParent(testWin, 'test2', function (d) {
       progress += d.s;
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);
@@ -111,17 +111,17 @@ describe('3p messaging', () => {
     let progress = '';
     const origOnError = window.onError;
     const expected = new Error('expected');
-    window.onerror = function(message, source, lineno, colno, error) {
+    window.onerror = function (message, source, lineno, colno, error) {
       if (error === expected) {
         return;
       }
       origOnError.apply(this, arguments);
     };
 
-    listenParent(testWin, 'test', function() {
+    listenParent(testWin, 'test', function () {
       throw expected;
     });
-    listenParent(testWin, 'test', function(d) {
+    listenParent(testWin, 'test', function (d) {
       progress += d.s;
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);

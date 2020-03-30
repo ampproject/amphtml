@@ -62,8 +62,8 @@ async function checkLinks() {
  */
 function reportResults(results) {
   const filesWithDeadLinks = results
-    .filter(result => result.containsDeadLinks)
-    .map(result => result.file);
+    .filter((result) => result.containsDeadLinks)
+    .map((result) => result.file);
   if (filesWithDeadLinks.length > 0) {
     log(
       red('ERROR:'),
@@ -98,7 +98,7 @@ function reportResults(results) {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  return filesIntroducedByPr.some(file => {
+  return filesIntroducedByPr.some((file) => {
     return file.length > 0 && link.includes(path.parse(file).base);
   });
 }
@@ -140,7 +140,7 @@ function checkLinksInFile(file) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
           // Log links with the correct github base as alive, otherwise flag deadlinks.
-          const isValid = filesIntroducedByPr.some(file => {
+          const isValid = filesIntroducedByPr.some((file) => {
             return link === GITHUB_BASE_PATH + file;
           });
           if (isValid) {

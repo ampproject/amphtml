@@ -39,7 +39,7 @@ export function adform(global, data) {
   // Custom ad url using "data-src" attribute
   if (src) {
     validateSrcPrefix(
-      Object.keys(hosts).map(type => hosts[type]),
+      Object.keys(hosts).map((type) => hosts[type]),
       src
     );
     url = src;

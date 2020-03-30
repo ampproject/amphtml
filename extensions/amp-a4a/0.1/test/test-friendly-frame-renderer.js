@@ -22,7 +22,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
+describes.realWin('FriendlyFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;

@@ -372,7 +372,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
-    this.unsubsribes_.forEach(unsubsribe => unsubsribe());
+    this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
   /**
@@ -431,7 +431,7 @@ export class AmpDoc {
     const metaEls = dev()
       .assertElement(this.win.document.head)
       .querySelectorAll('meta[name]');
-    iterateCursor(metaEls, metaEl => {
+    iterateCursor(metaEls, (metaEl) => {
       const name = metaEl.getAttribute('name');
       const content = metaEl.getAttribute('content');
       if (!name || content === null) {
@@ -1067,7 +1067,7 @@ function extractSingleDocParams(win, initParams) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installDocService(win, isSingleDoc, opt_initParams) {
-  registerServiceBuilder(win, 'ampdoc', function() {
+  registerServiceBuilder(win, 'ampdoc', function () {
     return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
 }

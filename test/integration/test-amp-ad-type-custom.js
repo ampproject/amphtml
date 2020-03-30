@@ -65,7 +65,7 @@ describes.integration(
       `,
     extensions: ['amp-ad', 'amp-mustache'],
   },
-  env => {
+  (env) => {
     let browser;
     let doc;
 

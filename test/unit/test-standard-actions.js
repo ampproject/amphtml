@@ -29,7 +29,7 @@ import {setParentWindow} from '../../src/service';
 import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
-describes.sandboxed('StandardActions', {}, env => {
+describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;
   let mutateElementStub;
   let scrollStub;
@@ -128,19 +128,13 @@ describes.sandboxed('StandardActions', {}, env => {
     });
 
     it('returns element (direct)', () => {
-      const el = html`
-        <input autofocus />
-      `;
+      const el = html` <input autofocus /> `;
       expect(getAutofocusElementForShowAction(el)).to.equal(el);
     });
 
     it('returns element (wrapped)', () => {
-      const el = html`
-        <input autofocus />
-      `;
-      const wrapper = html`
-        <div><div></div></div>
-      `;
+      const el = html` <input autofocus /> `;
+      const wrapper = html` <div><div></div></div> `;
       wrapper.firstElementChild.appendChild(el);
       expect(getAutofocusElementForShowAction(wrapper)).to.equal(el);
     });
@@ -222,9 +216,7 @@ describes.sandboxed('StandardActions', {}, env => {
       });
 
       it('executes asynchronously when no autofocus (direct)', () => {
-        const node = html`
-          <input />
-        `;
+        const node = html` <input /> `;
         standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ false);
       });
@@ -240,9 +232,7 @@ describes.sandboxed('StandardActions', {}, env => {
       });
 
       it('executes synchronously when autofocus (direct)', () => {
-        const node = html`
-          <input autofocus />
-        `;
+        const node = html` <input autofocus /> `;
         standardActions.handleShow_(trustedInvocation({node}));
         expectElementToHaveBeenShown(node, /* sync */ true);
       });
@@ -260,9 +250,7 @@ describes.sandboxed('StandardActions', {}, env => {
         });
 
         it('focuses [autofocus] element synchronously (direct)', () => {
-          const node = html`
-            <input autofocus />
-          `;
+          const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
 
           standardActions.handleShow_(trustedInvocation({node}));
@@ -272,12 +260,8 @@ describes.sandboxed('StandardActions', {}, env => {
         });
 
         it('focuses [autofocus] element synchronously (wrapped)', () => {
-          const wrapper = html`
-            <div><div></div></div>
-          `;
-          const node = html`
-            <input autofocus />
-          `;
+          const wrapper = html` <div><div></div></div> `;
+          const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
 
           wrapper.firstElementChild.appendChild(node);
@@ -288,9 +272,7 @@ describes.sandboxed('StandardActions', {}, env => {
         });
 
         it('does not focus element', () => {
-          const node = html`
-            <input />
-          `;
+          const node = html` <input /> `;
           node.focus = env.sandbox.spy();
 
           standardActions.handleShow_(trustedInvocation({node}));
@@ -303,9 +285,7 @@ describes.sandboxed('StandardActions', {}, env => {
       it('focuses [autofocus] element asynchronously (direct)', () => {
         stubPlatformIsIos(false);
 
-        const node = html`
-          <input autofocus />
-        `;
+        const node = html` <input autofocus /> `;
         node.focus = env.sandbox.spy();
 
         standardActions.handleShow_(trustedInvocation({node}));
@@ -317,12 +297,8 @@ describes.sandboxed('StandardActions', {}, env => {
       it('focuses [autofocus] element asynchronously (wrapped)', () => {
         stubPlatformIsIos(false);
 
-        const wrapper = html`
-          <div><div></div></div>
-        `;
-        const node = html`
-          <input autofocus />
-        `;
+        const wrapper = html` <div><div></div></div> `;
+        const node = html` <input autofocus /> `;
         node.focus = env.sandbox.spy();
 
         wrapper.firstElementChild.appendChild(node);
@@ -333,9 +309,7 @@ describes.sandboxed('StandardActions', {}, env => {
       });
 
       it('does not focus element', () => {
-        const node = html`
-          <input />
-        `;
+        const node = html` <input /> `;
         node.focus = env.sandbox.spy();
 
         standardActions.handleShow_(trustedInvocation({node}));
@@ -680,7 +654,7 @@ describes.sandboxed('StandardActions', {}, env => {
         }
       );
 
-      it('should check throwIfCannotNavigate() for AMP elements', function*() {
+      it('should check throwIfCannotNavigate() for AMP elements', function* () {
         const userError = env.sandbox.stub(user(), 'error');
 
         invocation.caller.tagName = 'AMP-FOO';
@@ -815,7 +789,7 @@ describes.sandboxed('StandardActions', {}, env => {
       expect(goBackStub).to.be.calledOnce;
     });
 
-    it('should implement optoutOfCid', function*() {
+    it('should implement optoutOfCid', function* () {
       const cid = cidServiceForDocForTesting(ampdoc);
       const optoutStub = env.sandbox.stub(cid, 'optOut');
       invocation.method = 'optoutOfCid';
@@ -842,7 +816,7 @@ describes.sandboxed('StandardActions', {}, env => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget_(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then((result) => {
         expect(result).to.equal('set-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -867,7 +841,7 @@ describes.sandboxed('StandardActions', {}, env => {
       };
       invocation.node = element;
 
-      return standardActions.handleAmpTarget_(invocation).then(result => {
+      return standardActions.handleAmpTarget_(invocation).then((result) => {
         expect(result).to.equal('push-state-complete');
         expect(bind.invoke).to.be.calledOnce;
         expect(bind.invoke).to.be.calledWith(invocation);
@@ -911,7 +885,7 @@ describes.sandboxed('StandardActions', {}, env => {
     });
   });
 
-  describes.fakeWin('installInEmbedWindow', {}, env => {
+  describes.fakeWin('installInEmbedWindow', {}, (env) => {
     let embedWin;
     let embedActions;
 

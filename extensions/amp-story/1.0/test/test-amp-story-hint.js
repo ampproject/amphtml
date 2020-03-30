@@ -22,7 +22,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story hint layer', {}, env => {
+describes.fakeWin('amp-story hint layer', {}, (env) => {
   let host;
   let win;
   let ampStoryHint;
@@ -31,18 +31,18 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     win = env.win;
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
     env.sandbox
       .stub(Services, 'vsyncFor')
-      .callsFake(() => ({mutate: task => task()}));
+      .callsFake(() => ({mutate: (task) => task()}));
     env.sandbox
       .stub(Services, 'timerFor')
       .callsFake(() => ({delay: NOOP, cancel: NOOP}));

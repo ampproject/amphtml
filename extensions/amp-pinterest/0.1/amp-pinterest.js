@@ -86,7 +86,7 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.render().then(node => {
+    return this.render().then((node) => {
       return this.element.appendChild(node);
     });
   }
@@ -134,6 +134,6 @@ class AmpPinterest extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-pinterest', '0.1', AMP => {
+AMP.extension('amp-pinterest', '0.1', (AMP) => {
   AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
 });

@@ -37,7 +37,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let storyEl;
     let ampStory;
@@ -53,14 +53,14 @@ describes.realWin(
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };
       });
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function() {
+      registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
 
@@ -68,13 +68,13 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function() {
+      registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
 
       AmpStory.isBrowserSupported = () => true;
 
-      return storyEl.getImpl().then(impl => {
+      return storyEl.getImpl().then((impl) => {
         ampStory = impl;
       });
     });

@@ -132,7 +132,7 @@ export class Poller {
           }
           this.poll_();
         })
-        .catch(err => {
+        .catch((err) => {
           if (err.retriable) {
             if (!this.backoffClock_) {
               this.backoffClock_ = exponentialBackoffClock();

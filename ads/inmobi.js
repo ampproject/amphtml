@@ -28,7 +28,7 @@ export function inmobi(global, data) {
     siteid: data.siteid,
     slot: data.slotid,
     manual: true,
-    onError: code => {
+    onError: (code) => {
       if (code == 'nfr') {
         global.context.noContentAvailable();
         setStyle(document.getElementById('my-ad-slot'), 'display', 'none');

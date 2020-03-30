@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-action-macro'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
 
@@ -47,12 +47,12 @@ describes.realWin(
       });
     }
 
-    it('should build if experiment is on', done => {
+    it('should build if experiment is on', (done) => {
       newActionMacro().then(
         () => {
           done();
         },
-        unused => {
+        (unused) => {
           done(new Error('component should have built'));
         }
       );
@@ -61,7 +61,7 @@ describes.realWin(
     it('should not build if experiment is off', () => {
       return allowConsoleError(() => {
         toggleExperiment(env.win, 'amp-action-macro', false);
-        return newActionMacro().catch(err => {
+        return newActionMacro().catch((err) => {
           expect(err.message).to.include('Experiment is off');
         });
       });

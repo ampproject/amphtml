@@ -87,7 +87,7 @@ async function build(bundles, name, buildFunc) {
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
     minify: argv.compiled,
-    onWatchBuild: async bundlePromise => {
+    onWatchBuild: async (bundlePromise) => {
       bundle.pendingBuild = bundlePromise;
       await bundlePromise;
       bundle.pendingBuild = undefined;

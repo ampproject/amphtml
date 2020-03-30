@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-viewer-gpay-inline'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 

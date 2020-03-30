@@ -16,7 +16,7 @@
 
 import {AccessOtherAdapter} from '../amp-access-other';
 
-describes.realWin('AccessOtherAdapter', {amp: true}, env => {
+describes.realWin('AccessOtherAdapter', {amp: true}, (env) => {
   let ampdoc;
   let validConfig;
   let context;
@@ -109,7 +109,7 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
       const obj = {'access': 'A'};
       adapter.authorizationResponse_ = obj;
       contextMock.expects('buildUrl').never();
-      return adapter.authorize().then(response => {
+      return adapter.authorize().then((response) => {
         expect(response).to.equal(obj);
       });
     });

@@ -21,11 +21,11 @@ import {parseJson} from '../src/json';
  * @param context
  */
 
-const initSlotList = function(context) {
+const initSlotList = function (context) {
   context.master.availableSlots = context.master.availableSlots || {};
 };
 
-const registerSlot = function(slot) {
+const registerSlot = function (slot) {
   context.master.availableSlots[slot.slotName] = slot;
 };
 
@@ -34,7 +34,7 @@ export function springAds(global, data) {
   computeInMasterFrame(
     global,
     'springAds',
-    function() {
+    function () {
       initSlotList(context);
     },
     () => {}
@@ -53,7 +53,7 @@ export function springAds(global, data) {
     computeInMasterFrame(
       global,
       'springAds',
-      function() {
+      function () {
         registerSlot({
           window,
           document,

@@ -114,7 +114,7 @@ export function handleClick(e, opt_viewerNavigate) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(dev().assertElement(e.target), element => {
+  const a = closest(dev().assertElement(e.target), (element) => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {

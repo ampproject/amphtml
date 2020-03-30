@@ -101,9 +101,9 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
     const src = assertHttpsUrl(getOption('src', string, ''), this.element);
 
@@ -131,11 +131,11 @@ export class Amp3dGltf extends AMP.BaseElement {
     });
     this.registerAction(
       'setModelRotation',
-      invocation => {
+      (invocation) => {
         this.sendCommandWhenReady_(
           'setModelRotation',
           invocation.args
-        ).catch(e =>
+        ).catch((e) =>
           dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
@@ -180,7 +180,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -249,6 +249,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

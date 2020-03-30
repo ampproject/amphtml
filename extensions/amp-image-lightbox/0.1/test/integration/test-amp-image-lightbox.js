@@ -19,7 +19,7 @@ import {poll} from '../../../../../testing/iframe';
 describe
   .configure()
   .skipFirefox()
-  .run('amp-image-lightbox', function() {
+  .run('amp-image-lightbox', function () {
     this.timeout(5000);
     const extensions = ['amp-image-lightbox'];
     const imageLightboxBody = `
@@ -48,7 +48,7 @@ describe
         body: imageLightboxBody,
         extensions,
       },
-      env => {
+      (env) => {
         let win;
         beforeEach(() => {
           win = env.win;

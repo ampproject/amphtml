@@ -21,7 +21,7 @@ const t = describe
   .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
   .skipEdge();
 
-t.run('user-error', function() {
+t.run('user-error', function () {
   describes.integration(
     'user-error integration test',
     {
@@ -48,7 +48,7 @@ t.run('user-error', function() {
             referrerpolicy="fail-referrer">
             `,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
@@ -88,7 +88,7 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-img');
@@ -129,7 +129,7 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-ad');

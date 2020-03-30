@@ -209,7 +209,7 @@ export class CookieWriter {
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
       .expandStringAsync(cookieValue, this.bindings_)
-      .then(value => {
+      .then((value) => {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
@@ -219,7 +219,7 @@ export class CookieWriter {
           });
         }
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'Error expanding cookie string', e);
       });
   }

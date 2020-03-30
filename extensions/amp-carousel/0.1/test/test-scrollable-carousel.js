@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-carousel'],
     },
   },
-  env => {
+  (env) => {
     let win,
       doc,
       owners,
@@ -86,7 +86,7 @@ describes.realWin(
       'should initialize correctly: create container, build initial slides ' +
         'and show control buttons',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // create container
@@ -139,7 +139,7 @@ describes.realWin(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is MORE than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button
@@ -232,7 +232,7 @@ describes.realWin(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is LESS than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button the first time
@@ -317,7 +317,7 @@ describes.realWin(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is MORE than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button twice to reach the right end
@@ -415,7 +415,7 @@ describes.realWin(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is LESS than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button twice to reach the right end and click on

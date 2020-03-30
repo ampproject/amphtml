@@ -16,7 +16,7 @@
 
 import {install} from '../../src/polyfills/array-includes';
 
-describes.fakeWin('Array.includes', {}, env => {
+describes.fakeWin('Array.includes', {}, (env) => {
   beforeEach(() => {
     env.win.Array = Array;
     install(env.win);

@@ -22,7 +22,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
     let cryptoSection1;
@@ -120,7 +120,7 @@ describes.realWin(
       it('should decrypt the content correctly', async () => {
         cryptoHandler = new CryptoHandler(ampdoc);
         return await decryptAesGcm(decryptedDocKey, encryptedContent).then(
-          actualContent => {
+          (actualContent) => {
             expect(actualContent.replace(/&#39;/g, "'")).to.equal(
               decryptedContent
             );

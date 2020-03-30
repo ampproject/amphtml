@@ -136,7 +136,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = Services.userNotificationManagerForDoc(
         this.element
-      ).then(service =>
+      ).then((service) =>
         service.get(dev().assertString(this.consentNotificationId_))
       );
     }
@@ -213,19 +213,19 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
       .then(() => Services.ampdocServiceFor(this.win))
-      .then(ampDocService => ampDocService.getAmpDoc(this.element))
-      .then(ampdoc =>
+      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
+      .then((ampdoc) =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
           variableServicePromiseForDoc(ampdoc),
         ])
       )
-      .then(services => {
+      .then((services) => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
         return new AnalyticsConfig(this.element).loadConfig();
       })
-      .then(config => {
+      .then((config) => {
         this.config_ = /** @type {!JsonObject} */ (config);
         return new CookieWriter(this.win, this.element, this.config_).write();
       })
@@ -344,7 +344,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.config_['extraUrlParamsReplaceMap']
         );
         promises.push(
-          this.isSampledIn_(trigger).then(result => {
+          this.isSampledIn_(trigger).then((result) => {
             if (!result) {
               return;
             }
@@ -370,7 +370,7 @@ export class AmpAnalytics extends AMP.BaseElement {
                   expansionOptions,
                   this.element
                 )
-                .then(selector => {
+                .then((selector) => {
                   trigger['selector'] = selector;
                   this.addTrigger_(trigger);
                 });
@@ -530,7 +530,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const k in this.config_['requests']) {
         this.config_['requests'][k]['baseUrl'] = expandTemplate(
           this.config_['requests'][k]['baseUrl'],
-          key => {
+          (key) => {
             const request = this.config_['requests'][key];
             return (request && request['baseUrl']) || '${' + key + '}';
           },
@@ -617,7 +617,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         return;
       }
     }
-    this.checkTriggerEnabled_(trigger, event).then(enabled => {
+    this.checkTriggerEnabled_(trigger, event).then((enabled) => {
       if (!enabled) {
         return;
       }
@@ -661,7 +661,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       trigger,
       expansionOptions,
       this.element
-    ).then(message => {
+    ).then((message) => {
       if (isIframed(this.win)) {
         // Only post message with explict `parentPostMessage`
         this.win.parent./*OK*/ postMessage(message, '*');
@@ -692,8 +692,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (threshold >= 0 && threshold <= 100) {
       const expansionOptions = this.expansionOptions_(dict({}), trigger);
       return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-        .then(key => this.cryptoService_.uniform(key))
-        .then(digest => digest * 100 < threshold);
+        .then((key) => this.cryptoService_.uniform(key))
+        .then((digest) => digest * 100 < threshold);
     }
     user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
     return resolve;
@@ -719,7 +719,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     );
 
     return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel]).then(
-      enabled => {
+      (enabled) => {
         devAssert(enabled.length === 2);
         return enabled[0] && enabled[1];
       }
@@ -746,9 +746,10 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(val =>
-      stringToBool(val)
-    );
+    return this.expandTemplateWithUrlParams_(
+      spec,
+      expansionOptions
+    ).then((val) => stringToBool(val));
   }
 
   /**
@@ -762,7 +763,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_
       .expandTemplate(spec, expansionOptions, this.element)
-      .then(key =>
+      .then((key) =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,
           this.variableService_.getMacros(this.element)
@@ -797,7 +798,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   // Register doc-service factory.
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',

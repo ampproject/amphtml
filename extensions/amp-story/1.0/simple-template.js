@@ -60,7 +60,7 @@ export function renderAsElement(doc, elementDef) {
  */
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
-  elementsDef.forEach(elementDef =>
+  elementsDef.forEach((elementDef) =>
     fragment.appendChild(renderSingle(doc, elementDef))
   );
   return fragment;
@@ -84,7 +84,7 @@ function renderSingle(doc, elementDef) {
   const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
   if (hasLocalizedTextContent || hasLocalizedLabel) {
     const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNull(win).then(localizationService => {
+    Services.localizationServiceForOrNull(win).then((localizationService) => {
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
 
       if (hasLocalizedTextContent) {

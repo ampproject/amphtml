@@ -136,12 +136,12 @@ class AmpSocialShare extends PreactBaseElement {
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
-      bindingVars.forEach(name => {
+      bindingVars.forEach((name) => {
         const bindingName = name.toUpperCase();
         bindings[bindingName] = urlParams[name];
       });
     }
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(result => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((result) => {
       let href = result;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
       const {protocol} = Services.urlForDoc(this.element).parse(href);
@@ -170,6 +170,6 @@ AmpSocialShare['props'] = {
   'type': {attr: 'type'},
 };
 
-AMP.extension(TAG, '0.2', AMP => {
+AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare);
 });

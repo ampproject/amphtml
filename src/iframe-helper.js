@@ -184,7 +184,7 @@ function dropListenSentinel(listenSentinel) {
       const {events} = windowEvents;
       for (const name in events) {
         // Splice here, so that each unlisten does not shift the array
-        events[name].splice(0, Infinity).forEach(event => {
+        events[name].splice(0, Infinity).forEach((event) => {
           event(noopData);
         });
       }
@@ -200,7 +200,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
   if (parentWin.listeningFors) {
     return;
   }
-  const listenForListener = function(event) {
+  const listenForListener = function (event) {
     if (!getData(event)) {
       return;
     }
@@ -283,7 +283,7 @@ export function listenFor(
     listenForEvents[typeOfMessage] || (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
-  let listener = function(data, source, origin, event) {
+  let listener = function (data, source, origin, event) {
     const sentinel = data['sentinel'];
 
     // Exclude messages that don't satisfy amp sentinel rules.
@@ -316,7 +316,7 @@ export function listenFor(
 
   events.push(listener);
 
-  return (unlisten = function() {
+  return (unlisten = function () {
     if (listener) {
       const index = events.indexOf(listener);
       if (index > -1) {
@@ -344,7 +344,7 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   if (typeof typeOfMessages == 'string') {
     typeOfMessages = [typeOfMessages];
   }
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     for (let i = 0; i < typeOfMessages.length; i++) {
       const message = typeOfMessages[i];
       const unlisten = listenFor(
@@ -431,7 +431,7 @@ export function parseIfNeeded(data) {
   if (typeof data == 'string') {
     if (data.charAt(0) == '{') {
       data =
-        tryParseJson(data, e => {
+        tryParseJson(data, (e) => {
           dev().warn(
             'IFRAME-HELPER',
             'Postmessage could not be parsed. ' +
@@ -476,7 +476,7 @@ export class SubscriptionApi {
       (data, source, origin) => {
         // This message might be from any window within the iframe, we need
         // to keep track of which windows want to be sent updates.
-        if (!this.clientWindows_.some(entry => entry.win == source)) {
+        if (!this.clientWindows_.some((entry) => entry.win == source)) {
           this.clientWindows_.push({win: source, origin});
         }
         requestCallback(data, source, origin);
@@ -494,7 +494,7 @@ export class SubscriptionApi {
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
-    remove(this.clientWindows_, client => !client.win.parent);
+    remove(this.clientWindows_, (client) => !client.win.parent);
     postMessageToWindows(
       this.iframe_,
       this.clientWindows_,

@@ -32,7 +32,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document;
     let ampdoc;
     let element;
@@ -235,10 +235,7 @@ describes.fakeWin(
         element
       );
       const sourceMock = env.sandbox.mock(source);
-      sourceMock
-        .expects('login_')
-        .withExactArgs('https://url', '')
-        .once();
+      sourceMock.expects('login_').withExactArgs('https://url', '').once();
       source.loginWithUrl('https://url');
     });
   }
@@ -250,7 +247,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement;
@@ -306,7 +303,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ false
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -317,7 +314,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -329,7 +326,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ false
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -341,7 +338,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=premium');
         });
     });
@@ -353,7 +350,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type2)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -372,7 +369,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, ampdoc;
     let clock;
     let adapterMock;

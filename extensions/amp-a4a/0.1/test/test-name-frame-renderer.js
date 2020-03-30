@@ -24,7 +24,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('NameFrameRenderer', realWinConfig, env => {
+describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;

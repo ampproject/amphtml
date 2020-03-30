@@ -93,10 +93,10 @@ async function checkFile(file) {
     const {requestErrors, fileErrors, rules} = response.body;
 
     if (requestErrors) {
-      requestErrors.forEach(err => log(red(err)));
+      requestErrors.forEach((err) => log(red(err)));
       throw new Error('Could not reach the owners syntax check API');
     } else if (fileErrors && fileErrors.length) {
-      fileErrors.forEach(err => log(red(err)));
+      fileErrors.forEach((err) => log(red(err)));
       throw new Error(`Errors encountered parsing "${file}"`);
     }
 

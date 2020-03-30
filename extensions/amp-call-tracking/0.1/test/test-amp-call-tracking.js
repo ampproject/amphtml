@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-call-tracking'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let xhrMock;
 
@@ -65,7 +65,7 @@ describes.realWin(
         .expects('fetchJson')
         .withArgs(
           url,
-          env.sandbox.match(init => init.credentials == 'include')
+          env.sandbox.match((init) => init.credentials == 'include')
         )
         .returns(
           Promise.resolve({
@@ -97,7 +97,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(callTrackingEl, `tel:${phoneNumber}`, phoneNumber);
       });
     });
@@ -117,7 +117,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${phoneNumber}`,
@@ -138,7 +138,7 @@ describes.realWin(
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
           callTrackingEl,
           `tel:${defaultNumber}`,

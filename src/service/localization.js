@@ -46,7 +46,7 @@ function findLocalizedString(
 ) {
   let localizedString = null;
 
-  languageCodes.some(languageCode => {
+  languageCodes.some((languageCode) => {
     const localizedStringBundle = localizedStringBundles[languageCode];
     if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
       localizedString =
@@ -112,7 +112,7 @@ export class LocalizationService {
    * @private
    */
   getLanguageCodesForElement_(element) {
-    const languageEl = closest(element, el => el.hasAttribute('lang'));
+    const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
     return getLanguageCodesFromString(languageCode || '');
   }

@@ -29,11 +29,11 @@ const imports = [
   },
 ];
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     ImportDeclaration(node) {
       const comments = context.getCommentsBefore(node.source);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }

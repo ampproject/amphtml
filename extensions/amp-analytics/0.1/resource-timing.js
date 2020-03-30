@@ -68,7 +68,7 @@ const RESOURCE_TIMING_BUFFER_SIZE = 150;
  * @template OUT
  */
 function yieldThread(fn) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(fn()));
   });
 }
@@ -171,7 +171,7 @@ function nameForEntry(entry, resourcesByHost) {
     }
     const index = findIndex(
       resources,
-      res =>
+      (res) =>
         res.pathPattern.test(url.pathname) && res.queryPattern.test(url.search)
     );
     if (index != -1) {
@@ -230,7 +230,7 @@ function filterEntries(entries, resourceDefs) {
   // definitions to have the same host.
   const byHost = groupSpecsByHost(resourceDefs);
   const results = [];
-  entries.forEach(entry => {
+  entries.forEach((entry) => {
     const name = nameForEntry(entry, byHost);
     if (name) {
       results.push({entry, name});
@@ -256,14 +256,14 @@ function serialize(entries, resourceTimingSpec, element) {
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
   const promises = filterEntries(entries, resources)
-    .map(resourceTimingEntry => {
+    .map((resourceTimingEntry) => {
       const {entry, name} = resourceTimingEntry;
       return entryToExpansionOptions(entry, name, format);
     })
-    .map(expansion =>
+    .map((expansion) =>
       variableService.expandTemplate(encoding['entry'], expansion, element)
     );
-  return Promise.all(promises).then(vars => vars.join(encoding['delim']));
+  return Promise.all(promises).then((vars) => vars.join(encoding['delim']));
 }
 
 /**
@@ -302,7 +302,7 @@ function serializeResourceTiming(element, resourceTimingSpec) {
   );
 
   // Filter resources that are too early.
-  entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
+  entries = entries.filter((e) => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }

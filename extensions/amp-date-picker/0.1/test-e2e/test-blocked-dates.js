@@ -23,7 +23,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amp-date-picker/blocked-dates.html',
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

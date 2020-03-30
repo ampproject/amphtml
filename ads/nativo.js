@@ -21,7 +21,7 @@ import {loadScript} from '../3p/3p';
  */
 export function nativo(global, data) {
   let ntvAd;
-  (function(ntvAd, global, data) {
+  (function (ntvAd, global, data) {
     global.history.replaceState(
       null,
       '',
@@ -63,7 +63,7 @@ export function nativo(global, data) {
      */
     function loadAdWhenViewed() {
       const g = global;
-      global.context.observeIntersection(function(positions) {
+      global.context.observeIntersection(function (positions) {
         const coordinates = getLastPositionCoordinates(positions);
         if (
           typeof coordinates.rootBounds != 'undefined' &&
@@ -82,7 +82,7 @@ export function nativo(global, data) {
      */
     function loadAdWhenTimedout() {
       const g = global;
-      setTimeout(function() {
+      setTimeout(function () {
         g.PostRelease.Start();
         delayedAdLoad = true;
       }, parseInt(data.delayByTime, 10));
@@ -115,15 +115,15 @@ export function nativo(global, data) {
       global.PostRelease.checkIsAdVisible();
     }
     // Public
-    ntvAd.getPercentageOfadViewed = function() {
+    ntvAd.getPercentageOfadViewed = function () {
       return percentageOfadViewed;
     };
-    ntvAd.getScriptURL = function() {
+    ntvAd.getScriptURL = function () {
       return 'https://s.ntv.io/serve/load.js';
     };
     // Configuration setup is based on the parameters/attributes associated with
     // the amp-ad node
-    ntvAd.setupAd = function() {
+    ntvAd.setupAd = function () {
       global._prx = [['cfg.Amp']];
       global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.href]);
       for (const key in data) {
@@ -144,13 +144,13 @@ export function nativo(global, data) {
     };
     // Used to Delay Start and Initalize Tracking. This is a callback AMP will
     // use once script is loaded
-    ntvAd.Start = function() {
+    ntvAd.Start = function () {
       if (isDelayedTimeStart(data)) {
         loadAdWhenTimedout();
       } else if (isDelayedViewStart(data)) {
         loadAdWhenViewed();
       }
-      global.PostRelease.checkAmpViewability = function() {
+      global.PostRelease.checkAmpViewability = function () {
         return ntvAd.getPercentageOfadViewed();
       };
       // ADD TRACKING HANDLER TO OBSERVER

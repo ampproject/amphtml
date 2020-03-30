@@ -279,7 +279,7 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    explicitParamsAttributes.forEach(explicitParam => {
+    explicitParamsAttributes.forEach((explicitParam) => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
@@ -440,6 +440,6 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDailymotion);
 });

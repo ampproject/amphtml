@@ -37,13 +37,13 @@ const tableOptions = {
  * @param {!Rules} css post css rules object
  */
 function zIndexCollector(acc, css) {
-  css.walkRules(rule => {
-    rule.walkDecls(decl => {
+  css.walkRules((rule) => {
+    rule.walkDecls((decl) => {
       // Split out multi selector rules
       let selectorNames = rule.selector.replace('\n', '');
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach(selector => {
+        selectorNames.forEach((selector) => {
           // If multiple redeclaration of a selector and z index
           // are done in a single file, this will get overridden.
           acc[selector] = decl.value;
@@ -89,11 +89,11 @@ function createTable(filesData) {
   const rows = [];
   Object.keys(filesData)
     .sort()
-    .forEach(fileName => {
+    .forEach((fileName) => {
       const selectors = filesData[fileName];
       Object.keys(selectors)
         .sort()
-        .forEach(selectorName => {
+        .forEach((selectorName) => {
           const zIndex = selectors[selectorName];
           const row = [selectorName, zIndex, fileName];
           rows.push(row);
@@ -122,7 +122,7 @@ function getZindex(cb) {
   const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
   getZindexStream('{css,src,extensions}/**/*.css')
-    .on('data', chunk => {
+    .on('data', (chunk) => {
       filesData[chunk.name] = chunk.selectors;
     })
     .on('end', () => {

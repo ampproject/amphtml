@@ -159,14 +159,14 @@ export function withDatePickerCommon(WrappedComponent) {
   DateComponent.prototype.constructor = DateComponent;
 
   /** @override */
-  DateComponent.prototype.componentDidMount = function() {
+  DateComponent.prototype.componentDidMount = function () {
     if (this.props['onMount']) {
       this.props['onMount']();
     }
   };
 
   /** @override */
-  DateComponent.prototype.componentWillReceiveProps = function(nextProps) {
+  DateComponent.prototype.componentWillReceiveProps = function (nextProps) {
     const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
     const blocked = nextProps['blocked'];
     const endDate = nextProps['endDate'];
@@ -200,7 +200,7 @@ export function withDatePickerCommon(WrappedComponent) {
   };
 
   /** @override */
-  DateComponent.prototype.render = function() {
+  DateComponent.prototype.render = function () {
     const props = /** @type {!JsonObject} */ (omit(
       this.props,
       Object.keys(defaultProps)

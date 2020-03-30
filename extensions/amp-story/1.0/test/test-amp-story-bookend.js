@@ -33,7 +33,7 @@ import {user} from '../../../../src/log';
 const location =
   'https://www.testorigin.com/amp-stories/example/path/google.com';
 
-describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
+describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
   let win;
   let doc;
   let storyElem;
@@ -140,7 +140,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
     env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
@@ -550,7 +550,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
       const ctaLinks = bookend.bookendEl_.querySelector(
         '.i-amphtml-story-bookend-cta-link-wrapper'
       );
-      ctaLinks.children[0].onclick = function(e) {
+      ctaLinks.children[0].onclick = function (e) {
         e.preventDefault(); // Make the test not actually navigate.
       };
       ctaLinks.children[0].click();
@@ -637,7 +637,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
       const ctaLinks = bookend.bookendEl_.querySelector(
         '.i-amphtml-story-bookend-cta-link-wrapper'
       );
-      ctaLinks.children[0].onclick = function(e) {
+      ctaLinks.children[0].onclick = function (e) {
         e.preventDefault(); // Make the test not actually navigate.
       };
       ctaLinks.children[0].click();

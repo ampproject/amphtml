@@ -33,7 +33,7 @@ const BAIL_OUT_CONDITIONS = {
   // Since we don't know if exported members are 'new'd, bail out on modification.
   isExported: (t, path) =>
     path.findParent(
-      path =>
+      (path) =>
         path.isExportNamedDeclaration() || path.isExportDefaultDeclaration()
     ),
 
@@ -70,7 +70,7 @@ const BAIL_OUT_CONDITIONS = {
     const {name} = path.get('id').node;
     let isNewed = false;
     path
-      .findParent(path => path.isProgram())
+      .findParent((path) => path.isProgram())
       .traverse({
         NewExpression(path) {
           if (t.isIdentifier(path.node.callee, {name})) {
@@ -102,7 +102,7 @@ function createVariableDeclaration(t, path) {
 
 // Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
 // See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   const DEBUG = false;
   const REPORT = false;
 
@@ -111,7 +111,7 @@ module.exports = function({types: t}) {
     pre() {
       this.bailoutCount = {...BAIL_OUT_CONDITIONS};
       Object.keys(this.bailoutCount).forEach(
-        key => (this.bailoutCount[key] = [])
+        (key) => (this.bailoutCount[key] = [])
       );
       this.successCount = [];
     },
@@ -146,7 +146,7 @@ module.exports = function({types: t}) {
           .log(`Success Count: ${this.successCount.length}`);
         console /*OK*/
           .log('Bail Out Reason Counts');
-        Object.keys(this.bailoutCount).forEach(name =>
+        Object.keys(this.bailoutCount).forEach((name) =>
           console /*OK*/
             .log(`${name}: ${this.bailoutCount[name].length}`)
         );

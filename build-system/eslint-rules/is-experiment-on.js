@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   const isExperimentOn = 'CallExpression[callee.name=isExperimentOn]';
   const message = 'isExperimentOn must be passed an explicit string';
 
@@ -28,7 +28,7 @@ module.exports = function(context) {
       }
 
       const comments = context.getCommentsBefore(arg);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }

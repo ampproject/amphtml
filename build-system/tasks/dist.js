@@ -188,8 +188,8 @@ function buildLoginDone(version) {
 async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
   const promises = [];
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
       const minifiedName = maybeToEsmName(fileName + '.js');
@@ -273,7 +273,7 @@ async function generateFileListing() {
   const distDir = 'dist';
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
-  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
+  const files = (await walk(distDir)).map((f) => f.replace(`${distDir}/`, ''));
   fs.writeFileSync(filesOut, files.join('\n') + '\n');
   endBuildStep('Generated', filesOut, startTime);
 }
@@ -288,8 +288,8 @@ async function preBuildWebPushPublisherFiles() {
   mkdirSync('dist/v0');
   const promises = [];
 
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const basePath = `extensions/amp-web-push/${version}/`;
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
 
@@ -313,9 +313,9 @@ async function preBuildWebPushPublisherFiles() {
  */
 function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     const basePath = `extensions/amp-web-push/${version}/`;
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const minifiedName = maybeToEsmName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);

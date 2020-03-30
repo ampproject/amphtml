@@ -53,7 +53,7 @@ export class AmpViewerHost {
 
     const target = this.ampIframe_.contentWindow;
     if (this.isWebview_ || opt_isHandshakePoll) {
-      Messaging.initiateHandshakeWithDocument(target).then(messaging => {
+      Messaging.initiateHandshakeWithDocument(target).then((messaging) => {
         this.messaging_ = messaging;
         this.completeHandshake_();
       });
@@ -62,7 +62,7 @@ export class AmpViewerHost {
         this.win,
         target,
         frameOrigin
-      ).then(messaging => {
+      ).then((messaging) => {
         this.messaging_ = messaging;
         this.completeHandshake_();
       });

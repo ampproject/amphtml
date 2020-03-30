@@ -25,7 +25,7 @@ const {CONTROL, downloadToDisk, EXPERIMENT} = require('./helpers');
  */
 function cacheDocuments(urls) {
   return Promise.all(
-    urls.flatMap(url => [
+    urls.flatMap((url) => [
       downloadToDisk(url, CONTROL),
       downloadToDisk(url, EXPERIMENT),
     ])

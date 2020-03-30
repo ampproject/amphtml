@@ -21,7 +21,7 @@ const TEST_SUITE_PATH = 'build-system/tasks/performance/test-suite.js';
 function runTests() {
   const mocha = new Mocha();
   mocha.addFile(path.join('./', TEST_SUITE_PATH));
-  mocha.run(failures => {
+  mocha.run((failures) => {
     return new Error(failures);
   });
 }

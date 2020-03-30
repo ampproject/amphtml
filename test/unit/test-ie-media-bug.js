@@ -82,7 +82,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match(arg => {
+        window.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -120,10 +120,7 @@ describe('ie-media-bug', () => {
       .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
       .returns({matches: true})
       .once();
-    windowMock
-      .expects('clearInterval')
-      .withExactArgs(intervalId)
-      .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
     intervalCallback();
     windowMock.verify();
     windowMock./*OK*/ restore();
@@ -147,7 +144,7 @@ describe('ie-media-bug', () => {
     windowMock
       .expects('setInterval')
       .withExactArgs(
-        window.sandbox.match(arg => {
+        window.sandbox.match((arg) => {
           intervalCallback = arg;
           return true;
         }),
@@ -155,10 +152,7 @@ describe('ie-media-bug', () => {
       )
       .returns(intervalId)
       .once();
-    windowMock
-      .expects('clearInterval')
-      .withExactArgs(intervalId)
-      .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;

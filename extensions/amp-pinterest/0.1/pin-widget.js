@@ -86,8 +86,8 @@ export class PinWidget {
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr
       .fetchJson(baseUrl + query, {})
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         try {
           return /** @type {JsonObject} */ (json)['data'][0];
         } catch (e) {

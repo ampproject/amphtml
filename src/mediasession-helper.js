@@ -148,7 +148,7 @@ function validateMetadata(element, metadata) {
   if (metadata && metadata.artwork) {
     const {artwork} = metadata;
     devAssert(isArray(artwork));
-    artwork.forEach(item => {
+    artwork.forEach((item) => {
       if (item) {
         const src = isObject(item) ? item.src : item;
         userAssert(urlService.isProtocolValid(src));

@@ -28,7 +28,7 @@ const FULL_TABLE = 68;
  * @param {string} url
  * @return {Array<string>} lines
  */
-const headerLines = url => [
+const headerLines = (url) => [
   '\nPAGE LOAD METRICS\n',
   `${url}\n\n`,
   [
@@ -66,11 +66,11 @@ function linesForMetric(metric, results) {
 function printReport(urls) {
   const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
 
-  urls.forEach(url => {
+  urls.forEach((url) => {
     const keys = Object.keys(results[url][CONTROL][0]);
     let lines = [];
     lines = [...lines, ...headerLines(url)];
-    lines = [...lines, ...keys.flatMap(m => linesForMetric(m, results[url]))];
+    lines = [...lines, ...keys.flatMap((m) => linesForMetric(m, results[url]))];
     console /* OK */
       .log(...lines);
   });
@@ -101,11 +101,11 @@ class PageMetrics {
 function getReport(urls) {
   const raw = JSON.parse(fs.readFileSync(RESULTS_PATH));
   const report = [];
-  urls.forEach(url => {
+  urls.forEach((url) => {
     const results = raw[url];
     const pageMetrics = new PageMetrics(url);
     const metrics = Object.keys(results[CONTROL][0]);
-    metrics.forEach(metric => {
+    metrics.forEach((metric) => {
       const control = trimmedMean(results[CONTROL], metric);
       const experiment = trimmedMean(results[EXPERIMENT], metric);
       pageMetrics.set(metric, experiment, control);

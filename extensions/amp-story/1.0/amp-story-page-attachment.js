@@ -106,7 +106,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Always open links in a new tab.
     this.contentEl_.addEventListener(
       'click',
-      event => {
+      (event) => {
         const {target} = event;
         if (target.tagName.toLowerCase() === 'a') {
           target.setAttribute('target', '_blank');
@@ -118,7 +118,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Closes the attachment on opacity background clicks.
     this.element.addEventListener(
       'click',
-      event => {
+      (event) => {
         if (
           event.target.tagName.toLowerCase() === 'amp-story-page-attachment'
         ) {

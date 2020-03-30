@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-vimeo'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

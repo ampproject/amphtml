@@ -69,7 +69,7 @@ describes.realWin(
       extensions: ['amp-carousel:0.2'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let container;

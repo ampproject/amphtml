@@ -42,7 +42,7 @@ const pageImplMock = {
   delegateVideoAutoplay: NOOP,
 };
 
-describes.realWin('story-ad-page', {amp: true}, env => {
+describes.realWin('story-ad-page', {amp: true}, (env) => {
   let win;
   let doc;
   let storyAutoAdsEl;

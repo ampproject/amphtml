@@ -303,7 +303,7 @@ describe('evaluate', () => {
     expect(evaluator.evaluate('obj2["bool"] = NULL', resp)).to.be.true;
   });
 
-  it('should NOT evaluate nested expressions with wrong type', function() {
+  it('should NOT evaluate nested expressions with wrong type', function () {
     expect(evaluator.evaluate('obj.bool = true', {obj: true})).to.be.false;
     expect(evaluator.evaluate('obj.num = 11', {obj: 11})).to.be.false;
     expect(evaluator.evaluate('obj.str = "A"', {obj: 'A'})).to.be.false;

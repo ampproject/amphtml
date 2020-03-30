@@ -57,7 +57,7 @@ const WorkerMessengerCommand = {
 
   Also see: https://github.com/w3c/ServiceWorker/issues/1156
 */
-self.addEventListener('message', event => {
+self.addEventListener('message', (event) => {
   /*
     Messages sent from amp-web-push have the format:
 
@@ -89,7 +89,7 @@ function onMessageReceivedSubscriptionState() {
   let retrievedPushSubscription = null;
   self.registration.pushManager
     .getSubscription()
-    .then(pushSubscription => {
+    .then((pushSubscription) => {
       retrievedPushSubscription = pushSubscription;
       if (!pushSubscription) {
         return null;
@@ -99,7 +99,7 @@ function onMessageReceivedSubscriptionState() {
         );
       }
     })
-    .then(permissionStateOrNull => {
+    .then((permissionStateOrNull) => {
       if (permissionStateOrNull == null) {
         broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE, false);
       } else {
@@ -150,7 +150,7 @@ function onMessageReceivedSubscribe() {
 function onMessageReceivedUnsubscribe() {
   self.registration.pushManager
     .getSubscription()
-    .then(subscription => subscription.unsubscribe())
+    .then((subscription) => subscription.unsubscribe())
     .then(() => {
       // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here
       broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, null);
@@ -163,7 +163,7 @@ function onMessageReceivedUnsubscribe() {
  * @param {!JsonObject} payload
  */
 function broadcastReply(command, payload) {
-  self.clients.matchAll().then(clients => {
+  self.clients.matchAll().then((clients) => {
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i];
       client./*OK*/ postMessage({

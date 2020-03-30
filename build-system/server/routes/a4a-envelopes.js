@@ -28,7 +28,7 @@ const {red} = require('ansi-colors');
 app.use(['/inabox', '/inabox-mraid'], (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
-  fs.promises.readFile(templatePath, 'utf8').then(template => {
+  fs.promises.readFile(templatePath, 'utf8').then((template) => {
     template = template.replace(/SOURCE/g, 'AD_URL');
     if (req.baseUrl == '/inabox-mraid') {
       // MRAID does not load amp4ads-host-v0.js
@@ -47,7 +47,7 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
   fs.promises
     .readFile(process.cwd() + templatePath, 'utf8')
-    .then(template => {
+    .then((template) => {
       let url;
       if (req.baseUrl == '/inabox-friendly') {
         url = getInaboxUrl(req, 'inabox-viewport-friendly');
@@ -68,10 +68,10 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
       }
       return requestFromUrl(template, url.href, req.query);
     })
-    .then(result => {
+    .then((result) => {
       res.end(result);
     })
-    .catch(err => {
+    .catch((err) => {
       log(red('Error:'), err);
       res.status(500);
       res.end();
@@ -86,12 +86,14 @@ app.use('/a4a(|-3p)/', (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
-  fs.promises.readFile(process.cwd() + templatePath, 'utf8').then(template => {
-    const content = fillTemplate(template, url.href, req.query)
-      .replace(/CHECKSIG/g, force3p || '')
-      .replace(/DISABLE3PFALLBACK/g, !force3p);
-    res.end(replaceUrls(getServeMode(), content));
-  });
+  fs.promises
+    .readFile(process.cwd() + templatePath, 'utf8')
+    .then((template) => {
+      const content = fillTemplate(template, url.href, req.query)
+        .replace(/CHECKSIG/g, force3p || '')
+        .replace(/DISABLE3PFALLBACK/g, !force3p);
+      res.end(replaceUrls(getServeMode(), content));
+    });
 });
 
 /**

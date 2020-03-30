@@ -143,13 +143,13 @@ export class AmpAdExit extends AMP.BaseElement {
     if (target.trackingUrls) {
       target.trackingUrls
         .map(substituteVariables)
-        .forEach(url => this.pingTrackingUrl_(url));
+        .forEach((url) => this.pingTrackingUrl_(url));
     }
     const finalUrl = substituteVariables(target.finalUrl);
     if (HostServices.isAvailable(this.getAmpDoc())) {
       HostServices.exitForDoc(this.getAmpDoc())
-        .then(exitService => exitService.openUrl(finalUrl))
-        .catch(error => {
+        .then((exitService) => exitService.openUrl(finalUrl))
+        .catch((error) => {
           // TODO: reporting on errors
           dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
           if (error.fallback) {
@@ -199,8 +199,9 @@ export class AmpAdExit extends AMP.BaseElement {
         if (customVarName[0] != '_') {
           continue;
         }
-        const customVar =
-          /** @type {!./config.VariableDef} */ (target['vars'][customVarName]);
+        const customVar = /** @type {!./config.VariableDef} */ (target['vars'][
+          customVarName
+        ]);
         if (!customVar) {
           continue;
         }
@@ -268,7 +269,7 @@ export class AmpAdExit extends AMP.BaseElement {
         whitelist[customVarName] = true;
       }
     }
-    return url =>
+    return (url) =>
       replacements.expandUrlSync(
         url,
         substitutionFunctions,
@@ -309,7 +310,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   filter_(filters, event) {
-    return filters.every(filter => {
+    return filters.every((filter) => {
       const result = filter.filter(event);
       user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
       return result;
@@ -378,8 +379,8 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target['trackingUrls'] || [],
           vars: target['vars'] || {},
           filters: (target['filters'] || [])
-            .map(f => this.userFilters_[f])
-            .filter(f => f),
+            .map((f) => this.userFilters_[f])
+            .filter((f) => f),
           behaviors: target['behaviors'] || {},
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
@@ -461,7 +462,7 @@ export class AmpAdExit extends AMP.BaseElement {
       return;
     }
     devAssert(!this.unlisten_, 'Unlistener should not already exist.');
-    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message', (event) => {
       // We shouldn't deserialize just any message...it would be too
       // expensive to parse ones that aren't for amp-ad-exit.
       if (!this.expectedOriginToVendor_[event.origin]) {
@@ -527,6 +528,6 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });

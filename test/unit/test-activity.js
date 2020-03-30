@@ -108,27 +108,27 @@ describe('Activity getTotalEngagedTime', () => {
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
 
-    const whenFirstVisiblePromise = new Promise(resolve => {
+    const whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolve = resolve;
     });
     window.sandbox
       .stub(ampdoc, 'whenFirstVisible')
       .returns(whenFirstVisiblePromise);
-    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
       scrollObservable.add(handler);
     });
 
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
+    return Services.activityForDoc(ampdoc.getHeadNode()).then((a) => {
       activity = a;
     });
   });
@@ -337,27 +337,27 @@ describe('Activity getIncrementalEngagedTime', () => {
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
 
-    const whenFirstVisiblePromise = new Promise(resolve => {
+    const whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolve = resolve;
     });
     window.sandbox
       .stub(ampdoc, 'whenFirstVisible')
       .returns(whenFirstVisiblePromise);
-    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake((handler) => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake((handler) => {
       scrollObservable.add(handler);
     });
 
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
+    return Services.activityForDoc(ampdoc.getHeadNode()).then((a) => {
       activity = a;
     });
   });

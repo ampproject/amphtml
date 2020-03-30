@@ -98,7 +98,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // context-changed is fired on each child element to notify it that the
     // parent has changed the wrapping context. This is equivalent to
     // updating the Context.Provider with new data and having it propagate.
-    this.element.addEventListener('i-amphtml-context-changed', e => {
+    this.element.addEventListener('i-amphtml-context-changed', (e) => {
       e.stopPropagation();
       this.scheduleRender_();
     });
@@ -106,7 +106,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // unmounted is fired on each child element to notify it that the parent
     // has removed the element from the DOM tree. This is equivalent to React
     // recursively calling componentWillUnmount.
-    this.element.addEventListener('i-amphtml-unmounted', e => {
+    this.element.addEventListener('i-amphtml-unmounted', (e) => {
       e.stopPropagation();
       this.unmount_();
     });
@@ -207,7 +207,7 @@ export class PreactBaseElement extends AMP.BaseElement {
  *
  * @protected {!PreactDef.FunctionalComponent}
  */
-PreactBaseElement['Component'] = function() {
+PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
 

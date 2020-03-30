@@ -366,22 +366,22 @@ describe('IntersectionObserver', () => {
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.win = window;
-    element.getVsync = function() {
+    element.getVsync = function () {
       return {
         measure(fn) {
           fn();
         },
       };
     };
-    element.getViewport = function() {
+    element.getViewport = function () {
       return {
         onScroll() {
           onScrollSpy();
-          return function() {};
+          return function () {};
         },
         onChanged() {
           onChangeSpy();
-          return function() {};
+          return function () {};
         },
       };
     };
@@ -414,7 +414,7 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };
@@ -434,7 +434,7 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };
@@ -513,7 +513,7 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };

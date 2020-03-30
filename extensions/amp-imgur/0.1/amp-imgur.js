@@ -132,6 +132,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-imgur', '0.1', AMP => {
+AMP.extension('amp-imgur', '0.1', (AMP) => {
   AMP.registerElement('amp-imgur', AmpImgur);
 });

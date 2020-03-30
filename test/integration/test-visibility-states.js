@@ -20,10 +20,7 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe
-  .configure()
-  .skipIfPropertiesObfuscated()
-  .ifChrome();
+const t = describe.configure().skipIfPropertiesObfuscated().ifChrome();
 
 t.run('Viewer Visibility State', () => {
   function noop() {}
@@ -34,7 +31,7 @@ t.run('Viewer Visibility State', () => {
       body: '',
       hash: 'visibilityState=prerender',
     },
-    env => {
+    (env) => {
       let win;
 
       let resources;
@@ -84,7 +81,7 @@ t.run('Viewer Visibility State', () => {
       }
 
       function waitForNextPass() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           shouldPass = true;
           notifyPass = resolve;
           resources.schedulePass();
@@ -105,12 +102,12 @@ t.run('Viewer Visibility State', () => {
         shouldPass = false;
 
         const vsync = Services.vsyncFor(win);
-        env.sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+        env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
           mutator();
         });
 
         return Services.viewerPromiseForDoc(win.document)
-          .then(v => {
+          .then((v) => {
             viewer = v;
 
             docHidden = env.sandbox.stub(win.document, 'hidden').value(false);
@@ -134,7 +131,7 @@ t.run('Viewer Visibility State', () => {
 
             return whenUpgradedToCustomElement(img);
           })
-          .then(img => {
+          .then((img) => {
             layoutCallback = env.sandbox.stub(
               img.implementation_,
               'layoutCallback'

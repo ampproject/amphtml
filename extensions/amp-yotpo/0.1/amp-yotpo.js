@@ -71,7 +71,7 @@ export class AmpYotpo extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -89,7 +89,7 @@ export class AmpYotpo extends AMP.BaseElement {
     const unlisten = listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.attemptChangeHeight(data['height']).catch(() => {
           /* do nothing */
         });
@@ -104,6 +104,6 @@ export class AmpYotpo extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-yotpo', '0.1', AMP => {
+AMP.extension('amp-yotpo', '0.1', (AMP) => {
   AMP.registerElement('amp-yotpo', AmpYotpo);
 });

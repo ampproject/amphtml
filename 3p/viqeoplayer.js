@@ -27,7 +27,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   const data = getData(global.context);
   let viqeoPlayerInstance;
   VIQEO['setConfig']({url: sourceUrl, amp: {pageViewId, canonicalUrl}});
-  VIQEO['subscribeTracking'](params => {
+  VIQEO['subscribeTracking']((params) => {
     viqeoPlayerInstance = params['player'];
   }, 'Player:added');
   VIQEO['subscribeTracking'](() => {
@@ -117,6 +117,6 @@ export function viqeoplayer(global) {
       ? 'https://cdn.viqeo.tv/js/vq_starter.js'
       : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1');
 
-  global['onViqeoLoad'] = VIQEO => viqeoPlayerInitLoaded(global, VIQEO);
+  global['onViqeoLoad'] = (VIQEO) => viqeoPlayerInitLoaded(global, VIQEO);
   loadScript(global, scriptPlayerInit);
 }

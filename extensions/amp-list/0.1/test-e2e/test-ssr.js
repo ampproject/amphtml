@@ -20,7 +20,7 @@ describes.endtoend(
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
     environments: ['viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -30,7 +30,7 @@ describes.endtoend(
     // TODO(estherkim): fails in viewer
     it.configure()
       .skipViewerDemo()
-      .run('should render ssr rendered list', async function() {
+      .run('should render ssr rendered list', async function () {
         const container = await getListContainer(controller);
         await verifyContainer(controller, container);
 
@@ -52,14 +52,14 @@ describes.endtoend(
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
       controller = env.controller;
     });
 
-    it('should render list', async function() {
+    it('should render list', async function () {
       const container = await getListContainer(controller);
       await verifyContainer(controller, container);
 

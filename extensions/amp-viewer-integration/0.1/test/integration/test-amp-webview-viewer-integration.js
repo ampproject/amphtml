@@ -17,10 +17,10 @@
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
 import {WebviewViewerForTesting} from '../../webview-viewer-for-testing.js';
 
-describes.sandboxed('AmpWebviewViewerIntegration', {}, env => {
+describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
-  describe.skip('Handshake', function() {
+  describe.skip('Handshake', function () {
     let viewerEl;
     let viewer;
 
@@ -63,7 +63,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, env => {
         },
       },
     },
-    env => {
+    (env) => {
       let integr;
 
       beforeEach(() => {

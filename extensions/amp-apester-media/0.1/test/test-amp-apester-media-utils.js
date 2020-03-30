@@ -21,7 +21,7 @@ import {
   extratctTitle,
 } from '../utils';
 
-describes.realWin('amp-apester-media-utils', {}, unused => {
+describes.realWin('amp-apester-media-utils', {}, (unused) => {
   beforeEach(() => {
     document.body.textContent = '';
     document.head.textContent = '';

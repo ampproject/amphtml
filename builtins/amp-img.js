@@ -75,7 +75,7 @@ export class AmpImg extends BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.img_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined
+        (value) => mutations[value] !== undefined
       );
       // Mutating src should override existing srcset, so remove the latter.
       if (

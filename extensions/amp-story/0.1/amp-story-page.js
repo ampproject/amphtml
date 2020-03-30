@@ -107,7 +107,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
-      isActive => this.toggleLoadingSpinner_(!!isActive),
+      (isActive) => this.toggleLoadingSpinner_(!!isActive),
       100
     );
 
@@ -160,10 +160,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addAdvanceListener(() =>
       this.next(/* opt_isAutomaticAdvance */ true)
     );
-    this.advancement_.addOnTapNavigationListener(navigationDirection =>
+    this.advancement_.addOnTapNavigationListener((navigationDirection) =>
       this.navigateOnTap(navigationDirection)
     );
-    this.advancement_.addProgressListener(progress =>
+    this.advancement_.addProgressListener((progress) =>
       this.emitProgress_(progress)
     );
   }
@@ -185,10 +185,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     storyEl.getImpl().then(
-      storyImpl => {
+      (storyImpl) => {
         this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
       },
-      reason => this.mediaPoolRejectFn_(reason)
+      (reason) => this.mediaPoolRejectFn_(reason)
     );
   }
 
@@ -198,7 +198,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
+    Array.prototype.forEach.call(mediaSet, (mediaItem) => {
       mediaItem.setAttribute('preload', 'auto');
     });
   }
@@ -257,8 +257,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   waitForMediaLayout_() {
     const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
-    const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
-      return new Promise(resolve => {
+    const mediaPromises = Array.prototype.map.call(mediaSet, (mediaEl) => {
+      return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-img':
           case 'amp-anim':
@@ -334,8 +334,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   whenAllMediaElements_(callbackFn) {
     const mediaSet = this.getAllMedia_();
-    return this.mediaPoolPromise_.then(mediaPool => {
-      const promises = Array.prototype.map.call(mediaSet, mediaEl => {
+    return this.mediaPoolPromise_.then((mediaPool) => {
+      const promises = Array.prototype.map.call(mediaSet, (mediaEl) => {
         return callbackFn(mediaPool, mediaEl);
       });
 
@@ -668,7 +668,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    getLogEntries(this.element).then(logEntries => {
+    getLogEntries(this.element).then((logEntries) => {
       dispatchCustom(
         this.win,
         this.element,
@@ -694,7 +694,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.debounceToggleLoadingSpinner_(true);
-    Array.prototype.forEach.call(videos, videoEl => {
+    Array.prototype.forEach.call(videos, (videoEl) => {
       this.unlisteners_.push(
         listen(videoEl, 'playing', () =>
           this.debounceToggleLoadingSpinner_(false)
@@ -713,7 +713,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   stopListeningToVideoEvents_() {
     this.debounceToggleLoadingSpinner_(false);
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_ = [];
   }
 

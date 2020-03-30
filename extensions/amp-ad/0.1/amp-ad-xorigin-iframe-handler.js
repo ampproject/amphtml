@@ -137,11 +137,11 @@ export class AmpAdXOriginIframeHandler {
     }
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe, 'entity-id', true).then(info => {
+    listenForOncePromise(this.iframe, 'entity-id', true).then((info) => {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
+    this.handleOneTimeRequest_(MessageType.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -152,7 +152,7 @@ export class AmpAdXOriginIframeHandler {
     });
 
     this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
-      return this.baseInstance_.getConsentState().then(consentState => {
+      return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
     });
@@ -189,7 +189,7 @@ export class AmpAdXOriginIframeHandler {
       listenFor(
         this.iframe,
         MessageType.USER_ERROR_IN_IFRAME,
-        data => {
+        (data) => {
           this.userErrorForAnalytics_(data['message']);
         },
         true,
@@ -229,7 +229,7 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         ['render-start', 'no-content'],
         true
-      ).then(info => {
+      ).then((info) => {
         const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStartMsgHandler_(info);
@@ -330,7 +330,7 @@ export class AmpAdXOriginIframeHandler {
           const messageId = info[CONSTANTS.messageIdFieldName];
           const payload = info[CONSTANTS.payloadFieldName];
 
-          getter(payload).then(content => {
+          getter(payload).then((content) => {
             const result = dict();
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
@@ -401,7 +401,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   cleanup_() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
     this.unlisteners_.length = 0;
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
@@ -439,7 +439,7 @@ export class AmpAdXOriginIframeHandler {
       this.uiHandler_
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
-          info => {
+          (info) => {
             this.sendEmbedSizeResponse_(
               info.success,
               info.newWidth,
@@ -510,7 +510,7 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_
       .getClientRectAsync(dev().assertElement(this.iframe))
-      .then(position => {
+      .then((position) => {
         devAssert(
           position,
           'element clientRect should intersects with root clientRect'
@@ -531,7 +531,7 @@ export class AmpAdXOriginIframeHandler {
     }
 
     this.sendPositionPending_ = true;
-    this.getIframePositionPromise_().then(position => {
+    this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
       this.inaboxPositionApi_.send(MessageType.POSITION, position);
     });
@@ -551,7 +551,7 @@ export class AmpAdXOriginIframeHandler {
         throttle(
           this.win_,
           () => {
-            this.getIframePositionPromise_().then(position => {
+            this.getIframePositionPromise_().then((position) => {
               this.inaboxPositionApi_.send(MessageType.POSITION, position);
             });
           },
@@ -561,7 +561,7 @@ export class AmpAdXOriginIframeHandler {
     );
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
-        this.getIframePositionPromise_().then(position => {
+        this.getIframePositionPromise_().then((position) => {
           this.inaboxPositionApi_.send(MessageType.POSITION, position);
         });
       })

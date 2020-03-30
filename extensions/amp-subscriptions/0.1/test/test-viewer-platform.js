@@ -25,7 +25,7 @@ import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {dict} from '../../../../src/utils/object';
 import {getWinOrigin} from '../../../../src/url';
 
-describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
+describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   let ampdoc;
   let win;
   let clock;

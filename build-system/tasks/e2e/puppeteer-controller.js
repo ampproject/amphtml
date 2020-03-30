@@ -317,7 +317,7 @@ class PuppeteerController {
    */
   async getDocumentElement() {
     const root = await this.getRoot_();
-    const getter = root => root.ownerDocument.documentElement;
+    const getter = (root) => root.ownerDocument.documentElement;
     const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
@@ -359,7 +359,7 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => ({value: element./*OK*/ innerText.trim()});
+    const getter = (element) => ({value: element./*OK*/ innerText.trim()});
     return new ControllerPromise(
       this.evaluateValue_(getter, element),
       this.getWaitFn_(getter, element)
@@ -430,7 +430,7 @@ class PuppeteerController {
    */
   getElementRect(handle) {
     const element = handle.getElement();
-    const getter = element => {
+    const getter = (element) => {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
@@ -456,7 +456,7 @@ class PuppeteerController {
       };
     };
     return new ControllerPromise(
-      this.evaluate(getter, element).then(handle => handle.jsonValue()),
+      this.evaluate(getter, element).then((handle) => handle.jsonValue()),
       this.getWaitFn_(getter, element)
     );
   }
@@ -553,9 +553,9 @@ class PuppeteerController {
    * @override
    */
   getTitle() {
-    const title = this.getCurrentFrame_().then(frame => frame.title());
+    const title = this.getCurrentFrame_().then((frame) => frame.title());
     return new ControllerPromise(title, () =>
-      this.getCurrentFrame_().then(frame => frame.title())
+      this.getCurrentFrame_().then((frame) => frame.title())
     );
   }
 
@@ -565,7 +565,7 @@ class PuppeteerController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root =>
+    const getter = (root) =>
       root.activeElement || root.ownerDocument.activeElement;
     const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
@@ -677,7 +677,7 @@ class PuppeteerController {
    * @return {!Promise}
    */
   switchToShadow(handle) {
-    const getter = shadowHost => shadowHost.shadowRoot.body;
+    const getter = (shadowHost) => shadowHost.shadowRoot.body;
     return this.switchToShadowInternal_(handle, getter);
   }
 
@@ -687,7 +687,7 @@ class PuppeteerController {
    * @return {!Promise}
    */
   switchToShadowRoot(handle) {
-    const getter = shadowHost => shadowHost.shadowRoot;
+    const getter = (shadowHost) => shadowHost.shadowRoot;
     return this.switchToShadowInternal_(handle, getter);
   }
 

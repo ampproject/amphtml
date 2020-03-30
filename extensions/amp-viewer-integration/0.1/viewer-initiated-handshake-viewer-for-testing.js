@@ -59,7 +59,7 @@ export class WebviewViewerForTesting {
     this.intervalCtr = 0;
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
@@ -112,7 +112,7 @@ export class WebviewViewerForTesting {
     if (!this.iframe) {
       return;
     }
-    const listener = function(e) {
+    const listener = function (e) {
       if (this.isChannelOpen_(e)) {
         //stop polling
         window.clearInterval(this.pollingIntervalIds_[intervalCtr]);

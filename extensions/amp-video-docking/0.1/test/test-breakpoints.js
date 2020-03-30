@@ -16,7 +16,7 @@
 
 import {applyBreakpointClassname} from '../breakpoints';
 
-describes.realWin('Synthetic Breakpoints', {amp: false}, env => {
+describes.realWin('Synthetic Breakpoints', {amp: false}, (env) => {
   const huge = 'foo-huge';
   const large = 'foo-large';
   const small = 'foo-small';
@@ -61,13 +61,13 @@ describes.realWin('Synthetic Breakpoints', {amp: false}, env => {
         () => {
           const element = env.win.document.createElement('div');
 
-          unexpected.forEach(className => {
+          unexpected.forEach((className) => {
             element.classList.add(className);
           });
 
           applyBreakpointClassname(element, width, breakpoints);
 
-          unexpected.forEach(className => {
+          unexpected.forEach((className) => {
             expect(element.classList.contains(className)).to.be.false;
           });
         }
@@ -75,8 +75,8 @@ describes.realWin('Synthetic Breakpoints', {amp: false}, env => {
     });
 
     Object.values(breakpoints).forEach(({className}) => {
-      [0, 1, 1000, 200000].forEach(width => {
-        [0, 1, 50, 1000, 1400, 100000].forEach(minWidth => {
+      [0, 1, 1000, 200000].forEach((width) => {
+        [0, 1, 50, 1000, 1400, 100000].forEach((minWidth) => {
           const applies = minWidth <= width;
           const verb = applies ? 'applies' : 'does not apply';
           it(

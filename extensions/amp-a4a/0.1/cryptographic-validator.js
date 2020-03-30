@@ -69,7 +69,7 @@ export class CryptographicValidator extends Validator {
         headers /* lifecycleCallback */,
         (unusedEventName, unusedExtraVariables) => {}
       )
-      .then(status => {
+      .then((status) => {
         switch (status) {
           case VerificationStatus.OK:
             return this.createOutput_(true, unvalidatedBytes);

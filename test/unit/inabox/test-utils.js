@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom.js';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
-describes.realWin('inabox-utils', {}, env => {
+describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;
   let parentPostMessageStub;
   let initCustomEventStub;

@@ -22,14 +22,14 @@ const {
 } = require('../babel-plugins/log-module-metadata.js');
 
 const selector = Object.keys(transformableMethods)
-  .map(name => `CallExpression[callee.property.name=${name}]`)
-  .concat(assertAliases.map(name => `CallExpression[callee.name=${name}]`))
+  .map((name) => `CallExpression[callee.property.name=${name}]`)
+  .concat(assertAliases.map((name) => `CallExpression[callee.name=${name}]`))
   .join(',');
 
 module.exports = {
   create(context) {
     return {
-      [selector]: function(node) {
+      [selector]: function (node) {
         // Don't evaluate or transform log.js
         if (context.getFilename().endsWith(definitionFile)) {
           return;

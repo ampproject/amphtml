@@ -194,7 +194,7 @@ function assertTarget(name, target, config) {
     name
   );
   if (target['filters']) {
-    target['filters'].forEach(filter => {
+    target['filters'].forEach((filter) => {
       userAssert(config['filters'][filter], "filter '%s' not defined", filter);
     });
   }

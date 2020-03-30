@@ -158,7 +158,7 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+    return getElementLayoutBox(this.anchorElement_).then((layoutBox) => {
       return this.getEstimatedPositionFromAchorLayout_(layoutBox);
     });
   }
@@ -193,8 +193,8 @@ export class Placement {
    * @return {!Promise<!PlacementState>}
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
-    return this.getEstimatedPosition().then(yPosition => {
-      return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
+    return this.getEstimatedPosition().then((yPosition) => {
+      return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
@@ -222,7 +222,7 @@ export class Placement {
           );
         }
 
-        return this.getPlacementSizing_(sizing).then(placement => {
+        return this.getPlacementSizing_(sizing).then((placement) => {
           // CustomElement polyfill does not call connectedCallback
           // synchronously. So we explicitly wait for CustomElement to be
           // ready.
@@ -329,7 +329,7 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
     return [];
   }
   const placements = [];
-  placementObjs.forEach(placementObj => {
+  placementObjs.forEach((placementObj) => {
     getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
@@ -369,7 +369,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
       };
     }
   }
-  anchorElements.forEach(anchorElement => {
+  anchorElements.forEach((anchorElement) => {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
@@ -409,7 +409,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {
-    elements = elements.filter(el => {
+    elements = elements.filter((el) => {
       return el.textContent.length >= minChars;
     });
   }
@@ -425,7 +425,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   if (anchorObj['sub']) {
     let subElements = [];
-    elements.forEach(el => {
+    elements.forEach((el) => {
       subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
     });
     return subElements;
@@ -448,7 +448,7 @@ function isPositionValid(anchorElement, position) {
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
-  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+  return !BLACKLISTED_ANCESTOR_TAGS.some((tagName) => {
     if (closestAncestorElementBySelector(elementToCheck, tagName)) {
       user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
       return true;

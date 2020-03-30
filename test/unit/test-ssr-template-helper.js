@@ -22,7 +22,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let hasCapabilityStub;
     let ssrTemplateHelper;
@@ -90,7 +90,7 @@ describes.fakeWin(
 
         return ssrTemplateHelper.ssr({}, {}, {}).then(
           () => Promise.reject(),
-          err => {
+          (err) => {
             expect(err).match(errorMsg);
           }
         );
@@ -178,7 +178,7 @@ describes.fakeWin(
 
           return ssrTemplateHelper
             .applySsrOrCsrTemplate({}, {html: '<div>some template</div>'})
-            .then(renderedHTML => {
+            .then((renderedHTML) => {
               expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
                 {},
                 '<div>some template</div>'
@@ -204,7 +204,7 @@ describes.fakeWin(
             .applySsrOrCsrTemplate({}, {html: '<div>some templates</div>'})
             .then(
               () => Promise.reject(),
-              error => expect(error).to.match(errorMsg)
+              (error) => expect(error).to.match(errorMsg)
             );
         });
 

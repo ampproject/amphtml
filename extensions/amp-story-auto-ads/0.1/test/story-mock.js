@@ -34,7 +34,7 @@ export class MockStoryImpl extends AMP.BaseElement {
   }
 
   getPageById(pageId) {
-    return this.pages_.find(page => page.element.id === pageId);
+    return this.pages_.find((page) => page.element.id === pageId);
   }
 
   // This is not very close to the real implementation as it ignores any
@@ -106,7 +106,7 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
     page.signals().signal(CommonSignals.BUILT);
     const implPromise = page
       .getImpl()
-      .then(pageImpl => storyImpl.addPage(pageImpl));
+      .then((pageImpl) => storyImpl.addPage(pageImpl));
     promises.push(implPromise);
   }
   return Promise.all(promises);
@@ -121,7 +121,7 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
 export function fireBuildSignals(doc, additonalSelectors = []) {
   const defaultSelectors = ['amp-ad', 'amp-story', 'amp-story-page'];
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
-  doc.querySelectorAll(selectors).forEach(element => {
+  doc.querySelectorAll(selectors).forEach((element) => {
     const signals = element.signals();
     signals.signal(CommonSignals.BUILT);
     signals.signal(CommonSignals.INI_LOAD);

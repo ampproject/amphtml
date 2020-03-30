@@ -28,7 +28,7 @@ import {
 import {Services} from '../../../../src/services';
 import {ValidationBubble} from '../validation-bubble';
 
-describes.realWin('form-validators', {amp: true}, env => {
+describes.realWin('form-validators', {amp: true}, (env) => {
   const emailTypeValidationMsg = 'Yo! That email does not look so.. email-y';
   const textPatternValidationMsg = 'Yo! No blank emails';
 
@@ -50,13 +50,13 @@ describes.realWin('form-validators', {amp: true}, env => {
     doc.body.appendChild(form);
 
     const {name, email, text, submit} = getInputs(doc);
-    [name, email, text, submit].forEach(c => form.appendChild(c));
+    [name, email, text, submit].forEach((c) => form.appendChild(c));
 
     if (isCustomValidations) {
       const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
         doc
       );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
     }
@@ -728,13 +728,13 @@ describes.realWin('form-validators', {amp: true}, env => {
       while (form.firstChild) {
         form.removeChild(form.firstChild);
       }
-      [name, email, submit].forEach(c => form.appendChild(c));
+      [name, email, submit].forEach((c) => form.appendChild(c));
 
-      validations.forEach(v => v.parentNode.removeChild(v));
+      validations.forEach((v) => v.parentNode.removeChild(v));
       const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
         doc
       );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
       validations = doc.querySelectorAll('[visible-when-invalid]');

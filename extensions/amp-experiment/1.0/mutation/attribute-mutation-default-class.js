@@ -48,7 +48,7 @@ export class AttributeMutationDefaultClass {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       element.setAttribute(
         this.mutationRecord_['attributeName'],
         this.mutationRecord_['value']

@@ -76,7 +76,7 @@ function updateBrowsers(config) {
 
   const chromeFlags = [];
   if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
+    argv.chrome_flags.split(',').forEach((flag) => {
       chromeFlags.push('--'.concat(flag));
     });
   }
@@ -188,16 +188,16 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.browserify.configure = function(bundle) {
-      bundle.on('prebundle', function() {
+    this.browserify.configure = function (bundle) {
+      bundle.on('prebundle', function () {
         log(
           green('Transforming tests with'),
           cyan('browserify') + green('...')
         );
       });
-      bundle.on('transform', function(tr) {
+      bundle.on('transform', function (tr) {
         if (tr instanceof babelify) {
-          tr.once('babelify', function() {
+          tr.once('babelify', function () {
             process.stdout.write('.');
           });
         }

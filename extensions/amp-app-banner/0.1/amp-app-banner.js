@@ -119,10 +119,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
    */
   isDismissed() {
     return Services.storageForDoc(this.getAmpDoc())
-      .then(storage => storage.get(this.getStorageKey_()))
+      .then((storage) => storage.get(this.getStorageKey_()))
       .then(
-        persistedValue => !!persistedValue,
-        reason => {
+        (persistedValue) => !!persistedValue,
+        (reason) => {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         }
@@ -131,7 +131,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   checkIfDismissed_() {
-    this.isDismissed().then(isDismissed => {
+    this.isDismissed().then((isDismissed) => {
       if (isDismissed) {
         this.hide_();
       } else {
@@ -309,7 +309,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   parseIosMetaContent_(metaContent) {
     const parts = metaContent.replace(/\s/, '').split(',');
     const config = {};
-    parts.forEach(part => {
+    parts.forEach((part) => {
       const keyValuePair = part.split('=');
       config[keyValuePair[0]] = keyValuePair[1];
     });
@@ -442,9 +442,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     return Services.xhrFor(this.win)
       .fetchJson(this.manifestHref_, {})
-      .then(res => res.json())
-      .then(json => this.parseManifest_(json))
-      .catch(error => {
+      .then((res) => res.json())
+      .then((json) => this.parseManifest_(json))
+      .catch((error) => {
         this.hide_();
         rethrowAsync(error);
       });
@@ -523,7 +523,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
  */
 function handleDismiss(state) {
   hideBanner(state);
-  state.storagePromise.then(storage => {
+  state.storagePromise.then((storage) => {
     storage.set(state.storageKey, true);
   });
 }
@@ -555,6 +555,6 @@ function updateViewportPadding(state) {
   state.viewport.addToFixedLayer(state.element);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAppBanner, CSS);
 });
