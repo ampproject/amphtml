@@ -68,6 +68,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
     string: 'Tip 1/2',
   },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
+    string: 'Tip',
+  },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS]: {
     string: 'Tap to go to the next screen',
   },

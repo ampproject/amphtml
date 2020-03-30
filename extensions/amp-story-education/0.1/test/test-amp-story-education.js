@@ -27,6 +27,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-education', {amp: true}, env => {
   let ampdoc;
+  let hasSwipeCap;
   let storeService;
   let storyEducation;
   let viewer;
@@ -51,8 +52,11 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     win.document.body.appendChild(element);
     storyEducation = new AmpStoryEducation(element);
 
+    hasSwipeCap = false;
+
     viewer = Services.viewerForDoc(storyEducation.element);
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(viewer, 'hasCapability').callsFake(() => hasSwipeCap);
     env.sandbox.stub(storyEducation, 'mutateElement').callsFake(fn => fn());
   });
 
@@ -130,6 +134,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
 
   describe('amp-story-education navigation', () => {
     it('should render the first navigation education step', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -143,6 +148,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     });
 
     it('should render the second navigation education step', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -155,7 +161,19 @@ describes.realWin('amp-story-education', {amp: true}, env => {
       expect(navigationSwipeEl).to.exist;
     });
 
+    it('should not render the second navigation education step if no swipe capability', () => {
+      hasSwipeCap = false;
+      storyEducation.buildCallback();
+
+      storyEducation.setState_(State.NAVIGATION_TAP);
+      const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
+      storyEducation.containerEl_.dispatchEvent(clickEvent);
+
+      expect(storyEducation.containerEl_).to.have.attribute('hidden');
+    });
+
     it('should navigate to the next step on tap', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
@@ -171,6 +189,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     });
 
     it('should hide the education on last step tap', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
