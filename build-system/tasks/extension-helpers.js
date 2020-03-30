@@ -430,8 +430,8 @@ async function buildExtension(
   const path = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
-  // instead of relying on the watcher used by compileUnminifiedJs, which only
-  // recompiles JS.
+  // instead of relying on the watchers used by compileUnminifiedJs and
+  // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
     watchExtension(path, name, version, latestVersion, hasCss, options);
@@ -541,6 +541,11 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
         : wrappers.extension(name, options.loadPriority),
     })
   );
+
+  // If an incremental watch build fails, simply return.
+  if (options.errored) {
+    return;
+  }
 
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;

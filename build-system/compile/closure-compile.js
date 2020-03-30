@@ -17,7 +17,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('google-closure-compiler');
-const colors = require('ansi-colors');
+const log = require('fancy-log');
+const {cyan, red, yellow} = require('ansi-colors');
+const {EventEmitter} = require('events');
 const {highlight} = require('cli-highlight');
 
 let compilerErrors = '';
@@ -33,35 +35,69 @@ function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
   message = message.replace(closurePluginLoggingPrefix, '');
   message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  message = message.replace(/WARNING/g, yellow('WARNING'));
+  message = message.replace(/ERROR/g, red('ERROR'));
   return message;
 }
 
-function handleCompilerError(outputFilename) {
-  handleError(
-    colors.red('Compilation failed for ') +
-      colors.cyan(outputFilename) +
-      colors.red(':')
-  );
+/**
+ * Handles a closure error during multi-pass compilation. Optionally doesn't
+ * emit a fatal error when compilation fails and signals the error so subsequent
+ * operations can be skipped (used in watch mode).
+ *
+ * @param {Error} err
+ * @param {string} outputFilename
+ * @param {?Object} options
+ * @param {?Function} resolve
+ */
+function handleCompilerError(err, outputFilename, options, resolve) {
+  logError(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
+  if (options && options.continueOnError) {
+    options.errored = true;
+    if (resolve) {
+      resolve();
+    }
+  } else {
+    emitError(err);
+  }
 }
 
-function handleTypeCheckError() {
-  handleError(colors.red('Type checking failed:'));
+/**
+ * Handles a closure error during type checking
+ *
+ * @param {Error} err
+ */
+function handleTypeCheckError(err) {
+  logError(red('Type checking failed:'));
+  emitError(err);
 }
 
-function handleSinglePassCompilerError() {
-  handleError(colors.red('Single pass compilation failed:'));
+/**
+ * Handles a closure error during single-pass compilation
+ *
+ * @param {Error} err
+ */
+function handleSinglePassCompilerError(err) {
+  logError(red('Single pass compilation failed:'));
+  emitError(err);
+}
+
+/**
+ * Emits an error to the caller
+ *
+ * @param {Error} err
+ */
+function emitError(err) {
+  err.showStack = false;
+  new EventEmitter().emit('error', err);
 }
 
 /**
  * Prints an error message when compilation fails
  * @param {string} message
  */
-function handleError(message) {
-  console./*OK*/ error(
-    `${message}\n` + formatClosureCompilerError(compilerErrors)
-  );
+function logError(message) {
+  log(`${message}\n` + formatClosureCompilerError(compilerErrors));
 }
 
 /**
