@@ -85,18 +85,8 @@ module.exports = function({types: t}) {
     // If the FunctionDeclaration identifier is newed in the scope of this program, bail out on modification.
     isNewedInProgramScope(path) {
       const {name} = path.get('id').node;
-      let isNewed = false;
-      path
-        .findParent(path => path.isProgram())
-        .traverse({
-          NewExpression(path) {
-            if (t.isIdentifier(path.node.callee, {name})) {
-              isNewed = true;
-              path.stop();
-            }
-          },
-        });
-      return isNewed;
+      const binding = path.scope.getBinding(name);
+      return binding.referencePaths.some(p => p.parentPath.isNewExpression());
     },
   };
 
