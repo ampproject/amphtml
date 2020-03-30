@@ -44,7 +44,11 @@ export function _ping_(global, data) {
   if (data.ad_container) {
     devAssert(global.context.container == data.ad_container, 'wrong container');
   }
+  const a = data['valid'];
+  console.log(typeof a);
+  console.log(data['valid'])
   if (data.valid == 'false') {
+    console.log('hmmmmmmm');
     // Immediately send no-content for visual diff test
     global.context.noContentAvailable();
   }

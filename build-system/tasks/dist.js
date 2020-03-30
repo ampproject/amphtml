@@ -121,10 +121,10 @@ async function dist() {
   }
 
   if (argv.esm) {
-    await createModuleCompatibleES5Bundle('v0.mjs');
+    await createModuleCompatibleES5Bundle('v0.js');
     if (!argv.core_runtime_only) {
-      await createModuleCompatibleES5Bundle('amp4ads-v0.mjs');
-      await createModuleCompatibleES5Bundle('shadow-v0.mjs');
+      await createModuleCompatibleES5Bundle('amp4ads-v0.js');
+      await createModuleCompatibleES5Bundle('shadow-v0.js');
     }
   }
 

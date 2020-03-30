@@ -201,7 +201,7 @@ export function getService(win, id) {
 }
 
 /**
- * Returns a promise for a service for the given id and window. Also expects an
+ * Returns a promise for a service for the given id and window. Also e`x`pects an
  * element that has the actual implementation. The promise resolves when the
  * implementation loaded. Users should typically wrap this as a special purpose
  * function (e.g. `Services.vsyncFor(win)`) for type safety and because the

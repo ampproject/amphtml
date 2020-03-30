@@ -43,13 +43,12 @@ let PendingMessageDef;
  * @return {!Promise}
  */
 export function invokeWebWorker(win, method, opt_args, opt_localWin) {
-  console.log('within invoke web worker');
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
-  //registerServiceBuilder(win, 'amp-worker', AmpWorker);
+  registerServiceBuilder(win, 'amp-worker', AmpWorker);
   const worker = Services.workerFor(win);
-  return worker.sendMessage_(method, opt_args || [], opt_localWin);
+  return worker.sendMessage(method, opt_args || [], opt_localWin);
 }
 export function installWebWorkerService(win) {
   registerServiceBuilder(win, 'amp-worker', AmpWorker);
@@ -100,31 +99,9 @@ class AmpWorker {
     /** @private {Worker} */
     this.worker_ = null;
 
-    /** @const @private {!Promise} */
-    console.log('initiate fetch promise');
+    this.fetchPromise_ = Promise.resolve();
     this.worker_ = new win.Worker('http://localhost:8000/dist/ww.js', { type: 'module' });
     this.worker_.onmessage = this.receiveMessage_.bind(this);
-
-    this.fetchPromise_ = Promise.resolve();
-
-    // this.fetchPromise_ = this.xhr_
-    //   .fetchText(url, {
-    //     ampCors: false,
-    //     bypassInterceptorForDev: getMode().localDev,
-    //   })
-    //   .then(res => res.text())
-    //   .then(text => {
-    //     // Workaround since Worker constructor only accepts same origin URLs.
-    //     const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
-    //       type: 'text/javascript',
-    //     });
-    //     const blobUrl = win.URL.createObjectURL(blob);
-    //     console.log('AMP to start worker', Date.now());
-    //     this.worker_ = new win.Worker(blobUrl);
-    //     this.worker_.onmessage = this.receiveMessage_.bind(this);
-    //   });
-
-    // console.log('fetch promise 1 is ', this.fetchPromise_);
 
     /**
      * Array of in-flight messages pending response from worker.
@@ -145,7 +122,6 @@ class AmpWorker {
      * @const @private {!Array<!Window>}
      */
     this.windows_ = [win];
-    console.log('end of compiling');
   }
 
   /**
@@ -154,11 +130,9 @@ class AmpWorker {
    * @param {!Array} args
    * @param {Window=} opt_localWin
    * @return {!Promise}
-   * @private
    * @restricted
    */
-  sendMessage_(method, args, opt_localWin) {
-    console.log('fetch Promise is ', this.fetchPromise_);
+  sendMessage(method, args, opt_localWin) {
     return this.fetchPromise_.then(() => {
       return new Promise((resolve, reject) => {
         const id = this.counter_++;
@@ -179,7 +153,7 @@ class AmpWorker {
 
   /**
    * Receives the result of a method invocation from the worker and resolves
-   * the Promise returned from the corresponding `sendMessage_()` call.
+   * the Promise returned from the corresponding `sendMessage()` call.
    * @param {!MessageEvent} event
    * @private
    */
@@ -189,7 +163,6 @@ class AmpWorker {
       returnValue,
       id,
     } = /** @type {FromWorkerMessageDef} */ (event.data);
-    console.log('received message');
     const message = this.messages_[id];
     if (!message) {
       dev().error(

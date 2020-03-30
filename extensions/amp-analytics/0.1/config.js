@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {invokeWebWorker} from '../../../src/service/worker-impl';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -25,6 +26,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {variableServiceForDoc} from './variables';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-analytics/config';
 
@@ -165,6 +167,7 @@ export class AnalyticsConfig {
       );
   }
 
+
   /**
    * Returns a promise that resolves when configuration is re-written if
    * configRewriter is configured by a vendor.
@@ -174,19 +177,24 @@ export class AnalyticsConfig {
   processConfigs_() {
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
-    const config = dict({});
+    let config = dict({});
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
-    mergeObjects(inlineConfig, config);
-    mergeObjects(this.remoteConfig_, config);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
-      // use default configuration merge.
-      return Promise.resolve();
-    }
-
-    return this.handleConfigRewriter_(config, configRewriterUrl);
+    let promise;
+    const remoteConfig = this.remoteConfig_;
+    promise = invokeWebWorker(self.window, 'deepMerge', {
+      configs: [inlineConfig, remoteConfig, config],
+    }).then(data => {
+      config = Object.assign(config, data.result);
+    });
+    return promise.then(() => {
+      if (!configRewriterUrl || this.isSandbox_) {
+        this.config_ = this.mergeConfigs_(config);
+        // use default configuration merge.
+        return Promise.resolve();
+      }
+      return this.handleConfigRewriter_(config, configRewriterUrl);
+     });
   }
 
   /**
