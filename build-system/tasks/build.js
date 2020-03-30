@@ -151,6 +151,7 @@ defaultTask.description =
 defaultTask.flags = {
   compiled: '  Compiles and serves minified binaries',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
   extensions: '  Pre-builds the given extensions, lazily builds the rest.',
   extensions_from:
     '  Pre-builds the extensions used by the provided example page.',
