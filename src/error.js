@@ -523,7 +523,10 @@ export function getErrorReportData(
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (self.context && self.context.location) {
+  if (IS_ESM) {
+    runtime = 'esm';
+    data['esm'] = '1';
+  } else if (self.context && self.context.location) {
     data['3p'] = '1';
     runtime = '3p';
   } else if (getMode().runtime) {
