@@ -117,9 +117,10 @@ export class GoogleSubscriptionsPlatform {
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
-        exp => startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+        (exp) =>
+          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
-      .map(exp => exp.substring(4));
+      .map((exp) => exp.substring(4));
 
     const swgConfig = {'experiments': ampExperimentsForSwg};
     let resolver = null;
@@ -129,7 +130,7 @@ export class GoogleSubscriptionsPlatform {
       serviceAdapter.getPageConfig(),
       {
         fetcher: new AmpFetcher(ampdoc.win),
-        configPromise: new Promise(resolve => (resolver = resolve)),
+        configPromise: new Promise((resolve) => (resolver = resolve)),
       },
       swgConfig
     );
@@ -148,7 +149,7 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.analytics().setUrl(ampdoc.getUrl());
     resolver();
 
-    this.runtime_.setOnLoginRequest(request => {
+    this.runtime_.setOnLoginRequest((request) => {
       this.onLoginRequest_(request && request.linkRequested);
     });
     this.runtime_.setOnLinkComplete(() => {
@@ -164,7 +165,7 @@ export class GoogleSubscriptionsPlatform {
         this.getServiceId()
       );
     });
-    this.runtime_.setOnFlowStarted(e => {
+    this.runtime_.setOnFlowStarted((e) => {
       // This information is used by Propensity.
       const params = /** @type {!JsonObject} */ ({});
       const data = /** @type {!JsonObject} */ (getData(e) || {});
@@ -194,7 +195,7 @@ export class GoogleSubscriptionsPlatform {
         );
       }
     });
-    this.runtime_.setOnFlowCanceled(e => {
+    this.runtime_.setOnFlowCanceled((e) => {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
@@ -223,8 +224,8 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
-    this.runtime_.setOnPaymentResponse(promise => {
-      promise.then(response => {
+    this.runtime_.setOnPaymentResponse((promise) => {
+      promise.then((response) => {
         this.onSubscribeResponse_(
           response,
           response.productType === 'CONTRIBUTION'
@@ -319,7 +320,7 @@ export class GoogleSubscriptionsPlatform {
    */
   loginWithAmpReaderId_() {
     // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
-    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+    this.serviceAdapter_.getReaderId('local').then((ampReaderId) => {
       this.runtime_.linkAccount({ampReaderId});
     });
   }
@@ -342,7 +343,7 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   maybeComplete_(promise) {
-    promise.then(result => {
+    promise.then((result) => {
       if (result) {
         this.runtime_.reset();
       }
@@ -398,7 +399,7 @@ export class GoogleSubscriptionsPlatform {
     );
     return this.runtime_
       .getEntitlements(encryptedDocumentKey)
-      .then(swgEntitlements => {
+      .then((swgEntitlements) => {
         // Get and store the isReadyToPay signal which is independent of
         // any entitlments existing.
         if (swgEntitlements.isReadyToPay) {
@@ -505,7 +506,7 @@ export class GoogleSubscriptionsPlatform {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
       // a minimal race condition here.
-      viewer.getViewerOrigin().then(origin => {
+      viewer.getViewerOrigin().then((origin) => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
             parseUrlDeprecated(origin).hostname
@@ -609,7 +610,7 @@ class AmpFetcher {
         credentials: 'include',
         prerenderSafe: true,
       })
-      .then(response => response.json());
+      .then((response) => response.json());
   }
 
   /** @override */
@@ -647,17 +648,17 @@ class AmpFetcher {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(
     'subscriptions-google',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
      * @return {*} TODO(#23582): Specify return type
      */
-    function(ampdoc) {
+    function (ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
-      Services.subscriptionsServiceForDoc(element).then(service => {
+      Services.subscriptionsServiceForDoc(element).then((service) => {
         service.registerPlatform(
           PLATFORM_ID,
           (platformConfig, serviceAdapter) => {

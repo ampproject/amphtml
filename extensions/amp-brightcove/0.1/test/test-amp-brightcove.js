@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-brightcove'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -63,7 +63,7 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -81,7 +81,7 @@ describes.realWin(
           'data-video-id': 'ref:amp-test-video',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -102,7 +102,7 @@ describes.realWin(
           'data-video-id': 'ref:amp-test-video',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         const obj = bc.implementation_;
@@ -117,7 +117,7 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-my-param': 'hello world',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         const params = parseUrlDeprecated(iframe.src).search.split('&');
         expect(params).to.contain('myParam=hello%20world');
@@ -128,7 +128,7 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.equal(
@@ -155,7 +155,7 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-playlist-id': 'ref:test-playlist',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('playlistId=ref:test-playlist');
@@ -166,7 +166,7 @@ describes.realWin(
     it('should allow both playlist and video id to be unset', () => {
       return getBrightcove({
         'data-account': '1290862519001',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).not.to.contain('&playlistId');
@@ -178,7 +178,7 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-referrer': 'COUNTER',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('referrer=1');
@@ -190,7 +190,7 @@ describes.realWin(
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
         'data-param-playsinline': 'false',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         expect(iframe.src).to.contain('playsinline=true');
@@ -201,7 +201,7 @@ describes.realWin(
       return getBrightcove({
         'data-account': '1290862519001',
         'data-video-id': 'ref:amp-test-video',
-      }).then(bc => {
+      }).then((bc) => {
         return Promise.resolve()
           .then(() => {
             const p = listenOncePromise(bc, VideoEvents.LOAD);

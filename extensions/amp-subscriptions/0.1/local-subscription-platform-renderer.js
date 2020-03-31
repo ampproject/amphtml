@@ -97,14 +97,14 @@ export class LocalSubscriptionPlatformRenderer {
           }
         }
       })
-      .then(candidate => {
+      .then((candidate) => {
         if (!candidate) {
           return;
         }
         if (candidate.tagName == 'TEMPLATE') {
           return this.templates_
             .renderTemplate(candidate, authResponse)
-            .then(element => {
+            .then((element) => {
               const renderState = /** @type {!JsonObject} */ (authResponse);
               return this.renderActionsInNode_(
                 renderState,
@@ -118,7 +118,7 @@ export class LocalSubscriptionPlatformRenderer {
         clone.removeAttribute('subscriptions-display');
         return clone;
       })
-      .then(element => {
+      .then((element) => {
         if (!element) {
           return;
         }

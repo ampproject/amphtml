@@ -215,7 +215,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     const url = this.buildUrl_();
     return Services.xhrFor(this.win)
       .fetchJson(url, {})
-      .then(res => {
+      .then((res) => {
         if (res.status === 200) {
           return res.json();
         }
@@ -294,7 +294,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.element.classList.add('amp-apester-container');
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_().then(
-      response => {
+      (response) => {
         if (!response || response['status'] === 204) {
           dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
@@ -357,12 +357,12 @@ class AmpApesterMedia extends AMP.BaseElement {
               });
             });
           })
-          .catch(error => {
+          .catch((error) => {
             dev().error(TAG, 'Display', error);
             return undefined;
           });
       },
-      error => {
+      (error) => {
         dev().error(TAG, 'Display', error);
         return undefined;
       }
@@ -403,7 +403,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     if (this.iframe_) {
       this.intersectionObserverApi_.destroy();
       this.intersectionObserverApi_ = null;
-      this.unlisteners_.forEach(unlisten => unlisten());
+      this.unlisteners_.forEach((unlisten) => unlisten());
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
@@ -421,7 +421,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   registerToApesterEvents_() {
     registerEvent(
       apesterEventNames.SET_FULL_SCREEN,
-      data => {
+      (data) => {
         // User clicked full screen button.
         if (this.mediaId_ === data.id) {
           setFullscreenOn(this.element);
@@ -433,7 +433,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     registerEvent(
       apesterEventNames.REMOVE_FULL_SCREEN,
-      data => {
+      (data) => {
         // User clicked close full screen button.
         if (this.mediaId_ === data.id) {
           setFullscreenOff(this.element);
@@ -445,7 +445,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     registerEvent(
       apesterEventNames.RESIZE_UNIT,
-      data => {
+      (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);
         }
@@ -457,6 +457,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpApesterMedia, CSS);
 });

@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-anim'],
     },
   },
-  env => {
+  (env) => {
     it('should propagate ARIA attributes', () => {
       const el = env.win.document.createElement('amp-anim');
       el.setAttribute('src', 'test.jpg');

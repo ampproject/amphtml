@@ -80,7 +80,7 @@ export function ssp(global, data) {
   computeInMasterFrame(
     global,
     'ssp-load',
-    done => {
+    (done) => {
       loadScript(global, 'https://ssp.imedia.cz/static/js/ssp.js', () => {
         // This callback is run just once for amp-ad with same type
         // Script will inject "sssp" object on Window
@@ -105,9 +105,9 @@ export function ssp(global, data) {
         });
       });
     },
-    ads => {
+    (ads) => {
       /** @suppress {checkTypes} */
-      const adById = keyBy(ads, item => item.id);
+      const adById = keyBy(ads, (item) => item.id);
       const ad = adById[position['id']];
 
       if (!ad || ['error', 'empty'].includes(ad.type)) {

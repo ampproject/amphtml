@@ -71,7 +71,7 @@ export const getAnalyticsService = (win, el) => {
 
   if (!service) {
     service = new StoryAnalyticsService(win, el);
-    registerServiceBuilder(win, 'story-analytics', function() {
+    registerServiceBuilder(win, 'story-analytics', function () {
       return service;
     });
   }
@@ -108,7 +108,7 @@ export class StoryAnalyticsService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.triggerEvent(
         isActive
           ? StoryAnalyticsEvent.BOOKEND_ENTER
@@ -118,7 +118,7 @@ export class StoryAnalyticsService {
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
-      pageId => {
+      (pageId) => {
         if (!pageId) {
           return;
         }

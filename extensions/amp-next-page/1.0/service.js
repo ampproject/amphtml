@@ -154,7 +154,7 @@ export class NextPageService {
     this.readyResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
+    this.readyPromise_ = new Promise((resolve) => {
       this.readyResolver_ = resolve;
     });
   }
@@ -270,7 +270,7 @@ export class NextPageService {
     devAssert(!this.finished_);
 
     // If a page is already queued to be fetched, wait for it
-    if (this.pages_.some(page => page.is(PageState.FETCHING))) {
+    if (this.pages_.some((page) => page.is(PageState.FETCHING))) {
       return Promise.resolve();
     }
     // If we're still too far from the bottom, early return
@@ -294,7 +294,7 @@ export class NextPageService {
     // Attempt to get more pages
     return (
       this.getRemotePages_()
-        .then(pages => this.queuePages_(pages))
+        .then((pages) => this.queuePages_(pages))
         // Queuing pages can result in no new pages (in case the server
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
@@ -329,14 +329,14 @@ export class NextPageService {
     });
 
     // If no page is visible then the host page should be
-    if (!this.pages_.some(page => page.isVisible())) {
+    if (!this.pages_.some((page) => page.isVisible())) {
       this.hostPage_.setVisibility(VisibilityState.VISIBLE);
     }
 
     // Hide elements if necessary
     this.pages_
-      .filter(page => page.isVisible())
-      .forEach(page =>
+      .filter((page) => page.isVisible())
+      .forEach((page) =>
         this.toggleHiddenAndReplaceableElements(
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
@@ -374,7 +374,7 @@ export class NextPageService {
     // Find the ones that should be hidden (no longer inside the viewport)
     return Promise.all(
       previousPages
-        .filter(page => {
+        .filter((page) => {
           // Pages that are outside of the viewport should be hidden
           return page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
         })
@@ -415,9 +415,9 @@ export class NextPageService {
         Math.max(0, index - pausePageCount - 1),
         Math.min(this.pages_.length, index + pausePageCount + 1)
       )
-      .filter(page => page.is(PageState.PAUSED));
+      .filter((page) => page.is(PageState.PAUSED));
 
-    return Promise.all(nearViewportPages.map(page => page.resume()));
+    return Promise.all(nearViewportPages.map((page) => page.resume()));
   }
 
   /**
@@ -504,7 +504,7 @@ export class NextPageService {
     this.visibilityObserver_.observe(
       shadowRoot /** element */,
       container /** parent */,
-      position => {
+      (position) => {
         page.relativePos = position;
         this.updateVisibility();
       }
@@ -635,7 +635,7 @@ export class NextPageService {
    */
   sanitizeDoc(doc) {
     // Parse for more pages and queue them
-    toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
+    toArray(doc.querySelectorAll('amp-next-page')).forEach((el) => {
       if (this.hasDeepParsing_) {
         const pages = this.getInlinePages_(el);
         this.queuePages_(pages);
@@ -659,7 +659,7 @@ export class NextPageService {
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
     // Hide elements that have [next-page-hide] on child documents
     if (doc !== this.hostPage_.document) {
-      toArray(doc.querySelectorAll('[next-page-hide]')).forEach(element =>
+      toArray(doc.querySelectorAll('[next-page-hide]')).forEach((element) =>
         toggle(element, false /** opt_display */)
       );
     }
@@ -672,7 +672,7 @@ export class NextPageService {
     // Replace elements that have [next-page-replace]
     toArray(
       doc.querySelectorAll('*:not(amp-next-page) [next-page-replace]')
-    ).forEach(element => {
+    ).forEach((element) => {
       let uniqueId = element.getAttribute('next-page-replace');
       if (!uniqueId) {
         uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
@@ -729,7 +729,7 @@ export class NextPageService {
   fetchPageDocument(page) {
     return Services.xhrFor(this.win_)
       .fetch(page.url, {ampCors: false})
-      .then(response => {
+      .then((response) => {
         // Make sure the response is coming from the same origin as the
         // page and update the page's url in case of a redirection
         validateUrl(response.url, this.ampdoc_.getUrl());
@@ -737,14 +737,14 @@ export class NextPageService {
 
         return response.text();
       })
-      .then(html => {
+      .then((html) => {
         const doc = this.doc_.implementation.createHTMLDocument('');
         doc.open();
         doc.write(html);
         doc.close();
         return doc;
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'failed to fetch %s', page.url, e);
         throw e;
       });
@@ -768,7 +768,7 @@ export class NextPageService {
       TAG
     );
 
-    return this.getRemotePages_().then(remotePages => {
+    return this.getRemotePages_().then((remotePages) => {
       if (remotePages.length === 0) {
         user().warn(TAG, 'Could not find recommendations');
         return Promise.resolve();
@@ -792,14 +792,14 @@ export class NextPageService {
       return Promise.resolve();
     }
     // Queue the given pages
-    pages.forEach(meta => {
+    pages.forEach((meta) => {
       try {
         validatePage(meta, this.ampdoc_.getUrl());
         // Prevent loops by checking if the page already exists
         // we use initialUrl since the url can get updated if
         // the page issues a redirect
         if (
-          this.pages_.some(page => page.initialUrl == meta.url) ||
+          this.pages_.some((page) => page.initialUrl == meta.url) ||
           this.pages_.length > this.maxPages_
         ) {
           return;
@@ -838,7 +838,7 @@ export class NextPageService {
         'be inside a <script> tag with type="application/json"'
     );
 
-    const parsed = tryParseJson(scriptElement.textContent, error => {
+    const parsed = tryParseJson(scriptElement.textContent, (error) => {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
@@ -875,14 +875,14 @@ export class NextPageService {
         xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
       }
     )
-      .then(result => {
+      .then((result) => {
         this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
           this.getHost_().setAttribute('src', this.nextSrc_);
         }
         return result['pages'] || [];
       })
-      .catch(error => {
+      .catch((error) => {
         user().error(TAG, 'error fetching page list from remote server', error);
         this.nextSrc_ = null;
         return [];
@@ -949,7 +949,7 @@ export class NextPageService {
 
     return this.templates_
       .findAndRenderTemplate(separator, data)
-      .then(rendered => {
+      .then((rendered) => {
         return this.mutator_.mutateElement(separator, () => {
           removeChildren(dev().assertElement(separator));
           separator.appendChild(rendered);
@@ -999,8 +999,8 @@ export class NextPageService {
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
-        .map(page => ({
+        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map((page) => ({
           title: page.title,
           url: page.url,
           image: page.image,
@@ -1010,7 +1010,7 @@ export class NextPageService {
     // Re-render templated recommendation box (if needed)
     return this.templates_
       .findAndRenderTemplate(recBox, data)
-      .then(rendered => {
+      .then((rendered) => {
         return this.mutator_.mutateElement(recBox, () => {
           removeChildren(dev().assertElement(recBox));
           recBox.appendChild(rendered);
@@ -1027,8 +1027,8 @@ export class NextPageService {
     const recBox = dev().assertElement(this.recBox_);
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
-        .map(page => ({
+        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map((page) => ({
           title: page.title,
           url: page.url,
           image: page.image,
@@ -1036,7 +1036,7 @@ export class NextPageService {
     });
 
     const html = htmlFor(this.getHost_());
-    const links = data['pages'].map(page => {
+    const links = data['pages'].map((page) => {
       const link = html`
         <a class="amp-next-page-link">
           <img ref="image" class="amp-next-page-image" />
@@ -1047,7 +1047,7 @@ export class NextPageService {
       image.src = page.image;
       title.textContent = page.title;
       link.href = page.url;
-      link.addEventListener('click', e => {
+      link.addEventListener('click', (e) => {
         triggerAnalyticsEvent(
           this.getHost_(),
           'amp-next-page-click',
@@ -1071,7 +1071,7 @@ export class NextPageService {
 
     return this.mutator_.mutateElement(recBox, () => {
       removeChildren(dev().assertElement(recBox));
-      links.forEach(link => recBox.appendChild(link));
+      links.forEach((link) => recBox.appendChild(link));
     });
   }
 }
