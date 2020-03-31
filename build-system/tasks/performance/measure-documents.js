@@ -76,14 +76,28 @@ const setupMeasurement = page =>
   });
 
 /**
- * Handles request interception for analytics:
- * - rewrites vendor config requests
- * - records first outgoing analytics request
- *
+ * Records first outgoing analytics request
  * @param {Request} interceptedRequest
  * @param {!Function} setEndTimeCallback
+ * @return {!Promise<boolean>}
  */
 async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
+  const interceptedUrl = interceptedRequest.url();
+  if (interceptedUrl.includes(ANALYTICS_PARAM)) {
+    setEndTimeCallback(Date.now());
+    interceptedRequest.abort();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Handles rewrites vendor config requests. Should always be
+ * included.
+ * @param {Request} interceptedRequest
+ * @return {!Promise<boolean>}
+ */
+const analyticsVendorRewriteHandler = async interceptedRequest => {
   const interceptedUrl = interceptedRequest.url();
   const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
   if (matchArray) {
@@ -98,17 +112,14 @@ async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
       contentType: 'application/json; charset=utf-8',
       body: jsonString,
     });
-  } else if (interceptedUrl.includes(ANALYTICS_PARAM)) {
-    setEndTimeCallback(Date.now());
-    interceptedRequest.abort();
-  } else {
-    interceptedRequest.continue();
+    return true;
   }
-}
+  return false;
+};
 
 /**
  * Add specified timeout by handler
- * @param {Object} handlerOptions
+ * @param {?Object} handlerOptions
  * @return {!Promise}
  */
 function delayBasedOnHandlerOptions(handlerOptions) {
@@ -169,48 +180,66 @@ const readMetrics = page =>
   });
 
 /**
- * Create the request handler
- * @param {Object} handlerOptions
+ * Set up appropriate handlers and default handlers
+ * @param {?Object} handlerOptions
  * @param {string} handlerName
  * @param {Puppeteer.page} page
  */
 function setUpRequestHandler(handlerOptions, handlerName, page) {
+  // Default handlers
+  const handlers = [analyticsVendorRewriteHandler];
+  // Setting up timing and adding specified handler
   if (handlerName === 'analyticsHandler') {
-    let endTime;
     Object.assign(handlerOptions, {'startTime': Date.now()});
-    page.on('request', interceptedRequest =>
-      handleAnalyticsRequests(interceptedRequest, analyticsRequestTime => {
-        if (!endTime) {
-          endTime = analyticsRequestTime;
-          Object.assign(handlerOptions, {endTime, 'timeout': 0});
+    handlers.push(interceptedRequest =>
+      handleAnalyticsRequests(interceptedRequest, endTime => {
+        if (!handlerOptions.endTime) {
+          Object.assign(handlerOptions, {
+            endTime,
+            'timeout': 0,
+          });
         }
       })
     );
   }
+
+  // There shoud only one place where requests are handled.
+  // Assumes that multiple handlers don't continue/abort/respond
+  // on the same request.
+  page.on('request', async interceptedRequest => {
+    const requestHandled = await handlers.reduce(
+      // Don't short circuit
+      async (prev, handler) => (await handler(interceptedRequest)) || prev,
+      false
+    );
+    if (!requestHandled) {
+      interceptedRequest.continue();
+    }
+  });
 }
 
 /**
  * Return metrics calcaultion based on handler
+ * @param {?Object} handlerOptions
  * @param {string} handlerName
- * @param {Object} handler
  * @param {Object} metrics
  * @return {Object}
  */
-function addHandlerMetric(handlerName, handler, metrics) {
+function addHandlerMetric(handlerOptions, handlerName, metrics) {
   if (handlerName === 'analyticsHandler') {
-    return addAnalyticsMetric(handler, metrics);
+    return addAnalyticsMetric(handlerOptions, metrics);
   }
   return metrics;
 }
 
 /**
  * Adds analytics metrics
- * @param {Object} handler
+ * @param {?Object} analyticsHandlerOptions
  * @param {Object} metrics
  * @return {Object}
  */
-function addAnalyticsMetric(handler, metrics) {
-  const {endTime, startTime} = handler;
+function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
+  const {endTime, startTime} = analyticsHandlerOptions;
   const analyticsRequest = endTime ? endTime - startTime : 0;
   return Object.assign(metrics, {analyticsRequest});
 }
@@ -261,27 +290,23 @@ async function measureDocument(url, version, {headless}, handlers) {
   const page = await browser.newPage();
   const {handlerOptions, handlerName} = getHandlerFromUrl(url, handlers);
   await page.setCacheEnabled(false);
+  await page.setRequestInterception(true);
   await setupMeasurement(page);
-
-  if (handlerOptions) {
-    await page.setRequestInterception(true);
-    setUpRequestHandler(handlerOptions, handlerName, page);
-  }
+  setUpRequestHandler(handlerOptions, handlerName, page);
 
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
       waitUntil: 'networkidle0',
     });
-  } catch (e) {
+  } catch {
     // site did not load
-    console.log(e);
     await browser.close();
     return;
   }
 
   let metrics = await readMetrics(page);
   await delayBasedOnHandlerOptions(handlerOptions);
-  metrics = addHandlerMetric(handlerName, handlerOptions, metrics);
+  metrics = addHandlerMetric(handlerOptions, handlerName, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
