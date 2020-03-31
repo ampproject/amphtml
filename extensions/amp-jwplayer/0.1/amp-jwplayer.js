@@ -20,7 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
-import {listen, getData, getDetail} from '../../../src/event-helper'
+import {listen, getData, getDetail} from '../../../src/event-helper';
 import {userAssert, dev} from '../../../src/log';
 import {
   createFrameFor,
@@ -39,6 +39,8 @@ const JWPLAYER_EVENTS = {
   'visible': VideoEvents.VISIBILITY,
   'adImpression': VideoEvents.AD_START,
   'adComplete': VideoEvents.AD_END,
+  'adPlay': VideoEvents.PLAYING,
+  'adPause': VideoEvents.PAUSE
 }
 
 const eventHandlers = {
@@ -63,6 +65,9 @@ const eventHandlers = {
   time: (time, ctx) => {
     ctx.currentTime_ = time.currentTime;
     ctx.sendCommand_('getPlayedRanges');
+  },
+  adTime: (adTime, ctx) => {
+    ctx.currentTime_ = adTime.position;
   }
 }
 
