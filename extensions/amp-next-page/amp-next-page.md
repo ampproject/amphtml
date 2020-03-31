@@ -28,13 +28,6 @@ limitations under the License.
 
 The `<amp-next-page>` component loads content pages one after another creating an infinite scroll experience.
 
-### Version notes
-
-| Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
-| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
-
 ### Configure and load pages
 
 Specify pages in a JSON configuration. Load the JSON configuration from a remote URL with the `src` attribute, or inline it within a `<script>` child element of `<amp-next-page>`. You may specify both a remote URL and inline a JSON object for a quicker suggestion loading speed.
@@ -387,6 +380,13 @@ Both `<amp-next-page>` specific triggers provide the variables `url` and `title`
 The default recommendation box and default separator both have a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom recommendation box or separator element to improve accessibility.
 
 Both the default recommendation box and default separator are keyboard-focusable. When a custom separator is provided, its `tabindex` is preserved if present, otherwise a `tabindex` of `0` will be added to the given element.
+
+## Version notes
+
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
+| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
 
 ## Validation
 
