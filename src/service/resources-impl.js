@@ -214,7 +214,7 @@ export class ResourcesImpl {
         : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
-          e => this.intersects_(e),
+          (e) => this.intersects_(e),
           {root, rootMargin: '200% 25%'}
         );
 
@@ -300,7 +300,7 @@ export class ResourcesImpl {
     if (getMode().localDev) {
       const inside = [];
       const outside = [];
-      entries.forEach(e => {
+      entries.forEach((e) => {
         const r = Resource.forElement(e.target);
         (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
       });
@@ -309,7 +309,7 @@ export class ResourcesImpl {
 
     this.intersectionObserverCallbackFired_ = true;
 
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const {boundingClientRect, target} = entry;
 
       const r = Resource.forElement(target);
