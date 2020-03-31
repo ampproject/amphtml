@@ -40,8 +40,8 @@ export class DatesList {
 
     /** @private @const */
     this.dates_ = dates
-      .filter(d => this.getDateType_(d) == DateType.DATE)
-      .map(d => this.moment_(d))
+      .filter((d) => this.getDateType_(d) == DateType.DATE)
+      .map((d) => this.moment_(d))
       .sort((a, b) => a.toDate() - b.toDate());
   }
 
@@ -83,7 +83,7 @@ export class DatesList {
    * @private
    */
   matchesDate_(date) {
-    return this.dates_.some(d => this.ReactDates_['isSameDay'](d, date));
+    return this.dates_.some((d) => this.ReactDates_['isSameDay'](d, date));
   }
 
   /**

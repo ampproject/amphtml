@@ -78,7 +78,7 @@ function logServeMode() {
  * @param {string} serveMode
  * @return {boolean}
  */
-const isRtvMode = serveMode => {
+const isRtvMode = (serveMode) => {
   return /^\d{15}$/.test(serveMode);
 };
 

@@ -113,7 +113,7 @@ export class TouchHandler {
    * @private
    */
   unlisten_() {
-    this.unlistenHandlers_.forEach(unlisten => unlisten());
+    this.unlistenHandlers_.forEach((unlisten) => unlisten());
     this.unlistenHandlers_.length = 0;
   }
 

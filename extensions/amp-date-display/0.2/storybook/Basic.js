@@ -32,7 +32,7 @@ export const _default = () => {
       timestampSeconds={dateTime}
       layout="fixed-height"
       height="20"
-      render={date => <span>{`The ISO date is ${date.iso}`}</span>}
+      render={(date) => <span>{`The ISO date is ${date.iso}`}</span>}
     />
   );
 };

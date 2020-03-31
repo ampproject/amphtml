@@ -32,10 +32,7 @@ export function opinary(global, data) {
   div2.setAttribute('id', 'opinaryAMP');
 
   // append divs to page
-  global.document
-    .getElementById('c')
-    .appendChild(div)
-    .appendChild(div2);
+  global.document.getElementById('c').appendChild(div).appendChild(div2);
 
   if (!document.querySelector("link[rel='canonical']")) {
     const link = document.createElement('link');

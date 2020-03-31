@@ -50,11 +50,11 @@ const MIN_EVENT_INTERVAL = 100;
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise(
     {
-      measure: state => {
+      measure: (state) => {
         state.width = win./*OK*/ innerWidth;
         state.height = win./*OK*/ innerHeight;
       },
-      mutate: state => {
+      mutate: (state) => {
         // We need to override runtime-level !important rules
         setImportantStyles(bodyElement, {
           'background': 'transparent',
@@ -246,7 +246,7 @@ class InaboxViewportImpl {
    */
   getClientRectAsync(el) {
     const local = el./*OK*/ getBoundingClientRect();
-    return this.binding_.getRootClientRectAsync().then(root => {
+    return this.binding_.getRootClientRectAsync().then((root) => {
       if (!root) {
         return layoutRectFromDomRect(local);
       }
@@ -512,7 +512,7 @@ export class ViewportBindingInabox {
     this.iframeClient_.makeRequest(
       MessageType.SEND_POSITIONS,
       MessageType.POSITION,
-      data => {
+      (data) => {
         dev().fine(TAG, 'Position changed: ', data);
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
       }
@@ -537,7 +537,7 @@ export class ViewportBindingInabox {
           // element.
           /** @type {!HTMLIFrameElement|!HTMLElement} */
           (this.win.frameElement || this.getScrollingElement()),
-          data => {
+          (data) => {
             this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
           }
         );
@@ -653,7 +653,7 @@ export class ViewportBindingInabox {
 
   /** @private */
   remeasureAllElements_() {
-    this.getChildResources().forEach(resource => resource.measure());
+    this.getChildResources().forEach((resource) => resource.measure());
   }
 
   /** @override */
@@ -676,11 +676,11 @@ export class ViewportBindingInabox {
       );
     }
     if (!this.requestPositionPromise_) {
-      this.requestPositionPromise_ = new Promise(resolve => {
+      this.requestPositionPromise_ = new Promise((resolve) => {
         this.iframeClient_.requestOnce(
           MessageType.SEND_POSITIONS,
           MessageType.POSITION,
-          data => {
+          (data) => {
             this.requestPositionPromise_ = null;
             devAssert(data['targetRect'], 'Host should send targetRect');
             resolve(data['targetRect']);
@@ -738,7 +738,7 @@ export class ViewportBindingInabox {
       if (this.isFriendlyIframed_) {
         const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
         if (iframe) {
-          this.topWindowFrameOverlayManager_.expandFrame(iframe, boxRect => {
+          this.topWindowFrameOverlayManager_.expandFrame(iframe, (boxRect) => {
             this.updateBoxRect_(boxRect);
             resolve();
           });
@@ -749,7 +749,7 @@ export class ViewportBindingInabox {
         this.iframeClient_.requestOnce(
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
+          (response) => {
             if (response['success']) {
               this.updateBoxRect_(response['boxRect']);
               resolve();
@@ -771,10 +771,13 @@ export class ViewportBindingInabox {
       if (this.isFriendlyIframed_) {
         const iframe = /** @type {?HTMLIFrameElement}*/ (this.win.frameElement);
         if (iframe) {
-          this.topWindowFrameOverlayManager_.collapseFrame(iframe, boxRect => {
-            this.updateBoxRect_(boxRect);
-            resolve();
-          });
+          this.topWindowFrameOverlayManager_.collapseFrame(
+            iframe,
+            (boxRect) => {
+              this.updateBoxRect_(boxRect);
+              resolve();
+            }
+          );
         } else {
           reject('Request to open lightbox failed; frame does not exist.');
         }
@@ -782,7 +785,7 @@ export class ViewportBindingInabox {
         this.iframeClient_.requestOnce(
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
+          (response) => {
             this.updateBoxRect_(response['boxRect']);
             resolve();
           }
@@ -862,7 +865,7 @@ export function installInaboxViewportService(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'viewport',
-    function() {
+    function () {
       return new InaboxViewportImpl(ampdoc, binding);
     },
     /* opt_instantiate */ true

@@ -47,12 +47,12 @@ export const AnalyticsVariable = {
  * @param {!Window} win
  * @return {!AmpStoryVariableService}
  */
-export const getVariableService = win => {
+export const getVariableService = (win) => {
   let service = Services.storyVariableService(win);
 
   if (!service) {
     service = new AmpStoryVariableService(win);
-    registerServiceBuilder(win, 'story-variable', function() {
+    registerServiceBuilder(win, 'story-variable', function () {
       return service;
     });
   }
@@ -95,13 +95,13 @@ export class AmpStoryVariableService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.PAGE_IDS, pageIds => {
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, (pageIds) => {
       this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.length;
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
-      pageId => {
+      (pageId) => {
         if (!pageId) {
           return;
         }

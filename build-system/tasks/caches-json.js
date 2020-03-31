@@ -31,7 +31,7 @@ const cachesJsonPath = 'build-system/global-configs/caches.json';
  */
 async function cachesJson() {
   return gulp.src([cachesJsonPath]).pipe(
-    through2.obj(function(file) {
+    through2.obj(function (file) {
       let obj;
       try {
         obj = JSON.parse(file.contents.toString());
