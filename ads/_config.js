@@ -852,6 +852,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'rakutenunifiedads': {
+    prefetch: 'https://s-cdn.rmp.rakuten.co.jp/js/amp.js',
+    renderStartImplemented: true,
+  },
+
   'rbinfox': {
     renderStartImplemented: true,
   },
