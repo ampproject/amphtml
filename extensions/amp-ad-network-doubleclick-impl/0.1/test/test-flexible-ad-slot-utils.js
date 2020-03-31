@@ -17,7 +17,7 @@ import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {getFlexibleAdSlotData} from '../flexible-ad-slot-utils';
 
-describes.realWin('#getFlexibleAdSlotData', {amp: true}, env => {
+describes.realWin('#getFlexibleAdSlotData', {amp: true}, (env) => {
   let doc, win;
   beforeEach(() => {
     win = env.win;
@@ -143,7 +143,7 @@ describes.realWin('#getFlexibleAdSlotData', {amp: true}, env => {
   });
 
   it('should return msz=-1 for non-fixed layouts', () => {
-    ['fill', 'fixed-height', 'fluid', 'responsive'].forEach(layout => {
+    ['fill', 'fixed-height', 'fluid', 'responsive'].forEach((layout) => {
       const parent = document.createElement('div');
       parent.setAttribute('width', 300);
       parent.setAttribute('layout', 'fixed');

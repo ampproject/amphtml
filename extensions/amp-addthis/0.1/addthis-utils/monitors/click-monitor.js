@@ -100,7 +100,7 @@ export class ClickMonitor {
    */
   getIframeClickString() {
     return Object.keys(this.iframeClickMap_)
-      .map(key => {
+      .map((key) => {
         return `${key}|${this.iframeClickMap_[key]}`;
       })
       .join(',');

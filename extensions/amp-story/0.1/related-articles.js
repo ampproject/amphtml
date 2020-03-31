@@ -100,11 +100,11 @@ function buildArticleFromJson_(articleJson) {
 export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (Object.keys(
     opt_articleSetsResponse || {}
-  ).map(headingKey => {
+  ).map((headingKey) => {
     const articleSet = {
       articles: opt_articleSetsResponse[headingKey]
         .map(buildArticleFromJson_)
-        .filter(valid => !!valid),
+        .filter((valid) => !!valid),
     };
 
     if (headingKey.trim().length) {
@@ -123,7 +123,7 @@ export function parseArticlesToClassicApi(bookendComponents) {
   const articleSet = {};
   articleSet.articles = [];
 
-  bookendComponents.forEach(component => {
+  bookendComponents.forEach((component) => {
     if (component['type'] == 'small') {
       articleSet.articles.push(buildArticleFromJson_(component));
     } else if (NEW_COMPONENTS.includes(component['type'])) {

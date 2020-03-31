@@ -73,7 +73,7 @@ describes.realWin(
     },
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
 
     beforeEach(() => {
@@ -173,7 +173,7 @@ describes.realWin(
           false /** waitForLayout */
         );
         await allowConsoleError(() =>
-          element.build().catch(err => {
+          element.build().catch((err) => {
             expect(err.message).to.include(
               'amp-next-page Page list expected an array, found: object: [object Object]'
             );
@@ -328,7 +328,7 @@ describes.realWin(
       });
 
       it('should not fetch the next document before scrolling', async () => {
-        [1, 2].forEach(i => {
+        [1, 2].forEach((i) => {
           expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
             VisibilityState.PRERENDER
@@ -457,11 +457,13 @@ describes.realWin(
 
         // Adds the two documents coming from Document 1's recommendations
         expect(service.pages_.length).to.equal(5);
-        expect(service.pages_.some(page => page.title == 'Title 3')).to.be.true;
-        expect(service.pages_.some(page => page.title == 'Title 4')).to.be.true;
+        expect(service.pages_.some((page) => page.title == 'Title 3')).to.be
+          .true;
+        expect(service.pages_.some((page) => page.title == 'Title 4')).to.be
+          .true;
         // Avoids loops (ignores previously inserted page)
         expect(
-          service.pages_.filter(page => page.title == 'Title 2').length
+          service.pages_.filter((page) => page.title == 'Title 2').length
         ).to.equal(1);
       });
 
@@ -645,17 +647,9 @@ describes.realWin(
         const templateRenderStub = env.sandbox
           .stub(service.templates_, 'findAndRenderTemplate')
           .onFirstCall()
-          .resolves(
-            html`
-              <span>Rendered 1</span>
-            `
-          )
+          .resolves(html` <span>Rendered 1</span> `)
           .onSecondCall()
-          .resolves(
-            html`
-              <span>Rendered 2</span>
-            `
-          );
+          .resolves(html` <span>Rendered 2</span> `);
 
         await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
         expect(templateRenderStub).to.have.been.calledWith(
@@ -711,11 +705,7 @@ describes.realWin(
         env.sandbox.stub(service, 'getViewportsAway_').returns(0);
         const templateRenderStub = env.sandbox
           .stub(service.templates_, 'findAndRenderTemplate')
-          .resolves(
-            html`
-              <span>Rendered</span>
-            `
-          );
+          .resolves(html` <span>Rendered</span> `);
 
         await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
         expect(templateRenderStub).to.have.been.calledWith(

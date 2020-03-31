@@ -41,7 +41,7 @@ describes.realWin(
       extensions: [],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lastSizeChangeAttempt;
     let element;
@@ -66,7 +66,7 @@ describes.realWin(
       };
       const storage = await Services.storageForDoc(doc);
       storageContent = {};
-      env.sandbox.stub(storage, 'get').callsFake(key => {
+      env.sandbox.stub(storage, 'get').callsFake((key) => {
         return Promise.resolve(storageContent[key]);
       });
       env.sandbox.stub(storage, 'set').callsFake((key, value) => {
@@ -183,7 +183,7 @@ describes.realWin(
       });
     });
 
-    describe('attemptChangeSize', () => {
+    describe('attemptToMatchResponsiveHeight', () => {
       it(`should attempt to set the right size for data-auto-format="${ADSENSE_RSPV_TAG}" without height fix experiment`, async () => {
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
@@ -192,7 +192,7 @@ describes.realWin(
           'width': '100vw',
         });
 
-        await state.attemptChangeSize();
+        await state.attemptToMatchResponsiveHeight();
 
         expect(lastSizeChangeAttempt).to.be.deep.equal({
           height: 300,
@@ -214,7 +214,7 @@ describes.realWin(
           'width': '100vw',
         });
 
-        await state.attemptChangeSize();
+        await state.attemptToMatchResponsiveHeight();
 
         expect(lastSizeChangeAttempt).to.be.deep.equal({
           height: 313,
@@ -230,7 +230,7 @@ describes.realWin(
           'width': '100vw',
         });
 
-        await state.attemptChangeSize();
+        await state.attemptToMatchResponsiveHeight();
 
         expect(lastSizeChangeAttempt).to.be.deep.equal({
           height: 1386,

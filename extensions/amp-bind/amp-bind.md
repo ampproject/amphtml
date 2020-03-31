@@ -991,7 +991,7 @@ Change the `width` and `height` using the `[width]` and `[height]` attributes.
 
 **Accessibility states and properties**
 
-Use to dynamically update information available to assistive technologies, such as screen readers. All `[aria-*]` and `[data-*]` are bindable. See the [full list here](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties).
+Use to dynamically update information available to assistive technologies, such as screen readers. [All `[aria-*]` attributes](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties) are bindable.
 
 **AMP Component specific and HTML attributes**
 
@@ -1271,6 +1271,8 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 [/filter] <!-- formats="email" -->
 
+[filter formats="websites, ads"]
+
 **`<source>`**
 
 - `[src]`
@@ -1285,6 +1287,8 @@ See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/W
 - [srclang]
 
 See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
+
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="websites, ads"]
 
@@ -1411,7 +1415,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
 
 ### Debugging State
 
-Use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console. To make this work, you need to enable the [development mode](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/#browser-developer-console).
 
 ### Expression grammar
 

@@ -26,7 +26,7 @@
 // Bad:
 // const [b] = value;
 // function bad([b]) {}
-module.exports = function(context) {
+module.exports = function (context) {
   function isAllowed(node) {
     const {parent} = node;
     if (parent.type !== 'VariableDeclarator') {
@@ -62,7 +62,7 @@ module.exports = function(context) {
   }
 
   return {
-    ArrayPattern: function(node) {
+    ArrayPattern: function (node) {
       if (isAllowed(node)) {
         return;
       }
