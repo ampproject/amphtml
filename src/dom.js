@@ -83,7 +83,7 @@ export function waitForChild(parent, checkFunc, callback) {
  * @return {!Promise}
  */
 export function waitForChildPromise(parent, checkFunc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     waitForChild(parent, checkFunc, resolve);
   });
 }
@@ -103,7 +103,7 @@ export function waitForBodyOpen(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyOpenPromise(doc) {
-  return new Promise(resolve => waitForBodyOpen(doc, resolve));
+  return new Promise((resolve) => waitForBodyOpen(doc, resolve));
 }
 
 /**
@@ -285,7 +285,7 @@ export function closestAncestorElementBySelector(element, selector) {
     return element.closest(selector);
   }
 
-  return closest(element, el => {
+  return closest(element, (el) => {
     return matches(el, selector);
   });
 }
@@ -319,7 +319,7 @@ export function ancestorElements(child, predicate) {
 export function ancestorElementsByTag(child, tagName) {
   assertIsName(tagName);
   tagName = tagName.toUpperCase();
-  return ancestorElements(child, el => {
+  return ancestorElements(child, (el) => {
     return el.tagName == tagName;
   });
 }
@@ -418,7 +418,7 @@ export function childElementByAttr(parent, attr) {
  */
 export function lastChildElementByAttr(parent, attr) {
   assertIsName(attr);
-  return lastChildElement(parent, el => {
+  return lastChildElement(parent, (el) => {
     return el.hasAttribute(attr);
   });
 }
@@ -554,7 +554,7 @@ export function getDataParamsFromAttributes(
   opt_computeParamNameFunc,
   opt_paramPattern
 ) {
-  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;

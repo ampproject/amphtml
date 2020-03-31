@@ -36,7 +36,7 @@ function touchDirs() {
     path.join(CONTROL_CACHE_PATH, 'v0'),
     EXPERIMENT_CACHE_PATH,
     path.join(EXPERIMENT_CACHE_PATH, 'v0'),
-  ].forEach(dirPath => {
+  ].forEach((dirPath) => {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath);
     }
@@ -71,8 +71,8 @@ function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
   return fetch(url)
-    .then(response => response.text())
-    .then(document => {
+    .then((response) => response.text())
+    .then((document) => {
       const filepath = urlToCachePath(url, version);
       fs.writeFileSync(filepath, document);
       return filepath.split(`performance/cache/${version}/`)[1];

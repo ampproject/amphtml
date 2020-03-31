@@ -96,7 +96,7 @@ export class AmpAnimation extends AMP.BaseElement {
       childElementByTag(this.element, 'script'),
       '"<script type=application/json>" must be present'
     );
-    this.configJson_ = tryParseJson(scriptElement.textContent, error => {
+    this.configJson_ = tryParseJson(scriptElement.textContent, (error) => {
       throw user().createError('failed to parse animation script', error);
     });
 
@@ -145,7 +145,7 @@ export class AmpAnimation extends AMP.BaseElement {
       ampdoc.onVisibilityChanged(() => {
         this.setVisible_(ampdoc.isVisible());
       });
-      this.getViewport().onResize(e => {
+      this.getViewport().onResize((e) => {
         if (e.relayoutAll) {
           this.onResize_();
         }
@@ -440,7 +440,7 @@ export class AmpAnimation extends AMP.BaseElement {
       this.runnerPromise_ = this.createRunner_(
         opt_args,
         opt_positionObserverData
-      ).then(runner => {
+      ).then((runner) => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -483,8 +483,8 @@ export class AmpAnimation extends AMP.BaseElement {
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
       .configJson_);
-    const args =
-      /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args || null);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
+      null);
 
     // Ensure polyfill is installed.
     installWebAnimationsIfNecessary(this.win);
@@ -535,7 +535,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerElement(TAG, AmpAnimation);
   AMP.registerServiceForDoc('web-animation', WebAnimationService);
 });

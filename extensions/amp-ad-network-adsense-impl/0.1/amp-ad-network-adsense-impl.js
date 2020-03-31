@@ -186,7 +186,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return ResponsiveState.maybeUpgradeToResponsive(
       this.element,
       this.getAdClientId_()
-    ).then(state => {
+    ).then((state) => {
       if (state != null) {
         this.responsiveState_ = state;
       }
@@ -224,7 +224,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
+    Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
   }
@@ -349,11 +349,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)
       .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch(unusedErr => {
+      .catch((unusedErr) => {
         // On error/timeout, proceed.
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
-    return identityPromise.then(identity => {
+    return identityPromise.then((identity) => {
       return googleAdUrl(
         this,
         ADSENSE_BASE_URL,
@@ -550,7 +550,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.parentElement &&
       this.element.parentElement.tagName == 'AMP-STICKY-AD'
     ) {
-      const stickyMsgListener = event => {
+      const stickyMsgListener = (event) => {
         if (
           getData(event) == 'fill_sticky' &&
           event['source'] == this.iframe.contentWindow
@@ -567,6 +567,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
 });

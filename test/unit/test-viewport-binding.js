@@ -23,7 +23,7 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {whenDocumentReady} from '../../src/document-ready';
 
-describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
@@ -216,7 +216,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, (env) => {
   let binding;
   let win;
   let ampdoc;
@@ -241,21 +241,9 @@ describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
     binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
   });
-
-  it('should reset overscroll on X-axis', () => {
-    win.scrollTo(1, 0);
-    expect(win.pageXOffset).to.equal(1);
-    return new Promise(resolve => {
-      win.addEventListener('scroll', () => {
-        if (win.pageXOffset == 0) {
-          resolve();
-        }
-      });
-    });
-  });
 });
 
-describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
+describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, (env) => {
   let win;
   let binding;
   let vsync;
@@ -508,7 +496,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should call scroll event', () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       binding.onScroll(resolve);
       binding.wrapper_.scrollTop = 11;
     }).then(() => {

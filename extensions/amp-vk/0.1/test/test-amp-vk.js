@@ -38,7 +38,7 @@ describes.realWin(
       extensions: ['amp-vk'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

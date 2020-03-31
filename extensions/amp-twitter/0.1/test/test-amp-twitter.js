@@ -25,7 +25,7 @@ describes.realWin(
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
-  env => {
+  (env) => {
     const tweetId = '585110598171631616';
     let win, doc;
 

@@ -27,13 +27,13 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      return buildAmpAutocomplete().then(ampAutocomplete => {
+      return buildAmpAutocomplete().then((ampAutocomplete) => {
         impl = ampAutocomplete;
       });
     });
@@ -962,7 +962,7 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return impl.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch((e) => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;

@@ -41,8 +41,8 @@ export class AmpStoryPlayerManager {
       return;
     }
 
-    const intersectingCallback = entries => {
-      entries.forEach(entry => {
+    const intersectingCallback = (entries) => {
+      entries.forEach((entry) => {
         if (!entry.isIntersecting) {
           return;
         }

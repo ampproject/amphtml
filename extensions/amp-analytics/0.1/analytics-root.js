@@ -79,11 +79,11 @@ export class AnalyticsRoot {
       // TODO: Using the visibility service and apply it for all tracking types
       const promise = HostServices.visibilityForDoc(this.ampdoc);
       this.usingHostAPIPromise_ = promise
-        .then(visibilityService => {
+        .then((visibilityService) => {
           this.hostVisibilityService_ = visibilityService;
           return true;
         })
-        .catch(error => {
+        .catch((error) => {
           dev().fine(
             TAG,
             'VisibilityServiceError - fallback=' + error.fallback
@@ -243,7 +243,7 @@ export class AnalyticsRoot {
       return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(
           user().assertElement(
             this.getHostElement(),
@@ -293,7 +293,7 @@ export class AnalyticsRoot {
         const selector = selectors[i];
         try {
           nodeList = this.getRoot().querySelectorAll(selector);
-        } catch {
+        } catch (e) {
           userAssert(false, `Invalid query selector ${selector}`);
         }
         for (let j = 0; j < nodeList.length; j++) {
@@ -320,10 +320,12 @@ export class AnalyticsRoot {
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
   getAmpElement(context, selector, selectionMethod) {
-    return this.getElement(context, selector, selectionMethod).then(element => {
-      this.verifyAmpElements_([element], selector);
-      return element;
-    });
+    return this.getElement(context, selector, selectionMethod).then(
+      (element) => {
+        this.verifyAmpElements_([element], selector);
+        return element;
+      }
+    );
   }
 
   /**
@@ -344,7 +346,7 @@ export class AnalyticsRoot {
         !selectionMethod,
         'Cannot have selectionMethod defined with an array selector.'
       );
-      return this.getElementsByQuerySelectorAll_(selectors).then(elements =>
+      return this.getElementsByQuerySelectorAll_(selectors).then((elements) =>
         elements.filter((element, index) => elements.indexOf(element) === index)
       );
     }
@@ -352,7 +354,7 @@ export class AnalyticsRoot {
       context,
       selectors[0],
       selectionMethod
-    ).then(element => [element]);
+    ).then((element) => [element]);
   }
 
   /**
@@ -383,7 +385,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(listener, context, selector, selectionMethod = null) {
-    return event => {
+    return (event) => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
         // cannot be retargeted across the boundary of the embed.

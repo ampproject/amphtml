@@ -109,13 +109,13 @@ export class AnalyticsConfig {
 
     return Services.xhrFor(toWin(this.win_))
       .fetchJson(vendorUrl, {ampCors: false})
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(
-        jsonValue => {
+        (jsonValue) => {
           this.predefinedConfig_[type] = jsonValue;
           dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
         },
-        err => {
+        (err) => {
           user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
         }
       );
@@ -141,20 +141,20 @@ export class AnalyticsConfig {
     }
     return Services.urlReplacementsForDoc(this.element_)
       .expandUrlAsync(remoteConfigUrl)
-      .then(expandedUrl => {
+      .then((expandedUrl) => {
         remoteConfigUrl = expandedUrl;
         return Services.xhrFor(toWin(this.win_)).fetchJson(
           remoteConfigUrl,
           fetchConfig
         );
       })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(
-        jsonValue => {
+        (jsonValue) => {
           this.remoteConfig_ = jsonValue;
           dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
         },
-        err => {
+        (err) => {
           user().error(
             TAG,
             'Error loading remote config: ',
@@ -212,19 +212,19 @@ export class AnalyticsConfig {
       }
       return Services.urlReplacementsForDoc(this.element_)
         .expandUrlAsync(configRewriterUrl)
-        .then(expandedUrl => {
+        .then((expandedUrl) => {
           return Services.xhrFor(toWin(this.win_)).fetchJson(
             expandedUrl,
             fetchConfig
           );
         })
-        .then(res => res.json())
+        .then((res) => res.json())
         .then(
-          jsonValue => {
+          (jsonValue) => {
             this.config_ = this.mergeConfigs_(jsonValue);
             dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
           },
-          err => {
+          (err) => {
             user().error(
               TAG,
               'Error rewriting configuration: ',
@@ -293,7 +293,7 @@ export class AnalyticsConfig {
     const mergedConfig = pubVarGroups || dict();
     deepMerge(mergedConfig, vendorVarGroups);
 
-    Object.keys(mergedConfig).forEach(groupName => {
+    Object.keys(mergedConfig).forEach((groupName) => {
       const group = mergedConfig[groupName];
       if (!group['enabled']) {
         // Any varGroups must be explicitly enabled.
@@ -301,7 +301,7 @@ export class AnalyticsConfig {
       }
 
       const groupPromise = this.shallowExpandObject(this.element_, group).then(
-        expandedGroup => {
+        (expandedGroup) => {
           // This is part of the user config and should not be sent.
           delete expandedGroup['enabled'];
           // Merge all groups into single `vars` object.
@@ -466,13 +466,13 @@ export class AnalyticsConfig {
     const urlReplacements = Services.urlReplacementsForDoc(element);
     const bindings = variableServiceForDoc(element).getMacros(element);
 
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       keys.push(key);
       const expanded = urlReplacements.expandStringAsync(obj[key], bindings);
       expansionPromises.push(expanded);
     });
 
-    return Promise.all(expansionPromises).then(expandedValues => {
+    return Promise.all(expansionPromises).then((expandedValues) => {
       keys.forEach((key, i) => (expandedObj[key] = expandedValues[i]));
       return expandedObj;
     });

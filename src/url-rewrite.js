@@ -151,7 +151,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
       user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
-    return srcset.stringify(url =>
+    return srcset.stringify((url) =>
       resolveImageUrlAttr(url, baseUrl, isProxyHost)
     );
   }
