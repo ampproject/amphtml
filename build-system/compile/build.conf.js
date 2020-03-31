@@ -182,14 +182,13 @@ function plugins({
   if (isSinglePass) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
-  let imports = {...experimentRemovedImports};
-  if (isEsmBuild) {
-    imports = {
-      ...imports,
-      ...esmRemovedImports,
-      ...validTransformedRemovableImports,
-    };
-  }
+  const imports = isEsmBuild
+    ? {
+        ...experimentRemovedImports,
+        ...esmRemovedImports,
+        ...validTransformedRemovableImports,
+      }
+    : {...experimentRemovedImports};
   applied.push(['filter-imports', {imports}]);
   if (isEsmBuild) {
     applied.push(localPlugin('transform-function-declarations'));

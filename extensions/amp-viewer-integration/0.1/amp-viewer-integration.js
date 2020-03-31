@@ -91,7 +91,8 @@ export class AmpViewerIntegration {
     }
 
     if (MOVE_FIXED_LAYER) {
-      this.initFixedLayer_(ampdoc);
+      const viewport = Services.viewportForDoc(ampdoc);
+      viewport.createFixedLayer(FixedLayer);
     }
 
     if (this.isWebView_ || this.isHandShakePoll_) {
@@ -274,15 +275,6 @@ export class AmpViewerIntegration {
    */
   initKeyboardHandler_(messaging) {
     new KeyboardHandler(this.win, messaging);
-  }
-
-  /**
-   * @param {!AmpDoc} ampdoc
-   * @private
-   */
-  initFixedLayer_(ampdoc) {
-    const viewport = Services.viewportForDoc(ampdoc);
-    viewport.createFixedLayer(FixedLayer);
   }
 }
 
