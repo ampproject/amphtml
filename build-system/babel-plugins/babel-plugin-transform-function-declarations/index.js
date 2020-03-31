@@ -68,7 +68,7 @@ module.exports = function ({types: t}) {
     },
 
     // If the FunctionDeclaration identifier is used a manner besides a CallExpression, bail.
-    referencesAreOnlyPathExpressions(path) {
+    referencesAreOnlyCallExpressions(path) {
       const {name} = path.get('id').node;
       const binding = path.scope.getBinding(name);
       return !binding.referencePaths.every((p) =>
