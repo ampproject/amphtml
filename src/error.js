@@ -27,7 +27,6 @@ import {dict} from './utils/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
@@ -63,6 +62,12 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
  * @const {number}
  */
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
+
+/**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const NEW_ERROR_REPORT_URL_FREQ = 0.2;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -338,7 +343,8 @@ function onError(message, filename, line, col, error) {
       try {
         return reportErrorToServerOrViewer(
           this,
-          /** @type {!JsonObject} */ (data)
+          /** @type {!JsonObject} */
+          (data)
         ).catch(() => {
           // catch async errors to avoid recursive errors.
         });
@@ -366,7 +372,7 @@ export function reportErrorToServerOrViewer(win, data) {
       const newErrorReportingUrl =
         'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
       const url =
-        IS_ESM || Math.random() < 0.2
+        IS_ESM || Math.random() < NEW_ERROR_REPORT_URL_FREQ
           ? newErrorReportingUrl
           : urls.errorReporting;
       xhr.open('POST', url, true);
