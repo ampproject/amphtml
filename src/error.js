@@ -24,9 +24,15 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
+
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
@@ -361,7 +367,14 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      // Override the errorReportingUrl to test the new error reporting endpoint.
+      const newErrorReportingUrl =
+        'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
+      const url =
+        IS_ESM && isExperimentOn(win, 'error-url')
+          ? newErrorReportingUrl
+          : urls.errorReporting;
+      xhr.open('POST', url, true);
       xhr.send(JSON.stringify(data));
     }
   });
