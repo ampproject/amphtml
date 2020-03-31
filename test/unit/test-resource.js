@@ -106,7 +106,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should build if element is currently building', () => {
     elementMock.expects('isBuilt').returns(false).once();
     elementMock.expects('isBuilding').returns(true).once();
-    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('isUpgraded').returns(true).once();
     elementMock.expects('build').returns(Promise.resolve()).once();
     const r = new Resource(2, element, resources);
     expect(r.isBuilding()).to.be.true;
