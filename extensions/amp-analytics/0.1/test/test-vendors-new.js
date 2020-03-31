@@ -223,17 +223,20 @@ function getAnalyticsTag(doc, vendor) {
   return analytics;
 }
 
-// Cache firstChild before append div to doc
-const {firstChild} = top.document.body;
+let outputBox;
 
 function writeOutput(vendor, output) {
+  if (!outputBox) {
+    outputBox = top.document.createElement('div');
+    top.document.body.appendChild(outputBox);
+  }
   const vendorDiv = top.document.createElement('h3');
   vendorDiv.textContent = vendor;
-  top.document.body.insertBefore(vendorDiv, firstChild);
+  outputBox.appendChild(vendorDiv);
 
   const out = top.document.createElement('div');
   out.textContent = JSON.stringify(output, null, '  ');
-  top.document.body.insertBefore(out, firstChild);
+  outputBox.appendChild(out);
 }
 
 /**
