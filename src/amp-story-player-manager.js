@@ -32,9 +32,8 @@ export class AmpStoryPlayerManager {
   /**
    * Calls layoutCallback on the player when it is close to the viewport.
    * @param {!AmpStoryPlayer} playerImpl
-   * @private
    */
-  layoutPlayer_(playerImpl) {
+  layoutWhenVisible(playerImpl) {
     if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
       this.layoutFallback_(playerImpl);
       return;
@@ -87,20 +86,6 @@ export class AmpStoryPlayerManager {
       .top;
     if (this.win_./*OK*/ innerHeight * 2 > playerTop) {
       playerImpl.layoutCallback();
-    }
-  }
-
-  /**
-   * Builds and layouts the players when appropiate.
-   * @public
-   */
-  loadPlayers() {
-    const doc = this.win_.document;
-    const players = doc.getElementsByTagName('amp-story-player');
-    for (let i = 0; i < players.length; i++) {
-      const player = players[i];
-      player.buildCallback();
-      this.layoutPlayer_(player);
     }
   }
 }
