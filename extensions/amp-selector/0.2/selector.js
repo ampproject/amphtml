@@ -92,9 +92,7 @@ export function Selector(props) {
         selectOption,
       }}
     >
-      {/** TODO: Replace options with props.children when
-       * AMP layer supports manipulating 'children' */}
-      {props['options']}
+      {props['children']}
     </SelectorContext.Provider>
   );
 }

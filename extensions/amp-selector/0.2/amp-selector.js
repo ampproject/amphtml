@@ -100,10 +100,7 @@ class AmpSelector extends PreactBaseElement {
       this.mutateProps(dict({'value': value}));
     };
     return dict({
-      // TODO: "options" should be "children",
-      // but neither "passthrough" or "children"
-      // allow for this kind of intervention yet
-      'options': children,
+      'children': children,
       'value': value,
       'onChange': onChange,
     });
@@ -175,7 +172,7 @@ class AmpSelector extends PreactBaseElement {
 AmpSelector.Component = Selector;
 
 /** @override */
-AmpSelector.passthrough = true;
+AmpSelector.attachShadow = true;
 
 /** @override */
 AmpSelector.props = {
