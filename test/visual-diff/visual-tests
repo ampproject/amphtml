@@ -210,26 +210,25 @@
       "loading_complete_selectors": ["video.i-amphtml-replaced-content"]
     },
     {
-      // TODO(#27456, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4656426
-      "flaky": true,
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar.amp.html",
       "name": "amp-sidebar",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ol.amp.html",
       "name": "amp-sidebar toolbar > ol",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
-      // TODO(#27456, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4637948
-      "flaky": true,
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
       "name": "amp-sidebar toolbar > ul",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
       // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
