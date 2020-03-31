@@ -42,10 +42,12 @@ async function validatorJava() {
   execOrDie(
     commands
       .concat([
+        'echo travis_fold:start:java_validator_build',
         'bazel run //:fetchAMPResources',
         'bazel build //:amphtml_validator_java_proto_lib',
         'bazel run //:copyValidatorJavaSource',
         'bazel build //:amphtml_validator_lib',
+        'echo travis_fold:end:java_validator_build',
         'bazel run //:amphtml_validator_test',
       ])
       .join(' && ')
