@@ -18,7 +18,7 @@ const DEBUG = false;
 
 // Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
 // See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   const BAIL_OUT_CONDITIONS = {
     // If this isn't a FunctionDeclaration, bail out on modification.
     isNotFunction(path) {
@@ -71,7 +71,7 @@ module.exports = function({types: t}) {
     referencesAreOnlyPathExpressions(path) {
       const {name} = path.get('id').node;
       const binding = path.scope.getBinding(name);
-      return !binding.referencePaths.every(p =>
+      return !binding.referencePaths.every((p) =>
         p.parentPath.isCallExpression({callee: p.node})
       );
     },
@@ -121,7 +121,7 @@ module.exports = function({types: t}) {
         }
 
         const usableBlock = path.findParent(
-          path => path.isBlockStatement() || path.isProgram()
+          (path) => path.isBlockStatement() || path.isProgram()
         );
         if (usableBlock) {
           usableBlock.unshiftContainer('body', createVariableDeclaration(path));
