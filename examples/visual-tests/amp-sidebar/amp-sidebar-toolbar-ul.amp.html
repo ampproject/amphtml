@@ -44,6 +44,12 @@
       width: 50vw;
     }
 
+    /* Using invalid AMP to target the sidebar. 
+    Disable transforms for visual diff test */
+    .i-amphtml-sidebar-mask, amp-sidebar[side] {
+      transform: none;
+    }
+
     #mybody section{
       background: red;
     }
@@ -68,7 +74,7 @@
 
   <h1>AMP Sidebar Example</h1>
   <button on='tap:sidebar.toggle'
-    aria-label="Click to toglge sidebar">
+    aria-label="Click to toggle sidebar">
     Toggle sidebar
   </button>
   <div id="target-id"></div>
@@ -97,5 +103,8 @@
       </div>
     </div>
   </article>
+
+  <div id="left-target-id">
+  </div>
 </body>
 </html>
