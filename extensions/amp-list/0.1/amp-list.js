@@ -508,7 +508,7 @@ export class AmpList extends AMP.BaseElement {
    * For amp-lists with 'single-item' enabled, we should not specify the
    * role of 'list' on the container or listitem on the children as it
    * causes screen readers to read an extra nested list with one item
-   * @param {!Element} element
+   * @param {!Node} element
    * @param {string} value
    * @private
    */
