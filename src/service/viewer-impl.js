@@ -25,6 +25,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
+import {endsWith, startsWith} from '../string';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -38,7 +39,6 @@ import {isIframed} from '../dom';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {endsWith, startsWith} from '../string';
 import {urls} from '../config';
 
 const TAG_ = 'Viewer';
