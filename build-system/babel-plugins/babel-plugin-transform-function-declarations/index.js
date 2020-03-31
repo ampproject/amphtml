@@ -125,6 +125,9 @@ module.exports = function ({types: t}) {
     (path) => referencesAreOnlyCallExpressions(path, path.get('id').node.name),
   ];
 
+  // If CallExpression names should be exhempt from arrow conversion, denote them here.
+  const EXHEMPTED_EXPRESSION_NAME_REGEXS = [/registerService/];
+
   const EXPRESSION_BAIL_OUT_CONDITIONS = [
     isNotFunction,
     isGenerator,
@@ -132,9 +135,14 @@ module.exports = function ({types: t}) {
     containsArgumentsUsage,
     containsThisExpression,
     (path) => {
-      const insideCallExpression = path.findParent((p) => p.isCallExpression());
-      if (insideCallExpression) {
-        return false;
+      const callExpression = path.findParent((p) => p.isCallExpression());
+      if (callExpression) {
+        const {name} = (callExpression.node && callExpression.node.callee) || {
+          name: null,
+        };
+        return EXHEMPTED_EXPRESSION_NAME_REGEXS.every((regexp) =>
+          regexp.test(name)
+        );
       }
 
       const declarator = path.findParent((p) => p.isVariableDeclarator());
