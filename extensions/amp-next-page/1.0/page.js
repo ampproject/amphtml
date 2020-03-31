@@ -233,7 +233,7 @@ export class Page {
 
     return this.manager_
       .fetchPageDocument(this)
-      .then(content => {
+      .then((content) => {
         this.state_ = PageState.LOADED;
         this.content_ = content;
         this.container_ = this.manager_.createDocumentContainerForPage(
@@ -259,7 +259,7 @@ export class Page {
         /** @type {!Document} */ (devAssert(this.content_)),
         this.is(PageState.PAUSED) /** force */
       )
-      .then(shadowDoc => {
+      .then((shadowDoc) => {
         if (!shadowDoc) {
           this.state_ = PageState.FAILED;
           return;

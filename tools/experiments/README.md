@@ -57,7 +57,7 @@ To prevent race conditions caused from loading the runtime and an inline script 
 
 ```html
 <script>
-  (self.AMP = self.AMP || []).push(function(AMP) {
+  (self.AMP = self.AMP || []).push(function (AMP) {
     AMP.toggleExperiment('my-experiment', true);
   });
 </script>

@@ -19,7 +19,7 @@ import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
 import {Services} from '../../../../src/services';
 
-describes.fakeWin('media-performance-metrics-service', {}, env => {
+describes.fakeWin('media-performance-metrics-service', {}, (env) => {
   let clock;
   let service;
   let tickStub;
@@ -338,7 +338,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   describe('Errors', () => {
-    it('should detect the video as already errored', done => {
+    it('should detect the video as already errored', (done) => {
       const video = win.document.createElement('video');
 
       video.onerror = () => {

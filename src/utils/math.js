@@ -160,7 +160,7 @@ export function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
  * @return {number}
  */
 export function sum(values) {
-  return values.reduce(function(a, b) {
+  return values.reduce(function (a, b) {
     return a + b;
   });
 }

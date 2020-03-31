@@ -25,7 +25,7 @@ import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
+describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
   let impl;
   let element;
 
@@ -248,7 +248,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       );
     });
 
-    Object.keys(RTC_ERROR_ENUM).forEach(errorName => {
+    Object.keys(RTC_ERROR_ENUM).forEach((errorName) => {
       it(`should send correct error value for ${errorName}`, () => {
         const rtcResponseArray = [
           {
@@ -429,14 +429,14 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       expect(customMacros.BKG_STATE()).to.equal(
         this.getAmpDoc().isVisible() ? 'visible' : 'hidden'
       );
-      Object.keys(macros).forEach(macro => {
+      Object.keys(macros).forEach((macro) => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
       return Promise.all([
-        customMacros.ADCID().then(adcid => {
+        customMacros.ADCID().then((adcid) => {
           expect(adcid).to.not.be.null;
         }),
-        customMacros.REFERRER().then(referrer => {
+        customMacros.REFERRER().then((referrer) => {
           expect(referrer).to.equal(env.win.document.referrer);
         }),
       ]);
@@ -455,10 +455,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       let adcid;
-      return customMacros.ADCID().then(adcid1 => {
+      return customMacros.ADCID().then((adcid1) => {
         adcid = adcid1;
         expect(adcid).to.not.be.null;
-        return customMacros.ADCID().then(adcid2 => {
+        return customMacros.ADCID().then((adcid2) => {
           expect(adcid2).to.equal(adcid);
         });
       });
@@ -476,7 +476,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       );
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      return customMacros.ADCID(0).then(adcid => {
+      return customMacros.ADCID(0).then((adcid) => {
         expect(adcid).to.be.undefined;
       });
     });

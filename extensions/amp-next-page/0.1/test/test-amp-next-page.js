@@ -35,7 +35,7 @@ describes.realWin(
       extensions: ['amp-next-page'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let element;
     let nextPage;
@@ -71,7 +71,7 @@ describes.realWin(
           mutator();
           return Promise.resolve();
         });
-      env.sandbox.stub(nextPage, 'mutateElement').callsFake(mutator => {
+      env.sandbox.stub(nextPage, 'mutateElement').callsFake((mutator) => {
         mutator();
         return Promise.resolve();
       });
@@ -83,7 +83,7 @@ describes.realWin(
     });
 
     describe('valid inline config', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         element.innerHTML = `
           <script type="application/json">
             {
@@ -108,7 +108,7 @@ describes.realWin(
         nextPage.buildCallback().then(done);
       });
 
-      it('does not fetch the next document before 3 viewports away', function*() {
+      it('does not fetch the next document before 3 viewports away', function* () {
         const xhrMock = env.sandbox.mock(Services.xhrFor(win));
         xhrMock.expects('fetch').never();
         env.sandbox
@@ -122,7 +122,7 @@ describes.realWin(
         xhrMock.verify();
       });
 
-      it('fetches the next document within 3 viewports away', function*() {
+      it('fetches the next document within 3 viewports away', function* () {
         env.fetchMock.get('*', EXAMPLE_PAGE);
         env.sandbox
           .stub(viewport, 'getClientRectAsync')
@@ -135,7 +135,7 @@ describes.realWin(
         expect(env.fetchMock.done(/\/document1/)).to.be.true;
       });
 
-      it('only fetches the next document once', function*() {
+      it('only fetches the next document once', function* () {
         const xhrMock = env.sandbox.mock(Services.xhrFor(win));
         // Promise which is never resolved.
         xhrMock
@@ -155,7 +155,7 @@ describes.realWin(
         xhrMock.verify();
       });
 
-      it('adds the hidden class to hideSelector elements', function*() {
+      it('adds the hidden class to hideSelector elements', function* () {
         env.fetchMock.get('*', EXAMPLE_PAGE);
 
         const nextPageService = yield getServicePromiseForDoc(
@@ -190,7 +190,7 @@ describes.realWin(
         );
       });
 
-      it('removes amp-analytics tags from child documents', function*() {
+      it('removes amp-analytics tags from child documents', function* () {
         const examplePage = `${EXAMPLE_PAGE}
           <amp-analytics id="analytics1"></amp-analytics>
           <amp-analytics id="analytics2"></amp-analytics>`;
@@ -218,7 +218,7 @@ describes.realWin(
         expect(shadowRoot.getElementById('analytics2')).to.be.null;
       });
 
-      it('blocks documents which resolve to a different origin when fetched', function*() {
+      it('blocks documents which resolve to a different origin when fetched', function* () {
         expectAsyncConsoleError(/ampUrl resolved to a different origin/, 2);
         env.fetchMock.get(/\/document1/, {
           redirectUrl: 'https://othersite.com/article',
@@ -255,7 +255,7 @@ describes.realWin(
         return nextPage.buildCallback().should.be.rejectedWith(error);
       });
 
-      it('fetches remote config when specified in src', function*() {
+      it('fetches remote config when specified in src', function* () {
         const config = {
           pages: [
             {
@@ -348,7 +348,7 @@ describes.realWin(
           '&ecr=1&crui=title&is_amp=3&output=xml';
       });
 
-      it('fetches recommendations from AdSense', function*() {
+      it('fetches recommendations from AdSense', function* () {
         fetchDocumentMock
           .expects('fetchDocument')
           .withExactArgs(win, url, {credentials: 'include'})
@@ -398,7 +398,7 @@ describes.realWin(
         expect(registerSpy.calledWith(element, config)).to.be.true;
       });
 
-      it('makes an unpersonalized request if missing consent', function*() {
+      it('makes an unpersonalized request if missing consent', function* () {
         fetchDocumentMock
           .expects('fetchDocument')
           .withExactArgs(win, url, {credentials: 'omit'})
@@ -407,7 +407,7 @@ describes.realWin(
         yield nextPage.buildCallback();
       });
 
-      it('filters pages with visible_urls from different origins', function*() {
+      it('filters pages with visible_urls from different origins', function* () {
         fetchDocumentMock
           .expects('fetchDocument')
           .withExactArgs(win, url, {credentials: 'include'})
@@ -483,7 +483,7 @@ describes.realWin(
         expect(registerSpy.calledWith(element, config)).to.be.true;
       });
 
-      it('falls back to inline config pages if the AdSense request fails', function*() {
+      it('falls back to inline config pages if the AdSense request fails', function* () {
         const config = {
           pages: [
             {
@@ -513,7 +513,7 @@ describes.realWin(
     });
 
     describe('manual visibility management', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         element.innerHTML = `
           <script type="application/json">
             {
@@ -538,7 +538,7 @@ describes.realWin(
         nextPage.buildCallback().then(done);
       });
 
-      it('defaults to the prerender visibility state for the next document', function*() {
+      it('defaults to the prerender visibility state for the next document', function* () {
         env.fetchMock.get('*', EXAMPLE_PAGE);
 
         const nextPageService = yield getServicePromiseForDoc(

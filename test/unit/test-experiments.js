@@ -31,7 +31,7 @@ import {createElementWithAttributes} from '../../src/dom';
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};
   return {
-    getItem: key => (key in state ? state[key] : null),
+    getItem: (key) => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
   };
 }
@@ -443,7 +443,7 @@ describe('toggleExperiment', () => {
   });
 });
 
-describes.realWin('meta override', {}, env => {
+describes.realWin('meta override', {}, (env) => {
   let win;
 
   beforeEach(() => {
@@ -479,7 +479,7 @@ describes.realWin('meta override', {}, env => {
   });
 });
 
-describes.fakeWin('url override', {}, env => {
+describes.fakeWin('url override', {}, (env) => {
   let win;
 
   beforeEach(() => {
@@ -659,7 +659,7 @@ describe('experiment branch tests', () => {
       window.sandbox.win.trafficEligible = true;
       const experimentInfo = {
         'expt_0': {
-          isTrafficEligible: win => {
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
@@ -676,7 +676,7 @@ describe('experiment branch tests', () => {
       window.sandbox.win.trafficEligible = false;
       const experimentInfo = {
         'expt_0': {
-          isTrafficEligible: win => {
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
@@ -710,7 +710,7 @@ describe('experiment branch tests', () => {
         window.sandbox.win.trafficEligible = false;
         const experimentInfo = {
           'expt_0': {
-            isTrafficEligible: win => {
+            isTrafficEligible: (win) => {
               return win.trafficEligible;
             },
             branches: ['0_0', '0_1'],

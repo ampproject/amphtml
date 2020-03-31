@@ -28,7 +28,7 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(
+exports.extension = function (
   name,
   loadPriority,
   intermediateDeps,

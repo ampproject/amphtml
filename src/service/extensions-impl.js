@@ -297,7 +297,7 @@ export class Extensions {
    * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
-    return this.preloadExtension(elementName).then(extension => {
+    return this.preloadExtension(elementName).then((extension) => {
       const element = devAssert(
         extension.elements[elementName],
         'Element not found: %s',
@@ -319,7 +319,7 @@ export class Extensions {
   addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
-    this.addDocFactory(ampdoc => {
+    this.addDocFactory((ampdoc) => {
       this.installElement_(ampdoc, name, implementationClass, css);
     });
   }
@@ -376,7 +376,7 @@ export class Extensions {
         serviceClass: implementationClass,
       })
     );
-    this.addDocFactory(ampdoc => {
+    this.addDocFactory((ampdoc) => {
       registerServiceBuilderForDoc(
         ampdoc,
         name,
@@ -420,7 +420,7 @@ export class Extensions {
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
     const promises = [];
-    extensionIds.forEach(extensionId => {
+    extensionIds.forEach((extensionId) => {
       promises.push(this.installExtensionInDoc(ampdoc, extensionId));
     });
     return Promise.all(promises);
@@ -436,7 +436,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
       ampdoc.declareExtension(extensionId);
-      holder.docFactories.forEach(factory => {
+      holder.docFactories.forEach((factory) => {
         try {
           factory(ampdoc);
         } catch (e) {
@@ -611,7 +611,7 @@ export class Extensions {
  * @param {!Window} win
  */
 export function stubLegacyElements(win) {
-  LEGACY_ELEMENTS.forEach(name => {
+  LEGACY_ELEMENTS.forEach((name) => {
     stubElementIfNotKnown(win, name);
   });
 }

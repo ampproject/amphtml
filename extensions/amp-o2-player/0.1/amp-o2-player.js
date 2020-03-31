@@ -143,6 +143,6 @@ class AmpO2Player extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-o2-player', '0.1', AMP => {
+AMP.extension('amp-o2-player', '0.1', (AMP) => {
   AMP.registerElement('amp-o2-player', AmpO2Player);
 });

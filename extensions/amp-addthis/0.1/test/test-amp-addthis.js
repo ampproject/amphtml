@@ -41,7 +41,7 @@ describes.realWin(
       extensions: ['amp-addthis'],
     },
   },
-  env => {
+  (env) => {
     const configManager = getConfigManager();
     const pubId = 'ra-5988ef04ee1db125';
     const widgetId = '29nf';
@@ -73,7 +73,7 @@ describes.realWin(
       if (configuration.productCode) {
         elementAttributes['data-product-code'] = configuration.productCode;
       }
-      Object.keys(shareConfig).forEach(key => {
+      Object.keys(shareConfig).forEach((key) => {
         elementAttributes[`data-share-${key}`] = shareConfig[key];
       });
       const at = createElementWithAttributes(
@@ -232,7 +232,7 @@ describes.realWin(
 
       return getAT({pubId, widgetId, shareConfig}).then(({at}) => {
         expect(Object.keys(shareConfig).length).to.equal(4);
-        Object.keys(shareConfig).forEach(key => {
+        Object.keys(shareConfig).forEach((key) => {
           expect(at.getAttribute(`data-share-${key}`)).to.equal(
             shareConfig[key]
           );
@@ -249,7 +249,7 @@ describes.realWin(
       });
     });
 
-    it('registers a view at most once per "session"', done => {
+    it('registers a view at most once per "session"', (done) => {
       const testConfigManager = new ConfigManager();
       let numPendingRequests = 0;
       let numViewsRegistered = 0;
@@ -258,7 +258,7 @@ describes.realWin(
         done();
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -353,7 +353,7 @@ describes.realWin(
       return new Promise((resolve, reject) => {
         const mockIframe = {
           contentWindow: {
-            postMessage: json => {
+            postMessage: (json) => {
               let receivedJSON;
 
               numPendingRequests--;
@@ -532,7 +532,7 @@ describes.realWin(
         'data-attr-counts': 'none',
         'data-attr-numPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal(result);
     });
@@ -542,7 +542,7 @@ describes.realWin(
         'data-attr-csounts': 'none',
         'data-attr-nsumPreferredServices': 5,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -555,7 +555,7 @@ describes.realWin(
         'data-attr-countsFontSize': {},
         'data-attr-desktopPosition': new Function(),
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self)).to.equal('');
     });
@@ -588,7 +588,7 @@ describes.realWin(
         'data-attr-titleFontSize': 1,
         'data-attr-__hideOnHomepage': 1,
       };
-      const getAttribute = key => mock[key];
+      const getAttribute = (key) => mock[key];
       const self = {element: {getAttribute}};
       expect(getWidgetOverload(self).length).to.equal(447);
     });
