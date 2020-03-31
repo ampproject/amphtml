@@ -139,6 +139,9 @@ export class ViewportImpl {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
+    /** @private {?FixedLayer} */
+    this.fixedLayer_ = null;
+
     if (!MOVE_FIXED_LAYER) {
       this.createFixedLayer(FixedLayer);
     }

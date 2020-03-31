@@ -319,7 +319,7 @@ export class ViewportInterface extends Disposable {
 
   /**
    * Create fixed layer from constructor (invoked by viewer integration)
-   * @param {function(new:FixedLayer)} constructor
+   * @param {typeof ../fixed-layer.FixedLayer} constructor
    */
   createFixedLayer(constructor) {}
 }
