@@ -6,4 +6,5 @@ Description:
 Shadow DOM-related polyfills
 
 Local Modifications:
-Stripped to only perform necessary Shadow CSS polyfilling.
+- Stripped to only perform necessary Shadow CSS polyfilling.
+- Shortened License based on intended functionality from build pipeline.

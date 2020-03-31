@@ -110,7 +110,7 @@ export class AmpVideoIntegration {
 
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
-      listenTo(this.win_, e => this.onMessage_(e));
+      listenTo(this.win_, (e) => this.onMessage_(e));
     });
 
     /** @private {boolean} */
@@ -251,14 +251,14 @@ export class AmpVideoIntegration {
    * @private
    */
   listenToJwPlayer_(player) {
-    ['error', 'setupError'].forEach(e => {
+    ['error', 'setupError'].forEach((e) => {
       player.on(e, () => {
         userAssert.apply(null, [false].concat(arguments));
         this.postEvent('error');
       });
     });
 
-    ['adSkipped', 'adComplete', 'adError'].forEach(e => {
+    ['adSkipped', 'adComplete', 'adError'].forEach((e) => {
       player.on(e, () => this.postEvent('ad_end'));
     });
 
@@ -270,11 +270,11 @@ export class AmpVideoIntegration {
       'pause': 'pause',
     };
 
-    Object.keys(redispatchAs).forEach(e => {
+    Object.keys(redispatchAs).forEach((e) => {
       player.on(e, () => this.postEvent(redispatchAs[e]));
     });
 
-    player.on('volume', e => this.onVolumeChange_(e.volume));
+    player.on('volume', (e) => this.onVolumeChange_(e.volume));
 
     this.method('play', () => player.play());
     this.method('pause', () => player.pause());
@@ -298,7 +298,7 @@ export class AmpVideoIntegration {
     player.ready(() => {
       const canplay = 'canplay';
 
-      ['playing', 'pause', 'ended'].forEach(e => {
+      ['playing', 'pause', 'ended'].forEach((e) => {
         player.on(e, () => this.postEvent(e));
       });
 
@@ -426,7 +426,7 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => {
+  listen(win, 'message', (e) => {
     const message = tryParseJson(getData(e));
     if (!message) {
       // only process valid JSON.
@@ -461,7 +461,7 @@ export function adopt(global) {
   const callbacks = (global.AmpVideoIframe = global.AmpVideoIframe || []);
 
   // Rewrite push to execute callbacks are added after adoption.
-  callbacks.push = callback => callback(integration);
+  callbacks.push = (callback) => callback(integration);
 
   // Execute callbacks created before adoption.
   callbacks.forEach(callbacks.push);

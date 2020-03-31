@@ -22,7 +22,7 @@ const EXTRA_URL_PARAM = {
   'analytics': 'amp-analytics-performance-param',
 };
 const ANALYTICS_PARAM = Object.keys(EXTRA_URL_PARAM)
-  .map(key => `${key}=${EXTRA_URL_PARAM[key]}`)
+  .map((key) => `${key}=${EXTRA_URL_PARAM[key]}`)
   .toString();
 const CDN_URL = 'https://cdn.ampproject.org/';
 const CDN_ANALYTICS_REGEXP = /https:\/\/cdn.ampproject.org\/rtv\/\d{15}\/v0\/analytics-vendors\/([\.\-\_0-9A-Za-z]+\.json)/;
@@ -43,7 +43,7 @@ function touchDirs() {
     path.join(CONTROL_CACHE_PATH, 'v0'),
     EXPERIMENT_CACHE_PATH,
     path.join(EXPERIMENT_CACHE_PATH, 'v0'),
-  ].forEach(dirPath => {
+  ].forEach((dirPath) => {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath);
     }
@@ -78,8 +78,8 @@ function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
   return fetch(url)
-    .then(response => response.text())
-    .then(document => {
+    .then((response) => response.text())
+    .then((document) => {
       const filepath = urlToCachePath(url, version);
       fs.writeFileSync(filepath, document);
       return filepath.split(`performance/cache/${version}/`)[1];
@@ -131,7 +131,7 @@ function getFile(filePath) {
 function getHandlerFromUrl(url, handlers) {
   const names = handlers ? Object.keys(handlers) : [];
   const handlerName = names.find(
-    handlerName => handlers[handlerName].urls.indexOf(url) !== -1
+    (handlerName) => handlers[handlerName].urls.indexOf(url) !== -1
   );
   return handlerName
     ? {

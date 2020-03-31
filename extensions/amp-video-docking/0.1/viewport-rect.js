@@ -20,7 +20,7 @@ import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
  * @return {{get: function():T, configurable: boolean, enumerable: boolean}}
  * @template T
  */
-const readonlyGetterProp = get => ({
+const readonlyGetterProp = (get) => ({
   get,
   configurable: false,
   enumerable: true,

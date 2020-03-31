@@ -50,7 +50,7 @@ const dateTimes = [];
  * @return {!Array<string>}
  */
 function getLog(format) {
-  return exec(`git log --format="${format}" ${filePath}`).then(logs =>
+  return exec(`git log --format="${format}" ${filePath}`).then((logs) =>
     logs.trim().split('\n')
   );
 }
@@ -64,7 +64,7 @@ function parseSizeFile(file) {
   const headers = lines[0]
     .trim()
     .split('|')
-    .map(x => x.trim());
+    .map((x) => x.trim());
   let minPos = -1;
   // Find the "min" column which is the closure compiled or the "size" column
   // which was previously babelify compiled file.
@@ -81,8 +81,8 @@ function parseSizeFile(file) {
   lines.shift();
 
   return lines
-    .map(line => {
-      const columns = line.split('|').map(x => x.trim());
+    .map((line) => {
+      const columns = line.split('|').map((x) => x.trim());
       let name = columns[columns.length - 1];
 
       // Older size.txt files contained duplicate entries of the same "entity",
@@ -131,7 +131,7 @@ function parseSizeFile(file) {
         size: `"${reversePrettyBytes(columns[minPos])}"`,
       };
     })
-    .filter(x => !!x);
+    .filter((x) => !!x);
 }
 
 /**
@@ -146,8 +146,8 @@ function mergeTables(dateTimes, tables) {
   const rows = [];
 
   // Aggregate all fields with same file name into an array
-  tables.forEach(table => {
-    table.forEach(field => {
+  tables.forEach((table) => {
+    table.forEach((field) => {
       const {name} = field;
       if (!obj[name]) {
         obj[name] = [];
@@ -162,7 +162,7 @@ function mergeTables(dateTimes, tables) {
   // Populate the headers array with unique file names for row 1
   Object.keys(obj)
     .sort()
-    .forEach(fileName => {
+    .forEach((fileName) => {
       // TODO(erwinm): figure out where this is occurring.
       if (fileName.trim() == '""') {
         return;
@@ -172,7 +172,7 @@ function mergeTables(dateTimes, tables) {
 
   // Populate column A with all the dates we've seen and then
   // populate all other columns with their respective file size if any.
-  dateTimes.forEach(dateTime => {
+  dateTimes.forEach((dateTime) => {
     // Seed array with empty string values
     const row = Array.apply(null, Array(tableHeaders[0].length)).map(
       () => '""'
@@ -228,25 +228,25 @@ function serializeCheckout(logs) {
     const sha = parts.shift();
     const dateTime = parts.join(' ');
 
-    return acc.then(tables => {
+    return acc.then((tables) => {
       // We checkout all the known commits for the file and accumulate
       // all the tables.
       return exec(`git checkout ${sha} ${filePath}`)
         .then(() => {
           return fs.promises.readFile(`${filePath}`);
         })
-        .then(file => {
+        .then((file) => {
           const quotedDateTime = `"${dateTime}"`;
           dateTimes.push(quotedDateTime);
           // We convert the read file string into an Table objects
-          const fields = parseSizeFile(file.toString()).map(field => {
+          const fields = parseSizeFile(file.toString()).map((field) => {
             field.dateTime = quotedDateTime;
             return field;
           });
           tables.push(fields);
           return tables;
         })
-        .catch(e => {
+        .catch((e) => {
           // Ignore if pathspec error. This can happen if the file was
           // deleted in git.
           if (/error: pathspec/.test(e.message)) {
@@ -262,11 +262,11 @@ function serializeCheckout(logs) {
 
 async function csvifySize() {
   const shaAndDate = '%H %ai';
-  return getLog(shaAndDate).then(logs => {
+  return getLog(shaAndDate).then((logs) => {
     // Reverse it from oldest to newest
-    return serializeCheckout(logs.reverse()).then(rows => {
+    return serializeCheckout(logs.reverse()).then((rows) => {
       rows.unshift.apply(rows, tableHeaders);
-      const tbl = rows.map(row => row.join(',')).join('\n');
+      const tbl = rows.map((row) => row.join(',')).join('\n');
       return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
     });
   });

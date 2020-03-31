@@ -98,7 +98,7 @@ const CHANNELS = [
 ];
 
 if (getMode().localDev) {
-  EXPERIMENTS.forEach(experiment => {
+  EXPERIMENTS.forEach((experiment) => {
     devAssert(
       experiment.cleanupIssue,
       `experiment ${experiment.name} must have a \`cleanupIssue\` field.`
@@ -121,7 +121,7 @@ function build() {
   const input = redirect.querySelector('input');
   const button = redirect.querySelector('button');
   const anchor = redirect.querySelector('a');
-  button.addEventListener('click', function() {
+  button.addEventListener('click', function () {
     let urlString = input.value.trim();
     // Avoid protocol-less urlString from being parsed as a relative URL.
     const hasProtocol = /^https?:\/\//.test(urlString);
@@ -138,12 +138,12 @@ function build() {
   });
 
   const channelsTable = document.getElementById('channels-table');
-  CHANNELS.forEach(function(experiment) {
+  CHANNELS.forEach(function (experiment) {
     channelsTable.appendChild(buildExperimentRow(experiment));
   });
 
   const experimentsTable = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
+  EXPERIMENTS.forEach(function (experiment) {
     experimentsTable.appendChild(buildExperimentRow(experiment));
   });
 
@@ -252,7 +252,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function (experiment) {
     updateExperimentRow(experiment);
   });
 }
@@ -372,9 +372,9 @@ function showConfirmation_(message, callback) {
     document.getElementById('popup-button-cancel')
   );
   const unlistenSet = [];
-  const closePopup = affirmative => {
+  const closePopup = (affirmative) => {
     container.classList.remove('show');
-    unlistenSet.forEach(unlisten => unlisten());
+    unlistenSet.forEach((unlisten) => unlisten());
     if (affirmative) {
       callback();
     }
@@ -406,7 +406,7 @@ function getAmpConfig() {
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise
-    .then(text => {
+    .then((text) => {
       const match = text.match(/self\.AMP_CONFIG=(\{.+?\})/);
       if (!match) {
         throw new Error("Can't find AMP_CONFIG in: " + text);
@@ -414,7 +414,7 @@ function getAmpConfig() {
       // Setting global var to make standard experiment code just work.
       return (self.AMP_CONFIG = JSON.parse(match[1]));
     })
-    .catch(error => {
+    .catch((error) => {
       console./*OK*/ error('Error fetching AMP_CONFIG', error);
       return {};
     });

@@ -50,7 +50,7 @@ function patchWebAnimations() {
     .readFileSync('node_modules/web-animations-js/web-animations.min.js')
     .toString();
   // Replace |requestAnimationFrame| with |window|.
-  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+  file = file.replace(/requestAnimationFrame/g, function (a, b) {
     if (file.charAt(b - 1) == '.') {
       return a;
     }

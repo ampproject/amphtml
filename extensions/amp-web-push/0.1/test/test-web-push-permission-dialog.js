@@ -28,7 +28,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;

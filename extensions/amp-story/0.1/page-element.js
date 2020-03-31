@@ -191,10 +191,10 @@ export class PageElement {
   static getElementsFromPage(page) {
     const pageElements = [];
 
-    Object.keys(PAGE_ELEMENT_FACTORIES).forEach(query => {
+    Object.keys(PAGE_ELEMENT_FACTORIES).forEach((query) => {
       const elements = scopedQuerySelectorAll(page.element, query);
       const factory = PAGE_ELEMENT_FACTORIES[query];
-      Array.prototype.forEach.call(elements, element => {
+      Array.prototype.forEach.call(elements, (element) => {
         const pageElement = factory(element, page);
         pageElements.push(pageElement);
       });

@@ -43,28 +43,28 @@ function requirePuppeteer_() {
  * @param {Puppeteer.page} page
  * @return {Promise} Resolves when script is evaluated
  */
-const setupMeasurement = page =>
+const setupMeasurement = (page) =>
   page.evaluateOnNewDocument(() => {
     window.longTasks = [];
     window.cumulativeLayoutShift = 0;
     window.measureStarted = Date.now();
     window.largestContentfulPaint = 0;
 
-    const longTaskObserver = new PerformanceObserver(list =>
-      list.getEntries().forEach(entry => window.longTasks.push(entry))
+    const longTaskObserver = new PerformanceObserver((list) =>
+      list.getEntries().forEach((entry) => window.longTasks.push(entry))
     );
 
     longTaskObserver.observe({entryTypes: ['longtask']});
 
-    const layoutShiftObserver = new PerformanceObserver(list =>
+    const layoutShiftObserver = new PerformanceObserver((list) =>
       list
         .getEntries()
-        .forEach(entry => (window.cumulativeLayoutShift += entry.value))
+        .forEach((entry) => (window.cumulativeLayoutShift += entry.value))
     );
 
     layoutShiftObserver.observe({entryTypes: ['layout-shift']});
 
-    const largestContentfulPaintObserver = new PerformanceObserver(list => {
+    const largestContentfulPaintObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       const entry = entries[entries.length - 1];
       window.largestContentfulPaint = entry.renderTime || entry.loadTime;
@@ -97,7 +97,7 @@ async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
  * @param {Request} interceptedRequest
  * @return {!Promise<boolean>}
  */
-const analyticsVendorRewriteHandler = async interceptedRequest => {
+const analyticsVendorRewriteHandler = async (interceptedRequest) => {
   const interceptedUrl = interceptedRequest.url();
   const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
   if (matchArray) {
@@ -123,7 +123,7 @@ const analyticsVendorRewriteHandler = async interceptedRequest => {
  * @return {!Promise}
  */
 function delayBasedOnHandlerOptions(handlerOptions) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(
       resolve,
       handlerOptions && handlerOptions.timeout ? handlerOptions.timeout : 0
@@ -137,12 +137,12 @@ function delayBasedOnHandlerOptions(handlerOptions) {
  * @param {Puppeteer.page} page
  * @return {Promise<object>} Resolves with page load metrics
  */
-const readMetrics = page =>
+const readMetrics = (page) =>
   page.evaluate(() => {
     const entries = performance.getEntries();
 
     function getMetric(name) {
-      const entry = entries.find(entry => entry.name === name);
+      const entry = entries.find((entry) => entry.name === name);
       return entry ? entry.startTime : 0;
     }
 
@@ -152,7 +152,7 @@ const readMetrics = page =>
     function getMaxFirstInputDelay() {
       let longest = 0;
 
-      window.longTasks.forEach(longTask => {
+      window.longTasks.forEach((longTask) => {
         if (
           longTask.startTime > firstContentfulPaint &&
           longTask.duration > longest
@@ -191,8 +191,8 @@ function setUpRequestHandler(handlerOptions, handlerName, page) {
   // Setting up timing and adding specified handler
   if (handlerName === 'analyticsHandler') {
     Object.assign(handlerOptions, {'startTime': Date.now()});
-    handlers.push(interceptedRequest =>
-      handleAnalyticsRequests(interceptedRequest, endTime => {
+    handlers.push((interceptedRequest) =>
+      handleAnalyticsRequests(interceptedRequest, (endTime) => {
         if (!handlerOptions.endTime) {
           Object.assign(handlerOptions, {
             endTime,
@@ -206,7 +206,7 @@ function setUpRequestHandler(handlerOptions, handlerName, page) {
   // There shoud only one place where requests are handled.
   // Assumes that multiple handlers don't continue/abort/respond
   // on the same request.
-  page.on('request', async interceptedRequest => {
+  page.on('request', async (interceptedRequest) => {
     const requestHandled = await handlers.reduce(
       // Don't short circuit
       async (prev, handler) => (await handler(interceptedRequest)) || prev,
@@ -328,7 +328,7 @@ async function measureDocuments(urls, {headless, runs, handlers}) {
   } catch {} // file does not exist (first run)
 
   // Make an array of tasks to be executed
-  const tasks = urls.flatMap(url =>
+  const tasks = urls.flatMap((url) =>
     Array.from({length: runs}).flatMap(() => [
       measureDocument.bind(null, url, CONTROL, {headless}, handlers),
       measureDocument.bind(null, url, EXPERIMENT, {headless}, handlers),

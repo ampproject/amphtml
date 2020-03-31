@@ -43,7 +43,7 @@ async function addExtraUrlParams(url, version) {
     let script = {};
     if (scriptTag) {
       tag.removeChild(scriptTag);
-      script = JSON.parse(scriptTag.innerHTML);
+      script = JSON.parse(scriptTag./*OK*/ innerHTML);
     }
     script = Object.assign(script, {
       extraUrlParams: EXTRA_URL_PARAM,
@@ -68,7 +68,7 @@ function rewriteAnalyticsConfig(handlers) {
     (handlers && handlers.analyticsHandler && handlers.analyticsHandler.urls) ||
     [];
   return Promise.all(
-    urls.flatMap(url => [
+    urls.flatMap((url) => [
       addExtraUrlParams(url, CONTROL),
       addExtraUrlParams(url, EXPERIMENT),
     ])
