@@ -192,9 +192,9 @@ export class AmpStoryPlayer extends HTMLElement {
   _setUpMessagingForIframe(story, iframeEl) {
     const iframeIdx = story[IFRAME_IDX];
 
-    this._messagingPromises[iframeIdx] = new Promise(resolve => {
+    this._messagingPromises[iframeIdx] = new Promise((resolve) => {
       this._initializeHandshake(story, iframeEl).then(
-        messaging => {
+        (messaging) => {
           messaging.setDefaultHandler(() => Promise.resolve());
           messaging.registerHandler('touchstart', (event, data) => {
             this._onTouchStart(data);
@@ -213,7 +213,7 @@ export class AmpStoryPlayer extends HTMLElement {
           });
           resolve(messaging);
         },
-        err => {
+        (err) => {
           console /*OK*/
             .log({err});
         }
@@ -382,7 +382,7 @@ export class AmpStoryPlayer extends HTMLElement {
     const detachedStory = this._stories[detachedStoryIdx];
     const nextStory = this._stories[nextStoryIdx];
 
-    this._messagingPromises[detachedStory[IFRAME_IDX]].then(messaging => {
+    this._messagingPromises[detachedStory[IFRAME_IDX]].then((messaging) => {
       messaging.unregisterHandler('selectDocument');
     });
 
@@ -435,7 +435,7 @@ export class AmpStoryPlayer extends HTMLElement {
     let inputUrl = addParamsToUrl(noFragmentUrl, params);
 
     // Prepend fragment of original url.
-    const prependFragment = match => {
+    const prependFragment = (match) => {
       // Remove the last '&' after amp_js_v=0.1 and replace with a '#'.
       return fragmentParam + match.slice(0, -1) + '#';
     };
@@ -451,7 +451,7 @@ export class AmpStoryPlayer extends HTMLElement {
    * @private
    */
   _updateVisibilityState(iframeIdx, visibilityState) {
-    this._messagingPromises[iframeIdx].then(messaging => {
+    this._messagingPromises[iframeIdx].then((messaging) => {
       messaging.sendRequest('visibilitychange', {state: visibilityState}, true);
     });
   }
