@@ -1,7 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
