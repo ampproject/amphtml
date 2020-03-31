@@ -163,6 +163,13 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
+    // Race condition: if an element is reparented while building, it'll
+    // receive a newly constructed Resource. Make sure this Resource's
+    // internal state is also "building".
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      this.build();
+    }
+
     /** @private {number} */
     this.priorityOverride_ = -1;
 
