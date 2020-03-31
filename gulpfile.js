@@ -33,7 +33,7 @@ const {
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, defaultTask, watch} = require('./build-system/tasks/build');
+const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
@@ -45,6 +45,7 @@ const {compileJison} = require('./build-system/tasks/compile-jison');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
+const {defaultTask} = require('./build-system/tasks/default-task');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
