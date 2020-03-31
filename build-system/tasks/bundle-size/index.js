@@ -58,7 +58,7 @@ async function getBrotliBundleSizes() {
   const bundleSizes = {};
 
   log(cyan('brotli'), 'bundle sizes are:');
-  const values = serialReport(process.cwd(), content =>
+  const values = serialReport(process.cwd(), (content) =>
     content.replace(replacementExpression, normalizedRtvNumber)
   );
   let next = await values.next();

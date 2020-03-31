@@ -23,9 +23,13 @@ import {
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../../src/service';
 import {user} from '../../../../../src/log';
 
-describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
+describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
   let script;
   let service;
@@ -59,7 +63,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   function stubFetch(url, headers, text, responseUrl) {
     xhr.fetchText.withArgs(url).resolves({
       headers: {
-        get: h => headers[h],
+        get: (h) => headers[h],
       },
       text: () => Promise.resolve(text),
       url: responseUrl || url,
@@ -76,6 +80,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
+    expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
   });
 
@@ -89,6 +94,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
+    expectAsyncConsoleError(/should require JS content-type/);
     return script.layoutCallback().should.be.fulfilled;
   });
 
@@ -197,6 +203,17 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   });
 
   describe('development mode', () => {
+    beforeEach(() => {
+      registerServiceBuilderForDoc(
+        env.win.document,
+        'amp-script',
+        AmpScriptService
+      );
+    });
+    afterEach(() => {
+      resetServiceForTesting(env.win, 'amp-script');
+    });
+
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
@@ -233,7 +250,7 @@ describes.repeated(
           ampdoc: variant.ampdoc,
         },
       },
-      env => {
+      (env) => {
         let crypto;
         let service;
 
@@ -266,6 +283,7 @@ describes.repeated(
           });
 
           it('should reject if hash does not exist in meta tag', () => {
+            expectAsyncConsoleError(/Script hash not found/);
             createMetaHash('amp-script-src', 'sha384-another_fake_hash');
 
             service = new AmpScriptService(env.ampdoc);
@@ -541,6 +559,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('AMP.setState(not_json)', async () => {
+      expectAsyncConsoleError(/Invalid AMP.setState/);
       await s.setStorage(
         StorageLocation.AMP_STATE,
         /* key */ null,

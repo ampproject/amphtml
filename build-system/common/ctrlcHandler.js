@@ -26,12 +26,12 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
- * the ongoing `gulp watch | build | dist` task.
+ * the ongoing `gulp` task.
  *
  * @param {string} command
  * @return {number}
  */
-exports.createCtrlcHandler = function(command) {
+exports.createCtrlcHandler = function (command) {
   if (!isTravisBuild()) {
     log(
       green('Running'),
@@ -66,7 +66,7 @@ exports.createCtrlcHandler = function(command) {
  *
  * @param {string} handlerProcess
  */
-exports.exitCtrlcHandler = function(handlerProcess) {
+exports.exitCtrlcHandler = function (handlerProcess) {
   const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;
   exec(exitCmd);
 };

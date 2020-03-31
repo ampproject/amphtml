@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amphtml-ads/botguard.a4a.html',
     environments: ['a4a-fie'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

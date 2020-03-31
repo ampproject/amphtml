@@ -21,25 +21,40 @@ const header = require('connect-header');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
+const path = require('path');
 const watch = require('gulp-watch');
+const {
+  distNailgunPort,
+  startNailgunServer,
+  stopNailgunServer,
+} = require('./nailgun');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
+const {cleanupBuildDir} = require('../compile/compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green, red} = require('ansi-colors');
+const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+// Used by new server implementation
+const typescriptBinary = './node_modules/typescript/bin/tsc';
+const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync(['build-system/server/**']);
+const serverFiles = globby.sync([
+  'build-system/server/**',
+  `!${transformsPath}/dist/**`,
+]);
 
 // Used to enable / disable lazy building.
 let lazyBuild = false;
@@ -83,7 +98,7 @@ async function startServer(
   }
 
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
   setServeMode(modeOptions);
@@ -103,6 +118,30 @@ async function startServer(
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
   logServeMode();
+
+  if (lazyBuild && argv.compiled) {
+    cleanupBuildDir();
+    await startNailgunServer(distNailgunPort, /* detached */ false);
+  }
+}
+
+/**
+ * Builds the new server by converting typescript transforms to JS
+ */
+function buildNewServer() {
+  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
+  log(
+    green('Building'),
+    cyan('AMP Dev Server'),
+    green('at'),
+    cyan(`${transformsPath}/dist`) + green('...')
+  );
+  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  if (result.status != 0) {
+    const err = new Error('Could not build AMP Dev Server');
+    err.showStack = false;
+    throw err;
+  }
 }
 
 /**
@@ -110,15 +149,18 @@ async function startServer(
  * live-reload.
  */
 function resetServerFiles() {
-  for (const serverFile in serverFiles) {
-    delete require.cache[serverFiles[serverFile]];
+  for (const serverFile of serverFiles) {
+    delete require.cache[path.resolve(serverFile)];
   }
 }
 
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
+  if (lazyBuild && argv.compiled) {
+    await stopNailgunServer(distNailgunPort);
+  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -129,8 +171,16 @@ function stopServer() {
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
-  stopServer();
+async function restartServer() {
+  await stopServer();
+  if (argv.new_server) {
+    try {
+      buildNewServer();
+    } catch {
+      log(red('ERROR:'), 'Could not build', cyan('AMP Dev Server'));
+      return;
+    }
+  }
   resetServerFiles();
   startServer();
 }
@@ -156,7 +206,12 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, restartServer);
+  watch(serverFiles, async () => {
+    await restartServer();
+  });
+  if (argv.new_server) {
+    buildNewServer();
+  }
   await startServer({}, {lazyBuild}, {});
   if (lazyBuild) {
     await performPreBuildSteps();
@@ -164,21 +219,26 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
+  buildNewServer,
   serve,
   doServe,
   startServer,
   stopServer,
 };
 
+/* eslint "google-camelcase/google-camelcase": 0 */
+
 serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
-  'host': '  Hostname or IP address to bind to (default: localhost)',
-  'port': '  Specifies alternative port (default: 8000)',
-  'https': '  Use HTTPS server',
-  'quiet': "  Run in quiet mode and don't log HTTP requests",
-  'cache': '  Make local resources cacheable by the browser',
-  'no_caching_extensions': '  Disable caching for extensions',
-  'compiled': '  Serve minified JS',
-  'cdn': '  Serve current prod JS',
-  'rtv': '  Serve JS from the RTV provided',
+  host: '  Hostname or IP address to bind to (default: localhost)',
+  port: '  Specifies alternative port (default: 8000)',
+  https: '  Use HTTPS server',
+  quiet: "  Run in quiet mode and don't log HTTP requests",
+  cache: '  Make local resources cacheable by the browser',
+  no_caching_extensions: '  Disable caching for extensions',
+  new_server: '  Use new server transforms',
+  compiled: '  Serve minified JS',
+  esm: '  Serve ESM JS (requires the use of --new_server)',
+  cdn: '  Serve current prod JS',
+  rtv: '  Serve JS from the RTV provided',
 };

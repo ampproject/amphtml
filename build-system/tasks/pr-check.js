@@ -41,7 +41,7 @@ async function prCheck(cb) {
     cb(err);
   };
 
-  const runCheck = cmd => {
+  const runCheck = (cmd) => {
     const {status} = timedExec(cmd, FILENAME);
     if (status != 0) {
       failTask();
@@ -83,6 +83,10 @@ async function prCheck(cb) {
 
   if (buildTargets.has('OWNERS')) {
     runCheck('gulp check-owners');
+  }
+
+  if (buildTargets.has('SERVER')) {
+    runCheck('gulp server-tests');
   }
 
   if (buildTargets.has('RUNTIME')) {

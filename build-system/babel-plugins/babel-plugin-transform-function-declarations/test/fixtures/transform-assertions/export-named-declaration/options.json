@@ -1,0 +1,4 @@
+{
+  "plugins": ["../../../../../babel-plugin-transform-function-declarations"],
+  "sourceType": "module"
+}

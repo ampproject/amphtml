@@ -36,14 +36,14 @@ import {
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
-describes.realWin('AmpFetcher', {amp: true}, env => {
+describes.realWin('AmpFetcher', {amp: true}, (env) => {
   let fetcher;
   let xhr;
 
@@ -62,7 +62,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     'baseUrl',
   ];
   const sentMessage = {
-    toArray: function() {
+    toArray: function () {
       return sentArray;
     },
   };
@@ -103,7 +103,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   });
 });
 
-describes.realWin('amp-subscriptions-google', {amp: true}, env => {
+describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ampdoc;
   let pageConfig;
   let platform;
@@ -488,7 +488,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         () => promise,
         null
       );
-      const resetPlatformsPromise = new Promise(resolve => {
+      const resetPlatformsPromise = new Promise((resolve) => {
         env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
           resolve();
         });

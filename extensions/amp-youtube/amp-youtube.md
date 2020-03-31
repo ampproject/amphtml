@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Displays a [YouTube](https://www.youtube.com/) video.
+  text: Displays a YouTube video.
 ---
 
 <!---

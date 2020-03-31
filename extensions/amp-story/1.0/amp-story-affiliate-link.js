@@ -95,7 +95,7 @@ export class AmpStoryAffiliateLink {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.AFFILIATE_LINK_STATE,
-      elementToToggleExpand => {
+      (elementToToggleExpand) => {
         const expand = this.element_ === elementToToggleExpand;
         this.element_.toggleAttribute('expanded', expand);
         this.textEl_.toggleAttribute('hidden', !expand);
@@ -110,7 +110,7 @@ export class AmpStoryAffiliateLink {
       }
     );
 
-    this.element_.addEventListener('click', event => {
+    this.element_.addEventListener('click', (event) => {
       if (this.element_.hasAttribute('expanded')) {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(

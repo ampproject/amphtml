@@ -17,21 +17,27 @@
 import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-display';
 import * as lolex from 'lolex';
-import {waitForChildPromise} from '../../../../src/dom';
+import {
+  waitForChildPromise,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 
 describes.realWin(
   'amp-date-display',
   {
     amp: {
+      runtimeOn: true,
       extensions: ['amp-mustache:0.2', 'amp-date-display:0.2'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let clock;
 
     async function getRenderedData() {
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
       await waitForChildPromise(element, () => {
         // The rendered container inserts a div element.
         return element.querySelector('div');
@@ -74,7 +80,6 @@ describes.realWin(
       });
       element.appendChild(template);
       element.setAttribute('layout', 'nodisplay');
-      win.document.body.appendChild(element);
     });
 
     afterEach(() => {
@@ -84,7 +89,7 @@ describes.realWin(
     it('renders mustache template into element', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
-      element.build();
+      win.document.body.appendChild(element);
 
       const data = await getRenderedData();
 
@@ -111,7 +116,7 @@ describes.realWin(
 
     it('does not rerender', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
-      element.build();
+      win.document.body.appendChild(element);
 
       await getRenderedData();
 

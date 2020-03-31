@@ -183,7 +183,7 @@ function onBindReadyAndRescan(env, bind, added, removed, options) {
  * @return {!Promise}
  */
 function waitForEvent(env, name) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
@@ -200,7 +200,7 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
 describe
   .configure()
   .ifChrome()
-  .run('Bind', function() {
+  .run('Bind', function () {
     // Give more than default 2000ms timeout for local testing.
     const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
     this.timeout(TIMEOUT);
@@ -214,7 +214,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let fieBind;
         let fieBody;
         let fieWindow;
@@ -309,7 +309,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let container;
 
@@ -356,7 +356,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let clock;
         let container;
@@ -649,7 +649,7 @@ describe
           });
         });
 
-        it('should update properties for empty strings', function*() {
+        it('should update properties for empty strings', function* () {
           const element = createElement(
             env,
             container,
@@ -970,7 +970,7 @@ describe
           });
           return promise.then(() => {
             return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
-              result => {
+              (result) => {
                 expect(result).to.equal('myval');
               }
             );
@@ -983,13 +983,8 @@ describe
               mystate: {mykey: 'myval'},
             });
 
-            // Integration tests may not use chai-as-promised.
-            try {
-              await bind.getStateAsync('mystate.mykey');
-              expect.fail();
-            } catch (err) {
-              expect(err).match(/#mystate/);
-            }
+            const state = bind.getStateAsync('mystate.mykey');
+            return expect(state).to.eventually.rejectedWith(/#mystate/);
           });
 
           it('should not wait if the still-loading state is irrelevant', async () => {
@@ -1002,7 +997,7 @@ describe
               env,
               container,
               'irrelevant',
-              new Promise(unused => {})
+              new Promise((unused) => {})
             );
 
             const state = await bind.getStateAsync('mystate.myKey');

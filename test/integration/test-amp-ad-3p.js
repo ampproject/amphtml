@@ -27,13 +27,13 @@ describe.configure().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
-    return createFixture().then(f => {
+    return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
     });
   });
 
-  it('create an iframe with APIs', function() {
+  it('create an iframe with APIs', function () {
     this.timeout(20000);
     let iframe;
     let lastIO = null;
@@ -46,9 +46,9 @@ describe.configure().run('amp-ad 3P', () => {
       undefined,
       5000
     )
-      .then(iframeElement => {
+      .then((iframeElement) => {
         iframe = iframeElement;
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (iframe.contentWindow.context) {
             resolve(iframe.contentWindow.context);
           }
@@ -58,7 +58,7 @@ describe.configure().run('amp-ad 3P', () => {
           };
         });
       })
-      .then(context => {
+      .then((context) => {
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
           'https://www.example.com/doubleclick.html'
@@ -189,7 +189,7 @@ describe.configure().run('amp-ad 3P', () => {
       })
       .then(() => {
         lastIO = null;
-        iframe.contentWindow.context.observeIntersection(changes => {
+        iframe.contentWindow.context.observeIntersection((changes) => {
           lastIO = changes[changes.length - 1];
         });
         fixture.win.scrollTo(0, 1000);
@@ -201,7 +201,7 @@ describe.configure().run('amp-ad 3P', () => {
       .then(
         () =>
           new Promise((resolve, reject) => {
-            iframe.contentWindow.context.getHtml('a', ['href'], content => {
+            iframe.contentWindow.context.getHtml('a', ['href'], (content) => {
               if (content == '<a href="http://test.com/test">Test link</a>') {
                 resolve();
               } else {

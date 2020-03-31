@@ -165,21 +165,21 @@ export class AdvancementConfig {
   /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
-    this.progressListeners_.forEach(progressListener => {
+    this.progressListeners_.forEach((progressListener) => {
       progressListener(progress);
     });
   }
 
   /** @protected */
   onAdvance() {
-    this.advanceListeners_.forEach(advanceListener => {
+    this.advanceListeners_.forEach((advanceListener) => {
       advanceListener();
     });
   }
 
   /** @protected */
   onPrevious() {
-    this.previousListeners_.forEach(previousListener => {
+    this.previousListeners_.forEach((previousListener) => {
       previousListener();
     });
   }
@@ -189,7 +189,7 @@ export class AdvancementConfig {
    * @protected
    */
   onTapNavigation(navigationDirection) {
-    this.tapNavigationListeners_.forEach(navigationListener => {
+    this.tapNavigationListeners_.forEach((navigationListener) => {
       navigationListener(navigationDirection);
     });
   }
@@ -386,7 +386,7 @@ class ManualAdvancement extends AdvancementConfig {
   isNavigationalClick_(event) {
     return !closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         return hasTapAction(el);
       },
       /* opt_stopAt */ this.element_
@@ -403,7 +403,7 @@ class ManualAdvancement extends AdvancementConfig {
   isProtectedTarget_(event) {
     return !!closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         const elementRole = el.getAttribute('role');
 
         if (elementRole) {
@@ -428,7 +428,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         tagName = el.tagName.toLowerCase();
 
         if (tagName === 'amp-story-page-attachment') {
@@ -476,7 +476,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     return !!closest(
       target,
-      el => {
+      (el) => {
         tagName = el.tagName.toLowerCase();
 
         if (
@@ -756,11 +756,11 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_TIME
     );
+    super.onAdvance();
   }
 
   /**
@@ -837,7 +837,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
-    this.elements_.forEach(el => {
+    this.elements_.forEach((el) => {
       listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
     });
   }
@@ -966,17 +966,22 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.mediaElement_,
       'Media element was unspecified.'
     );
+
     this.unlistenFns_.push(
       listenOnce(mediaElement, 'ended', () => this.onAdvance())
     );
-    this.unlistenFns_.push(
-      listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate())
-    );
+
+    this.onProgressUpdate();
+
+    this.timer_.poll(POLL_INTERVAL_MS, () => {
+      this.onProgressUpdate();
+      return !this.isRunning();
+    });
   }
 
   /** @private */
   startVideoInterfaceElement_() {
-    this.element_.getImpl().then(video => {
+    this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
 
@@ -997,7 +1002,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
-    this.unlistenFns_.forEach(fn => fn());
+    this.unlistenFns_.forEach((fn) => fn());
   }
 
   /**
@@ -1026,11 +1031,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_MEDIA
     );
+    super.onAdvance();
   }
 
   /**

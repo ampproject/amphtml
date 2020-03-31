@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-date-picker'],
     },
   },
-  env => {
+  (env) => {
     const moment = requireExternal('moment');
     let clock;
     let win;
@@ -245,7 +245,7 @@ describes.realWin(
       });
 
       describe('src templates', () => {
-        it('should parse date templates', function() {
+        it('should parse date templates', function () {
           this.timeout(4000);
           const template = createDateTemplate('{{val}}', {
             dates: '2018-01-01',
