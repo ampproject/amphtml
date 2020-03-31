@@ -28,7 +28,7 @@ limitations under the License.
 
 Provides a way for viewers to glance at the content outline and jump to any section. This is helpful for mobile devices where even a couple of sentences into a section requires scrolling.
 
-## Behavior
+## Usage
 
 The `amp-accordion` component allows you to display collapsible and expandable content sections. This component provides a way for viewers to glance at the content outline and jump to any section. Effective use reduces scrolling needs on mobile devices.
 

@@ -156,6 +156,10 @@ Explain analytics.
 
 Accessibility information related to `${name}`.
 
+## Version notes (optional)
+
+Information on version differences and migration notes.
+
 ## Validation
 
 See [\${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
