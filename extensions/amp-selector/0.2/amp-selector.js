@@ -42,15 +42,15 @@ class AmpSelector extends PreactBaseElement {
     if (this.element.hasAttribute('disabled')) {
       this.element.setAttribute('aria-disabled', 'true');
     }
-    const getValueAndChildren = () => {
+    const getOptionState = () => {
       const children = [];
       const optionChildren = toArray(this.element.querySelectorAll('[option]'));
 
       const value = [];
       optionChildren
         // Skip options that are themselves within an option
-        .filter(child => !this.getOptionElement(child.parentElement))
-        .forEach(child => {
+        .filter((child) => !this.getOptionElement_(child.parentElement))
+        .forEach((child) => {
           const option = child.getAttribute('option');
           if (!child.hasAttribute('role')) {
             child.setAttribute('role', 'option');
@@ -69,20 +69,20 @@ class AmpSelector extends PreactBaseElement {
               // Skip mutations to avoid cycles.
               mu.takeRecords();
             },
-            getOption: e => this.getOption(dev().assertElement(e.target)),
+            getOption: (e) =>
+              this.getOptionValue_(dev().assertElement(e.target)),
           };
-          if (child.hasAttribute('selected')) {
+          if (child.hasAttribute('selected') && option) {
             value.push(option);
           }
           const optionChild = <Option {...props} />;
           children.push(optionChild);
         });
-
       return {value, children};
     };
 
     const rebuild = () => {
-      this.mutateProps(getValueAndChildren());
+      this.mutateProps(getOptionState());
     };
 
     const mu = new MutationObserver(rebuild);
@@ -91,26 +91,12 @@ class AmpSelector extends PreactBaseElement {
       subtree: true,
     });
 
-    const {value, children} = getValueAndChildren();
-
-    const selectUniqueOption = option => {
-      this.element
-        .querySelectorAll('[selected]')
-        .forEach(selected => selected.removeAttribute('selected'));
-      selectOption(option);
-    };
-    const selectOption = option => {
-      const selector = `[option="${option}"]`;
-      const optionElement = scopedQuerySelector(this.element, selector);
-      if (optionElement.hasAttribute('selected')) {
-        optionElement.removeAttribute('selected');
-        return;
-      }
-      optionElement.setAttribute('selected', '');
-    };
-    const onChange = e => {
+    const {value, children} = getOptionState();
+    const onChange = (e) => {
       const {value, option} = e.target;
-      isArray(value) ? selectOption(option) : selectUniqueOption(option);
+      isArray(value)
+        ? this.selectOption_(option)
+        : this.selectUniqueOption_(option);
       this.mutateProps(dict({'value': value}));
     };
     return dict({
@@ -135,8 +121,9 @@ class AmpSelector extends PreactBaseElement {
   /**
    * @param {Element=} element
    * @return {Element|undefined}
+   * @private
    */
-  getOptionElement(element) {
+  getOptionElement_(element) {
     if (!element) {
       return;
     }
@@ -146,13 +133,41 @@ class AmpSelector extends PreactBaseElement {
   /**
    * @param {!Element} element
    * @return {string|undefined}
+   * @private
    */
-  getOption(element) {
-    const optionElement = this.getOptionElement(element);
+  getOptionValue_(element) {
+    const optionElement = this.getOptionElement_(element);
     if (!optionElement || optionElement.hasAttribute('disabled')) {
       return;
     }
     return optionElement.getAttribute('option');
+  }
+
+  /**
+   * Appends the 'selected' attribute on the child with the given 'option' value.
+   * @param {string} option
+   * @private
+   */
+  selectOption_(option) {
+    const selector = `[option="${option}"]`;
+    const optionElement = scopedQuerySelector(this.element, selector);
+    if (optionElement.hasAttribute('selected')) {
+      optionElement.removeAttribute('selected');
+      return;
+    }
+    optionElement.setAttribute('selected', '');
+  }
+
+  /**
+   * Removes all 'selected' attributes on children before selecting the given option.
+   * @param {string} option
+   * @private
+   */
+  selectUniqueOption_(option) {
+    this.element
+      .querySelectorAll('[selected]')
+      .forEach((selected) => selected.removeAttribute('selected'));
+    this.selectOption_(option);
   }
 }
 
@@ -172,6 +187,6 @@ AmpSelector.props = {
   'keyboardSelectMode': {attr: 'keyboard-select-mode'},
 };
 
-AMP.extension(TAG, '0.2', AMP => {
+AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpSelector, CSS);
 });

@@ -53,7 +53,7 @@ export function Selector(props) {
   const selected = /** @type {!Array} */ (value
     ? [].concat(value)
     : selectedState);
-  const selectOption = option => {
+  const selectOption = (option) => {
     if (!option) {
       return;
     }
@@ -61,7 +61,7 @@ export function Selector(props) {
     let newValue = null;
     if (isMultiple) {
       newValue = selected.includes(option)
-        ? selected.filter(v => v != option)
+        ? selected.filter((v) => v != option)
         : selected.concat(option);
     } else if (!selected.includes(option)) {
       newValue = [option];
@@ -82,9 +82,9 @@ export function Selector(props) {
     tag,
     {
       ...props,
-      role: props['role'] || 'listbox',
-      'aria-multiselectable': isMultiple,
       'aria-disabled': disabled,
+      'aria-multiselectable': isMultiple,
+      role: props['role'] || 'listbox',
     },
     <SelectorContext.Provider
       value={{
@@ -109,7 +109,7 @@ export function Option(props) {
   const selectorContext = Preact.useContext(SelectorContext);
   const {'selected': selected, 'selectOption': selectOption} = selectorContext;
   const isSelected = /** @type {!Array} */ (selected).includes(option);
-  const status = disabled
+  const statusStyle = disabled
     ? CSS.DISABLED
     : isSelected
     ? CSS.SELECTED
@@ -117,11 +117,11 @@ export function Option(props) {
   const optionProps = {
     ...props,
     'aria-disabled': disabled,
-    role: props['role'] || 'option',
-    onClick: e => selectOption(getOption(e)),
+    onClick: (e) => selectOption(getOption(e)),
     option,
+    role: props['role'] || 'option',
     selected: isSelected,
-    style: {...status, ...style},
+    style: {...statusStyle, ...style},
   };
   const tag = props['type'] || props['tagName'] || 'div';
   // TODO: Support '.' access to return <props.tagName ...> in JSX
