@@ -459,6 +459,11 @@ function createBaseCustomElementClass(win) {
       return this.implementation_.getDefaultActionAlias();
     }
 
+    /** @return {boolean} */
+    isBuilding() {
+      return !!this.buildingPromise_;
+    }
+
     /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.

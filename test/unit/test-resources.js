@@ -1291,6 +1291,9 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       hasAttribute() {
         return false;
       },
+      isBuilding() {
+        return false;
+      },
       isBuilt() {
         return true;
       },
