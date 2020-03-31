@@ -816,6 +816,8 @@ export class AmpList extends AMP.BaseElement {
   doRenderPass_() {
     const current = this.renderItems_;
 
+    user().fine(TAG, 'Rendering list', this.element, 'with data', current.data);
+
     devAssert(current && current.data, 'Nothing to render.');
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
