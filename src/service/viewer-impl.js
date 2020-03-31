@@ -320,7 +320,7 @@ export class ViewerImpl {
         let error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
-        if (error && reason === timeoutMessage) {
+        if (error && error.message.endsWith(timeoutMessage)) {
           error = dev().createExpectedError(error);
         }
         reportError(error);
