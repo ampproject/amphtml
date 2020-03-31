@@ -70,7 +70,7 @@ const validTransformedRemovableImports = {
   '../build/ampdoc.css': ['cssText', 'ampDocCss'],
 };
 
-const experimentFlag = (function() {
+const experimentFlag = (function () {
   const {defineExperimentConstant} = argv;
   if (Array.isArray(defineExperimentConstant)) {
     if (defineExperimentConstant.length > 0) {
