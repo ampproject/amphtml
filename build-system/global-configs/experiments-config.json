@@ -10,10 +10,10 @@
   "experimentB": {
     "name": "MOVE_FIXED_LAYER",
     "environment": "AMP",
-    "command": "gulp dist --defineExperimentConstant=MOVE_FIXED_LAYER",
+    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
     "issue": "",
     "expirationDateUTC": "2020-12-31",
-    "defineExperimentConstant": "MOVE_FIXED_LAYER"
+    "define_experiment_constant": "MOVE_FIXED_LAYER"
   },
   "experimentC": {}
 }

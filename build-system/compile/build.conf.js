@@ -71,15 +71,15 @@ const validTransformedRemovableImports = {
 };
 
 const experimentFlag = (function () {
-  const {defineExperimentConstant} = argv;
-  if (Array.isArray(defineExperimentConstant)) {
-    if (defineExperimentConstant.length > 0) {
-      throw new Error('Only one defineExperimentConstant flag is allowed');
+  const constant = argv['define_experiment_constant'];
+  if (Array.isArray(constant)) {
+    if (constant.length > 0) {
+      throw new Error('Only one define_experiment_constant flag is allowed');
     } else {
-      return defineExperimentConstant[0];
+      return constant[0];
     }
   }
-  return defineExperimentConstant;
+  return constant;
 })();
 
 const experimentRemovedImports =
@@ -117,7 +117,7 @@ function getReplacePlugin(isEsmBuild) {
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach((experiment) => {
     const experimentDefine =
-      experimentsConfig[experiment]['defineExperimentConstant'];
+      experimentsConfig[experiment]['define_experiment_constant'];
 
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;

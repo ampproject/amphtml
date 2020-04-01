@@ -465,11 +465,7 @@ dist.flags = {
   version_override: '  Override the version written to AMP_CONFIG',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
-<<<<<<< HEAD
   debug: '  Outputs the file contents during compilation lifecycles',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
-=======
-  defineExperimentConstant: '  Use to set constants for experiment builds',
->>>>>>> 693b8089e... Add experiment
 };
