@@ -814,10 +814,10 @@ export function fullscreenExit(element) {
   }
   const docBoundExit =
     ownerDocument.cancelFullScreen ||
-    ownerDocument.exitFullscreencancelFullScreen ||
-    ownerDocument.webkitExitFullscreencancelFullScreen ||
-    ownerDocument.webkitCancelFullScreencancelFullScreen ||
-    ownerDocument.mozCancelFullScreencancelFullScreen ||
+    ownerDocument.exitFullscreen ||
+    ownerDocument.webkitExitFullscreen ||
+    ownerDocument.webkitCancelFullScreen ||
+    ownerDocument.mozCancelFullScreen ||
     ownerDocument.msExitFullscreen;
   if (docBoundExit) {
     docBoundExit.call(ownerDocument);
