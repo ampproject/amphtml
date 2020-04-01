@@ -15,14 +15,13 @@
  */
 
 module.exports = function ({types: t}) {
-  function whichQuasiIndexToExtend(quasis, start) {
-    for (let i = 0; i < quasis.length; i++) {
-      const quasi = quasis[i];
-      if (quasi.start > start) {
-        return i;
+  function whichCloneQuasi(clonedQuasis, index) {
+    for (let i = index; i >= 0; i--) {
+      const quasi = clonedQuasis[i];
+      if (quasi !== null) {
+        return index;
       }
     }
-    return null;
   }
 
   return {
@@ -31,44 +30,43 @@ module.exports = function ({types: t}) {
       TemplateLiteral(path) {
         const {expressions, quasis} = path.node;
         let newQuasis = [...quasis.map((quasi) => t.cloneNode(quasi))];
-        let newExpressions = [];
+        let newExpressions = [
+          ...expressions.map((expression) => t.cloneNode(expression)),
+        ];
+        let conversions = 0;
 
-        expressions.forEach((expression, index) => {
+        for (let index = expressions.length; index >= 0; index--) {
+          const expression = expressions[index];
           if (
             t.isStringLiteral(expression) ||
             t.isNumericLiteral(expression) ||
             t.isBooleanLiteral(expression)
           ) {
-            const {start, value} = expression;
-            const indexToExtend = whichQuasiIndexToExtend(quasis, start);
-            const {value: cValue} = quasis[indexToExtend];
+            const {value} = expression;
+            const readIndex = whichCloneQuasi(newQuasis, index + 1);
+            const modifyIndex = whichCloneQuasi(newQuasis, index);
+            const {value: changedValue} = newQuasis[readIndex];
+            const {value: previousValue} = newQuasis[modifyIndex];
 
-            if (indexToExtend > 0) {
-              const {value: pValue} = quasis[indexToExtend - 1];
-              // Merge the quasis so the number of quasis
-              // doesn't exceed the expressions by more than 1.
-              newQuasis[indexToExtend - 1] = t.templateElement({
-                raw: pValue.raw + value + cValue.raw,
-                cooked: pValue.cooked + value + cValue.cooked,
-              });
-              newQuasis[indexToExtend] = null;
-            } else {
-              newQuasis[indexToExtend] = t.templateElement({
-                raw: value + cValue.raw,
-                cooked: value + cValue.cooked,
-              });
-            }
+            newQuasis[modifyIndex] = t.templateElement({
+              raw: previousValue.raw + value + changedValue.raw,
+              cooked: previousValue.cooked + value + changedValue.cooked,
+            });
+            newQuasis[index + 1] = null;
             newExpressions[index] = null;
-          } else {
-            newExpressions[index] = t.cloneNode(expression);
+            conversions++;
           }
-        });
+        }
+
+        if (conversions === 0) {
+          return;
+        }
 
         newQuasis = newQuasis.filter(Boolean);
         newExpressions = newExpressions.filter(Boolean);
 
-        path.skip();
         path.replaceWith(t.templateLiteral(newQuasis, newExpressions));
+        path.skip();
       },
     },
   };
