@@ -76,16 +76,17 @@ class AmpSocialShare extends AMP.BaseElement {
     this.platform_ = Services.platformFor(this.win);
     this.viewer_ = Services.viewerForDoc(element);
 
+    const systemShareSupported = 'share' in navigator;
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
-      if (!this.systemShareSupported_()) {
+      if (!systemShareSupported) {
         toggle(element, false);
         return;
       }
     } else {
       // Hide/ignore non-system component if system share wants to be unique
       const systemOnly =
-        this.systemShareSupported_() &&
+        systemShareSupported &&
         !!this.win.document.querySelectorAll(
           'amp-social-share[type=system][data-mode=replace]'
         ).length;
@@ -188,19 +189,6 @@ class AmpSocialShare extends AMP.BaseElement {
       const windowFeatures = 'resizable,scrollbars,width=640,height=480';
       openWindowDialog(this.win, href, target, windowFeatures);
     }
-  }
-
-  /**
-   * @private
-   * @return {*} TODO(#23582): Specify return type
-   */
-  systemShareSupported_() {
-    // Chrome exports navigator.share in WebView but does not implement it.
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
-    const isChromeWebview =
-      this.viewer_.isWebviewEmbedded() && this.platform_.isChrome();
-
-    return 'share' in navigator && !isChromeWebview;
   }
 }
 
