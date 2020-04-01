@@ -23,6 +23,21 @@ limitations under the License.
 </amp-ad>
 ```
 
+```html
+<amp-ad
+  width="300"
+  height="250"
+  type="rakutenunifiedads"
+  data-id="63"
+  data-env="dev"
+  data-genre='{"master_id":1,"code":"100371","match":"children"}'
+  data-ifa="DUMMY_IFA"
+  data-targeting='{"k1":"string type","k2":["male", "female"]}'
+  data-responsive="true"
+>
+</amp-ad>
+```
+
 ## Configuration
 
 ### Required parameters
@@ -33,3 +48,7 @@ limitations under the License.
 ### Optional parameters
 
 - `data-env` : Environment of server for Not production. e.g. `dev`, `stg`, `tst`
+- `data-genre` : Genre object
+- `data-ifa` : IFA string
+- `data-targeting` : Targeting object
+- `data-responsive` : Boolean for responsive ad spot or not
