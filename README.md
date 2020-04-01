@@ -1,4 +1,4 @@
-_**Do you build things with AMP?  Make sure to fill out the [AMP DevX Survey](https://go.amp.dev/devx-survey)!**_
+_**Do you build things with AMP? Make sure to fill out the [AMP DevX Survey](https://go.amp.dev/devx-survey)!**_
 
 # AMP ⚡
 
