@@ -27,14 +27,14 @@ if (argv.update_tests) {
  * Simple wrapper around the python based validator build.
  */
 async function validator() {
-  execOrDie('cd validator && python build.py' + validatorArgs);
+  execOrDie('python build.py' + validatorArgs, {cwd: 'validator'});
 }
 
 /**
  * Simple wrapper around the Java validator test suite.
  */
 async function validatorJava() {
-  const commands = ['cd validator/java'];
+  const commands = [];
   if (argv.clean) {
     commands.append('bazel clean');
   }
@@ -50,7 +50,8 @@ async function validatorJava() {
         'echo travis_fold:end:java_validator_build',
         'bazel run //:amphtml_validator_test',
       ])
-      .join(' && ')
+      .join(' && '),
+    {cwd: 'validator/java'}
   );
 }
 
@@ -58,7 +59,7 @@ async function validatorJava() {
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
-  execOrDie('cd validator/webui && python build.py' + validatorArgs);
+  execOrDie('python build.py' + validatorArgs, {cwd: 'validator/webui'});
 }
 
 module.exports = {
