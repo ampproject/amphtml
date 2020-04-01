@@ -37,7 +37,12 @@ async function validator() {
  * Simple wrapper around the Java validator test suite.
  */
 async function validatorJava() {
-  execOrDie('./build_and_test.sh', {cwd: 'validator/java', stdio: 'inherit'});
+  let cmd = './build_and_test.sh';
+  if (argv.install_bazel) {
+    cmd = `./install_bazel.sh && ${cmd}`;
+  }
+
+  execOrDie(cmd, {cwd: 'validator/java', stdio: 'inherit'});
 }
 
 /**
@@ -64,8 +69,8 @@ validator.flags = {
 validatorJava.description =
   'Builds and tests the AMP validator Java implementation.';
 validatorJava.flags = {
-  'clean':
-    '  Cleans the build directories before running Java validator tests.',
+  'install_bazel':
+    '  Installs Bazel before trying to build and run tests.',
 };
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';

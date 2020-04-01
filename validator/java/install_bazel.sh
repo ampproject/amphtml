@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+# This script installs Bazel, either by downloading it or by installing from the
+# Travis cache if available.
+CYAN() { echo -e "\033[0;36m$1\033[0m"; }
+YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
+GREEN() { echo -e "\033[0;32m$1\033[0m"; }
+RED() { echo -e "\033[0;31m$1\033[0m"; }
+
+LOG_PREFIX=$(YELLOW "prepare_bazel.sh")
+BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel_2.2.0-linux-x86_64.deb"
+BIN_DIR="bin"
+BAZEL_BIN_PATH="$BIN_DIR/bazel_2.2.0-linux-x86_64.deb"
+
+if [[ -f $BAZEL_BIN_PATH ]]; then
+  echo "$LOG_PREFIX Using cached Bazel binary $(CYAN "BAZEL_BIN_PATH")"
+else
+  echo "$LOG_PREFIX Downloading $(CYAN "BAZEL_BIN_URL")"
+  mkdir -p $BIN_DIR
+  wget -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
+  echo "SHA256 ($BAZEL_BIN_PATH) = b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3" | sha256sum -c -
+fi
+
+sudo dpkg -i $BAZEL_BIN_PATH
