@@ -361,7 +361,6 @@
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -466,7 +465,6 @@
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
