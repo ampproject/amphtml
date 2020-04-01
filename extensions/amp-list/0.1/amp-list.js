@@ -470,7 +470,7 @@ export class AmpList extends AMP.BaseElement {
    */
   createContainer_() {
     const container = this.win.document.createElement('div');
-    container.setAttribute('role', 'list');
+    this.setRoleAttribute_(container, 'list');
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
@@ -491,7 +491,7 @@ export class AmpList extends AMP.BaseElement {
   addElementsToContainer_(elements, container) {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
+        this.setRoleAttribute_(element, 'listitem');
       }
       if (
         !element.hasAttribute('tabindex') &&
@@ -501,6 +501,21 @@ export class AmpList extends AMP.BaseElement {
       }
       container.appendChild(element);
     });
+  }
+
+  /**
+   * Adds the 'role' attribute to the element.
+   * For amp-lists with 'single-item' enabled, we should not specify the
+   * role of 'list' on the container or listitem on the children as it
+   * causes screen readers to read an extra nested list with one item
+   * @param {!Node} element
+   * @param {string} value
+   * @private
+   */
+  setRoleAttribute_(element, value) {
+    if (!this.element.hasAttribute('single-item')) {
+      element.setAttribute('role', value);
+    }
   }
 
   /**
