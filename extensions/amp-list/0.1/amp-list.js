@@ -1016,7 +1016,7 @@ export class AmpList extends AMP.BaseElement {
       return this.maybeResizeListToFitItems_();
     };
 
-    if (this.isLayoutContainer_) {
+    if (!this.loadMoreEnabled_ & this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
         renderAndResize().then((resized) =>
           resized ? this.unlockHeightInsideMutate_() : null
