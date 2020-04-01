@@ -367,6 +367,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PulsePoint](../../ads/pulsepoint.md)
 - [PuffNetwork](../../ads/puffnetwork.md)
 - [Purch](../../ads/purch.md)
+- [Rakuten Unified Ads](../../ads/rakutenunifiedads.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [RbInfoxSg](../../ads/rbinfox.md)
 - [Realclick](../../ads/realclick.md)
