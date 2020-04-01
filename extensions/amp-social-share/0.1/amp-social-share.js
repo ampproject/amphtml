@@ -55,6 +55,11 @@ class AmpSocialShare extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     const {element} = this;
     const typeAttr = userAssert(
