@@ -20,19 +20,12 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
-goog.provide('parse_css.ParseCssTest');
+goog.module('parse_css.ParseCssTest');
 
-goog.require('goog.asserts');
-goog.require('json_testutil.makeJsonKeyCmpFn');
-goog.require('json_testutil.renderJSON');
-goog.require('parse_css.BlockType');
-goog.require('parse_css.QualifiedRule');
-goog.require('parse_css.RuleVisitor');
-goog.require('parse_css.extractUrls');
-goog.require('parse_css.parseAStylesheet');
-goog.require('parse_css.parseMediaQueries');
-goog.require('parse_css.stripVendorPrefix');
-goog.require('parse_css.tokenize');
+const asserts = goog.require('goog.asserts');
+const json_testutil = goog.require('json_testutil');
+const parse_css = goog.require('parse_css');
+const tokenize_css = goog.require('tokenize_css');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -88,7 +81,7 @@ describe('tokenize', () => {
   it('generates tokens for simple example', () => {
     const css = 'foo { bar: baz; }';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     assertJSONEquals(
         [
           {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
@@ -111,7 +104,7 @@ describe('tokenize', () => {
   it('tokenizes with parse errors', () => {
     const css = ' "\n "';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     assertJSONEquals(
         [
           {'line': 1, 'col': 0, 'tokenType': 'WHITESPACE'},
@@ -135,7 +128,7 @@ describe('tokenize', () => {
     const css = 'line 1 "unterminated\n' +
         'line 2 "unterminated\n';
     let errors = [];
-    parse_css.tokenize(css, 1, 0, errors);
+    tokenize_css.tokenize(css, 1, 0, errors);
     assertJSONEquals(
         [
           {
@@ -155,7 +148,7 @@ describe('tokenize', () => {
         ],
         errors);
     errors = [];
-    parse_css.tokenize(css, 5, 5, errors);
+    tokenize_css.tokenize(css, 5, 5, errors);
     assertJSONEquals(
         [
           {
@@ -180,7 +173,7 @@ describe('tokenize', () => {
     // Note that Javascript has its own escaping, so there's really just one
     // '\'.
     let errors = [];
-    parse_css.tokenize('a trailing \\\nbackslash', 1, 0, errors);
+    tokenize_css.tokenize('a trailing \\\nbackslash', 1, 0, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -192,7 +185,7 @@ describe('tokenize', () => {
         errors);
 
     errors = [];
-    parse_css.tokenize('h1 {color: red; } /*', 1, 0, errors);
+    tokenize_css.tokenize('h1 {color: red; } /*', 1, 0, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -204,7 +197,7 @@ describe('tokenize', () => {
         errors);
 
     errors = [];
-    parse_css.tokenize('oh hi url(foo"bar)', 1, 0, errors);
+    tokenize_css.tokenize('oh hi url(foo"bar)', 1, 0, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -278,7 +271,7 @@ describe('parseAStylesheet', () => {
   it('parses rgb values', () => {
     const css = 'foo { bar: rgb(255, 0, 127); }';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -359,7 +352,7 @@ describe('parseAStylesheet', () => {
   it('parses a hash reference', () => {
     const css = '#foo {}';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -393,7 +386,7 @@ describe('parseAStylesheet', () => {
   it('parses an @media rule', () => {
     const css = '@media {}';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -432,7 +425,7 @@ describe('parseAStylesheet', () => {
            '  src: url(\'foo.ttf\');\n' +
            '}';
         const errors = [];
-        const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+        const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
         assertJSONEquals(
             [
               {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
@@ -523,8 +516,8 @@ describe('parseAStylesheet', () => {
             ],
             tokenlist);
         const sheet = parse_css.parseAStylesheet(
-            tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
-            errors);
+            tokenlist, ampAtRuleParsingSpec,
+            parse_css.BlockType.PARSE_AS_IGNORE, errors);
         assertStrictEqual(0, errors.length);
         assertJSONEquals(
             {
@@ -675,7 +668,7 @@ describe('parseAStylesheet', () => {
         '@media { @gregable }\n' + // unrecognized @rule, ignored
         'color: red;\n'; // declaration outside qualified rule.
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -710,7 +703,7 @@ describe('parseAStylesheet', () => {
     // @gregable is not supported by the grammar.
     const css = '@gregable {}\n.foo{prop}';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -767,7 +760,7 @@ describe('parseAStylesheet', () => {
         '  .note { float: none }\n' +
         '}';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -834,7 +827,7 @@ describe('parseAStylesheet', () => {
   it('handles selectors but does not parse them in detail yet', () => {
     const css = ' h1 { color: blue; } ';
     const errors = [];
-    const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -928,7 +921,7 @@ describe('extractUrls', () => {
     const css =
         '@font-face {font-family: \'Foo\'; src: url(\'http://foo.com/bar.ttf\');}';
     const errors = [];
-    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -952,7 +945,7 @@ describe('extractUrls', () => {
     const css =
         'body{background-image: url(\'http://a.com/b/c=d\\000026e=f_g*h\');}';
     const errors = [];
-    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -970,6 +963,53 @@ describe('extractUrls', () => {
         parsedUrls);
   });
 
+  // This test verifies that a declaration ending in `!important` is treated by
+  // parsing out the `!important` marker and setting that as a special value in
+  // the declaration. In particular, we are looking for:
+  // 1) rules[0].declarations[0].important is true.
+  // 2) rules[0].declarations[0].value does not contain the tokens corresponding
+  //    to `!important`.
+  it('detects important', () => {
+    const css = 'b { color: red !important }';
+    const errors = [];
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        {
+          'line': 1,
+          'col': 0,
+          'tokenType': 'STYLESHEET',
+          'rules': [{
+            'line': 1,
+            'col': 0,
+            'tokenType': 'QUALIFIED_RULE',
+            'prelude': [
+              {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'b'},
+              {'line': 1, 'col': 1, 'tokenType': 'WHITESPACE'},
+              {'line': 1, 'col': 2, 'tokenType': 'EOF_TOKEN'}
+            ],
+            'declarations': [{
+              'line': 1,
+              'col': 4,
+              'tokenType': 'DECLARATION',
+              'name': 'color',
+              'value': [
+                {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
+                {'line': 1, 'col': 11, 'tokenType': 'IDENT', 'value': 'red'},
+                {'line': 1, 'col': 14, 'tokenType': 'WHITESPACE'},
+                {'line': 1, 'col': 26, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'important': true
+            }]
+          }],
+          'eof': {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}
+        },
+        sheet);
+  });
+
   // This example contains both image urls, other urls (fonts) and
   // segments in between.
   it('handles longer example', () => {
@@ -979,7 +1019,7 @@ describe('extractUrls', () => {
         'format(\'woff\'),url(\'http://b.com/1.ttf\') format(\'truetype\'),' +
         'src:url(\'\') format(\'embedded-opentype\');}';
     const errors = [];
-    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -1032,7 +1072,7 @@ describe('extractUrls', () => {
     const css = '.a \r\n{ color:red; background-image:url(4.png) }\r\n' +
         '.b { color:black; \r\nbackground-image:url(\'http://a.com/b.png\') }';
     const errors = [];
-    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -1071,7 +1111,7 @@ describe('extractUrls', () => {
         'rel=\'stylesheet\' type=\'text/css\'>\');\n' +
         '    }\n';
     const errors = [];
-    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
@@ -1098,7 +1138,7 @@ describe('extractUrls', () => {
 function mediaQueryStylesheet(mediaQuery) {
   const css = '@media ' + mediaQuery + ' {}';
   const errors = [];
-  const tokenList = parse_css.tokenize(css, 1, 0, errors);
+  const tokenList = tokenize_css.tokenize(css, 1, 0, errors);
   const sheet = parse_css.parseAStylesheet(
       tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
       errors);
@@ -1226,15 +1266,15 @@ describe('parseMediaQueries', () => {
 
 /**
  * @param {string} selector
- * @return {!Array<parse_css.Token>}
+ * @return {!Array<!tokenize_css.Token>}
  */
 function parseSelectorForTest(selector) {
   const css = selector + '{}';
   const errors = [];
-  const tokenlist = parse_css.tokenize(css, 1, 0, errors);
+  const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
   const sheet = parse_css.parseAStylesheet(
       tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
       errors);
-  return goog.asserts.assertInstanceof(sheet.rules[0], parse_css.QualifiedRule)
+  return asserts.assertInstanceof(sheet.rules[0], parse_css.QualifiedRule)
       .prelude;
 }

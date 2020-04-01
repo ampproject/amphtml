@@ -63,8 +63,8 @@ export class ReadDepthTracker {
     return Promise.all(
       [].slice
         .call(this.paragraphs_)
-        .map(p => this.viewport_.getClientRectAsync(p))
-    ).then(rects => {
+        .map((p) => this.viewport_.getClientRectAsync(p))
+    ).then((rects) => {
       let lastIdxAboveViewport = null;
       let lastPosition = null;
       for (let i = rects.length - 1; i >= 0; i--) {
@@ -114,7 +114,7 @@ export class ReadDepthTracker {
           encodeURIComponent(snippet),
         false
       )
-      .then(url => {
+      .then((url) => {
         Services.xhrFor(this.ampdoc_.win).fetch(url);
       });
   }

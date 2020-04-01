@@ -98,7 +98,7 @@ export class ScrollBar extends ScrollComponent {
           '&x=QUERY_PARAM(scrollx)',
         false
       )
-      .then(scrollbarUrl => {
+      .then((scrollbarUrl) => {
         this.frame_.setAttribute('src', scrollbarUrl);
       });
   }

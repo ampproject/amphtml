@@ -32,7 +32,7 @@ import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {setTimeout} from 'timers';
 
-describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
+describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let element;
@@ -101,7 +101,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
     env.sandbox
       .stub(PageConfigResolver.prototype, 'resolveConfig')
-      .callsFake(function() {
+      .callsFake(function () {
         configResolver = this;
         return Promise.resolve(pageConfig);
       });
@@ -117,7 +117,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     isStory = false;
     env.sandbox
       .stub(utilsStory, 'isStoryDocument')
-      .returns({then: fn => fn(isStory)});
+      .returns({then: (fn) => fn(isStory)});
   });
 
   it('should call `initialize_` on start', async () => {
@@ -186,6 +186,27 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           alwaysGrant: true,
         };
         subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+
+      await subscriptionService.initialize_();
+      expect(processStateStub).to.be.calledWith(true);
+    });
+
+    it('should skip everything and unlock document for unlocked page config', async () => {
+      const processStateStub = env.sandbox.stub(
+        subscriptionService,
+        'processGrantState_'
+      );
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: false,
+        };
+        subscriptionService.pageConfig_ = pageConfig = new PageConfig(
+          'scenic-2017.appspot.com:news',
+          false
+        );
         return Promise.resolve();
       });
       subscriptionService.start();
@@ -618,10 +639,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(firstVisibleStub).to.be.called;
     });
 
-    it('should report failure if platform timeouts', done => {
+    it('should report failure if platform timeouts', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
-        .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
+        .callsFake(() => new Promise((resolve) => setTimeout(resolve, 8000)));
       const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
@@ -632,7 +653,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     }).timeout(7000);
 
-    it('should report failure if platform reject promise', done => {
+    it('should report failure if platform reject promise', (done) => {
       env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => Promise.reject());
@@ -1174,6 +1195,26 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       platformStore.resolveEntitlement('local', entitlement);
       await expect(subscriptionService.getAuthdataField('data.other')).to
         .eventually.be.undefined;
+    });
+
+    it('should resolve authdata on an unlocked page', async () => {
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: false,
+        };
+        subscriptionService.pageConfig_ = pageConfig = new PageConfig(
+          'scenic-2017.appspot.com:news',
+          false
+        );
+        return Promise.resolve();
+      });
+
+      await expect(
+        subscriptionService.getAuthdataField('grantReason')
+      ).to.eventually.equal(GrantReason.UNLOCKED);
+      await expect(
+        subscriptionService.getAuthdataField('data.userAccount')
+      ).to.eventually.equal(undefined);
     });
   });
 });

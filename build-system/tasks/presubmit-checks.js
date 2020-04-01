@@ -132,6 +132,7 @@ const forbiddenTerms = {
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
+      'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -367,7 +368,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
-      'src/amp-story-player.js',
+      'src/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -400,6 +401,7 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
       'src/service/cid-impl.js',
@@ -954,8 +956,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
   // Functions
-  '\\.changeHeight\\(': bannedTermsHelpString,
-  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.applySize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.expand\\(': bannedTermsHelpString,
@@ -1223,7 +1224,7 @@ function isInBuildSystemFixtureFolder(filePath) {
  */
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function (match) {
     // Preserve the newlines
     const newlines = [];
     for (let i = 0; i < match.length; i++) {
@@ -1253,7 +1254,7 @@ function matchTerms(file, terms) {
   const contents = stripComments(file.contents.toString());
   const {relative} = file;
   return Object.keys(terms)
-    .map(function(term) {
+    .map(function (term) {
       let fix;
       const {whitelist, checkInTestFolder} = terms[term];
       // NOTE: we could do a glob test instead of exact check in the future
@@ -1316,7 +1317,7 @@ function matchTerms(file, terms) {
 
       return hasTerm;
     })
-    .some(function(hasAnyTerm) {
+    .some(function (hasAnyTerm) {
       return hasAnyTerm;
     });
 }
@@ -1371,7 +1372,7 @@ function hasAnyTerms(file) {
 function isMissingTerms(file) {
   const contents = file.contents.toString();
   return Object.keys(requiredTerms)
-    .map(function(term) {
+    .map(function (term) {
       const filter = requiredTerms[term];
       if (!filter.test(file.path)) {
         return false;
@@ -1389,7 +1390,7 @@ function isMissingTerms(file) {
       }
       return false;
     })
-    .some(function(hasMissingTerm) {
+    .some(function (hasMissingTerm) {
       return hasMissingTerm;
     });
 }
@@ -1405,13 +1406,13 @@ function presubmit() {
   return gulp
     .src(srcGlobs)
     .pipe(
-      through2.obj(function(file, enc, cb) {
+      through2.obj(function (file, enc, cb) {
         forbiddenFound = hasAnyTerms(file) || forbiddenFound;
         missingRequirements = isMissingTerms(file) || missingRequirements;
         cb();
       })
     )
-    .on('end', function() {
+    .on('end', function () {
       if (forbiddenFound) {
         log(
           colors.blue(

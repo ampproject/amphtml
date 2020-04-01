@@ -17,7 +17,7 @@
 import {AmpStoryMediaQueryService} from '../amp-story-media-query-service';
 import {poll} from '../../../../testing/iframe';
 
-describes.realWin('amp-story-media-query-service', {amp: true}, env => {
+describes.realWin('amp-story-media-query-service', {amp: true}, (env) => {
   let mediaQueryService;
   let storyEl;
   let styleEl;
@@ -55,7 +55,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
     setMatcherSize(200, 100);
     storyEl.appendChild(styleEl);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       requestAnimationFrame(() => {
         mediaQueryService = new AmpStoryMediaQueryService(win);
         resolve();
@@ -96,7 +96,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
   it('should add the className if the media query matches on resize', async () => {
     await mediaQueryService.onMediaQueryMatch(
       '(orientation: portrait)',
-      matches => {
+      (matches) => {
         storyEl.classList.toggle('portrait', matches);
       }
     );

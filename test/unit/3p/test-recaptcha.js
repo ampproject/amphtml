@@ -23,10 +23,8 @@ import {urls} from '../../../src/config';
 
 describe('3p recaptcha.js', () => {
   it('should require a window.name', () => {
-    allowConsoleError(() => {
-      window.name = undefined;
-      expect(initRecaptcha).to.throw('window');
-    });
+    window.name = undefined;
+    expect(initRecaptcha).to.throw('window');
   });
 
   it('should require a sitekey in the window.name dataObject', () => {
@@ -46,7 +44,7 @@ describe('3p recaptcha.js', () => {
   });
 
   describe('doesOriginDomainMatchIframeSrc()', () => {
-    const getMockIframeWindowWithLocation = url => {
+    const getMockIframeWindowWithLocation = (url) => {
       // NOTE: The thirdPartyUrl returned by the config
       // Will return localhost for testing.
       // Therefore, passed URLS should do the same
@@ -56,7 +54,7 @@ describe('3p recaptcha.js', () => {
     };
 
     it('should require the origin', () => {
-      return doesOriginDomainMatchIframeSrc({}, {}).catch(err => {
+      return doesOriginDomainMatchIframeSrc({}, {}).catch((err) => {
         expect(err.message.includes('origin')).to.be.ok;
       });
     });

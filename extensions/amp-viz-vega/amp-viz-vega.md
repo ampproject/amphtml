@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays visualizations created by using [Vega](https://vega.github.io/vega/) visualization grammar.
+  text: Displays visualizations created by using Vega visualization grammar.
 experimental: true
 ---
 

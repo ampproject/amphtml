@@ -19,33 +19,45 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
 import {LocalizationService} from '../../../../src/service/localization';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-education', {amp: true}, env => {
+describes.realWin('amp-story-education', {amp: true}, (env) => {
+  let ampdoc;
+  let hasSwipeCap;
   let storeService;
   let storyEducation;
+  let viewer;
   let win;
 
   beforeEach(() => {
     win = env.win;
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
     const element = win.document.createElement('amp-story-education');
+    ampdoc = new AmpDocSingle(win);
+    element.getAmpDoc = () => ampdoc;
     win.document.body.appendChild(element);
     storyEducation = new AmpStoryEducation(element);
 
-    env.sandbox.stub(storyEducation, 'mutateElement').callsFake(fn => fn());
+    hasSwipeCap = false;
+
+    viewer = Services.viewerForDoc(storyEducation.element);
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(viewer, 'hasCapability').callsFake(() => hasSwipeCap);
+    env.sandbox.stub(storyEducation, 'mutateElement').callsFake((fn) => fn());
   });
 
   it('should render', () => {
@@ -122,6 +134,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
 
   describe('amp-story-education navigation', () => {
     it('should render the first navigation education step', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -135,6 +148,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     });
 
     it('should render the second navigation education step', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -147,7 +161,19 @@ describes.realWin('amp-story-education', {amp: true}, env => {
       expect(navigationSwipeEl).to.exist;
     });
 
+    it('should not render the second navigation education step if no swipe capability', () => {
+      hasSwipeCap = false;
+      storyEducation.buildCallback();
+
+      storyEducation.setState_(State.NAVIGATION_TAP);
+      const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
+      storyEducation.containerEl_.dispatchEvent(clickEvent);
+
+      expect(storyEducation.containerEl_).to.have.attribute('hidden');
+    });
+
     it('should navigate to the next step on tap', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
@@ -163,6 +189,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     });
 
     it('should hide the education on last step tap', () => {
+      hasSwipeCap = true;
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
@@ -172,6 +199,71 @@ describes.realWin('amp-story-education', {amp: true}, env => {
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
       expect(storyEducation.containerEl_).to.have.attribute('hidden');
+    });
+  });
+
+  describe('amp-story-education viewer messaging', () => {
+    it('should not send viewer message if not visible', async () => {
+      const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      // Viewer is not visible.
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .rejects();
+
+      storyEducation.buildCallback();
+      await Promise.resolve();
+
+      expect(sendStub).to.not.have.been.called;
+    });
+
+    it('should send canShowScreens for navigation on build', async () => {
+      const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // Microtask tick.
+
+      expect(sendStub).to.have.been.calledOnceWith('canShowScreens', {
+        screens: [{screen: 'ontas'}],
+      });
+    });
+
+    it('should show navigation screen on viewer response', async () => {
+      env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
+        screens: [{screen: 'ontas', show: true}],
+      });
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // whenFirstVisible icrotask tick.
+      await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
+
+      const navigationTapEl = storyEducation.containerEl_.querySelector(
+        '[step="tap"]'
+      );
+      expect(navigationTapEl).to.exist;
+    });
+
+    it('should not show navigation screen on viewer response', async () => {
+      env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
+        screens: [{screen: 'ontas', show: false}],
+      });
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // whenFirstVisible microtask tick.
+      await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
+
+      const navigationTapEl = storyEducation.containerEl_.querySelector(
+        '[step="tap"]'
+      );
+      expect(navigationTapEl).to.not.exist;
     });
   });
 });

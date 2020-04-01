@@ -45,7 +45,7 @@ async function vendorConfigs(opt_options) {
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
-    gulpWatch(srcPath, function() {
+    gulpWatch(srcPath, function () {
       vendorConfigs(copyOptions);
     });
   }
@@ -65,7 +65,7 @@ async function vendorConfigs(opt_options) {
       .pipe(
         gulpif(
           !options.minify,
-          rename(function(path) {
+          rename(function (path) {
             path.basename += '.max';
           })
         )
