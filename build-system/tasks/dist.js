@@ -419,6 +419,8 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
+  copyCss,
+  copyParsers,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */

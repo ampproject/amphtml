@@ -656,6 +656,7 @@ const forbiddenTerms = {
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
+      'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
