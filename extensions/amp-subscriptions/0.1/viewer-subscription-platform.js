@@ -119,12 +119,13 @@ export class ViewerSubscriptionPlatform {
       .then((entitlementData) => {
         entitlementData = entitlementData || {};
 
-        const error = entitlementData['error'];
+        /** Note to devs: Send error at top level of postMessage instead. */
+        const deprecatedError = entitlementData['error'];
         const authData = entitlementData['authorization'];
         const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
-        if (error) {
-          throw new Error(error.message);
+        if (deprecatedError) {
+          throw new Error(deprecatedError.message);
         }
 
         if (!authData) {
