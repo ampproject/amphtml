@@ -34,25 +34,7 @@ async function validator() {
  * Simple wrapper around the Java validator test suite.
  */
 async function validatorJava() {
-  const commands = [];
-  if (argv.clean) {
-    commands.append('bazel clean');
-  }
-
-  execOrDie(
-    commands
-      .concat([
-        'echo travis_fold:start:java_validator_build',
-        'bazel run //:fetchAMPResources',
-        'bazel build //:amphtml_validator_java_proto_lib',
-        'bazel run //:copyValidatorJavaSource',
-        'bazel build //:amphtml_validator_lib',
-        'echo travis_fold:end:java_validator_build',
-        'bazel run //:amphtml_validator_test',
-      ])
-      .join(' && '),
-    {cwd: 'validator/java'}
-  );
+  execOrDie('./build_and_test.sh', {cwd: 'validator/java'});
 }
 
 /**
