@@ -591,19 +591,9 @@ function createBaseCustomElementClass(win) {
         }
       }
 
-      if (this.isLoadingEnabled_()) {
-        if (this.isInViewport_) {
-          // Already in viewport - start showing loading.
-          this.toggleLoading(true);
-        } else if (
-          layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0 &&
-          !this.loadingContainer_
-        ) {
-          // Few top elements will also be pre-initialized with a loading
-          // element.
-          this.mutateOrInvoke_(() => this.prepareLoading_());
-        }
+      // Few top elements will also be pre-initialized with a loading element.
+      if (layoutBox.top < PREPARE_LOADING_THRESHOLD && layoutBox.top >= 0) {
+        this.mutateOrInvoke_(() => this.prepareLoading_());
       }
     }
 
