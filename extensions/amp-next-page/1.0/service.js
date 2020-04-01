@@ -218,10 +218,9 @@ export class NextPageService {
     insertAfterOrAtStart(this.host_, this.recBox_, null /** after */);
 
     this.nextSrc_ = this.getHost_().getAttribute('src');
-    this.hasDeepParsing_ =
-      (this.getHost_().hasAttribute('deep-parsing') &&
-        this.getHost_().getAttribute('deep-parsing') !== 'false') ||
-      !this.nextSrc_;
+    this.hasDeepParsing_ = this.getHost_().hasAttribute('deep-parsing')
+      ? this.getHost_().getAttribute('deep-parsing') !== 'false'
+      : !this.nextSrc_;
     this.maxPages_ = this.getHost_().hasAttribute('max-pages')
       ? parseInt(this.getHost_().getAttribute('max-pages'), 10)
       : Infinity;
