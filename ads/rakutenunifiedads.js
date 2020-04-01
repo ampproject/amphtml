@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const {
-  verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+import {hasOwn} from '../src/utils/object';
+import {validateData, writeScript} from '../3p/3p';
 
-module.exports = {
-  'open sidebar': async (page, name) => {
-    await page.tap('[on="tap:sidebar1.toggle"]');
-    await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
-  },
-};
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function rakutenunifiedads(global, data) {
+  validateData(data, ['id']);
+  if (hasOwn(data, 'env')) {
+    data.env = `${data.env}-`;
+  } else {
+    data.env = '';
+  }
+  global.runa = data;
+  writeScript(global, `https://${data.env}s-cdn.rmp.rakuten.co.jp/js/amp.js`);
+}

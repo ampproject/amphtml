@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+export default function Foo() {
+  let couldBeAnArrow = () => 1;
 
-const {
-  verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
-
-module.exports = {
-  'open sidebar': async (page, name) => {
-    await page.tap('[on="tap:sidebar1.toggle"]');
-    await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
-  },
-};
+  console.log(couldBeAnArrow());
+}
