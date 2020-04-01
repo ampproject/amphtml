@@ -27,21 +27,27 @@ if (argv.update_tests) {
  * Simple wrapper around the python based validator build.
  */
 async function validator() {
-  execOrDie('python build.py' + validatorArgs, {cwd: 'validator'});
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator',
+    stdio: 'inherit',
+  });
 }
 
 /**
  * Simple wrapper around the Java validator test suite.
  */
 async function validatorJava() {
-  execOrDie('./build_and_test.sh', {cwd: 'validator/java'});
+  execOrDie('./build_and_test.sh', {cwd: 'validator/java', stdio: 'inherit'});
 }
 
 /**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
-  execOrDie('python build.py' + validatorArgs, {cwd: 'validator/webui'});
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator/webui',
+    stdio: 'inherit',
+  });
 }
 
 module.exports = {
