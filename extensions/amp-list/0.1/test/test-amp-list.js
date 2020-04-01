@@ -322,6 +322,33 @@ describes.repeated(
               });
           });
 
+          it('should not include `role` attribute if single-item is set', () => {
+            const fetched = {'items': {title: 'Title1'}};
+            const itemElement = doc.createElement('div');
+
+            // single-item attribute must be set before buildCallback(), so use
+            // a new test AmpList instance.
+            element = createAmpListElement();
+            element.setAttribute('single-item', 'true');
+            list = createAmpList(element);
+
+            const rendered = expectFetchAndRender(fetched, [itemElement], {
+              expr: 'items',
+              singleItem: true,
+            });
+
+            return list
+              .layoutCallback()
+              .then(() => rendered)
+              .then(() => {
+                expect(list.container_.hasAttribute('role')).to.be.false;
+                expect(list.container_.contains(itemElement)).to.be.true;
+                expect(list.container_.children.length).to.equal(1);
+                expect(list.container_.children[0].hasAttribute('role')).to.be
+                  .false;
+              });
+          });
+
           it('should trim the results to max-items', () => {
             const fetched = {
               items: [{title: 'Title1'}, {title: 'Title2'}, {title: 'Title3'}],
