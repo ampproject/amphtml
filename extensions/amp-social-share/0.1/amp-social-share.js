@@ -39,9 +39,6 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
-    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = null;
-
     /** @private {?string} */
     this.href_ = null;
 
@@ -74,7 +71,6 @@ class AmpSocialShare extends AMP.BaseElement {
     );
 
     this.platform_ = Services.platformFor(this.win);
-    this.viewer_ = Services.viewerForDoc(element);
 
     const systemShareSupported = 'share' in navigator;
     if (typeAttr === 'system') {
