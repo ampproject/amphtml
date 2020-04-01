@@ -64,6 +64,12 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 /**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const NEW_ERROR_REPORT_URL_FREQ = 0.2;
+
+/**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
@@ -337,7 +343,8 @@ function onError(message, filename, line, col, error) {
       try {
         return reportErrorToServerOrViewer(
           this,
-          /** @type {!JsonObject} */ (data)
+          /** @type {!JsonObject} */
+          (data)
         ).catch(() => {
           // catch async errors to avoid recursive errors.
         });
@@ -361,7 +368,14 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      // Override the errorReportingUrl to test the new error reporting endpoint.
+      const newErrorReportingUrl =
+        'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
+      const url =
+        IS_ESM || Math.random() < NEW_ERROR_REPORT_URL_FREQ
+          ? newErrorReportingUrl
+          : urls.errorReporting;
+      xhr.open('POST', url, true);
       xhr.send(JSON.stringify(data));
     }
   });
