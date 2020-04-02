@@ -75,7 +75,7 @@ const q1 = (array) => {
  */
 const q3 = (array) => {
   sort(array);
-  const mid = Math.ceil(array.length / 2);
+  const mid = Math.floor(array.length / 2);
   const half = array.slice(mid);
   return median(half);
 };
