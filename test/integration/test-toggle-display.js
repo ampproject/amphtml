@@ -27,7 +27,7 @@ describe
 
     beforeEach(() => {
       return createFixtureIframe('test/fixtures/images.html', 500)
-        .then(f => {
+        .then((f) => {
           fixture = f;
 
           // Wait for one <amp-img> element to load.
@@ -42,7 +42,7 @@ describe
       'toggle',
       {
         'regular': () => {},
-        'inline display style': el => {
+        'inline display style': (el) => {
           setInitialDisplay(el, 'inline-block');
         },
         'stylesheet display style': () => {

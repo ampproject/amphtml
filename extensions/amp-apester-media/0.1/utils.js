@@ -81,7 +81,7 @@ export function getPlatform() {
 export function extractElementTags(element) {
   const tagsAttribute = element && element.getAttribute('data-apester-tags');
   if (tagsAttribute) {
-    return tagsAttribute.split(',').map(tag => tag.trim()) || [];
+    return tagsAttribute.split(',').map((tag) => tag.trim()) || [];
   }
   return [];
 }
@@ -96,19 +96,19 @@ export function extratctTitle(root) {
     root.querySelectorAll('script[type="application/ld+json"]')
   );
   return scriptTags
-    .map(scriptTag => {
+    .map((scriptTag) => {
       if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
         return {};
       }
       return tryParseJson(scriptTag.textContent) || {};
     })
-    .map(jsonLd => jsonLd && jsonLd['headline'])
-    .filter(e => typeof e === 'string')
-    .map(title =>
+    .map((jsonLd) => jsonLd && jsonLd['headline'])
+    .filter((e) => typeof e === 'string')
+    .map((title) =>
       title
         .trim()
         .split(' ')
-        .filter(w => w.length > 2)
+        .filter((w) => w.length > 2)
     )
     .reduce((result, headline) => {
       return result.concat(headline);
@@ -123,8 +123,8 @@ export function extratctTitle(root) {
 export function extractArticleTags(ampdoc) {
   return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
-    .map(e => e.trim())
-    .filter(e => e);
+    .map((e) => e.trim())
+    .filter((e) => e);
 }
 
 /**
@@ -141,7 +141,7 @@ export function extractTags(ampdoc, element) {
       ? articleMetaTags
       : extratctTitle(ampdoc.getRootNode()) || []
   );
-  const loweredCase = concatedTags.map(tag => tag.toLowerCase().trim());
+  const loweredCase = concatedTags.map((tag) => tag.toLowerCase().trim());
   const noDuplication = loweredCase.filter(
     (item, pos, self) => self.indexOf(item) === pos
   );
@@ -173,7 +173,7 @@ export function setFullscreenOff(element) {
  * @param {!Array} unlisteners
  */
 export function registerEvent(eventName, callback, win, iframe, unlisteners) {
-  const unlisten = events.listen(win, 'message', event => {
+  const unlisten = events.listen(win, 'message', (event) => {
     const fromApesterMedia = iframe.contentWindow === event.source;
     if (events.getData(event)['type'] === eventName && fromApesterMedia) {
       callback(events.getData(event));
@@ -198,7 +198,7 @@ export function generatePixelURL(publisherId, affiliateId) {
   };
 
   const qs = Object.keys(qsObj)
-    .map(key => `${key}=${qsObj[key]}`)
+    .map((key) => `${key}=${qsObj[key]}`)
     .join('&');
 
   return `${ampPixelURL}?${qs}`;

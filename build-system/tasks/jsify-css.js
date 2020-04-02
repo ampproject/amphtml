@@ -88,8 +88,8 @@ function transformCss(filename, opt_cssnano) {
  *    processing
  */
 function jsifyCssAsync(filename) {
-  return transformCss(filename).then(function(result) {
-    result.warnings().forEach(function(warn) {
+  return transformCss(filename).then(function (result) {
+    result.warnings().forEach(function (warn) {
       log(colors.red(warn.toString()));
     });
     const {css} = result;

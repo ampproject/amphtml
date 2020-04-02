@@ -33,7 +33,7 @@ const {
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, defaultTask, watch} = require('./build-system/tasks/build');
+const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
@@ -45,6 +45,7 @@ const {compileJison} = require('./build-system/tasks/compile-jison');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
+const {defaultTask} = require('./build-system/tasks/default-task');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
@@ -60,6 +61,7 @@ const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
 const {prettify} = require('./build-system/tasks/prettify');
+const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
 const {todosFindClosed} = require('./build-system/tasks/todos');
@@ -92,7 +94,7 @@ function checkFlags(name, taskFunc) {
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
-  usedFlags.forEach(flag => {
+  usedFlags.forEach((flag) => {
     if (!validFlags.includes(flag)) {
       invalidFlags.push(`--${flag}`);
     }
@@ -107,7 +109,7 @@ function checkFlags(name, taskFunc) {
     log('For detailed usage information, run', cyan('gulp help') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
-      validFlags.forEach(key => {
+      validFlags.forEach((key) => {
         log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
       });
     }
@@ -154,6 +156,7 @@ createTask('prettify', prettify);
 createTask('process-3p-github-pr', process3pGithubPr);
 createTask('process-github-issues', processGithubIssues);
 createTask('serve', serve);
+createTask('server-tests', serverTests);
 createTask('size', size);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);

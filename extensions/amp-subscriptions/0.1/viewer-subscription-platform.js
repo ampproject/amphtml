@@ -116,15 +116,16 @@ export class ViewerSubscriptionPlatform {
         ENTITLEMENTS_REQUEST_TIMEOUT,
         this.viewer_.sendMessageAwaitResponse('auth', authRequest)
       )
-      .then(entitlementData => {
+      .then((entitlementData) => {
         entitlementData = entitlementData || {};
 
-        const error = entitlementData['error'];
+        /** Note to devs: Send error at top level of postMessage instead. */
+        const deprecatedError = entitlementData['error'];
         const authData = entitlementData['authorization'];
         const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
-        if (error) {
-          throw new Error(error.message);
+        if (deprecatedError) {
+          throw new Error(deprecatedError.message);
         }
 
         if (!authData) {
@@ -132,7 +133,7 @@ export class ViewerSubscriptionPlatform {
         }
 
         return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
-          reason => {
+          (reason) => {
             this.sendAuthTokenErrorToViewer_(reason.message);
             throw reason;
           }
@@ -148,7 +149,7 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   verifyAuthToken_(token, decryptedDocumentKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);

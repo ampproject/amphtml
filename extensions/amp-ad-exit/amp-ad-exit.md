@@ -178,7 +178,7 @@ Note that the default 1 second click delay uses time from extension load as inte
         "flour": {
           "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
           "filters": ["3sClick", "2sClick"]
-        },
+        }
       },
       "options": {
         "startTimingEvent": "navigationStart"
@@ -191,7 +191,7 @@ Note that the default 1 second click delay uses time from extension load as inte
         },
         "2sClick": {
           "type": "clickDelay",
-          "delay": 2000,
+          "delay": 2000
         }
       }
     }
@@ -336,7 +336,7 @@ Example:
             "_3pAnalytics": {
               "defaultValue": "no_response",
               "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
-             }
+            }
           }
         }
       }

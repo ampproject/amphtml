@@ -132,7 +132,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleOoyalaMessage_(event);
     });
 
@@ -318,6 +318,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpOoyalaPlayer);
 });
