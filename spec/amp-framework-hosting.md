@@ -47,7 +47,7 @@ If you have advanced hosting capabilities or would like to customize the version
 - `<config>` is one of `canary` or `prod`, indicating whether the build is meant to be served as a canary release or a production release, respectively. When the `--config` flag is omitted, the build system defaults to `prod`.
 - `<version>` is the version you want to assign to the build. When the `--version_override` flag is omitted, the build system defaults to the commit time of the last commit in the active branch and appends a trailing zero: `TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S` with `0` appended. Note that the version specified here is not the "runtime version" (RTV), which contains both the config and the version. The runtime version is discussed in more detail in section [Serve the framework](#serve-the-framework). Also, keep in mind that the version needs to be URL path compatible; no characters should require URI encoding.
 
-### Option 2: Download the framework using @amp-toolbox/download-runtime
+### Option 2: Download the framework with an AMP Toolbox tool
 
 [AMP Toolbox](https://github.com/ampproject/amp-toolbox) has both an `npm` package and a command line tool that will fetch a complete AMP framework from `cdn.ampproject.org`. You can pick the tool best suited to your release workflow.
 
