@@ -66,7 +66,6 @@ module.exports = function ({types: t}) {
         newExpressions = newExpressions.filter(Boolean);
 
         path.replaceWith(t.templateLiteral(newQuasis, newExpressions));
-        path.skip();
       },
     },
   };

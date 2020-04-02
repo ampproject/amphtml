@@ -59,7 +59,7 @@ module.exports = function ({types: t}) {
     containsThisExpression(path) {
       let containsThis = false;
       path.traverse({
-        ThisExpression() {
+        ThisExpression(path) {
           containsThis = true;
           path.stop();
         },
