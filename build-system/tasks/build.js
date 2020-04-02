@@ -30,7 +30,6 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, yellow} = require('ansi-colors');
-const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
@@ -69,7 +68,9 @@ async function build() {
   printNobuildHelp();
   printConfigHelp('gulp build');
   parseExtensionFlags();
-  await performPrerequisiteSteps(argv.watch);
+  await compileCss(argv.watch);
+  await compileJison();
+  await bootstrapThirdPartyFrames(argv.watch);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(argv.watch, /* minify */ false);
   } else {
@@ -81,50 +82,8 @@ async function build() {
   }
 }
 
-/**
- * Prints a useful help message prior to the default gulp task
- */
-function printDefaultTaskHelp() {
-  log(green('Running the default ') + cyan('gulp ') + green('task.'));
-  log(
-    green(
-      '⤷ JS and extensions will be lazily built when requested from the server.'
-    )
-  );
-}
-
-/**
- * Performs the pre-requisite build steps for gulp and gulp build
- *
- * @param {boolean} watch
- * @return {!Promise}
- */
-async function performPrerequisiteSteps(watch) {
-  await compileCss(watch);
-  await compileJison();
-  await bootstrapThirdPartyFrames(watch);
-}
-
-/**
- * The default task run when `gulp` is executed
- *
- * @return {!Promise}
- */
-async function defaultTask() {
-  maybeUpdatePackages();
-  createCtrlcHandler('gulp');
-  process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp');
-  printDefaultTaskHelp();
-  parseExtensionFlags(/* preBuild */ true);
-  await performPrerequisiteSteps(/* watch */ true);
-  await doServe(/* lazyBuild */ true);
-  log(green('JS and extensions will be lazily built when requested...'));
-}
-
 module.exports = {
   build,
-  defaultTask,
   watch,
 };
 
@@ -145,16 +104,3 @@ build.flags = {
 };
 
 watch.description = 'Deprecated. Use gulp build --watch or gulp dist --watch';
-
-defaultTask.description =
-  'Starts the dev server, lazily builds JS and extensions when requested, and watches them for changes';
-defaultTask.flags = {
-  compiled: '  Compiles and serves minified binaries',
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  closure_concurrency: '  Sets the number of concurrent invocations of closure',
-  extensions: '  Pre-builds the given extensions, lazily builds the rest.',
-  extensions_from:
-    '  Pre-builds the extensions used by the provided example page.',
-  version_override: '  Overrides the version written to AMP_CONFIG',
-  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
-};
