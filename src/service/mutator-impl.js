@@ -221,18 +221,8 @@ export class MutatorImpl {
       mutate: () => {
         mutator();
 
-        // TODO(willchou): IntersectionObserver won't catch size changes,
-        // which means layout boxes may be stale. However, always requesting
-        // measure after any mutation is overkill and probably expensive.
-        // Instead, survey measureMutateElement() callers to determine which
-        // should explicitly call requestMeasure() to fix this.
-
-        // With IntersectionObserver, no need to remeasure and set relayout
-        // on element size changes since enter/exit viewport will be detected.
-        if (this.intersect_) {
-          this.resources_.maybeHeightChanged();
-          return;
-        }
+        // TODO(willchou): toggleLoading() mutate causes a lot of unnecessary
+        // remeasures. Add affordance to mutateElement() to disable remeasures.
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -243,11 +233,17 @@ export class MutatorImpl {
           const r = Resource.forElement(ampElements[i]);
           r.requestMeasure();
         }
+        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+        // With IntersectionObserver, no need to set relayout top.
+        if (this.intersect_) {
+          this.resources_.maybeHeightChanged();
+          return;
+        }
+
         if (relayoutTop != -1) {
           this.resources_.setRelayoutTop(relayoutTop);
         }
-        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-
         // Need to measure again in case the element has become visible or
         // shifted.
         this.vsync_.measure(() => {
@@ -433,10 +429,9 @@ export class MutatorImpl {
         callback: opt_callback,
       }
     );
-    // With IntersectionObserver, remeasuring after size changes are no longer needed.
-    if (!this.intersect_) {
-      this.resources_.schedulePassVsync();
-    }
+    // With IntersectionObserver, we still want to schedule a pass to execute
+    // the requested measures of the newly resized element(s).
+    this.resources_.schedulePassVsync();
   }
 }
 
