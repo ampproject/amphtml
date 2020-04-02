@@ -196,7 +196,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>Analytics & Measurement</td>
     <td>
       <ul>
-        <li><code>&lt;amp-analytics></code></li>
         <li><code>&lt;amp-experiment></code></li>
         <li><code>&lt;amp-pixel></code></li>
       </ul>
