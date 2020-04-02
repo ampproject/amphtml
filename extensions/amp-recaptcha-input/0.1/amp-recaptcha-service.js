@@ -116,7 +116,7 @@ export class AmpRecaptchaService {
     } else if (this.global_ !== global) {
       return Promise.reject(
         new Error(
-          'You must supply the global attribute ' +
+          'You must supply the data-global attribute ' +
             'to all or none of the amp-recaptcha-input elements.'
         )
       );

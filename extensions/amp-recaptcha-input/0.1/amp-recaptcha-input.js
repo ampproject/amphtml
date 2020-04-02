@@ -79,7 +79,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    this.global_ = this.element.hasAttribute('global');
+    this.global_ = this.element.hasAttribute('data-global');
 
     return recaptchaServiceForDoc(this.element).then((service) => {
       this.recaptchaService_ = service;
