@@ -200,14 +200,14 @@ export class OwnersImpl {
         resource.whenBuilt().then(() => {
           this.measureAndTryScheduleLayout_(
             resource,
-            !layout,
+            /* isPreload */ !layout,
             parentResource.getLayoutPriority()
           );
         });
       } else {
         this.measureAndTryScheduleLayout_(
           resource,
-          !layout,
+          /* isPreload */ !layout,
           parentResource.getLayoutPriority()
         );
       }
@@ -228,7 +228,7 @@ export class OwnersImpl {
     ) {
       this.resources_.scheduleLayoutOrPreload(
         resource,
-        !isPreload,
+        /* layout */ !isPreload,
         opt_parentPriority
       );
     }

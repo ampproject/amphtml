@@ -217,6 +217,15 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
+
+    /** @const @private {boolean} */
+    this.intersect_ = resources.isIntersectionExperimentOn();
+
+    /**
+     * A client rect that was "premeasured" by an IntersectionObserver.
+     * @private {?ClientRect}
+     */
+    this.premeasuredRect_ = null;
   }
 
   /**
@@ -327,7 +336,15 @@ export class Resource {
     return this.element.build().then(
       () => {
         this.isBuilding_ = false;
-        this.state_ = ResourceState.NOT_LAID_OUT;
+        // With IntersectionObserver, measure can happen before build
+        // so check if we're "ready for layout" (measured and built) here.
+        if (this.intersect_) {
+          this.state_ = this.hasBeenMeasured()
+            ? ResourceState.READY_FOR_LAYOUT
+            : ResourceState.NOT_LAID_OUT;
+        } else {
+          this.state_ = ResourceState.NOT_LAID_OUT;
+        }
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
@@ -421,12 +438,22 @@ export class Resource {
   }
 
   /**
+   * Stores a client rect that was "premeasured" by an IntersectionObserver.
+   * Should only be used in IntersectionObserver mode.
+   * @param {!ClientRect} clientRect
+   */
+  premeasure(clientRect) {
+    devAssert(this.intersect_);
+    this.premeasuredRect_ = clientRect;
+  }
+
+  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
-   *    premeasured ClientRect instead of calling getBoundingClientRect.
+   * @param {boolean} usePremeasuredRect If true, consumes the previously
+   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
-  measure(opt_premeasuredRect) {
+  measure(usePremeasuredRect = false) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -457,7 +484,12 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.computeMeasurements_(opt_premeasuredRect);
+    if (usePremeasuredRect) {
+      this.computeMeasurements_(devAssert(this.premeasuredRect_));
+      this.premeasuredRect_ = null;
+    } else {
+      this.computeMeasurements_();
+    }
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -568,6 +600,14 @@ export class Resource {
    */
   hasBeenMeasured() {
     return !!this.initialLayoutBox_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasBeenPremeasured() {
+    devAssert(this.intersect_);
+    return !!this.premeasuredRect_;
   }
 
   /**

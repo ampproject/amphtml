@@ -79,7 +79,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element).getState()).to.equal(
+    expect(new Resource(1, element, resources).getState()).to.equal(
       ResourceState.NOT_LAID_OUT
     );
   });
