@@ -4,17 +4,16 @@
   "description": "Gulp storybook tasks",
   "main": "index.js",
   "dependencies": {
-    "@babel/core": "^7.0.0-0",
+    "@babel/core": "7.9.0",
     "@babel/preset-react": "7.9.4",
-    "@storybook/addon-a11y": "^5.3.18",
-    "@storybook/addon-knobs": "^5.3.18",
-    "@storybook/addon-viewport": "^5.3.18",
-    "@storybook/preact": "^5.3.18",
-    "babel-loader": "^8.0.6",
-    "preact": "^10.3.4"
-  },
-  "devDependencies": {
-    "core-js": "^2.6.9",
-    "preact-render-to-string": "^5.1.4"
+    "@babel/runtime-corejs3": "7.9.2",
+    "@storybook/addon-a11y": "5.3.18",
+    "@storybook/addon-knobs": "5.3.18",
+    "@storybook/addon-viewport": "5.3.18",
+    "@storybook/preact": "5.3.18",
+    "babel-loader": "8.0.6",
+    "core-js": "3",
+    "preact": "10.3.4",
+    "preact-render-to-string": "5.1.4"
   }
 }

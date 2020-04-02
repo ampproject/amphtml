@@ -43,7 +43,6 @@
     "atob": "2.1.2",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
-    "babel-loader": "8.1.0",
     "babel-plugin-filter-imports": "4.0.0",
     "babel-plugin-istanbul": "6.0.0",
     "babel-plugin-minify-replace": "0.5.0",
