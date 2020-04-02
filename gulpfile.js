@@ -88,7 +88,8 @@ function createTask(name, taskFunc) {
  * @param {function} taskFunc
  */
 function checkFlags(name, taskFunc) {
-  if (!argv._.includes(name)) {
+  const isDefaultTask = name == 'default' && argv._.length == 0;
+  if (!argv._.includes(name) && !isDefaultTask) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
