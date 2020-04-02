@@ -161,7 +161,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   play(isAutoplay) {
-    let reason = 'amp-interaction';
+    let reason;
     if (isAutoplay) {
       reason = 'auto';
     }
