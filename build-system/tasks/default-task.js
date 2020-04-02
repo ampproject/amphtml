@@ -57,7 +57,7 @@ async function defaultTask() {
     await copyCss();
     await copyParsers();
   }
-  await bootstrapThirdPartyFrames(/* watch */ true);
+  await bootstrapThirdPartyFrames(/* watch */ true, argv.compiled);
   await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
