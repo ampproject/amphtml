@@ -20,7 +20,6 @@ const conf = require('./build.conf');
 const fs = require('fs-extra');
 const path = require('path');
 const remapping = require('@ampproject/remapping');
-const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 
@@ -109,12 +108,6 @@ exports.postClosureBabel = function (directory, isEsmBuild) {
     );
 
     const {compressed, terserMap} = terserMinify(code);
-    if (compressed === undefined) {
-      console.log(file.path, {
-        'pre babel': tempy.writeSync(file.contents),
-        'pre terser': tempy.writeSync(code),
-      });
-    }
     file.contents = Buffer.from(compressed, 'utf-8');
 
     // TODO: Remapping should support a chain, instead of multiple invocations.
