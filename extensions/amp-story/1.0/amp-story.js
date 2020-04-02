@@ -2066,17 +2066,21 @@ export class AmpStory extends AMP.BaseElement {
             'publisher provided fallback.'
         );
       } else {
-        this.layoutStory_().then(() =>
+        this.layoutStory_().then(() => {
+          this.storeService_.dispatch(
+            Action.TOGGLE_PAUSED,
+            this.pausedStateToRestore_
+          );
           this.mutateElement(() => {
             this.unsupportedBrowserLayer_.removeLayer();
-            this.element.classList.remove('i-amphtml-story-fallback');
-          })
-        );
+          });
+        });
       }
     } else {
-      this.mutateElement(() => {
-        this.element.classList.add('i-amphtml-story-fallback');
-      });
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
       // Displays the publisher provided fallback or fallbacks to the default
       // unsupported browser layer.
       if (fallbackEl) {
