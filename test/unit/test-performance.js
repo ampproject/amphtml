@@ -637,16 +637,16 @@ describes.realWin('performance', {amp: true}, (env) => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(4);
+          const initialCount = tickSpy.callCount;
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(5);
+            expect(tickSpy).to.have.callCount(initialCount + 1);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(5);
+              expect(tickSpy).to.have.callCount(initialCount + 1);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(6);
+                expect(tickSpy).to.have.callCount(initialCount + 2);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
@@ -1268,6 +1268,87 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         label: 'cls',
         delta: 0.55,
       });
+    });
+  });
+
+  describe('forwards navigation metrics', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+      PerformanceObserverStub.callsFake((callback) => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
+
+    it('after performance service registered', () => {
+      // Pretend that the Navigation API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['navigation'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      // Fake fid that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'navigation',
+              domComplete: 0,
+              domContentLoadedEventEnd: 1,
+              domContentLoadedEventStart: 2,
+              domInteractive: 3,
+              loadEventEnd: 4,
+              loadEventStart: 5,
+              requestStart: 6,
+              responseStart: 7,
+            },
+          ];
+        },
+      });
+
+      expect(perf.events_.length).to.equal(8);
+      expect(perf.events_).to.be.jsonEqual([
+        {
+          label: 'domComplete',
+          delta: 0,
+        },
+        {
+          label: 'domContentLoadedEventEnd',
+          delta: 1,
+        },
+        {
+          label: 'domContentLoadedEventStart',
+          delta: 2,
+        },
+        {
+          label: 'domInteractive',
+          delta: 3,
+        },
+        {
+          label: 'loadEventEnd',
+          delta: 4,
+        },
+        {
+          label: 'loadEventStart',
+          delta: 5,
+        },
+        {
+          label: 'requestStart',
+          delta: 6,
+        },
+        {
+          label: 'responseStart',
+          delta: 7,
+        },
+      ]);
     });
   });
 });
