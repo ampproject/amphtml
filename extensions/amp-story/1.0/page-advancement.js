@@ -43,6 +43,9 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
+/** @private @const {number} */
+const TOP_REGION = 0.8;
+
 /**
  * Protected edges of the screen in pixels. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
@@ -474,6 +477,15 @@ export class ManualAdvancement extends AdvancementConfig {
       return false;
     }
 
+    if (
+      target.getAttribute('has-tooltip') === 'auto' &&
+      this.isInScreenBottom_(event, pageRect)
+    ) {
+      event.target.setAttribute('target', '_blank');
+      event.target.setAttribute('role', 'link');
+      return false;
+    }
+
     return !!closest(
       target,
       (el) => {
@@ -491,6 +503,18 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+  }
+
+  /**
+   * Checks if element is inside of the bottom region of the screen.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenBottom_(event, pageRect) {
+    const targetRect = event.target.getBoundingClientRect();
+    return targetRect.top - pageRect.top >= pageRect.height * TOP_REGION;
   }
 
   /**
