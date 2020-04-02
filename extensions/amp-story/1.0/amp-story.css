@@ -235,10 +235,6 @@ amp-story-page[active] {
   animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
-.i-amphtml-story-fallback amp-story-page {
-  display: none !important;
-}
-
 /* Setting `translateY` distances as a trick so that the runtime schedules
  * layout for the next N pages. The default value (1000%) means that pages are
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since

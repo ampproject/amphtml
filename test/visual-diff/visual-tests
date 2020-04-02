@@ -329,8 +329,6 @@
       ]
     },
     {
-      // TODO(#27185, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
@@ -363,7 +361,6 @@
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -464,13 +461,10 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
-      // TODO(#27185, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
