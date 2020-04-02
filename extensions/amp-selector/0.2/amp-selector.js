@@ -33,23 +33,25 @@ const TAG = 'amp-selector';
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
-    if (!this.element.hasAttribute('role')) {
-      this.element.setAttribute('role', 'listbox');
+    const {/** @type {!Element} */ element} = this;
+
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'listbox');
     }
-    if (this.element.hasAttribute('multiple')) {
-      this.element.setAttribute('aria-multiselectable', 'true');
+    if (element.hasAttribute('multiple')) {
+      element.setAttribute('aria-multiselectable', 'true');
     }
-    if (this.element.hasAttribute('disabled')) {
-      this.element.setAttribute('aria-disabled', 'true');
+    if (element.hasAttribute('disabled')) {
+      element.setAttribute('aria-disabled', 'true');
     }
     const getOptionState = () => {
       const children = [];
-      const optionChildren = toArray(this.element.querySelectorAll('[option]'));
+      const optionChildren = toArray(element.querySelectorAll('[option]'));
 
       const value = [];
       optionChildren
         // Skip options that are themselves within an option
-        .filter((child) => !this.getOptionElement_(child.parentElement))
+        .filter((child) => !getOptionElement(child.parentElement))
         .forEach((child) => {
           const option = child.getAttribute('option');
           if (!child.hasAttribute('role')) {
@@ -69,8 +71,7 @@ class AmpSelector extends PreactBaseElement {
               // Skip mutations to avoid cycles.
               mu.takeRecords();
             },
-            getOption: (e) =>
-              this.getOptionValue_(dev().assertElement(e.target)),
+            getOption: (e) => getOptionValue(dev().assertElement(e.target)),
           };
           if (child.hasAttribute('selected') && option) {
             value.push(option);
@@ -86,7 +87,7 @@ class AmpSelector extends PreactBaseElement {
     };
 
     const mu = new MutationObserver(rebuild);
-    mu.observe(this.element, {
+    mu.observe(element, {
       attributeFilter: ['option', 'selected'],
       subtree: true,
     });
@@ -95,8 +96,8 @@ class AmpSelector extends PreactBaseElement {
     const onChange = (e) => {
       const {value, option} = e.target;
       isArray(value)
-        ? this.selectOption_(option)
-        : this.selectUniqueOption_(option);
+        ? selectOption(element, option)
+        : selectUniqueOption(element, option);
       this.mutateProps(dict({'value': value}));
     };
     return dict({
@@ -114,58 +115,56 @@ class AmpSelector extends PreactBaseElement {
     );
     return true;
   }
+}
 
-  /**
-   * @param {Element=} element
-   * @return {Element|undefined}
-   * @private
-   */
-  getOptionElement_(element) {
-    if (!element) {
-      return;
-    }
-    return closestAncestorElementBySelector(element, '[option]');
+/**
+ * @param {Element=} element
+ * @return {Element|undefined}
+ */
+function getOptionElement(element) {
+  if (!element) {
+    return;
   }
+  return closestAncestorElementBySelector(element, '[option]');
+}
 
-  /**
-   * @param {!Element} element
-   * @return {string|undefined}
-   * @private
-   */
-  getOptionValue_(element) {
-    const optionElement = this.getOptionElement_(element);
-    if (!optionElement || optionElement.hasAttribute('disabled')) {
-      return;
-    }
-    return optionElement.getAttribute('option');
+/**
+ * @param {!Element} element
+ * @return {string|undefined}
+ */
+function getOptionValue(element) {
+  const optionElement = getOptionElement(element);
+  if (!optionElement || optionElement.hasAttribute('disabled')) {
+    return;
   }
+  return optionElement.getAttribute('option');
+}
 
-  /**
-   * Appends the 'selected' attribute on the child with the given 'option' value.
-   * @param {string} option
-   * @private
-   */
-  selectOption_(option) {
-    const selector = `[option="${option}"]`;
-    const optionElement = scopedQuerySelector(this.element, selector);
-    if (optionElement.hasAttribute('selected')) {
-      optionElement.removeAttribute('selected');
-      return;
-    }
-    optionElement.setAttribute('selected', '');
+/**
+ * Appends the 'selected' attribute on the child of the given element with the given 'option' value.
+ * @param {!Element} element
+ * @param {string} option
+ */
+function selectOption(element, option) {
+  const selector = `[option="${option}"]`;
+  const optionElement = scopedQuerySelector(element, selector);
+  if (optionElement.hasAttribute('selected')) {
+    optionElement.removeAttribute('selected');
+    return;
   }
+  optionElement.setAttribute('selected', '');
+}
 
-  /**
-   * Removes all 'selected' attributes on children before selecting the given option.
-   * @param {string} option
-   * @private
-   */
-  selectUniqueOption_(option) {
-    this.element
-      .querySelectorAll('[selected]')
-      .forEach((selected) => selected.removeAttribute('selected'));
-    this.selectOption_(option);
-  }
+/**
+ * Removes all 'selected' attributes on children before selecting the given option.
+ * @param {!Element} element
+ * @param {string} option
+ */
+function selectUniqueOption(element, option) {
+  element
+    .querySelectorAll('[selected]')
+    .forEach((selected) => selected.removeAttribute('selected'));
+  selectOption(element, option);
 }
 
 /** @override */
