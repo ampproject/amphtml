@@ -470,7 +470,7 @@ export class AmpList extends AMP.BaseElement {
    */
   createContainer_() {
     const container = this.win.document.createElement('div');
-    container.setAttribute('role', 'list');
+    this.setRoleAttribute_(container, 'list');
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
@@ -491,7 +491,7 @@ export class AmpList extends AMP.BaseElement {
   addElementsToContainer_(elements, container) {
     elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
+        this.setRoleAttribute_(element, 'listitem');
       }
       if (
         !element.hasAttribute('tabindex') &&
@@ -501,6 +501,21 @@ export class AmpList extends AMP.BaseElement {
       }
       container.appendChild(element);
     });
+  }
+
+  /**
+   * Adds the 'role' attribute to the element.
+   * For amp-lists with 'single-item' enabled, we should not specify the
+   * role of 'list' on the container or listitem on the children as it
+   * causes screen readers to read an extra nested list with one item
+   * @param {!Node} element
+   * @param {string} value
+   * @private
+   */
+  setRoleAttribute_(element, value) {
+    if (!this.element.hasAttribute('single-item')) {
+      element.setAttribute('role', value);
+    }
   }
 
   /**
@@ -1016,7 +1031,7 @@ export class AmpList extends AMP.BaseElement {
       return this.maybeResizeListToFitItems_();
     };
 
-    if (this.isLayoutContainer_) {
+    if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
         renderAndResize().then((resized) =>
           resized ? this.unlockHeightInsideMutate_() : null
@@ -1122,12 +1137,16 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Measure and lock height before performing given mutate fn.
-   * Applicable for layout=container.
+   * Applicable for layout=container without infinite scrolling.
    * @private
    * @param {!Function} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
+    devAssert(
+      !this.loadMoreEnabled_,
+      'amp-list[layout=container] does not support infinite scrolling with [load-more].'
+    );
     let currentHeight;
     return this.measureMutateElement(
       () => {
