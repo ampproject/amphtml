@@ -44,6 +44,9 @@ class AmpSocialShare extends AMP.BaseElement {
 
     /** @private {?string} */
     this.target_ = null;
+
+    /** @private {?Array<string>} */
+    this.bindingVars_ = null;
   }
 
   /** @override */
@@ -109,38 +112,7 @@ class AmpSocialShare extends AMP.BaseElement {
       getDataParamsFromAttributes(element)
     );
 
-    const hrefWithVars = addParamsToUrl(
-      dev().assertString(this.shareEndpoint_),
-      this.params_
-    );
-    const urlReplacements = Services.urlReplacementsForDoc(this.element);
-    const bindingVars = typeConfig['bindings'];
-    const bindings = {};
-    if (bindingVars) {
-      bindingVars.forEach((name) => {
-        const bindingName = name.toUpperCase();
-        bindings[bindingName] = this.params_[name];
-      });
-    }
-
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((href) => {
-      this.href_ = href;
-      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const {protocol} = Services.urlForDoc(element).parse(href);
-      const isMailTo = protocol === 'mailto:';
-      const isSms = protocol === 'sms:';
-      this.target_ =
-        this.platform_.isIos() && (isMailTo || isSms)
-          ? '_top'
-          : this.element.hasAttribute('data-target')
-          ? this.element.getAttribute('data-target')
-          : '_blank';
-      if (isSms) {
-        // http://stackoverflow.com/a/19126326
-        // This code path seems to be stable for both iOS and Android.
-        this.href_ = this.href_.replace('?', '?&');
-      }
-    });
+    this.bindingVars_ = typeConfig['bindings'];
 
     element.setAttribute('role', 'button');
     if (!element.hasAttribute('tabindex')) {
@@ -149,6 +121,43 @@ class AmpSocialShare extends AMP.BaseElement {
     element.addEventListener('click', () => this.handleClick_());
     element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     element.classList.add(`amp-social-share-${typeAttr}`);
+  }
+
+  /** @override */
+  layoutCallback() {
+    const bindings = {};
+    if (this.bindingVars_) {
+      this.bindingVars_.forEach((name) => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = this.params_[name];
+      });
+    }
+
+    const hrefWithVars = addParamsToUrl(
+      dev().assertString(this.shareEndpoint_),
+      this.params_
+    );
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
+    return urlReplacements
+      .expandUrlAsync(hrefWithVars, bindings)
+      .then((href) => {
+        this.href_ = href;
+        // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+        const {protocol} = Services.urlForDoc(this.element).parse(href);
+        const isMailTo = protocol === 'mailto:';
+        const isSms = protocol === 'sms:';
+        this.target_ =
+          this.platform_.isIos() && (isMailTo || isSms)
+            ? '_top'
+            : this.element.hasAttribute('data-target')
+            ? this.element.getAttribute('data-target')
+            : '_blank';
+        if (isSms) {
+          // http://stackoverflow.com/a/19126326
+          // This code path seems to be stable for both iOS and Android.
+          this.href_ = this.href_.replace('?', '?&');
+        }
+      });
   }
 
   /**
