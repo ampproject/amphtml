@@ -43,7 +43,7 @@ describes.repeated(
         },
         runtimeOn: false,
       },
-      env => {
+      (env) => {
         let win, doc, ampdoc;
         let element, list, listMock;
         let resource, resources;
@@ -70,7 +70,7 @@ describes.repeated(
             resetPendingChangeSize: env.sandbox.stub(),
           };
           resources = {
-            getResourceForElement: e => (e === element ? resource : null),
+            getResourceForElement: (e) => (e === element ? resource : null),
           };
 
           element = createAmpListElement();
@@ -159,14 +159,8 @@ describes.repeated(
 
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
-            listMock
-              .expects('togglePlaceholder')
-              .withExactArgs(true)
-              .once();
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(true, true)
-              .once();
+            listMock.expects('togglePlaceholder').withExactArgs(true).once();
+            listMock.expects('toggleLoading').withExactArgs(true, true).once();
           }
 
           // Stub the rendering of the template.
@@ -188,7 +182,7 @@ describes.repeated(
           // Call mutate OR measureMutate, then measure during render.
           listMock
             .expects('mutateElement')
-            .callsFake(m => m())
+            .callsFake((m) => m())
             .atLeast(0);
           listMock
             .expects('measureMutateElement')
@@ -199,18 +193,12 @@ describes.repeated(
             .atLeast(0);
           listMock
             .expects('measureElement')
-            .callsFake(m => m())
+            .callsFake((m) => m())
             .atLeast(1);
 
           // Hide loading/placeholder during render.
-          listMock
-            .expects('toggleLoading')
-            .withExactArgs(false)
-            .atLeast(1);
-          listMock
-            .expects('togglePlaceholder')
-            .withExactArgs(false)
-            .atLeast(1);
+          listMock.expects('toggleLoading').withExactArgs(false).atLeast(1);
+          listMock.expects('togglePlaceholder').withExactArgs(false).atLeast(1);
         }
 
         describe('without amp-bind', () => {
@@ -231,7 +219,7 @@ describes.repeated(
               });
           });
 
-          it('should reset pending change-size request after render', function*() {
+          it('should reset pending change-size request after render', function* () {
             const itemElement = doc.createElement('div');
             const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
               itemElement,
@@ -334,6 +322,33 @@ describes.repeated(
               });
           });
 
+          it('should not include `role` attribute if single-item is set', () => {
+            const fetched = {'items': {title: 'Title1'}};
+            const itemElement = doc.createElement('div');
+
+            // single-item attribute must be set before buildCallback(), so use
+            // a new test AmpList instance.
+            element = createAmpListElement();
+            element.setAttribute('single-item', 'true');
+            list = createAmpList(element);
+
+            const rendered = expectFetchAndRender(fetched, [itemElement], {
+              expr: 'items',
+              singleItem: true,
+            });
+
+            return list
+              .layoutCallback()
+              .then(() => rendered)
+              .then(() => {
+                expect(list.container_.hasAttribute('role')).to.be.false;
+                expect(list.container_.contains(itemElement)).to.be.true;
+                expect(list.container_.children.length).to.equal(1);
+                expect(list.container_.children[0].hasAttribute('role')).to.be
+                  .false;
+              });
+          });
+
           it('should trim the results to max-items', () => {
             const fetched = {
               items: [{title: 'Title1'}, {title: 'Title2'}, {title: 'Title3'}],
@@ -396,14 +411,8 @@ describes.repeated(
               });
             });
             // TODO(#14772): this expectation is sometimes not met.
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(false)
-              .once();
-            listMock
-              .expects('togglePlaceholder')
-              .withExactArgs(false)
-              .once();
+            listMock.expects('toggleLoading').withExactArgs(false).once();
+            listMock.expects('togglePlaceholder').withExactArgs(false).once();
 
             return layout.then(() => {
               expect(list.container_.contains(foo)).to.be.true;
@@ -463,14 +472,8 @@ describes.repeated(
 
           it('should fail to load b/c data array is absent', () => {
             expectAsyncConsoleError(/Response must contain an array/, 1);
-            listMock
-              .expects('fetch_')
-              .returns(Promise.resolve({}))
-              .once();
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(false)
-              .once();
+            listMock.expects('fetch_').returns(Promise.resolve({})).once();
+            listMock.expects('toggleLoading').withExactArgs(false).once();
             return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
               /Response must contain an array/
             );
@@ -482,14 +485,8 @@ describes.repeated(
               1
             );
             element.setAttribute('single-item', 'true');
-            listMock
-              .expects('fetch_')
-              .returns(Promise.resolve())
-              .once();
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(false)
-              .once();
+            listMock.expects('fetch_').returns(Promise.resolve()).once();
+            listMock.expects('toggleLoading').withExactArgs(false).once();
             return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
               /Response must contain an array or object/
             );
@@ -560,34 +557,22 @@ describes.repeated(
             });
           });
 
-          it('should not show placeholder on fetch failure', function*() {
+          it('should not show placeholder on fetch failure', function* () {
             // Stub fetch_() to fail.
-            listMock
-              .expects('fetch_')
-              .returns(Promise.reject())
-              .once();
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(false)
-              .once();
+            listMock.expects('fetch_').returns(Promise.reject()).once();
+            listMock.expects('toggleLoading').withExactArgs(false).once();
             listMock.expects('togglePlaceholder').never();
 
             return list.layoutCallback();
           });
 
-          it('should trigger "fetch-error" event on fetch failure', function*() {
+          it('should trigger "fetch-error" event on fetch failure', function* () {
             const actions = {trigger: env.sandbox.spy()};
             env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
             // Stub fetch_() to fail.
-            listMock
-              .expects('fetch_')
-              .returns(Promise.reject())
-              .once();
-            listMock
-              .expects('toggleLoading')
-              .withExactArgs(false)
-              .once();
+            listMock.expects('fetch_').returns(Promise.reject()).once();
+            listMock.expects('toggleLoading').withExactArgs(false).once();
 
             yield list.layoutCallback();
 
@@ -754,10 +739,7 @@ describes.repeated(
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.reject());
 
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
@@ -771,10 +753,7 @@ describes.repeated(
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve(undefined));
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(/received no response/);
@@ -785,10 +764,7 @@ describes.repeated(
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({init: {status: 400}}));
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
@@ -796,7 +772,7 @@ describes.repeated(
               );
             });
 
-            it('should delegate template rendering to viewer', function*() {
+            it('should delegate template rendering to viewer', function* () {
               const rendered = doc.createElement('p');
               const html =
                 '<div role="list" class="i-amphtml-fill-content ' +
@@ -894,44 +870,29 @@ describes.repeated(
                 .expects('getVsync')
                 .returns({
                   measure: () => {},
-                  mutate: block => block(),
+                  mutate: (block) => block(),
                 })
                 .atLeast(1);
             });
 
             it('should hide fallback element on fetch success', () => {
               // Stub fetch and render to succeed.
-              listMock
-                .expects('fetch_')
-                .returns(Promise.resolve([]))
-                .once();
+              listMock.expects('fetch_').returns(Promise.resolve([])).once();
               templates.findAndRenderTemplate.returns(Promise.resolve([]));
               // Act as if a fallback is already displayed.
               env.sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
 
               listMock.expects('togglePlaceholder').never();
-              listMock
-                .expects('toggleFallback')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('toggleFallback').withExactArgs(false).once();
               return list.layoutCallback().catch(() => {});
             });
 
             it('should hide placeholder and show fallback on fetch failure', () => {
               // Stub fetch_() to fail.
-              listMock
-                .expects('fetch_')
-                .returns(Promise.reject())
-                .once();
+              listMock.expects('fetch_').returns(Promise.reject()).once();
 
-              listMock
-                .expects('togglePlaceholder')
-                .withExactArgs(false)
-                .once();
-              listMock
-                .expects('toggleFallback')
-                .withExactArgs(true)
-                .once();
+              listMock.expects('togglePlaceholder').withExactArgs(false).once();
+              listMock.expects('toggleFallback').withExactArgs(true).once();
               return list.layoutCallback().catch(() => {});
             });
           });
@@ -944,7 +905,7 @@ describes.repeated(
             bind = {
               rescan: env.sandbox.stub().returns(Promise.resolve()),
               signals: () => {
-                return {get: unusedName => false};
+                return {get: (unusedName) => false};
               },
               getState: () => ({}),
             };
@@ -981,7 +942,7 @@ describes.repeated(
 
             // firstPromise won't resolve until the render triggered by secondPromise completes.
             let resolveFirstPromise;
-            const firstPromise = new Promise(resolve => {
+            const firstPromise = new Promise((resolve) => {
               resolveFirstPromise = () => resolve({items: [foo]});
             });
             const secondPromise = Promise.resolve({items: [bar]});
@@ -1021,14 +982,8 @@ describes.repeated(
 
               listMock.expects('fetchList_').never();
               // Expect hiding of placeholder/loading after render.
-              listMock
-                .expects('togglePlaceholder')
-                .withExactArgs(false)
-                .once();
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('togglePlaceholder').withExactArgs(false).once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
 
               element.setAttribute('src', 'https://new.com/list.json');
               list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
@@ -1123,14 +1078,8 @@ describes.repeated(
 
               listMock.expects('fetchList_').never();
               // Expect hiding of placeholder/loading after render.
-              listMock
-                .expects('togglePlaceholder')
-                .withExactArgs(false)
-                .once();
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('togglePlaceholder').withExactArgs(false).once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
 
               element.setAttribute('src', 'https://new.com/list.json');
               list.mutatedAttributesCallback({'src': DEFAULT_ITEMS});
@@ -1147,23 +1096,14 @@ describes.repeated(
 
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
-              listMock
-                .expects('togglePlaceholder')
-                .withExactArgs(true)
-                .once();
+              listMock.expects('togglePlaceholder').withExactArgs(true).once();
               listMock
                 .expects('toggleLoading')
                 .withExactArgs(true, true)
                 .once();
               // Expect hiding of placeholder/loading after render.
-              listMock
-                .expects('togglePlaceholder')
-                .withExactArgs(false)
-                .once();
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(false)
-                .once();
+              listMock.expects('togglePlaceholder').withExactArgs(false).once();
+              listMock.expects('toggleLoading').withExactArgs(false).once();
 
               element.setAttribute('src', 'https://new.com/list.json');
               list.mutatedAttributesCallback({'src': DEFAULT_ITEMS});
@@ -1247,7 +1187,7 @@ describes.repeated(
 
             it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
               bind.signals = () => {
-                return {get: name => name === 'FIRST_MUTATE'};
+                return {get: (name) => name === 'FIRST_MUTATE'};
               };
               const child = doc.createElement('div');
               child.setAttribute('i-amphtml-binding', '');

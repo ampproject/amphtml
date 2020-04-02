@@ -71,7 +71,7 @@ export function extractUrlExperimentId(win, element) {
   let arg;
   let match;
   expKeys.forEach(
-    key =>
+    (key) =>
       (arg =
         arg ||
         ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
@@ -112,7 +112,7 @@ export function parseExperimentIds(idString) {
  */
 export function isInExperiment(element, id) {
   return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
-    x => {
+    (x) => {
       return x === id;
     }
   );
@@ -140,7 +140,7 @@ export function isInManualExperiment(element) {
  * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
-  return idList.every(id => {
+  return idList.every((id) => {
     return !isNaN(parseInt(id, 10));
   });
 }

@@ -66,12 +66,12 @@ document.head.appendChild(lightboxScript);
 To modify their code, just write normal javascript for DOM mutations:
 
 ```js
-document.querySelectorAll('amp-img').forEach(ampImg => {
+document.querySelectorAll('amp-img').forEach((ampImg) => {
   ampImg.removeAttribute('on');
   ampImg.setAttribute('lightbox', '');
 });
 
-document.querySelectorAll('amp-carousel').forEach(carousel => {
+document.querySelectorAll('amp-carousel').forEach((carousel) => {
   carousel.setAttribute('lightbox', '');
 });
 ```

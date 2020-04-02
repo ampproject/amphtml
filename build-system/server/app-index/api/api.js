@@ -37,7 +37,7 @@ function searchListing(fileSet, opt_searchQuery) {
     threshold: 0.4,
   });
 
-  return fuse.search(opt_searchQuery).map(i => fileSet[i]);
+  return fuse.search(opt_searchQuery).map((i) => fileSet[i]);
 }
 
 async function handleListingRequest({query: {path, search}}, res) {

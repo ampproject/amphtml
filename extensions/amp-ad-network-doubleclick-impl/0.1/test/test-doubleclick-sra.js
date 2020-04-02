@@ -63,7 +63,7 @@ const config = {amp: true, allowExternalResources: true};
   calling setAttribute('src', 'foo') on the iframe, which will cause all these
   tests to fail.
 */
-describes.realWin('Doubleclick SRA', config, env => {
+describes.realWin('Doubleclick SRA', config, (env) => {
   let doc;
 
   beforeEach(() => {
@@ -116,7 +116,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       for (let i = 0; i < 2; i++) {
         impls.push({
           element: {
-            getAttribute: name => {
+            getAttribute: (name) => {
               expect(name).to.equal('data-slot');
               return '/1234/foo.com/news/world/2018/06/17/article';
             },
@@ -168,7 +168,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       expect(isAdTest(impls)).to.be.null;
       impls[0] = {
         element: {
-          getAttribute: name => {
+          getAttribute: (name) => {
             expect(name).to.equal('data-experiment-id');
             return undefined;
           },
@@ -177,7 +177,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       expect(isAdTest(impls)).to.be.null;
       impls[1] = {
         element: {
-          getAttribute: name => {
+          getAttribute: (name) => {
             expect(name).to.equal('data-experiment-id');
             return '123,117152632,456';
           },
@@ -332,7 +332,7 @@ describes.realWin('Doubleclick SRA', config, env => {
   });
 
   describe('#constructSRABlockParameters', () => {
-    [true, false].forEach(forceSafeFrame => {
+    [true, false].forEach((forceSafeFrame) => {
       it(`should combine for SRA, forceSafeframe ${forceSafeFrame}`, () => {
         const targeting1 = {
           cookieOptOut: 1,
@@ -489,7 +489,7 @@ describes.realWin('Doubleclick SRA', config, env => {
             bodyUsed: false,
             text: () => {
               let slotDataString = '';
-              responses.forEach(slot => {
+              responses.forEach((slot) => {
                 slotDataString += `${JSON.stringify(slot.headers)}\n${
                   slot.creative
                 }\n`;
@@ -524,8 +524,8 @@ describes.realWin('Doubleclick SRA', config, env => {
             arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
             bodyUsed: false,
             headers: {
-              get: header => headers[header],
-              has: header => header in headers,
+              get: (header) => headers[header],
+              has: (header) => header in headers,
             },
             text: () => {
               throw new Error('should not be SRA!');
@@ -571,7 +571,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       );
       const expIds = [];
       let expectedAttemptCollapseCalls = 0;
-      items.forEach(network => {
+      items.forEach((network) => {
         if (typeof network == 'number') {
           network = {networkId: network, instances: 1};
         }
@@ -600,7 +600,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       });
       const grouping = {};
       const groupingPromises = {};
-      doubleclickInstances.forEach(impl => {
+      doubleclickInstances.forEach((impl) => {
         const networkId = getNetworkId(impl.element);
         (grouping[networkId] || (grouping[networkId] = [])).push(impl);
         (
@@ -642,15 +642,15 @@ describes.realWin('Doubleclick SRA', config, env => {
           }
         });
       };
-      Object.keys(grouping).forEach(networkId => {
+      Object.keys(grouping).forEach((networkId) => {
         const validInstances = grouping[networkId].filter(
-          impl => impl.element.getAttribute('data-test-invalid') != 'true'
+          (impl) => impl.element.getAttribute('data-test-invalid') != 'true'
         );
         const isSra =
           validInstances.length > 1 &&
           !validInstances[0].experimentIds.includes('21062235');
         const sraResponses = [];
-        validInstances.forEach(impl => {
+        validInstances.forEach((impl) => {
           const creative = `slot${idx++}`;
           if (isSra) {
             let headers = {
@@ -775,7 +775,7 @@ describes.realWin('Doubleclick SRA', config, env => {
         sraRequestAdUrlResolvers
       );
       expect(sraRequestAdUrlResolvers.length).to.equal(1);
-      return slotDeferred.promise.then(fetchResponse => {
+      return slotDeferred.promise.then((fetchResponse) => {
         expect(fetchResponse.headers.get('a')).to.equal('b');
         expect(fetchResponse.headers.get('c')).to.equal('123');
         expect(
@@ -784,7 +784,7 @@ describes.realWin('Doubleclick SRA', config, env => {
         expect(fetchResponse.headers.has('unknown')).to.be.false;
         return fetchResponse
           .arrayBuffer()
-          .then(buffer => expect(utf8Decode(buffer)).to.equal(creative));
+          .then((buffer) => expect(utf8Decode(buffer)).to.equal(creative));
       });
     });
 
@@ -807,7 +807,7 @@ describes.realWin('Doubleclick SRA', config, env => {
         },
       ];
       const promises = [];
-      const resolvers = blocks.map(block => block.deferred.resolve);
+      const resolvers = blocks.map((block) => block.deferred.resolve);
       for (let i = 1; i <= blocks.length; i++) {
         const {creative, headers, deferred} = blocks[i - 1];
         sraBlockCallbackHandler(
@@ -818,8 +818,8 @@ describes.realWin('Doubleclick SRA', config, env => {
         );
         expect(resolvers.length).to.equal(blocks.length - i);
         promises.push(
-          deferred.promise.then(fetchResponse => {
-            Object.keys(headers).forEach(name =>
+          deferred.promise.then((fetchResponse) => {
+            Object.keys(headers).forEach((name) =>
               expect(fetchResponse.header.get(name)).to.equal(
                 String(headers[name])
               )
@@ -830,7 +830,7 @@ describes.realWin('Doubleclick SRA', config, env => {
             expect(fetchResponse.headers.has('unknown')).to.be.false;
             return fetchResponse
               .arrayBuffer()
-              .then(buffer => expect(utf8Decode(buffer)).to.equal(creative));
+              .then((buffer) => expect(utf8Decode(buffer)).to.equal(creative));
           })
         );
       }

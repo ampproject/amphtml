@@ -163,6 +163,13 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
+    // Race condition: if an element is reparented while building, it'll
+    // receive a newly constructed Resource. Make sure this Resource's
+    // internal state is also "building".
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      this.build();
+    }
+
     /** @private {number} */
     this.priorityOverride_ = -1;
 
@@ -324,7 +331,7 @@ export class Resource {
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
-      reason => {
+      (reason) => {
         this.maybeReportErrorOnBuildFailure(reason);
         this.isBuilding_ = false;
         this.element.signals().rejectSignal('res-built', reason);
@@ -874,7 +881,7 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(
       () => this.layoutComplete_(true),
-      reason => this.layoutComplete_(false, reason)
+      (reason) => this.layoutComplete_(false, reason)
     );
     return this.layoutPromise_;
   }

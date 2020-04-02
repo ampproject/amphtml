@@ -53,6 +53,6 @@ AmpTimeago['props'] = {
   'cutoff': {attr: 'cutoff', type: 'number'},
 };
 
-AMP.extension(TAG, '0.2', AMP => {
+AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpTimeago);
 });

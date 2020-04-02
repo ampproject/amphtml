@@ -19,7 +19,7 @@ const babel = require('@babel/core');
 const conf = require('./build.conf');
 const fs = require('fs-extra');
 const path = require('path');
-const resorcery = require('@jridgewell/resorcery');
+const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 
@@ -42,7 +42,7 @@ function loadSourceMap(file) {
  */
 function returnMapFirst(map) {
   let first = true;
-  return function(file) {
+  return function (file) {
     if (first) {
       first = false;
       return map;
@@ -86,10 +86,10 @@ function terserMinify(code) {
  * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-exports.postClosureBabel = function(directory, isEsmBuild) {
+exports.postClosureBabel = function (directory, isEsmBuild) {
   const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
 
-  return through.obj(function(file, enc, next) {
+  return through.obj(function (file, enc, next) {
     if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
       return next(null, file);
     }
@@ -101,7 +101,7 @@ exports.postClosureBabel = function(directory, isEsmBuild) {
       sourceMaps: true,
       inputSourceMap: false,
     });
-    let remapped = resorcery(
+    let remapped = remapping(
       babelMap,
       returnMapFirst(map),
       !argv.full_sourcemaps
@@ -110,8 +110,8 @@ exports.postClosureBabel = function(directory, isEsmBuild) {
     const {compressed, terserMap} = terserMinify(code);
     file.contents = Buffer.from(compressed, 'utf-8');
 
-    // TODO: Resorcery should support a chain, instead of multiple invocations.
-    remapped = resorcery(
+    // TODO: Remapping should support a chain, instead of multiple invocations.
+    remapped = remapping(
       terserMap,
       returnMapFirst(remapped),
       !argv.full_sourcemaps

@@ -217,6 +217,7 @@ import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rakutenunifiedads} from '../ads/rakutenunifiedads';
 import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
@@ -510,6 +511,7 @@ register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rakutenunifiedads', rakutenunifiedads);
 register('rbinfox', rbinfox);
 register('readmo', readmo);
 register('realclick', realclick);
@@ -638,7 +640,7 @@ export function draw3p(win, data, configCallback) {
     win.context.tagName
   );
   if (configCallback) {
-    configCallback(data, data => {
+    configCallback(data, (data) => {
       userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -659,7 +661,7 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(
+window.draw3p = function (
   opt_configCallback,
   opt_allowed3pTypes,
   opt_allowedEmbeddingOrigins

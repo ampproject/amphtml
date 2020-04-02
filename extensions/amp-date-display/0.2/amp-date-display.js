@@ -51,7 +51,7 @@ class AmpDateDisplay extends PreactBaseElement {
         const host = this.element;
         const domPromise = templates
           .findAndRenderTemplate(host, data)
-          .then(rendered => {
+          .then((rendered) => {
             const container = document.createElement('div');
             container.appendChild(rendered);
 
@@ -94,6 +94,6 @@ AmpDateDisplay['props'] = {
   'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
 };
 
-AMP.extension(TAG, '0.2', AMP => {
+AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);
 });

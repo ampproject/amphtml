@@ -74,7 +74,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     return this.ampDoc_
       .whenReady()
       .then(() => viewer.getReferrerUrl())
-      .then(referrer => {
+      .then((referrer) => {
         this.referrer_ = referrer;
         this.ampDoc_.whenFirstVisible().then(() => {
           this.runSmartlinks_();
@@ -87,7 +87,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   runSmartlinks_() {
-    this.getLinkmateOptions_().then(config => {
+    this.getLinkmateOptions_().then((config) => {
       this.linkmateOptions_.linkmateExpected = config['linkmate_enabled'];
       this.linkmateOptions_.publisherID = config['publisher_id'];
 
@@ -133,8 +133,8 @@ export class AmpSmartlinks extends AMP.BaseElement {
           method: 'GET',
           ampCors: false,
         })
-        .then(res => res.json())
-        .then(res => {
+        .then((res) => res.json())
+        .then((res) => {
           return getData(res)[0]['amp_config'];
         });
     } catch (err) {
@@ -180,7 +180,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
 
     return this.linkRewriterService_.registerLinkRewriter(
       TAG,
-      anchorList => {
+      (anchorList) => {
         return this.linkmate_.runLinkmate(anchorList);
       },
       options
@@ -212,7 +212,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   generateUUID_() {
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
       (
         c ^
         (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
@@ -221,6 +221,6 @@ export class AmpSmartlinks extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-smartlinks', '0.1', AMP => {
+AMP.extension('amp-smartlinks', '0.1', (AMP) => {
   AMP.registerElement('amp-smartlinks', AmpSmartlinks);
 });

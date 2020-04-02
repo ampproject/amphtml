@@ -86,7 +86,7 @@ export function newPerformanceResourceTiming(
   };
 }
 
-describes.realWin('resourceTiming', {amp: true}, env => {
+describes.realWin('resourceTiming', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let element;
@@ -97,14 +97,14 @@ describes.realWin('resourceTiming', {amp: true}, env => {
    * @param {string} expectedResult
    * @return {!Promise<undefined>}
    */
-  const runSerializeTest = function(
+  const runSerializeTest = function (
     fakeEntries,
     resourceTimingSpec,
     expectedResult
   ) {
     env.sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
     return getResourceTiming(element, resourceTimingSpec, Date.now()).then(
-      result => {
+      (result) => {
         expect(result).to.equal(expectedResult);
       }
     );
@@ -122,7 +122,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if the performance API is not supported', () => {
     return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
-      result => {
+      (result) => {
         expect(result).to.equal('');
       }
     );
@@ -131,7 +131,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   it('should return empty when resource timing is not supported', () => {
     // Performance API (ampdoc.performance) doesn't support resource timing.
     return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
-      result => {
+      (result) => {
         expect(result).to.equal('');
       }
     );
@@ -149,7 +149,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     env.sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
     return getResourceTiming(element, spec, Date.now() - 60 * 1000).then(
-      result => {
+      (result) => {
         expect(result).to.equal('');
       }
     );
@@ -611,14 +611,14 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
     return getResourceTiming(element, spec, Date.now())
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('link.100.400');
         expect(spec['responseAfter']).to.equal(600);
 
         // Check resource timings a second time.
         return getResourceTiming(element, spec, Date.now());
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('script.200.500');
         expect(spec['responseAfter']).to.equal(800);
       });

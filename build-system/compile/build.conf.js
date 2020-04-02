@@ -16,7 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
-const localPlugin = name =>
+const localPlugin = (name) =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const jsxOpts = {
@@ -25,7 +25,7 @@ const jsxOpts = {
   useSpread: true,
 };
 
-const defaultPlugins = isEsmBuild => [
+const defaultPlugins = (isEsmBuild) => [
   localPlugin('transform-fix-leading-comments'),
   '@babel/plugin-transform-react-constant-elements',
   ['@babel/plugin-transform-react-jsx', jsxOpts],
@@ -41,7 +41,7 @@ const defaultPlugins = isEsmBuild => [
   getReplacePlugin(isEsmBuild),
 ];
 
-const postCompilationPlugins = isEsmBuild =>
+const postCompilationPlugins = (isEsmBuild) =>
   isEsmBuild
     ? [
         localPlugin('transform-minified-comments'),
@@ -103,7 +103,7 @@ function getReplacePlugin(isEsmBuild) {
   }
 
   // default each experiment flag constant to false
-  Object.keys(experimentsConfig).forEach(experiment => {
+  Object.keys(experimentsConfig).forEach((experiment) => {
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 

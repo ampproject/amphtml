@@ -73,7 +73,7 @@ let SetStateConfigurationDef;
 const SET_STATE_CONFIGURATIONS = {
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
-    isValueValid: value => typeof value === 'boolean',
+    isValueValid: (value) => typeof value === 'boolean',
   },
 };
 
@@ -103,13 +103,13 @@ export class AmpStoryViewerMessagingHandler {
    * @public
    */
   startListening() {
-    this.viewer_.onMessageRespond('getDocumentState', data =>
+    this.viewer_.onMessageRespond('getDocumentState', (data) =>
       this.onGetDocumentState_(data)
     );
-    this.viewer_.onMessage('onDocumentState', data =>
+    this.viewer_.onMessage('onDocumentState', (data) =>
       this.onOnDocumentState_(data)
     );
-    this.viewer_.onMessageRespond('setDocumentState', data =>
+    this.viewer_.onMessageRespond('setDocumentState', (data) =>
       this.onSetDocumentState_(data)
     );
   }
@@ -171,7 +171,7 @@ export class AmpStoryViewerMessagingHandler {
       return;
     }
 
-    this.storeService_.subscribe(config.property, value => {
+    this.storeService_.subscribe(config.property, (value) => {
       this.viewer_.sendMessage(
         'documentStateUpdate',
         dict({'state': state, 'value': value})
