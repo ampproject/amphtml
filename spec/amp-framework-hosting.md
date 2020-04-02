@@ -42,10 +42,10 @@ gulp dist
 
 The built framework can be found in directory `dist`. The version assigned to the build is in `dist/version.txt` and a listing of all files included in build is in `dist/files.txt`. The framework is ready to be moved to and served from your host.
 
-If you have advanced hosting capabilities or would like to customize the versioning system, you may be interested in flags `--config=<config>` and `--version_override=<version>`, where...
+If you have advanced hosting capabilities or would like to customize the versioning system, you may be interested in the following flags to `gulp dist`:
 
-- `<config>` is one of `canary` or `prod`, indicating whether the build is meant to be served as a canary release or a production release, respectively. When the `--config` flag is omitted, the build system defaults to `prod`.
-- `<version>` is the version you want to assign to the build. When the `--version_override` flag is omitted, the build system defaults to the commit time of the last commit in the active branch and appends a trailing zero: `TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S` with `0` appended. Note that the version specified here is not the "runtime version" (RTV), which contains both the config and the version. The runtime version is discussed in more detail in section [Serve the framework](#serve-the-framework). Also, keep in mind that the version needs to be URL path compatible; no characters should require URI encoding.
+- `--config`: Indicate the release type of the distribution, production (`prod`) or canary (`canary`). Defaults to `prod`.
+- `--version_override`: Assign a version to the distribution. The version needs to be URL path compatible; no characters should require URI encoding. Defaults to the commit time of the last commit in the active branch and appends a trailing zero: `TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S` with `0` appended. Note that the version specified here is not the "runtime version" (RTV), which contains both the config and the version. The runtime version is discussed in more detail in section [Serve the AMP framework](#serve-the-amp-framework).
 
 ### Option 2: Download the framework with an AMP Toolbox tool
 
@@ -56,7 +56,7 @@ If you have advanced hosting capabilities or would like to customize the version
 
 ### Option 3: Manually copy the framework from cdn.ampproject.org
 
-The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>` where `<rtv>` is the runtime version. Note that a "runtime version" (RTV) contains both the config and the version; this is discussed in more detail in section [Serve the framework](#serve-the-framework).
+The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>` where `<rtv>` is the runtime version. Note that a "runtime version" (RTV) contains both the config and the version; this is discussed in more detail in section [Serve the AMP framework](#serve-the-amp-framework).
 
 #### Copy files
 
@@ -86,7 +86,7 @@ becomes
 <script async custom-element="amp-carousel" src="https://example.com/amp/v0/amp-carousel-0.1.js"></script>
 ```
 
-Versioned URLs are also possible and discussed in section [Serve the framework](#serve-the-framework).
+Versioned URLs are also possible and discussed in section [Serve the AMP framework](#serve-the-amp-framework).
 
 Important: All scripts must come from the same origin. Fetching scripts from multiple origins is not supported and can lead to unpredictable end user experiences.
 
