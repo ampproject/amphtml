@@ -164,12 +164,12 @@ export class MutatorImpl {
   }
 
   /** @override */
-  mutateElement(element, mutator, skipMeasure) {
+  mutateElement(element, mutator, skipRemeasure) {
     return this.measureMutateElementResources_(
       element,
       null,
       mutator,
-      skipMeasure
+      skipRemeasure
     );
   }
 
@@ -200,14 +200,14 @@ export class MutatorImpl {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
-   * @param {boolean} skipMeasure
+   * @param {boolean} skipRemeasure
    * @return {!Promise}
    */
   measureMutateElementResources_(
     element,
     measurer,
     mutator,
-    skipMeasure = false
+    skipRemeasure = false
   ) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
@@ -231,7 +231,7 @@ export class MutatorImpl {
       },
       mutate: () => {
         mutator();
-        if (skipMeasure) {
+        if (skipRemeasure) {
           return;
         }
 

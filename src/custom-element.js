@@ -1761,7 +1761,7 @@ function createBaseCustomElementClass(win) {
           }
         },
         undefined,
-        /* skipMeasure */ true
+        /* skipRemeasure */ true
       );
     }
 
@@ -1842,14 +1842,14 @@ function createBaseCustomElementClass(win) {
      *
      * @param {function()} mutator
      * @param {?Element=} opt_element
-     * @param {boolean=} opt_skipMeasure
+     * @param {boolean=} opt_skipRemeasure
      */
-    mutateOrInvoke_(mutator, opt_element, opt_skipMeasure = false) {
+    mutateOrInvoke_(mutator, opt_element, opt_skipRemeasure = false) {
       if (this.ampdoc_) {
         Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
           opt_element || this,
           mutator,
-          opt_skipMeasure
+          opt_skipRemeasure
         );
       } else {
         mutator();
