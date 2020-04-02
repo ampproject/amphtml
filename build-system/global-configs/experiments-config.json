@@ -12,7 +12,7 @@
     "environment": "AMP",
     "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
     "issue": "",
-    "expirationDateUTC": "2020-12-31",
+    "expiration_date_utc": "2020-12-31",
     "define_experiment_constant": "MOVE_FIXED_LAYER"
   },
   "experimentC": {}
