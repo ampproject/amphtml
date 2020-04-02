@@ -421,6 +421,7 @@ module.exports = {
   dist,
   copyCss,
   copyParsers,
+  prebuild,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */

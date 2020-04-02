@@ -18,7 +18,7 @@ const log = require('fancy-log');
 const {bootstrapThirdPartyFrames, printConfigHelp} = require('./helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {copyCss, copyParsers} = require('./dist');
+const {copyCss, copyParsers, prebuild} = require('./dist');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {doServe} = require('./serve');
@@ -51,6 +51,9 @@ async function defaultTask() {
   printConfigHelp('gulp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
+  if (argv.compiled) {
+    await prebuild();
+  }
   await compileCss(/* watch */ true);
   await compileJison();
   if (argv.compiled) {
