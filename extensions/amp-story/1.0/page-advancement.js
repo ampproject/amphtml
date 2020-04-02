@@ -479,10 +479,10 @@ export class ManualAdvancement extends AdvancementConfig {
 
     if (
       target.getAttribute('has-tooltip') === 'auto' &&
-      this.isInScreenBottom_(event, pageRect)
+      this.isInScreenBottom_(target, pageRect)
     ) {
-      event.target.setAttribute('target', '_blank');
-      event.target.setAttribute('role', 'link');
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
       return false;
     }
 
@@ -507,13 +507,13 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * Checks if element is inside of the bottom region of the screen.
-   * @param {!Event} event
+   * @param {!Element} target
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenBottom_(event, pageRect) {
-    const targetRect = event.target.getBoundingClientRect();
+  isInScreenBottom_(target, pageRect) {
+    const targetRect = target.getBoundingClientRect();
     return targetRect.top - pageRect.top >= pageRect.height * TOP_REGION;
   }
 
