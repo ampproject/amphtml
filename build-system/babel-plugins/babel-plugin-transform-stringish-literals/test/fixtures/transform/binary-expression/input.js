@@ -13,9 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let none = `/rtv/100/log-messages.simple.json`;
-let start = `123/foo`;
-let middle = `/rtv/012003312116250/log-messages.simple.json`;
-let end = `rtv/123`;
-let number = `123/foo`;
-let boolean = `true/foo`;
+
+let add = `/rtv` + `/bar`;
+let multipleAdd = `/rtv` + `/bar` + `/`;
+let subtract = `/rtv` - `r`;
+let multiply = `/rtv` * `r`;
+let divide = `/rtv` / `r`;
+
+let numberStart = 1 + `/foo`;
+let stringStart = '1' + `/foo`;
+let numberEnd = `foo/` + 1;
+let stringEnd = `foo/` + '1';
+let illegalCharacter = `Invalid share providers configuration for in bookend. ` + 'Value must be `true` or a params object.';
+
+let stringLiterals = '1' + '2';
+let numberLiterals = 1 + 2;
+let booleanLiterals = false + true;
+
+let identifiers = `${foo}` + `${bar}`;
