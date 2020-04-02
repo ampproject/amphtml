@@ -339,6 +339,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [mox](../../ads/mox.md)
+- [my6Sense](../../ads/my6sense.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [NativeRoll](../../ads/nativeroll.md)

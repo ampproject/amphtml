@@ -707,6 +707,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'my6sense': {
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
