@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const {bootstrapThirdPartyFrames, printConfigHelp} = require('./helpers');
-const {compileCss} = require('./css');
-const {compileJison} = require('./compile-jison');
-const {copyCss, copyParsers, prebuild} = require('./dist');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-
-const argv = require('minimist')(process.argv.slice(2));
+const {printConfigHelp} = require('./helpers');
+const {runPreBuildSteps} = require('./build');
+const {runPreDistSteps} = require('./dist');
 
 /**
  * Prints a useful help message prior to the default gulp task
@@ -52,15 +50,10 @@ async function defaultTask() {
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
   if (argv.compiled) {
-    await prebuild();
+    await runPreDistSteps(/* watch */ true);
+  } else {
+    await runPreBuildSteps(/* watch */ true);
   }
-  await compileCss(/* watch */ true);
-  await compileJison();
-  if (argv.compiled) {
-    await copyCss();
-    await copyParsers();
-  }
-  await bootstrapThirdPartyFrames(/* watch */ true, argv.compiled);
   await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
