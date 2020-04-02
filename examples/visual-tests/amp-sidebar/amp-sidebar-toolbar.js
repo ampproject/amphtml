@@ -20,11 +20,20 @@
 
 const {
   verifySelectorsVisible,
+  verifySelectorsInvisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
+  'renders closed': async (page, name) => {
+    await verifySelectorsInvisible(page, name, [
+      'amp-sidebar.i-amphtml-element',
+    ]);
+  },
+
   'open sidebar toolbar': async (page, name) => {
-    await page.tap('[on="tap:sidebar.toggle"]');
+    const toggleButtonSelector = '[on="tap:sidebar.toggle"]';
+    await verifySelectorsVisible(page, name, [toggleButtonSelector]);
+    await page.tap(toggleButtonSelector);
     await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
     await verifySelectorsVisible(page, name, ['nav[toolbar]']);
   },
