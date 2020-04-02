@@ -16,7 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrDie} = require('../common/exec');
+const {execScriptAsync} = require('../../common/exec');
+const {installPackages} = require('../../common/utils');
 
 let storybookArgs = '--quiet';
 if (argv.port) {
@@ -28,9 +29,16 @@ if (argv.port) {
  * for AMP components (HTML Environment)
  */
 async function storybookAmp() {
-  execOrDie(
-    'node_modules/.bin/start-storybook -c ./tools/storybook/amp-env ' +
-      storybookArgs
+  // install storybook-specific modules
+  installPackages(__dirname);
+
+  execScriptAsync(
+    `./node_modules/.bin/start-storybook -c ./amp-env ${storybookArgs}`,
+    {
+      'stdio': [null, process.stdout, process.stderr],
+      cwd: __dirname,
+      env: process.env,
+    }
   );
 }
 
@@ -38,9 +46,16 @@ async function storybookAmp() {
  * Simple wrapper around the storybook start script.
  */
 async function storybookPreact() {
-  execOrDie(
-    'node_modules/.bin/start-storybook -c ./tools/storybook/preact-env ' +
-      storybookArgs
+  // install storybook-specific modules
+  installPackages(__dirname);
+
+  execScriptAsync(
+    `./node_modules/.bin/start-storybook -c ./preact-env ${storybookArgs}`,
+    {
+      'stdio': [null, process.stdout, process.stderr],
+      cwd: __dirname,
+      env: process.env,
+    }
   );
 }
 

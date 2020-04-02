@@ -327,14 +327,14 @@ After each run, a new set of results will be available at `https://percy.io/<org
 
 To speed up development and testing of components, it is advised to use the Storybook dashboard and develop "stories" (testing scenarios) for components. Storybook has many features that assist with the isolated development and manual testing of components including easy manual interaction with component parameters, integrated accessibility auditing, responsiveness testing, etc.
 
-AMP includes two Storybook environments: `storybook:amp` (for components living inside AMP pages) and `storybook:preact` (simulating Bento components living in a Preact/React app).
+AMP includes two Storybook environments: `storybook-amp` (for components living inside AMP pages) and `storybook-preact` (simulating Bento components living in a Preact/React app).
 
 To run these environments and explore existing AMP components, run
 
 ```sh
-gulp storybook:amp
+gulp storybook-amp
 # ------ or ------
-gulp storybook:preact
+gulp storybook-preact
 ```
 
 Test scenarios (stories) live inside each of the components' directories, stories ran in the AMP environment have the `.amp.js` extension:

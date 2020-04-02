@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
+import * as Preact from '../../../../src/preact';
 import {makeDecorator} from '@storybook/addons';
 import render from 'preact-render-to-string/jsx';
 

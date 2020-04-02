@@ -63,7 +63,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
       'validator/engine/validator_test.js',
-      'tools/storybook/amp-env/decorator.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -73,7 +73,7 @@ const forbiddenTerms = {
       'build-system/tasks/create-golden-css/css/main.css',
       'css/ampdoc.css',
       'css/ampshared.css',
-      'tools/storybook/amp-env/decorator.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
     ],
   },
   'describe\\.only': '',
@@ -1156,7 +1156,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
-      'tools/storybook/amp-env/decorator.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {

@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../tools/storybook/amp-env/decorator.js';
+import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line
 storiesOf('Youtube', module)
