@@ -233,15 +233,24 @@ function addHandlerMetric(handlerOptions, handlerName, metrics) {
 }
 
 /**
- * Adds analytics metrics
+ * If reqest didn't fire, don't include any value for
+ * analyticsRequest.
  * @param {?Object} analyticsHandlerOptions
  * @param {Object} metrics
  * @return {Object}
  */
 function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
   const {endTime, startTime} = analyticsHandlerOptions;
-  const analyticsRequest = endTime ? endTime - startTime : 0;
-  return Object.assign(metrics, {analyticsRequest});
+  const analyticsMetric = {};
+  // If there is no end time, that means that request didn't fire.
+  let requestsFailed = 0;
+  if (!endTime) {
+    requestsFailed++;
+  } else {
+    analyticsMetric['analyticsRequest'] = endTime - startTime;
+  }
+  analyticsMetric['requestsFailed'] = requestsFailed;
+  return Object.assign(metrics, analyticsMetric);
 }
 
 /**
@@ -273,8 +282,8 @@ function writeMetrics(url, version, metrics) {
  *
  * @param {string} url
  * @param {string} version "control" or "experiment"
- * @param {Object} options
- * @param {Object} handlers
+ * @param {!Object} options
+ * @param {!Object} handlers
  * @return {Promise}
  */
 async function measureDocument(url, version, {headless}, handlers) {

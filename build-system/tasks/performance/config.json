@@ -1,8 +1,10 @@
 {
   "headless": true,
   "runs": 100,
-  "urls": [],
   "handlers": {
+    "defaultHandler": {
+      "urls": []
+    },
     "analyticsHandler": {
       "timeout": 2000,
       "urls": []

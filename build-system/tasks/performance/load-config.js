@@ -28,15 +28,17 @@ function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
   const config = JSON.parse(file);
   if (argv.url) {
-    config.urls = [argv.url];
+    config.handlers.defaultHandler.urls = [argv.url];
   }
-  config.urls = Object.keys(config.handlers).reduce(
-    (prev, curr) =>
-      config.handlers[curr].urls.length
-        ? prev.concat(config.handlers[curr].urls)
-        : prev,
-    config.urls
-  );
+  // Create new url field
+  config.urls = Object.keys(config.handlers).reduce((prev, curr) => {
+    config.handlers[curr].urls.forEach((url) => {
+      if (prev.indexOf(url) !== -1) {
+        throw new Error('All urls must be unique');
+      }
+    });
+    return prev.concat(config.handlers[curr].urls);
+  }, []);
   if (config.urls.length < 1) {
     throw new Error('No URLs found in config.');
   }

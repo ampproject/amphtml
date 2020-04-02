@@ -25,6 +25,8 @@ const ANALYTICS_PARAM = Object.keys(EXTRA_URL_PARAM)
   .map((key) => `${key}=${EXTRA_URL_PARAM[key]}`)
   .toString();
 const CDN_URL = 'https://cdn.ampproject.org/';
+const AMP_JS_PATH = '/dist/amp.js';
+const LOCAL_PATH_REGEXP = /dist\/(v0\/amp-[A-Za-z\-0-9\.]+).max(.js)/;
 const CDN_ANALYTICS_REGEXP = /https:\/\/cdn.ampproject.org\/rtv\/\d{15}\/v0\/analytics-vendors\/([\.\-\_0-9A-Za-z]+\.json)/;
 const CONTROL = 'control';
 const EXPERIMENT = 'experiment';
@@ -87,16 +89,14 @@ function downloadToDisk(url, version = CONTROL) {
 }
 
 /**
- * Copy a script file from /dist to cache by url
+ * Copy a script file from /dist to cache from filePath
  *
- * @param {string} url
+ * @param {string} filePath
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function copyToCache(url, version = EXPERIMENT) {
+function copyToCache(filePath, version = EXPERIMENT) {
   touchDirs();
-
-  const filePath = url.split(CDN_URL)[1];
 
   const fromPath = path.join(__dirname, '../../../dist/', filePath);
   const destDir =
@@ -121,15 +121,14 @@ function getFile(filePath) {
 
 /**
  * Helper method to return the handler details associated
- * with the current URL being tested. Returns empty object
- * if no handler is found.
+ * with the current URL being tested.
  *
  * @param {string} url
- * @param {?Object} handlers
+ * @param {!Object} handlers
  * @return {!Object} Resolves with relative path to file
  */
 function getHandlerFromUrl(url, handlers) {
-  const names = handlers ? Object.keys(handlers) : [];
+  const names = Object.keys(handlers);
   const handlerName = names.find(
     (handlerName) => handlers[handlerName].urls.indexOf(url) !== -1
   );
@@ -143,6 +142,8 @@ function getHandlerFromUrl(url, handlers) {
 
 module.exports = {
   CDN_URL,
+  LOCAL_PATH_REGEXP,
+  AMP_JS_PATH,
   ANALYTICS_PARAM,
   EXTRA_URL_PARAM,
   CDN_ANALYTICS_REGEXP,

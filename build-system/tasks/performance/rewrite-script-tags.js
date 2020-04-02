@@ -19,6 +19,8 @@ const {
   CDN_URL,
   CONTROL,
   EXPERIMENT,
+  LOCAL_PATH_REGEXP,
+  AMP_JS_PATH,
   copyToCache,
   downloadToDisk,
   urlToCachePath,
@@ -37,8 +39,14 @@ async function useLocalScripts(url) {
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
+    const matchArray = script.src.match(LOCAL_PATH_REGEXP);
     if (script.src.startsWith(CDN_URL)) {
-      script.src = await copyToCache(script.src);
+      const split = script.src.split(CDN_URL)[1];
+      script.src = await copyToCache(split);
+    } else if (matchArray) {
+      script.src = await copyToCache(matchArray[1] + matchArray[2]);
+    } else if (script.src === AMP_JS_PATH) {
+      script.src = await copyToCache('v0.js');
     }
   }
 
@@ -57,8 +65,15 @@ async function useRemoteScripts(url) {
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
+    const matchArray = script.src.match(LOCAL_PATH_REGEXP);
     if (script.src.startsWith(CDN_URL)) {
       script.src = await downloadToDisk(script.src);
+    } else if (matchArray) {
+      script.src = await downloadToDisk(
+        CDN_URL + matchArray[1] + matchArray[2]
+      );
+    } else if (script.src === AMP_JS_PATH) {
+      script.src = await downloadToDisk(CDN_URL + 'v0.js');
     }
   }
 
