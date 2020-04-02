@@ -147,6 +147,13 @@ export class Performance {
     );
 
     /**
+     * Whether the user agent supports the navigation timing API
+     *
+     * @private {boolean}
+     */
+    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
+
+    /**
      * The latest reported largest contentful paint time, where the loadTime
      * is specified.
      *
@@ -290,6 +297,7 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
+    let recordedNavigation = false;
     const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
@@ -319,6 +327,18 @@ export class Performance {
         if (entry.renderTime) {
           this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
+      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
+        [
+          'domComplete',
+          'domContentLoadedEventEnd',
+          'domContentLoadedEventStart',
+          'domInteractive',
+          'loadEventEnd',
+          'loadEventStart',
+          'requestStart',
+          'responseStart',
+        ].forEach((label) => this.tick(label, entry[label]));
+        recordedNavigation = true;
       }
     };
 
@@ -346,6 +366,11 @@ export class Performance {
     if (this.supportsLargestContentfulPaint_) {
       const lcpObserver = this.createPerformanceObserver_(processEntry);
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
+    }
+
+    if (this.supportsNavigation_) {
+      const navigationObserver = this.createPerformanceObserver_(processEntry);
+      navigationObserver.observe({type: 'navigation', buffered: true});
     }
 
     if (entryTypesToObserve.length === 0) {
