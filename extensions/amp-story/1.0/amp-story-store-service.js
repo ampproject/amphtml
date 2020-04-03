@@ -45,6 +45,15 @@ export const getStoreService = (win) => {
 };
 
 /**
+ * Context inside the story as stated by the --i-amphtml-story-context CSS
+ * variable.
+ * @const @enum {number}
+ */
+export const StoryContextStore = {
+  EMBEDDED_COMPONENT: 0,
+};
+
+/**
  * Different UI experiences to display the story.
  * @const @enum {number}
  */
