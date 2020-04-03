@@ -343,11 +343,16 @@ export class VariableSource {
 
     // Allow no URL macros for AMP4Email format documents.
     // This cannot be overwritten even if the meta tag is provided.
-    if (
-      this.ampdoc.isSingleDoc() &&
-      isAmp4Email(/** @type {!Document} */ (this.ampdoc.getRootNode()))
-    ) {
-      return [];
+    if (this.ampdoc.isSingleDoc()) {
+      const doc = /** @type {Document} */ (this.ampdoc.getRootNode());
+      if (
+        doc &&
+        doc.documentElement &&
+        doc.documentElement.hasAttribute &&
+        isAmp4Email(doc)
+      ) {
+        return [];
+      }
     }
 
     // A meta[name="amp-allowed-url-macros"] tag, if present,
