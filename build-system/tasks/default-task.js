@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const {bootstrapThirdPartyFrames, printConfigHelp} = require('./helpers');
-const {compileCss} = require('./css');
-const {compileJison} = require('./compile-jison');
-const {copyCss, copyParsers} = require('./dist');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-
-const argv = require('minimist')(process.argv.slice(2));
+const {printConfigHelp} = require('./helpers');
+const {runPreBuildSteps} = require('./build');
+const {runPreDistSteps} = require('./dist');
 
 /**
  * Prints a useful help message prior to the default gulp task
@@ -51,13 +49,11 @@ async function defaultTask() {
   printConfigHelp('gulp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
-  await compileCss(/* watch */ true);
-  await compileJison();
   if (argv.compiled) {
-    await copyCss();
-    await copyParsers();
+    await runPreDistSteps(/* watch */ true);
+  } else {
+    await runPreBuildSteps(/* watch */ true);
   }
-  await bootstrapThirdPartyFrames(/* watch */ true);
   await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
@@ -72,11 +68,22 @@ defaultTask.description =
   'Starts the dev server, lazily builds JS and extensions when requested, and watches them for changes';
 defaultTask.flags = {
   compiled: '  Compiles and serves minified binaries',
+  pseudo_names:
+    '  Compiles with readable names. ' +
+    'Great for profiling and debugging production code.',
+  pretty_print:
+    '  Outputs compiled code with whitespace. ' +
+    'Great for debugging production code.',
+  fortesting: '  Compiles production binaries for local testing',
+  noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
   extensions: '  Pre-builds the given extensions, lazily builds the rest.',
   extensions_from:
     '  Pre-builds the extensions used by the provided example page.',
+  full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
   version_override: '  Overrides the version written to AMP_CONFIG',
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };
