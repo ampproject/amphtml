@@ -1014,7 +1014,7 @@ export class AmpList extends AMP.BaseElement {
       return this.maybeResizeListToFitItems_();
     };
 
-    if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
+    if (this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
         renderAndResize().then(resized =>
           resized ? this.unlockHeightInsideMutate_() : null
@@ -1120,16 +1120,12 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Measure and lock height before performing given mutate fn.
-   * Applicable for layout=container without infinite scrolling.
+   * Applicable for layout=container.
    * @private
    * @param {!Function} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
-    devAssert(
-      !this.loadMoreEnabled_,
-      'amp-list[layout=container] does not support infinite scrolling with [load-more].'
-    );
     let currentHeight;
     return this.measureMutateElement(
       () => {
