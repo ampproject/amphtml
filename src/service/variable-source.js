@@ -331,8 +331,9 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The allowlist of substitutable AMP variables. (if provided in
-   *     a meta tag).
+   * Searches for the "amp-allowed-url-macros" meta tag, parses and returns its contents.
+   * For email documents, the allowlist defaults to empty and supercedes the meta tag.
+   * @return {?Array<string>} The allowlist of substitutable AMP variables
    * @private
    */
   getUrlMacroWhitelist_() {
@@ -346,7 +347,7 @@ export class VariableSource {
       this.ampdoc.isSingleDoc() &&
       isAmp4Email(/** @type {!Document} */ (this.ampdoc.getRootNode()))
     ) {
-      return (this.variableWhiteList_ = []);
+      return [];
     }
 
     // A meta[name="amp-allowed-url-macros"] tag, if present,
