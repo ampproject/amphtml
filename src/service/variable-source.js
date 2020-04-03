@@ -15,6 +15,7 @@
  */
 import {Services} from '../services';
 import {devAssert} from '../log';
+import {isAmp4Email} from '../format';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
 import {whenDocumentComplete} from '../document-ready';
@@ -330,13 +331,22 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
+   * @return {?Array<string>} The allowlist of substitutable AMP variables. (if provided in
    *     a meta tag).
    * @private
    */
   getUrlMacroWhitelist_() {
     if (this.variableWhitelist_) {
       return this.variableWhitelist_;
+    }
+
+    // Allow no URL macros for AMP4Email format documents.
+    // This cannot be overwritten even if the meta tag is provided.
+    if (
+      this.ampdoc.isSingleDoc() &&
+      isAmp4Email(/** @type {!Document} */ (this.ampdoc.getRootNode()))
+    ) {
+      return (this.variableWhiteList_ = []);
     }
 
     // A meta[name="amp-allowed-url-macros"] tag, if present,
