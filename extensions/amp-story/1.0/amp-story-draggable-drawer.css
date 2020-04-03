@@ -24,7 +24,6 @@
   overflow: hidden !important;
   z-index: 4 !important; /** Over amp-story-cta-layer. */
   transform: translate3d(0, 100%, 0) !important;
-  /** If you change the duration of this animation, please reflect if in the JavaScript close_ method too. */
   transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
