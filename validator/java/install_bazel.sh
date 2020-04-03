@@ -34,10 +34,11 @@ fi
 if [[ -f $BAZEL_BIN_PATH ]]; then
   echo "$LOG_PREFIX Using cached Bazel binary $(CYAN "BAZEL_BIN_PATH")"
 else
-  echo "$LOG_PREFIX Downloading $(CYAN "BAZEL_BIN_URL")"
+  echo "$LOG_PREFIX Downloading $(CYAN "BAZEL_BIN_URL")..."
   mkdir -p $BIN_DIR
   wget -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
   echo "SHA256 ($BAZEL_BIN_PATH) = b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3" | sha256sum -c -
 fi
 
+echo "$LOG_PREFIX Installing $(CYAN "bazel") from $(CYAN "$BAZEL_BIN_PATH")..."
 sudo dpkg -i $BAZEL_BIN_PATH
