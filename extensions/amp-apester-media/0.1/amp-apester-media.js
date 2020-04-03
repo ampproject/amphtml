@@ -152,7 +152,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         'data-apester-channel-id'
       ),
       renderer: true,
-      tags: extractTags(this.getAmpDoc().getRootNode(), this.element),
+      tags: extractTags(this.getAmpDoc(), this.element),
     };
   }
 
