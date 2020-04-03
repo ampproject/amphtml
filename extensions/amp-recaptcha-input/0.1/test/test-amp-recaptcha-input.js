@@ -106,7 +106,7 @@ describes.realWin(
         });
       });
 
-      it('Should apply styles aftyer build', () => {
+      it('Should apply styles after build', () => {
         return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(win.getComputedStyle(ampRecaptchaInput).position).to.equal(
             'absolute'

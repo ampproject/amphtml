@@ -27,7 +27,7 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict} from '../src/utils/object';
+import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
@@ -55,6 +55,10 @@ const TAG = 'RECAPTCHA';
 
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
+
+/** @const {string} */
+const GLOBAL_RECAPTCHA_API_URL =
+  'https://www.recaptcha.net/recaptcha/api.js?render=';
 
 /** {?IframeMessaginClient} */
 let iframeMessagingClient = null;
@@ -99,6 +103,14 @@ export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
     'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   sitekey = dataObject.sitekey;
+  // Determine the recaptcha api URL based on global property
+  devAssert(
+    hasOwn(dataObject, 'global'),
+    'The global property is required for the <amp-recaptcha-input> iframe'
+  );
+  if (dataObject.global) {
+    recaptchaApiBaseUrl = GLOBAL_RECAPTCHA_API_URL;
+  }
   const recaptchaApiUrl = recaptchaApiBaseUrl + sitekey;
 
   loadScript(

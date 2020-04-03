@@ -35,6 +35,14 @@ describe('3p recaptcha.js', () => {
     });
   });
 
+  it('should require a global property in the window.name dataObject', () => {
+    allowConsoleError(() => {
+      window.name = '{"sitekey":"sitekey"}';
+      expect(initRecaptcha).to.throw('global');
+      window.name = undefined;
+    });
+  });
+
   describe('doesOriginDomainMatchIframeSrc()', () => {
     const getMockIframeWindowWithLocation = (url) => {
       // NOTE: The thirdPartyUrl returned by the config

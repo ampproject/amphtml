@@ -109,16 +109,40 @@ describes.realWin(
         ' if they pass a different sitekey',
       () => {
         expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-        return recaptchaService.register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-
-          return recaptchaService.register(anotherFakeSitekey).catch((err) => {
+        return recaptchaService
+          .register(fakeSitekey)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(anotherFakeSitekey);
+          })
+          .catch((err) => {
             expect(err).to.be.ok;
+            expect(err.message).to.have.string('sitekey');
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
-        });
+      }
+    );
+
+    it(
+      'should not allow elements to register,' +
+        ' if they do not all or none pass in the global attribute',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService
+          .register(fakeSitekey, true)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(fakeSitekey, false);
+          })
+          .catch((err) => {
+            expect(err).to.be.ok;
+            expect(err.message).to.have.string('data-global');
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
       }
     );
 

@@ -136,6 +136,7 @@ describe
               JSON.stringify({
                 'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
                 'sentinel': 'amp-recaptcha',
+                'global': false,
               })
             );
           });
