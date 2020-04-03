@@ -215,8 +215,7 @@ export class Crypto {
   }
 
   /**
-   * Returns a cryptographically random string with 128 bits of entropy
-   * to be used as a subdomain for SafeFrame.
+   * Returns a cryptographically random string with 128 bits of entropy.
    * @return {string}
    */
   getSecureRandomString() {
@@ -226,7 +225,7 @@ export class Crypto {
       this.win_.msCrypto);
     let /** !Array<number>|!Uint8Array */ randomValues;
 
-    if (cryptoLib !== undefined) {
+    if (cryptoLib) {
       randomValues = new Uint8Array(16);
       cryptoLib.getRandomValues(randomValues);
     } else {

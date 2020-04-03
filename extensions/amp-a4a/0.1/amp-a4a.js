@@ -59,7 +59,6 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -251,11 +250,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
-
-    /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(
-      this.win
-    ).getSecureRandomString();
 
     /**
      * Initialize this with the slot width/height attributes, and override
@@ -1841,18 +1835,6 @@ export class AmpA4A extends AMP.BaseElement {
       }
       return null;
     }
-  }
-
-  /**
-   * @return {string} full url to safeframe implementation.
-   */
-  getSafeframePath() {
-    let host = 'tpc.googlesyndication.com';
-    if (isExperimentOn(this.win, 'random-subdomains-for-safeframe')) {
-      host = this.safeFrameSubdomain_ + '.safeframe.googlesyndication.com';
-    }
-
-    return `https://${host}/safeframe/${this.safeframeVersion}/html/container.html`;
   }
 
   /**

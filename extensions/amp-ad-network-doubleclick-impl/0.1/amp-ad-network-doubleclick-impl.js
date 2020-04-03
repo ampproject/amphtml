@@ -276,6 +276,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
+    /** @private {string} The random subdomain to load SafeFrame from */
+    this.safeFrameSubdomain_ = Services.cryptoFor(
+      this.win
+    ).getSecureRandomString();
+
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
 
@@ -1017,6 +1022,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.destroySafeFrameApi_();
     return super.unlayoutCallback();
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   */
+  getSafeframePath() {
+    const subdomain = isExperimentOn(
+      this.win,
+      'random-subdomains-for-safeframe'
+    )
+      ? this.safeFrameSubdomain_ + '.safeframe'
+      : 'tpc';
+
+    return `https://${subdomain}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
   }
 
   /** @visibleForTesting */
