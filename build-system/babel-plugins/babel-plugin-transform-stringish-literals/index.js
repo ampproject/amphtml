@@ -15,21 +15,10 @@
  */
 
 module.exports = function ({types: t}) {
-  const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
-
-  function whichCloneQuasi(clonedQuasis, index) {
-    for (let i = index; i >= 0; i--) {
-      const quasi = clonedQuasis[i];
-      if (quasi !== null) {
-        return index;
-      }
-    }
-  }
-
   return {
     name: 'flatten-stringish-literals',
     visitor: {
-      BinaryExpression(path) {
+      'BinaryExpression|TemplateLiteral': function (path) {
         const e = path.evaluate();
         if (!e.confident) {
           return;
@@ -37,46 +26,6 @@ module.exports = function ({types: t}) {
 
         path.replaceWith(t.valueToNode(e.value));
         path.skip();
-      },
-      TemplateLiteral(path) {
-        const {expressions, quasis} = path.node;
-        const newQuasis = cloneNodes(quasis);
-        const newExpressions = cloneNodes(expressions);
-        let conversions = 0;
-
-        for (let index = expressions.length; index >= 0; index--) {
-          const expression = expressions[index];
-          if (
-            t.isStringLiteral(expression) ||
-            t.isNumericLiteral(expression) ||
-            t.isBooleanLiteral(expression)
-          ) {
-            const {value} = expression;
-            const readIndex = whichCloneQuasi(newQuasis, index + 1);
-            const modifyIndex = whichCloneQuasi(newQuasis, index);
-            const {value: changedValue} = newQuasis[readIndex];
-            const {value: previousValue} = newQuasis[modifyIndex];
-
-            newQuasis[modifyIndex] = t.templateElement({
-              raw: previousValue.raw + value + changedValue.raw,
-              cooked: previousValue.cooked + value + changedValue.cooked,
-            });
-            newQuasis[index + 1] = null;
-            newExpressions[index] = null;
-            conversions++;
-          }
-        }
-
-        if (conversions === 0) {
-          return;
-        }
-
-        path.replaceWith(
-          t.templateLiteral(
-            newQuasis.filter(Boolean),
-            newExpressions.filter(Boolean)
-          )
-        );
       },
     },
   };
