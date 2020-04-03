@@ -24,19 +24,14 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
-  distNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
-const {cleanupBuildDir} = require('../compile/compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
+const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 
@@ -118,11 +113,6 @@ async function startServer(
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
   logServeMode();
-
-  if (lazyBuild && argv.compiled) {
-    cleanupBuildDir();
-    await startNailgunServer(distNailgunPort, /* detached */ false);
-  }
 }
 
 /**

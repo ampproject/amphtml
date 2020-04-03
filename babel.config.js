@@ -30,7 +30,9 @@ const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
 const isClosureCompiler =
-  argv._.includes('dist') || argv._.includes('check-types');
+  argv._.includes('dist') ||
+  argv._.includes('check-types') ||
+  (argv._.length == 0 && argv.compiled);
 const {esm} = argv;
 
 const targets = (esm) => {
