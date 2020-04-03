@@ -36,7 +36,7 @@ if [[ -f $BAZEL_BIN_PATH ]]; then
 else
   echo "$LOG_PREFIX Downloading $(CYAN "BAZEL_BIN_URL")..."
   mkdir -p $BIN_DIR
-  wget -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
+  wget -q -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
   echo "SHA256 ($BAZEL_BIN_PATH) = b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3" | sha256sum -c -
 fi
 
