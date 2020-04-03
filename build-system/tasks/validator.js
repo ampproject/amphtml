@@ -69,8 +69,7 @@ validator.flags = {
 validatorJava.description =
   'Builds and tests the AMP validator Java implementation.';
 validatorJava.flags = {
-  'install_bazel':
-    '  Installs Bazel before trying to build and run tests.',
+  'install_bazel': '  Installs Bazel before trying to build and run tests.',
 };
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
