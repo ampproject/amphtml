@@ -46,6 +46,7 @@ const postCompilationPlugins = (isEsmBuild) =>
     ? [
         localPlugin('transform-minified-comments'),
         localPlugin('transform-function-declarations'),
+        localPlugin('transform-stringish-literals'),
       ]
     : [];
 
