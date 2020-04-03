@@ -26,6 +26,11 @@ BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel
 BIN_DIR="bin"
 BAZEL_BIN_PATH="$BIN_DIR/bazel_2.2.0-linux-x86_64.deb"
 
+if type bazel &>/dev/null ; then
+  echo "$LOG_PREFIX Bazel binary detected; skipping installation"
+  exit
+fi
+
 if [[ -f $BAZEL_BIN_PATH ]]; then
   echo "$LOG_PREFIX Using cached Bazel binary $(CYAN "BAZEL_BIN_PATH")"
 else
