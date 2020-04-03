@@ -87,7 +87,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildRemote_();
     }
 
-    this.win.addEventListener('pageshow', event => {
+    this.win.addEventListener('pageshow', (event) => {
       // On browser back, Safari does not reload the page but resumes its cached
       // version. This event's parameter lets us know when this happens so we
       // can cleanup the remote opening animation.
@@ -251,7 +251,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   openRemote_() {
     const animationEl = this.win.document.createElement('div');
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    const storyEl = closest(this.element, el => el.tagName === 'AMP-STORY');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
     this.mutateElement(() => {
@@ -303,7 +303,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
-    const storyEl = closest(this.element, el => el.tagName === 'AMP-STORY');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
       '.i-amphtml-story-page-attachment-expand'
     );
