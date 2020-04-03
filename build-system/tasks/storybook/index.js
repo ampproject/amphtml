@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execScriptAsync} = require('../../common/exec');
+const {exec} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
 let storybookArgs = '--quiet';
@@ -32,14 +32,11 @@ async function storybookAmp() {
   // install storybook-specific modules
   installPackages(__dirname);
 
-  execScriptAsync(
-    `./node_modules/.bin/start-storybook -c ./amp-env ${storybookArgs}`,
-    {
-      'stdio': [null, process.stdout, process.stderr],
-      cwd: __dirname,
-      env: process.env,
-    }
-  );
+  exec(`./node_modules/.bin/start-storybook -c ./amp-env ${storybookArgs}`, {
+    'stdio': [null, process.stdout, process.stderr],
+    cwd: __dirname,
+    env: process.env,
+  });
 }
 
 /**
@@ -49,14 +46,11 @@ async function storybookPreact() {
   // install storybook-specific modules
   installPackages(__dirname);
 
-  execScriptAsync(
-    `./node_modules/.bin/start-storybook -c ./preact-env ${storybookArgs}`,
-    {
-      'stdio': [null, process.stdout, process.stderr],
-      cwd: __dirname,
-      env: process.env,
-    }
-  );
+  exec(`./node_modules/.bin/start-storybook -c ./preact-env ${storybookArgs}`, {
+    'stdio': [null, process.stdout, process.stderr],
+    cwd: __dirname,
+    env: process.env,
+  });
 }
 
 module.exports = {
