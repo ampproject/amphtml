@@ -37,7 +37,7 @@ async function validator() {
  * Simple wrapper around the Java validator test suite.
  */
 async function validatorJava() {
-  execOrDie('./install_bazel && ./build_and_test.sh', {
+  execOrDie('./install_bazel.sh && ./build_and_test.sh', {
     cwd: 'validator/java',
     stdio: 'inherit',
   });
