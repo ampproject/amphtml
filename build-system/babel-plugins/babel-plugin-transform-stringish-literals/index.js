@@ -45,7 +45,7 @@ module.exports = function ({types: t}) {
 
           const {left, right} = path.node;
           if (t.isTemplateLiteral(right)) {
-            const rightQuasis = cloneNodes(right.quasis);
+            let rightQuasis = cloneNodes(right.quasis);
 
             if (t.isTemplateLiteral(left)) {
               const leftQuasis = cloneNodes(left.quasis);
@@ -56,9 +56,22 @@ module.exports = function ({types: t}) {
               };
               rightQuasis[0] = null;
 
+              rightQuasis = rightQuasis.filter(Boolean);
+              if (leftQuasis.length === 1 && rightQuasis.length === 1) {
+                // When both sides of the expression are TemplateLiterals with a single quasi,
+                // the expression can be replaced with a StringLiteral.
+                // `foo` + `bar` => "foobar"
+                path.replaceWith(
+                  t.stringLiteral(
+                    leftQuasis[0].value.raw + rightQuasis[0].value.raw
+                  )
+                );
+                return;
+              }
+
               path.replaceWith(
                 t.templateLiteral(
-                  [...leftQuasis, ...rightQuasis.filter(Boolean)],
+                  [...leftQuasis, ...rightQuasis],
                   [
                     ...cloneNodes(left.expressions),
                     ...cloneNodes(right.expressions),
@@ -70,6 +83,15 @@ module.exports = function ({types: t}) {
 
             // Left is a literal, containing a value to merge into the right.
             const leftValue = escapeStringForTemplateLiteral(left.value);
+            if (rightQuasis.length === 1) {
+              // The right side has a single quasi (so it can be a StringLiteral).
+              // Merging two StringLiterals gives you a StringLiteral.
+              path.replaceWith(
+                t.stringLiteral(leftValue + rightQuasis[0].value.raw)
+              );
+              return;
+            }
+
             rightQuasis[0].value = {
               raw: leftValue + rightQuasis[0].value.raw,
               cooked: leftValue + rightQuasis[0].value.cooked,
@@ -81,6 +103,15 @@ module.exports = function ({types: t}) {
 
           // Right is a literal containing a value to merge into the left.
           if (t.isTemplateLiteral(left)) {
+            if (left.quasis.length === 1) {
+              // The left side has a single quasi (so it can be a StringLiteral).
+              // Merging two StringLiterals gives you a StringLiteral.
+              path.replaceWith(
+                t.stringLiteral(left.quasis[0].value.raw + right.value)
+              );
+              return;
+            }
+
             const rightValue = escapeStringForTemplateLiteral(right.value);
             const leftQuasis = cloneNodes(left.quasis);
             const finalLeftQuasi = leftQuasis[leftQuasis.length - 1];
@@ -95,7 +126,7 @@ module.exports = function ({types: t}) {
             return;
           }
 
-          // Merge two string literals
+          // Merge two StringLiterals gives you a StringLiteral.
           if (t.isStringLiteral(left) && t.isStringLiteral(right)) {
             const newLiteral = t.cloneNode(left);
             newLiteral.value = left.value + String(right.value);
@@ -105,8 +136,8 @@ module.exports = function ({types: t}) {
       },
       TemplateLiteral(path) {
         const {expressions, quasis} = path.node;
-        const newQuasis = cloneNodes(quasis);
         const newExpressions = cloneNodes(expressions);
+        let newQuasis = cloneNodes(quasis);
         let conversions = 0;
 
         for (let index = expressions.length; index >= 0; index--) {
@@ -136,11 +167,15 @@ module.exports = function ({types: t}) {
           return;
         }
 
+        newQuasis = newQuasis.filter(Boolean);
+        if (newQuasis.length === 1) {
+          // When there is only a single quasi remaining, this can be represented as a StringLiteral.
+          path.replaceWith(t.stringLiteral(newQuasis[0].value.raw));
+          return;
+        }
+
         path.replaceWith(
-          t.templateLiteral(
-            newQuasis.filter(Boolean),
-            newExpressions.filter(Boolean)
-          )
+          t.templateLiteral(newQuasis, newExpressions.filter(Boolean))
         );
       },
     },
