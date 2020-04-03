@@ -79,7 +79,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element).getState()).to.equal(
+    expect(new Resource(1, element, resources).getState()).to.equal(
       ResourceState.NOT_LAID_OUT
     );
   });
@@ -101,6 +101,15 @@ describes.realWin('Resource', {amp: true}, (env) => {
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
+  });
+
+  it('should build if element is currently building', () => {
+    elementMock.expects('isBuilt').returns(false).once();
+    elementMock.expects('isBuilding').returns(true).once();
+    elementMock.expects('isUpgraded').returns(true).once();
+    elementMock.expects('build').returns(Promise.resolve()).once();
+    const r = new Resource(2, element, resources);
+    expect(r.isBuilding()).to.be.true;
   });
 
   it('should blacklist on build failure', () => {
@@ -751,6 +760,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         tagName: 'PARENT',
         hasAttribute: () => false,
         isBuilt: () => false,
+        isBuilding: () => false,
         contains: () => true,
       };
       child = {
@@ -758,6 +768,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         tagName: 'CHILD',
         hasAttribute: () => false,
         isBuilt: () => false,
+        isBuilding: () => false,
         contains: () => true,
         parentElement: parent,
       };
@@ -766,6 +777,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         tagName: 'GRANDCHILD',
         hasAttribute: () => false,
         isBuilt: () => false,
+        isBuilding: () => false,
         contains: () => true,
         getElementsByClassName: () => {
           return [];
@@ -993,6 +1005,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       tagName: 'AMP-AD',
       hasAttribute: () => false,
       isBuilt: () => false,
+      isBuilding: () => false,
       isUpgraded: () => false,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
