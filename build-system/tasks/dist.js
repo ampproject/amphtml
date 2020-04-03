@@ -86,6 +86,23 @@ function printDistHelp() {
 }
 
 /**
+ * Perform the prerequisite steps before starting the minified build.
+ * Used by `gulp` and `gulp dist`.
+ *
+ * @param {boolean} watch
+ */
+async function runPreDistSteps(watch) {
+  cleanupBuildDir();
+  await prebuild();
+  await compileCss(watch);
+  await compileJison();
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(watch, /* minify */ true);
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+}
+
+/**
  * Dist Build
  * @return {!Promise}
  */
@@ -96,17 +113,9 @@ async function dist() {
   printNobuildHelp();
   printDistHelp();
 
-  cleanupBuildDir();
-  await prebuild();
-  await compileCss();
-  await compileJison();
-
-  await copyCss();
-  await copyParsers();
-  await bootstrapThirdPartyFrames(argv.watch, /* minify */ true);
+  await runPreDistSteps(argv.watch);
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
-  await startNailgunServer(distNailgunPort, /* detached */ false);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(argv.watch, /* minify */ true);
   } else {
@@ -419,8 +428,7 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  copyCss,
-  copyParsers,
+  runPreDistSteps,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
