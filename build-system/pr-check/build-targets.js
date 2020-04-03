@@ -182,10 +182,12 @@ const targetMatchers = {
     );
   },
   'VALIDATOR_JAVA': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
     return (
-      !isOwnersFile(file) &&
-      (file.startsWith('validator/java/') ||
-        file === 'build-system/tasks/validator.js')
+      file.startsWith('validator/java/') ||
+      file === 'build-system/tasks/validator.js'
     );
   },
   'VALIDATOR_WEBUI': (file) => {
