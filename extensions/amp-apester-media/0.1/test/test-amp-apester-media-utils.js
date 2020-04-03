@@ -28,6 +28,7 @@ describes.realWin('amp-apester-media-utils', {}, (unused) => {
     document.head.textContent = '';
   });
   afterEach(() => {
+    // Clear cached AmpDoc meta since document is reused in each test
     Services.ampdoc(document).meta_ = null;
   });
 
