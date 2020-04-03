@@ -15,12 +15,7 @@
  */
 
 const fs = require('fs');
-const {
-  CONTROL,
-  EXTRA_URL_PARAM,
-  EXPERIMENT,
-  urlToCachePath,
-} = require('./helpers');
+const {CONTROL, EXPERIMENT, urlToCachePath} = require('./helpers');
 const {JSDOM} = require('jsdom');
 
 /**
@@ -29,8 +24,9 @@ const {JSDOM} = require('jsdom');
  *
  * @param {string} url
  * @param {string} version
+ * @param {?object} extraUrlParams
  */
-async function addExtraUrlParams(url, version) {
+async function addExtraUrlParams(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
   const document = fs.readFileSync(cachePath);
   const dom = new JSDOM(document);
@@ -46,7 +42,7 @@ async function addExtraUrlParams(url, version) {
       script = JSON.parse(scriptTag./*OK*/ innerHTML);
     }
     script = Object.assign(script, {
-      extraUrlParams: EXTRA_URL_PARAM,
+      extraUrlParams,
     });
     const newScriptTag = dom.window.document.createElement('script');
     newScriptTag.textContent = JSON.stringify(script);
@@ -64,13 +60,13 @@ async function addExtraUrlParams(url, version) {
  * @return {Promise}
  */
 function rewriteAnalyticsConfig(handlers) {
-  const urls =
-    (handlers && handlers.analyticsHandler && handlers.analyticsHandler.urls) ||
-    [];
+  const {urls, extraUrlParam} = handlers.find(
+    (handler) => handler.handlerName === 'analyticsHandler'
+  );
   return Promise.all(
     urls.flatMap((url) => [
-      addExtraUrlParams(url, CONTROL),
-      addExtraUrlParams(url, EXPERIMENT),
+      addExtraUrlParams(url, CONTROL, extraUrlParam),
+      addExtraUrlParams(url, EXPERIMENT, extraUrlParam),
     ])
   );
 }

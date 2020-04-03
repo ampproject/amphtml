@@ -18,15 +18,10 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
-const EXTRA_URL_PARAM = {
-  'analytics': 'amp-analytics-performance-param',
-};
-const ANALYTICS_PARAM = Object.keys(EXTRA_URL_PARAM)
-  .map((key) => `${key}=${EXTRA_URL_PARAM[key]}`)
-  .toString();
 const CDN_URL = 'https://cdn.ampproject.org/';
 const AMP_JS_PATH = '/dist/amp.js';
 const LOCAL_PATH_REGEXP = /dist\/(v0\/amp-[A-Za-z\-0-9\.]+).max(.js)/;
+const ANALYTICS_VENDORS_PATH = 'extensions/amp-analytics/0.1/vendors/';
 const CDN_ANALYTICS_REGEXP = /https:\/\/cdn.ampproject.org\/rtv\/\d{15}\/v0\/analytics-vendors\/([\.\-\_0-9A-Za-z]+\.json)/;
 const CONTROL = 'control';
 const EXPERIMENT = 'experiment';
@@ -119,40 +114,17 @@ function getFile(filePath) {
   return Promise.resolve(fs.readFileSync(fromPath));
 }
 
-/**
- * Helper method to return the handler details associated
- * with the current URL being tested.
- *
- * @param {string} url
- * @param {!Object} handlers
- * @return {!Object} Resolves with relative path to file
- */
-function getHandlerFromUrl(url, handlers) {
-  const names = Object.keys(handlers);
-  const handlerName = names.find(
-    (handlerName) => handlers[handlerName].urls.indexOf(url) !== -1
-  );
-  return handlerName
-    ? {
-        handlerName,
-        'handlerOptions': {...handlers[handlerName]},
-      }
-    : {};
-}
-
 module.exports = {
-  CDN_URL,
-  LOCAL_PATH_REGEXP,
   AMP_JS_PATH,
-  ANALYTICS_PARAM,
-  EXTRA_URL_PARAM,
+  ANALYTICS_VENDORS_PATH,
   CDN_ANALYTICS_REGEXP,
+  CDN_URL,
   CONTROL,
   EXPERIMENT,
+  LOCAL_PATH_REGEXP,
   RESULTS_PATH,
   copyToCache,
   downloadToDisk,
-  urlToCachePath,
   getFile,
-  getHandlerFromUrl,
+  urlToCachePath,
 };

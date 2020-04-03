@@ -18,14 +18,13 @@ const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
 const {
-  ANALYTICS_PARAM,
+  ANALYTICS_VENDORS_PATH,
   CDN_ANALYTICS_REGEXP,
   CONTROL,
   EXPERIMENT,
   RESULTS_PATH,
   urlToCachePath,
   getFile,
-  getHandlerFromUrl,
 } = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
@@ -77,13 +76,19 @@ const setupMeasurement = (page) =>
 
 /**
  * Records first outgoing analytics request
+ *
  * @param {Request} interceptedRequest
+ * @param {string} analyticsParam
  * @param {!Function} setEndTimeCallback
  * @return {!Promise<boolean>}
  */
-async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
+async function handleAnalyticsRequests(
+  interceptedRequest,
+  analyticsParam,
+  setEndTimeCallback
+) {
   const interceptedUrl = interceptedRequest.url();
-  if (interceptedUrl.includes(ANALYTICS_PARAM)) {
+  if (interceptedUrl.includes(analyticsParam)) {
     setEndTimeCallback(Date.now());
     interceptedRequest.abort();
     return true;
@@ -102,10 +107,7 @@ const analyticsVendorRewriteHandler = async (interceptedRequest) => {
   const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
   if (matchArray) {
     const filename = matchArray[1];
-    const pathToJson = path.join(
-      'extensions/amp-analytics/0.1/vendors/',
-      filename
-    );
+    const pathToJson = path.join(ANALYTICS_VENDORS_PATH, filename);
     const jsonString = await getFile(pathToJson);
     interceptedRequest.respond({
       status: 200,
@@ -180,36 +182,55 @@ const readMetrics = (page) =>
   });
 
 /**
- * Set up appropriate handlers and default handlers
- * @param {?Object} handlerOptions
- * @param {string} handlerName
- * @param {Puppeteer.page} page
+ * Set up defaults handlers
+ * @param {!Array<function>} handlersList
  */
-function setUpRequestHandler(handlerOptions, handlerName, page) {
-  // Default handlers
-  const handlers = [analyticsVendorRewriteHandler];
+function setUpDefaultHandlers(handlersList) {
+  // Always rewrite vendor json requests to pull locally.
+  // That way we are not including the time difference between
+  // fetching a local file vs network request to CDN.
+  handlersList.push(analyticsVendorRewriteHandler);
+}
+
+/**
+ * Set up appropriate handlers
+ * @param {!Array<function>} handlersList
+ * @param {?Object} handlerOptions
+ */
+function setUpAddionalHandlers(handlersList, handlerOptions) {
   // Setting up timing and adding specified handler
-  if (handlerName === 'analyticsHandler') {
+  if (handlerOptions.handlerName === 'analyticsHandler') {
     Object.assign(handlerOptions, {'startTime': Date.now()});
-    handlers.push((interceptedRequest) =>
-      handleAnalyticsRequests(interceptedRequest, (endTime) => {
-        if (!handlerOptions.endTime) {
-          Object.assign(handlerOptions, {
-            endTime,
-            'timeout': 0,
-          });
+    handlersList.push((interceptedRequest) =>
+      handleAnalyticsRequests(
+        interceptedRequest,
+        handlerOptions.analyticsParam,
+        (endTime) => {
+          if (!handlerOptions.endTime) {
+            Object.assign(handlerOptions, {
+              endTime,
+              'timeout': 0,
+            });
+          }
         }
-      })
+      )
     );
   }
+}
 
-  // There shoud only one place where requests are handled.
-  // Assumes that multiple handlers don't continue/abort/respond
-  // on the same request.
+/**
+ * Send each intercepted request to all handlers in list.
+ * Takes care of continueing the request if the handler
+ * doesn't alter/use the request.
+ * @param {!Array<function>} handlersList
+ * @param {Puppeteer.page} page
+ */
+function startRequestListener(handlersList, page) {
   page.on('request', async (interceptedRequest) => {
-    const requestHandled = await handlers.reduce(
+    const requestHandled = await handlersList.reduce(
       // Don't short circuit
-      async (prev, handler) => (await handler(interceptedRequest)) || prev,
+      async (prev, handleRequest) =>
+        (await handleRequest(interceptedRequest)) || prev,
       false
     );
     if (!requestHandled) {
@@ -221,15 +242,12 @@ function setUpRequestHandler(handlerOptions, handlerName, page) {
 /**
  * Return metrics calcaultion based on handler
  * @param {?Object} handlerOptions
- * @param {string} handlerName
  * @param {Object} metrics
- * @return {Object}
  */
-function addHandlerMetric(handlerOptions, handlerName, metrics) {
-  if (handlerName === 'analyticsHandler') {
-    return addAnalyticsMetric(handlerOptions, metrics);
+function addHandlerMetric(handlerOptions, metrics) {
+  if (handlerOptions.handlerName === 'analyticsHandler') {
+    addAnalyticsMetric(handlerOptions, metrics);
   }
-  return metrics;
 }
 
 /**
@@ -237,7 +255,6 @@ function addHandlerMetric(handlerOptions, handlerName, metrics) {
  * analyticsRequest.
  * @param {?Object} analyticsHandlerOptions
  * @param {Object} metrics
- * @return {Object}
  */
 function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
   const {endTime, startTime} = analyticsHandlerOptions;
@@ -250,7 +267,7 @@ function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
     analyticsMetric['analyticsRequest'] = endTime - startTime;
   }
   analyticsMetric['requestsFailed'] = requestsFailed;
-  return Object.assign(metrics, analyticsMetric);
+  Object.assign(metrics, analyticsMetric);
 }
 
 /**
@@ -282,13 +299,12 @@ function writeMetrics(url, version, metrics) {
  *
  * @param {string} url
  * @param {string} version "control" or "experiment"
- * @param {!Object} options
- * @param {!Object} handlers
+ * @param {!Object} config
  * @return {Promise}
  */
-async function measureDocument(url, version, {headless}, handlers) {
+async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
-    headless,
+    headless: config.headless,
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',
@@ -297,25 +313,29 @@ async function measureDocument(url, version, {headless}, handlers) {
   });
 
   const page = await browser.newPage();
-  const {handlerOptions, handlerName} = getHandlerFromUrl(url, handlers);
+  const handlerOptionsForUrl = {...config.urlToHandlers[url]};
+  const handlersList = [];
   await page.setCacheEnabled(false);
   await page.setRequestInterception(true);
   await setupMeasurement(page);
-  setUpRequestHandler(handlerOptions, handlerName, page);
+  setUpDefaultHandlers(handlersList);
+  setUpAddionalHandlers(handlersList, handlerOptionsForUrl);
+  startRequestListener(handlersList, page);
 
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
       waitUntil: 'networkidle0',
     });
-  } catch {
+  } catch (e) {
     // site did not load
     await browser.close();
+    console.log(e);
     return;
   }
 
-  let metrics = await readMetrics(page);
-  await delayBasedOnHandlerOptions(handlerOptions);
-  metrics = addHandlerMetric(handlerOptions, handlerName, metrics);
+  const metrics = await readMetrics(page);
+  await delayBasedOnHandlerOptions(handlerOptionsForUrl);
+  addHandlerMetric(handlerOptionsForUrl, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
@@ -325,11 +345,11 @@ async function measureDocument(url, version, {headless}, handlers) {
  * runs a script on the page to collect performance metrics. Saves
  * performance metrics to results.json in this directory.
  *
- * @param {Array<string>} urls
- * @param {{headless:boolean, runs:number, timeout:number, handlers:Object}} options
+ * @param {!Array<string>} urls
+ * @param {!Object} config
  * @return {Promise} Fulfills when all URLs have been measured
  */
-async function measureDocuments(urls, {headless, runs, handlers}) {
+async function measureDocuments(urls, config) {
   requirePuppeteer_();
 
   try {
@@ -338,9 +358,9 @@ async function measureDocuments(urls, {headless, runs, handlers}) {
 
   // Make an array of tasks to be executed
   const tasks = urls.flatMap((url) =>
-    Array.from({length: runs}).flatMap(() => [
-      measureDocument.bind(null, url, CONTROL, {headless}, handlers),
-      measureDocument.bind(null, url, EXPERIMENT, {headless}, handlers),
+    Array.from({length: config.runs}).flatMap(() => [
+      measureDocument.bind(null, url, CONTROL, config),
+      measureDocument.bind(null, url, EXPERIMENT, config),
     ])
   );
 

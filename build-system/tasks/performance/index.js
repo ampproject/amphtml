@@ -29,12 +29,13 @@ const {printReport} = require('./print-report');
  */
 async function performance() {
   installPackages(__dirname);
-  const {headless, runs, urls, handlers} = new loadConfig();
+  const config = new loadConfig();
+  const urls = Object.keys(config.urlToHandlers);
   await cacheDocuments(urls);
   await compileScripts(urls);
   await rewriteScriptTags(urls);
-  await rewriteAnalyticsTags(handlers);
-  await getMetrics(urls, {headless, runs, handlers});
+  await rewriteAnalyticsTags(config.handlers);
+  await getMetrics(urls, config);
   runTests();
   printReport(urls);
 }

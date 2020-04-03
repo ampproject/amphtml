@@ -22,24 +22,25 @@ const PATH = './config.json';
 
 /**
  * Loads test config from ./config.json
- * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>, handlers:Object}}
+ * @return {{concurrency:number, headless:boolean, runs:number, handlers:Array<Object>, urlToHandlers:Object}}
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
   const config = JSON.parse(file);
-  if (argv.url) {
-    config.handlers.defaultHandler.urls = [argv.url];
-  }
-  // Create new url field
-  config.urls = Object.keys(config.handlers).reduce((prev, curr) => {
-    config.handlers[curr].urls.forEach((url) => {
-      if (prev.indexOf(url) !== -1) {
-        throw new Error('All urls must be unique');
+  // Create mapping of url to handlers for ease of use later
+  config.urlToHandlers = config.handlers.reduce((mapping, handlerOptions) => {
+    if (argv.url && handlerOptions.handlerName === 'defaultHandler') {
+      handlerOptions.urls = [argv.url];
+    }
+    handlerOptions.urls.forEach((url) => {
+      if (mapping[url]) {
+        throw new Error('All urls must be unique: %s.', url);
       }
+      mapping[url] = handlerOptions;
     });
-    return prev.concat(config.handlers[curr].urls);
-  }, []);
-  if (config.urls.length < 1) {
+    return mapping;
+  }, {});
+  if (Object.keys(config.urlToHandlers).length < 1) {
     throw new Error('No URLs found in config.');
   }
   return config;
