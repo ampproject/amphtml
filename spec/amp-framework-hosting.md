@@ -49,9 +49,9 @@ If you have advanced hosting capabilities or would like to customize the version
 
 ### Option 2: Download the framework with an AMP Toolbox tool
 
-[AMP Toolbox](https://github.com/ampproject/amp-toolbox) has both an `npm` package and a command line tool that will fetch a complete AMP framework from `cdn.ampproject.org`. You can pick the tool best suited to your release workflow.
+[AMP Toolbox](https://github.com/ampproject/amp-toolbox) has both a Node.js module and a command line tool that will fetch a complete AMP framework from `cdn.ampproject.org`. Pick the tool best suited to your release workflow.
 
-- [@ampproject/toolbox-download-runtime](https://github.com/ampproject/amp-toolbox/tree/master/packages/download-runtime) - library for use in your own Node.js projects
+- [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) - Node.js module
 - [@ampproject/toolbox-cli](https://github.com/ampproject/amp-toolbox/tree/master/packages/cli) - command line interface
 
 ### Option 3: Manually copy the framework from cdn.ampproject.org
