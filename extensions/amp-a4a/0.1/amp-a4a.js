@@ -59,6 +59,7 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -1835,6 +1836,20 @@ export class AmpA4A extends AMP.BaseElement {
       }
       return null;
     }
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   */
+  getSafeframePath() {
+    const subdomain = isExperimentOn(
+      this.win,
+      'random-subdomains-for-safeframe'
+    )
+      ? this.safeFrameSubdomain_ + '.safeframe'
+      : 'tpc';
+
+    return `https://${subdomain}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
   }
 
   /**

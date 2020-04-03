@@ -1024,20 +1024,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.unlayoutCallback();
   }
 
-  /**
-   * @return {string} full url to safeframe implementation.
-   */
-  getSafeframePath() {
-    const subdomain = isExperimentOn(
-      this.win,
-      'random-subdomains-for-safeframe'
-    )
-      ? this.safeFrameSubdomain_ + '.safeframe'
-      : 'tpc';
-
-    return `https://${subdomain}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
-  }
-
   /** @visibleForTesting */
   cleanupAfterTest() {
     this.destroySafeFrameApi_();
