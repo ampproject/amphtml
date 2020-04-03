@@ -13,25 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {useState} from '../../../src/preact';
+import {useContext, useState} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext({});
 
@@ -41,9 +26,11 @@ const SelectorContext = Preact.createContext({});
  */
 export function Selector(props) {
   const {
-    'value': value,
+    'as': Comp = 'div',
+    'children': children,
     'defaultValue': defaultValue,
     'disabled': disabled,
+    'value': value,
   } = props;
   const isMultiple = props['multiple'] !== undefined;
   const [selectedState, setSelectedState] = useState(
@@ -76,24 +63,17 @@ export function Selector(props) {
     }
   };
 
-  const tag = props['tagName'] || 'div';
-  // TODO: Support '.' access to return <props.tagName ...> in JSX
-  return Preact.createElement(
-    tag,
-    {
-      ...props,
-      'aria-disabled': disabled,
-      'aria-multiselectable': isMultiple,
-      role: props['role'] || 'listbox',
-    },
-    <SelectorContext.Provider
-      value={{
-        selected,
-        selectOption,
-      }}
-    >
-      {props['children']}
-    </SelectorContext.Provider>
+  return (
+    <Comp {...props} aria-disabled={disabled} aria-multiselectable={isMultiple}>
+      <SelectorContext.Provider
+        value={{
+          selected,
+          selectOption,
+        }}
+      >
+        {children}
+      </SelectorContext.Provider>
+    </Comp>
   );
 }
 
@@ -102,10 +82,21 @@ export function Selector(props) {
  * @return {PreactDef.Renderable}
  */
 export function Option(props) {
-  const {'option': option, 'disabled': disabled, 'style': style} = props;
-  const getOption = props['getOption'] || (() => option);
-  const selectorContext = Preact.useContext(SelectorContext);
+  const {
+    'as': Comp = 'div',
+    'disabled': disabled,
+    'getOption': getOption,
+    'onClick': onClick,
+    'option': option,
+    'role': role,
+    'style': style,
+  } = props;
+  const selectorContext = useContext(SelectorContext);
   const {'selected': selected, 'selectOption': selectOption} = selectorContext;
+  const clickHandler = (e) => {
+    onClick ? onClick() : null;
+    selectOption(getOption ? getOption(e) : option);
+  };
   const isSelected = /** @type {!Array} */ (selected).includes(option);
   const statusStyle = disabled
     ? CSS.DISABLED
@@ -115,13 +106,11 @@ export function Option(props) {
   const optionProps = {
     ...props,
     'aria-disabled': disabled,
-    onClick: (e) => selectOption(getOption(e)),
+    onClick: clickHandler,
     option,
-    role: props['role'] || 'option',
+    role: role || 'option',
     selected: isSelected,
     style: {...statusStyle, ...style},
   };
-  const tag = props['type'] || props['tagName'] || 'div';
-  // TODO: Support '.' access to return <props.tagName ...> in JSX
-  return Preact.createElement(tag, {...optionProps});
+  return <Comp {...optionProps}></Comp>;
 }

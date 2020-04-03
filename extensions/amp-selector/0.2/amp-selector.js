@@ -62,6 +62,7 @@ class AmpSelector extends PreactBaseElement {
             child.setAttribute('aria-disabled', 'true');
           }
           const props = {
+            as: 'Slot',
             option,
             disabled: isDisabled,
             type: 'Slot',
