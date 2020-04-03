@@ -47,7 +47,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
-    timedExecOrDie('gulp validator-java --install_bazel');
+    timedExecOrDie('gulp validator-java');
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
@@ -73,7 +73,7 @@ function main() {
     }
 
     if (buildTargets.has('VALIDATOR_JAVA')) {
-      timedExecOrDie('gulp validator-java --install_bazel');
+      timedExecOrDie('gulp validator-java');
     }
 
     if (buildTargets.has('VALIDATOR_WEBUI')) {
