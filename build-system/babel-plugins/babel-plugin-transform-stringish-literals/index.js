@@ -136,6 +136,13 @@ module.exports = function ({types: t}) {
       },
       TemplateLiteral(path) {
         const {expressions, quasis} = path.node;
+
+        if (quasis.length === 1) {
+          // When there is only a single quasi remaining, this can be represented as a StringLiteral.
+          path.replaceWith(t.stringLiteral(quasis[0].value.raw));
+          return;
+        }
+
         const newExpressions = cloneNodes(expressions);
         let newQuasis = cloneNodes(quasis);
         let conversions = 0;

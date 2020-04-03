@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let none = `/rtv/100/log-messages.simple.json`;
+let none = "/rtv/100/log-messages.simple.json";
 let start = "123/foo";
 let middle = "/rtv/012003312116250/log-messages.simple.json";
 let end = "rtv/123";
