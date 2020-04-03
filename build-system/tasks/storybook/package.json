@@ -12,7 +12,7 @@
     "@storybook/addon-viewport": "5.3.18",
     "@storybook/preact": "5.3.18",
     "babel-loader": "8.0.6",
-    "core-js": "3",
+    "core-js": "3.6.4",
     "preact": "10.3.4",
     "preact-render-to-string": "5.1.4"
   }
