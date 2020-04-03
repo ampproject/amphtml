@@ -21,7 +21,7 @@ YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 
-LOG_PREFIX=$(YELLOW "prepare_bazel.sh")
+LOG_PREFIX=$(YELLOW "install_bazel.sh")
 BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel_2.2.0-linux-x86_64.deb"
 BIN_DIR="bin"
 BAZEL_BIN_PATH="$BIN_DIR/bazel_2.2.0-linux-x86_64.deb"
