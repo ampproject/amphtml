@@ -32,7 +32,6 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
-      - wget
       - pkg-config
   chrome: stable
   hosts:
