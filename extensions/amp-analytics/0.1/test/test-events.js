@@ -1950,6 +1950,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         let saveCallback2;
         let eventsSpy;
         let res;
+        let error;
 
         beforeEach(() => {
           toggleExperiment(win, 'visibility-trigger-improvements', true);
@@ -1974,24 +1975,28 @@ describes.realWin('Events', {amp: 1}, (env) => {
         });
 
         afterEach(async () => {
-          [unlisten, unlisten2].forEach((value) => {
-            if (value) {
-              expect(value).to.not.be.called;
-            }
-          });
-          expect(res).to.be.a('function');
-          await res();
-          [unlisten, unlisten2].forEach((value) => {
-            if (value) {
-              expect(value).to.be.calledOnce;
-            }
-          });
+          if (!error) {
+            [unlisten, unlisten2].forEach((value) => {
+              if (value) {
+                expect(value).to.not.be.called;
+              }
+            });
+            expect(res).to.be.a('function');
+            await res();
+            [unlisten, unlisten2].forEach((value) => {
+              if (value) {
+                expect(value).to.be.calledOnce;
+              }
+            });
+          }
 
           toggleExperiment(win, 'visibility-trigger-improvements', false);
         });
 
         it('should fire event per selector', async () => {
-          config['visibilitySpec'] = {selector: ['.target', '.target2']};
+          config['visibilitySpec'] = {
+            selector: ['.target', '.target2'],
+          };
           iniLoadTrackerMock.expects('getRootSignal').twice();
           iniLoadTrackerMock
             .expects('getElementSignal')
@@ -2051,6 +2056,18 @@ describes.realWin('Events', {amp: 1}, (env) => {
           expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
             totalVisibleTime: 15,
           });
+        });
+
+        it('should error on duplicate selectors', async () => {
+          error = true;
+          config['visibilitySpec'] = {
+            selector: ['.target', '.target'],
+          };
+          expect(() => {
+            tracker.add(analyticsElement, 'visible', config, eventResolver);
+          }).to.throw(
+            /Cannot have duplicate selectors in selectors list: .target/
+          );
         });
       });
     });
@@ -2126,28 +2143,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
     });
 
     describe('should wait on correct readyPromise', () => {
-      it('with waitFor default value', () => {
-        // Default case: selector is not specified
-        expect(tracker.getReadyPromise(undefined)).to.be.null;
-        // Default case: waitFor is not specified, no AMP element selected
-        iniLoadTrackerMock
-          .expects('getRootSignal')
-          .returns(Promise.resolve())
-          .once();
-        const waitForTracker1 = tracker.getReadyPromise('ini-load');
-        return waitForTracker1.then(() => {
-          iniLoadTrackerMock
-            .expects('getElementSignal')
-            .withExactArgs('ini-load', target)
-            .returns(Promise.resolve())
-            .once();
-          // Default case: waitFor is not specified, AMP element selected
-          const promise2 = tracker.getReadyPromise('ini-load', target);
-          target.signals().signal('ini-load');
-          return promise2;
-        });
-      });
-
       it('with waitFor NONE', () => {
         expect(tracker.getReadyPromise('none')).to.be.null;
       });
@@ -2159,16 +2154,13 @@ describes.realWin('Events', {amp: 1}, (env) => {
           .twice();
         const promise = tracker.getReadyPromise('ini-load');
         return promise.then(() => {
-          const promise1 = tracker.getReadyPromise('ini-load');
-          return promise1.then(() => {
-            iniLoadTrackerMock
-              .expects('getElementSignal')
-              .withExactArgs('ini-load', target)
-              .returns(Promise.resolve())
-              .once();
-            const promise2 = tracker.getReadyPromise('ini-load', target);
-            return promise2;
-          });
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target)
+            .returns(Promise.resolve())
+            .once();
+          const promise2 = tracker.getReadyPromise('ini-load', target);
+          return promise2;
         });
       });
 
@@ -2187,16 +2179,13 @@ describes.realWin('Events', {amp: 1}, (env) => {
           .twice();
         const promise = tracker.getReadyPromise('render-start');
         return promise.then(() => {
-          const promise1 = tracker.getReadyPromise('render-start');
-          return promise1.then(() => {
-            signalTrackerMock
-              .expects('getElementSignal')
-              .withExactArgs('render-start', target)
-              .returns(Promise.resolve())
-              .once();
-            const promise2 = tracker.getReadyPromise('render-start', target);
-            return promise2;
-          });
+          signalTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('render-start', target)
+            .returns(Promise.resolve())
+            .once();
+          const promise2 = tracker.getReadyPromise('render-start', target);
+          return promise2;
         });
       });
     });

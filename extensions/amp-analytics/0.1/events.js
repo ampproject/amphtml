@@ -27,7 +27,6 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -1433,9 +1432,6 @@ export class VisibilityTracker extends EventTracker {
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     const unlistenPromises = [];
-    const multiSelectorVisibilityOn =
-      isExperimentOn(this.root.ampdoc.win, 'visibility-trigger-improvements') &&
-      isArray(selector);
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1514,8 +1510,7 @@ export class VisibilityTracker extends EventTracker {
         .getAmpElements(
           context.parentElement || context,
           selector,
-          selectionMethod,
-          multiSelectorVisibilityOn
+          selectionMethod
         )
         .then((elements) => {
           for (let i = 0; i < elements.length; i++) {
@@ -1552,14 +1547,15 @@ export class VisibilityTracker extends EventTracker {
    */
   assertUniqueSelectors_(selectors) {
     if (isArray(selectors)) {
-      const filtered = selectors.filter(
-        (val, index) => selectors.indexOf(val) === index
-      );
-      userAssert(
-        selectors.length === filtered.length,
-        'Cannot have duplicate selectors in selectors list: %s',
-        selectors
-      );
+      const map = {};
+      for (let i = 0; i < selectors.length; i++) {
+        userAssert(
+          !map[selectors[i]],
+          'Cannot have duplicate selectors in selectors list: %s',
+          selectors
+        );
+        map[selectors[i]] = selectors[i];
+      }
     }
   }
 

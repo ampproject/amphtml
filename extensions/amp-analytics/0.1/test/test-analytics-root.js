@@ -25,6 +25,7 @@ import {
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
 import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;
@@ -364,6 +365,11 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.classList.add('i-amphtml-element');
         child2.classList.add('i-amphtml-element');
         child3.classList.add('i-amphtml-element');
+        toggleExperiment(win, 'visibility-trigger-improvements', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
       });
 
       it('should find element and elements by selector', async () => {
@@ -371,10 +377,12 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child2.classList.add('myClass');
         child3.classList.add('notMyClass');
         expect(
-          await root.getAmpElements(body, ['.myClass'], null, true)
+          await root.getAmpElements(body, ['.myClass'], null)
         ).to.deep.equal([child, child2]);
+        // Check that non-experiment works
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
         expect(
-          await root.getAmpElements(body, '.notMyClass', null, false)
+          await root.getAmpElements(body, '.notMyClass', null)
         ).to.deep.equal([child3]);
       });
 
@@ -382,14 +390,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.id = 'myId';
         child.classList.add('myClass');
         expect(
-          await root.getAmpElements(body, ['.myClass', '#myId'], null, true)
-        ).to.deep.equal([child]);
-      });
-
-      it('should remove duplicate selectors', async () => {
-        child.classList.add('myClass');
-        expect(
-          await root.getAmpElements(body, ['.myClass', '.myClass'], null, true)
+          await root.getAmpElements(body, ['.myClass', '#myId'], null)
         ).to.deep.equal([child]);
       });
 
@@ -397,21 +398,21 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.classList.add('myClass');
         expectAsyncConsoleError(/Element ":host" not found/, 1);
         await expect(
-          root.getAmpElements(body, [':host'], null, true)
+          root.getAmpElements(body, [':host'], null)
         ).to.be.rejectedWith(/Element ":host" not found​​​/);
       });
 
       it('should handle missing selector for AMP search', async () => {
         expectAsyncConsoleError(/Element "#unknown" not found/, 1);
         await expect(
-          root.getAmpElements(body, ['#unknown'], null, true)
+          root.getAmpElements(body, ['#unknown'], null)
         ).to.be.rejectedWith(/Element "#unknown" not found​​​/);
       });
 
       it('should handle invalid selector', async () => {
         expectAsyncConsoleError(/Invalid query selector 12345/, 1);
         await expect(
-          root.getAmpElements(body, [12345], null, true)
+          root.getAmpElements(body, [12345], null)
         ).to.be.rejectedWith(/Invalid query selector 12345​​​/);
       });
 
@@ -419,13 +420,13 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         expectAsyncConsoleError(/required to be an AMP element/, 1);
         child.classList.remove('i-amphtml-element');
         await expect(
-          root.getAmpElements(body, ['#child'], null, true)
+          root.getAmpElements(body, ['#child'], null)
         ).to.be.rejectedWith(/required to be an AMP element/);
       });
 
       it('should fail if selection method is found', async () => {
         try {
-          await root.getAmpElements(body, ['#child'], 'scope', true);
+          await root.getAmpElements(body, ['#child'], 'scope');
         } catch (e) {
           expect(e).to.match(
             /Cannot have selectionMethod scope defined with an array selector/
@@ -725,11 +726,19 @@ describes.realWin(
     describe('get amp elements', () => {
       beforeEach(() => {
         child.classList.add('i-amphtml-element');
+        toggleExperiment(win, 'visibility-trigger-improvements', true);
+      });
+
+      afterEach(() => {
+        child.classList.add('i-amphtml-element');
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
       });
 
       it('should find all elements by selector', async () => {
         const child2 = win.document.createElement('child');
         const child3 = win.document.createElement('child');
+        child.id = 'hi';
+        child2.id = 'bye';
         body.appendChild(child2);
         body.appendChild(child3);
         child.classList.add('myClass');
@@ -737,18 +746,19 @@ describes.realWin(
         child3.classList.add('notMyClass');
         child2.classList.add('i-amphtml-element');
         child3.classList.add('i-amphtml-element');
-        expect(
-          await root.getAmpElements(body, ['.myClass'], null, true)
-        ).to.deep.equals([child, child2]);
-        expect(
-          await root.getAmpElements(body, '.notMyClass', null, false)
-        ).to.deep.equals([child3]);
+        const e = await root.getAmpElements(body, ['.myClass'], null);
+
+        expect(e).to.deep.equals([child, child2]);
+        // Check that non-experiment version works
+        // toggleExperiment(win, 'visibility-trigger-improvements', false);
+        // e = await root.getAmpElements(body, '.notMyClass', null);
+        // expect(e).to.deep.equals([child3]);
       });
 
       it('should handle missing selector for AMP search', async () => {
         expectAsyncConsoleError(/Element "#unknown" not found/, 1);
         await expect(
-          root.getAmpElements(body, ['#unknown'], null, true)
+          root.getAmpElements(body, ['#unknown'], null)
         ).to.be.rejectedWith(/Element "#unknown" not found​​​/);
       });
 
@@ -756,7 +766,7 @@ describes.realWin(
         expectAsyncConsoleError(/required to be an AMP element/, 1);
         child.classList.remove('i-amphtml-element');
         await expect(
-          root.getAmpElements(body, ['#child'], null, true)
+          root.getAmpElements(body, ['#child'], null)
         ).to.be.rejectedWith(/required to be an AMP element/);
       });
     });

@@ -25,6 +25,8 @@ import {
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
@@ -340,11 +342,13 @@ export class AnalyticsRoot {
    * @param {!Array<string>|string} selectors DOM query selector(s).
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
-  getAmpElements(context, selectors, selectionMethod, opt_multiSelectorOn) {
-    if (opt_multiSelectorOn) {
+  getAmpElements(context, selectors, selectionMethod) {
+    if (
+      isExperimentOn(this.ampdoc.win, 'visibility-trigger-improvements') &&
+      isArray(selectors)
+    ) {
       userAssert(
         !selectionMethod,
         'Cannot have selectionMethod %s defined with an array selector.',
