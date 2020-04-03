@@ -1788,6 +1788,100 @@ describes.realWin(
       });
     });
 
+    describe('email documents', () => {
+      beforeEach(() => {
+        env.win.document.documentElement.setAttribute('amp4email', '');
+      });
+
+      it('should supply default actions whitelist for email documents without meta', () => {
+        action = new ActionService(env.ampdoc, env.win.document);
+        const i = new ActionInvocation(
+          target,
+          'toggleClass', // hardcoded default
+          /* args */ null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH,
+          'tap',
+          'AMP'
+        );
+        expect(action.invoke_(i)).to.be.null;
+        expect(spy).to.be.calledWithExactly(i);
+      });
+
+      it('should override empty actions whitelist with defaults for email documents', () => {
+        const meta = createElementWithAttributes(env.win.document, 'meta', {
+          name: 'amp-action-whitelist',
+          content: '',
+        });
+        env.win.document.head.appendChild(meta);
+        action = new ActionService(env.ampdoc, env.win.document);
+        action = new ActionService(env.ampdoc, env.win.document);
+        const i = new ActionInvocation(
+          target,
+          'toggleClass', // hardcoded default
+          /* args */ null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH,
+          'tap',
+          'AMP'
+        );
+        expect(action.invoke_(i)).to.be.null;
+        expect(spy).to.be.calledWithExactly(i);
+      });
+
+      it('should override non-empty actions whitelist with defaults for email documents', () => {
+        const meta = createElementWithAttributes(env.win.document, 'meta', {
+          name: 'amp-action-whitelist',
+          content:
+            'AMP.pushState, AMP.setState, AMP.print, ' +
+            'amp-element.defaultAction',
+        });
+        env.win.document.head.appendChild(meta);
+        action = new ActionService(env.ampdoc, env.win.document);
+        const i = new ActionInvocation(
+          target,
+          'print',
+          /* args */ null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH,
+          'tap',
+          'AMP'
+        );
+        env.sandbox.stub(action, 'error_');
+        expect(action.invoke_(i)).to.be.null;
+        expect(action.error_).to.be.calledWith(
+          '"AMP.print" is not whitelisted ' +
+            '[{"tagOrTarget":"*","method":"show"},' +
+            '{"tagOrTarget":"*","method":"hide"},' +
+            '{"tagOrTarget":"*","method":"toggleVisibility"},' +
+            '{"tagOrTarget":"*","method":"toggleClass"},' +
+            '{"tagOrTarget":"*","method":"focus"},' +
+            '{"tagOrTarget":"AMP","method":"setState"},' +
+            '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"},' +
+            '{"tagOrTarget":"AMP-IMAGE-LIGHTBOX","method":"open"},' +
+            '{"tagOrTarget":"AMP-LIGHTBOX","method":"open"},' +
+            '{"tagOrTarget":"AMP-LIGHTBOX","method":"close"},' +
+            '{"tagOrTarget":"AMP-LIST","method":"changeToLayoutContainer"},' +
+            '{"tagOrTarget":"AMP-LIST","method":"refresh"},' +
+            '{"tagOrTarget":"AMP-SELECTOR","method":"clear"},' +
+            '{"tagOrTarget":"AMP-SELECTOR","method":"selectUp"},' +
+            '{"tagOrTarget":"AMP-SELECTOR","method":"selectDown"},' +
+            '{"tagOrTarget":"AMP-SELECTOR","method":"toggle"},' +
+            '{"tagOrTarget":"AMP-SIDEBAR","method":"open"},' +
+            '{"tagOrTarget":"AMP-SIDEBAR","method":"close"},' +
+            '{"tagOrTarget":"AMP-SIDEBAR","method":"toggle"},' +
+            '{"tagOrTarget":"FORM","method":"clear"},' +
+            '{"tagOrTarget":"FORM","method":"submit"}].'
+        );
+      });
+    });
+
     it('should not allow any action with empty string whitelist', () => {
       const meta = createElementWithAttributes(env.win.document, 'meta', {
         name: 'amp-action-whitelist',

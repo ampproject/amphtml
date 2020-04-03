@@ -159,6 +159,16 @@ describes.fakeWin(
               expect(value).to.equal('0.1234');
             });
         });
+
+        it('Should ignore whitelisted variables for email documents', () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          expect(variableSource.getExpr()).to.be.ok;
+          expect(variableSource.getExpr().toString()).not.to.contain('ABC');
+          expect(variableSource.getExpr().toString()).not.to.contain('ABCD');
+          expect(variableSource.getExpr().toString()).not.to.contain(
+            'CANONICAL'
+          );
+        });
       }
     );
 
