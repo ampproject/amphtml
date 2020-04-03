@@ -88,10 +88,10 @@ export function extractElementTags(element) {
 
 /**
  * Extract article's first 5 words from the title and use them for tags.
- * @param {!Node} root
+ * @param {!Document|!ShadowRoot} root
  * @return {!Array<string>}
  */
-export function extratctTitle(root) {
+export function extractTitle(root) {
   const scriptTags = toArray(
     root.querySelectorAll('script[type="application/ld+json"]')
   );
@@ -117,31 +117,29 @@ export function extratctTitle(root) {
 }
 /**
  * Extracts article meta keywords
- * @param {*} root
- * @return {*} TODO(#23582): Specify return type
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {Array<string>}
  */
-export function extractArticleTags(root) {
-  const metaKeywords = root.querySelector('meta[name="keywords"]') || {
-    content: '',
-  };
-  return metaKeywords.content
-    .trim()
+export function extractArticleTags(ampdoc) {
+  return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
-    .filter((e) => e)
-    .map((e) => e.trim());
+    .map((e) => e.trim())
+    .filter((e) => e);
 }
 
 /**
  * Extracts tags from a given element and document.
- * @param {!Node} root
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Node} element
  * @return {Array<string>}
  */
-export function extractTags(root, element) {
+export function extractTags(ampdoc, element) {
   const extractedTags = extractElementTags(element) || [];
-  const articleMetaTags = extractArticleTags(root);
+  const articleMetaTags = extractArticleTags(ampdoc);
   const concatedTags = extractedTags.concat(
-    articleMetaTags.length ? articleMetaTags : extratctTitle(root) || []
+    articleMetaTags.length
+      ? articleMetaTags
+      : extractTitle(ampdoc.getRootNode()) || []
   );
   const loweredCase = concatedTags.map((tag) => tag.toLowerCase().trim());
   const noDuplication = loweredCase.filter(
