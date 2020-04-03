@@ -24,7 +24,7 @@ RED() { echo -e "\033[0;31m$1\033[0m"; }
 LOG_PREFIX=$(YELLOW "install_bazel.sh")
 BAZEL_VERSION="2.2.0"
 BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel_$BAZEL_VERSION-linux-x86_64.deb"
-BIN_DIR="bin"
+BIN_DIR="bazel-bin"
 BAZEL_BIN_PATH="$BIN_DIR/bazel_$BAZEL_VERSION-linux-x86_64.deb"
 
 if type bazel &>/dev/null ; then

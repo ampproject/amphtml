@@ -120,5 +120,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - validator/java/bin
+    - validator/java/bazel-bin
   yarn: true
