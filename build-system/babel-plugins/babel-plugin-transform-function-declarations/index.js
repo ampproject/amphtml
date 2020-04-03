@@ -126,7 +126,7 @@ module.exports = function ({types: t}) {
   ];
 
   // If CallExpression names should be exhempt from arrow conversion, denote them here.
-  const EXHEMPTED_EXPRESSION_NAME_REGEXS = [/registerService/];
+  const EXEMPTED_EXPRESSION_NAME_REGEXS = [/registerService/];
 
   const EXPRESSION_BAIL_OUT_CONDITIONS = [
     isNotFunction,
@@ -140,7 +140,7 @@ module.exports = function ({types: t}) {
         const {name} = (callExpression.node && callExpression.node.callee) || {
           name: null,
         };
-        return EXHEMPTED_EXPRESSION_NAME_REGEXS.every((regexp) =>
+        return EXEMPTED_EXPRESSION_NAME_REGEXS.every((regexp) =>
           regexp.test(name)
         );
       }
