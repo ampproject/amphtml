@@ -62,7 +62,7 @@ const NON_AMP_ELEMENTS_ACTIONS_ = {
 
 /** @const {!Object<string, !Array<string>>} */
 const DEFAULT_EMAIL_ACTIONS_ = {
-  '*': ['show', 'hide', 'toggleVisibility', 'focus'],
+  '*': ['show', 'hide', 'toggleVisibility', 'toggleClass', 'focus'],
   'AMP': ['setState'],
   'AMP-CAROUSEL': ['goToSlide'],
   'AMP-IMAGE-LIGHTBOX': ['open'],
@@ -70,7 +70,7 @@ const DEFAULT_EMAIL_ACTIONS_ = {
   'AMP-LIST': ['changeToLayoutContainer', 'refresh'],
   'AMP-SELECTOR': ['clear', 'selectUp', 'selectDown', 'toggle'],
   'AMP-SIDEBAR': ['open', 'close', 'toggle'],
-  'FORM': ['submit'],
+  'FORM': ['clear', 'submit'],
 };
 
 /**
