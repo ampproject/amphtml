@@ -10,7 +10,7 @@
   "experimentB": {
     "name": "MOVE_FIXED_LAYER",
     "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
+    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER && gulp dist --esm --define_experiment_constant=MOVE_FIXED_LAYER",
     "issue": "",
     "expiration_date_utc": "2020-12-31",
     "define_experiment_constant": "MOVE_FIXED_LAYER"
