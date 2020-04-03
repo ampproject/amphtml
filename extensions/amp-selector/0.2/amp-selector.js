@@ -67,6 +67,8 @@ class AmpSelector extends PreactBaseElement {
             type: 'Slot',
             retarget: true,
             assignedElements: [child],
+            // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
+            // See https://github.com/ampproject/amp-react-prototype/issues/40.
             postRender: () => {
               // Skip mutations to avoid cycles.
               mu.takeRecords();
