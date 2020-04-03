@@ -22,9 +22,10 @@ GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 
 LOG_PREFIX=$(YELLOW "install_bazel.sh")
-BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel_2.2.0-linux-x86_64.deb"
+BAZEL_VERSION="2.2.0"
+BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel_$BAZEL_VERSION-linux-x86_64.deb"
 BIN_DIR="bin"
-BAZEL_BIN_PATH="$BIN_DIR/bazel_2.2.0-linux-x86_64.deb"
+BAZEL_BIN_PATH="$BIN_DIR/bazel_$BAZEL_VERSION-linux-x86_64.deb"
 
 if type bazel &>/dev/null ; then
   echo "$LOG_PREFIX Bazel binary detected; skipping installation"
@@ -32,9 +33,9 @@ if type bazel &>/dev/null ; then
 fi
 
 if [[ -f $BAZEL_BIN_PATH ]]; then
-  echo "$LOG_PREFIX Using cached Bazel binary $(CYAN "BAZEL_BIN_PATH")"
+  echo "$LOG_PREFIX Using cached Bazel binary $(CYAN "$BAZEL_BIN_PATH")"
 else
-  echo "$LOG_PREFIX Downloading $(CYAN "BAZEL_BIN_URL")..."
+  echo "$LOG_PREFIX Downloading $(CYAN "$BAZEL_BIN_URL")..."
   mkdir -p $BIN_DIR
   wget -q -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
   echo "SHA256 ($BAZEL_BIN_PATH) = b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3" | sha256sum -c -
