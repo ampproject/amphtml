@@ -339,7 +339,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
       expect(element).to.equal(child);
     });
 
-    it('should allow not-found element for AMP search', async () => {
+    it('should handle missing selector for AMP search', async () => {
       await root.getAmpElement(body, '#unknown').catch((error) => {
         expect(error).to.match(/Element "#unknown" not found/);
       });
@@ -354,36 +354,65 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
 
     describe('get amp elements', () => {
       let child2;
-      let elements;
+      let child3;
 
       beforeEach(() => {
         child2 = win.document.createElement('child');
+        child3 = win.document.createElement('child');
         body.appendChild(child2);
+        body.appendChild(child3);
         child.classList.add('i-amphtml-element');
         child2.classList.add('i-amphtml-element');
+        child3.classList.add('i-amphtml-element');
       });
 
-      it('should find all elements by selector', async () => {
-        child.id = 'myId';
-        child2.id = 'myId';
+      it('should find element and elements by selector', async () => {
         child.classList.add('myClass');
         child2.classList.add('myClass');
-        elements = await root.getAmpElements(
-          body,
-          ['#myId.myClass'],
-          null,
-          true
-        );
-        expect(elements).to.contain(child);
-        expect(elements).to.contain(child2);
-        expect(elements.length).to.equal(2);
+        child3.classList.add('notMyClass');
+        expect(
+          await root.getAmpElements(body, ['.myClass'], null, true)
+        ).to.deep.equal([child, child2]);
+        expect(
+          await root.getAmpElements(body, '.notMyClass', null, false)
+        ).to.deep.equal([child3]);
       });
 
-      it('should allow not-found element for AMP search', async () => {
+      it('should remove duplicate elements found', async () => {
+        child.id = 'myId';
+        child.classList.add('myClass');
+        expect(
+          await root.getAmpElements(body, ['.myClass', '#myId'], null, true)
+        ).to.deep.equal([child]);
+      });
+
+      it('should remove duplicate selectors', async () => {
+        child.classList.add('myClass');
+        expect(
+          await root.getAmpElements(body, ['.myClass', '.myClass'], null, true)
+        ).to.deep.equal([child]);
+      });
+
+      it('should ignore special selectors', async () => {
+        child.classList.add('myClass');
+        expectAsyncConsoleError(/Element ":host" not found/, 1);
+        await expect(
+          root.getAmpElements(body, [':host'], null, true)
+        ).to.be.rejectedWith(/Element ":host" not found​​​/);
+      });
+
+      it('should handle missing selector for AMP search', async () => {
         expectAsyncConsoleError(/Element "#unknown" not found/, 1);
         await expect(
           root.getAmpElements(body, ['#unknown'], null, true)
         ).to.be.rejectedWith(/Element "#unknown" not found​​​/);
+      });
+
+      it('should handle invalid selector', async () => {
+        expectAsyncConsoleError(/Invalid query selector 12345/, 1);
+        await expect(
+          root.getAmpElements(body, [12345], null, true)
+        ).to.be.rejectedWith(/Invalid query selector 12345​​​/);
       });
 
       it('should fail if the found element is not AMP for AMP search', async () => {
@@ -392,6 +421,16 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         await expect(
           root.getAmpElements(body, ['#child'], null, true)
         ).to.be.rejectedWith(/required to be an AMP element/);
+      });
+
+      it('should fail if selection method is found', async () => {
+        try {
+          await root.getAmpElements(body, ['#child'], 'scope', true);
+        } catch (e) {
+          expect(e).to.match(
+            /Cannot have selectionMethod scope defined with an array selector/
+          );
+        }
       });
     });
   });
@@ -684,33 +723,29 @@ describes.realWin(
     });
 
     describe('get amp elements', () => {
-      let child2;
-      let elements;
-
       beforeEach(() => {
-        child2 = win.document.createElement('child');
-        body.appendChild(child2);
         child.classList.add('i-amphtml-element');
-        child2.classList.add('i-amphtml-element');
       });
 
       it('should find all elements by selector', async () => {
-        child.id = 'myId';
-        child2.id = 'myId';
+        const child2 = win.document.createElement('child');
+        const child3 = win.document.createElement('child');
+        body.appendChild(child2);
+        body.appendChild(child3);
         child.classList.add('myClass');
         child2.classList.add('myClass');
-        elements = await root.getAmpElements(
-          body,
-          ['#myId.myClass'],
-          null,
-          true
-        );
-        expect(elements).to.contain(child);
-        expect(elements).to.contain(child2);
-        expect(elements.length).to.equal(2);
+        child3.classList.add('notMyClass');
+        child2.classList.add('i-amphtml-element');
+        child3.classList.add('i-amphtml-element');
+        expect(
+          await root.getAmpElements(body, ['.myClass'], null, true)
+        ).to.deep.equals([child, child2]);
+        expect(
+          await root.getAmpElements(body, '.notMyClass', null, false)
+        ).to.deep.equals([child3]);
       });
 
-      it('should allow not-found element for AMP search', async () => {
+      it('should handle missing selector for AMP search', async () => {
         expectAsyncConsoleError(/Element "#unknown" not found/, 1);
         await expect(
           root.getAmpElements(body, ['#unknown'], null, true)

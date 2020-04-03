@@ -26,7 +26,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue, isFiniteNumber} from '../../../src/types';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
 
@@ -1429,12 +1429,13 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     const unlistenPromises = [];
     const multiSelectorVisibilityOn =
       isExperimentOn(this.root.ampdoc.win, 'visibility-trigger-improvements') &&
-      Array.isArray(selector);
+      isArray(selector);
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1482,14 +1483,13 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
+      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
       unlistenPromises.push(
         visibilityManagerPromise.then(
           (visibilityManager) => {
             return visibilityManager.listenRoot(
               visibilitySpec,
-              this.getReadyPromise(
-                waitForSpec || (selector ? 'ini-load' : null)
-              ),
+              this.getReadyPromise(readyPromiseWaitForSpec),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(
                 this,
@@ -1508,12 +1508,12 @@ export class VisibilityTracker extends EventTracker {
       // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      const selectors = Array.isArray(selector) ? selector : [selector];
-      this.assertUniqueSelectors_(selectors);
+      readyPromiseWaitForSpec = waitForSpec || 'ini-load';
+      this.assertUniqueSelectors_(selector);
       this.root
         .getAmpElements(
           context.parentElement || context,
-          selectors,
+          selector,
           selectionMethod,
           multiSelectorVisibilityOn
         )
@@ -1525,10 +1525,7 @@ export class VisibilityTracker extends EventTracker {
                   return visibilityManager.listenElement(
                     elements[i],
                     visibilitySpec,
-                    this.getReadyPromise(
-                      waitForSpec || 'ini-load',
-                      elements[i]
-                    ),
+                    this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
                     createReportReadyPromiseFunc,
                     this.onEvent_.bind(this, eventType, listener, elements[i])
                   );
@@ -1551,17 +1548,19 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * Assert that the selectors are all unique
-   * @param {!Array<string>} selectors
+   * @param {!Array<string>|string} selectors
    */
   assertUniqueSelectors_(selectors) {
-    const filtered = selectors.filter(
-      (val, index) => selectors.indexOf(val) === index
-    );
-    userAssert(
-      selectors.length === filtered.length,
-      'Cannot have duplicate selectors in selectors list: %s',
-      selectors
-    );
+    if (isArray(selectors)) {
+      const filtered = selectors.filter(
+        (val, index) => selectors.indexOf(val) === index
+      );
+      userAssert(
+        selectors.length === filtered.length,
+        'Cannot have duplicate selectors in selectors list: %s',
+        selectors
+      );
+    }
   }
 
   /**

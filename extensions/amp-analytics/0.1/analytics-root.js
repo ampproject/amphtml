@@ -305,7 +305,10 @@ export class AnalyticsRoot {
         this.verifyAmpElements_(elementArray, selector);
         elements = elements.concat(elementArray);
       }
-      return elements;
+      // Return unique
+      return elements.filter(
+        (element, index) => elements.indexOf(element) === index
+      );
     });
   }
 
@@ -334,7 +337,7 @@ export class AnalyticsRoot {
    * the specified context node.
    *
    * @param {!Element} context
-   * @param {!Array<string>} selectors Array of DOM query selector.
+   * @param {!Array<string>|string} selectors DOM query selector(s).
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
    * @param {boolean=} opt_multiSelectorOn multi-selector expriment
@@ -344,15 +347,14 @@ export class AnalyticsRoot {
     if (opt_multiSelectorOn) {
       userAssert(
         !selectionMethod,
-        'Cannot have selectionMethod defined with an array selector.'
+        'Cannot have selectionMethod %s defined with an array selector.',
+        selectionMethod
       );
-      return this.getElementsByQuerySelectorAll_(selectors).then((elements) =>
-        elements.filter((element, index) => elements.indexOf(element) === index)
-      );
+      return this.getElementsByQuerySelectorAll_(selectors);
     }
     return this.getAmpElement(
       context,
-      selectors[0],
+      selectors,
       selectionMethod
     ).then((element) => [element]);
   }
