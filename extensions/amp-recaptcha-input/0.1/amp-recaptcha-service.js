@@ -88,15 +88,19 @@ export class AmpRecaptchaService {
 
     /** @private {Object} */
     this.executeMap_ = {};
+
+    /** @private {boolean} */
+    this.global_;
   }
 
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
    * @param {string} sitekey
+   * @param {boolean} global
    * @return {Promise}
    */
-  register(sitekey) {
+  register(sitekey, global = false) {
     if (!this.sitekey_) {
       this.sitekey_ = sitekey;
     } else if (this.sitekey_ !== sitekey) {
@@ -104,6 +108,16 @@ export class AmpRecaptchaService {
         new Error(
           'You must supply the same sitekey ' +
             'to all amp-recaptcha-input elements.'
+        )
+      );
+    }
+    if (this.global_ === undefined) {
+      this.global_ = global;
+    } else if (this.global_ !== global) {
+      return Promise.reject(
+        new Error(
+          'You must supply the data-global attribute ' +
+            'to all or none of the amp-recaptcha-input elements.'
         )
       );
     }
@@ -230,6 +244,7 @@ export class AmpRecaptchaService {
           dict({
             'sitekey': this.sitekey_,
             'sentinel': 'amp-recaptcha',
+            'global': this.global_,
           })
         )
       );
