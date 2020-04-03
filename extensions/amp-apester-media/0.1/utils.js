@@ -91,7 +91,7 @@ export function extractElementTags(element) {
  * @param {!Document|!ShadowRoot} root
  * @return {!Array<string>}
  */
-export function extratctTitle(root) {
+export function extractTitle(root) {
   const scriptTags = toArray(
     root.querySelectorAll('script[type="application/ld+json"]')
   );
@@ -139,7 +139,7 @@ export function extractTags(ampdoc, element) {
   const concatedTags = extractedTags.concat(
     articleMetaTags.length
       ? articleMetaTags
-      : extratctTitle(ampdoc.getRootNode()) || []
+      : extractTitle(ampdoc.getRootNode()) || []
   );
   const loweredCase = concatedTags.map((tag) => tag.toLowerCase().trim());
   const noDuplication = loweredCase.filter(

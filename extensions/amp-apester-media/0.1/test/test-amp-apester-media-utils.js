@@ -19,7 +19,7 @@ import {
   extractArticleTags,
   extractElementTags,
   extractTags,
-  extratctTitle,
+  extractTitle,
 } from '../utils';
 
 describes.realWin('amp-apester-media-utils', {}, (unused) => {
@@ -55,7 +55,7 @@ describes.realWin('amp-apester-media-utils', {}, (unused) => {
 
   it('Extract title works well with no dl json', () => {
     const expected = [];
-    const tags = extratctTitle(document);
+    const tags = extractTitle(document);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -80,7 +80,7 @@ describes.realWin('amp-apester-media-utils', {}, (unused) => {
     }`;
     element.text = jsonLd;
     document.body.appendChild(element);
-    const tags = extratctTitle(document);
+    const tags = extractTitle(document);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -105,7 +105,7 @@ describes.realWin('amp-apester-media-utils', {}, (unused) => {
     }`;
     element.text = jsonLd;
     document.body.appendChild(element);
-    const tags = extratctTitle(document);
+    const tags = extractTitle(document);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -133,7 +133,7 @@ describes.realWin('amp-apester-media-utils', {}, (unused) => {
       document.body.appendChild(element);
     }
 
-    const tags = extratctTitle(document);
+    const tags = extractTitle(document);
     expect(tags).to.deep.equal(expected);
   });
 
