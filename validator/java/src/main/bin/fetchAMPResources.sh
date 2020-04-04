@@ -33,6 +33,9 @@ else
     echo "Append validator main proto asci files"
     cat ../validator-main.protoascii >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
 
+    echo "Append validator css proto ascii files"
+    cat ../validator-css.protoascii >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
+
     echo "Concatenate all extension proto asci files"
     for i in `find ../../extensions -name "*.protoascii"`; do
         echo $i;
