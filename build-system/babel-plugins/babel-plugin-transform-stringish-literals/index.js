@@ -135,6 +135,7 @@ module.exports = function ({types: t}) {
             return;
           }
 
+          // Merge a left NumberLiteral into a right String or Number literal.
           if (t.isNumericLiteral(left)) {
             if (t.isStringLiteral(right)) {
               path.replaceWith(
