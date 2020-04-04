@@ -32,6 +32,7 @@ This document provides details for testing and building your AMP code.
 - [Visual Diff Tests](#visual-diff-tests)
   - [Failing Tests](#failing-tests)
   - [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
+- [Isolated Component Testing](#isolated-component-testing)
 - [Testing on devices](#testing-on-devices)
   - [Testing with ngrok](#testing-with-ngrok)
   - [Testing with Firebase](#testing-with-firebase)
@@ -321,6 +322,31 @@ The debug flags `--chrome_debug` and `--webserver_debug` can be used independent
 To execute only a subset of the tests (i.e., when creating or debugging an existing test) use the `--grep` regular expression flag. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
 
 After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
+
+## Isolated Component Testing
+
+To speed up development and testing of components, it is advised to use the Storybook dashboard and develop "stories" (testing scenarios) for components. Storybook has many features that assist with the isolated development and manual testing of components including easy manual interaction with component parameters, integrated accessibility auditing, responsiveness testing, etc.
+
+AMP includes two Storybook environments: `storybook-amp` (for components living inside AMP pages) and `storybook-preact` (simulating Bento components living in a Preact/React app).
+
+To run these environments and explore existing AMP components, run
+
+```sh
+gulp storybook-amp
+# ------ or ------
+gulp storybook-preact
+```
+
+Test scenarios (stories) live inside each of the components' directories, stories ran in the AMP environment have the `.amp.js` extension:
+
+```sh
+# Preact environment test scenario
+./extensions/amp-example/0.1/storybook/Basic.js
+# AMP environment test scenario
+./extensions/amp-example/0.1/storybook/Basic.amp.js
+```
+
+Read more about [Writing Storybook Test Scenarios](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories) in the official [Storybook documentation](https://storybook.js.org/docs/).
 
 ## Testing on devices
 
