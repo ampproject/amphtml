@@ -1056,22 +1056,6 @@ public class AMPHtmlParserTest {
 //        }
   }
 
-  @Test
-  public void testCdataViolatesBlacklist() {
-    try {
-      String inputHtml =
-        readFile(
-          "test-cases/css/testCdataViolatesBlacklist.html");
-      final int maxNode = 10000;
-      ValidatorProtos.ValidationResult result =
-        ampHtmlParser.parse(inputHtml, ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, ExitCondition.FULL_PARSING, maxNode);
-      Assert.assertEquals(result.getErrorsCount(), 1, "Expecting to have 1 error");
-      Assert.assertTrue(result.getErrors(0).getCode() == ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST);
-    } catch (final IOException ex) {
-      ex.printStackTrace();
-    }
-  }
-
   public static String readFile(@Nonnull final String filePath) throws IOException {
     final StringBuilder sb = new StringBuilder();
     final InputStream is =
