@@ -15,7 +15,6 @@
  */
 
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
@@ -113,17 +112,20 @@ function getEpoch(props) {
     epoch = Date.now();
   } else if (datetime) {
     epoch = Date.parse(datetime);
-    userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
+    if (isNaN(epoch)) {
+      console /*OK*/
+        .error(`Invalid date: ${datetime}`);
+    }
   } else if (timestampMs) {
     epoch = timestampMs;
   } else if (timestampSeconds) {
     epoch = timestampSeconds * 1000;
   }
 
-  userAssert(
-    epoch !== undefined,
-    'One of datetime, timestamp-ms, or timestamp-seconds is required'
-  );
+  if (epoch === undefined) {
+    console /*OK*/
+      .error('One of datetime, timestamp-ms, or timestamp-seconds is required');
+  }
 
   return epoch;
 }

@@ -25,6 +25,7 @@ const PACKAGE_JSON_PATHS = [
   'package.json',
   'build-system/tasks/e2e/package.json',
   'build-system/tasks/visual-diff/package.json',
+  'build-system/tasks/storybook/package.json',
 ];
 
 const checkerExecutable = 'npx npm-exact-versions';
