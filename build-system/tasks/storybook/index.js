@@ -24,33 +24,33 @@ if (argv.port) {
   storybookArgs += ` -p ${argv.port}`;
 }
 
+function runStorybook(mode) {
+  // install storybook-specific modules
+  installPackages(__dirname);
+
+  exec(
+    `./node_modules/.bin/start-storybook -c ./${mode}-env ${storybookArgs}`,
+    {
+      'stdio': [null, process.stdout, process.stderr],
+      cwd: __dirname,
+      env: process.env,
+    }
+  );
+}
+
 /**
  * Simple wrapper around the storybook start script
  * for AMP components (HTML Environment)
  */
-async function storybookAmp() {
-  // install storybook-specific modules
-  installPackages(__dirname);
-
-  exec(`./node_modules/.bin/start-storybook -c ./amp-env ${storybookArgs}`, {
-    'stdio': [null, process.stdout, process.stderr],
-    cwd: __dirname,
-    env: process.env,
-  });
+function storybookAmp() {
+  runStorybook('amp' /** mode */);
 }
 
 /**
  * Simple wrapper around the storybook start script.
  */
-async function storybookPreact() {
-  // install storybook-specific modules
-  installPackages(__dirname);
-
-  exec(`./node_modules/.bin/start-storybook -c ./preact-env ${storybookArgs}`, {
-    'stdio': [null, process.stdout, process.stderr],
-    cwd: __dirname,
-    env: process.env,
-  });
+function storybookPreact() {
+  runStorybook('preact' /** mode */);
 }
 
 module.exports = {
