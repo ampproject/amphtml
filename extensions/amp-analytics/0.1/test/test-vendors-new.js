@@ -157,8 +157,7 @@ describes.realWin(
 
               yield macroTask();
               expect(requestVerifier.hasRequestSent()).to.be.true;
-              let url = requestVerifier.getLastRequestUrl();
-
+              const lastUrl = requestVerifier.getLastRequestUrl();
               const vendorData = VENDOR_REQUESTS[vendor];
               if (!vendorData) {
                 throw new Error(
@@ -167,7 +166,7 @@ describes.realWin(
               }
               const val = vendorData[name];
               if (val == '<ignore for test>') {
-                url = '<ignore for test>';
+                continue;
               }
               if (val == null) {
                 throw new Error(
@@ -175,19 +174,18 @@ describes.realWin(
                     vendor +
                     '.' +
                     name +
-                    ' in vendor-requests.json. Expected value: ' +
-                    url
+                    ' in vendor-requests.json. Last sent out value is: ' +
+                    lastUrl
                 );
               }
-              outputConfig[name] = url;
+              outputConfig[name] = lastUrl;
               // Write this out for easy copy pasting.
-              if (url !== val) {
+              if (!requestVerifier.verifyAndRemoveRequestUrl(val)) {
                 throw new Error(
                   `Vendor ${vendor}, request ${name} doesn't match. ` +
-                    `Expected value ${val}, get value ${url}.`
+                    `Expected value ${val}, last sent out value is ${lastUrl}.`
                 );
               }
-              expect(url).to.equal(val);
             }
             writeOutput(vendor, outputConfig);
           });
@@ -225,17 +223,20 @@ function getAnalyticsTag(doc, vendor) {
   return analytics;
 }
 
-// Cache firstChild before append div to doc
-const {firstChild} = top.document.body;
+let outputBox;
 
 function writeOutput(vendor, output) {
+  if (!outputBox) {
+    outputBox = top.document.createElement('div');
+    top.document.body.appendChild(outputBox);
+  }
   const vendorDiv = top.document.createElement('h3');
   vendorDiv.textContent = vendor;
-  top.document.body.insertBefore(vendorDiv, firstChild);
+  outputBox.appendChild(vendorDiv);
 
   const out = top.document.createElement('div');
   out.textContent = JSON.stringify(output, null, '  ');
-  top.document.body.insertBefore(out, firstChild);
+  outputBox.appendChild(out);
 }
 
 /**
