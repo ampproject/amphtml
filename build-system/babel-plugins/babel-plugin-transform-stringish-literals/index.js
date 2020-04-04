@@ -82,16 +82,16 @@ module.exports = function ({types: t}) {
             }
 
             // Left is a literal, containing a value to merge into the right.
-            const leftValue = escapeStringForTemplateLiteral(left.value);
             if (rightQuasis.length === 1) {
               // The right side has a single quasi (so it can be a StringLiteral).
               // Merging two StringLiterals gives you a StringLiteral.
               path.replaceWith(
-                t.stringLiteral(leftValue + rightQuasis[0].value.raw)
+                t.stringLiteral(left.value + rightQuasis[0].value.raw)
               );
               return;
             }
 
+            const leftValue = escapeStringForTemplateLiteral(left.value);
             rightQuasis[0].value = {
               raw: leftValue + rightQuasis[0].value.raw,
               cooked: leftValue + rightQuasis[0].value.cooked,
@@ -126,11 +126,26 @@ module.exports = function ({types: t}) {
             return;
           }
 
-          // Merge two StringLiterals gives you a StringLiteral.
-          if (t.isStringLiteral(left) && t.isStringLiteral(right)) {
-            const newLiteral = t.cloneNode(left);
-            newLiteral.value = left.value + String(right.value);
-            path.replaceWith(newLiteral);
+          // Merge two StringLiterals (or left string, and right number) gives you a StringLiteral.
+          if (
+            t.isStringLiteral(left) &&
+            (t.isStringLiteral(right) || t.isNumericLiteral(right))
+          ) {
+            path.replaceWith(t.stringLiteral(left.value + String(right.value)));
+            return;
+          }
+
+          if (t.isNumericLiteral(left)) {
+            if (t.isStringLiteral(right)) {
+              path.replaceWith(
+                t.stringLiteral(String(left.value) + right.value)
+              );
+              return;
+            }
+            if (t.isNumericLiteral(right)) {
+              path.replaceWith(t.numericLiteral(left.value + right.value));
+              return;
+            }
           }
         },
       },
