@@ -351,6 +351,16 @@ export class ImagePixelVerifier {
     }
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
+
+  verifyAndRemoveRequestUrl(url) {
+    for (let i = this.imagePixels_.length - 1; i >= 0; i--) {
+      if (this.imagePixels_[i].src == url) {
+        this.imagePixels_.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export function measureMutateElementStub(measure, mutate) {
