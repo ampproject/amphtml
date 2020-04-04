@@ -29,6 +29,8 @@ import {
 import {macroTask} from '../../testing/yield';
 import {registerElement} from '../../src/service/custom-element-registry';
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 describes.realWin(
   'extension-analytics',
   {
