@@ -1051,9 +1051,23 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
+      // amp-video, amp-audio, as well as amp-story and amp-story-page with
+      // a background audio are eligible for media based auto advance.
       const elements = element.querySelectorAll(
-        `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          #${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-story[background-audio][data-id=${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}],
+          amp-story[background-audio]#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-story-page[background-audio][data-id=${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}],
+          amp-story-page[background-audio]#${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}`
       );
       if (!elements.length) {
         if (autoAdvanceStr) {
