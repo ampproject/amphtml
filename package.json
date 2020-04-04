@@ -78,7 +78,7 @@
     "eslint-plugin-notice": "0.8.9",
     "eslint-plugin-prettier": "3.1.2",
     "eslint-plugin-react": "7.19.0",
-    "eslint-plugin-react-hooks": "2.5.1",
+    "eslint-plugin-react-hooks": "3.0.0",
     "eslint-plugin-sort-imports-es6-autofix": "0.5.0",
     "eslint-plugin-sort-requires": "2.1.0",
     "event-stream": "4.0.1",
