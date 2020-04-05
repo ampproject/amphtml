@@ -23,19 +23,19 @@ import {loadScript, validateData} from '../3p/3p';
 export function mediaad(global, data) {
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateData(data, ['medtag', 'publisher']);
+  validateData(data, ['adspotid', 'publisher']);
 
   const d = document.getElementById('c');
   const meddiv = document.createElement('div');
-  meddiv.setAttribute('id', data.medtag);
-  d.append();
+  meddiv.setAttribute('id', data.adspotid);
+  d.appendChild(meddiv);
 
   let ampAdWidgetVerify;
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
     changes.forEach(function (c) {
       if (c.intersectionRect.height && ampAdWidgetVerify) {
-        ampAdWidgetVerify(data.medtag, data.publisher);
+        ampAdWidgetVerify(data.adspotid, data.publisher);
       }
     });
   });
@@ -46,7 +46,7 @@ export function mediaad(global, data) {
       data.publisher
     )}/loader.js`,
     () => {
-      ampAdWidgetVerify = window.ampAdWidgetVerify;
+      ampAdWidgetVerify = global.ampAdWidgetVerify;
     }
   );
 }
