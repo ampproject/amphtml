@@ -25,11 +25,12 @@ export function mediaad(global, data) {
   // and exactly one page-type
   validateData(data, ['medtag', 'publisher']);
 
-  var d = document.getElementById('c');
-  var meddiv = document.createElement('div');
+  const d = document.getElementById('c');
+  const meddiv = document.createElement('div');
   meddiv.setAttribute('id', data.medtag);
   d.append();
 
+  let ampAdWidgetVerify;
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
     changes.forEach(function (c) {
@@ -41,6 +42,11 @@ export function mediaad(global, data) {
 
   loadScript(
     global,
-    `https://s1.mediaad.org/serve/${encodeURIComponent(data.publisher)}/loader.js`
+    `https://s1.mediaad.org/serve/${encodeURIComponent(
+      data.publisher
+    )}/loader.js`,
+    () => {
+      ampAdWidgetVerify = window.ampAdWidgetVerify;
+    }
   );
 }
