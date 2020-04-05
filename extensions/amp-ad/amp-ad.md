@@ -329,6 +329,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
+- [Mediaad.org](../../ads/mediaad.md)
 - [Media.net](../../ads/medianet.md)
 - [Mediavine](../../ads/mediavine.md)
 - [Medyanet](../../ads/medyanet.md)

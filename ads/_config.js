@@ -642,6 +642,8 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'mediaad': {},
+
   'medianet': {
     preconnect: 'https://contextual.media.net',
     renderStartImplemented: true,
