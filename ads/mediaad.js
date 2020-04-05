@@ -23,19 +23,23 @@ import {loadScript, validateData} from '../3p/3p';
 export function mediaad(global, data) {
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateData(data, ['adspotid', 'publisher']);
+  validateData(data, ['medtag', 'publisher']);
 
   const d = document.getElementById('c');
   const meddiv = document.createElement('div');
-  meddiv.setAttribute('id', data.adspotid);
+  meddiv.setAttribute('id', data['medtag']);
   d.appendChild(meddiv);
 
-  let ampAdWidgetVerify;
+  global._mediaad = global._mediaad || [];
+
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
     changes.forEach(function (c) {
-      if (c.intersectionRect.height && ampAdWidgetVerify) {
-        ampAdWidgetVerify(data.adspotid, data.publisher);
+      if (c.intersectionRect.height) {
+        global._mediaad.push({
+          medtag: data['medtag'],
+          publisher: data.publisher,
+        });
       }
     });
   });
@@ -44,9 +48,6 @@ export function mediaad(global, data) {
     global,
     `https://s1.mediaad.org/serve/${encodeURIComponent(
       data.publisher
-    )}/loader.js`,
-    () => {
-      ampAdWidgetVerify = global.ampAdWidgetVerify;
-    }
+    )}/loader.js`
   );
 }
