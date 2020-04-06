@@ -19,8 +19,7 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
-
+import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
