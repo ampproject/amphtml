@@ -457,7 +457,7 @@ export class AmpStoryPlayer {
     // Get an AMP Cache URL from a cache domain, and a canonical URL
     ampToolboxCacheUrl
       .createCacheUrl('cdn.ampproject.org', href)
-      .then((cacheUrl) => {
+      .then((unusedCacheUrl) => {
         // TODO: do something with the cacheUrl here.
       });
   }
