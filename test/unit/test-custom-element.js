@@ -1988,7 +1988,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.viewportCallback(true);
         clock.tick(101);
         expect(toggle).to.be.calledOnce;
-        expect(toggle.firstCall.args).to.deep.equal([true, {startTime: 0}]);
+        expect(toggle.firstCall.args).to.deep.equal([
+          true,
+          {startTime: env.sandbox.match.number},
+        ]);
       });
 
       it('should NOT turn on when enters viewport but already laid out', () => {
