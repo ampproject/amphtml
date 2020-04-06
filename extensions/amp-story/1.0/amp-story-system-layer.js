@@ -301,7 +301,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-      canShowButtons => {
+      (canShowButtons) => {
         this.systemLayerEl_.classList.toggle(
           'i-amphtml-story-ui-no-buttons',
           !canShowButtons
@@ -349,7 +349,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -365,17 +365,17 @@ export class SystemLayer {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -383,7 +383,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.STORY_HAS_AUDIO_STATE,
-      hasAudio => {
+      (hasAudio) => {
         this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
@@ -391,7 +391,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
-      isMuted => {
+      (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
       true /** callToInitialize */
@@ -399,7 +399,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -407,7 +407,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      index => {
+      (index) => {
         this.onPageIndexUpdate_(index);
       },
       true /** callToInitialize */
@@ -415,7 +415,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -423,7 +423,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
-      audio => {
+      (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
       },
       true /** callToInitialize */
@@ -431,7 +431,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.HAS_SIDEBAR_STATE,
-      hasSidebar => {
+      (hasSidebar) => {
         this.onHasSidebarStateUpdate_(hasSidebar);
       },
       true /** callToInitialize */
@@ -439,7 +439,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
@@ -748,7 +748,7 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
     });
   }
 

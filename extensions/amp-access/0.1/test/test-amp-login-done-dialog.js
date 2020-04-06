@@ -19,7 +19,6 @@ import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 describe('LoginDoneDialog', () => {
   let clock;
   let windowApi;
-  let windowMock;
   let dialog;
   let messageListener;
   let openerMock;
@@ -31,7 +30,7 @@ describe('LoginDoneDialog', () => {
     messageListener = undefined;
     closeButton = {};
     windowApi = {
-      close: () => {},
+      close: window.sandbox.spy(),
       navigator: {
         language: 'fr-FR',
       },
@@ -56,15 +55,17 @@ describe('LoginDoneDialog', () => {
       open: () => {},
       postMessage: () => {},
       setTimeout: (callback, t) => window.setTimeout(callback, t),
+      setInterval: (callback, t) => window.setInterval(callback, t),
+      clearInterval: (callback, t) => window.clearInterval(callback, t),
       document: {
         documentElement: document.createElement('div'),
-        getElementById: id => {
+        getElementById: (id) => {
           if (id == 'closeButton') {
             return closeButton;
           }
           return null;
         },
-        querySelector: sel => {
+        querySelector: (sel) => {
           if (sel == '[lang="unk"]') {
             return null;
           }
@@ -72,7 +73,6 @@ describe('LoginDoneDialog', () => {
         },
       },
     };
-    windowMock = window.sandbox.mock(windowApi);
     openerMock = window.sandbox.mock(windowApi.opener);
 
     dialog = new LoginDoneDialog(windowApi);
@@ -160,7 +160,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match(arg => {
+          window.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -178,9 +178,9 @@ describe('LoginDoneDialog', () => {
         })
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(messageListener).to.not.exist;
         });
@@ -194,9 +194,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -214,9 +214,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -233,9 +233,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -253,9 +253,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
           expect(windowApi.location.replace.firstCall.args[0]).to.equal(
@@ -298,9 +298,9 @@ describe('LoginDoneDialog', () => {
         .postbackOrRedirect_()
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.match(/No opener or return location available/);
           expect(messageListener).to.not.exist;
         });
@@ -310,7 +310,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          window.sandbox.match(arg => {
+          window.sandbox.match((arg) => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -328,18 +328,40 @@ describe('LoginDoneDialog', () => {
         })
         .then(
           () => 'SUCCESS',
-          error => 'ERROR ' + error
+          (error) => 'ERROR ' + error
         )
-        .then(res => {
+        .then((res) => {
           expect(res).to.match(/Timed out/);
           expect(messageListener).to.not.exist;
         });
     });
 
+    it('should keep trying to close window for a minute', () => {
+      dialog.postbackSuccess_();
+      expect(windowApi.close).to.have.callCount(1);
+      clock.tick(60000);
+      expect(windowApi.close).to.have.callCount(121);
+      windowApi.close.resetHistory();
+      // After 60 seconds it'll stop trying.
+      clock.tick(60000);
+      expect(windowApi.close).to.not.be.called;
+    });
+
+    it('should stop trying to close window after it is closed', () => {
+      dialog.postbackSuccess_();
+      clock.tick(30000);
+      expect(windowApi.close).to.have.callCount(61);
+      windowApi.close.resetHistory();
+      windowApi.closed = true;
+      // After the window is closed it'll stop trying.
+      clock.tick(30000);
+      expect(windowApi.close).to.not.be.called;
+    });
+
     it('should revert to error mode if window is not closed', () => {
-      windowMock.expects('close').once();
       dialog.postbackError_ = window.sandbox.spy();
       dialog.postbackSuccess_();
+      expect(windowApi.close).to.be.calledOnce;
       expect(dialog.postbackError_).to.have.not.been.called;
 
       clock.tick(10000);
@@ -355,8 +377,8 @@ describe('LoginDoneDialog', () => {
       ).to.equal('postback');
       expect(closeButton.onclick).to.exist;
 
-      windowMock.expects('close').once();
       closeButton.onclick();
+      expect(windowApi.close).to.be.calledOnce;
     });
 
     it('should configure error mode for "close"', () => {
@@ -366,8 +388,8 @@ describe('LoginDoneDialog', () => {
       expect(
         windowApi.document.documentElement.getAttribute('data-error')
       ).to.equal('postback');
-      windowMock.expects('close').once();
       closeButton.onclick();
+      expect(windowApi.close).to.be.calledOnce;
 
       clock.tick(3000);
       expect(windowApi.document.documentElement).to.have.class('amp-error');

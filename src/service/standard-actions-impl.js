@@ -154,7 +154,7 @@ export class StandardActions {
       case 'setState':
         const element =
           node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
-        return Services.bindForDocOrNull(element).then(bind => {
+        return Services.bindForDocOrNull(element).then((bind) => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
@@ -183,8 +183,8 @@ export class StandardActions {
 
       case 'optoutOfCid':
         return Services.cidForDoc(this.ampdoc)
-          .then(cid => cid.optOut())
-          .catch(reason => {
+          .then((cid) => cid.optOut())
+          .catch((reason) => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
     }
@@ -203,7 +203,7 @@ export class StandardActions {
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
     if (startsWith(caller.tagName, 'AMP-')) {
-      permission = caller.getImpl().then(impl => {
+      permission = caller.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();
         }
@@ -218,7 +218,7 @@ export class StandardActions {
           {target: args['target'], opener: args['opener']}
         );
       },
-      /* onrejected */ e => {
+      /* onrejected */ (e) => {
         user().error(TAG, e.message);
       }
     );

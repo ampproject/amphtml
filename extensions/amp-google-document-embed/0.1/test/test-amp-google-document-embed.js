@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-google-document-embed'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -50,7 +50,7 @@ describes.realWin(
     }
 
     it('renders arbitrary documents', () => {
-      return getDriveViewer('https://example.com/doc.pdf').then(element => {
+      return getDriveViewer('https://example.com/doc.pdf').then((element) => {
         const iframe = element.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -62,7 +62,7 @@ describes.realWin(
     it('renders Google Docs documents', () => {
       const googleDocumentUrl =
         'https://docs.google.com/document/d/e/2PACX-1vQcy6GoJ2yCKMxe4SNALCPCYWV2Ufg-e6D3djyaJluQXubAfKA3toPqVxWaWK-lJFm4Nyxv-swrkvyN/pub';
-      return getDriveViewer(googleDocumentUrl).then(element => {
+      return getDriveViewer(googleDocumentUrl).then((element) => {
         const iframe = element.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(googleDocumentUrl);
@@ -70,7 +70,7 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', () => {
-      return getDriveViewer('https://example.com/doc.pdf').then(element => {
+      return getDriveViewer('https://example.com/doc.pdf').then((element) => {
         const impl = element.implementation_;
         impl.unlayoutCallback();
         expect(element.querySelector('iframe')).to.be.null;

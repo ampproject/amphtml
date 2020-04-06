@@ -65,7 +65,7 @@ describe('AMPHTML ad on AMP Page', () => {
   </amp-ad>
       `,
     },
-    env => {
+    (env) => {
       // TODO(#24657): Flaky on Travis.
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
@@ -89,7 +89,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
@@ -122,7 +122,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it.configure()
         .skipEdge()
         .run('should layout amp-img, amp-pixel, amp-analytics', () => {
@@ -150,7 +150,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
@@ -170,12 +170,12 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       let adContent;
       let iframe;
       before(() => {
         // Gets the same ad as the other tests.
-        return fetchAdContent().then(text => {
+        return fetchAdContent().then((text) => {
           adContent = text;
         });
       });
@@ -221,11 +221,11 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
-    env => {
+    (env) => {
       let adContent;
       let iframe;
       before(() => {
-        return fetchAdContent().then(text => {
+        return fetchAdContent().then((text) => {
           adContent = text;
         });
       });
@@ -307,7 +307,7 @@ describe('A more real AMPHTML image ad', () => {
         <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -342,7 +342,7 @@ describe('A more real AMPHTML image ad', () => {
       amp: false,
       body: '',
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -382,7 +382,7 @@ describe('A more real AMPHTML image ad', () => {
         <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
     },
-    env => {
+    (env) => {
       let iframe;
       let doc;
       beforeEach(() => {
@@ -416,13 +416,13 @@ describe('A more real AMPHTML image ad', () => {
 });
 
 function testAmpComponents() {
-  const imgPromise = RequestBank.withdraw('image').then(req => {
+  const imgPromise = RequestBank.withdraw('image').then((req) => {
     expect(req.url).to.equal('/');
   });
-  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+  const pixelPromise = RequestBank.withdraw('pixel').then((req) => {
     expect(req.url).to.equal('/foo?cid=');
   });
-  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+  const analyticsPromise = RequestBank.withdraw('analytics').then((req) => {
     expect(req.url).to.match(/^\/bar\?/);
     const queries = parseQueryString(req.url.substr('/bar'.length));
     expect(queries['cid']).to.equal('');
@@ -439,15 +439,15 @@ function testAmpComponentsBTF(win) {
   // The iframe starts BTF. "visible" trigger should be after scroll.
   // We will record scrolling time for comparison.
   let scrollTime = Infinity;
-  const imgPromise = RequestBank.withdraw('image').then(req => {
+  const imgPromise = RequestBank.withdraw('image').then((req) => {
     expect(Date.now()).to.be.below(scrollTime);
     expect(req.url).to.equal('/');
   });
-  const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+  const pixelPromise = RequestBank.withdraw('pixel').then((req) => {
     expect(Date.now()).to.be.below(scrollTime);
     expect(req.url).to.equal('/foo?cid=');
   });
-  const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
+  const analyticsPromise = RequestBank.withdraw('analytics').then((req) => {
     expect(req.url).to.match(/^\/bar\?/);
     const queries = parseQueryString(req.url.substr('/bar'.length));
     expect(queries['cid']).to.equal('');
@@ -478,7 +478,7 @@ function fetchAdContent() {
       ampCors: false,
       credentials: 'omit',
     })
-    .then(res => res.text());
+    .then((res) => res.text());
 }
 
 /**

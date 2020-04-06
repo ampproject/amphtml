@@ -26,10 +26,10 @@ const {red, cyan, yellow} = require('ansi-colors');
  *
  * @return {!Stream}
  */
-exports.checkForUnknownDeps = function() {
+exports.checkForUnknownDeps = function () {
   const regex = /[\w$]+?\$\$module\$[\w$]+/;
 
-  return through.obj(function(file, encoding, cb) {
+  return through.obj(function (file, encoding, cb) {
     const contents = file.contents.toString();
     if (!contents.includes('$$module$')) {
       // Fast check, since regexes can backtrack like crazy.

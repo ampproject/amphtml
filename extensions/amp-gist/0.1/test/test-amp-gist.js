@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-gist'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -46,7 +46,7 @@ describes.realWin(
     }
 
     it('renders responsively', () => {
-      return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
+      return getIns('b9bb35bc68df68259af94430f012425f').then((ins) => {
         const iframe = ins.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -57,7 +57,7 @@ describes.realWin(
       return getIns(
         'b9bb35bc68df68259af94430f012425f',
         'hello-world.html'
-      ).then(ins => {
+      ).then((ins) => {
         const iframe = ins.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);

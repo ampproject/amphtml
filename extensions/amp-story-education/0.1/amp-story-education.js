@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/layout';
@@ -24,6 +25,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -36,7 +38,7 @@ const TAG = 'amp-story-education';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildNavigationEl = element => {
+const buildNavigationEl = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-education-navigation">
@@ -49,6 +51,11 @@ const buildNavigationEl = element => {
       <button class="i-amphtml-story-education-navigation-button"></button>
     </div>
   `;
+};
+
+/** @enum {string} */
+const Screen = {
+  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas',
 };
 
 /** @enum */
@@ -79,6 +86,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.storeService_ = /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (Services.storyStoreService(
       this.win
     ));
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
   }
 
   /** @override */
@@ -86,7 +96,21 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_.classList.add('i-amphtml-story-education');
     toggle(this.containerEl_, false);
     this.startListening_();
-    createShadowRootWithStyle(this.element, this.containerEl_, CSS);
+    // Extra host to reset inherited styles and further enforce shadow DOM style
+    // scoping using amp-story-shadow-reset.css.
+    const hostEl = this.win.document.createElement('div');
+    this.element.appendChild(hostEl);
+    createShadowRootWithStyle(hostEl, this.containerEl_, CSS);
+
+    this.viewer_ = Services.viewerForDoc(this.element);
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    if (this.viewer_.isEmbedded() && isMobileUI) {
+      this.maybeShowScreen_(
+        Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
+        State.NAVIGATION_TAP
+      );
+    }
   }
 
   /** @override */
@@ -104,9 +128,26 @@ export class AmpStoryEducation extends AMP.BaseElement {
       true /** useCapture */
     );
 
+    // Prevent touchevents from being forwarded through viewer messaging.
+    this.containerEl_.addEventListener(
+      'touchstart',
+      (event) => event.stopPropagation(),
+      true /** useCapture */
+    );
+    this.containerEl_.addEventListener(
+      'touchmove',
+      (event) => event.stopPropagation(),
+      true /** useCapture */
+    );
+    this.containerEl_.addEventListener(
+      'touchend',
+      (event) => event.stopPropagation(),
+      true /** useCapture */
+    );
+
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => this.onRtlStateUpdate_(rtlState),
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
       true /** callToInitialize */
     );
   }
@@ -116,7 +157,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    if (this.state_ === State.NAVIGATION_TAP) {
+    if (
+      this.state_ === State.NAVIGATION_TAP &&
+      this.viewer_.hasCapability('swipe')
+    ) {
       this.setState_(State.NAVIGATION_SWIPE);
       return;
     }
@@ -150,6 +194,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     switch (state) {
       case State.HIDDEN:
+        this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
           toggle(this.containerEl_, false);
@@ -162,10 +207,13 @@ export class AmpStoryEducation extends AMP.BaseElement {
       case State.NAVIGATION_TAP:
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'tap');
+        const progressStringId = this.viewer_.hasCapability('swipe')
+          ? LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
         ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          progressStringId
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
@@ -217,6 +265,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     }
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action.TOGGLE_EDUCATION, true);
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
@@ -224,8 +273,41 @@ export class AmpStoryEducation extends AMP.BaseElement {
       this.containerEl_.appendChild(template);
     });
   }
+
+  /**
+   * Asks the viewer whether the navigation screen should be shown.
+   * Viewer responses should be treated right away, and not cached.
+   * @param {!Screen} screen Screen to show
+   * @param {!State} state State to set
+   * @private
+   */
+  maybeShowScreen_(screen, state) {
+    // Only show education screens when the ampdoc is visible.
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() => {
+        // TODO(gmajoulet): update this method to support showing multiple
+        // screens, if/when needed.
+        this.viewer_
+          .sendMessageAwaitResponse(
+            'canShowScreens',
+            dict({'screens': [{'screen': screen}]})
+          )
+          .then((response) => {
+            const shouldShow = !!(
+              response &&
+              response['screens'] &&
+              response['screens'][0] &&
+              response['screens'][0]['show']
+            );
+            if (shouldShow) {
+              this.setState_(state);
+            }
+          });
+      });
+  }
 }
 
-AMP.extension('amp-story-education', '0.1', AMP => {
+AMP.extension('amp-story-education', '0.1', (AMP) => {
   AMP.registerElement('amp-story-education', AmpStoryEducation, CSS);
 });

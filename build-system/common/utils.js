@@ -27,6 +27,15 @@ const {isTravisBuild} = require('./travis');
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
+ * Cleans and builds binaries with --fortesting flag and
+ * overriden config.
+ */
+function buildMinifiedRuntime() {
+  execOrDie('gulp clean');
+  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+}
+
+/**
  * Logs a message on the same line to indicate progress
  *
  * @param {string} message
@@ -49,7 +58,7 @@ function logOnSameLine(message) {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter(changedFile => {
+  return gitDiffNameOnlyMaster().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -137,6 +146,7 @@ function installPackages(dir) {
 }
 
 module.exports = {
+  buildMinifiedRuntime,
   getFilesChanged,
   getFilesToCheck,
   installPackages,

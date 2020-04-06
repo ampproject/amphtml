@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a simple embedded [Hulu](http://www.hulu.com) video.
+  text: Displays a simple embedded Hulu video.
 ---
 
 <!---

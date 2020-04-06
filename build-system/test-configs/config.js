@@ -114,11 +114,14 @@ const presubmitGlobs = [
   '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
+  '!validator/chromeextension/*.*',
   '!validator/dist/**/*.*',
+  '!validator/htmlparser/**/*.*',
   '!validator/node_modules/**/*.*',
   '!validator/nodejs/node_modules/**/*.*',
   '!validator/webui/dist/**/*.*',
   '!validator/webui/node_modules/**/*.*',
+  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/e2e/node_modules/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
@@ -127,7 +130,6 @@ const presubmitGlobs = [
   '!build/polyfills.js',
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
-  '!validator/chromeextension/*.*',
   '!src/purifier/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.

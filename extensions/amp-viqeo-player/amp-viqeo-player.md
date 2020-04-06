@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Viqeo](https://viqeo.tv/) video player.
+  text: Displays a Viqeo video player.
 ---
 
 <!---

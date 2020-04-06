@@ -21,7 +21,7 @@ import {
 
 const XHR_BUFFER_SIZE = 2;
 
-describes.fakeWin('LiveListManager', {amp: true}, env => {
+describes.fakeWin('LiveListManager', {amp: true}, (env) => {
   const jitterOffset = 1000;
   let win, doc;
   let ampdoc;
@@ -40,7 +40,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     xhrs = setUpMockXhrs(env.sandbox);
 
     manager = new LiveListManager(ampdoc);
-    const docReadyPromise = new Promise(resolve => {
+    const docReadyPromise = new Promise((resolve) => {
       ready = resolve;
     });
     env.sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
@@ -57,10 +57,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     const xhrs = [];
     const xhrResolvers = [];
     for (let i = 0; i < XHR_BUFFER_SIZE; i++) {
-      xhrs[i] = new Promise(resolve => (xhrResolvers[i] = resolve));
+      xhrs[i] = new Promise((resolve) => (xhrResolvers[i] = resolve));
     }
     let xhrCount = 0;
-    mockXhr.onCreate = function(xhr) {
+    mockXhr.onCreate = function (xhr) {
       xhrResolvers[xhrCount++](xhr);
     };
     return xhrs;
@@ -170,7 +170,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       const fromServer = doc.createElement('div');
       fromServer.appendChild(customSlot);
       fromServer.getElementById = () => {};
-      env.sandbox.stub(fromServer, 'getElementById').callsFake(id => {
+      env.sandbox.stub(fromServer, 'getElementById').callsFake((id) => {
         return fromServer.querySelector(`#${id}`);
       });
 
@@ -205,7 +205,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       const tick = interval - jitterOffset;
       expect(manager.poller_.isRunning()).to.be.true;
       clock.tick(tick);
-      return xhrs[0].then(xhr =>
+      return xhrs[0].then((xhr) =>
         expect(xhr.url).to.match(/amp_latest_update_time=2222/)
       );
     });
@@ -473,7 +473,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           200,
           {
@@ -486,7 +486,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             415,
             {
@@ -517,7 +517,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           200,
           {
@@ -530,7 +530,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             500,
             {
@@ -563,7 +563,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
       expect(manager.poller_.backoffClock_).to.be.null;
-      xhrs[0].then(xhr =>
+      xhrs[0].then((xhr) =>
         xhr.respond(
           415,
           {
@@ -578,7 +578,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         // tick 1 max initial backoff with random = 1
         clock.tick(700);
         expect(fetchSpy).to.have.callCount(2);
-        xhrs[1].then(xhr =>
+        xhrs[1].then((xhr) =>
           xhr.respond(
             200,
             {
@@ -641,7 +641,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      return xhrs[0].then(xhr => {
+      return xhrs[0].then((xhr) => {
         expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
         expect(xhr.url).to.match(/#dev=1/);
         expect(xhr.url).to.match(/amp_latest_update_time/);
@@ -667,7 +667,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(fetchSpy).to.have.not.been.called;
         clock.tick(tick);
         expect(fetchSpy).to.be.calledOnce;
-        return xhrs[0].then(xhr => {
+        return xhrs[0].then((xhr) => {
           expect(xhr.url).to.match(
             /^https:\/\/cdn\.ampproject\.org\/c\/www\.example\.com\/foo\/bar\?hello=world/
           );
@@ -699,7 +699,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(fetchSpy).to.have.not.been.called;
         clock.tick(tick);
         expect(fetchSpy).to.be.calledOnce;
-        return xhrs[0].then(xhr => {
+        return xhrs[0].then((xhr) => {
           expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
           expect(xhr.url).to.match(/#dev=1/);
           expect(xhr.url).to.match(/amp_latest_update_time/);
@@ -717,7 +717,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
-    doc.querySelectorAll = function() {};
+    doc.querySelectorAll = function () {};
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -740,7 +740,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(xhr => {
+      xhrs[0].then((xhr) => {
         expect(xhr.url).to.match(/amp_latest_update_time=1111/);
         xhr.respond(
           200,
@@ -753,7 +753,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         clock.tick(tick);
         expect(fetchSpy).to.have.callCount(2);
-        return xhrs[1].then(xhr =>
+        return xhrs[1].then((xhr) =>
           expect(xhr.url).to.match(/amp_latest_update_time=2500/)
         );
       });
@@ -767,14 +767,14 @@ describes.realWin(
     amp: true,
     fakeRegisterElement: true,
   },
-  env => {
+  (env) => {
     let manager;
     let ampdoc;
     let win;
     let doc;
     let extensions;
 
-    beforeEach(function() {
+    beforeEach(function () {
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;

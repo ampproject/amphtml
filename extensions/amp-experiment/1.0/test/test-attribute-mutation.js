@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let elements;
 
@@ -269,7 +269,7 @@ describes.realWin(
         attributeMutation.parseAndValidate();
         attributeMutation.mutate();
 
-        attributeMutation.elements_.forEach(element => {
+        attributeMutation.elements_.forEach((element) => {
           expect(element.getAttribute(attributeName)).to.equal(value);
         });
       });
@@ -282,7 +282,7 @@ describes.realWin(
           attributeMutation.parseAndValidate();
           attributeMutation.mutate();
 
-          attributeMutation.elements_.forEach(element => {
+          attributeMutation.elements_.forEach((element) => {
             expect(element.getAttribute('style')).to.equal(
               'background-color: rgb(0, 0, 0); color: rgb(0, 0, 0);'
             );
@@ -324,7 +324,7 @@ describes.realWin(
         attributeMutation.parseAndValidate();
         attributeMutation.mutate();
 
-        attributeMutation.elements_.forEach(element => {
+        attributeMutation.elements_.forEach((element) => {
           expect(element.getAttribute(attributeName)).to.equal(value);
         });
         expect(mutatedAttributesCallbackSpy).to.be.calledOnce;

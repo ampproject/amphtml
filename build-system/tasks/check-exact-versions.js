@@ -35,7 +35,7 @@ const checkerExecutable = 'npx npm-exact-versions';
  */
 async function checkExactVersions() {
   let success = true;
-  PACKAGE_JSON_PATHS.forEach(file => {
+  PACKAGE_JSON_PATHS.forEach((file) => {
     const checkerCmd = `${checkerExecutable} --path ${file}`;
     const err = getStderr(checkerCmd);
     if (err) {
