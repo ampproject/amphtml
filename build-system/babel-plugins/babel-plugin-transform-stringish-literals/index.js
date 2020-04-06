@@ -132,7 +132,7 @@ module.exports = function ({types: t}) {
           // When the remaining number of quasis is one.
           // Replace the TemplateLiteral with a StringLiteral.
           // `foo` => 'foo'
-          path.replaceWith(t.stringLiteral(newQuasis[0].value.raw));
+          path.replaceWith(t.stringLiteral(newQuasis[0].value.cooked));
           return;
         }
 
