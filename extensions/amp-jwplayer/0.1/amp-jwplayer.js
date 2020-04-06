@@ -19,20 +19,26 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {removeElement} from '../../../src/dom';
-import {listen, getData, getDetail} from '../../../src/event-helper';
+import {removeElement, fullscreenEnter, fullscreenExit, isFullscreenElement} from '../../../src/dom';
+import {listen, getData, getDetail} from '../../../src/event-helper'
 import {userAssert, dev} from '../../../src/log';
 import {
+  addUnsafeAllowAutoplay,
   createFrameFor,
   isJsonOrObj,
   mutedOrUnmutedEvent,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
+import {
+  disableScrollingOnIframe,
+} from '../../../src/iframe-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {once} from '../../../src/utils/function';
+import { Deferred } from '../../../src/utils/promise';
 
 const JWPLAYER_EVENTS = {
+  'ready': VideoEvents.LOAD,
   'play': VideoEvents.PLAYING,
   'pause': VideoEvents.PAUSE,
   'complete': VideoEvents.ENDED,
@@ -45,7 +51,13 @@ const JWPLAYER_EVENTS = {
 
 const eventHandlers = {
   fullscreen: (fullscreenInfo, ctx) => {
-      ctx.fullscreen_ = fullscreenInfo.fullscreen;
+    const { fullscreen } = fullscreenInfo;
+    
+    if (fullscreen == ctx.isFullscreen()) {
+      return;
+    }
+
+    fullscreen ? ctx.fullscreenEnter() : ctx.fullscreenExit();
   },
   meta: (metadata, ctx) => {
     if (metadata.metadataType === 'media') {
@@ -53,7 +65,9 @@ const eventHandlers = {
     }
   },
   mute: (muted, ctx) => {
-      ctx.onToggleMute_(muted.mute);
+    const {element} = ctx;
+    ctx.muted_ = muted.mute;
+    element.dispatchCustomEvent(mutedOrUnmutedEvent(muted.mute));
   },
   playedRanges: (playedRanges, ctx) => {
     ctx.playedRanges_ = playedRanges.ranges;
@@ -100,8 +114,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
     /** @private {function()} */
     this.onReadyOnce_ = once((readyEvent) => this.onReady_(readyEvent));
+
+    this.muteOnAutoOnce_ = once(() => this.muteOnAuto_());
 
     /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
@@ -112,9 +131,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {boolean} */
-    this.fullscreen_ = false;
-
     /** @private {./time.timeDef} */
     this.duration_ = 0;
 
@@ -123,7 +139,6 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /** @private {Array<Array>} */
     this.playedRanges_ = [];
-
   }
 
   /**
@@ -135,7 +150,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     this.playlistItem = dict(data.playlistItem);
     this.muted_ = !!data.muted;
-    Services.videoManagerForDoc(element).register(this);
+    this.playerReadyResolver_(this.iframe_);
     element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
@@ -164,11 +179,18 @@ class AmpJWPlayer extends AMP.BaseElement {
     return this.playedRanges_;
   }
 
+  muteOnAuto_() {
+    if(!this.muted_) {
+      this.mute();
+    }
+  }
+
   /** @override */
   play(isAutoplay) {
     let reason;
     if (isAutoplay) {
       reason = 'auto';
+      this.muteOnAutoOnce_();
     }
     this.sendCommand_('play', { reason });
   }
@@ -198,7 +220,7 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @private
    */
   onMessage_(messageEvent) {
-    if (messageEvent.source != this.iframe_.contentWindow) {
+    if (!this.iframe_ || messageEvent.source != this.iframe_.contentWindow) {
       return;
     }
 
@@ -213,7 +235,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     const value = getDetail(data);
 
     // Log any valid events
-    dev().info(event || 'anon event', value || data);
+    dev().info('amp event: ' + event || 'anon event', value || data);
 
     if (event === 'ready') {
       this.onReadyOnce_(value);
@@ -238,21 +260,23 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @private
    */
   sendCommand_(method, optParams) {
-    if (!this.iframe_ || !this.iframe_.contentWindow) {
-      return;
-    }
-    
-    dev().info('command', method);
+    this.playerReadyPromise_.then(() => {
+      if (!this.iframe_ || !this.iframe_.contentWindow) {
+        return;
+      }
+      
+      dev().info('command sent:', method, optParams);
 
-    this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'method': method,
-          'optParams': optParams,
-        })
-      ),
-      '*'
-    );
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        JSON.stringify(
+          dict({
+            'method': method,
+            'optParams': optParams,
+          })
+        ),
+        '*'
+      );
+    });
   }
 
   /** @override */
@@ -283,28 +307,42 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    return true;
+    return false;
+  }
+
+  isSafariOrIos() {
+    const platform = Services.platformFor(this.win);
+
+    return platform.isSafari() || platform.isIos()
   }
 
   /** @override */
   fullscreenEnter() {
-    if (!this.iframe_ || this.fullscreen_) {
+    if (!this.iframe_) {
       return;
     }
-    this.sendCommand_('setFullscreen', true);
+    if (this.isSafariOrIos()) {
+      this.sendCommand_('setFullscreen', true);
+    } else {
+      fullscreenEnter(dev().assertElement(this.iframe_));
+    }
   }
 
   /** @override */
   fullscreenExit() {
-    if (!this.iframe_ || !this.fullscreen_) {
+    if (!this.iframe_) {
       return;
     }
-    this.sendCommand_('setFullscreen', false);
+    if (this.isSafariOrIos()) {
+      this.sendCommand_('setFullscreen', false);
+    } else {
+      fullscreenExit(dev().assertElement(this.iframe_));
+    }
   }
 
   /** @override */
   isFullscreen() {
-    return this.fullscreen_;
+    return isFullscreenElement(this.iframe_);
   }
 
   /**
@@ -320,18 +358,14 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
+    const ampDoc = this.getAmpDoc();
+    const preconnectUrl = (url) => Services.preconnectFor(this.win).url(ampDoc, url, onLayout);
     // Host that serves player configuration and content redirects
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      'https://content.jwplatform.com',
-      onLayout
-    );
+    preconnectUrl('https://content.jwplatform.com');
     // CDN which hosts jwplayer assets
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      'https://ssl.p.jwpcdn.com',
-      onLayout
-    );
+    preconnectUrl('https://ssl.p.jwpcdn.com');
+    // Embed
+    preconnectUrl(this.getSingleLineEmbed());
   }
 
   /** @override */
@@ -341,9 +375,11 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    setIsMediaComponent(this.element);
+    const { element } = this;
+    const deferred = new Deferred();
 
-    const {element} = this;
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     this.contentid_ = userAssert(
       element.getAttribute('data-playlist-id') ||
@@ -361,32 +397,50 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
 
-    installVideoManagerForDoc(this.getAmpDoc());
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
+  }
+
+  getSingleLineEmbed() {
+    const IS_DEV = true;
+    const cid = encodeURIComponent(this.contentid_);
+    const pid = encodeURIComponent(this.playerid_);
+    let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
+
+    if (IS_DEV) {
+      const testPage = 'http://localhost:3000/jwplayer-commercial/test/public/platform/amp/iframe.html';
+      if (testPage) {
+        baseUrl = `${testPage}?cid=${cid}&pid=${pid}`;
+      }
+    }
+    return baseUrl;
   }
 
   /** @override */
   layoutCallback() {
-    const cid = encodeURIComponent(this.contentid_);
-    const pid = encodeURIComponent(this.playerid_);
     const queryParams = dict({
       'search': this.getContextualVal_() || undefined,
       'contextual': this.contentContextual_ || undefined,
       'recency': this.contentRecency_ || undefined,
       'backfill': this.contentBackfill_ || undefined,
+      'isAMP': true,
     });
     const IS_DEV = true;
     let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
-    if (IS_DEV) {
-      const testPage = new URLSearchParams(document.location.search).get('test_page');
-      if (testPage) {
-        baseUrl = `${testPage}?cid=${cid}&pid=${pid}`;
-      }
-    }
+    const url = this.getSingleLineEmbed();
+    const src = addParamsToUrl(url, queryParams);
+    const frame = disableScrollingOnIframe(createFrameFor(this, src, this.element.id));
 
-    const src = addParamsToUrl(baseUrl, queryParams);
-    const frame = createFrameFor(this, src, this.element.id);
+    addUnsafeAllowAutoplay(frame);
+    disableScrollingOnIframe(frame);
+    // Subscribe to messages from player
     this.unlistenFrame_ = listen(this.win, 'message', this.onMessage_);
+    // Forward fullscreen changes to player to update ui
+    this.unlistenFullscreen_ = listen(frame, 'fullscreenchange', () => {
+      const isFullscreen = this.isFullscreen();
+      this.sendCommand_('setFullscreen', isFullscreen);
+    });
     this.iframe_ = /** @type {HTMLIFrameElement} */ (frame);
   
     return this.loadPromise(this.iframe_);
@@ -397,10 +451,14 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (this.unlistenFrame_) {
       this.unlistenFrame_();
     }
+    if (this.unlistenFullscreen_) {
+      this.unlistenFullscreen_();
+    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    
     return true; // Call layoutCallback again.
   }
 
