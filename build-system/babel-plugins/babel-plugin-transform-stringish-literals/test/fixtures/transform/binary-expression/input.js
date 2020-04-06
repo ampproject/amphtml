@@ -24,7 +24,8 @@ let numberStart = 1 + `/foo`;
 let stringStart = '1' + `/foo`;
 let numberEnd = `foo/` + 1;
 let stringEnd = `foo/` + '1';
-let illegalCharacter = `Invalid share providers configuration for in bookend. ` + 'Value must be `true` or a params object.';
+let illegalCharacterString = `Invalid share providers configuration for in bookend. ` + 'Value must be `true` or a params object.';
+let illegalCharacterTemplate = `Invalid ${x}` + 'Value must be `true` or a params object.';
 
 let stringLiterals = '1' + '2';
 let numberLiterals = 1 + 2;
