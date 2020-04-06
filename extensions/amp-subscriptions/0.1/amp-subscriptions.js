@@ -144,12 +144,11 @@ export class SubscriptionService {
         // If the page is not locked then we treat it as granted and show any
         // subscriptions content sections.
         this.processGrantState_(true);
-        return;
       }
 
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
-        this.startAuthorizationFlow_(false);
+        this.startAuthorizationFlow_(false /** doPlatformSelection */);
         return;
       }
 
@@ -276,6 +275,7 @@ export class SubscriptionService {
    *
    * @param {string} serviceId
    * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
+   * @return {!Promise}
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -324,26 +324,29 @@ export class SubscriptionService {
   /**
    * Reset all platforms and re-fetch entitlements after an
    * external event (for example a login)
+   * @return {!Promise}
    */
   resetPlatforms() {
-    this.platformStore_ = this.platformStore_.resetPlatformStore();
-    this.renderer_.toggleLoading(true);
+    return this.initialize_().then(() => {
+      this.platformStore_ = this.platformStore_.resetPlatformStore();
+      this.renderer_.toggleLoading(true);
 
-    this.platformStore_
-      .getAvailablePlatforms()
-      .forEach((subscriptionPlatform) => {
-        this.fetchEntitlements_(subscriptionPlatform);
-      });
-    this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-      ''
-    );
-    // deprecated event fired for backward compatibility
-    this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
-      ''
-    );
-    this.startAuthorizationFlow_();
+      this.platformStore_
+        .getAvailablePlatforms()
+        .forEach((subscriptionPlatform) => {
+          this.fetchEntitlements_(subscriptionPlatform);
+        });
+      this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+        ''
+      );
+      // deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+        ''
+      );
+      this.startAuthorizationFlow_();
+    });
   }
 
   /**
@@ -454,20 +457,26 @@ export class SubscriptionService {
    * @private
    */
   processGrantState_(grantState) {
-    this.renderer_.toggleLoading(false);
-    /*
-     * If the viewer is providing a paywall we don't want the publisher
-     * paywall to render in the case of no grant so we leave the page
-     * in the original "unknown" state.
-     */
-    if (grantState || !this.doesViewerProvidePaywall_) {
-      this.renderer_.setGrantState(grantState);
+    // Don't show paywalls on free pages.
+    if (this.isPageUnlocked_()) {
+      grantState = true;
     }
+
+    // Hide loading animation.
+    this.renderer_.toggleLoading(false);
+
+    // Track view.
     this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
-    if (grantState === false) {
-      // TODO(@prateekbh): Show UI that no eligible entitlement found
+
+    // If the viewer is providing a paywall we don't want the publisher
+    // paywall to render in the case of no grant so we leave the page
+    // in the original "unknown" state.
+    if (this.doesViewerProvidePaywall_ && !grantState) {
       return;
     }
+
+    // Update UI.
+    this.renderer_.setGrantState(grantState);
   }
 
   /**
@@ -519,6 +528,11 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
+    // Don't fetch entitlements on free pages.
+    if (this.isPageUnlocked_()) {
+      return Promise.resolve();
+    }
+
     let timeout = ENTITLEMENTS_REQUEST_TIMEOUT;
     if (getMode().development || getMode().localDev) {
       timeout = ENTITLEMENTS_REQUEST_TIMEOUT * 2;
@@ -700,12 +714,7 @@ export class SubscriptionService {
    * @private
    */
   isPageUnlocked_() {
-    return (
-      !this.pageConfig_.isLocked() ||
-      // If a service marks `alwaysGrant` as true, it will unlock the page
-      // unless the viewer provides auth.
-      (this.platformConfig_['alwaysGrant'] && !this.doesViewerProvideAuth_)
-    );
+    return !this.pageConfig_.isLocked() || this.platformConfig_['alwaysGrant'];
   }
 }
 
