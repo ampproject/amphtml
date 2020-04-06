@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+const TILDA_REGEXP = /\x60/g;
+
 module.exports = function ({types: t}) {
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
-  const escapeForLiteral = (value) => String(value).replace(/\x60/g, '\\`');
+  const escapeForLiteral = (value) =>
+    String(value).replace(TILDA_REGEXP, '\\`');
 
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
