@@ -45,14 +45,6 @@ import {tryResolve} from '../src/utils/promise';
 const TAG = 'CustomElement';
 
 /**
- * The elements positioned ahead of this threshold may have their loading
- * indicator initialized faster. This is benefitial to avoid relayout during
- * render phase or scrolling.
- * @private @const {number}
- */
-const PREPARE_LOADING_THRESHOLD = 1000;
-
-/**
  * @enum {number}
  */
 const UpgradeState = {
@@ -589,11 +581,6 @@ function createBaseCustomElementClass(win) {
         } catch (e) {
           reportError(e, this);
         }
-      }
-
-      // Few top elements will also be pre-initialized with a loading element.
-      if (layoutBox.top < PREPARE_LOADING_THRESHOLD && layoutBox.top >= 0) {
-        this.mutateOrInvoke_(() => this.prepareLoading_());
       }
     }
 
@@ -1224,7 +1211,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
-          const beforeDelay = Date.now();
+          const loadingStartTime = Date.now();
           Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
@@ -1234,7 +1221,7 @@ function createBaseCustomElementClass(win) {
               this.ownerDocument &&
               this.ownerDocument.defaultView
             ) {
-              this.toggleLoading(true, {startTime: beforeDelay});
+              this.toggleLoading(true, {startTime: loadingStartTime});
             }
           }, 100);
         }

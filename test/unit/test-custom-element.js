@@ -2013,17 +2013,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(toggle).to.not.be.called;
       });
 
-      it('should prepare loading when measured if in the top window', () => {
-        stubInA4A(false);
-        const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.setAttribute('layout', 'fill');
-        container.appendChild(element);
-        element.updateLayoutBox({top: 0, width: 300});
-        expect(toggle).to.have.not.been.called;
-        expect(element.loadingContainer_).to.not.be.null;
-        expect(element.loadingContainer_).to.have.class('amp-hidden');
-      });
-
       it('should toggle loading off after layout complete', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
