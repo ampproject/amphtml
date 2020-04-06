@@ -119,7 +119,8 @@ module.exports = function ({types: t}) {
             const {value: previousValue} = newQuasis[modifyIndex];
 
             newQuasis[modifyIndex] = t.templateElement({
-              raw: previousValue.raw + value + changedValue.raw,
+              raw:
+                previousValue.raw + escapeForLiteral(value) + changedValue.raw,
               cooked: previousValue.cooked + value + changedValue.cooked,
             });
             newQuasis[index + 1] = null;
