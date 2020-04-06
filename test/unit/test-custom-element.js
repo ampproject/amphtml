@@ -2000,18 +2000,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(toggle).to.have.not.been.called;
       });
 
-      // WHY when measured?
-      // it('should start loading when measured if already in viewport', () => {
-      //   stubInA4A(false);
-      //   const toggle = env.sandbox.spy(element, 'toggleLoading');
-      //   element.isInViewport_ = true;
-      //   element.setAttribute('layout', 'fill');
-      //   container.appendChild(element);
-      //   element.updateLayoutBox({top: 0, width: 300});
-      //   expect(toggle).to.be.calledOnce;
-      //   expect(toggle.firstCall.args[0]).to.equal(true);
-      // });
-
       it('should create loading when measured if in the top window', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
