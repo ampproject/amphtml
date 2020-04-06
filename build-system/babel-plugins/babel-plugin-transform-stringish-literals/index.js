@@ -29,23 +29,22 @@ module.exports = function ({types: t}) {
     }
   }
 
-  function joinTemplateLiterals(left, right) {
-    // First merge the first member of the right quasi into the last quasi on the left.
-    const fromQuasi = right.get('quasis.0');
-    const toQuasi = left.get(`quasis.${left.node.quasis.length - 1}`);
-    toQuasi.node.value.raw += fromQuasi.node.value.raw;
-    toQuasi.node.value.cooked += fromQuasi.node.value.cooked;
+  function joinTemplateLiterals(leftPath, rightPath) {
+    const {node: leftNode} = leftPath;
+    const {node: rightNode} = rightPath;
 
-    // Can safely remove the merged quasi.
-    // Done here so the right quasis do not contain this merged value to push into the left.
-    fromQuasi.remove();
+    // First merge the first member of the right quasi into the last quasi on the left.
+    const fromQuasi = rightNode.quasis[0];
+    const toQuasi = leftNode.quasis[leftNode.quasis.length - 1];
+    toQuasi.value.raw += fromQuasi.value.raw;
+    toQuasi.value.cooked += fromQuasi.value.cooked;
 
     // Merge the right remaining quasis and expressions to ensure merged left is valid.
-    left.node.quasis.push(...right.node.quasis);
-    left.node.expressions.push(...right.node.expressions);
+    leftNode.quasis.push(...rightNode.quasis.slice(1));
+    leftNode.expressions.push(...rightNode.expressions);
 
     // Now the left contains the values of the right, so remove the right.
-    right.remove();
+    rightPath.remove();
   }
 
   function joinMaybeTemplateLiteral(path) {
