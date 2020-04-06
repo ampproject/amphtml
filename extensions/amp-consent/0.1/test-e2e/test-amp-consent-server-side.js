@@ -36,7 +36,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should respect server side decision and persist it', async () => {
+    //TODO (micajuineho): Unskip flaky test
+    it.skip('should respect server side decision and persist it', async () => {
       resetAllElements();
 
       const currentUrl = await controller.getCurrentUrl();
