@@ -68,16 +68,6 @@ const AMP_OPT_IN_COOKIE = {
   NIGHTLY: 'nightly',
 };
 
-/**
- * Legacy values for __Host-AMP_OPT_IN cookie.
- * TODO(#25205): remove this once the CDN stops supporting these values.
- */
-const _LEGACY_AMP_OPT_IN_COOKIE = {
-  DISABLED: '0',
-  EXPERIMENTAL: '1',
-  BETA: '2',
-};
-
 /** @const {!Array<!ExperimentDef>} */
 const CHANNELS = [
   {
@@ -285,14 +275,9 @@ function isExperimentOn_(id) {
   const optInCookieValue = getCookie(window, '__Host-AMP_OPT_IN');
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
-      return [
-        AMP_OPT_IN_COOKIE.EXPERIMENTAL,
-        _LEGACY_AMP_OPT_IN_COOKIE.EXPERIMENTAL,
-      ].includes(optInCookieValue);
+      return optInCookieValue == AMP_OPT_IN_COOKIE.EXPERIMENTAL;
     case BETA_CHANNEL_ID:
-      return [AMP_OPT_IN_COOKIE.BETA, _LEGACY_AMP_OPT_IN_COOKIE.BETA].includes(
-        optInCookieValue
-      );
+      return optInCookieValue == AMP_OPT_IN_COOKIE.BETA;
     case NIGHTLY_CHANNEL_ID:
       return optInCookieValue == AMP_OPT_IN_COOKIE.NIGHTLY;
     case RTV_CHANNEL_ID:
