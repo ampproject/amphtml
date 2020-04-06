@@ -1692,12 +1692,13 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=, startTime:(number=)}} opt_options
+     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined), startTime:(number|undefined)}=} opt_options
      * @public @final
      */
     toggleLoading(state, opt_options) {
       const cleanup = opt_options && opt_options.cleanup;
       const force = opt_options && opt_options.force;
+      const startTime = opt_options && opt_options.startTime;
       assertNotTemplate(this);
       if (
         state &&
