@@ -35,7 +35,11 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+<<<<<<< HEAD
 import {getMode} from './mode';
+=======
+import {getExperimentBranch, isExperimentOn} from './experiments';
+>>>>>>> f0595f7fe... Introduce more chunking in FIE init
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -82,12 +86,38 @@ export let FriendlyIframeSpec;
  */
 let srcdocSupported;
 
+/** @const {!{id: string, control: string, experiment: string}} */
+export const FIE_INIT_CHUNKING_EXP = {
+  id: 'fie-init-chunking',
+  control: '21065820',
+  experiment: '21065821',
+};
+
 /**
  * @param {boolean|undefined} val
  * @visibleForTesting
  */
 export function setSrcdocSupportedForTesting(val) {
   srcdocSupported = val;
+}
+
+/**
+ * @param {!Window} win
+ * @return {function(*): !Promise<*>}
+ */
+function getDelayPromise(win) {
+  if (
+    isExperimentOn(win, 'fie-init-chunking') &&
+    getExperimentBranch(win, FIE_INIT_CHUNKING_EXP.id) ===
+      FIE_INIT_CHUNKING_EXP.experiment
+  ) {
+    return (val) =>
+      new Promise((resolve) => {
+        setTimeout(() => resolve(val), 0);
+      });
+  } else {
+    return (val) => Promise.resolve(val);
+  }
 }
 
 /**
@@ -218,7 +248,7 @@ export function installFriendlyIframeEmbed(
     });
   }
 
-  return readyPromise.then(() => {
+  return readyPromise.then(getDelayPromise(win)).then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     const signals = spec.host && spec.host.signals();
     const ampdoc =
@@ -760,38 +790,52 @@ export class FriendlyIframeEmbed {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
 
-    // Install necessary polyfills.
-    installPolyfillsInChildWindow(parentWin, childWin);
+    return Promise.resolve()
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        // Install necessary polyfills.
+        installPolyfillsInChildWindow(parentWin, childWin);
+      })
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        // Install runtime styles.
+        installStylesLegacy(
+          childWin.document,
+          ampSharedCss,
+          /* callback */ null,
+          /* opt_isRuntimeCss */ true,
+          /* opt_ext */ 'amp-runtime'
+        );
+      })
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        // Run pre-install callback.
+        if (opt_preinstallCallback) {
+          opt_preinstallCallback(childWin);
+        }
+      })
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        // Install embeddable standard services.
+        installStandardServicesInEmbed(childWin);
+      })
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        // Install built-ins and legacy elements.
+        copyBuiltinElementsToChildWindow(topWin, childWin);
+        stubLegacyElements(childWin);
+      })
+      .then(getDelayPromise(parentWin))
+      .then(() => {
+        const promises = [];
+        extensionIds.forEach((extensionId) => {
+          // This will extend automatic upgrade of custom elements from top
+          // window to the child window.
+          if (!LEGACY_ELEMENTS.includes(extensionId)) {
+            stubElementIfNotKnown(childWin, extensionId);
+          }
 
-    // Install runtime styles.
-    installStylesLegacy(
-      childWin.document,
-      ampSharedCss,
-      /* callback */ null,
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
-    );
-
-    // Run pre-install callback.
-    if (opt_preinstallCallback) {
-      opt_preinstallCallback(childWin);
-    }
-
-    // Install embeddable standard services.
-    installStandardServicesInEmbed(childWin);
-
-    // Install built-ins and legacy elements.
-    copyBuiltinElementsToChildWindow(topWin, childWin);
-    stubLegacyElements(childWin);
-
-    const promises = [];
-    extensionIds.forEach((extensionId) => {
-      // This will extend automatic upgrade of custom elements from top
-      // window to the child window.
-      if (!LEGACY_ELEMENTS.includes(extensionId)) {
-        stubElementIfNotKnown(childWin, extensionId);
-      }
-
+<<<<<<< HEAD
       // Install CSS.
       const promise = extensions
         .preloadExtension(extensionId)
@@ -813,31 +857,57 @@ export class FriendlyIframeEmbed {
                   /* completeCallback */ resolve,
                   /* isRuntime */ false,
                   extensionId
+=======
+          const promise = extensions
+            .preloadExtension(extensionId)
+            .then((extension) => {
+              // Adopt embeddable extension services.
+              extension.services.forEach((service) => {
+                installServiceInEmbedIfEmbeddable(
+                  childWin,
+                  service.serviceClass
+>>>>>>> e16ee5279... Introduce more chunking in FIE init
                 );
-              } else {
-                resolve();
+              });
+
+              // Adopt the custom elements.
+              let elementPromises = null;
+              for (const elementName in extension.elements) {
+                const elementDef = extension.elements[elementName];
+                const elementPromise = new Promise((resolve) => {
+                  if (elementDef.css) {
+                    installStylesLegacy(
+                      childWin.document,
+                      elementDef.css,
+                      /* completeCallback */ resolve,
+                      /* isRuntime */ false,
+                      extensionId
+                    );
+                  } else {
+                    resolve();
+                  }
+                }).then(() => {
+                  upgradeOrRegisterElement(
+                    childWin,
+                    elementName,
+                    elementDef.implementationClass
+                  );
+                });
+                if (elementPromises) {
+                  elementPromises.push(elementPromise);
+                } else {
+                  elementPromises = [elementPromise];
+                }
               }
-            }).then(() => {
-              upgradeOrRegisterElement(
-                childWin,
-                elementName,
-                elementDef.implementationClass
-              );
+              if (elementPromises) {
+                return Promise.all(elementPromises).then(() => extension);
+              }
+              return extension;
             });
-            if (elementPromises) {
-              elementPromises.push(elementPromise);
-            } else {
-              elementPromises = [elementPromise];
-            }
-          }
-          if (elementPromises) {
-            return Promise.all(elementPromises).then(() => extension);
-          }
-          return extension;
+          promises.push(promise);
         });
-      promises.push(promise);
-    });
-    return Promise.all(promises);
+        return Promise.all(promises);
+      });
   }
 }
 
