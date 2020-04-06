@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-const TILDA_REGEXP = /\x60/g;
+const ESCAPE_REGEX = /\${|\\|`/g;
 
 module.exports = function ({types: t}) {
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
   const escapeForLiteral = (value) =>
-    String(value).replace(TILDA_REGEXP, '\\`');
+    String(value).replace(ESCAPE_REGEX, '\\$&');
 
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
@@ -38,6 +38,7 @@ module.exports = function ({types: t}) {
     toQuasi.node.value.cooked += fromQuasi.node.value.cooked;
 
     // Can safely remove the merged quasi.
+    // Done here so the right quasis do not contain this merged value to push into the left.
     fromQuasi.remove();
 
     // Merge the right remaining quasis and expressions to ensure merged left is valid.
@@ -62,7 +63,7 @@ module.exports = function ({types: t}) {
       if (e.confident) {
         const quasi = left.node.quasis[left.node.quasis.length - 1];
         quasi.value.raw += escapeForLiteral(e.value);
-        quasi.value.cooked += escapeForLiteral(e.value);
+        quasi.value.cooked += e.value;
         right.remove();
       }
     } else if (right.isTemplateLiteral()) {
@@ -70,7 +71,7 @@ module.exports = function ({types: t}) {
       if (e.confident) {
         const quasi = right.node.quasis[0];
         quasi.value.raw = escapeForLiteral(e.value) + quasi.value.raw;
-        quasi.value.cooked = escapeForLiteral(e.value) + quasi.value.cooked;
+        quasi.value.cooked = e.value + quasi.value.cooked;
         left.remove();
       }
     }
