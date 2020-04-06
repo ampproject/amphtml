@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayerManager} from '../../src/amp-story-player-manager';
-import {IFRAME_IDX} from '../../src/amp-story-player-impl';
+import {AmpStoryPlayer, IFRAME_IDX} from '../../src/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
-  let url;
-  let manager;
+
   const fireHandler = [];
+  const DEFAULT_URL =
+    'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
   let messagingMock;
+  let oldPrototype;
 
-  function buildStoryPlayer(numStories = 1) {
+  function buildStoryPlayer(numStories = 1, url = DEFAULT_URL) {
     playerEl = win.document.createElement('amp-story-player');
     for (let i = 0; i < numStories; i++) {
       const storyAnchor = win.document.createElement('a');
-      url =
-        'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
       storyAnchor.setAttribute('href', url);
       playerEl.appendChild(storyAnchor);
     }
-    win.document.body.appendChild(playerEl);
-    manager = new AmpStoryPlayerManager(win);
 
-    env.sandbox
-      .stub(Messaging, 'waitForHandshakeFromDocument')
-      .resolves(fakeMessaging);
+    win.document.body.appendChild(playerEl);
   }
 
   function swipeLeft() {
@@ -69,6 +64,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+
+    // By the time this code runs, the outer window has already defined
+    // AmpStoryPlayer in the import, which still references the HTMLElement
+    // native function it extends. Then the `custom-elements.js` polyfill
+    // replaces it in the inner window `realWin`, but by this point it's no good
+    // because it's already been accessed, throwing an error.
+    //
+    // By using `Object.setPrototypeOf(AmpStoryPlayer, win.HTMLElement)`, we
+    // make `AmpStoryPlayer` native to the current inner `realWin` window,
+    // making sure it uses the polyfill and not the native function.
+    //
+    // Doing this causes the class to be poisoned, so we reset it on every test
+    // run.
+    oldPrototype = Object.getPrototypeOf(AmpStoryPlayer);
+    Object.setPrototypeOf(AmpStoryPlayer, win.HTMLElement);
+    Object.setPrototypeOf(AmpStoryPlayer.prototype, win.HTMLElement.prototype);
+    win.customElements.define('amp-story-player', AmpStoryPlayer);
+
     fakeMessaging = {
       setDefaultHandler: () => {},
       sendRequest: () => {},
@@ -78,47 +91,51 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       },
     };
     messagingMock = env.sandbox.mock(fakeMessaging);
+    env.sandbox
+      .stub(Messaging, 'waitForHandshakeFromDocument')
+      .resolves(fakeMessaging);
   });
 
   afterEach(() => {
     messagingMock.verify();
+    Object.setPrototypeOf(AmpStoryPlayer, oldPrototype);
+    Object.setPrototypeOf(AmpStoryPlayer.prototype, oldPrototype.prototype);
   });
 
   it('should build an iframe for each story', () => {
     buildStoryPlayer();
-    manager.loadPlayers();
 
     expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
   it('should correctly append params at the end of the story url', () => {
     buildStoryPlayer();
-    manager.loadPlayers();
+
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_URL +
+        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+        '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
-  it('should correctly append params at the end of a story url with existing params', () => {
-    buildStoryPlayer();
-    url += '?testParam=true#myhash=hashValue';
-    playerEl.firstElementChild.setAttribute('href', url);
+  it('should correctly append params at the end of a story url with existing params', async () => {
+    const existingParams = '?testParam=true#myhash=hashValue';
+    buildStoryPlayer(1, DEFAULT_URL + existingParams);
 
-    manager.loadPlayers();
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_URL +
+        existingParams +
+        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+        '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
   it('should set first story as visible', () => {
     buildStoryPlayer(3);
-    manager.loadPlayers();
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -128,7 +145,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should prerender next stories', () => {
     buildStoryPlayer(3);
-    manager.loadPlayers();
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
@@ -143,7 +159,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
 
-      await manager.loadPlayers();
+      await Promise.resolve(); // Microtask tick.
 
       swipeLeft();
       expect(stories[0][IFRAME_IDX]).to.eql(0);
@@ -162,7 +178,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
 
-      await manager.loadPlayers();
+      await Promise.resolve(); // Microtask tick.
 
       swipeLeft();
       swipeLeft();
@@ -181,14 +197,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.expects('registerHandler').withArgs('touchmove');
     messagingMock.expects('registerHandler').withArgs('touchend');
     messagingMock.expects('setDefaultHandler');
-
-    await manager.loadPlayers();
   });
 
   it('should navigate to next story when the last page of a story is tapped', async () => {
     buildStoryPlayer(2);
-
-    await manager.loadPlayers();
 
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
@@ -202,7 +214,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
-    await manager.loadPlayers();
+    await Promise.resolve(); // Microtask tick.
 
     swipeLeft();
 
@@ -215,7 +227,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
-    await manager.loadPlayers();
+    await Promise.resolve(); // Microtask tick.
 
     swipeLeft();
     swipeLeft();
