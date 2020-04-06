@@ -397,6 +397,8 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
+    this.contentContextual_ = element.getAttribute('data-content-contextual') || '';
+    this.contentRecency_ = element.getAttribute('data-content-recency') || '';
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
