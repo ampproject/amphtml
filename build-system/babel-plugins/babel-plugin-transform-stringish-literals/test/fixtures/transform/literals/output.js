@@ -20,3 +20,6 @@ let end = "rtv/123";
 let number = "123/foo";
 let boolean = "true/foo";
 let preventEscaping = "\n";
+let xss = `\u1234\n\`;
+alert("XSS")\`;
+${foo}`;

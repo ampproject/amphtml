@@ -18,8 +18,7 @@ const ESCAPE_REGEX = /\${|\\|`/g;
 
 module.exports = function ({types: t}) {
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
-  const escapeForLiteral = (value) =>
-    String(value).replace(ESCAPE_REGEX, '\\$&');
+  const escapeValue = (value) => String(value).replace(ESCAPE_REGEX, '\\$&');
 
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
@@ -62,7 +61,7 @@ module.exports = function ({types: t}) {
       const e = right.evaluate();
       if (e.confident) {
         const quasi = left.node.quasis[left.node.quasis.length - 1];
-        quasi.value.raw += escapeForLiteral(e.value);
+        quasi.value.raw += escapeValue(e.value);
         quasi.value.cooked += e.value;
         right.remove();
       }
@@ -70,7 +69,7 @@ module.exports = function ({types: t}) {
       const e = left.evaluate();
       if (e.confident) {
         const quasi = right.node.quasis[0];
-        quasi.value.raw = escapeForLiteral(e.value) + quasi.value.raw;
+        quasi.value.raw = escapeValue(e.value) + quasi.value.raw;
         quasi.value.cooked = e.value + quasi.value.cooked;
         left.remove();
       }
@@ -119,8 +118,7 @@ module.exports = function ({types: t}) {
             const {value: previousValue} = newQuasis[modifyIndex];
 
             newQuasis[modifyIndex] = t.templateElement({
-              raw:
-                previousValue.raw + escapeForLiteral(value) + changedValue.raw,
+              raw: previousValue.raw + escapeValue(value) + changedValue.raw,
               cooked: previousValue.cooked + value + changedValue.cooked,
             });
             newQuasis[index + 1] = null;
