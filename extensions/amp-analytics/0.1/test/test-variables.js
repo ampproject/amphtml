@@ -30,7 +30,7 @@ import {
 
 const fakeElement = document.documentElement;
 
-describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let variables;
 
   beforeEach(() => {
@@ -214,13 +214,17 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles array with no vars', () => {
-      return check('${array}', 'foo,bar', {
-        'array': ['foo', 'bar'],
+      return check('${array}', 'foo,bar,3', {
+        'array': ['foo', 'bar', 3],
       });
     });
 
     it('handles empty var name', () => {
       return check('${}', '', {});
+    });
+
+    it('handles null vars', () => {
+      return check('${arr}', ',notNull', {'arr': [null, 'notNull']});
     });
 
     describe('should handle recursive vars', () => {
@@ -252,7 +256,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
+  describes.fakeWin('macros', {amp: true}, (env) => {
     let doc;
     let win;
     let urlReplacementService;

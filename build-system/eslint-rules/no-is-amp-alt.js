@@ -16,9 +16,9 @@
 'use strict';
 
 const selector = 'AssignmentExpression Identifier[name=IS_AMP_ALT]';
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    [selector]: function(node) {
+    [selector]: function (node) {
       context.report({
         node,
         message: 'No Assignment to IS_AMP_ALT global property allowed',

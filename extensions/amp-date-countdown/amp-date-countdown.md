@@ -169,10 +169,10 @@ _Example: Demonstrating usage of timeout event_
 <amp-animation id="hide-timeout-event" layout="nodisplay">
   <script type="application/json">
     {
-        "duration": "1s",
-        "fill": "both",
-        "selector": "#ampdate, #sample",
-        "keyframes": { "visibility": "hidden"}
+      "duration": "1s",
+      "fill": "both",
+      "selector": "#ampdate, #sample",
+      "keyframes": {"visibility": "hidden"}
     }
   </script>
 </amp-animation>

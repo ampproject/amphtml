@@ -108,7 +108,7 @@ function declareExtension(
 ) {
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
-  versions.forEach(v => {
+  versions.forEach((v) => {
     extensionsObject[`${name}-${v}`] = {
       name,
       version: v,
@@ -140,7 +140,7 @@ function maybeInitializeExtensions(
 ) {
   if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
-    extensionBundles.forEach(c => {
+    extensionBundles.forEach((c) => {
       declareExtension(
         c.name,
         c.version,
@@ -282,7 +282,7 @@ function getExtensionsFromArg(examples) {
 
   const extensions = [];
 
-  examples.split(',').forEach(example => {
+  examples.split(',').forEach((example) => {
     const html = fs.readFileSync(example, 'utf8');
     const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
     const extensionNameMatchIndex = 2;
@@ -314,7 +314,7 @@ function getExtensionsFromArg(examples) {
  */
 function dedupe(arr) {
   const map = Object.create(null);
-  arr.forEach(item => (map[item] = true));
+  arr.forEach((item) => (map[item] = true));
   return Object.keys(map);
 }
 
@@ -380,7 +380,7 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  watch(path + '/**/*', function() {
+  watch(path + '/**/*', function () {
     const bundleComplete = buildExtension(
       name,
       version,
@@ -430,8 +430,8 @@ async function buildExtension(
   const path = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
-  // instead of relying on the watcher used by compileUnminifiedJs, which only
-  // recompiles JS.
+  // instead of relying on the watchers used by compileUnminifiedJs and
+  // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
     watchExtension(path, name, version, latestVersion, hasCss, options);
@@ -483,7 +483,7 @@ function buildExtensionCss(path, name, version, options) {
 
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
-    mainCss => {
+    (mainCss) => {
       writeCssBinaries(`${name}-${version}.css`, mainCss);
       if (isAliased) {
         writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
@@ -494,8 +494,8 @@ function buildExtensionCss(path, name, version, options) {
   if (Array.isArray(options.cssBinaries)) {
     promises.push.apply(
       promises,
-      options.cssBinaries.map(function(name) {
-        return jsifyCssAsync(`${path}/${name}.css`).then(css => {
+      options.cssBinaries.map(function (name) {
+        return jsifyCssAsync(`${path}/${name}.css`).then((css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
           if (isAliased) {
             writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
@@ -530,6 +530,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: version === latestVersion ? `${name}-latest.js` : '',
+      esmPassCompilation: argv.esm || false,
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -540,6 +541,11 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
         : wrappers.extension(name, options.loadPriority),
     })
   );
+
+  // If an incremental watch build fails, simply return.
+  if (options.errored) {
+    return;
+  }
 
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;

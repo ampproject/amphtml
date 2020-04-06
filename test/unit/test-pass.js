@@ -40,7 +40,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match(value => {
+        window.sandbox.match((value) => {
           delayedFunc = value;
           return true;
         }),
@@ -103,10 +103,7 @@ describe('Pass', () => {
       .withExactArgs(window.sandbox.match.func, 111)
       .returns(2)
       .once();
-    timerMock
-      .expects('cancel')
-      .withExactArgs(1)
-      .once();
+    timerMock.expects('cancel').withExactArgs(1).once();
     pass.schedule(222);
     // Will re-schedule b/c the existing pass is later.
     const isScheduled = pass.schedule(111);
@@ -125,7 +122,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match(value => {
+        window.sandbox.match((value) => {
           delayedFunc0 = value;
           return true;
         }),
@@ -136,7 +133,7 @@ describe('Pass', () => {
     timerMock
       .expects('delay')
       .withExactArgs(
-        window.sandbox.match(value => {
+        window.sandbox.match((value) => {
           delayedFunc1 = value;
           return true;
         }),

@@ -542,7 +542,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
       {
         "selector": ".target-class",
         "duration": "4s",
-        "delay": "var(--delay, 100ms)",
+        "delay": "var(--delay, 100ms)"
       }
     ]
   </script>

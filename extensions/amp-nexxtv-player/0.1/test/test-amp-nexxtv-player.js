@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-nexxtv-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

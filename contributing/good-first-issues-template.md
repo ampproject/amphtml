@@ -47,14 +47,14 @@ Step-by-step instructions for the contributor to follow as they work through the
 - [ ] Follow the instructions for [building AMP](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server).
 - [ ] [Create a Git branch](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch) for making your changes.
 - [ ] [Sign the Contributor License Agreement](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributor-license-agreement) before creating a Pull Request. (If you are contributing code on behalf of a corporation start this process as early as possible.)
-  <!--
-  Add steps that are specific to the issue here, e.g. perhaps they should edit a test, run `gulp unit` or `gulp integration` to see it fails, change a file and then run test again to see that the new test succeeds?  Adjust the level of detail for the background you indicated the contributor should have.
-  -->
+<!--
+Add steps that are specific to the issue here, e.g. perhaps they should edit a test, run `gulp unit` or `gulp integration` to see it fails, change a file and then run test again to see that the new test succeeds?  Adjust the level of detail for the background you indicated the contributor should have.
+-->
 - [ ] [Commit your changes](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#edit-files-and-commit-them) frequently.
 - [ ] [Push your changes to GitHub](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#push-your-changes-to-your-github-fork).
-  <!--
-  Ideally suggest a reviewer for the Pull Request; not knowing who to set as the reviewer can be confusing for new contributors.
-  -->
+<!--
+Ideally suggest a reviewer for the Pull Request; not knowing who to set as the reviewer can be confusing for new contributors.
+-->
 - [ ] [Create a Pull Request](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review). Mention `closes Issue <this issue number>` in the description.
 - [ ] [Respond to your reviewer's comments](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#respond-to-pull-request-comments) (if any).
 

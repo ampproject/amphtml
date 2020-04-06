@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-delight-player'],
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(4000);
     let win, doc;
 
@@ -59,7 +59,7 @@ describes.realWin(
     it('renders', () => {
       return getDelightPlayer({
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
-      }).then(delight => {
+      }).then((delight) => {
         const iframe = delight.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -84,7 +84,7 @@ describes.realWin(
     it('should forward events', () => {
       return getDelightPlayer({
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
-      }).then(delight => {
+      }).then((delight) => {
         return Promise.resolve()
           .then(() => {
             const p = listenOncePromise(delight, VideoEvents.LOAD);

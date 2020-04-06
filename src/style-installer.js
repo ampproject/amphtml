@@ -257,11 +257,11 @@ export function makeBodyVisible(doc) {
     .then(() => {
       return waitForServices(win);
     })
-    .catch(reason => {
+    .catch((reason) => {
       rethrowAsync(reason);
       return [];
     })
-    .then(services => {
+    .then((services) => {
       bodyMadeVisible = true;
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);

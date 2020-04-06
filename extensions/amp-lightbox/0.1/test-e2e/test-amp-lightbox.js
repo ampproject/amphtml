@@ -22,7 +22,7 @@ describes.endtoend(
     environments: 'ampdoc-amp4ads-preset',
     experiments: ['amp-lightbox-a4a-proto'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(() => {

@@ -39,7 +39,7 @@ export class CharacterDataMutation {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       element.textContent = this.mutationRecord_['value'];
     });
   }

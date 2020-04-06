@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/layout';
@@ -37,7 +38,7 @@ const TAG = 'amp-story-education';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildNavigationEl = element => {
+const buildNavigationEl = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-education-navigation">
@@ -95,10 +96,16 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_.classList.add('i-amphtml-story-education');
     toggle(this.containerEl_, false);
     this.startListening_();
-    createShadowRootWithStyle(this.element, this.containerEl_, CSS);
+    // Extra host to reset inherited styles and further enforce shadow DOM style
+    // scoping using amp-story-shadow-reset.css.
+    const hostEl = this.win.document.createElement('div');
+    this.element.appendChild(hostEl);
+    createShadowRootWithStyle(hostEl, this.containerEl_, CSS);
 
     this.viewer_ = Services.viewerForDoc(this.element);
-    if (this.viewer_.isEmbedded()) {
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    if (this.viewer_.isEmbedded() && isMobileUI) {
       this.maybeShowScreen_(
         Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
         State.NAVIGATION_TAP
@@ -124,23 +131,23 @@ export class AmpStoryEducation extends AMP.BaseElement {
     // Prevent touchevents from being forwarded through viewer messaging.
     this.containerEl_.addEventListener(
       'touchstart',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
     this.containerEl_.addEventListener(
       'touchmove',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
     this.containerEl_.addEventListener(
       'touchend',
-      event => event.stopPropagation(),
+      (event) => event.stopPropagation(),
       true /** useCapture */
     );
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => this.onRtlStateUpdate_(rtlState),
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
       true /** callToInitialize */
     );
   }
@@ -150,7 +157,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    if (this.state_ === State.NAVIGATION_TAP) {
+    if (
+      this.state_ === State.NAVIGATION_TAP &&
+      this.viewer_.hasCapability('swipe')
+    ) {
       this.setState_(State.NAVIGATION_SWIPE);
       return;
     }
@@ -197,10 +207,13 @@ export class AmpStoryEducation extends AMP.BaseElement {
       case State.NAVIGATION_TAP:
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'tap');
+        const progressStringId = this.viewer_.hasCapability('swipe')
+          ? LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
         ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          progressStringId
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
@@ -280,7 +293,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
             'canShowScreens',
             dict({'screens': [{'screen': screen}]})
           )
-          .then(response => {
+          .then((response) => {
             const shouldShow = !!(
               response &&
               response['screens'] &&
@@ -295,6 +308,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-story-education', '0.1', AMP => {
+AMP.extension('amp-story-education', '0.1', (AMP) => {
   AMP.registerElement('amp-story-education', AmpStoryEducation, CSS);
 });

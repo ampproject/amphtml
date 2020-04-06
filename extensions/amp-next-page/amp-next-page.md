@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-next-page
 
-## Behavior
-
-Given a list of pages, `amp-next-page` tries to load them after the current
-document, providing an infinite-scroll type experience.
-
-Pages should be specified in a JSON config loaded from a remote URL listed in
-the element `src`, or inlined as a `script` element child.
-
-## Version notes
-
-| Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
-| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
-
 ## Usage
 
 The `<amp-next-page>` component loads content pages one after another creating an infinite scroll experience.
@@ -315,7 +300,7 @@ The `src` attribute is a required attribute, unless the `<amp-next-page>` compon
 
 ### `max-pages` (optional)
 
-The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, <amp-next-page> displays the recommendation box. The default is `Infinity`.
+The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, `<amp-next-page>` displays the recommendation box. The default is `Infinity`.
 
 ### `deep-parsing` (optional)
 
@@ -395,6 +380,13 @@ Both `<amp-next-page>` specific triggers provide the variables `url` and `title`
 The default recommendation box and default separator both have a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom recommendation box or separator element to improve accessibility.
 
 Both the default recommendation box and default separator are keyboard-focusable. When a custom separator is provided, its `tabindex` is preserved if present, otherwise a `tabindex` of `0` will be added to the given element.
+
+## Version notes
+
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
+| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
 
 ## Validation
 

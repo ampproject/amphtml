@@ -65,12 +65,12 @@ export class VisibilityObserverEntry {
 
     this.observer_
       .getPositionObserver()
-      .observe(top, PositionObserverFidelity.LOW, position =>
+      .observe(top, PositionObserverFidelity.LOW, (position) =>
         this.topSentinelPositionChanged(position, callback)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, PositionObserverFidelity.LOW, position =>
+      .observe(bottom, PositionObserverFidelity.LOW, (position) =>
         this.bottomSentinelPositionChanged(position, callback)
       );
   }
