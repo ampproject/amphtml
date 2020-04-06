@@ -45,6 +45,7 @@ import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
+import {shouldLoadPolyfill} from './polyfills/intersection-observer';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -266,6 +267,12 @@ function adoptShared(global, callback) {
   // delivered.
   if (Services.platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
+  }
+
+  // Some deferred polyfills.
+  if (shouldLoadPolyfill(global)) {
+    console.log('Start InOb extension loading.');
+    Services.extensionsFor(global).preloadExtension('amp-intersection-observer-polyfill');
   }
 
   return iniPromise;

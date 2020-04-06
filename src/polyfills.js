@@ -26,6 +26,7 @@ import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer';
 
 installFetch(self);
 installMathSign(self);
@@ -42,6 +43,7 @@ if (self.document) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(self, class {});
+  installIntersectionObserver(self);
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no
