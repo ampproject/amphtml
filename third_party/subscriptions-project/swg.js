@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.98 */
+/** Version: 0.1.22.100 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1630,8 +1630,10 @@ function getRandomInts(numInts, maxVal) {
       ? new Uint16Array(numInts)
       : new Uint32Array(numInts);
 
-  if (crypto && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
+  const isIE = !!self['msCrypto'];
+  const localCrypto = isIE ? self['msCrypto'] : self.crypto;
+  if (localCrypto && localCrypto.getRandomValues) {
+    localCrypto.getRandomValues(arr);
     for (let i = arr.length - 1; i > -1; i--) {
       arr[i] = arr[i] % maxVal;
     }
@@ -1723,6 +1725,10 @@ function getUuid() {
     }
   }
   return uuid;
+}
+
+function getSwgTransactionId() {
+  return getUuid() + '.swg';
 }
 
 /**
@@ -5575,7 +5581,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.98',
+    '_client': 'SwG 0.1.22.100',
   });
 }
 
@@ -6689,7 +6695,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.98',
+        '_client': 'SwG 0.1.22.100',
         'supportsEventManager': true,
       },
       args || {}
@@ -7156,6 +7162,11 @@ const ExperimentFlags = {
    *  Publishers should not activate this experiment.
    */
   LOGGING_BEACON: 'logging-beacon',
+
+  /** Enables googleTransactionID change. With the experiment on the ID is
+   *  changed from '<uuid>' to '<uuid>.swg'.
+   */
+  UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
 };
 
 /**
@@ -7587,9 +7598,18 @@ class AnalyticsService {
   setStaticContext_() {
     const context = this.context_;
     // These values should all be available during page load.
-    context.setTransactionId(getUuid());
+    if (
+      isExperimentOn(
+        this.doc_.getWin(),
+        ExperimentFlags.UPDATE_GOOGLE_TRANSACTION_ID
+      )
+    ) {
+      context.setTransactionId(getSwgTransactionId());
+    } else {
+      context.setTransactionId(getUuid());
+    }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.98');
+    context.setClientVersion('SwG 0.1.22.100');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
