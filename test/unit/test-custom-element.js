@@ -1986,9 +1986,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
         element.viewportCallback(true);
-        clock.tick(1000);
+        clock.tick(101);
         expect(toggle).to.be.calledOnce;
-        expect(toggle.firstCall.args[0]).to.equal(true);
+        expect(toggle.firstCall.args).to.deep.equal([true, {startTime: 0}]);
       });
 
       it('should NOT turn on when enters viewport but already laid out', () => {
@@ -2000,7 +2000,17 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(toggle).to.have.not.been.called;
       });
 
-      it('should create loading when measured if in the top window', () => {
+      it('should not start loading when measured if already in viewport', () => {
+        stubInA4A(false);
+        const toggle = env.sandbox.spy(element, 'toggleLoading');
+        element.isInViewport_ = true;
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
+        element.updateLayoutBox({top: 0, width: 300});
+        expect(toggle).to.not.be.called;
+      });
+
+      it('should prepare loading when measured if in the top window', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
         element.setAttribute('layout', 'fill');

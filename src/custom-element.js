@@ -1224,6 +1224,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
+          const beforeDelay = Date.now();
           Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
@@ -1233,7 +1234,7 @@ function createBaseCustomElementClass(win) {
               this.ownerDocument &&
               this.ownerDocument.defaultView
             ) {
-              this.toggleLoading(true);
+              this.toggleLoading(true, {startTime: beforeDelay});
             }
           }, 100);
         }
@@ -1659,8 +1660,9 @@ function createBaseCustomElementClass(win) {
      * actually be shown. This method must also be called in the mutate
      * context.
      * @private
+     * @param {number=} startTime
      */
-    prepareLoading_() {
+    prepareLoading_(startTime) {
       if (!this.isLoadingEnabled_()) {
         return;
       }
@@ -1675,7 +1677,8 @@ function createBaseCustomElementClass(win) {
           this.getAmpDoc(),
           this,
           this.layoutWidth_,
-          this.layoutHeight_
+          this.layoutHeight_,
+          startTime
         );
 
         container.appendChild(loadingElement);
@@ -1689,7 +1692,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=} opt_options
+     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=, startTime:(number=)} opt_options
      * @public @final
      */
     toggleLoading(state, opt_options) {
