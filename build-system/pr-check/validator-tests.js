@@ -47,16 +47,16 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
-    timedExecOrDie('gulp validator-java');
     timedExecOrDie('gulp validator-webui');
+    timedExecOrDie('gulp validator-java');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('VALIDATOR') &&
-      !buildTargets.has('VALIDATOR_JAVA') &&
-      !buildTargets.has('VALIDATOR_WEBUI')
+      !buildTargets.has('VALIDATOR_WEBUI') &&
+      !buildTargets.has('VALIDATOR_JAVA')
     ) {
       console.log(
         `${FILELOGPREFIX} Skipping`,
@@ -72,12 +72,12 @@ function main() {
       timedExecOrDie('gulp validator');
     }
 
-    if (buildTargets.has('VALIDATOR_JAVA')) {
-      timedExecOrDie('gulp validator-java');
-    }
-
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       timedExecOrDie('gulp validator-webui');
+    }
+
+    if (buildTargets.has('VALIDATOR_JAVA')) {
+      timedExecOrDie('gulp validator-java');
     }
   }
 
