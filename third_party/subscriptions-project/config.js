@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.98 */
+/** Version: 0.1.22.100 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -784,7 +784,9 @@ class PageConfigResolver {
       this.configResolver_ = null;
     } else if (this.doc_.isReady()) {
       this.configResolver_(
-        Promise.reject(user().createError('No config could be discovered in the page'))
+        Promise.reject(
+          user().createError('No config could be discovered in the page')
+        )
       );
       this.configResolver_ = null;
     }
