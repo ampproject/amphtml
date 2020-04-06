@@ -55,7 +55,8 @@ const buildNavigationEl = (element) => {
 
 /** @enum {string} */
 const Screen = {
-  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas',
+  ONBOARDING_NAVIGATION_TAP: 'ont', // Sent on page load if no "swipe" capability.
+  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas', // Sent on page load if "swipe" capability.
 };
 
 /** @enum */
@@ -106,10 +107,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
     if (this.viewer_.isEmbedded() && isMobileUI) {
-      this.maybeShowScreen_(
-        Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
-        State.NAVIGATION_TAP
-      );
+      const screen = this.viewer_.hasCapability('swipe')
+        ? Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE
+        : Screen.ONBOARDING_NAVIGATION_TAP;
+      this.maybeShowScreen_(screen, State.NAVIGATION_TAP);
     }
   }
 
