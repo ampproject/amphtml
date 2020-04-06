@@ -425,8 +425,6 @@ class AmpJWPlayer extends AMP.BaseElement {
       'backfill': this.contentBackfill_ || undefined,
       'isAMP': true,
     });
-    const IS_DEV = true;
-    let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
     const url = this.getSingleLineEmbed();
     const src = addParamsToUrl(url, queryParams);
