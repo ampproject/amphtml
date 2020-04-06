@@ -178,8 +178,8 @@ AmpSelector.attachShadow = true;
 
 /** @override */
 AmpSelector.props = {
+  // TODO: Add 'forms' attribute when form integrations are supported.
   'disabled': {attr: 'disabled'},
-  'form': {attr: 'form'},
   'multiple': {attr: 'multiple'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
