@@ -277,12 +277,6 @@
         "local/no-duplicate-name-typedef": 0,
         "google-camelcase/google-camelcase": 0
       }
-    },
-    {
-      "files": ["src/amp-story-player-impl.js"],
-      "rules": {
-        "local/private-prop-names": 0
-      }
     }
   ]
 }
