@@ -33,6 +33,7 @@ import {bezierCurve} from '../../../src/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
+import {isAmp4Email} from '../../../src/format';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -792,6 +793,14 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.container_) {
       return;
     }
+    const doc = this.element.ownerDocument;
+    if (doc && isAmp4Email(doc)) {
+      Services.actionServiceForDoc(this.element).addToWhitelist(
+        'AMP-IMAGE-LIGHTBOX',
+        'open'
+      );
+    }
+
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-image-lightbox-container');
     this.element.appendChild(this.container_);

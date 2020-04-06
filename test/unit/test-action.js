@@ -1857,27 +1857,12 @@ describes.realWin(
         expect(action.invoke_(i)).to.be.null;
         expect(action.error_).to.be.calledWith(
           '"AMP.print" is not whitelisted ' +
-            '[{"tagOrTarget":"*","method":"show"},' +
-            '{"tagOrTarget":"*","method":"hide"},' +
-            '{"tagOrTarget":"*","method":"toggleVisibility"},' +
-            '{"tagOrTarget":"*","method":"toggleClass"},' +
+            '[{"tagOrTarget":"AMP","method":"setState"},' +
             '{"tagOrTarget":"*","method":"focus"},' +
-            '{"tagOrTarget":"AMP","method":"setState"},' +
-            '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"},' +
-            '{"tagOrTarget":"AMP-IMAGE-LIGHTBOX","method":"open"},' +
-            '{"tagOrTarget":"AMP-LIGHTBOX","method":"open"},' +
-            '{"tagOrTarget":"AMP-LIGHTBOX","method":"close"},' +
-            '{"tagOrTarget":"AMP-LIST","method":"changeToLayoutContainer"},' +
-            '{"tagOrTarget":"AMP-LIST","method":"refresh"},' +
-            '{"tagOrTarget":"AMP-SELECTOR","method":"clear"},' +
-            '{"tagOrTarget":"AMP-SELECTOR","method":"selectUp"},' +
-            '{"tagOrTarget":"AMP-SELECTOR","method":"selectDown"},' +
-            '{"tagOrTarget":"AMP-SELECTOR","method":"toggle"},' +
-            '{"tagOrTarget":"AMP-SIDEBAR","method":"open"},' +
-            '{"tagOrTarget":"AMP-SIDEBAR","method":"close"},' +
-            '{"tagOrTarget":"AMP-SIDEBAR","method":"toggle"},' +
-            '{"tagOrTarget":"FORM","method":"clear"},' +
-            '{"tagOrTarget":"FORM","method":"submit"}].'
+            '{"tagOrTarget":"*","method":"hide"},' +
+            '{"tagOrTarget":"*","method":"show"},' +
+            '{"tagOrTarget":"*","method":"toggleClass"},' +
+            '{"tagOrTarget":"*","method":"toggleVisibility"}].'
         );
       });
     });

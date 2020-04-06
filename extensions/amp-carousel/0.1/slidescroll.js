@@ -25,6 +25,7 @@ import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isAmp4Email} from '../../../src/format';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -147,6 +148,10 @@ export class AmpSlideScroll extends BaseSlides {
   buildSlides() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
+    const doc = this.element.ownerDocument;
+    if (doc && isAmp4Email(doc)) {
+      this.action_.addToWhitelist('AMP-CAROUSEL', 'goToSlide');
+    }
 
     this.hasNativeSnapPoints_ =
       getStyle(this.element, 'scrollSnapType') != undefined;

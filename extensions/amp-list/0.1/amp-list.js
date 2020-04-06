@@ -54,6 +54,7 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
@@ -171,6 +172,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -191,6 +195,13 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.action_ = Services.actionServiceForDoc(this.element);
+    const doc = this.element.ownerDocument;
+    if (doc && isAmp4Email(doc)) {
+      this.action_.addToWhitelist('AMP-LIST', 'changeToLayoutContainer');
+      this.action_.addToWhitelist('AMP-LIST', 'refresh');
+    }
+
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
@@ -622,8 +633,7 @@ export class AmpList extends AMP.BaseElement {
           dict({'response': error.response})
         )
       : null;
-    const actions = Services.actionServiceForDoc(this.element);
-    actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+    this.action_.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
   }
 
   /**

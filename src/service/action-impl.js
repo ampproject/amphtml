@@ -60,19 +60,6 @@ const NON_AMP_ELEMENTS_ACTIONS_ = {
   'form': ['submit', 'clear'],
 };
 
-/** @const {!Object<string, !Array<string>>} */
-const DEFAULT_EMAIL_ACTIONS_ = {
-  '*': ['show', 'hide', 'toggleVisibility', 'toggleClass', 'focus'],
-  'AMP': ['setState'],
-  'AMP-CAROUSEL': ['goToSlide'],
-  'AMP-IMAGE-LIGHTBOX': ['open'],
-  'AMP-LIGHTBOX': ['open', 'close'],
-  'AMP-LIST': ['changeToLayoutContainer', 'refresh'],
-  'AMP-SELECTOR': ['clear', 'selectUp', 'selectDown', 'toggle'],
-  'AMP-SIDEBAR': ['open', 'close', 'toggle'],
-  'FORM': ['clear', 'submit'],
-};
-
 /**
  * Interactable widgets which should trigger tap events when the user clicks
  * or activates via the keyboard. Not all are here, e.g. progressbar, tabpanel,
@@ -828,13 +815,14 @@ export class ActionService {
       this.ampdoc.isSingleDoc() &&
       isAmp4Email(/** @type {!Document} */ (this.root_))
     ) {
-      return Object.keys(DEFAULT_EMAIL_ACTIONS_)
-        .map((tagOrTarget) =>
-          DEFAULT_EMAIL_ACTIONS_[tagOrTarget].map((method) => {
-            return {tagOrTarget, method};
-          })
-        )
-        .reduce((a, b) => a.concat(b), []); // flatten
+      return [
+        {tagOrTarget: 'AMP', method: 'setState'},
+        {tagOrTarget: '*', method: 'focus'},
+        {tagOrTarget: '*', method: 'hide'},
+        {tagOrTarget: '*', method: 'show'},
+        {tagOrTarget: '*', method: 'toggleClass'},
+        {tagOrTarget: '*', method: 'toggleVisibility'},
+      ];
     }
     const actionWhitelist = this.ampdoc.getMetaByName('amp-action-whitelist');
     if (actionWhitelist === null) {

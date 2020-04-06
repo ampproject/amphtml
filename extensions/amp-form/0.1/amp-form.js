@@ -70,6 +70,7 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {once} from '../../../src/utils/function';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -127,8 +128,11 @@ export class AmpForm {
     /** @private @const {string} */
     this.id_ = id;
 
+    /** @private @const {?Document} */
+    this.doc_ = element.ownerDocument;
+
     /** @const @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    this.win_ = toWin(this.doc_.defaultView);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -235,6 +239,9 @@ export class AmpForm {
     Services.formSubmitForDoc(element).then((service) => {
       this.formSubmitService_ = service;
     });
+
+    /** @private */
+    this.isAmp4Email_ = this.doc_ && isAmp4Email(this.doc_);
   }
 
   /**
@@ -341,6 +348,13 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
+    once(() => {
+      if (this.isAmp4Email_) {
+        this.actions_.addToWhitelist('FORM', 'clear');
+        this.actions_.addToWhitelist('FORM', 'submit');
+      }
+    });
+
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
@@ -955,9 +969,8 @@ export class AmpForm {
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
     }
-    const doc = this.form_.ownerDocument;
     // Only degrade trust across form submission in AMP4EMAIL for now.
-    return doc && isAmp4Email(doc)
+    return this.isAmp4Email_
       ? /** @type {!ActionTrust} */ (incomingTrust - 1)
       : incomingTrust;
   }
@@ -1145,9 +1158,8 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      const doc = this.form_.ownerDocument;
       userAssert(
-        !(doc && isAmp4Email(doc)),
+        !this.isAmp4Email_,
         'Redirects not supported in AMP4Email.',
         this.form_
       );
