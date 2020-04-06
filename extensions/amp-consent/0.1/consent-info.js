@@ -29,6 +29,7 @@ import {isEnumValue, isObject} from '../../../src/types';
 export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
+  GDPR: 'g',
   IS_DIRTY: 'd',
 };
 
@@ -50,6 +51,7 @@ export const CONSENT_ITEM_STATE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
+ *  gdprApplies: (boolean|undefined)
  *  isDirty: (boolean|undefined),
  * }}
  */
@@ -64,6 +66,7 @@ export function getStoredConsentInfo(value) {
   if (value === undefined) {
     return constructConsentInfo(
       CONSENT_ITEM_STATE.UNKNOWN,
+      undefined,
       undefined,
       undefined
     );
@@ -80,6 +83,7 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
+    value[STORAGE_KEY.GDPR],
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -141,6 +145,10 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.STRING] = consentInfo['consentString'];
   }
 
+  if (consentInfo['gdprApplies']) {
+    obj[STORAGE_KEY.GDPR] = consentInfo['gdprApplies'];
+  }
+
   if (consentInfo['isDirty'] === true) {
     obj[STORAGE_KEY.IS_DIRTY] = 1;
   }
@@ -185,13 +193,14 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
       calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
       (infoA['consentString'] || '') === (infoB['consentString'] || '');
+    const gdprAppliesEqual = infoA['gdprApplies'] === infoB['gdprApplies'];
     let isDirtyEqual;
     if (opt_isDirty) {
       isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    return stateEqual && stringEqual && isDirtyEqual;
+    return stateEqual && stringEqual && gdprAppliesEqual && isDirtyEqual;
   }
   return false;
 }
@@ -203,24 +212,27 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
  */
 function getLegacyStoredConsentInfo(value) {
   const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined);
+  return constructConsentInfo(state, undefined, undefined, undefined);
 }
 
 /**
  * Construct the consentInfo object from values
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
+ * @param {boolean=} opt_gdprApplies
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
+  opt_gdprApplies,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
+    'gdprApplies': opt_gdprApplies,
     'isDirty': opt_isDirty,
   };
 }

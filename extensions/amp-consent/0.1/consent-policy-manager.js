@@ -76,6 +76,9 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
+
+    /** @private {?string} */
+    this.gdprApplies_ = null;
   }
 
   /**
@@ -136,7 +139,7 @@ export class ConsentPolicyManager {
         // Has initial consent state value. Evaluate immediately
         instance.evaluate(this.consentState_);
       }
-      this.consentStateChangeObservables_.add(state => {
+      this.consentStateChangeObservables_.add((state) => {
         instance.evaluate(state);
       });
       this.consentPromptInitiated_.promise.then(() => {
@@ -151,9 +154,9 @@ export class ConsentPolicyManager {
    */
   init_() {
     // Set up handler to listen to consent instance value change.
-    this.ConsentStateManagerPromise_.then(manager => {
+    this.ConsentStateManagerPromise_.then((manager) => {
       manager.whenConsentReady().then(() => {
-        manager.onConsentStateChange(info => {
+        manager.onConsentStateChange((info) => {
           this.consentStateChangeHandler_(info);
           if (this.consentValueInitiatedResolver_) {
             this.consentValueInitiatedResolver_();
@@ -179,8 +182,14 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const prevConsentStr = this.consentString_;
+    const gdprApplies = info['gdprApplies'];
+    const {
+      consentString_: prevConsentStr,
+      gdprApplies_: prevGdprApplies,
+    } = this;
+
     this.consentString_ = consentStr;
+    this.gdprApplies_ = gdprApplies;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -199,8 +208,9 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString doesn't change with dismiss action
+      // consentString and gdprApplies doesn't change with dismiss action
       this.consentString_ = prevConsentStr;
+      this.gdprApplies_ = prevGdprApplies;
     } else {
       this.consentState_ = state;
     }
@@ -263,7 +273,7 @@ export class ConsentPolicyManager {
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
-      .then(manager => {
+      .then((manager) => {
         return manager.getConsentInstanceSharedData();
       });
   }
@@ -277,6 +287,18 @@ export class ConsentPolicyManager {
   getConsentStringInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
       return this.consentString_;
+    });
+  }
+
+  /**
+   * Get the gdprApplies value of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?boolean>}
+   */
+  getGdprAppliesInfo(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.gdprApplies_;
     });
   }
 
