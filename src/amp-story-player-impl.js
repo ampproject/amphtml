@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {
   addParamsToUrl,
@@ -411,8 +410,8 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
-    this.getCacheUrl_(story.href);
     const {href} = this.getEncodedLocation_(story.href, visibilityState);
+
     iframe.setAttribute('src', href);
   }
 
@@ -448,18 +447,6 @@ export class AmpStoryPlayer {
     inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
 
     return parseUrlWithA(this.cachedA_, inputUrl);
-  }
-
-  /**
-   * @param {string} href
-   */
-  getCacheUrl_(href) {
-    // Get an AMP Cache URL from a cache domain, and a canonical URL
-    ampToolboxCacheUrl
-      .createCacheUrl('cdn.ampproject.org', href)
-      .then((unusedCacheUrl) => {
-        // TODO: do something with the cacheUrl here.
-      });
   }
 
   /**
