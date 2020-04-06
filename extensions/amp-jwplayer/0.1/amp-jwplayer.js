@@ -188,6 +188,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   play(isAutoplay) {
     let reason;
+
     if (isAutoplay) {
       reason = 'auto';
       this.muteOnAutoOnce_();
@@ -401,6 +402,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
   }
 
+  /**
+   * @private
+   * @returns {string}
+   */
   getSingleLineEmbed() {
     const IS_DEV = true;
     const cid = encodeURIComponent(this.contentid_);
@@ -408,7 +413,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
     if (IS_DEV) {
-      const testPage = 'http://localhost:3000/jwplayer-commercial/test/public/platform/amp/iframe.html';
+      const testPage = new URLSearchParams(document.location.search).get('test_page');
       if (testPage) {
         baseUrl = `${testPage}?cid=${cid}&pid=${pid}`;
       }
@@ -488,8 +493,8 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @return {?string=}
    * @private
+   * @returns {?string=}
    */
   getContextualVal_() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
@@ -502,16 +507,6 @@ class AmpJWPlayer extends AMP.BaseElement {
       return ogTitle || title || '';
     }
     return this.contentSearch_;
-  }
-
-  /**
-   * @param {boolean}
-   * @private
-   */
-  onToggleMute_(muted) {
-    const {element} = this;
-    this.muted_ = muted;
-    element.dispatchCustomEvent(mutedOrUnmutedEvent(muted));
   }
 }
 
