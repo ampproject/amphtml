@@ -237,7 +237,7 @@ export class AdvancementConfig {
  * Always provides a progress of 1.0.  Advances when the user taps the
  * corresponding section, depending on language settings.
  */
-class ManualAdvancement extends AdvancementConfig {
+export class ManualAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {!Element} element The element that, when clicked, can cause
@@ -657,7 +657,7 @@ class ManualAdvancement extends AdvancementConfig {
  * Provides progress and advancement based on a fixed duration of time,
  * specified in either seconds or milliseconds.
  */
-class TimeBasedAdvancement extends AdvancementConfig {
+export class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
@@ -799,7 +799,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * having been executed before the amp-story-page buildCallback, which is not
  * guaranteed.
  */
-class MediaBasedAdvancement extends AdvancementConfig {
+export class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
    * @param {!Array<!Element>} elements
@@ -909,7 +909,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return this.element_;
     } else if (
       this.element_.hasAttribute('background-audio') &&
-      (tagName === 'amp-story' || tagName === 'amp-story-page')
+      tagName === 'amp-story-page'
     ) {
       return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
@@ -1051,10 +1051,26 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const elements = element.querySelectorAll(
-        `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          #${escapeCssSelectorIdent(autoAdvanceStr)}`
+      // amp-video, amp-audio, as well as amp-story-page with a background audio
+      // are eligible for media based auto advance.
+      const elements = toArray(
+        element.querySelectorAll(
+          `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        )
       );
+      if (
+        matches(
+          element,
+          `amp-story-page[background-audio]#${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}`
+        )
+      ) {
+        elements.push(element);
+      }
       if (!elements.length) {
         if (autoAdvanceStr) {
           user().warn(
@@ -1066,7 +1082,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
         return null;
       }
 
-      return new MediaBasedAdvancement(win, toArray(elements));
+      return new MediaBasedAdvancement(win, elements);
     } catch (e) {
       return null;
     }
