@@ -1692,7 +1692,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=, startTime:(number=)} opt_options
+     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=, startTime:(number=)}} opt_options
      * @public @final
      */
     toggleLoading(state, opt_options) {
@@ -1731,7 +1731,7 @@ function createBaseCustomElementClass(win) {
             state = false;
           }
           if (state) {
-            this.prepareLoading_();
+            this.prepareLoading_(startTime);
           }
           if (!this.loadingContainer_) {
             return;
