@@ -23,7 +23,7 @@ export function install(win) {
   delete win.IntersectionObserver;
   delete win.IntersectionObserverEntry;
 
-  if (win.IntersectionObserver) {
+  if (!win.IntersectionObserver) {
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
   }
 }
