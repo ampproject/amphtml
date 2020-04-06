@@ -356,13 +356,15 @@ function onError(message, filename, line, col, error) {
 }
 
 /**
- * Determines if the Beta error reporting endpoint should be used.
+ * Determines the error reporting endpoint which should be used.
  *
  * @param {!JsonObject} errData Data from `getErrorReportData`.
- * @return {boolean}
+ * @return {string} error reporting endpoint URL.
  */
-function useBetaReportingUrl_(errData) {
-  return errData['esm'] === '1' || Math.random() < BETA_ERROR_REPORT_URL_FREQ;
+function chooseReportingUrl_(errData) {
+  const useBeta =
+    errData['esm'] === '1' || Math.random() < BETA_ERROR_REPORT_URL_FREQ;
+  return useBeta ? urls.betaErrorReporting : urls.errorReporting;
 }
 
 /**
@@ -378,14 +380,7 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      const newErrorReportingUrl =
-        'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
-      // Divert to the Beta error reporting endpoint.
-      const url =
-        useBetaReportingUrl_(data)
-          ? newErrorReportingUrl
-          : urls.errorReporting;
-      xhr.open('POST', url, true);
+      xhr.open('POST', chooseReportingUrl_(data), true);
       xhr.send(JSON.stringify(data));
     }
   });
