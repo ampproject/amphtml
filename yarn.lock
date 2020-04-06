@@ -8041,10 +8041,10 @@ gulp-jest@4.0.3:
     plugin-error "^1.0.1"
     through2 "^2.0.1"
 
-gulp-jsonlint@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.1.tgz#6ebb117f50e2eb7cd8a4ff20094998110b55d296"
-  integrity sha512-vZmMMp2D+z8SpDc8PoSJ6IdxaaPk9zpwNjIPaHFe/qu+WyAoGQ0HTxulokLnZx7qsOx4GFwAjCEwXQyUI6Hi4A==
+gulp-jsonlint@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/gulp-jsonlint/-/gulp-jsonlint-1.3.2.tgz#d7d5bb76466ad445ab150cda603738ce5e531b51"
+  integrity sha512-770G/GqhmIFwpgbNfvi5JnAcNBwvmOOTn+rhLelP6Y5YIDBsxWQEqboYaXfdscpKHEnIUu1NDJS51T+lyiHC6w==
   dependencies:
     ansi-colors "^4.1.1"
     fancy-log "^1.3.3"
