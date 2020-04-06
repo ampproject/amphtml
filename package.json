@@ -17,6 +17,7 @@
     "@ampproject/animations": "0.2.0",
     "@ampproject/viewer-messaging": "1.1.0",
     "@ampproject/worker-dom": "0.24.0",
+    "@ampproject/toolbox-cache-url": "2.2.0",
     "dompurify": "2.0.7",
     "moment": "2.24.0",
     "preact": "10.2.1",
