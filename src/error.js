@@ -363,7 +363,13 @@ function onError(message, filename, line, col, error) {
  */
 function chooseReportingUrl_(errData) {
   const useBeta =
-    errData['esm'] === '1' || Math.random() < BETA_ERROR_REPORT_URL_FREQ;
+    // Legacy reporting drops non-.js stacktraces.
+    errData['esm'] === '1' ||
+    // Legacy reporting throttles non-canary binary types by a factor of 20.
+    errData['bt'] === 'nightly' ||
+    // Randomly divert remaining error reporting traffic.
+    Math.random() < BETA_ERROR_REPORT_URL_FREQ;
+
   return useBeta ? urls.betaErrorReporting : urls.errorReporting;
 }
 
