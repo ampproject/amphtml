@@ -386,8 +386,8 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
- * (depends on whether they opted into one of the pre-release channels or a into
- * a specific RTV) so that experiment state can reflect the default activated
+ * (depends on whether they opted into one of the pre-release channels or into a
+ * specific RTV) so that experiment state can reflect the default activated
  * experiments.
  * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
  */
