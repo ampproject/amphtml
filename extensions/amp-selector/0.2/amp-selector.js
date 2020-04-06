@@ -24,8 +24,8 @@ import {
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-selector';
