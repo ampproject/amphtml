@@ -56,9 +56,7 @@ export function Selector(props) {
     if (newValue) {
       setSelectedState(newValue);
       if (onChange) {
-        onChange({
-          target: {value: isMultiple ? newValue : newValue[0], option},
-        });
+        onChange({value: newValue, option});
       }
     }
   };

@@ -38,7 +38,9 @@ class AmpSelector extends PreactBaseElement {
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'listbox');
     }
-    if (element.hasAttribute('multiple')) {
+
+    const isMultiple = element.hasAttribute('multiple');
+    if (isMultiple) {
       element.setAttribute('aria-multiselectable', 'true');
     }
     if (element.hasAttribute('disabled')) {
@@ -97,8 +99,8 @@ class AmpSelector extends PreactBaseElement {
 
     const {value, children} = getOptionState();
     const onChange = (e) => {
-      const {value, option} = e.target;
-      isArray(value)
+      const {value, option} = e;
+      isMultiple
         ? selectOption(element, option)
         : selectUniqueOption(element, option);
       this.mutateProps(dict({'value': value}));
