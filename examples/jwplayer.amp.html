@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <meta property="og:title" content="title_tag" />
   <link href='https://fonts.googleapis.com/css?family=Georgia%7COpen+Sans%7CRoboto' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -17,8 +18,9 @@
   <h3>Responsive</h3>
 
   <amp-jwplayer
-      data-media-id="BZ6tc0gy"
-      data-player-id="uoIbMPm3"
+      data-media-id="CtaIzmFs"
+      data-player-id="BjcwyK37"
+      dock
       layout="responsive" width="16" height="9">
   </amp-jwplayer>
 
@@ -26,17 +28,20 @@
 
   <amp-jwplayer
       data-playlist-id="482jsTAr"
-      data-player-id="uoIbMPm3"
-      width="480" height="270">
+      data-player-id="BjcwyK37"
+      dock
+      width="480" height="270"
+      >
   </amp-jwplayer>
 
   <h3>Responsive contextual</h3>
 
     <amp-jwplayer
-        data-player-id="uoIbMPm3"
+        data-player-id="BjcwyK37"
         data-media-id="BZ6tc0gy"
         data-content-search="__CONTEXTUAL__"
         data-content-backfill=true
+        dock
         layout="responsive" width="480" height="270">
     </amp-jwplayer>
 
@@ -56,5 +61,21 @@
       width="480" height="270">
     </amp-jwplayer>
 
+
+   <h3>Actions</h3>
+   <amp-jwplayer
+   id="myVideo"
+      data-media-id="CtaIzmFs"
+      data-player-id="BjcwyK37"
+      width="300px" height="50vh"
+      controls=""
+      layout="fixed"
+      >
+  </amp-jwplayer>
+  <button on="tap:myVideo.play">Play</button>
+  <button on="tap:myVideo.pause">Pause</button>
+  <button on="tap:myVideo.mute">Mute</button>
+  <button on="tap:myVideo.unmute">Unmute</button>
+  <button on="tap:myVideo.fullscreen">FS</button>
 </body>
 </html>
