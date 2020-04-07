@@ -2593,11 +2593,6 @@ acorn@5.X, acorn@^5.0.3, acorn@^5.5.3:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.3.tgz#67aa231bf8812974b85235a96771eb6bd07ea279"
   integrity sha512-T/zvzYRfbVojPWahDsE5evJdHb3oJoQfFbsrKM7w5Zcs++Tr257tia3BmMP8XYVjp1S9RZXQMh7gao96BlqZOw==
 
-acorn@^4.0.3:
-  version "4.0.13"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
-  integrity sha1-EFSVrlNh1pe9GVyCUZLhrX8lN4c=
-
 acorn@^6.0.1:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.3.0.tgz#0087509119ffa4fc0a0041d1e93a417e68cb856e"
@@ -5716,12 +5711,12 @@ deps-sort@^2.0.0:
     subarg "^1.0.0"
     through2 "^2.0.0"
 
-derequire@2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/derequire/-/derequire-2.0.6.tgz#31a414bb7ca176239fa78b116636ef77d517e768"
-  integrity sha1-MaQUu3yhdiOfp4sRZjbvd9UX52g=
+derequire@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/derequire/-/derequire-2.1.0.tgz#a98ed0648549c1721f8a3d5be3ad7bf40531789f"
+  integrity sha512-hsj81m3YIbFt8UxW2qSV+Qf3R8yEKwIkdrKiom6q2sUq3DXHXBUAQCki45MCBIeHdlg9OpfOSXJ+hnB7Y0M5Cg==
   dependencies:
-    acorn "^4.0.3"
+    acorn "^7.1.1"
     concat-stream "^1.4.6"
     escope "^3.6.0"
     through2 "^2.0.0"
