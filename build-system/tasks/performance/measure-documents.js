@@ -16,12 +16,7 @@
 
 const fs = require('fs');
 const log = require('fancy-log');
-const {
-  CONTROL,
-  EXPERIMENT,
-  RESULTS_PATH,
-  urlToCachePath,
-} = require('./helpers');
+const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -121,36 +116,33 @@ const readMetrics = (page) =>
 /**
  * Writes measurements to ./results.json
  *
- * @param {string} url
- * @param {string} version
- * @param {*} metrics
+ * @param {Array<string>} urls
+ * @param {Object} results
  */
-function writeMetrics(url, version, metrics) {
-  let results = {};
+function writeMetrics(urls, results) {
+  try {
+    fs.unlinkSync(RESULTS_PATH);
+  } catch {} // file does not exist (first run)
 
-  if (fs.existsSync(RESULTS_PATH)) {
-    results = JSON.parse(fs.readFileSync(RESULTS_PATH));
-  }
-
-  if (!results[url]) {
-    results[url] = {[CONTROL]: [], [EXPERIMENT]: []};
-  }
-
-  results[url][version].push(metrics);
-
-  fs.writeFileSync(RESULTS_PATH, JSON.stringify(results));
+  const writtenResults = {};
+  urls.forEach((url) => {
+    writtenResults[url] = {
+      [CONTROL]: results[CONTROL][url],
+      [EXPERIMENT]: results[EXPERIMENT][url],
+    };
+  });
+  fs.writeFileSync(RESULTS_PATH, JSON.stringify(writtenResults));
 }
 
 /**
  * Opens Chrome, loads the URL from local file cache, and collects
- * metrics for the specified URL and version
+ * metrics for the specified URL.
  *
  * @param {string} url
- * @param {string} version "control" or "experiment"
  * @param {Object} options
  * @return {Promise}
  */
-async function measureDocument(url, version, {headless}) {
+async function measureDocument(url, {headless}) {
   const browser = await puppeteer.launch({
     headless,
     args: [
@@ -164,7 +156,7 @@ async function measureDocument(url, version, {headless}) {
   await setupMeasurement(page);
 
   try {
-    await page.goto(`file:${urlToCachePath(url, version)}`, {
+    await page.goto(url, {
       waitUntil: 'networkidle0',
     });
   } catch {
@@ -174,31 +166,33 @@ async function measureDocument(url, version, {headless}) {
   }
 
   const metrics = await readMetrics(page);
-  writeMetrics(url, version, metrics);
   await browser.close();
+  return {url, metrics};
 }
 
 /**
- * Loads cached local copies of the URLs in Chrome with Puppeteer and
- * runs a script on the page to collect performance metrics. Saves
- * performance metrics to results.json in this directory.
+ * Navigates to locally served pages in Chrome with Puppeteer and
+ * runs a script to collect performance metrics. Returns results
+ * as an object with url as key, and array of metrics as value.
  *
  * @param {Array<string>} urls
+ * @param {string} version "control" or "experiment"
  * @param {{headless:boolean, runs:number}} options
- * @return {Promise} Fulfills when all URLs have been measured
+ * @return {Promise<Objects>} Metric results
  */
-async function measureDocuments(urls, {headless, runs}) {
+async function measureDocuments(urls, version, {headless, runs}) {
+  log(`Getting metrics for version: ${version}`);
   requirePuppeteer_();
 
-  try {
-    fs.unlinkSync(RESULTS_PATH);
-  } catch {} // file does not exist (first run)
+  const results = {};
+  urls.forEach((url) => {
+    results[url] = [];
+  });
 
   // Make an array of tasks to be executed
   const tasks = urls.flatMap((url) =>
     Array.from({length: runs}).flatMap(() => [
-      measureDocument.bind(null, url, CONTROL, {headless}),
-      measureDocument.bind(null, url, EXPERIMENT, {headless}),
+      measureDocument.bind(null, url, version, {headless}),
     ])
   );
 
@@ -213,8 +207,11 @@ async function measureDocuments(urls, {headless, runs}) {
   let i = 0;
   for (const task of tasks) {
     log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
-    await task();
+    const {url, metrics} = await task();
+    results[url].push(metrics);
   }
+
+  return results;
 }
 
-module.exports = measureDocuments;
+module.exports = {measureDocuments, writeMetrics};

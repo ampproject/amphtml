@@ -14,25 +14,66 @@
  * limitations under the License.
  */
 
-const cacheDocuments = require('./cache-documents');
-const compileScripts = require('./compile-scripts');
-const getMetrics = require('./measure-documents');
+const argv = require('minimist')(process.argv.slice(2));
 const loadConfig = require('./load-config');
-const rewriteScriptTags = require('./rewrite-script-tags');
 const runTests = require('./run-tests');
-const {installPackages} = require('../../common/utils');
+const {
+  buildMinifiedRuntime,
+  buildUnminifiedRuntime,
+  installPackages,
+} = require('../../common/utils');
+const {CONTROL, EXPERIMENT, HOST, PORT} = require('./helpers');
+const {measureDocuments, writeMetrics} = require('./measure-documents');
 const {printReport} = require('./print-report');
+const {startServer, stopServer} = require('../serve');
+
+async function setupExperimentTests() {
+  installPackages(__dirname);
+  if (!argv.nobuild) {
+    if (argv.compiled) {
+      buildMinifiedRuntime();
+    } else {
+      buildUnminifiedRuntime();
+    }
+  }
+
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: !!argv.compiled}
+  );
+}
+
+async function setupControlTests() {
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {cdn: true}
+  );
+}
 
 /**
  * @return {!Promise}
  */
 async function performance() {
-  installPackages(__dirname);
   const {headless, runs, urls} = new loadConfig();
-  await cacheDocuments(urls);
-  await compileScripts(urls);
-  await rewriteScriptTags(urls);
-  await getMetrics(urls, {headless, runs});
+  const results = {};
+
+  await setupExperimentTests();
+  results[EXPERIMENT] = await measureDocuments(urls, EXPERIMENT, {
+    headless,
+    runs,
+  });
+  stopServer();
+
+  await setupControlTests();
+  results[CONTROL] = await measureDocuments(urls, CONTROL, {
+    headless,
+    runs,
+  });
+  stopServer();
+
+  writeMetrics(urls, results);
   runTests();
   printReport(urls);
 }
@@ -40,7 +81,8 @@ async function performance() {
 performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
-  'nobuild': '  Does not compile minified runtime before running tests',
+  'compiled': '  Compiles and serves minified runtime',
+  'nobuild': '  Does not compile runtime before running tests',
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
   'url': '  Page to test. Overrides urls set in config.json',

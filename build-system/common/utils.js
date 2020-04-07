@@ -36,6 +36,14 @@ function buildMinifiedRuntime() {
 }
 
 /**
+ * Cleaned and builds unminified runtime
+ */
+function buildUnminifiedRuntime() {
+  execOrDie('gulp clean');
+  execOrDie('gulp build --fortesting');
+}
+
+/**
  * Logs a message on the same line to indicate progress
  *
  * @param {string} message
@@ -147,6 +155,7 @@ function installPackages(dir) {
 
 module.exports = {
   buildMinifiedRuntime,
+  buildUnminifiedRuntime,
   getFilesChanged,
   getFilesToCheck,
   installPackages,
