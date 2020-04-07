@@ -165,21 +165,21 @@ export class AdvancementConfig {
   /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
-    this.progressListeners_.forEach(progressListener => {
+    this.progressListeners_.forEach((progressListener) => {
       progressListener(progress);
     });
   }
 
   /** @protected */
   onAdvance() {
-    this.advanceListeners_.forEach(advanceListener => {
+    this.advanceListeners_.forEach((advanceListener) => {
       advanceListener();
     });
   }
 
   /** @protected */
   onPrevious() {
-    this.previousListeners_.forEach(previousListener => {
+    this.previousListeners_.forEach((previousListener) => {
       previousListener();
     });
   }
@@ -189,7 +189,7 @@ export class AdvancementConfig {
    * @protected
    */
   onTapNavigation(navigationDirection) {
-    this.tapNavigationListeners_.forEach(navigationListener => {
+    this.tapNavigationListeners_.forEach((navigationListener) => {
       navigationListener(navigationDirection);
     });
   }
@@ -237,7 +237,7 @@ export class AdvancementConfig {
  * Always provides a progress of 1.0.  Advances when the user taps the
  * corresponding section, depending on language settings.
  */
-class ManualAdvancement extends AdvancementConfig {
+export class ManualAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {!Element} element The element that, when clicked, can cause
@@ -386,7 +386,7 @@ class ManualAdvancement extends AdvancementConfig {
   isNavigationalClick_(event) {
     return !closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         return hasTapAction(el);
       },
       /* opt_stopAt */ this.element_
@@ -403,7 +403,7 @@ class ManualAdvancement extends AdvancementConfig {
   isProtectedTarget_(event) {
     return !!closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         const elementRole = el.getAttribute('role');
 
         if (elementRole) {
@@ -428,7 +428,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     closest(
       dev().assertElement(event.target),
-      el => {
+      (el) => {
         tagName = el.tagName.toLowerCase();
 
         if (tagName === 'amp-story-page-attachment') {
@@ -476,7 +476,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     return !!closest(
       target,
-      el => {
+      (el) => {
         tagName = el.tagName.toLowerCase();
 
         if (
@@ -657,7 +657,7 @@ class ManualAdvancement extends AdvancementConfig {
  * Provides progress and advancement based on a fixed duration of time,
  * specified in either seconds or milliseconds.
  */
-class TimeBasedAdvancement extends AdvancementConfig {
+export class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
@@ -756,11 +756,11 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_TIME
     );
+    super.onAdvance();
   }
 
   /**
@@ -799,7 +799,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * having been executed before the amp-story-page buildCallback, which is not
  * guaranteed.
  */
-class MediaBasedAdvancement extends AdvancementConfig {
+export class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
    * @param {!Array<!Element>} elements
@@ -837,7 +837,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
-    this.elements_.forEach(el => {
+    this.elements_.forEach((el) => {
       listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
     });
   }
@@ -909,7 +909,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return this.element_;
     } else if (
       this.element_.hasAttribute('background-audio') &&
-      (tagName === 'amp-story' || tagName === 'amp-story-page')
+      tagName === 'amp-story-page'
     ) {
       return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
@@ -981,7 +981,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @private */
   startVideoInterfaceElement_() {
-    this.element_.getImpl().then(video => {
+    this.element_.getImpl().then((video) => {
       this.video_ = video;
     });
 
@@ -1002,7 +1002,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
-    this.unlistenFns_.forEach(fn => fn());
+    this.unlistenFns_.forEach((fn) => fn());
   }
 
   /**
@@ -1031,11 +1031,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   onAdvance() {
-    super.onAdvance();
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_MEDIA
     );
+    super.onAdvance();
   }
 
   /**
@@ -1051,10 +1051,26 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const elements = element.querySelectorAll(
-        `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          #${escapeCssSelectorIdent(autoAdvanceStr)}`
+      // amp-video, amp-audio, as well as amp-story-page with a background audio
+      // are eligible for media based auto advance.
+      const elements = toArray(
+        element.querySelectorAll(
+          `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        )
       );
+      if (
+        matches(
+          element,
+          `amp-story-page[background-audio]#${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}`
+        )
+      ) {
+        elements.push(element);
+      }
       if (!elements.length) {
         if (autoAdvanceStr) {
           user().warn(
@@ -1066,7 +1082,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
         return null;
       }
 
-      return new MediaBasedAdvancement(win, toArray(elements));
+      return new MediaBasedAdvancement(win, elements);
     } catch (e) {
       return null;
     }

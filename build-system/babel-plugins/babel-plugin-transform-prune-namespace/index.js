@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module.exports = function() {
+module.exports = function () {
   const namespace = '_';
 
   const namespacedVisitor = {

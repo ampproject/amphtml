@@ -19,7 +19,7 @@ import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
 import {Services} from '../../../../src/services';
 
-describes.fakeWin('media-performance-metrics-service', {}, env => {
+describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let clock;
   let service;
   let tickStub;
@@ -42,7 +42,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     env.sandbox
       .stub(Services, 'performanceFor')
       .returns({tickDelta: () => {}, flush: () => {}});
-    service = new MediaPerformanceMetricsService();
+    service = new MediaPerformanceMetricsService(win);
     tickStub = env.sandbox.stub(service.performanceService_, 'tickDelta');
   });
 
@@ -62,7 +62,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     clock.tick(300);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(5);
+    expect(tickStub).to.have.callCount(6);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -76,7 +76,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     clock.tick(10000);
     service.stopMeasuring(video);
 
-    expect(tickStub).to.have.callCount(1);
+    expect(tickStub).to.have.callCount(2);
     expect(flushStub).to.have.been.calledOnce;
   });
 
@@ -96,7 +96,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     video2.dispatchEvent(new Event('playing'));
     service.stopMeasuring(video2);
 
-    expect(tickStub).to.have.callCount(9);
+    expect(tickStub).to.have.callCount(11);
     expect(flushStub).to.have.been.calledTwice;
   });
 
@@ -338,14 +338,14 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   describe('Errors', () => {
-    it('should detect the video as already errored', done => {
+    it('should detect the video as already errored', (done) => {
       const video = win.document.createElement('video');
 
       video.onerror = () => {
         service.startMeasuring(video);
         service.stopMeasuring(video);
 
-        expect(tickStub).to.have.been.calledOnceWithExactly('verr', 4);
+        expect(tickStub).to.have.been.calledWithExactly('verr', 4);
         done();
       };
 
@@ -360,7 +360,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       service.startMeasuring(video);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
+      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
     });
 
     it('should detect that the video errors', () => {
@@ -373,7 +373,55 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       clock.tick(300);
       service.stopMeasuring(video);
 
-      expect(tickStub).to.have.been.calledOnceWithExactly('verr', 0);
+      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
+    });
+  });
+
+  describe('Cache state', () => {
+    it('should register the video as playing from origin', () => {
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      source.setAttribute('src', 'foo.mp4');
+      video.appendChild(source);
+      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 0);
+    });
+
+    it('should register the video as playing from origin w/ cache miss', () => {
+      const video = win.document.createElement('video');
+      const cacheSource = win.document.createElement('source');
+      const originSource = win.document.createElement('source');
+      cacheSource.setAttribute(
+        'src',
+        'htps://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4'
+      );
+      originSource.setAttribute('src', 'foo.mp4');
+      video.appendChild(cacheSource);
+      video.appendChild(originSource);
+      env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 1);
+    });
+
+    it('should register the video as playing from cache', () => {
+      const url = 'https://foo-com.cdn.ampproject.org/bv/s/foo.com/foo.mp4';
+      const video = win.document.createElement('video');
+      const source = win.document.createElement('source');
+      source.setAttribute('src', url);
+      video.appendChild(source);
+      env.sandbox.stub(video, 'currentSrc').value(url);
+
+      service.startMeasuring(video);
+      service.stopMeasuring(video);
+
+      expect(tickStub).to.have.been.calledWithExactly('vcs', 2);
     });
   });
 });

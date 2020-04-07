@@ -22,7 +22,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
+describes.realWin('FriendlyFrameUtil', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
@@ -65,7 +65,7 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   });
 
   it('should append iframe child', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.innerHTML).to.equal(
         minifiedCreative
@@ -79,14 +79,14 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
       '<meta http-equiv=Content-Security-Policy content="script-src ' +
       "'none';object-src 'none';child-src 'none'\">" +
       '<p>Hello, World!</p>';
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
     });
   });
 
   it('should set correct attributes on the iframe', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
@@ -98,7 +98,7 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   });
 
   it('should style body of iframe document to be visible', () => {
-    return renderPromise.then(iframe => {
+    return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.style.visibility).to.equal(
         'visible'

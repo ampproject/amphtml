@@ -408,7 +408,7 @@ data.epl_e;
  * @param {!Window} global
  * @param {!Object} data
  */
-window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd = function (global, data) {};
 window.EzoicAmpAd.prototype.createAd;
 
 // flite.js

@@ -393,7 +393,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.keysetPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
-        this.getSigningServiceNames().forEach(signingServiceName => {
+        this.getSigningServiceNames().forEach((signingServiceName) => {
           verifier.loadKeyset(signingServiceName);
         });
       });
@@ -498,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
     // preconnect unnecessarily, however it is assumed that isValidElement
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
-      preconnect.forEach(p => {
+      preconnect.forEach((p) => {
         Services.preconnectFor(this.win).url(
           this.getAmpDoc(),
           p,
@@ -669,7 +669,7 @@ export class AmpA4A extends AMP.BaseElement {
           const consentStatePromise = getConsentPolicyState(
             this.element,
             consentPolicyId
-          ).catch(err => {
+          ).catch((err) => {
             user().error(TAG, 'Error determining consent state', err);
             return CONSENT_POLICY_STATE.UNKNOWN;
           });
@@ -677,7 +677,7 @@ export class AmpA4A extends AMP.BaseElement {
           const consentStringPromise = getConsentPolicyInfo(
             this.element,
             consentPolicyId
-          ).catch(err => {
+          ).catch((err) => {
             user().error(TAG, 'Error determining consent string', err);
             return null;
           });
@@ -689,7 +689,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
-      .then(consentResponse => {
+      .then((consentResponse) => {
         checkStillCurrent();
 
         const consentState = consentResponse[0];
@@ -702,7 +702,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
-      .then(adUrl => {
+      .then((adUrl) => {
         checkStillCurrent();
         this.adUrl_ = adUrl;
         // If we should skip the XHR, we will instead request and render
@@ -719,7 +719,7 @@ export class AmpA4A extends AMP.BaseElement {
       // {bytes, headers} object), or null if no response is available /
       // response is empty.
       /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
-      .then(fetchResponse => {
+      .then((fetchResponse) => {
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
         // If the response is null (can occur for non-200 responses)  or
@@ -792,7 +792,7 @@ export class AmpA4A extends AMP.BaseElement {
         // fetchResponse.arrayBuffer(), the next step in the chain will
         // resolve it to a concrete value, but we'll lose track of
         // fetchResponse.headers.
-        return fetchResponse.arrayBuffer().then(bytes => {
+        return fetchResponse.arrayBuffer().then((bytes) => {
           if (bytes.byteLength == 0) {
             // The server returned no content. Instead of displaying a blank
             // rectangle, we collapse the slot instead.
@@ -806,7 +806,7 @@ export class AmpA4A extends AMP.BaseElement {
         });
       })
       /** @return {!Promise<?ArrayBuffer>} */
-      .then(responseParts => {
+      .then((responseParts) => {
         checkStillCurrent();
         // Keep a handle to the creative body so that we can render into
         // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
@@ -830,7 +830,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
         return this.maybeValidateAmpCreative(bytes, headers);
       })
-      .then(creative => {
+      .then((creative) => {
         checkStillCurrent();
         // Need to know if creative was verified as part of render outside
         // viewport but cannot wait on promise.  Sadly, need a state a
@@ -841,7 +841,7 @@ export class AmpA4A extends AMP.BaseElement {
       // This block returns CreativeMetaDataDef iff the creative was verified
       // as AMP and could be properly parsed for friendly iframe render.
       /** @return {?CreativeMetaDataDef} */
-      .then(creativeDecoded => {
+      .then((creativeDecoded) => {
         checkStillCurrent();
         // Note: It's critical that #getAmpAdMetadata be called
         // on precisely the same creative that was validated
@@ -865,24 +865,24 @@ export class AmpA4A extends AMP.BaseElement {
         // Load any extensions; do not wait on their promises as this
         // is just to prefetch.
         const extensions = Services.extensionsFor(this.win);
-        creativeMetaDataDef.customElementExtensions.forEach(extensionId =>
+        creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
           extensions.preloadExtension(extensionId)
         );
         // Preload any fonts.
-        (creativeMetaDataDef.customStylesheets || []).forEach(font =>
+        (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
           Services.preconnectFor(this.win).preload(this.getAmpDoc(), font.href)
         );
 
         const urls = Services.urlForDoc(this.element);
         // Preload any AMP images.
         (creativeMetaDataDef.images || []).forEach(
-          image =>
+          (image) =>
             urls.isSecure(image) &&
             Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
         );
         return creativeMetaDataDef;
       })
-      .catch(error => {
+      .catch((error) => {
         switch (error.message || error) {
           case IFRAME_GET:
           case NETWORK_FAILURE:
@@ -924,7 +924,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
         return signatureVerifierFor(this.win).verify(bytes, headers);
       })
-      .then(status => {
+      .then((status) => {
         checkStillCurrent();
         let result = null;
         switch (status) {
@@ -961,7 +961,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   populatePostAdResponseExperimentFeatures_(input) {
-    input.split(',').forEach(line => {
+    input.split(',').forEach((line) => {
       if (!line) {
         return;
       }
@@ -1095,7 +1095,7 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_
-      .then(creativeMetaData => {
+      .then((creativeMetaData) => {
         checkStillCurrent();
         if (this.isCollapsed_) {
           return Promise.resolve();
@@ -1111,7 +1111,7 @@ export class AmpA4A extends AMP.BaseElement {
           return this.renderNonAmpCreative();
         }
         // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch(err => {
+        return this.renderAmpCreative_(creativeMetaData).catch((err) => {
           checkStillCurrent();
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
@@ -1124,7 +1124,7 @@ export class AmpA4A extends AMP.BaseElement {
           return this.renderNonAmpCreative();
         });
       })
-      .catch(error => {
+      .catch((error) => {
         this.promiseErrorHandler_(error);
         throw cancellation();
       });
@@ -1170,7 +1170,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(() => {
           this.originalSlotSize_ = null;
         })
-        .catch(err => {
+        .catch((err) => {
           // TODO(keithwrightbos): if we are unable to revert size, on next
           // trigger of promise chain the ad request may fail due to invalid
           // slot size.  Determine how to handle this case.
@@ -1363,7 +1363,7 @@ export class AmpA4A extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetch(adUrl, xhrInit)
-      .catch(error => {
+      .catch((error) => {
         if (error.response && error.response.status > 200) {
           // Invalid server response code so we should collapse.
           return null;
@@ -1460,7 +1460,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!throttleApplied && !this.inNonAmpPreferenceExp()) {
       incrementLoadingAds(this.win, renderPromise);
     }
-    return renderPromise.then(result => {
+    return renderPromise.then((result) => {
       this.maybeTriggerAnalyticsEvent_('crossDomainIframeLoaded');
       // Pass on the result to the next value in the promise change.
       return result;
@@ -1496,7 +1496,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
-      creativeMetaData.customStylesheets.forEach(s => {
+      creativeMetaData.customStylesheets.forEach((s) => {
         const href = s['href'];
         if (href) {
           fontsArray.push(href);
@@ -1524,7 +1524,7 @@ export class AmpA4A extends AMP.BaseElement {
           new A4AVariableSource(parentAmpdoc, embedWin)
         );
       }
-    ).then(friendlyIframeEmbed => {
+    ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.friendlyIframeEmbed_ = friendlyIframeEmbed;
       setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
@@ -1533,7 +1533,7 @@ export class AmpA4A extends AMP.BaseElement {
         friendlyIframeEmbed.iframe.contentDocument ||
         friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
-      protectFunctionWrapper(this.onCreativeRender, this, err => {
+      protectFunctionWrapper(this.onCreativeRender, this, (err) => {
         dev().error(
           TAG,
           this.element.getAttribute('type'),
@@ -1594,7 +1594,7 @@ export class AmpA4A extends AMP.BaseElement {
       /* opt_isA4A */ true,
       this.letCreativeTriggerRenderStart()
     );
-    protectFunctionWrapper(this.onCreativeRender, this, err => {
+    protectFunctionWrapper(this.onCreativeRender, this, (err) => {
       dev().error(
         TAG,
         this.element.getAttribute('type'),
@@ -1667,7 +1667,7 @@ export class AmpA4A extends AMP.BaseElement {
     );
     this.maybeTriggerAnalyticsEvent_('renderSafeFrameStart');
     const checkStillCurrent = this.verifyStillCurrent();
-    return tryResolve(() => utf8Decode(creativeBody)).then(creative => {
+    return tryResolve(() => utf8Decode(creativeBody)).then((creative) => {
       checkStillCurrent();
       let srcPath;
       let name = '';
@@ -1792,7 +1792,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
 
         const urls = Services.urlForDoc(this.element);
-        metaData.customStylesheets.forEach(stylesheet => {
+        metaData.customStylesheets.forEach((stylesheet) => {
           if (
             !isObject(stylesheet) ||
             !stylesheet['href'] ||

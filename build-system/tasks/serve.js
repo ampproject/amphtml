@@ -31,12 +31,14 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
+const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 // Used by new server implementation
+const typescriptBinary = './node_modules/typescript/bin/tsc';
 const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
@@ -91,7 +93,7 @@ async function startServer(
   }
 
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
   setServeMode(modeOptions);
@@ -117,7 +119,7 @@ async function startServer(
  * Builds the new server by converting typescript transforms to JS
  */
 function buildNewServer() {
-  const buildCmd = `npx typescript -p ${transformsPath}/tsconfig.json`;
+  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
   log(
     green('Building'),
     cyan('AMP Dev Server'),
@@ -145,7 +147,10 @@ function resetServerFiles() {
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
+  if (lazyBuild && argv.compiled) {
+    await stopNailgunServer(distNailgunPort);
+  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -156,8 +161,8 @@ function stopServer() {
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
-  stopServer();
+async function restartServer() {
+  await stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();
@@ -191,7 +196,9 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, restartServer);
+  watch(serverFiles, async () => {
+    await restartServer();
+  });
   if (argv.new_server) {
     buildNewServer();
   }
@@ -202,6 +209,7 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
+  buildNewServer,
   serve,
   doServe,
   startServer,

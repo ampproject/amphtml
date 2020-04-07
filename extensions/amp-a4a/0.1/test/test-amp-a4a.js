@@ -344,7 +344,7 @@ describe('amp-a4a', () => {
       'ad-iframe-loaded',
     ]
       .concat(additionalEvents)
-      .forEach(evnt =>
+      .forEach((evnt) =>
         expect(triggerAnalyticsEventSpy).to.be.calledWith(a4a.element, evnt, {
           'time': window.sandbox.match.number,
         })
@@ -479,7 +479,7 @@ describe('amp-a4a', () => {
 
     it('should fire amp-analytics triggers for lifecycle events', async () => {
       let iniLoadResolver;
-      const iniLoadPromise = new Promise(resolve => {
+      const iniLoadPromise = new Promise((resolve) => {
         iniLoadResolver = resolve;
       });
       const whenIniLoadedStub = window.sandbox
@@ -611,7 +611,7 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       let promiseResolver;
-      a4a.adPromise_ = new Promise(resolver => {
+      a4a.adPromise_ = new Promise((resolver) => {
         promiseResolver = resolver;
       });
       const layoutCallbackPromise = a4a.layoutCallback();
@@ -636,7 +636,7 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       let promiseResolver;
-      a4a.renderAmpCreative_ = new Promise(resolver => {
+      a4a.renderAmpCreative_ = new Promise((resolver) => {
         promiseResolver = resolver;
       });
       const layoutCallbackPromise = a4a.layoutCallback();
@@ -814,7 +814,7 @@ describe('amp-a4a', () => {
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
-        headerVal => {
+        (headerVal) => {
           // TODO(wg-ads, #25690): Fails on Travis.
           it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
@@ -924,7 +924,7 @@ describe('amp-a4a', () => {
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
-        headerVal => {
+        (headerVal) => {
           it(`should not attach a SafeFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
             // If rendering type is anything but safeframe, we SHOULD NOT
@@ -1005,7 +1005,7 @@ describe('amp-a4a', () => {
       expect(fetchMock.called('ad')).to.be.true;
     });
 
-    ['nameframe', 'safeframe'].forEach(renderType => {
+    ['nameframe', 'safeframe'].forEach((renderType) => {
       it(`should not use ${renderType} if creative is A4A`, async () => {
         adResponse.headers[RENDERING_TYPE_HEADER] = renderType;
         a4a.buildCallback();
@@ -1250,7 +1250,7 @@ describe('amp-a4a', () => {
         'allowtransparency': '',
         'scrolling': 'no',
       };
-      Object.keys(expectedAttributes).forEach(key => {
+      Object.keys(expectedAttributes).forEach((key) => {
         expect(friendlyIframe.getAttribute(key)).to.equal(
           expectedAttributes[key]
         );
@@ -1326,7 +1326,7 @@ describe('amp-a4a', () => {
       const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
-      window.sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
+      window.sandbox.stub(a4a, 'getAmpAdMetadata').callsFake((creative) => {
         const metaData = AmpA4A.prototype.getAmpAdMetadata.call(a4a, creative);
         metaData.images = [
           'https://prefetch.me.com?a=b',
@@ -1561,7 +1561,7 @@ describe('amp-a4a', () => {
         .stub(a4a, 'onNetworkFailure')
         .withArgs(
           window.sandbox.match(
-            val =>
+            (val) =>
               val.message && val.message.indexOf('XHR Failed fetching') == 0
           ),
           TEST_URL
@@ -1597,7 +1597,7 @@ describe('amp-a4a', () => {
         .stub(a4a, 'onNetworkFailure')
         .withArgs(
           window.sandbox.match(
-            val =>
+            (val) =>
               val.message && val.message.indexOf('XHR Failed fetching') == 0
           ),
           TEST_URL
@@ -1684,7 +1684,7 @@ describe('amp-a4a', () => {
         name: 'no fill header',
         fn: () => (adResponse.headers['amp-ff-empty-creative'] = ''),
       },
-    ].forEach(test => {
+    ].forEach((test) => {
       it(`should collapse ${test.name}`, async () => {
         const fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -1727,7 +1727,7 @@ describe('amp-a4a', () => {
           height: 456,
         });
         let attemptChangeSizeResolver;
-        const attemptChangeSizePromise = new Promise(resolve => {
+        const attemptChangeSizePromise = new Promise((resolve) => {
           attemptChangeSizeResolver = resolve;
         });
         window.sandbox
@@ -1795,9 +1795,9 @@ describe('amp-a4a', () => {
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: viewport => {
+          whenWithinViewport: (viewport) => {
             expect(viewport).to.equal(3);
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
           },
@@ -1818,9 +1818,9 @@ describe('amp-a4a', () => {
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: viewport => {
+          whenWithinViewport: (viewport) => {
             expect(viewport).to.equal(6);
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
           },
@@ -2116,7 +2116,7 @@ describe('amp-a4a', () => {
       const frameDoc = friendlyIframe.contentDocument;
       const styles = frameDoc.querySelectorAll('style[amp-custom]');
       expect(
-        Array.prototype.some.call(styles, s => {
+        Array.prototype.some.call(styles, (s) => {
           return s.innerHTML == 'p { background: green }';
         }),
         'Some style is "background: green"'
@@ -2144,7 +2144,7 @@ describe('amp-a4a', () => {
       const frameDoc = friendlyIframe.contentDocument;
       const styles = frameDoc.querySelectorAll('style[amp-custom]');
       expect(
-        Array.prototype.some.call(styles, s => {
+        Array.prototype.some.call(styles, (s) => {
           return s.innerHTML == 'p { background: green }';
         }),
         'Some style is "background: green"'
@@ -2167,7 +2167,7 @@ describe('amp-a4a', () => {
           ampdoc: 'shadow',
         },
       },
-      env => {
+      (env) => {
         it('should return priority of 1', () => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
@@ -2184,7 +2184,7 @@ describe('amp-a4a', () => {
           ampdoc: 'single',
         },
       },
-      env => {
+      (env) => {
         it('should return priority of 2', () => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
@@ -2246,7 +2246,7 @@ describe('amp-a4a', () => {
       setupForAdTesting(fixture);
       let whenFirstVisibleResolve = null;
       whenVisibleMock.returns(
-        new Promise(resolve => {
+        new Promise((resolve) => {
           whenFirstVisibleResolve = resolve;
         })
       );
@@ -2293,7 +2293,9 @@ describe('amp-a4a', () => {
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
         let inResolver;
-        const policyPromise = new Promise(resolver => (inResolver = resolver));
+        const policyPromise = new Promise(
+          (resolver) => (inResolver = resolver)
+        );
         window.sandbox
           .stub(Services, 'consentPolicyServiceForDocOrNull')
           .returns(
@@ -2415,7 +2417,7 @@ describe('amp-a4a', () => {
         let errorCalls = 0;
         expect(
           protectFunctionWrapper(
-            name => {
+            (name) => {
               return `hello ${name}`;
             },
             null,
@@ -2604,7 +2606,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       // We don't really care about the behavior of the following methods, so
@@ -2649,7 +2651,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       // We don't really care about the behavior of the following methods, so
@@ -2694,7 +2696,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       window.sandbox
@@ -2809,7 +2811,7 @@ describe('amp-a4a', () => {
   //   - All
 });
 
-describes.realWin('AmpA4a-RTC', {amp: true}, env => {
+describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
   let element;
   let a4a;
   let errorSpy;
@@ -2871,7 +2873,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       {type: 'doubleclick'},
       {type: 'doubleclick', prefVal: ''},
       {type: 'otherNetwork', prefVal: true},
-    ].forEach(test =>
+    ].forEach((test) =>
       it(JSON.stringify(test), () => {
         const {type, prefVal, expected} = test;
         if (type) {

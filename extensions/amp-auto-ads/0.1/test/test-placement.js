@@ -16,14 +16,8 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
-import {
-  NO_OP_EXP,
-  PlacementState,
-  getPlacementsFromConfigObj,
-} from '../placement';
+import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
   'placement',
@@ -34,7 +28,7 @@ describes.realWin(
       extensions: ['amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let container;
 
@@ -55,52 +49,6 @@ describes.realWin(
       env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
-    });
-
-    describe('noOpExperiment', () => {
-      it('should set the correct ID on the ad element', () => {
-        forceExperimentBranch(
-          ampdoc.win,
-          NO_OP_EXP.branch,
-          NO_OP_EXP.experiment
-        );
-
-        const anchor = doc.createElement('div');
-        anchor.id = 'anId';
-        container.appendChild(anchor);
-
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
-              },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
-        expect(placements).to.have.lengthOf(1);
-
-        const attributes = {
-          'type': '_ping_',
-        };
-
-        const sizing = {};
-
-        const adTracker = new AdTracker([], {
-          initialMinSpacing: 0,
-          subsequentMinSpacing: [],
-          maxAdCount: 10,
-        });
-
-        const result = placements[0].placeAd(attributes, sizing, adTracker);
-        env.flushVsync();
-        return result.then(() => {
-          const adElement = anchor.firstChild;
-          expect(isInExperiment(adElement, NO_OP_EXP.experiment)).to.be.true;
-        });
-      });
     });
 
     describe('getAdElement', () => {
@@ -187,7 +135,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(15);
         });
       });
@@ -213,7 +161,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(15);
         });
       });
@@ -239,7 +187,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(115);
         });
       });
@@ -266,7 +214,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(115);
         });
       });
@@ -697,7 +645,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
-          .then(placementState => {
+          .then((placementState) => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('_ping_');
@@ -749,7 +697,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
@@ -795,7 +743,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
@@ -840,7 +788,7 @@ describes.realWin(
 
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(
               PlacementState.TOO_NEAR_EXISTING_AD
             );
@@ -880,7 +828,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[0].tagName).to.equal('AMP-AD');
@@ -918,7 +866,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[1].tagName).to.equal('AMP-AD');
@@ -957,7 +905,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[0].tagName).to.equal('AMP-AD');
@@ -996,7 +944,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[1].tagName).to.equal('AMP-AD');
@@ -1039,7 +987,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
             expect(anchor2.childNodes).to.have.lengthOf(1);

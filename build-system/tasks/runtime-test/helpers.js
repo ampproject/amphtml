@@ -166,7 +166,7 @@ function maybePrintArgvMessages() {
   } else {
     log(green('Running tests against unminified code.'));
   }
-  Object.keys(argv).forEach(arg => {
+  Object.keys(argv).forEach((arg) => {
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));
@@ -259,8 +259,8 @@ async function runTestInSauceLabs(config) {
   const useStable = argv.stable || !flagSet;
   const useBeta = argv.beta || !flagSet;
 
-  const isBeta = browserId => browserId.toLowerCase().endsWith('_beta');
-  const isStable = browserId => !isBeta(browserId);
+  const isBeta = (browserId) => browserId.toLowerCase().endsWith('_beta');
+  const isStable = (browserId) => !isBeta(browserId);
 
   return await runTestInBatches_(config, {
     beta: useBeta ? config.browsers.filter(isBeta) : [],
@@ -393,7 +393,7 @@ async function runTestInBatchesWithBrowsers_(
     endIndex = Math.min(batch * BATCHSIZE, browsers.length);
   }
 
-  return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
+  return batchExitCodes.every((exitCode) => exitCode == 0) ? 0 : 1;
 }
 
 /**
@@ -409,11 +409,11 @@ async function createKarmaServer(
   runCompleteFn = reportTestRunComplete
 ) {
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(configBatch, exitCode => {
+  const karmaServer = new Server(configBatch, (exitCode) => {
     maybePrintCoverageMessage();
     resolver(exitCode);
   });

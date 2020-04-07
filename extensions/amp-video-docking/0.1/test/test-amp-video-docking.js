@@ -42,7 +42,7 @@ const noop = () => {};
 
 const slotId = 'my-slot-element';
 
-describes.realWin('video docking', {amp: true}, env => {
+describes.realWin('video docking', {amp: true}, (env) => {
   let ampdoc;
   let manager;
   let viewport;
@@ -63,7 +63,7 @@ describes.realWin('video docking', {amp: true}, env => {
     return {
       element,
       getLayoutBox: () => defaultLayoutRect,
-      mutateElement: cb => tryResolve(cb),
+      mutateElement: (cb) => tryResolve(cb),
       applyFillContent: env.sandbox.spy(),
     };
   }
@@ -224,18 +224,16 @@ describes.realWin('video docking', {amp: true}, env => {
     beforeEach(() => {
       html = htmlFor(env.win.document);
       video = createVideo();
-      internalElement = html`
-        <video></video>
-      `;
+      internalElement = html` <video></video> `;
 
       video.element.appendChild(internalElement);
 
       env.sandbox.stub(env.win, 'requestAnimationFrame').callsArg(0);
 
-      getComputedStyle = el => env.win.getComputedStyle(el);
+      getComputedStyle = (el) => env.win.getComputedStyle(el);
 
-      bodyLayerElement = s => elementExists(env.win.document.body, s);
-      videoLayerElement = s => elementExists(video.element, s);
+      bodyLayerElement = (s) => elementExists(env.win.document.body, s);
+      videoLayerElement = (s) => elementExists(video.element, s);
     });
 
     it('delegates controls positioning', async () => {
@@ -314,7 +312,7 @@ describes.realWin('video docking', {amp: true}, env => {
 
       const expectedTransform = transformMatrix(x, y, scale);
 
-      [internalElement, overlay, shadow].forEach(el => {
+      [internalElement, overlay, shadow].forEach((el) => {
         expect(getComputedStyle(el)).to.include({
           'transform': expectedTransform,
           'width': width + 'px',
@@ -426,7 +424,7 @@ describes.realWin('video docking', {amp: true}, env => {
           videoLayerElement('.amp-video-docked-placeholder-background'),
           videoLayerElement('.amp-video-docked-placeholder-icon'),
           bodyLayerElement('.amp-video-docked-shadow'),
-        ].forEach(el => {
+        ].forEach((el) => {
           const style = getComputedStyle(el);
 
           expect(style['transitionDuration']).to.equal(durationSecondsStr);
@@ -596,16 +594,12 @@ describes.realWin('video docking', {amp: true}, env => {
     });
 
     it('uses `poster` attr', () => {
-      const el = html`
-        <amp-video poster="foo.png"></amp-video>
-      `;
+      const el = html` <amp-video poster="foo.png"></amp-video> `;
       expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 
     it('uses `data-poster` attr', () => {
-      const el = html`
-        <amp-video data-poster="foo.png"></amp-video>
-      `;
+      const el = html` <amp-video data-poster="foo.png"></amp-video> `;
       expect(getPosterImageSrc(el)).to.equal('foo.png');
     });
 

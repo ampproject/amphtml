@@ -20,10 +20,6 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
-const tempy = require('tempy');
-
-const SRC_TEMP_DIR = tempy.directory();
-
 const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
@@ -50,6 +46,7 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/toolbox-cache-url/package.json',
   'node_modules/@ampproject/viewer-messaging/package.json',
   'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
@@ -154,6 +151,5 @@ const THIRD_PARTY_TRANSFORM_GLOBS = [
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  SRC_TEMP_DIR,
   THIRD_PARTY_TRANSFORM_GLOBS,
 };
