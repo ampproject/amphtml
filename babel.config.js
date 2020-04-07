@@ -27,23 +27,15 @@
 
 const {
   depCheckConfig,
-} = require('./build-system/babel-config/dep-check-config');
-const {
   postClosureConfig,
-} = require('./build-system/babel-config/post-closure-config');
-const {
   preClosureConfig,
-} = require('./build-system/babel-config/pre-closure-config');
-const {
   singlePassConfig,
-} = require('./build-system/babel-config/single-pass-config');
-const {
+  testConfig,
   unminifiedConfig,
-} = require('./build-system/babel-config/unminified-config');
-const {testConfig} = require('./build-system/babel-config/test-config');
+} = require('./build-system/babel-config');
 
 /**
- * Mapping of babel transform callers to the their corresponding babel configs.
+ * Mapping of babel transform callers to their corresponding babel configs.
  */
 const babelTransforms = new Map([
   ['dep-check', depCheckConfig],
@@ -63,7 +55,6 @@ const babelTransforms = new Map([
 module.exports = function (api) {
   const caller = api.caller((caller) => caller.name);
   if (babelTransforms.has(caller)) {
-    console.log(caller, babelTransforms.get(caller));
     return babelTransforms.get(caller);
   } else {
     const err = new Error('Unrecognized Babel caller (see babel.config.js).');
