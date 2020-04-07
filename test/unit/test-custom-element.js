@@ -1767,7 +1767,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
-        clock = lolex.install({target: win});
+        clock = lolex.install({target: win, now: 42});
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
@@ -1980,18 +1980,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(toggle).to.have.not.been.called;
       });
 
-      it('should turn on when enters viewport', () => {
+      it('should turn on when enters viewport, after a 100ms delay', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
         element.viewportCallback(true);
-        clock.tick(101);
-        expect(toggle).to.be.calledOnce;
-        expect(toggle.firstCall.args).to.deep.equal([
-          true,
-          {startTime: env.sandbox.match.number},
-        ]);
+        clock.tick(99);
+        expect(toggle).not.called;
+        clock.tick(100);
+        expect(toggle).calledOnceWith(true, {startTime: 42});
       });
 
       it('should NOT turn on when enters viewport but already laid out', () => {
