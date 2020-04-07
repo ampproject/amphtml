@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds [BeOpinion](https://beopinion.com/) content.
+  text: Embeds BeOpinion content.
 ---
 
 <!---

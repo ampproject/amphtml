@@ -16,7 +16,7 @@
 
 import {pubmine} from '../../../ads/pubmine';
 
-describes.fakeWin('pubmine', {}, env => {
+describes.fakeWin('pubmine', {}, (env) => {
   let win;
   const mockData = {
     siteid: 'amp-test',

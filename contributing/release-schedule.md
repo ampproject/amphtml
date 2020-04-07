@@ -62,7 +62,13 @@ Opting into the _Beta Channel_ is intended for:
 - testing and playing with the version of the AMP runtime that will be released soon
 - using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
 
-When you opt into the _Experimental_ or _Beta_ channel, you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Experimental/Beta Channel_ version of AMP.
+**Notes:**
+
+- When you opt into the _Experimental_ or _Beta_ channel via the cookie mechanism, you are only affecting the AMP JS libraries in your browser.
+- An alternative to using cookies to opt a page into these pre-release channels is adding `?optin=experimental`/`?optin=beta` to the URL of the AMP runtime (e.g., `https://cdn.ampproject.org/v0.js?optin=beta`).
+  - URL-based opt-in should only be used for development purposes.
+  - Doing so will cause the AMP validator to flag your page as invalid, and prevent it from being included in AMP caches.
+  - There is no valid-AMP way to force visitors to your site to use the _AMP Experimental/Beta Channel_ version of AMP.
 
 To opt your browser into one of these channels, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Experimental Channel" or "AMP Beta Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
 

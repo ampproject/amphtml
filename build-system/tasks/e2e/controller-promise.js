@@ -62,7 +62,7 @@ class ControllerPromise {
 
   /** @override */
   then(opt_onFulfilled, opt_onRejected) {
-    opt_onFulfilled = opt_onFulfilled || (x => x);
+    opt_onFulfilled = opt_onFulfilled || ((x) => x);
     // Allow this and future `then`s to update the wait value.
     let wrappedWait = null;
     if (this.waitForValue) {
@@ -87,8 +87,8 @@ class ControllerPromise {
  */
 function wrapWait(wait, mutate) {
   return (condition, opt_mutate) => {
-    opt_mutate = opt_mutate || (x => x);
-    return wait(condition, value => opt_mutate(mutate(value)));
+    opt_mutate = opt_mutate || ((x) => x);
+    return wait(condition, (value) => opt_mutate(mutate(value)));
   };
 }
 

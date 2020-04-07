@@ -4,7 +4,7 @@ formats:
   - websites
   - email
 teaser:
-  text: Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
+  text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
 ---
 
 <!--
@@ -42,8 +42,9 @@ Example:
   height="20"
   datetime="2017-04-11T00:37:33.809Z"
   locale="en"
-  >Saturday 11 April 2017 00.37</amp-timeago
 >
+  Saturday 11 April 2017 00.37
+</amp-timeago>
 ```
 
 [/example]

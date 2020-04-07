@@ -84,30 +84,15 @@ function isTemplateTagSupported() {
  * Creates a named custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {string} name The name of the custom element.
  * @return {typeof AmpElement} The custom element class.
  */
-export function createCustomElementClass(win, name) {
-  const baseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
+export function createCustomElementClass(win) {
+  const BaseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
     win
   ));
-  class CustomAmpElement extends baseCustomElement {
-    /**
-     * @see https://github.com/WebReflection/document-register-element#v1-caveat
-     * @suppress {checkTypes}
-     * @param {HTMLElement} self
-     */
-    constructor(self) {
-      return super(self);
-    }
-    /**
-     * The name of the custom element.
-     * @return {string}
-     */
-    elementName() {
-      return name;
-    }
-  }
+  // It's necessary to create a subclass, because the same "base" class cannot
+  // be registered to multiple custom elements.
+  class CustomAmpElement extends BaseCustomElement {}
   return /** @type {typeof AmpElement} */ (CustomAmpElement);
 }
 
@@ -127,15 +112,10 @@ function createBaseCustomElementClass(win) {
    * @abstract @extends {HTMLElement}
    */
   class BaseCustomElement extends htmlElement {
-    /**
-     * @see https://github.com/WebReflection/document-register-element#v1-caveat
-     * @suppress {checkTypes}
-     * @param {HTMLElement} self
-     */
-    constructor(self) {
-      self = super(self);
-      self.createdCallback();
-      return self;
+    /** */
+    constructor() {
+      super();
+      this.createdCallback();
     }
 
     /**
@@ -251,7 +231,7 @@ function createBaseCustomElementClass(win) {
       // `opt_implementationClass` is only used for tests.
       let Ctor =
         win.__AMP_EXTENDED_ELEMENTS &&
-        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
+        win.__AMP_EXTENDED_ELEMENTS[this.localName];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
@@ -306,13 +286,6 @@ function createBaseCustomElementClass(win) {
         delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
-
-    /**
-     * The name of the custom element.
-     * @abstract
-     * @return {string}
-     */
-    elementName() {}
 
     /** @return {!Signals} */
     signals() {
@@ -486,6 +459,11 @@ function createBaseCustomElementClass(win) {
       return this.implementation_.getDefaultActionAlias();
     }
 
+    /** @return {boolean} */
+    isBuilding() {
+      return !!this.buildingPromise_;
+    }
+
     /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
@@ -508,13 +486,13 @@ function createBaseCustomElementClass(win) {
           resolve(this.implementation_.buildCallback());
         } else {
           Services.consentPolicyServiceForDocOrNull(this)
-            .then(policy => {
+            .then((policy) => {
               if (!policy) {
                 return true;
               }
               return policy.whenPolicyUnblock(/** @type {string} */ (policyId));
             })
-            .then(shouldUnblock => {
+            .then((shouldUnblock) => {
               if (shouldUnblock) {
                 resolve(this.implementation_.buildCallback());
               } else {
@@ -547,7 +525,7 @@ function createBaseCustomElementClass(win) {
             }
           }
         },
-        reason => {
+        (reason) => {
           this.signals_.rejectSignal(
             CommonSignals.BUILT,
             /** @type {!Error} */ (reason)
@@ -731,7 +709,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Changes the size of the element.
+     * Applies a size change to the element.
      *
      * This method is called by Resources and shouldn't be called by anyone
      * else. This method must always be called in the mutation context.
@@ -742,7 +720,7 @@ function createBaseCustomElementClass(win) {
      * @final
      * @package
      */
-    changeSize(newHeight, newWidth, opt_newMargins) {
+    applySize(newHeight, newWidth, opt_newMargins) {
       const sizer = this.getSizer_();
       if (sizer) {
         // From the moment height is changed the element becomes fully
@@ -917,10 +895,10 @@ function createBaseCustomElementClass(win) {
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
         res
-          .then(upgrade => {
+          .then((upgrade) => {
             this.completeUpgrade_(upgrade || impl, startTime);
           })
-          .catch(reason => {
+          .catch((reason) => {
             this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
             rethrowAsync(reason);
           });
@@ -1206,7 +1184,7 @@ function createBaseCustomElementClass(win) {
             this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
           }
         },
-        reason => {
+        (reason) => {
           // add layoutCount_ by 1 despite load fails or not
           if (isLoadEvent) {
             this.signals_.rejectSignal(
@@ -1468,7 +1446,7 @@ function createBaseCustomElementClass(win) {
       this.actionQueue_ = null;
 
       // Notice, the actions are currently not de-duped.
-      actionQueue.forEach(invocation => {
+      actionQueue.forEach((invocation) => {
         this.executionAction_(invocation, true);
       });
     }
@@ -1525,7 +1503,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     getRealChildNodes() {
-      return dom.childNodes(this, node => !isInternalOrServiceNode(node));
+      return dom.childNodes(this, (node) => !isInternalOrServiceNode(node));
     }
 
     /**
@@ -1537,7 +1515,7 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(
         this,
-        element => !isInternalOrServiceNode(element)
+        (element) => !isInternalOrServiceNode(element)
       );
     }
 
@@ -1547,7 +1525,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     getPlaceholder() {
-      return dom.lastChildElement(this, el => {
+      return dom.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
           // Blacklist elements that has a native placeholder property
@@ -1568,9 +1546,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          dev()
-            .assertElement(placeholder)
-            .classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
@@ -1753,32 +1729,40 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      this.mutateOrInvoke_(() => {
-        let state = this.loadingState_;
-        // Repeat "loading enabled" check because it could have changed while
-        // waiting for vsync.
-        if (state && !force && !this.isLoadingEnabled_()) {
-          state = false;
-        }
-        if (state) {
-          this.prepareLoading_();
-        }
-        if (!this.loadingContainer_) {
-          return;
-        }
+      this.mutateOrInvoke_(
+        () => {
+          let state = this.loadingState_;
+          // Repeat "loading enabled" check because it could have changed while
+          // waiting for vsync.
+          if (state && !force && !this.isLoadingEnabled_()) {
+            state = false;
+          }
+          if (state) {
+            this.prepareLoading_();
+          }
+          if (!this.loadingContainer_) {
+            return;
+          }
 
-        this.loadingContainer_.classList.toggle('amp-hidden', !state);
-        this.loadingElement_.classList.toggle('amp-active', state);
+          this.loadingContainer_.classList.toggle('amp-hidden', !state);
+          this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && cleanup && !this.implementation_.isLoadingReused()) {
-          const loadingContainer = this.loadingContainer_;
-          this.loadingContainer_ = null;
-          this.loadingElement_ = null;
-          this.mutateOrInvoke_(() => {
-            dom.removeElement(loadingContainer);
-          });
-        }
-      });
+          if (!state && cleanup && !this.implementation_.isLoadingReused()) {
+            const loadingContainer = this.loadingContainer_;
+            this.loadingContainer_ = null;
+            this.loadingElement_ = null;
+            this.mutateOrInvoke_(
+              () => {
+                dom.removeElement(loadingContainer);
+              },
+              undefined,
+              true
+            );
+          }
+        },
+        undefined,
+        /* skipRemeasure */ true
+      );
     }
 
     /**
@@ -1838,8 +1822,8 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             const mutator = Services.mutatorForDoc(this.getAmpDoc());
-            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
-            mutator./*OK*/ mutateElement(this, () => {
+            mutator.forceChangeSize(this, requestedHeight, requestedWidth);
+            mutator.mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1858,12 +1842,14 @@ function createBaseCustomElementClass(win) {
      *
      * @param {function()} mutator
      * @param {?Element=} opt_element
+     * @param {boolean=} opt_skipRemeasure
      */
-    mutateOrInvoke_(mutator, opt_element) {
+    mutateOrInvoke_(mutator, opt_element, opt_skipRemeasure = false) {
       if (this.ampdoc_) {
         Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
           opt_element || this,
-          mutator
+          mutator,
+          opt_skipRemeasure
         );
       } else {
         mutator();
@@ -1920,12 +1906,11 @@ function isInternalOrServiceNode(node) {
  * Creates a new custom element class prototype.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @param {string} name The name of the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
-export function createAmpElementForTesting(win, name, opt_implementationClass) {
-  const Element = createCustomElementClass(win, name);
+export function createAmpElementForTesting(win, opt_implementationClass) {
+  const Element = createCustomElementClass(win);
   if (getMode().test && opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }

@@ -26,7 +26,7 @@ export function loka(global, data) {
   global.lokaParams = data;
 
   const container = global.document.querySelector('#c');
-  container.addEventListener('lokaUnitLoaded', e => {
+  container.addEventListener('lokaUnitLoaded', (e) => {
     if (e.detail.isReady) {
       global.context.renderStart();
     } else {

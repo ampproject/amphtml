@@ -112,9 +112,11 @@ describe('JwtHelper', () => {
         if (!helper.isVerificationSupported()) {
           return;
         }
-        return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
-          expect(tok['name']).to.equal('John Do');
-        });
+        return helper
+          .decodeAndVerify(TOKEN, Promise.resolve(PEM))
+          .then((tok) => {
+            expect(tok['name']).to.equal('John Do');
+          });
       });
 
     it.configure()
@@ -135,7 +137,7 @@ describe('JwtHelper', () => {
           () => {
             throw new Error('must have failed');
           },
-          error => {
+          (error) => {
             // Expected.
             expect(error.message).to.match(/Signature verification failed/);
           }
@@ -187,7 +189,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Invalid token/);
         }
       );
@@ -199,7 +201,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -212,7 +214,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -241,7 +243,7 @@ describe('JwtHelper', () => {
         )
         .returns(Promise.resolve(true))
         .once();
-      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
+      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then((tok) => {
         expect(tok['name']).to.equal('John Do');
       });
     });

@@ -197,8 +197,10 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 
 ### Dynamic resizing
 
+`<amp-list>` can be used with `layout="CONTAINER"` with two caveats: (1) A list with changing contents must have a determinable initial height from a fixed-height placeholder, and (2) once content changes inside the list, resize will occur _only_ if it does not cause content jumping. This is enforced by locking the height of the list prior to rendering contents and conditionally unlocking it accordingly.
+
 [filter formats="websites, stories"]
-In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+In several cases, we need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. If there is no placeholder, or content is known to change only on user interaction, it may be more suitable to use a different layout than "container" initially and then change accordingly. See the following example:
 [/filter]<!-- formats="websites, stories" -->
 
 [filter formats="email"]
@@ -216,6 +218,35 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 >
   <template type="amp-mustache">
     {{title}}
+  </template>
+</amp-list>
+```
+
+### Initialization from amp-state
+
+In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
+
+Here’s how to have `<amp-list>` render from an `<amp-state>`:
+
+1. Add the [amp-bind](https://amp.dev/documentation/components/amp-bind/) script to your document's `<head>`.
+2. Use the `amp-state:` protocol in your `<amp-list>`’s src attribute, like this:
+   `<amp-list src="amp-state:localState">`
+
+Note that `<amp-list>` treats your JSON in the same way whether it’s requested from your server or pulled from a state variable. The format required doesn’t change.
+
+See below for a full example,
+
+```html
+<amp-state id="localState">
+  <script type="application/json">
+    {
+      "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+    }
+  </script>
+</amp-state>
+<amp-list src="amp-state:localState">
+  <template type="amp-mustache">
+    <li>{{id}}</li>
   </template>
 </amp-list>
 ```

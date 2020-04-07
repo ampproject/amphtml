@@ -80,7 +80,7 @@ function getMode_(win) {
     // from the URL.
     win.location.originalHash || win.location.hash
   );
-  const {spt: singlePassType, esm} = AMP_CONFIG;
+  const {spt: singlePassType} = AMP_CONFIG;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -104,7 +104,7 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    esm,
+    esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,

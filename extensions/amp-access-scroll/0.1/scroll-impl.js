@@ -33,7 +33,7 @@ const TAG = 'amp-access-scroll-elt';
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const accessConfig = baseUrl => {
+const accessConfig = (baseUrl) => {
   /** @const {!JsonObject} */
   const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
     'authorization':
@@ -64,7 +64,7 @@ const accessConfig = baseUrl => {
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const analyticsConfig = baseUrl => {
+const analyticsConfig = (baseUrl) => {
   const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'scroll':
@@ -103,7 +103,7 @@ const analyticsConfig = baseUrl => {
  * @param {!JsonObject} config
  * @return {string}
  */
-const devEtld = config => {
+const devEtld = (config) => {
   return getMode().development && config['etld'] ? config['etld'] : '';
 };
 
@@ -113,7 +113,7 @@ const devEtld = config => {
  * @param {!JsonObject} config
  * @return {string}
  */
-const connectHostname = config => {
+const connectHostname = (config) => {
   return `https://connect${devEtld(config) || '.scroll.com'}`;
 };
 
@@ -151,7 +151,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   /** @override */
   authorize() {
     // TODO(dbow): Handle timeout?
-    return super.authorize().then(response => {
+    return super.authorize().then((response) => {
       const holdback = response['features'] && response['features']['h'];
       const isStory = this.ampdoc
         .getRootNode()
@@ -169,12 +169,12 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           const sheet = new Sheet(this.ampdoc, holdback);
 
           const relay = new Relay(this.baseUrl_);
-          relay.register(sheet.window, message => {
+          relay.register(sheet.window, (message) => {
             if (message['_scramp'] === 'au' || message['_scramp'] === 'st') {
               sheet.update(message);
             }
           });
-          relay.register(bar.window, message => {
+          relay.register(bar.window, (message) => {
             if (message['_scramp'] === 'st') {
               sheet.update(message);
               bar.update(message);
@@ -243,9 +243,9 @@ class ScrollContentBlocker {
       .fetchJson('https://block.scroll.com/check.json')
       .then(
         () => false,
-        e => this.blockedByScrollApp_(e.message)
+        (e) => this.blockedByScrollApp_(e.message)
       )
-      .then(blockedByScrollApp => {
+      .then((blockedByScrollApp) => {
         if (blockedByScrollApp === true) {
           // TODO(dbow): Ideally we would automatically redirect to the page
           // here, but for now we are adding a button so we redirect on user
@@ -260,7 +260,7 @@ class ScrollContentBlocker {
             holdback
           );
           const relay = new Relay(baseUrl);
-          relay.register(bar.window, message => {
+          relay.register(bar.window, (message) => {
             if (message['_scramp'] === 'st') {
               bar.update(message);
             }
