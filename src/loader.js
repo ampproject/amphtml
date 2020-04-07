@@ -38,15 +38,16 @@ function getLoaderServicePromise(ampDoc, element) {
  * @param {!AmpElement} element
  * @param {number} elementWidth
  * @param {number} elementHeight
+ * @param {number=} startTime
  * @return {!Element} The loader root element.
  */
 export function createLoaderElement(
   ampDoc,
   element,
   elementWidth,
-  elementHeight
+  elementHeight,
+  startTime = Date.now()
 ) {
-  const startTime = Date.now();
   // We create the loader root element up front, since it is needed
   // synchronously. We create the actual element with animations when the
   // service is ready.
