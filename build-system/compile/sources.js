@@ -46,7 +46,6 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
   'node_modules/@ampproject/toolbox-cache-url/package.json',
-  'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.cjs.js',
   'node_modules/@ampproject/viewer-messaging/package.json',
   'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',

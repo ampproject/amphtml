@@ -21,7 +21,6 @@
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {ampToolboxCacheUrl} from '@ampproject/toolbox-cache-url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -33,6 +32,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import ampUrl from '@ampproject/toolbox-cache-url';
 
 /**
  * @fileoverview
@@ -289,7 +289,7 @@ export class AmpRecaptchaService {
       }
 
       // TODO: win location href curls domain MAY need to be the same
-      return ampToolboxCacheUrl
+      return ampUrl
         .createCurlsSubdomain(winLocation.href)
         .then((curlsSubdomain) => {
           return (
@@ -318,7 +318,7 @@ export class AmpRecaptchaService {
         return this.win_.location.hostname.split('.')[0];
       });
     } else {
-      curlsSubdomainPromise = ampToolboxCacheUrl.createCurlsSubdomain(
+      curlsSubdomainPromise = ampUrl.createCurlsSubdomain(
         this.win_.location.href
       );
     }
