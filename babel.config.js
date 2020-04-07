@@ -115,26 +115,6 @@ const ignoredGlobalModules = devDependencies().filter(
 );
 
 /**
- * Resolves the full path of a local plugin with the given name.
- *
- * @param {string} name
- * @return {string}
- */
-function localPlugin(name) {
-  return require.resolve(`./build-system/babel-plugins/babel-plugin-${name}`);
-}
-
-/**
- * Resolves the full path of a babel monorepo plugin with the given name.
- *
- * @param {string} name
- * @return {string}
- */
-function babelPlugin(name) {
-  return `@babel/plugin-${name}`;
-}
-
-/**
  * Computes options for the minify-replace plugin
  *
  * @return {Array<string|Object>}
@@ -206,10 +186,10 @@ const replacePlugin = getReplacePlugin();
  */
 function getDepCheckConfig() {
   const depCheckPlugins = [
-    localPlugin('transform-fix-leading-comments'),
-    babelPlugin('transform-react-constant-elements'),
-    [babelPlugin('transform-classes'), {loose: false}],
-    [babelPlugin('transform-react-jsx'), defaultJsxOpts],
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    '@babel/plugin-transform-react-constant-elements',
+    ['@babel/plugin-transform-classes', {loose: false}],
+    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
   ];
   const depCheckPresets = [defaultPresetEnvPlugin];
   return {
@@ -229,11 +209,11 @@ function getDepCheckConfig() {
 function getUnminifiedConfig() {
   const unminifiedPlugins = [
     replacePlugin,
-    localPlugin('transform-json-configuration'),
-    localPlugin('transform-fix-leading-comments'),
-    babelPlugin('transform-react-constant-elements'),
-    [babelPlugin('transform-classes'), {loose: false}],
-    [babelPlugin('transform-react-jsx'), defaultJsxOpts],
+    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    '@babel/plugin-transform-react-constant-elements',
+    ['@babel/plugin-transform-classes', {loose: false}],
+    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
   ];
   const unminifiedPresets = [defaultPresetEnvPlugin];
   return {
@@ -253,30 +233,40 @@ function getUnminifiedConfig() {
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
   const preClosurePlugins = [
-    localPlugin('transform-fix-leading-comments'),
-    babelPlugin('transform-react-constant-elements'),
-    [babelPlugin('transform-react-jsx'), defaultJsxOpts],
-    localPlugin('transform-inline-configure-component'),
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    '@babel/plugin-transform-react-constant-elements',
+    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
+    './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
-    [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
-    localPlugin('transform-parenthesize-expression'),
-    localPlugin('is_minified-constant-transformer'),
-    localPlugin('transform-amp-extension-call'),
-    localPlugin('transform-html-template'),
-    localPlugin('transform-version-call'),
-    localPlugin('transform-simple-array-destructure'),
+    [
+      './build-system/babel-plugins/babel-plugin-transform-log-methods',
+      {replaceCallArguments: false},
+    ],
+    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
+    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
+    './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
+    './build-system/babel-plugins/babel-plugin-transform-html-template',
+    './build-system/babel-plugins/babel-plugin-transform-version-call',
+    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,
-    argv.single_pass ? localPlugin('transform-amp-asserts') : null,
+    argv.single_pass
+      ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
+      : null,
     argv.esm ? defaultFilterImportsPlugin : null,
-    argv.esm ? localPlugin('transform-function-declarations') : null,
+    argv.esm
+      ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
+      : null,
     isCheckTypes
-      ? localPlugin('transform-simple-object-destructure')
-      : localPlugin('transform-json-configuration'),
+      ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
+      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     !(argv.fortesting || isCheckTypes)
-      ? [localPlugin('amp-mode-transformer'), {isEsmBuild: argv.esm}]
+      ? [
+          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+          {isEsmBuild: argv.esm},
+        ]
       : null,
     !(argv.fortesting || isCheckTypes)
-      ? localPlugin('is_dev-constant-transformer')
+      ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
   const babelPresetEnvOptions = argv.esm
@@ -308,10 +298,10 @@ function getPreClosureConfig() {
 function getPostClosureConfig() {
   const postClosurePlugins = argv.esm
     ? [
-        localPlugin('transform-minified-comments'),
-        localPlugin('transform-remove-directives'),
-        localPlugin('transform-function-declarations'),
-        localPlugin('transform-stringish-literals'),
+        './build-system/babel-plugins/babel-plugin-transform-minified-comments',
+        './build-system/babel-plugins/babel-plugin-transform-remove-directives',
+        './build-system/babel-plugins/babel-plugin-transform-function-declarations',
+        './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
       ]
     : [];
   return {
@@ -329,7 +319,9 @@ function getPostClosureConfig() {
  * @return {!Object}
  */
 function getSinglePassConfig() {
-  const singlePassPlugins = [localPlugin('transform-prune-namespace')];
+  const singlePassPlugins = [
+    './build-system/babel-plugins/babel-plugin-transform-prune-namespace',
+  ];
   return {
     compact: false,
     inputSourceMap: false,
@@ -348,11 +340,11 @@ function getTestConfig() {
   const testPlugins = [
     argv.coverage ? defaultInstanbulPlugin : null,
     replacePlugin,
-    localPlugin('transform-json-configuration'),
-    localPlugin('transform-fix-leading-comments'),
-    babelPlugin('transform-react-constant-elements'),
-    [babelPlugin('transform-classes'), {loose: false}],
-    [babelPlugin('transform-react-jsx'), defaultJsxOpts],
+    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    '@babel/plugin-transform-react-constant-elements',
+    ['@babel/plugin-transform-classes', {loose: false}],
+    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
   ].filter(Boolean);
   return {
     compact: false,
