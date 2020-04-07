@@ -20,13 +20,11 @@ import {
   StoryAnimationDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
-  WebKeyframesCreateFnDef,
-} from './animation-types';
-import {
   WebAnimationDef,
   WebAnimationPlayState,
+  WebKeyframesCreateFnDef,
   WebKeyframesDef,
-} from '../../amp-animation/0.1/web-animation-types';
+} from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {
   childElementByTag,

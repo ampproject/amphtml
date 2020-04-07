@@ -19,8 +19,7 @@
  * presets.
  */
 
-import {StoryAnimationDimsDef} from './animation-types';
-import {WebKeyframesDef} from '../../amp-animation/0.1/web-animation-types';
+import {StoryAnimationDimsDef, WebKeyframesDef} from './animation-types';
 import {rotate, scale, translate} from '../../../src/style';
 
 /**

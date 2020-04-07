@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import {WebKeyframesDef} from '../../amp-animation/0.1/web-animation-types';
+import {
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+} from '../../amp-animation/0.1/web-animation-types';
+
+export {WebAnimationDef, WebAnimationPlayState, WebKeyframesDef};
 
 /** @typedef {function(StoryAnimationDimsDef):!WebKeyframesDef} */
 export let WebKeyframesCreateFnDef;
