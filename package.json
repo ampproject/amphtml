@@ -61,7 +61,7 @@
     "connect-header": "0.0.5",
     "cssnano": "4.1.10",
     "del": "5.1.0",
-    "derequire": "2.0.6",
+    "derequire": "2.1.0",
     "dev-null": "0.1.1",
     "doctrine": "3.0.0",
     "envify": "4.1.0",
