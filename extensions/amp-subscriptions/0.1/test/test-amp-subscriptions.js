@@ -37,6 +37,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let ampdoc;
   let element;
   let pageConfig;
+  let freePageConfig;
   let subscriptionService;
   let configResolver;
   let analyticsEventStub;
@@ -67,6 +68,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     },
   };
 
+  const freePlatformConfig = {
+    alwaysGrant: true,
+    services: [{'serviceId': 'platform1'}],
+  };
+
   const serviceConfigIframe = {
     services: [
       {
@@ -88,6 +94,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     },
   };
 
+  /** Awaits N times. Allows promises to resolve. */
+  async function flush(n = 100) {
+    for (let i = 0; i < n; i++) {
+      await 'tick';
+    }
+  }
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -99,6 +112,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
+    freePageConfig = new PageConfig('scenic-2017.appspot.com:news', false);
     env.sandbox
       .stub(PageConfigResolver.prototype, 'resolveConfig')
       .callsFake(function () {
@@ -189,16 +203,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = {
-            alwaysGrant: true,
-          };
+          subscriptionService.platformConfig_ = freePlatformConfig;
           subscriptionService.pageConfig_ = pageConfig;
           return Promise.resolve();
         });
       subscriptionService.start();
+      await flush();
 
-      await subscriptionService.whenConfigsAreProcessed_();
-      expect(processStateStub).to.be.calledWith(true);
+      await expect(processStateStub).to.be.calledWith(true);
     });
 
     it('should skip everything and unlock document for unlocked page config', async () => {
@@ -209,18 +221,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = {
-            alwaysGrant: false,
-          };
-          subscriptionService.pageConfig_ = pageConfig = new PageConfig(
-            'scenic-2017.appspot.com:news',
-            false
-          );
+          subscriptionService.platformConfig_ = serviceConfig;
+          subscriptionService.pageConfig_ = freePageConfig;
           return Promise.resolve();
         });
       subscriptionService.start();
+      await flush();
 
-      await subscriptionService.whenConfigsAreProcessed_();
       expect(processStateStub).to.be.calledWith(true);
     });
 
@@ -594,34 +601,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
   });
 
-  describe('processGrantState_', () => {
-    let setGrantStateStub;
-
-    beforeEach(async () => {
-      setGrantStateStub = env.sandbox.stub(
-        subscriptionService.renderer_,
-        'setGrantState'
-      );
-      await subscriptionService.whenConfigsAreProcessed_();
-    });
-
-    it('can process grant state of false', () => {
-      subscriptionService.processGrantState_(false);
-      expect(setGrantStateStub).to.be.calledWith(false);
-    });
-
-    it('forces grant state to true for free pages', () => {
-      // Mark page as free.
-      subscriptionService.platformConfig_ = {
-        alwaysGrant: true,
-        services: [{'serviceId': 'platform1'}],
-      };
-
-      subscriptionService.processGrantState_(false);
-      expect(setGrantStateStub).to.be.calledWith(true);
-    });
-  });
-
   describe('fetchEntitlements_', () => {
     let platform;
     let serviceAdapter;
@@ -765,10 +744,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       );
       await subscriptionService.whenConfigsAreProcessed_();
       // Mark page as free.
-      subscriptionService.platformConfig_ = {
-        alwaysGrant: true,
-        services: [{'serviceId': 'platform1'}],
-      };
+      subscriptionService.platformConfig_ = freePlatformConfig;
 
       await subscriptionService.fetchEntitlements_(platform);
       expect(getEntitlementsStub).to.not.be.called;
@@ -851,10 +827,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = {
-            alwaysGrant: true,
-            services: [{'serviceId': 'platform1'}],
-          };
+          subscriptionService.platformConfig_ = freePlatformConfig;
           subscriptionService.pageConfig_ = pageConfig;
           return Promise.resolve();
         });
@@ -1083,6 +1056,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
   describe('initializePlatformStore_', () => {
     it('should initialize platform store with the given ids', () => {
+      subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       const entitlement = Entitlement.parseFromJson(
         serviceConfig.fallbackEntitlement
@@ -1263,15 +1237,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = {
-            alwaysGrant: false,
-          };
-          subscriptionService.pageConfig_ = pageConfig = new PageConfig(
-            'scenic-2017.appspot.com:news',
-            false
-          );
+          subscriptionService.platformConfig_ = serviceConfig;
+          subscriptionService.pageConfig_ = freePageConfig;
           return Promise.resolve();
         });
+      subscriptionService.start();
 
       await expect(
         subscriptionService.getAuthdataField('grantReason')

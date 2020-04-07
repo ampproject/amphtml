@@ -143,12 +143,6 @@ export class SubscriptionService {
 
       userAssert(this.pageConfig_, 'Page config is null');
 
-      if (this.isPageFree_()) {
-        // If the page is free then we treat it as granted and show any
-        // subscriptions content sections.
-        this.processGrantState_(true);
-      }
-
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false /** doPlatformSelection */);
@@ -202,19 +196,7 @@ export class SubscriptionService {
   /** @override from AccessVars */
   getAuthdataField(field) {
     return this.whenConfigsAreProcessed_()
-      .then(() => {
-        if (this.isPageFree_()) {
-          return new Entitlement({
-            source: '',
-            raw: '',
-            granted: true,
-            grantReason: GrantReason.UNLOCKED,
-            dataObject: {},
-          });
-        }
-
-        return this.platformStore_.getEntitlementPromiseFor('local');
-      })
+      .then(() => this.platformStore_.getEntitlementPromiseFor('local'))
       .then((entitlement) => getValueForExpr(entitlement.json(), field));
   }
 
@@ -338,6 +320,8 @@ export class SubscriptionService {
   resetPlatforms() {
     return this.whenConfigsAreProcessed_().then(() => {
       this.platformStore_ = this.platformStore_.resetPlatformStore();
+      this.maybeAddFreeEntitlement_(this.platformStore_);
+
       this.renderer_.toggleLoading(true);
 
       this.platformStore_
@@ -467,11 +451,6 @@ export class SubscriptionService {
    * @private
    */
   processGrantState_(grantState) {
-    // Don't show paywalls on free pages.
-    if (this.isPageFree_()) {
-      grantState = true;
-    }
-
     // Hide loading animation.
     this.renderer_.toggleLoading(false);
 
@@ -589,6 +568,7 @@ export class SubscriptionService {
       this.platformConfig_['score'],
       fallbackEntitlement
     );
+    this.maybeAddFreeEntitlement_(this.platformStore_);
   }
 
   /**
@@ -716,6 +696,28 @@ export class SubscriptionService {
         });
     }
     return null;
+  }
+
+  /**
+   * Adds entitlement on free pages.
+   * @param {!PlatformStore} platformStore
+   * @private
+   */
+  maybeAddFreeEntitlement_(platformStore) {
+    if (!this.isPageFree_()) {
+      return;
+    }
+
+    platformStore.resolveEntitlement(
+      'local',
+      new Entitlement({
+        source: '',
+        raw: '',
+        granted: true,
+        grantReason: GrantReason.UNLOCKED,
+        dataObject: {},
+      })
+    );
   }
 
   /**
