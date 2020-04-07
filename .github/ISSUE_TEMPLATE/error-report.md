@@ -7,13 +7,16 @@ assignees: ''
 
 ---
 
-<!-- Please only file error reports from AMP Error Reporting here. -->
+<!--
+Please only file error reports from AMP Error Reporting here.
+Replace/remove all of the text in brackets, including this text.
+-->
+
 Details
 ---
 
-**Error report:** go/ampe/<Error ID>
-**First seen:** <First seen date>
-<!--
+**Error report:** [link](go/ampe/<Error_ID>)
+**First seen:** <First seen date> <!--
 Select "1 day" on the error details page for the error and record the
 occurrences.
 -->
@@ -30,7 +33,9 @@ Stacktrace
 If there are other interesting trends to note (ex. all user-agent strings are
 from iPhones, sudden jump in volume with recent release, etc.),
 uncomment and include them in the section below.
+-->
 
+<!--
 Notes
 ---
 <Additional notes>
