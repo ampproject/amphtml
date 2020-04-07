@@ -737,8 +737,8 @@ export function getPageConfigClassForTesting() {
   return PageConfig;
 }
 
-// Register the extension services.
-AMP.extension(TAG, '0.1', function (AMP) {
+// Register the `amp-subscriptions` extension.
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('subscriptions', function (ampdoc) {
     return new SubscriptionService(ampdoc).start();
   });
