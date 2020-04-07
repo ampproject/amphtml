@@ -25,346 +25,33 @@
 
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const experimentsConfig = require('./build-system/global-configs/experiments-config.json');
-const experimentsConstantBackup = require('./build-system/global-configs/experiments-const.json');
-const fs = require('fs');
-
-/**
- * Default options for transform-react-jsx. Used by pre-closure and dep-check.
- */
-const defaultJsxOpts = {
-  pragma: 'Preact.createElement',
-  pragmaFrag: 'Preact.Fragment',
-  useSpread: true,
-};
-
-/**
- * Default preset-env plugin. Used by dep-check and tests.
- */
-const defaultPresetEnvPlugin = [
-  '@babel/preset-env',
-  {
-    bugfixes: true,
-    modules: 'commonjs',
-    loose: true,
-    targets: {'browsers': ['Last 2 versions']},
-  },
-];
-
-/**
- * Default filter-imports plugin. Used by pre-closure.
- */
-const defaultFilterImportsPlugin = [
-  'filter-imports',
-  {
-    imports: {
-      // Imports removed for all ESM builds.
-      './polyfills/document-contains': ['installDocContains'],
-      './polyfills/domtokenlist': ['installDOMTokenList'],
-      './polyfills/fetch': ['installFetch'],
-      './polyfills/math-sign': ['installMathSign'],
-      './polyfills/object-assign': ['installObjectAssign'],
-      './polyfills/object-values': ['installObjectValues'],
-      './polyfills/promise': ['installPromise'],
-      './polyfills/array-includes': ['installArrayIncludes'],
-      '../third_party/css-escape/css-escape': ['cssEscape'],
-      // Imports that are not needed for valid transformed documents.
-      '../build/ampshared.css': ['cssText', 'ampSharedCss'],
-      '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-    },
-  },
-];
-
-/**
- * Default istanbul plugin. Used by tests.
- */
-const defaultInstanbulPlugin = [
-  'istanbul',
-  {
-    exclude: [
-      'ads/**/*.js',
-      'build-system/**/*.js',
-      'extensions/**/test/**/*.js',
-      'third_party/**/*.js',
-      'test/**/*.js',
-      'testing/**/*.js',
-    ],
-  },
-];
-
-/**
- * Gets relative paths to all the devDependencies defined in package.json.
- *
- * @return {!Array<string>}
- */
-function devDependencies() {
-  const file = fs.readFileSync('package.json', 'utf8');
-  const packageJson = JSON.parse(file);
-  const devDependencies = Object.keys(packageJson['devDependencies']);
-  return devDependencies.map((p) => `./node_modules/${p}`);
-}
-
-/**
- * Ignore devDependencies except for 'chai-as-promised' which contains ES6 code.
- * ES6 code is fine for most test environments, but not for integration tests
- * running on SauceLabs since some older browsers need ES5.
- */
-const ignoredGlobalModules = devDependencies().filter(
-  (dep) => dep.indexOf('chai-as-promised') === -1
-);
-
-/**
- * Computes options for the minify-replace plugin
- *
- * @return {Array<string|Object>}
- */
-function getReplacePlugin() {
-  /**
-   * @param {string} identifierName the identifier name to replace
-   * @param {boolean} value the value to replace with
-   * @return {!Object} replacement options used by minify-replace plugin
-   */
-  function createReplacement(identifierName, value) {
-    return {
-      identifierName,
-      replacement: {type: 'booleanLiteral', value: !!value},
-    };
-  }
-
-  const replacements = [createReplacement('IS_ESM', argv.esm)];
-  const defineFlag = argv.defineExperimentConstant;
-
-  // add define flags from arguments
-  if (Array.isArray(defineFlag)) {
-    if (defineFlag.length > 1) {
-      throw new Error('Only one defineExperimentConstant flag is allowed');
-    } else {
-      replacements.push(createReplacement(defineFlag[0], true));
-    }
-  } else if (defineFlag) {
-    replacements.push(createReplacement(defineFlag, true));
-  }
-
-  // default each experiment flag constant to false
-  Object.keys(experimentsConfig).forEach((experiment) => {
-    const experimentDefine =
-      experimentsConfig[experiment]['defineExperimentConstant'];
-    const flagExists = (element) =>
-      element['identifierName'] === experimentDefine;
-    // only add default replacement if it already doesn't exist in array
-    if (experimentDefine && !replacements.some(flagExists)) {
-      replacements.push(createReplacement(experimentDefine, false));
-    }
-  });
-
-  // default each backup experiment constant to the customized value
-  const experimentsConstantBackupEntries = Object.entries(
-    experimentsConstantBackup
-  );
-  for (const [experimentDefine, value] of experimentsConstantBackupEntries) {
-    const flagExists = (element) =>
-      element['identifierName'] === experimentDefine;
-    // only add default replacement if it already doesn't exist in array
-    if (experimentDefine && !replacements.some(flagExists)) {
-      replacements.push(createReplacement(experimentDefine, !!value));
-    }
-  }
-
-  return ['minify-replace', {replacements}];
-}
-
-/**
- * The fully configured minify-replace plugin.
- */
-const replacePlugin = getReplacePlugin();
-
-/**
- * Gets the config for babel transforms run during `gulp dep-check`.
- *
- * @return {!Object}
- */
-function getDepCheckConfig() {
-  const depCheckPlugins = [
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-    '@babel/plugin-transform-react-constant-elements',
-    ['@babel/plugin-transform-classes', {loose: false}],
-    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
-  ];
-  const depCheckPresets = [defaultPresetEnvPlugin];
-  return {
-    compact: false,
-    ignore: ignoredGlobalModules,
-    plugins: depCheckPlugins,
-    presets: depCheckPresets,
-    sourceType: 'module',
-  };
-}
-
-/**
- * Gets the config for babel transforms run during `gulp build`.
- *
- * @return {!Object}
- */
-function getUnminifiedConfig() {
-  const unminifiedPlugins = [
-    replacePlugin,
-    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-    '@babel/plugin-transform-react-constant-elements',
-    ['@babel/plugin-transform-classes', {loose: false}],
-    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
-  ];
-  const unminifiedPresets = [defaultPresetEnvPlugin];
-  return {
-    compact: false,
-    ignore: ignoredGlobalModules,
-    plugins: unminifiedPlugins,
-    presets: unminifiedPresets,
-    sourceType: 'module',
-  };
-}
-
-/**
- * Gets the config for pre-closure babel transforms run during `gulp dist`.
- *
- * @return {!Object}
- */
-function getPreClosureConfig() {
-  const isCheckTypes = argv._.includes('check-types');
-  const preClosurePlugins = [
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-    '@babel/plugin-transform-react-constant-elements',
-    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
-    './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
-    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
-    [
-      './build-system/babel-plugins/babel-plugin-transform-log-methods',
-      {replaceCallArguments: false},
-    ],
-    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
-    './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
-    './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
-    './build-system/babel-plugins/babel-plugin-transform-html-template',
-    './build-system/babel-plugins/babel-plugin-transform-version-call',
-    './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
-    replacePlugin,
-    argv.single_pass
-      ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
-      : null,
-    argv.esm ? defaultFilterImportsPlugin : null,
-    argv.esm
-      ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-      : null,
-    isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
-      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    !(argv.fortesting || isCheckTypes)
-      ? [
-          './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-          {isEsmBuild: argv.esm},
-        ]
-      : null,
-    !(argv.fortesting || isCheckTypes)
-      ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
-      : null,
-  ].filter(Boolean);
-  const babelPresetEnvOptions = argv.esm
-    ? {bugfixes: true, modules: false, targets: {esmodules: true}}
-    : {
-        bugfixes: true,
-        loose: true,
-        modules: false,
-        targets: {'browsers': ['Last 2 versions']},
-      };
-  const preClosurePresets = [['@babel/preset-env', babelPresetEnvOptions]];
-  const preClosureConfig = {
-    compact: false,
-    plugins: preClosurePlugins,
-    presets: preClosurePresets,
-    retainLines: true,
-  };
-  if (argv.esm) {
-    preClosureConfig.sourceType = 'module';
-  }
-  return preClosureConfig;
-}
-
-/**
- * Gets the config for post-closure babel transforms run during `gulp dist`.
- *
- * @return {!Object}
- */
-function getPostClosureConfig() {
-  const postClosurePlugins = argv.esm
-    ? [
-        './build-system/babel-plugins/babel-plugin-transform-minified-comments',
-        './build-system/babel-plugins/babel-plugin-transform-remove-directives',
-        './build-system/babel-plugins/babel-plugin-transform-function-declarations',
-        './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
-      ]
-    : [];
-  return {
-    inputSourceMap: false,
-    plugins: postClosurePlugins,
-    retainLines: false,
-    sourceMaps: true,
-    sourceType: 'module',
-  };
-}
-
-/**
- * Gets the config for babel transforms run during `gulp dist --single_pass`.
- *
- * @return {!Object}
- */
-function getSinglePassConfig() {
-  const singlePassPlugins = [
-    './build-system/babel-plugins/babel-plugin-transform-prune-namespace',
-  ];
-  return {
-    compact: false,
-    inputSourceMap: false,
-    plugins: singlePassPlugins,
-    sourceMaps: true,
-  };
-}
-
-/**
- * Gets the config for babel transforms run during `gulp [unit|integration]`.
- *
- * @return {!Object}
- */
-function getTestConfig() {
-  const testPresets = [defaultPresetEnvPlugin];
-  const testPlugins = [
-    argv.coverage ? defaultInstanbulPlugin : null,
-    replacePlugin,
-    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-    '@babel/plugin-transform-react-constant-elements',
-    ['@babel/plugin-transform-classes', {loose: false}],
-    ['@babel/plugin-transform-react-jsx', defaultJsxOpts],
-  ].filter(Boolean);
-  return {
-    compact: false,
-    ignore: ignoredGlobalModules,
-    plugins: testPlugins,
-    presets: testPresets,
-    sourceType: 'module',
-  };
-}
+const {
+  depCheckConfig,
+} = require('./build-system/babel-config/dep-check-config');
+const {
+  postClosureConfig,
+} = require('./build-system/babel-config/post-closure-config');
+const {
+  preClosureConfig,
+} = require('./build-system/babel-config/pre-closure-config');
+const {
+  singlePassConfig,
+} = require('./build-system/babel-config/single-pass-config');
+const {
+  unminifiedConfig,
+} = require('./build-system/babel-config/unminified-config');
+const {testConfig} = require('./build-system/babel-config/test-config');
 
 /**
  * Mapping of babel transform callers to the their corresponding babel configs.
  */
 const babelTransforms = new Map([
-  ['dep-check', getDepCheckConfig()],
-  ['unminified', getUnminifiedConfig()],
-  ['pre-closure', getPreClosureConfig()],
-  ['post-closure', getPostClosureConfig()],
-  ['single-pass', getSinglePassConfig()],
-  ['test', getTestConfig()],
+  ['dep-check', depCheckConfig],
+  ['unminified', unminifiedConfig],
+  ['pre-closure', preClosureConfig],
+  ['post-closure', postClosureConfig],
+  ['single-pass', singlePassConfig],
+  ['test', testConfig],
 ]);
 
 /**
@@ -376,7 +63,7 @@ const babelTransforms = new Map([
 module.exports = function (api) {
   const caller = api.caller((caller) => caller.name);
   if (babelTransforms.has(caller)) {
-    console.log('found caller', caller);
+    console.log(caller, babelTransforms.get(caller));
     return babelTransforms.get(caller);
   } else {
     const err = new Error('Unrecognized Babel caller (see babel.config.js).');

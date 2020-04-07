@@ -264,8 +264,6 @@
         "require": false
       },
       "rules": {
-        "local/no-array-destructuring": 0,
-        "local/no-for-of-statement": 0,
         "local/no-module-exports": 0
       }
     },

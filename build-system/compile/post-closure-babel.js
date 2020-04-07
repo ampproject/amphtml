@@ -79,14 +79,15 @@ function terserMinify(code) {
 }
 
 /**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup added
+ * space with Terser. Used only in esm mode.
  *
  * @param {string} directory directory this file lives in
  * @return {!Promise}
  */
 exports.postClosureBabel = function (directory) {
   return through.obj(function (file, enc, next) {
-    if (path.extname(file.path) === '.map') {
+    if (!argv.esm || path.extname(file.path) === '.map') {
       return next(null, file);
     }
 

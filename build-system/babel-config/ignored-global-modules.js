@@ -1,0 +1,43 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
+const fs = require('fs');
+
+/**
+ * Gets relative paths to all the devDependencies defined in package.json.
+ *
+ * @return {!Array<string>}
+ */
+function devDependencies() {
+  const file = fs.readFileSync('package.json', 'utf8');
+  const packageJson = JSON.parse(file);
+  const devDependencies = Object.keys(packageJson['devDependencies']);
+  return devDependencies.map((p) => `./node_modules/${p}`);
+}
+
+/**
+ * Ignore devDependencies except for 'chai-as-promised' which contains ES6 code.
+ * ES6 code is fine for most test environments, but not for integration tests
+ * running on SauceLabs since some older browsers need ES5.
+ */
+const ignoredGlobalModules = devDependencies().filter(
+  (dep) => dep.indexOf('chai-as-promised') === -1
+);
+
+module.exports = {
+  ignoredGlobalModules,
+};
