@@ -186,7 +186,7 @@ class AnimationRunner {
       // can get rid of this entire method (and this async chain!) if we ensure
       // that presets avoid visual jumps either via:
       // a) default styles and/or
-      // b) by not using special <amp-animation> syntax in keyframes.
+      // b) by not using special <amp-animation> syntax in initial keyframe.
       return /** @type {!StoryAnimationDimsDef} */ ({
         pageWidth: pageRect.width,
         pageHeight: pageRect.height,
