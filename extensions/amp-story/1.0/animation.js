@@ -98,10 +98,10 @@ class AnimationRunner {
     /** @private @const */
     this.vsync_ = vsync;
 
-    const {target} = animationDef;
-
-    /** @private @const {!Element|undefined} */
-    this.target_ = target && dev().assertElement(target);
+    /** @private @const {?Element} */
+    this.presetTarget_ = !!animationDef.preset
+      ? dev().assertElement(animationDef.target)
+      : null;
 
     /** @private @const */
     this.sequence_ = sequence;
@@ -131,8 +131,15 @@ class AnimationRunner {
     this.firstFrameProps_ = this.webAnimationDefPromise_.then(
       (animationDef) => {
         const {keyframes} = animationDef;
-        const isPreset = this.target_ && Array.isArray(keyframes);
-        if (!isPreset) {
+        if (!this.presetTarget_) {
+          // It's not possible to backfill the first frame unless it's
+          // explicitly defined by the resulting config, and doesn't use any
+          // CSS extensions or special <amp-animation> syntax.
+          // If <amp-story> is rendered before the amp-animation extension
+          // loads, this could cause a visual jump from CSS state that doesn't
+          // match the result of how amp-animation resolves the first frame.
+          // This depends on the author properly setting their CSS so that the
+          // initial element's state looks like the first animation frame.
           return null;
         }
         devAssert(
@@ -152,14 +159,10 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    // TODO(alanorozco): This check should only be for preset animations,
-    // since they have their first frame filled (negative delays wrap around, so
-    // we can't realistically evaluate the correct state for CSS props.)
-    const {delay} = animationDef;
-    if (delay) {
+    if (this.presetTarget_) {
       userAssert(
-        parseInt(getLengthNumeral(delay.toString()) || 0, 10) >= 0,
-        'Negative delays are not allowed in amp-story animations.'
+        dev().assertNumber(animationDef.delay) >= 0,
+        'Negative delays are not allowed in amp-story "animate-in" animations.'
       );
     }
 
@@ -176,14 +179,19 @@ class AnimationRunner {
       // amp-animation CSS extensions or var()s. That removes the need for:
       // 1. this measurement
       // 2. animate-in presets having their keyframes evaluated from functions.
+      // Caveat:
+      // - We historically calculate these from <amp-story> and resolve since
+      //   we explicitly backfill the first animation frame via CSS to prevent
+      //   visual jumps (see applyFirstFrame), unless we assume that
+      //   amp-animation most likely loads first (see firstFrameProps_).
       // Notes:
       // - We don't care about unscaledClientRect, since that's required to
       //   support an abandoned experiment (amp-story-page-scaling).
       // - targetWidth/targetHeight are already available as width()/height()
       // - pageWidth/pageHeight should be exposed as vw/vh
       // - targetX/targetY should be exposed somehow (?)
-
-      const targetRect = unscaledClientRect(dev().assertElement(this.target_));
+      const target = dev().assertElement(this.presetTarget_);
+      const targetRect = unscaledClientRect(target);
       const pageRect = unscaledClientRect(this.page_);
 
       return /** @type {!StoryAnimationDimsDef} */ ({
@@ -199,8 +207,6 @@ class AnimationRunner {
 
   /**
    * Evaluates a preset's keyframes function using dimensions.
-   * TODO(alanorozco): We can remove keyframe function evaluation if we define
-   * preset keyframes how amp-animation wants them. See getDims().
    * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
    * @return {!Promise<!WebKeyframesDef>}
    * @private
@@ -221,9 +227,7 @@ class AnimationRunner {
     const {preset} = animationDef;
     if (!preset) {
       // This is an amp-animation config, so it's already formed how the
-      // WebAnimations Builder already wants it.
-      // TODO(alanorozco): We can simplify this and make it sync if we define
-      // preset keyframes how amp-animation wants them. See getDims().
+      // WebAnimations Builder wants it.
       return Promise.resolve(/** @type {!WebAnimationDef} */ (animationDef));
     }
     const {target, delay, duration, easing} = animationDef;
@@ -253,7 +257,7 @@ class AnimationRunner {
       }
       return this.vsync_.mutatePromise(() => {
         setStyles(
-          dev().assertElement(this.target_),
+          dev().assertElement(this.presetTarget_),
           assertDoesNotContainDisplay(devAssert(firstFrameProps))
         );
       });
@@ -441,8 +445,8 @@ class AnimationRunner {
 
   /** @private */
   notifyFinish_() {
-    if (this.target_ && this.target_.id) {
-      this.sequence_.notifyFinish(this.target_.id);
+    if (this.presetTarget_ && this.presetTarget_.id) {
+      this.sequence_.notifyFinish(this.presetTarget_.id);
     }
   }
 }
