@@ -336,6 +336,11 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.a4aAnalyticsConfig_ = null;
 
+    /** @private {string} The random subdomain to load SafeFrame from */
+    this.safeFrameSubdomain_ = Services.cryptoFor(
+      this.win
+    ).getSecureRandomString();
+
     /**
      * The amp-analytics element that for this impl's analytics config. It will
      * be null before buildCallback() executes or if the impl does not provide

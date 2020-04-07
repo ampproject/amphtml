@@ -222,9 +222,8 @@ export class Crypto {
    */
   getSecureRandomString() {
     // Support IE 11
-    const cryptoLib =
-      /** @type {!webCrypto.Crypto|undefined} */ (this.win_.crypto ||
-      this.win_.msCrypto);
+    const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
+      .crypto || this.win_.msCrypto);
     let /** !Array<number>|!Uint8Array */ randomValues;
 
     if (cryptoLib) {

@@ -139,6 +139,12 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
+/**@const @enum{string} */
+const RANDOM_SUBDOMAIN_BRANCHES = {
+  RANDOM_SUBDOMAIN_CONTROL: '21065817',
+  RANDOM_SUBDOMAIN_EXPERIMENT: '21065818',
+};
+
 /**
  * Required size to be sent with fluid requests.
  * @const {string}
@@ -276,11 +282,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(
-      this.win
-    ).getSecureRandomString();
-
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
 
@@ -385,6 +386,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
         '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+
+        // Random Subdomain
+        '10': RANDOM_SUBDOMAIN_BRANCHES.RANDOM_SUBDOMAIN_CONTROL,
+        '11': RANDOM_SUBDOMAIN_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT,
       }[urlExperimentId];
       if (forcedExperimentId) {
         this.experimentIds.push(forcedExperimentId);
@@ -471,6 +476,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+        RANDOM_SUBDOMAIN_BRANCHES.RANDOM_SUBDOMAIN_CONTROL,
+        RANDOM_SUBDOMAIN_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT,
       ].some((eid) => this.experimentIds.indexOf(eid) >= 0);
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -1432,9 +1439,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
-    const noFallbackExp = this.experimentIds.includes(
-      DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER
-    );
+    const noFallbackExp =
+      this.experimentIds.includes(
+        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER
+      ) ||
+      this.experimentIds.includes(
+        RANDOM_SUBDOMAIN_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT
+      );
     sraRequests =
       sraRequests ||
       this.groupSlotsForSra().then((groupIdToBlocksAry) => {
