@@ -77,7 +77,7 @@ function maybeReplaceDefaultCompiler() {
 async function startNailgunServer(port, detached) {
   await maybeGenerateRunner(port);
 
-  if (argv.disable_nailgun) {
+  if (argv.disable_nailgun || argv.use_native) {
     return;
   }
 

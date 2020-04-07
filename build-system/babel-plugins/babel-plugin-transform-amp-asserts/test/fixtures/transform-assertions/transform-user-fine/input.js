@@ -16,3 +16,10 @@
 user().fine(1);
 let result = user().fine(user(), 'hello', 'world');
 let result2 = user().fine();
+
+class Foo {
+  isSingleDoc() {
+    // TODO(#22733): remove when ampdoc-fie is launched.
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
+  }
+}

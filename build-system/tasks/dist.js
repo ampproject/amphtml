@@ -462,4 +462,5 @@ dist.flags = {
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  use_native: '  Uses the native implementation of closure when possible',
 };

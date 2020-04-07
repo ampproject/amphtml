@@ -74,7 +74,10 @@ module.exports = function (babel) {
 
       // If we can statically evaluate the value to a falsey expression
       if (evaluation.confident) {
-        if (type) {
+        if (evaluation.value === null) {
+          path.replaceWith(t.nullLiteral());
+          return;
+        } else if (type) {
           if (typeof evaluation.value !== type) {
             path.replaceWith(template.ast`
               (function() {

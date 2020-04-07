@@ -20,6 +20,7 @@ const closureCompiler = require('google-closure-compiler');
 const log = require('fancy-log');
 const {cyan, red, yellow} = require('ansi-colors');
 const {EventEmitter} = require('events');
+const {getNativeImagePath} = require('google-closure-compiler/lib/utils.js');
 const {highlight} = require('cli-highlight');
 
 let compilerErrors = '';
@@ -114,7 +115,15 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
     logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
-  if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
+  if (
+    argv.use_native &&
+    (process.platform == 'darwin' || process.platform == 'linux')
+  ) {
+    closureCompiler.compiler.JAR_PATH = null;
+    closureCompiler.compiler.javaPath = getNativeImagePath();
+    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+    initOptions.extraArguments = null; // Already part of nailgun-server
+  } else if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
     // For single-pass compilation, use the default compiler.jar
     closureCompiler.compiler.JAR_PATH = require.resolve(
       '../../node_modules/google-closure-compiler-java/compiler.jar'
@@ -144,6 +153,11 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
     }
   }
 
+  // console.log({
+  //   compilerOptions,
+  //   pluginOptions,
+  //   path: closureCompiler.compiler.JAR_PATH,
+  // });
   return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
 }
 
