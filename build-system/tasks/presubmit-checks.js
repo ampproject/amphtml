@@ -728,7 +728,6 @@ const forbiddenTerms = {
       'src/base-element.js',
       'extensions/amp-experiment/0.1/amp-experiment.js',
       'extensions/amp-experiment/1.0/amp-experiment.js',
-      'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
     ],
   },
   '^describe[\\.|\\(|$]': {

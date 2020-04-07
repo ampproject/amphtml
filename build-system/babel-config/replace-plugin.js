@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
+const {getExperimentConstant} = require('./helpers');
 
 /**
  * Computes options for the minify-replace plugin
@@ -38,17 +39,10 @@ function getReplacePlugin() {
   }
 
   const replacements = [createReplacement('IS_ESM', argv.esm)];
-  const defineFlag = argv.define_experiment_constant;
 
-  // add define flags from arguments
-  if (Array.isArray(defineFlag)) {
-    if (defineFlag.length > 1) {
-      throw new Error('Only one define_experiment_constant flag is allowed');
-    } else {
-      replacements.push(createReplacement(defineFlag[0], true));
-    }
-  } else if (defineFlag) {
-    replacements.push(createReplacement(defineFlag, true));
+  const experimentConstant = getExperimentConstant();
+  if (experimentConstant) {
+    replacements.push(createReplacement(experimentConstant, true));
   }
 
   // default each experiment flag constant to false

@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {getExperimentConstant} = require('./helpers');
 const {getReplacePlugin} = require('./replace-plugin');
 
 /**
@@ -46,6 +47,17 @@ function getPreClosureConfig() {
       },
     },
   ];
+  const experimentConstant = getExperimentConstant();
+  // For FixedLayer experiment
+  if (experimentConstant === 'MOVE_FIXED_LAYER') {
+    // For experiment = true, remove import from viewport-impl.js
+    filterImportsPlugin[1]['imports']['./../fixed-layer'] = ['FixedLayer'];
+  } else {
+    // For experiment = false, remove import from amp-viewer-integration.js
+    filterImportsPlugin[1]['imports']['../../../src/service/fixed-layer'] = [
+      'FixedLayer',
+    ];
+  }
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
