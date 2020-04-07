@@ -1,6 +1,7 @@
 ---
 $category@: dynamic-content
 formats:
+  - stories
   - websites
 teaser:
   text: Provides an approximate country-level geolocation interface.
