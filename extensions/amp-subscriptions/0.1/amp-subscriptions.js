@@ -133,7 +133,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Starts the amp-subscription Service
+   * Starts the `amp-subscriptions` extension.
    * @return {SubscriptionService}
    */
   start() {
