@@ -17,7 +17,9 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
+import {Deferred} from '../../../src/utils/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -39,6 +41,7 @@ import {endsWith, expandTemplate, startsWith} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
@@ -223,10 +226,24 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then((services) => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
-        return new AnalyticsConfig(this.element).loadConfig();
+        const loadConfigDeferred = new Deferred();
+        const loadConfigTask = () => {
+          return new AnalyticsConfig(this.element)
+            .loadConfig()
+            .then((config) => {
+              loadConfigDeferred.resolve(config);
+            });
+        };
+        if (isExperimentOn(this.win, 'analytics-chunks')) {
+          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+        } else {
+          loadConfigTask();
+        }
+        return loadConfigDeferred.promise;
       })
       .then((config) => {
         this.config_ = /** @type {!JsonObject} */ (config);
+        // CookieWriter not enabled on proxy origin, do not chunk
         return new CookieWriter(this.win, this.element, this.config_).write();
       })
       .then(() => {
@@ -357,7 +374,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               }
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
-              this.addTrigger_(trigger);
+              return this.addTrigger_(trigger);
             } else if (
               trigger['selector'] &&
               startsWith(trigger['selector'], '${') &&
@@ -372,10 +389,10 @@ export class AmpAnalytics extends AMP.BaseElement {
                 )
                 .then((selector) => {
                   trigger['selector'] = selector;
-                  this.addTrigger_(trigger);
+                  return this.addTrigger_(trigger);
                 });
             } else {
-              this.addTrigger_(trigger);
+              return this.addTrigger_(trigger);
             }
           })
         );
@@ -405,15 +422,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!JsonObject} config
    * @private
    * @noinline
+   * @return {!Promise}
    */
   addTrigger_(config) {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
-      return;
+      return Promise.resolve();
     }
     try {
-      this.analyticsGroup_.addTrigger(
+      return this.analyticsGroup_.addTrigger(
         config,
         this.handleEvent_.bind(this, config)
       );
@@ -421,6 +439,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+      return Promise.resolve();
     }
   }
 
@@ -558,16 +577,31 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Create the linker-manager that will append linker params as necessary.
    * @private
+   * @return {Promise}
    */
   initializeLinker_() {
     const type = this.element.getAttribute('type');
-    this.linkerManager_ = new LinkerManager(
-      this.getAmpDoc(),
-      this.config_,
-      type,
-      this.element
-    );
-    this.linkerManager_.init();
+    const linkerTaskDeferred = new Deferred();
+    const linkerTask = () => {
+      try {
+        this.linkerManager_ = new LinkerManager(
+          this.getAmpDoc(),
+          this.config_,
+          type,
+          this.element
+        );
+        this.linkerManager_.init();
+      } catch (e) {
+        user.error(TAG, 'error initiating analytics linker, %s', e);
+      }
+      linkerTaskDeferred.resolve();
+    };
+    if (isExperimentOn(this.win, 'analytics-chunks')) {
+      chunk(this.element, linkerTask, ChunkPriority.LOW);
+    } else {
+      linkerTask();
+    }
+    return linkerTaskDeferred.promise;
   }
 
   /**
