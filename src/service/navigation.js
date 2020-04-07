@@ -624,16 +624,18 @@ export class Navigation {
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
-    if (Services.platformFor(this.ampdoc.win).isIe()) {
-      const id = toLocation.hash.substring(1);
-      const elementWithId = this.ampdoc.getElementById(id);
-      if (elementWithId) {
-        if (
-          !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
-        ) {
-          elementWithId.tabIndex = -1;
+    if (!IS_ESM) {
+      if (Services.platformFor(this.ampdoc.win).isIe()) {
+        const id = toLocation.hash.substring(1);
+        const elementWithId = this.ampdoc.getElementById(id);
+        if (elementWithId) {
+          if (
+            !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
+          ) {
+            elementWithId.tabIndex = -1;
+          }
+          tryFocus(elementWithId);
         }
-        tryFocus(elementWithId);
       }
     }
 
