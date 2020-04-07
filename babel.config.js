@@ -59,6 +59,7 @@ const defaultFilterImportsPlugin = [
   'filter-imports',
   {
     imports: {
+      // Imports removed for all ESM builds.
       './polyfills/document-contains': ['installDocContains'],
       './polyfills/domtokenlist': ['installDOMTokenList'],
       './polyfills/fetch': ['installFetch'],
@@ -68,6 +69,7 @@ const defaultFilterImportsPlugin = [
       './polyfills/promise': ['installPromise'],
       './polyfills/array-includes': ['installArrayIncludes'],
       '../third_party/css-escape/css-escape': ['cssEscape'],
+      // Imports that are not needed for valid transformed documents.
       '../build/ampshared.css': ['cssText', 'ampSharedCss'],
       '../build/ampdoc.css': ['cssText', 'ampDocCss'],
     },
@@ -249,6 +251,7 @@ function getUnminifiedConfig() {
  * @return {!Object}
  */
 function getPreClosureConfig() {
+  const isCheckTypes = argv._.includes('check-types');
   const preClosurePlugins = [
     localPlugin('transform-fix-leading-comments'),
     babelPlugin('transform-react-constant-elements'),
@@ -263,28 +266,19 @@ function getPreClosureConfig() {
     localPlugin('transform-version-call'),
     localPlugin('transform-simple-array-destructure'),
     replacePlugin,
-  ];
-  if (argv.single_pass) {
-    preClosurePlugins.push(localPlugin('transform-amp-asserts'));
-  }
-  if (argv.esm) {
-    preClosurePlugins.push(
-      defaultFilterImportsPlugin,
-      localPlugin('transform-function-declarations')
-    );
-  }
-  const isCheckTypes = argv._.includes('check-types');
-  if (isCheckTypes) {
-    preClosurePlugins.push(localPlugin('transform-simple-object-destructure'));
-  } else {
-    preClosurePlugins.push(localPlugin('transform-json-configuration'));
-  }
-  if (!argv.fortesting && !isCheckTypes) {
-    preClosurePlugins.push(
-      [localPlugin('amp-mode-transformer'), {isEsmBuild: argv.esm}],
-      localPlugin('is_dev-constant-transformer')
-    );
-  }
+    argv.single_pass ? localPlugin('transform-amp-asserts') : null,
+    argv.esm ? defaultFilterImportsPlugin : null,
+    argv.esm ? localPlugin('transform-function-declarations') : null,
+    isCheckTypes
+      ? localPlugin('transform-simple-object-destructure')
+      : localPlugin('transform-json-configuration'),
+    !(argv.fortesting || isCheckTypes)
+      ? [localPlugin('amp-mode-transformer'), {isEsmBuild: argv.esm}]
+      : null,
+    !(argv.fortesting || isCheckTypes)
+      ? localPlugin('is_dev-constant-transformer')
+      : null,
+  ].filter(Boolean);
   const babelPresetEnvOptions = argv.esm
     ? {bugfixes: true, modules: false, targets: {esmodules: true}}
     : {
@@ -352,16 +346,14 @@ function getSinglePassConfig() {
 function getTestConfig() {
   const testPresets = [defaultPresetEnvPlugin];
   const testPlugins = [
+    argv.coverage ? defaultInstanbulPlugin : null,
     replacePlugin,
     localPlugin('transform-json-configuration'),
     localPlugin('transform-fix-leading-comments'),
     babelPlugin('transform-react-constant-elements'),
     [babelPlugin('transform-classes'), {loose: false}],
     [babelPlugin('transform-react-jsx'), defaultJsxOpts],
-  ];
-  if (argv.converage) {
-    testPlugins.unshift(defaultInstanbulPlugin);
-  }
+  ].filter(Boolean);
   return {
     compact: false,
     ignore: ignoredGlobalModules,
