@@ -20,7 +20,6 @@ import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
@@ -102,7 +101,13 @@ export function getIframe(
   }
   count[attributes['type']] += 1;
 
-  const baseUrl = getBootstrapBaseUrl(parentWindow, undefined, disallowCustom);
+  const ampdoc = parentElement.getAmpDoc();
+  const baseUrl = getBootstrapBaseUrl(
+    parentWindow,
+    ampdoc,
+    undefined,
+    disallowCustom
+  );
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -137,21 +142,16 @@ export function getIframe(
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
-  iframe.onload = function() {
+  iframe.onload = function () {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
-    // Block synchronous XHR in ad. These are very rare, but super bad for UX
-    // as they block the UI thread for the arbitrary amount of time until the
-    // request completes.
-    iframe.setAttribute('allow', "sync-xhr 'none';");
-  }
+  // Block synchronous XHR in ad. These are very rare, but super bad for UX
+  // as they block the UI thread for the arbitrary amount of time until the
+  // request completes.
+  iframe.setAttribute('allow', "sync-xhr 'none';");
   const excludeFromSandbox = ['facebook'];
-  if (
-    isExperimentOn(parentWindow, 'sandbox-ads') &&
-    !excludeFromSandbox.includes(opt_type)
-  ) {
+  if (!excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute(
@@ -197,24 +197,26 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
- * @param {!./preconnect.Preconnect} preconnect
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./preconnect.PreconnectService} preconnect
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
-  const url = getBootstrapBaseUrl(win, undefined, opt_disallowCustom);
-  preconnect.preload(url, 'document');
+export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
+  const url = getBootstrapBaseUrl(win, ampdoc, undefined, opt_disallowCustom);
+  preconnect.preload(ampdoc, url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   const scriptUrl = getMode().localDev
     ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
     : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
-  preconnect.preload(scriptUrl, 'script');
+  preconnect.preload(ampdoc, scriptUrl, 'script');
 }
 
 /**
  * Returns the base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {boolean=} opt_strictForUnitTest
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {string}
@@ -222,12 +224,13 @@ export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
  */
 export function getBootstrapBaseUrl(
   parentWindow,
+  ampdoc,
   opt_strictForUnitTest,
   opt_disallowCustom
 ) {
   const customBootstrapBaseUrl = opt_disallowCustom
     ? null
-    : getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest);
+    : getCustomBootstrapBaseUrl(parentWindow, ampdoc, opt_strictForUnitTest);
   return customBootstrapBaseUrl || getDefaultBootstrapBaseUrl(parentWindow);
 }
 
@@ -242,7 +245,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
  * @param {*} win
  */
 export function resetBootstrapBaseUrlForTesting(win) {
-  win.defaultBootstrapSubDomain = undefined;
+  win.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN = undefined;
 }
 
 /**
@@ -257,11 +260,12 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
-  parentWindow.defaultBootstrapSubDomain =
-    parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN =
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN ||
+    getSubDomain(parentWindow);
   return (
     'https://' +
-    parentWindow.defaultBootstrapSubDomain +
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +
     `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
     `${srcFileBasename}.html`
   );
@@ -332,17 +336,20 @@ export function getRandom(win) {
  * Returns the custom base URL for 3p bootstrap iframes if it exists.
  * Otherwise null.
  * @param {!Window} parentWindow
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {boolean=} opt_strictForUnitTest
  * @return {?string}
  */
-function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  const meta = parentWindow.document.querySelector(
-    'meta[name="amp-3p-iframe-src"]'
-  );
+function getCustomBootstrapBaseUrl(
+  parentWindow,
+  ampdoc,
+  opt_strictForUnitTest
+) {
+  const meta = ampdoc.getMetaByName('amp-3p-iframe-src');
   if (!meta) {
     return null;
   }
-  const url = assertHttpsUrl(meta.getAttribute('content'), meta);
+  const url = assertHttpsUrl(meta, 'meta[name="amp-3p-iframe-src"]');
   userAssert(
     url.indexOf('?') == -1,
     '3p iframe url must not include query string %s in element %s.',

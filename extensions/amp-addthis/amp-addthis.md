@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays AddThis customizable social share buttons.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,20 +23,6 @@ limitations under the License.
 -->
 
 # amp-addthis
-Displays <a href="https://www.addthis.com">AddThis</a> customizable social share buttons.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-addthis" src="https://cdn.ampproject.org/v0/amp-addthis-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Why AddThis?
 
@@ -46,9 +33,11 @@ AddThis is trusted by over 15,000,000 websites with over 2 billion unique users,
 ## Share Buttons
 
 ### Floating
+
 Placed on the sides, top, or bottom of your page, following your reader as they scroll. A great way to promote sharing without getting too in-your-face.
 
 Example:
+
 ```html
 <!--
   This example uses a placeholder pubId.
@@ -61,14 +50,17 @@ Example:
   layout="responsive"
   data-pub-id="ra-5c191331410932ff"
   data-widget-id="957l"
-  data-widget-type="floating">
+  data-widget-type="floating"
+>
 </amp-addthis>
 ```
 
 ### Inline
+
 Integrate share buttons into your content for a seamless sharing experience.
 
 Example:
+
 ```html
 <!--
   This example uses a placeholder pubId.
@@ -80,11 +72,13 @@ Example:
   height="92"
   data-pub-id="ra-5c191331410932ff"
   data-widget-id="mv93"
-  data-widget-type="inline">
+  data-widget-type="inline"
+>
 </amp-addthis>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-pub-id</strong></td>
@@ -119,7 +113,6 @@ Example:
     <td>Optional. If set, this is the description of the page that the AddThis tool will attempt to share when sharing occurs. If not set, this is left undefined.</td>
   </tr>
 </table>
-
 
 ## Implementation Documentation
 
@@ -156,4 +149,5 @@ AddThis Data may consist of the following:
 AddThis Data will be treated as personal information to the extent required under applicable law. Publishers are required per the AddThis Terms of Service to obtain all necessary End User consents and authorizations, and provide any required notices for the provision of AddThis Data collected from End Users to Oracle.
 
 ## Support
+
 If you have any questions or need any help in implementing AddThis on AMP, please contact our fabulous support team by submitting a ticket [here](https://www.addthis.com/support/) or by emailing [help@addthis.com](mailto:help@addthis.com).

@@ -20,7 +20,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story system layer', {amp: true}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   let win;
   let systemLayer;
   let progressBarStub;
@@ -29,30 +29,32 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store', () => ({
-      get: NOOP,
-      subscribe: NOOP,
-    }));
+    registerServiceBuilder(win, 'story-store', function () {
+      return {
+        get: NOOP,
+        subscribe: NOOP,
+      };
+    });
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
-      build: sandbox.stub().returns(progressBarRoot),
-      getRoot: sandbox.stub().returns(progressBarRoot),
-      setActiveSegmentId: sandbox.spy(),
-      updateProgress: sandbox.spy(),
+      build: env.sandbox.stub().returns(progressBarRoot),
+      getRoot: env.sandbox.stub().returns(progressBarRoot),
+      setActiveSegmentId: env.sandbox.spy(),
+      updateProgress: env.sandbox.spy(),
     };
 
-    sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
+    env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+    env.sandbox.stub(Services, 'vsyncFor').returns({
+      mutate: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win);
   });
 
   it.skip('should build UI', () => {
-    const initializeListeners = sandbox
+    const initializeListeners = env.sandbox
       .stub(systemLayer, 'initializeListeners_')
       .callsFake(NOOP);
 
@@ -65,10 +67,10 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
   it.skip('should attach event handlers', () => {
-    const rootMock = {addEventListener: sandbox.spy()};
+    const rootMock = {addEventListener: env.sandbox.spy()};
 
-    sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
-    sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
     systemLayer.initializeListeners_();
 
@@ -76,7 +78,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   });
 
   it('should set the active page index', () => {
-    [0, 1, 2, 3, 4].forEach(index => {
+    [0, 1, 2, 3, 4].forEach((index) => {
       systemLayer.setActivePageId(index);
       progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });

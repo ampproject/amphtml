@@ -93,9 +93,9 @@ export class PolyfillFormDataWrapper {
   /** @override */
   entries() {
     const fieldEntries = [];
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => fieldEntries.push([name, value]));
+      values.forEach((value) => fieldEntries.push([name, value]));
     });
 
     // Generator functions are not supported by the current Babel configuration,
@@ -114,9 +114,9 @@ export class PolyfillFormDataWrapper {
   getFormData() {
     const formData = new FormData();
 
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => formData.append(name, value));
+      values.forEach((value) => formData.append(name, value));
     });
 
     return formData;
@@ -157,7 +157,7 @@ class NativeFormDataWrapper {
     }
 
     const button = getSubmitButtonUsed(opt_form);
-    if (button) {
+    if (button && button.name) {
       this.append(button.name, button.value);
     }
   }
@@ -198,7 +198,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
     super(opt_form);
 
     if (opt_form) {
-      iterateCursor(opt_form.elements, input => {
+      iterateCursor(opt_form.elements, (input) => {
         if (input.type == 'file' && input.files.length == 0) {
           this.formData_.delete(input.name);
           this.formData_.append(input.name, new Blob([]), '');
@@ -229,7 +229,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
  * support `FormData.prototype.entries`.
  *
  * @interface
- * @note Subclassing `FormData` doesn't work in this case as the transpiler
+ * Subclassing `FormData` doesn't work in this case as the transpiler
  *     generates code that calls the super constructor directly using
  *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
  *     enforces that constructors be called with the `new` operator.

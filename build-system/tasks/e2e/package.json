@@ -3,12 +3,12 @@
   "name": "gulp-e2e",
   "version": "0.1.0",
   "description": "Gulp e2e",
-  "dependencies": {
-    "@babel/register": "7.4.4",
+  "devDependencies": {
+    "@babel/register": "7.9.0",
     "babel-regenerator-runtime": "6.5.0",
-    "chromedriver": "74.0.0",
-    "puppeteer": "1.17.0",
-    "geckodriver": "1.16.2",
-    "selenium-webdriver": "4.0.0-alpha.1"
+    "chromedriver": "80.0.1",
+    "puppeteer": "2.1.1",
+    "geckodriver": "1.19.1",
+    "selenium-webdriver": "4.0.0-alpha.7"
   }
 }

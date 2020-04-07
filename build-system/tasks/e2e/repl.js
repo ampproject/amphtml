@@ -44,8 +44,9 @@ function installRepl(global, env) {
   /**
    * Usage: in a test, await repl();
    * @param {*} mochaThis
+   * @return {!Promise}
    */
-  global.repl = function(mochaThis) {
+  global.repl = function (mochaThis) {
     mochaThis.timeout(REPL_INFINITE_TIMEOUT);
 
     const {controller} = env;
@@ -54,7 +55,7 @@ function installRepl(global, env) {
     global.repl.continue = replContinue;
 
     if (!replPromise) {
-      replPromise = new Promise(resolve => {
+      replPromise = new Promise((resolve) => {
         replResolve = resolve;
       });
     }

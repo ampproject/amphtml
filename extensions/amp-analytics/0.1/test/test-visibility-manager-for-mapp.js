@@ -46,7 +46,7 @@ class MockVisibilityInterface {
   }
 }
 
-describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
+describes.fakeWin('VisibilityManagerForMapp', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
@@ -58,17 +58,17 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
 
-    viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
+    viewer = win.__AMP_SERVICES.viewer.obj;
+    env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
     visibilityInterface = new MockVisibilityInterface();
     root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
 
     win.IntersectionObserver = null;
 
-    eventPromise = new Promise(resolve => {
+    eventPromise = new Promise((resolve) => {
       eventResolver = resolve;
     });
   });
@@ -79,7 +79,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
     root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
     expect(root.parent).to.be.null;
     expect(root.ampdoc).to.equal(ampdoc);
-    expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
+    expect(root.getStartTime()).to.equal(ampdoc.getFirstVisibleTime());
     expect(root.isBackgrounded()).to.be.true;
     expect(root.isBackgroundedAtStart()).to.be.true;
 
@@ -156,9 +156,9 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
 
   it('listen on root integrated', () => {
     // There's a clock.tick(1) in beforeEach, so firstSeenTime is
-    // /*tick*/1 + /*tick*/1 - /*viewer.getFirstVisibleTime*/ 1)
+    // /*tick*/1 + /*tick*/1 - /*ampdoc.getFirstVisibleTime*/ 1)
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const spec = dict({
       'totalTimeMin': 10,
       'visiblePercentageMin': 20,
@@ -185,7 +185,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
       layoutRectLtwh(1, 2, 100, 201)
     );
     clock.tick(3);
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
       expect(state.totalVisibleTime).to.equal(10);

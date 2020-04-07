@@ -14,34 +14,42 @@
  * limitations under the License.
  */
 
-/* global require */
+/* global require, process */
 
+const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const {cyan, red} = require('ansi-colors');
+
 const {
-  compileAccessExpr,
-  compileBindExpr,
-  compileCssExpr,
-} = require('./build-system/tasks/compile-expr');
+  checkExactVersions,
+} = require('./build-system/tasks/check-exact-versions');
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {
+  storybookAmp,
+  storybookPreact,
+} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, defaultTask, watch} = require('./build-system/tasks/build');
+const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
-const {cachesJson, jsonSyntax} = require('./build-system/tasks/json-check');
-const {changelog, changelogUpdate} = require('./build-system/tasks/changelog');
+const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
+const {checkOwners} = require('./build-system/tasks/check-owners');
 const {checkTypes} = require('./build-system/tasks/check-types');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
+const {compileJison} = require('./build-system/tasks/compile-jison');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
+const {defaultTask} = require('./build-system/tasks/default-task');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
@@ -52,64 +60,116 @@ const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
 const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
+const {performance} = require('./build-system/tasks/performance');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
-const {releaseTag} = require('./build-system/tasks/release-tagging');
+const {prettify} = require('./build-system/tasks/prettify');
+const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
-const {test} = require('./build-system/tasks/runtime-test');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
+const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
-// Keep this list alphabetized.
-gulp.task('a4a', a4a);
-gulp.task('ava', ava);
-gulp.task('babel-plugin-tests', babelPluginTests);
-gulp.task('build', build);
-gulp.task('bundle-size', bundleSize);
-gulp.task('caches-json', cachesJson);
-gulp.task('changelog', changelog);
-gulp.task('changelog:update', changelogUpdate);
-gulp.task('check-links', checkLinks);
-gulp.task('check-types', checkTypes);
-gulp.task('clean', clean);
-gulp.task('codecov-upload', codecovUpload);
-gulp.task('compile-access-expr', compileAccessExpr);
-gulp.task('compile-bind-expr', compileBindExpr);
-gulp.task('compile-css-expr', compileCssExpr);
-gulp.task('create-golden-css', createGoldenCss);
-gulp.task('css', css);
-gulp.task('csvify-size', csvifySize);
-gulp.task('default', defaultTask);
-gulp.task('dep-check', depCheck);
-gulp.task('dev-dashboard-tests', devDashboardTests);
-gulp.task('dist', dist);
-gulp.task('e2e', e2e);
-gulp.task('firebase', firebase);
-gulp.task('get-zindex', getZindex);
-gulp.task('integration', integration);
-gulp.task('json-syntax', jsonSyntax);
-gulp.task('lint', lint);
-gulp.task('make-extension', makeExtension);
-gulp.task('nailgun-start', nailgunStart);
-gulp.task('nailgun-stop', nailgunStop);
-gulp.task('pr-check', prCheck);
-gulp.task('prepend-global', prependGlobal);
-gulp.task('presubmit', presubmit);
-gulp.task('process-3p-github-pr', process3pGithubPr);
-gulp.task('process-github-issues', processGithubIssues);
-gulp.task('release:tag', releaseTag);
-gulp.task('test', test);
-gulp.task('serve', serve);
-gulp.task('size', size);
-gulp.task('todos:find-closed', todosFindClosed);
-gulp.task('unit', unit);
-gulp.task('update-packages', updatePackages);
-gulp.task('validator', validator);
-gulp.task('validator-webui', validatorWebui);
-gulp.task('visual-diff', visualDiff);
-gulp.task('watch', watch);
+/**
+ * Creates a gulp task using the given name and task function.
+ *
+ * @param {string} name
+ * @param {function} taskFunc
+ */
+function createTask(name, taskFunc) {
+  checkFlags(name, taskFunc);
+  gulp.task(name, taskFunc);
+}
+
+/**
+ * Checks if the flags passed in to a task are valid.
+ * @param {string} name
+ * @param {function} taskFunc
+ */
+function checkFlags(name, taskFunc) {
+  const isDefaultTask = name == 'default' && argv._.length == 0;
+  if (!argv._.includes(name) && !isDefaultTask) {
+    return; // This isn't the task being run.
+  }
+  const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
+  const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
+  const invalidFlags = [];
+  usedFlags.forEach((flag) => {
+    if (!validFlags.includes(flag)) {
+      invalidFlags.push(`--${flag}`);
+    }
+  });
+  if (invalidFlags.length > 0) {
+    log(
+      red('ERROR:'),
+      'Found invalid flags for',
+      cyan(`gulp ${name}`) + ':',
+      cyan(invalidFlags.join(', '))
+    );
+    log('For detailed usage information, run', cyan('gulp help') + '.');
+    if (validFlags.length > 0) {
+      log('Valid flags for', cyan(`gulp ${name}`) + ':');
+      validFlags.forEach((key) => {
+        log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
+      });
+    }
+    process.exit(1);
+  }
+}
+
+/**
+ * All the gulp tasks. Keep this list alphabetized.
+ */
+createTask('a4a', a4a);
+createTask('ava', ava);
+createTask('babel-plugin-tests', babelPluginTests);
+createTask('build', build);
+createTask('bundle-size', bundleSize);
+createTask('caches-json', cachesJson);
+createTask('check-exact-versions', checkExactVersions);
+createTask('check-links', checkLinks);
+createTask('check-owners', checkOwners);
+createTask('check-types', checkTypes);
+createTask('clean', clean);
+createTask('codecov-upload', codecovUpload);
+createTask('compile-jison', compileJison);
+createTask('create-golden-css', createGoldenCss);
+createTask('css', css);
+createTask('csvify-size', csvifySize);
+createTask('default', defaultTask);
+createTask('dep-check', depCheck);
+createTask('dev-dashboard-tests', devDashboardTests);
+createTask('dist', dist);
+createTask('e2e', e2e);
+createTask('firebase', firebase);
+createTask('get-zindex', getZindex);
+createTask('integration', integration);
+createTask('lint', lint);
+createTask('make-extension', makeExtension);
+createTask('nailgun-start', nailgunStart);
+createTask('nailgun-stop', nailgunStop);
+createTask('performance', performance);
+createTask('pr-check', prCheck);
+createTask('prepend-global', prependGlobal);
+createTask('presubmit', presubmit);
+createTask('prettify', prettify);
+createTask('process-3p-github-pr', process3pGithubPr);
+createTask('process-github-issues', processGithubIssues);
+createTask('serve', serve);
+createTask('server-tests', serverTests);
+createTask('size', size);
+createTask('storybook-amp', storybookAmp);
+createTask('storybook-preact', storybookPreact);
+createTask('todos:find-closed', todosFindClosed);
+createTask('unit', unit);
+createTask('update-packages', updatePackages);
+createTask('validator', validator);
+createTask('validator-webui', validatorWebui);
+createTask('vendor-configs', vendorConfigs);
+createTask('visual-diff', visualDiff);
+createTask('watch', watch);

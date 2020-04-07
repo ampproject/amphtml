@@ -2,11 +2,12 @@
 $category@: presentation
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
-  text: Triggers and monitors the loading of custom fonts.
+  text: Trigger and monitor the loading of custom fonts on AMP pages.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,24 +25,6 @@ limitations under the License.
 -->
 
 # amp-font
-Trigger and monitor the loading of custom fonts on AMP pages.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-font/">Annotated code example for amp-font</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Behavior
 
@@ -51,19 +34,22 @@ The `amp-font` extension allows adding and removing CSS classes from `document.d
 or `document.body` based on whether a font was loaded or is in error-state.
 
 Example:
+
 ```html
-  <amp-font
-      layout="nodisplay"
-      font-family="My Font"
-      timeout="3000"
-      on-error-remove-class="my-font-loading"
-      on-error-add-class="my-font-missing"></amp-font>
-  <amp-font
-      layout="nodisplay"
-      font-family="My Other Font"
-      timeout="1000"
-      on-load-add-class="my-other-font-loaded"
-      on-load-remove-class="my-other-font-loading"></amp-font>
+<amp-font
+  layout="nodisplay"
+  font-family="My Font"
+  timeout="3000"
+  on-error-remove-class="my-font-loading"
+  on-error-add-class="my-font-missing"
+></amp-font>
+<amp-font
+  layout="nodisplay"
+  font-family="My Other Font"
+  timeout="1000"
+  on-load-add-class="my-other-font-loaded"
+  on-load-remove-class="my-other-font-loading"
+></amp-font>
 ```
 
 The extension observes loading of a font and when it loads executes the optional attributes `on-load-add-class` and `on-load-remove-class` and when there is any error or timeout runs `on-error-remove-class` and `on-error-add-class`.
@@ -76,10 +62,10 @@ Using these classes authors can guard whether a font is displayed and get the fo
 - implement FOIT where the page renders with no text before the font comes in
 - make the timeout very short and only use a font if it was already cached.
 
-
-The `amp-font` extension accepts the `layout` value:  `nodisplay`
+The `amp-font` extension accepts the `layout` value: `nodisplay`
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>font-family</strong></td>
@@ -114,7 +100,6 @@ The `amp-font` extension accepts the `layout` value:  `nodisplay`
     <td>Must be <code>nodisplay</code>.</td>
   </tr>
 </table>
-
 
 ## Validation
 

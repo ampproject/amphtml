@@ -14,37 +14,101 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Index Exchange
+# Index Exchange AMP RTC
 
-Index supports Header Tag style bidding using DoubleClick as the ad server.
-
-## Example
-
-```html
-<amp-ad width="300" height="250"
-  type="ix"
-  data-ix-id="54321"
-  data-slot="/1234/example">
-</amp-ad>
-```
+Index Exchange (IX) supports [AMP Real Time Config (RTC)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md) which allows Publishers to augment their ad requests with targeting information that is retrieved at runtime. This document provides instructions on adding IX as a vendor to AMP pages.
 
 ## Configuration
 
-For semantics of configuration, please contact your account manager at Index Exchange.
+Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that uses RTC must have the `rtc-config` attribute set with valid JSON.
 
-If you use `remote.html` in your AMP pages, you must add `ix` into the array that outlines the list of acceptable types. For example, `['doubleclick']` should be changed to `['doubleclick', 'ix']`. If you do not use `remote.html`, this step is not required.
+**Attributes**
 
-Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by default. Both width and height override attributes (`data-override-width` and `data-override-height`) and multi-size ads (via `data-multi-size`) are supported.
+- `<amp-ad>`: Required. IX `<amp-ad>` tags require the `width`, `height`, and `type="doubleclick"` parameters.</br>
+  **Note**: IX leverages AMP through Google Ad Manager (GAM, formerly DoubleClick for Publishers).
 
-### Required parameters
+- `data-slot`: Required. Data attributes to serve ads.
 
-- `data-ix-id`
-- `data-slot`
+- `data-multi-size`: Optional. A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. The `width` and `height` attributes are always included as one of the valid sizes, unless overridden by `data-override-width` and `data-override-height` attributes which change the size of creatives eligible for the slot. For details refer to the [Multi-size Ad documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/multi-size.md).
 
-### Optional parameters
+- `data-multi-size-validation`: Optional. If set to false, this allows secondary sizes specified in the `data-multi-size` attribute to be less than 2/3rds of the corresponding primary size. By default, this is assumed to be true.
 
-- `data-ix-slot`
-- `data-ix-timeout`
+- `rtc-config`: JSON configuration data which handles the communication with AMP RTC.
+  - `vendors` : Required object. The key is `IndexExchange` and the value is the `SITE_ID`.</br>
+    **Note:** Refer to the materials provided by your account team for your specific SITE_ID details. We recommend one SITE_ID per domain, per unique slot and size. To use more than one SITE_ID, contact your IX Representative.
+  - `timeoutMillis`: Optional integer. Defines the timeout in milliseconds for each individual RTC callout. The configured timeout must be greater than 0 and less than 1000ms. If omitted, the timeout value defaults to 1000ms.
 
-Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
+### Example: RTC Specification on an amp-ad
 
+```
+<!-- Note: Default timeout is 1000ms -->
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/1234/pos"
+  rtc-config='{
+                "vendors": {
+                  "IndexExchange": {"SITE_ID": "123456"}
+                },
+                "timeoutMillis": 1000
+              }'
+>
+</amp-ad>
+```
+
+The value of `rtc-config` must conform to the following specification:
+
+```
+{
+  "vendors": {
+    "IndexExchange": {"SITE_ID": "123456"}
+  },
+  "timeoutMillis": 1000
+}
+```
+
+### Example: Multi-size request on an amp-ad
+
+```html
+<!-- Note: Default timeout is 1000ms -->
+<amp-ad
+  width="728"
+  height="90"
+  type="doubleclick"
+  data-slot="/1234/pos"
+  data-multi-size="700x90,700x60,500x60"
+  rtc-config='{
+                "vendors": {
+                  "IndexExchange": {"SITE_ID": "123456"}
+                },
+                "timeoutMillis": 1000
+              }'
+>
+</amp-ad>
+```
+
+### Example: Multi-size request on an amp-ad ignoring size validation
+
+```html
+<!-- Note: Default timeout is 1000ms -->
+<amp-ad
+  width="728"
+  height="90"
+  type="doubleclick"
+  data-slot="/1234/pos"
+  data-multi-size="300x25"
+  data-multi-size-validation="false"
+  rtc-config='{
+                "vendors": {
+                  "IndexExchange": {"SITE_ID": "123456"}
+                },
+                "timeoutMillis": 1000
+              }'
+>
+</amp-ad>
+```
+
+Additional parameters including JSON are passed through in the resulting call to GAM. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
+
+To learn about the required Google Ad Manager (GAM) configuration, refer to [Index Exchange Knowledge Base](https://kb.indexexchange.com/Mobile/About_AMP.htm).

@@ -15,17 +15,17 @@
  */
 'use strict';
 
-const deglob = require('globs-to-files');
-const findImports = require('find-imports');
+const findImports = require('find-imports-forked');
 const fs = require('fs');
+const globby = require('globby');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
 
-const {gitDiffNameOnlyMaster} = require('../../git');
+const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestSkipped} = require('../report-test-status');
 
 const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
@@ -63,13 +63,13 @@ function extractCssJsFileMap() {
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
 
-  extensions.forEach(extension => {
+  extensions.forEach((extension) => {
     const cssData = extensionsCssMapJson[extension];
     if (cssData['hasCss']) {
       addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
       if (cssData.hasOwnProperty('cssBinaries')) {
         const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach(cssBinary => {
+        cssBinaries.forEach((cssBinary) => {
           addCssJsEntry(cssData, cssBinary, cssJsFileMap);
         });
       }
@@ -93,7 +93,7 @@ function getImports(jsFile) {
   });
   const files = [];
   const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function(file) {
+  imports.forEach(function (file) {
     const fullPath = path.resolve(jsFileDir, `${file}.js`);
     if (fs.existsSync(fullPath)) {
       const relativePath = path.relative(ROOT_DIR, fullPath);
@@ -114,10 +114,10 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   const jsFiles = [];
   if (cssJsFileMap.hasOwnProperty(cssFile)) {
     const cssFileDir = path.dirname(cssFile);
-    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
+    const jsFilesInDir = fs.readdirSync(cssFileDir).filter((file) => {
       return path.extname(file) == '.js';
     });
-    jsFilesInDir.forEach(jsFile => {
+    jsFilesInDir.forEach((jsFile) => {
       const jsFilePath = `${cssFileDir}/${jsFile}`;
       if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
         jsFiles.push(jsFilePath);
@@ -150,7 +150,7 @@ function getUnitTestsToRun() {
   }
 
   log(green('INFO:'), 'Running the following unit tests:');
-  tests.forEach(test => {
+  tests.forEach((test) => {
     log(cyan(test));
   });
 
@@ -171,7 +171,7 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   let srcFiles = [];
 
   function isUnitTest(file) {
-    return unitTestPaths.some(pattern => {
+    return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
@@ -179,7 +179,7 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
-      filesImported.filter(function(file) {
+      filesImported.filter(function (file) {
         return srcFiles.includes(file);
       }).length > 0
     );
@@ -188,15 +188,13 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
-    const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests
-      .filter(testFile => {
-        return shouldRunTest(testFile, srcFiles);
-      })
-      .map(fullPath => path.relative(ROOT_DIR, fullPath));
+    const allUnitTests = globby.sync(unitTestPaths);
+    return allUnitTests.filter((testFile) => {
+      return shouldRunTest(testFile, srcFiles);
+    });
   }
 
-  filesChanged.forEach(file => {
+  filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
       if (!isTravisBuild()) {
         log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
@@ -212,7 +210,7 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
 
   if (srcFiles.length > 0) {
     const moreTestsToRun = getTestsFor(srcFiles);
-    moreTestsToRun.forEach(test => {
+    moreTestsToRun.forEach((test) => {
       if (!testsToRun.includes(test)) {
         testsToRun.push(test);
       }

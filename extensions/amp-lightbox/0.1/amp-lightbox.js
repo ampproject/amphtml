@@ -38,7 +38,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
@@ -161,8 +161,9 @@ class AmpLightbox extends AMP.BaseElement {
           this.container_,
           'E#19457 this.container_'
         );
-        this.scheduleLayout(container);
-        this.scheduleResume(container);
+        const owners = Services.ownersForDoc(this.element);
+        owners.scheduleLayout(this.element, container);
+        owners.scheduleResume(this.element, container);
       },
       500
     );
@@ -180,8 +181,8 @@ class AmpLightbox extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
 
-    this.registerDefaultAction(unused => this.open_(), 'open');
-    this.registerAction('close', this.close.bind(this));
+    this.registerDefaultAction((i) => this.open_(i.trust), 'open');
+    this.registerAction('close', (i) => this.close(i.trust));
   }
 
   /**
@@ -190,8 +191,8 @@ class AmpLightbox extends AMP.BaseElement {
    */
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
-    this.getComponentDescendants_().forEach(child => {
-      this.setAsOwner(child);
+    this.getComponentDescendants_().forEach((child) => {
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
 
@@ -225,7 +226,7 @@ class AmpLightbox extends AMP.BaseElement {
     }
     element.appendChild(this.container_);
 
-    children.forEach(child => {
+    children.forEach((child) => {
       this.container_.appendChild(child);
     });
 
@@ -258,9 +259,10 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * @param {!ActionTrust} trust
    * @private
    */
-  open_() {
+  open_(trust) {
     if (this.active_) {
       return;
     }
@@ -276,17 +278,18 @@ class AmpLightbox extends AMP.BaseElement {
     const {promise, resolve} = new Deferred();
     this.getViewport()
       .enterLightboxMode(this.element, promise)
-      .then(() => this.finalizeOpen_(resolve));
+      .then(() => this.finalizeOpen_(resolve, trust));
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
     const open = mutations['open'];
     if (open !== undefined) {
+      // Mutations via AMP.setState() require default trust.
       if (open) {
-        this.open_();
+        this.open_(ActionTrust.DEFAULT);
       } else {
-        this.close();
+        this.close(ActionTrust.DEFAULT);
       }
     }
   }
@@ -305,9 +308,10 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * @param {!Function} callback Called when open animation completes.
+   * @param {!ActionTrust} trust
    * @private
    */
-  finalizeOpen_(callback) {
+  finalizeOpen_(callback, trust) {
     const {element} = this;
 
     const {
@@ -319,7 +323,7 @@ class AmpLightbox extends AMP.BaseElement {
     const props = Object.keys(openStyle);
 
     const transition = props
-      .map(p => `${p} ${durationSeconds}s ease-in`)
+      .map((p) => `${p} ${durationSeconds}s ease-in`)
       .join(',');
 
     this.eventCounter_++;
@@ -349,7 +353,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     const container = dev().assertElement(this.container_);
     if (!this.isScrollable_) {
-      this.updateInViewport(container, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        container,
+        true
+      );
     } else {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
@@ -364,13 +372,14 @@ class AmpLightbox extends AMP.BaseElement {
 
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    this.scheduleLayout(container);
-    this.scheduleResume(container);
-    this.triggerEvent_(LightboxEvents.OPEN);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, container);
+    owners.scheduleResume(this.element, container);
+    this.triggerEvent_(LightboxEvents.OPEN, trust);
 
     this.getHistory_()
       .push(this.close.bind(this))
-      .then(historyId => {
+      .then((historyId) => {
         this.historyId_ = historyId;
       });
 
@@ -389,7 +398,8 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.closeButtonHeader_ = header;
 
-    listenOnce(header, 'click', () => this.close());
+    // Click gesture is high trust.
+    listenOnce(header, 'click', () => this.close(ActionTrust.HIGH));
 
     element.insertBefore(header, this.container_);
 
@@ -427,14 +437,17 @@ class AmpLightbox extends AMP.BaseElement {
   closeOnEscape_(event) {
     if (event.key == Keys.ESCAPE) {
       event.preventDefault();
-      this.close();
+      // Keypress gesture is high trust.
+      this.close(ActionTrust.HIGH);
     }
   }
 
   /**
    * Closes the lightbox.
+   *
+   * @param {!ActionTrust} trust
    */
-  close() {
+  close(trust) {
     if (!this.active_) {
       return;
     }
@@ -447,13 +460,16 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.getViewport()
       .leaveLightboxMode(this.element)
-      .then(() => this.finalizeClose_());
+      .then(() => this.finalizeClose_(trust));
   }
 
   /**
    * Clean up when closing lightbox.
+   *
+   * @param {!ActionTrust} trust
+   * @private
    */
-  finalizeClose_() {
+  finalizeClose_(trust) {
     const {element} = this;
     const event = ++this.eventCounter_;
 
@@ -488,9 +504,12 @@ class AmpLightbox extends AMP.BaseElement {
       this.boundCloseOnEscape_
     );
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(dev().assertElement(this.container_));
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      dev().assertElement(this.container_)
+    );
     this.active_ = false;
-    this.triggerEvent_(LightboxEvents.CLOSE);
+    this.triggerEvent_(LightboxEvents.CLOSE, trust);
   }
 
   /**
@@ -580,15 +599,20 @@ class AmpLightbox extends AMP.BaseElement {
    */
   updateChildrenInViewport_(newPos, oldPos) {
     const seen = [];
-    this.forEachVisibleChild_(newPos, cell => {
+    this.forEachVisibleChild_(newPos, (cell) => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
-      this.scheduleLayout(cell);
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(this.element, cell, true);
+      owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, cell => {
+      this.forEachVisibleChild_(oldPos, (cell) => {
         if (!seen.includes(cell)) {
-          this.updateInViewport(cell, false);
+          Services.ownersForDoc(this.element).updateInViewport(
+            this.element,
+            cell,
+            false
+          );
         }
       });
     }
@@ -670,11 +694,12 @@ class AmpLightbox extends AMP.BaseElement {
    * Triggeres event to window.
    *
    * @param {string} name
+   * @param {!ActionTrust} trust
    * @private
    */
-  triggerEvent_(name) {
+  triggerEvent_(name, trust) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+    this.action_.trigger(this.element, name, event, trust);
   }
 }
 
@@ -686,9 +711,9 @@ class AmpLightbox extends AMP.BaseElement {
  */
 function setTransparentBody(win, body) {
   const state = {};
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc(body);
 
-  Services.resourcesForDoc(ampdoc).measureMutateElement(
+  Services.mutatorForDoc(ampdoc).measureMutateElement(
     body,
     function measure() {
       state.alreadyTransparent =
@@ -712,7 +737,7 @@ function setTransparentBody(win, body) {
   );
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   // TODO(alanorozco): refactor this somehow so we don't need to do a direct
   // getMode check
   if (getMode().runtime == 'inabox') {

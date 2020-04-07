@@ -21,200 +21,197 @@
  * determine which tasks are required to run for pull request builds.
  */
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
-const {gitDiffNameOnlyMaster} = require('../git');
+const {gitDiffNameOnlyMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 /**
- * A mapping of functions that match a given file to one or more build targets.
- */
-const targetMatchers = [
-  {
-    targets: ['AVA'],
-    func: file => {
-      return (
-        file == 'build-system/tasks/ava.js' ||
-        file.startsWith('build-system/tasks/csvify-size/') ||
-        file.startsWith('build-system/tasks/get-zindex/') ||
-        file.startsWith('build-system/tasks/prepend-global/')
-      );
-    },
-  },
-  {
-    targets: ['BABEL_PLUGIN', 'RUNTIME'], // Test the runtime for babel plugin changes.
-    func: file => {
-      return (
-        file == 'build-system/tasks/babel-plugin-tests.js' ||
-        file.startsWith('build-system/babel-plugins/')
-      );
-    },
-  },
-  {
-    targets: ['CACHES_JSON'],
-    func: file => {
-      return (
-        file == 'build-system/tasks/json-check.js' || file == 'caches.json'
-      );
-    },
-  },
-  {
-    targets: ['DEV_DASHBOARD'],
-    func: file => {
-      return (
-        file == 'build-system/tasks/dev-dashboard-tests.js' ||
-        file == 'build-system/app.js' ||
-        file.startsWith('build-system/app-index/')
-      );
-    },
-  },
-  {
-    targets: ['DOCS'],
-    func: file => {
-      return (
-        file == 'build-system/tasks/check-links.js' ||
-        (path.extname(file) == '.md' && !file.startsWith('examples/'))
-      );
-    },
-  },
-  {
-    targets: ['E2E_TEST'],
-    func: file => {
-      return (
-        file.startsWith('build-system/tasks/e2e/') ||
-        config.e2eTestPaths.some(pattern => {
-          return minimatch(file, pattern);
-        })
-      );
-    },
-  },
-  {
-    targets: ['FLAG_CONFIG'],
-    func: file => {
-      return file.startsWith('build-system/global-configs/');
-    },
-  },
-  {
-    targets: ['INTEGRATION_TEST'],
-    func: file => {
-      return (
-        file.startsWith('build-system/tasks/runtime-test/') ||
-        config.integrationTestPaths.some(pattern => {
-          return minimatch(file, pattern);
-        })
-      );
-    },
-  },
-  {
-    targets: ['UNIT_TEST'],
-    func: file => {
-      return (
-        file.startsWith('build-system/tasks/unit/') ||
-        config.unitTestPaths.some(pattern => {
-          return minimatch(file, pattern);
-        })
-      );
-    },
-  },
-  {
-    targets: ['VALIDATOR', 'RUNTIME'], // Test the runtime for validator changes.
-    func: file => {
-      if (file.startsWith('validator/webui/')) {
-        return false;
-      }
-      if (file.startsWith('validator/')) {
-        return true;
-      }
-      // validator files for each extension
-      if (!file.startsWith('extensions/')) {
-        return false;
-      }
-      const pathArray = path.dirname(file).split(path.sep);
-      if (pathArray.length < 2) {
-        // At least 2 with ['extensions', '{$name}']
-        return false;
-      }
-      // Validator files take the form of validator-.*\.(html|out|protoascii)
-      const name = path.basename(file);
-      return (
-        name.startsWith('validator-') &&
-        (name.endsWith('.out') ||
-          name.endsWith('.html') ||
-          name.endsWith('.protoascii'))
-      );
-    },
-  },
-  {
-    targets: ['VALIDATOR_WEBUI'],
-    func: file => {
-      return file.startsWith('validator/webui/');
-    },
-  },
-  {
-    targets: ['VISUAL_DIFF'],
-    func: file => {
-      return (
-        file.startsWith('build-system/tasks/visual-diff/') ||
-        file.startsWith('examples/visual-tests/') ||
-        file == 'test/visual-diff/visual-tests'
-      );
-    },
-  },
-];
-
-/**
- * Returns false if flag config files are mixed with any other files.
- * @param {!Set<string>} buildTargets
- * @param {string} fileName
+ * Checks if the given file is an OWNERS file
+ * @param {string} file
  * @return {boolean}
  */
-function areValidBuildTargets(buildTargets, fileName) {
-  const files = gitDiffNameOnlyMaster();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size > 1) {
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Looks like your PR contains',
-      colors.cyan('{prod|canary}-config.json'),
-      'in addition to other files.'
-    );
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'AMP config files need to be backward compatible with source code for at',
-      'least two weeks. See https://github.com/ampproject/amphtml/issues/8188.'
-    );
-    const nonFlagConfigFiles = files.filter(
-      file => !file.startsWith('build-system/global-configs/')
-    );
-    console.log(
-      fileLogPrefix,
-      colors.red('ERROR:'),
-      'Please move these files to a separate PR:\n',
-      colors.cyan(nonFlagConfigFiles.join('\n '))
-    );
-    return false;
-  }
-  return true;
+function isOwnersFile(file) {
+  return file.endsWith('OWNERS');
 }
+
+/**
+ * A dictionary of functions that match a given file to a given build target.
+ */
+const targetMatchers = {
+  'AVA': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/ava.js' ||
+      file.startsWith('build-system/tasks/csvify-size/') ||
+      file.startsWith('build-system/tasks/get-zindex/') ||
+      file.startsWith('build-system/tasks/prepend-global/')
+    );
+  },
+  'BABEL_PLUGIN': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/babel-plugins/log-module-metadata.js' ||
+      file == 'build-system/babel-plugins/static-template-metadata.js' ||
+      file == 'build-system/compile/internal-version.js' ||
+      file == 'build-system/compile/log-messages.js' ||
+      file == 'build-system/tasks/babel-plugin-tests.js' ||
+      file.startsWith('build-system/babel-plugins/')
+    );
+  },
+  'CACHES_JSON': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/caches-json.js' ||
+      file == 'build-system/global-configs/caches.json'
+    );
+  },
+  'DEV_DASHBOARD': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/dev-dashboard-tests.js' ||
+      file == 'build-system/server/app.js' ||
+      file.startsWith('build-system/server/app-index/')
+    );
+  },
+  'DOCS': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/check-links.js' ||
+      (path.extname(file) == '.md' && !file.startsWith('examples/'))
+    );
+  },
+  'E2E_TEST': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('build-system/tasks/e2e/') ||
+      config.e2eTestPaths.some((pattern) => {
+        return minimatch(file, pattern);
+      })
+    );
+  },
+  'FLAG_CONFIG': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return file.startsWith('build-system/global-configs/');
+  },
+  'INTEGRATION_TEST': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/integration.js' ||
+      (file.startsWith('build-system/tasks/runtime-test/') &&
+        !file.endsWith('unit.js')) ||
+      config.integrationTestPaths.some((pattern) => {
+        return minimatch(file, pattern);
+      })
+    );
+  },
+  'OWNERS': (file) => {
+    return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
+  },
+  'PACKAGE_UPGRADE': (file) => {
+    return file == 'package.json' || file == 'yarn.lock';
+  },
+  'SERVER': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/serve.js' ||
+      file == 'build-system/tasks/server-tests.js' ||
+      file.startsWith('build-system/server/')
+    );
+  },
+  'UNIT_TEST': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file == 'build-system/tasks/unit.js' ||
+      file.startsWith('build-system/tasks/runtime-test/') ||
+      config.unitTestPaths.some((pattern) => {
+        return minimatch(file, pattern);
+      })
+    );
+  },
+  'VALIDATOR': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    if (file.startsWith('validator/webui/')) {
+      return false;
+    }
+    if (file.startsWith('validator/')) {
+      return true;
+    }
+    // validator files for each extension
+    if (!file.startsWith('extensions/')) {
+      return false;
+    }
+    const pathArray = path.dirname(file).split(path.sep);
+    if (pathArray.length < 2) {
+      // At least 2 with ['extensions', '{$name}']
+      return false;
+    }
+    // Validator files take the form of validator-.*\.(html|out|protoascii)
+    const name = path.basename(file);
+    return (
+      name.startsWith('validator-') &&
+      (name.endsWith('.out') ||
+        name.endsWith('.html') ||
+        name.endsWith('.protoascii'))
+    );
+  },
+  'VALIDATOR_WEBUI': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return file.startsWith('validator/webui/');
+  },
+  'VISUAL_DIFF': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('build-system/tasks/visual-diff/') ||
+      file.startsWith('examples/visual-tests/') ||
+      file == 'test/visual-diff/visual-tests'
+    );
+  },
+};
 
 /**
  * Populates buildTargets with a set of build targets contained in a PR after
  * making sure they are valid. Used to determine which checks to perform / tests
  * to run during PR builds.
- * @param {!Set<string>} buildTargets
  * @param {string} fileName
  * @return {boolean}
  */
-function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
+function determineBuildTargets(fileName = 'build-targets.js') {
   const filesChanged = gitDiffNameOnlyMaster();
-  buildTargets.clear;
+  const buildTargets = new Set();
   for (const file of filesChanged) {
     let matched = false;
-    targetMatchers.forEach(matcher => {
-      if (matcher.func(file)) {
-        matcher.targets.forEach(target => buildTargets.add(target));
+    Object.keys(targetMatchers).forEach((target) => {
+      const matcher = targetMatchers[target];
+      if (matcher(file)) {
+        buildTargets.add(target);
         matched = true;
       }
     });
@@ -225,13 +222,18 @@ function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
     `${fileLogPrefix} Detected build targets:`,
-    colors.cyan(
-      Array.from(buildTargets)
-        .sort()
-        .join(', ')
-    )
+    colors.cyan(Array.from(buildTargets).sort().join(', '))
   );
-  return areValidBuildTargets(buildTargets, fileName);
+  // Test the runtime for babel plugin and server changes.
+  if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
+    buildTargets.add('RUNTIME');
+  }
+  // Test all targets on Travis during package upgrades.
+  if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
+    const allTargets = Object.keys(targetMatchers);
+    allTargets.forEach((target) => buildTargets.add(target));
+  }
+  return buildTargets;
 }
 
 module.exports = {

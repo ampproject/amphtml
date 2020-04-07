@@ -27,9 +27,7 @@ Please visit our [website](https://widget.my.com) for more information about us.
 ## Example
 
 ```html
-<amp-embed height="250"
-    type="mywidget"
-    data-cid="your-campaign-id">
+<amp-embed height="250" type="mywidget" data-cid="your-campaign-id">
 </amp-embed>
 ```
 

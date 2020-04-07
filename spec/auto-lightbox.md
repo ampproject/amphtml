@@ -1,27 +1,21 @@
 # Auto-lightbox
 
-**This feature is experimental and activated by the `amp-auto-lightbox` experiment.**
-This will be gradually rolled out to production in the upcoming weeks.
-
-The standard AMP runtime finds elligible [`amp-img`](https://www.ampproject.org/docs/reference/components/amp-img)
-elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery)
+The standard AMP runtime finds elligible [`amp-img`](https://amp.dev/documentation/components/amp-img)
+elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 for enhanced user experience that includes panning and pinch-to-zoom.
 
-Please note that this treatment is only applied on documents loaded from `http://*.cdn.ampproject.org`,
-effectively only for those that come from Google Search results. 
+Including the [`amp-lightbox-gallery` extension script](https://amp.dev/documentation/components/amp-lightbox-gallery/) and [using it explicitly](https://amp.dev/documentation/components/amp-lightbox-gallery/#usage) (by setting the `lightbox` attribute on a valid element) disables the auto-lightbox treatment on a document.
 
-Documents also need to contain either of the following:
+Otherwise, it's applied only on documents that contain either of the following:
 
-- an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
-- or a `@type` field declared in [JSON+LD schema](https://www.ampproject.org/docs/fundamentals/discovery#use-schema.org-for-most-search-engines)
+- **a.** an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
+- **b.** ...or a `@type` field declared in [JSON+LD schema](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery#use-schema.org-for-most-search-engines)
   that's any of the following:
   - `Article`
   - `NewsArticle`
   - `BlogPosting`
   - `LiveBlogPosting`
   - `DiscussionForumPosting`
-  
-Documents that explicitly use `amp-lightbox-gallery` are excluded from this treatment.
 
 ## Excluded images
 
@@ -48,8 +42,7 @@ the `data-amp-auto-lightbox-disable` attribute.
 For example, if you'd like to disable it on a particular image, you can do:
 
 ```html
-<amp-img src="my-image.png" ... data-amp-auto-lightbox-disable>
-</amp-img>
+<amp-img src="my-image.png" ... data-amp-auto-lightbox-disable> </amp-img>
 ```
 
 To disable it on a particular document section:
@@ -69,5 +62,5 @@ Or to disable it for your entire document altogether:
 ```
 
 If you'd like manual tuning of disabled/enabled images and/or grouping, please use
-[`amp-lightbox-gallery`](https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery)
+[`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 directly.

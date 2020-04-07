@@ -23,7 +23,7 @@ import {
   createPseudoLocale,
 } from '../../src/localized-strings';
 
-describes.fakeWin('localization', {}, env => {
+describes.fakeWin('localization', {}, (env) => {
   describe('localized string IDs', () => {
     it('should have unique values', () => {
       // Transform string IDs from a map of keys to values to a multimap of
@@ -46,7 +46,7 @@ describes.fakeWin('localization', {}, env => {
       // Assert that each of the lists of keys from the created multimap has
       // exactly one value.
       const localizedStringIdValues = Object.keys(valuesToKeys);
-      localizedStringIdValues.forEach(value => {
+      localizedStringIdValues.forEach((value) => {
         const keys = valuesToKeys[value];
         expect(keys, `${value} is never used in a localized string ID`).to.not
           .be.empty;
@@ -71,6 +71,18 @@ describes.fakeWin('localization', {}, env => {
       expect(localizationService.getLocalizedString('test_string_id')).to.equal(
         'test string content'
       );
+    });
+
+    it('should handle registration of uppercase locales', () => {
+      env.win.document.documentElement.setAttribute('lang', 'zh-CN');
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('zh-CN', {
+        '123': {
+          string: '买票',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('123')).to.equal('买票');
     });
 
     it('should utilize fallback if string is missing', () => {
@@ -121,7 +133,7 @@ describes.fakeWin('localization', {}, env => {
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
-        s => `${s} ${s}`
+        (s) => `${s} ${s}`
       );
 
       expect(pseudoLocaleBundle['test_string_id'].string).to.equal('foo foo');
@@ -137,7 +149,7 @@ describes.fakeWin('localization', {}, env => {
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
-        s => `${s} ${s}`
+        (s) => `${s} ${s}`
       );
 
       expect(Object.keys(originalStringBundle)).to.deep.equal(

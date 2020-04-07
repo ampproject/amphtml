@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -25,7 +26,6 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -37,11 +37,10 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -87,7 +86,11 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?function()} */
     this.dialogResolver_ = null;
 
+    /** @private {boolean} */
     this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.consentStateChangedViaPromptUI_ = false;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -100,6 +103,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.consentId_ = null;
+
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
   }
 
   /** @override */
@@ -115,9 +121,20 @@ export class AmpConsent extends AMP.BaseElement {
       'amp-consent should have an id'
     );
 
-    const config = new ConsentConfig(this.element);
+    const configManager = new ConsentConfig(this.element);
 
-    this.consentConfig_ = config.getConsentConfig();
+    return configManager.getConsentConfigPromise().then((validatedConfig) => {
+      this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
+      this.initialize_(validatedConfig);
+    });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} validatedConfig
+   */
+  initialize_(validatedConfig) {
+    this.consentConfig_ = validatedConfig;
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
@@ -158,14 +175,14 @@ export class AmpConsent extends AMP.BaseElement {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);
-      // <amp-consent> will manualy schedule layout for its children.
-      this.setAsOwner(child);
+      // <amp-consent> will manually schedule layout for its children.
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     }
 
     const consentPolicyManagerPromise = getServicePromiseForDoc(
       this.getAmpDoc(),
       CONSENT_POLICY_MANAGER
-    ).then(manager => {
+    ).then((manager) => {
       this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (manager);
       this.consentPolicyManager_.setLegacyConsentInstanceId(
         /** @type {string} */ (this.consentId_)
@@ -184,7 +201,7 @@ export class AmpConsent extends AMP.BaseElement {
     const consentStateManagerPromise = getServicePromiseForDoc(
       this.getAmpDoc(),
       CONSENT_STATE_MANAGER
-    ).then(manager => {
+    ).then((manager) => {
       manager.registerConsentInstance(this.consentId_, this.consentConfig_);
       this.consentStateManager_ = /** @type {!ConsentStateManager} */ (manager);
     });
@@ -192,7 +209,7 @@ export class AmpConsent extends AMP.BaseElement {
     const notificationUiManagerPromise = getServicePromiseForDoc(
       this.getAmpDoc(),
       NOTIFICATION_UI_MANAGER
-    ).then(manager => {
+    ).then((manager) => {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
@@ -232,7 +249,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Listen to external consent flow iframe's response
    */
   enableExternalInteractions_() {
-    this.win.addEventListener('message', event => {
+    this.win.addEventListener('message', (event) => {
       if (!this.isPromptUIOn_) {
         return;
       }
@@ -248,10 +265,7 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
-      if (
-        isExperimentOn(this.win, 'amp-consent-v2') &&
-        data['info'] !== undefined
-      ) {
+      if (data['info'] !== undefined) {
         if (typeof data['info'] != 'string') {
           user().error(
             TAG,
@@ -377,6 +391,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -404,19 +420,19 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
+    this.syncRemoteConsentState_();
 
     this.getConsentRequiredPromise_()
-      .then(isConsentRequired => {
+      .then((isConsentRequired) => {
         return this.initPromptUI_(isConsentRequired);
       })
-      .then(isPostPromptUIRequired => {
+      .then((isPostPromptUIRequired) => {
         if (isPostPromptUIRequired) {
           this.handlePostPromptUI_();
         }
         this.consentPolicyManager_.enableTimeout();
       })
-      .catch(unusedError => {
+      .catch((unusedError) => {
         // TODO: Handle errors
       });
 
@@ -429,38 +445,26 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   getConsentRequiredPromise_() {
-    userAssert(
-      this.consentConfig_['checkConsentHref'] ||
-        this.consentConfig_['promptIfUnknownForGeoGroup'],
-      'neither checkConsentHref nor promptIfUnknownForGeoGroup is defined'
-    );
-    let consentRequiredPromise = null;
-    if (this.consentConfig_['promptIfUnknownForGeoGroup']) {
-      const geoGroup = this.consentConfig_['promptIfUnknownForGeoGroup'];
-      consentRequiredPromise = this.isConsentRequiredGeo_(geoGroup);
-    } else {
-      consentRequiredPromise = this.getConsentRemote_().then(
-        remoteConfigResponse => {
-          if (
-            !remoteConfigResponse ||
-            !hasOwn(remoteConfigResponse, 'promptIfUnknown')
-          ) {
-            this.user().error(
-              TAG,
-              'Expecting promptIfUnknown from ' +
-                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
-                'specified'
-            );
-            // Set to false if not defined
+    return this.consentStateManager_
+      .getConsentInstanceInfo()
+      .then((storedInfo) => {
+        if (hasStoredValue(storedInfo)) {
+          return Promise.resolve(true);
+        }
+        const consentRequired = this.consentConfig_['consentRequired'];
+        if (typeof consentRequired === 'boolean') {
+          return Promise.resolve(consentRequired);
+        }
+        return this.getConsentRemote_().then((consentResponse) => {
+          if (!consentResponse) {
             return false;
           }
-          return !!remoteConfigResponse['promptIfUnknown'];
-        }
-      );
-    }
-    return consentRequiredPromise.then(required => {
-      return !!required;
-    });
+          // `promptIfUnknown` is a legacy field
+          return consentResponse['consentRequired'] !== undefined
+            ? !!consentResponse['consentRequired']
+            : !!consentResponse['promptIfUnknown'];
+        });
+      });
   }
 
   /**
@@ -468,7 +472,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   passSharedData_() {
     const responsePromise = this.getConsentRemote_();
-    const sharedDataPromise = responsePromise.then(response => {
+    const sharedDataPromise = responsePromise.then((response) => {
       if (!response || response['sharedData'] === undefined) {
         return null;
       }
@@ -479,27 +483,47 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Set dirtyBit of the local consent value based on server response
+   * Clear cache for server side decision and then sync.
    */
-  maybeSetDirtyBit_() {
-    const responsePromise = this.getConsentRemote_();
-    responsePromise.then(response => {
-      if (response && !!response['forcePromptOnNext']) {
+  syncRemoteConsentState_() {
+    this.getConsentRemote_().then((response) => {
+      if (!response) {
+        return;
+      }
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
+      if (expireCache) {
         this.consentStateManager_.setDirtyBit();
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString'] || undefined
+        );
       }
     });
   }
 
   /**
-   * Returns a promise that if user is in the given geoGroup
-   * @param {string} geoGroup
-   * @return {Promise<boolean>}
+   * Sync with local storage if consentRequired is true.
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
    */
-  isConsentRequiredGeo_(geoGroup) {
-    return Services.geoForDocOrNull(this.element).then(geo => {
-      userAssert(geo, 'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return geo.isInCountryGroup(geoGroup) == GEO_IN_GROUP.IN;
-    });
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
+    }
   }
 
   /**
@@ -515,13 +539,14 @@ export class AmpConsent extends AMP.BaseElement {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
       const storeConsentPromise = this.consentStateManager_.getLastConsentInstanceInfo();
-      this.remoteConfigPromise_ = storeConsentPromise.then(storedInfo => {
+      this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
+          'matchedGeoGroup': this.matchedGeoGroup_,
         });
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];
@@ -536,11 +561,13 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
-        const viewer = Services.viewerForDoc(ampdoc);
-        return viewer.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
+        const xhrService = Services.xhrFor(this.win);
+        return ampdoc.whenFirstVisible().then(() => {
+          return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+            .then((res) =>
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+            );
         });
       });
     }
@@ -562,7 +589,7 @@ export class AmpConsent extends AMP.BaseElement {
     );
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceInfo().then(info => {
+    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
       if (hasStoredValue(info)) {
         // Has user stored value, no need to prompt
         return true;
@@ -606,9 +633,33 @@ export class AmpConsent extends AMP.BaseElement {
       });
     });
   }
+
+  /**
+   * @return {?ConsentStateManager}
+   * @visibleForTesting
+   */
+  getConsentStateManagerForTesting() {
+    return this.consentStateManager_;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @visibleForTesting
+   */
+  getConsentRequiredPromiseForTesting() {
+    return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
+  }
 }
 
-AMP.extension('amp-consent', '0.1', AMP => {
+AMP.extension('amp-consent', '0.1', (AMP) => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerServiceForDoc(CONSENT_STATE_MANAGER, ConsentStateManager);

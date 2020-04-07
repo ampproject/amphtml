@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dict} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 
@@ -24,7 +24,13 @@ import {registerServiceBuilder} from '../../../src/service';
 export let StoryVariableDef;
 
 /** @enum {string} */
-const Variable = {
+export const AnalyticsVariable = {
+  BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
+  BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
+  BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
+  STORY_REACTION_ID: 'storyReactionId',
+  STORY_REACTION_RESPONSE: 'storyReactionResponse',
+  STORY_REACTION_TYPE: 'storyReactionType',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -41,12 +47,14 @@ const Variable = {
  * @param {!Window} win
  * @return {!AmpStoryVariableService}
  */
-export const getVariableService = win => {
+export const getVariableService = (win) => {
   let service = Services.storyVariableService(win);
 
   if (!service) {
-    service = new AmpStoryVariableService();
-    registerServiceBuilder(win, 'story-variable', () => service);
+    service = new AmpStoryVariableService(win);
+    registerServiceBuilder(win, 'story-variable', function () {
+      return service;
+    });
   }
 
   return service;
@@ -58,55 +66,75 @@ export const getVariableService = win => {
  */
 export class AmpStoryVariableService {
   /**
+   * @param {!Window} win
    * @public
    */
-  constructor() {
+  constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
-      [Variable.STORY_PAGE_INDEX]: null,
-      [Variable.STORY_PAGE_ID]: null,
-      [Variable.STORY_PAGE_COUNT]: null,
-      [Variable.STORY_PROGRESS]: null,
-      [Variable.STORY_IS_MUTED]: null,
-      [Variable.STORY_PREVIOUS_PAGE_ID]: null,
-      [Variable.STORY_ADVANCEMENT_MODE]: null,
+      [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
+      [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
+      [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
+      [AnalyticsVariable.STORY_REACTION_ID]: null,
+      [AnalyticsVariable.STORY_REACTION_RESPONSE]: null,
+      [AnalyticsVariable.STORY_REACTION_TYPE]: null,
+      [AnalyticsVariable.STORY_PAGE_INDEX]: null,
+      [AnalyticsVariable.STORY_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_PAGE_COUNT]: null,
+      [AnalyticsVariable.STORY_PROGRESS]: null,
+      [AnalyticsVariable.STORY_IS_MUTED]: null,
+      [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
     });
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
+  }
+
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, (pageIds) => {
+      this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.length;
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (pageId) => {
+        if (!pageId) {
+          return;
+        }
+
+        this.variables_[
+          AnalyticsVariable.STORY_PREVIOUS_PAGE_ID
+        ] = this.variables_[AnalyticsVariable.STORY_PAGE_ID];
+
+        this.variables_[AnalyticsVariable.STORY_PAGE_ID] = pageId;
+
+        const pageIndex = /** @type {number} */ (this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        ));
+        this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
+
+        const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
+          .length;
+        if (numberOfPages > 0) {
+          this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+            pageIndex / numberOfPages;
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
+   * Updates a variable with a new value
+   * @param {string} name
+   * @param {*} update
    */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        const {
-          pageIndex,
-          pageId,
-          storyProgress,
-          totalPages,
-          previousPageId,
-        } = stateChangeEvent.value;
-        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
-        this.variables_[Variable.STORY_PAGE_ID] = pageId;
-        this.variables_[Variable.STORY_PROGRESS] = storyProgress;
-        this.variables_[Variable.STORY_PAGE_COUNT] = totalPages;
-        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = previousPageId;
-        break;
-    }
-  }
-
-  /**
-   * @param {boolean} isMuted
-   */
-  onMutedStateChange(isMuted) {
-    this.variables_[Variable.STORY_IS_MUTED] = isMuted;
-  }
-
-  /**
-   * @param {string} advancementMode
-   */
-  onAdvancementModeStateChange(advancementMode) {
-    this.variables_[Variable.STORY_ADVANCEMENT_MODE] = advancementMode;
+  onVariableUpdate(name, update) {
+    this.variables_[name] = update;
   }
 
   /**

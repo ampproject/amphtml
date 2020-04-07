@@ -23,14 +23,8 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 describe('getIntersectionChangeEntry', () => {
-  let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    sandbox.useFakeTimers();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    window.sandbox.useFakeTimers();
   });
 
   it('intersect correctly base', () => {
@@ -330,11 +324,7 @@ describe('IntersectionObserver', () => {
     }
   }
 
-  const ElementClass = createAmpElementForTesting(
-    window,
-    'amp-int',
-    TestElement
-  );
+  const ElementClass = createAmpElementForTesting(window, TestElement);
   customElements.define('amp-int', ElementClass);
 
   const iframeSrc =
@@ -342,7 +332,6 @@ describe('IntersectionObserver', () => {
     location.port +
     '/test/fixtures/served/iframe-intersection.html';
 
-  let sandbox;
   let testIframe;
   let element;
   let getIntersectionChangeEntrySpy;
@@ -362,38 +351,37 @@ describe('IntersectionObserver', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
-    testElementCreatedCallback = sandbox.spy();
-    testElementPreconnectCallback = sandbox.spy();
-    testElementFirstAttachedCallback = sandbox.spy();
-    testElementBuildCallback = sandbox.spy();
-    testElementLayoutCallback = sandbox.spy();
-    testElementFirstLayoutCompleted = sandbox.spy();
-    testElementViewportCallback = sandbox.spy();
-    testElementGetInsersectionElementLayoutBox = sandbox.spy();
-    getIntersectionChangeEntrySpy = sandbox.spy();
-    onScrollSpy = sandbox.spy();
-    onChangeSpy = sandbox.spy();
+    clock = window.sandbox.useFakeTimers();
+    testElementCreatedCallback = window.sandbox.spy();
+    testElementPreconnectCallback = window.sandbox.spy();
+    testElementFirstAttachedCallback = window.sandbox.spy();
+    testElementBuildCallback = window.sandbox.spy();
+    testElementLayoutCallback = window.sandbox.spy();
+    testElementFirstLayoutCompleted = window.sandbox.spy();
+    testElementViewportCallback = window.sandbox.spy();
+    testElementGetInsersectionElementLayoutBox = window.sandbox.spy();
+    getIntersectionChangeEntrySpy = window.sandbox.spy();
+    onScrollSpy = window.sandbox.spy();
+    onChangeSpy = window.sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.win = window;
-    element.getVsync = function() {
+    element.getVsync = function () {
       return {
         measure(fn) {
           fn();
         },
       };
     };
-    element.getViewport = function() {
+    element.getViewport = function () {
       return {
         onScroll() {
           onScrollSpy();
-          return function() {};
+          return function () {};
         },
         onChanged() {
           onChangeSpy();
-          return function() {};
+          return function () {};
         },
       };
     };
@@ -409,14 +397,13 @@ describe('IntersectionObserver', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     testIframe.parentNode.removeChild(testIframe);
   });
 
   it('should not send intersection', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    const postMessageSpy = sinon /*OK*/
+    const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
     ioInstance.sendElementIntersection_();
     expect(postMessageSpy).to.have.not.been.called;
@@ -427,7 +414,7 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };
@@ -447,7 +434,7 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };
@@ -490,7 +477,7 @@ describe('IntersectionObserver', () => {
   });
 
   it('should init listeners when element is in viewport', () => {
-    const fireSpy = sandbox.spy(IntersectionObserver.prototype, 'fire');
+    const fireSpy = window.sandbox.spy(IntersectionObserver.prototype, 'fire');
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
@@ -501,7 +488,7 @@ describe('IntersectionObserver', () => {
   });
 
   it('should unlisten listeners when element is out of viewport', () => {
-    const fireSpy = sandbox.spy(IntersectionObserver.prototype, 'fire');
+    const fireSpy = window.sandbox.spy(IntersectionObserver.prototype, 'fire');
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
@@ -526,7 +513,7 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    testIframe.contentWindow.postMessage = message => {
+    testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     };

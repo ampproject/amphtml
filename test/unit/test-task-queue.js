@@ -17,18 +17,12 @@
 import {TaskQueue} from '../../src/service/task-queue';
 
 describe('TaskQueue', () => {
-  let sandbox;
   let clock;
   let queue;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     queue = new TaskQueue();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should enqueue and dequeue', () => {
@@ -61,7 +55,7 @@ describe('TaskQueue', () => {
     queue.enqueue({id: 'B', v: 2});
     queue.enqueue({id: 'C', v: 1});
 
-    const task = queue.peek(task => 10 - task.v);
+    const task = queue.peek((task) => 10 - task.v);
     expect(task.id).to.equal('B');
   });
 });

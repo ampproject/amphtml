@@ -17,10 +17,11 @@
 
 const gulp = require('gulp');
 const jest = require('gulp-jest').default;
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * Simple wrapper around the jest tests for custom babel plugins.
+ * @return {!Vinyl}
  */
 function babelPluginTests() {
   return gulp.src('./build-system/babel-plugins/testSetupFile.js').pipe(

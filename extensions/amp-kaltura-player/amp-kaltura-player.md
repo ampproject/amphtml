@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays the Kaltura Player as used in Kaltura's Video Platform.
 ---
+
 <!---
 Copyright 2016 Kaltura. All Rights Reserved.
 
@@ -23,25 +24,6 @@ limitations under the License.
 
 # amp-kaltura-player
 
-An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -49,13 +31,16 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
- <amp-kaltura-player
-      data-uiconf="33502051"
-      data-partner="1281471"
-      data-entryid="1_3ts1ms9c"
-      data-param-streamerType = "auto"
-      layout="responsive" width="480" height="270">
-  </amp-kaltura-player>
+<amp-kaltura-player
+  data-uiconf="33502051"
+  data-partner="1281471"
+  data-entryid="1_3ts1ms9c"
+  data-param-streamerType="auto"
+  layout="responsive"
+  width="480"
+  height="270"
+>
+</amp-kaltura-player>
 ```
 
 ## Attributes
@@ -83,10 +68,9 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

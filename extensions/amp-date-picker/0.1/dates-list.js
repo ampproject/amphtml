@@ -15,17 +15,15 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import RRule from '../../../third_party/rrule/rrule';
 
 /** @enum {string} */
 const DateType = {
   INVALID: 'invalid',
-  RRULE: 'rrule',
   DATE: 'date',
 };
 
 /**
- * A class which wraps a list of moment or RRULE dates.
+ * A class which wraps a list of moment dates.
  */
 export class DatesList {
   /**
@@ -41,35 +39,31 @@ export class DatesList {
     this.moment_ = requireExternal('moment');
 
     /** @private @const */
-    this.rrulestrs_ = dates
-      .filter(d => this.getDateType_(d) === DateType.RRULE)
-      .map(d => tryParseRrulestr(d));
-
-    /** @private @const */
     this.dates_ = dates
-      .filter(d => this.getDateType_(d) == DateType.DATE)
-      .map(d => this.moment_(d))
+      .filter((d) => this.getDateType_(d) == DateType.DATE)
+      .map((d) => this.moment_(d))
       .sort((a, b) => a.toDate() - b.toDate());
   }
 
   /**
-   * Determines if the given date is contained within the RRULEs or moment
-   * dates contained in the date list.
+   * Determines if the given date is contained within the moment dates
+   * contained in the date list.
    * @param {!moment|string} date
    * @return {boolean}
    */
   contains(date) {
     const m = this.moment_(date);
-    return this.matchesDate_(m) || this.matchesRrule_(m);
+    return this.matchesDate_(m);
   }
 
   /**
    * Gets the first date in the date list after the given date.
-   * @param {!moment|string} date
+   * @param {!moment|string} momentOrString
    * @return {!moment}
    */
-  firstDateAfter(date) {
-    const m = this.moment_(date);
+  firstDateAfter(momentOrString) {
+    const m = this.moment_(momentOrString);
+    const date = m.toDate();
 
     const firstDatesAfter = [];
     for (let i = 0; i < this.dates_.length; i++) {
@@ -78,10 +72,6 @@ export class DatesList {
         break;
       }
     }
-    const rruleDates = this.rrulestrs_
-      .map(rrule => rrule.after(m.toDate()))
-      .filter(Boolean);
-    firstDatesAfter.concat(rruleDates);
 
     return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
   }
@@ -93,29 +83,11 @@ export class DatesList {
    * @private
    */
   matchesDate_(date) {
-    return this.dates_.some(d => this.ReactDates_['isSameDay'](d, date));
+    return this.dates_.some((d) => this.ReactDates_['isSameDay'](d, date));
   }
 
   /**
-   * Determines if any internal RRULE object matches the given date.
-   * @param {!moment} date
-   * @return {boolean}
-   * @private
-   */
-  matchesRrule_(date) {
-    const nextDate = date
-      .clone()
-      .startOf('day')
-      .add(1, 'day')
-      .toDate();
-    return this.rrulestrs_.some(rrule => {
-      const rruleDay = this.moment_(rrule.before(nextDate));
-      return this.ReactDates_['isSameDay'](rruleDay, date);
-    });
-  }
-
-  /**
-   * Distinguish between RRULE dates and moment dates.
+   * Distinguish between moment dates.
    * @param {!moment|string} date
    * @return {!DateType}
    * @private
@@ -125,24 +97,6 @@ export class DatesList {
       return DateType.DATE;
     }
 
-    const dateStr = /** @type {string} */ (date);
-    if (tryParseRrulestr(dateStr)) {
-      return DateType.RRULE;
-    }
-
     return DateType.INVALID;
-  }
-}
-
-/**
- * Tries to parse a string into an RRULE object.
- * @param {string} str A string which represents a repeating date RRULE spec.
- * @return {?JsonObject}
- */
-function tryParseRrulestr(str) {
-  try {
-    return RRule.fromString(str);
-  } catch (e) {
-    return null;
   }
 }

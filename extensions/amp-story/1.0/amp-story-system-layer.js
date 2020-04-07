@@ -27,7 +27,7 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -119,6 +119,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -129,6 +130,7 @@ const TEMPLATE = {
             {
               tag: 'div',
               attrs: dict({
+                'role': 'alert',
                 'class': 'i-amphtml-message-container',
               }),
               children: [
@@ -164,6 +166,8 @@ const TEMPLATE = {
                 'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
               tag: 'div',
@@ -171,15 +175,18 @@ const TEMPLATE = {
                 'role': 'button',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
             },
           ],
         },
         {
-          tag: 'div',
+          tag: 'a',
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -187,6 +194,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
       ],
     },
@@ -213,7 +221,7 @@ export class SystemLayer {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Element} */
+    /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
     /** @private {boolean} */
@@ -235,7 +243,7 @@ export class SystemLayer {
     this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
-    this.progressBar_ = ProgressBar.create(win);
+    this.progressBar_ = ProgressBar.create(win, this.parentEl_);
 
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
@@ -258,8 +266,9 @@ export class SystemLayer {
 
   /**
    * @return {!Element}
+   * @param {string} initialPageId
    */
-  build() {
+  build(initialPageId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -268,11 +277,17 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    // Make the share button link to the current document to make sure
+    // embedded STAMPs always have a back-link to themselves, and to make
+    // gestures like right-clicks work.
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-share-control'
+    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(),
+      this.progressBar_.build(initialPageId),
       this.systemLayerEl_.firstChild
     );
 
@@ -286,7 +301,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-      canShowButtons => {
+      (canShowButtons) => {
         this.systemLayerEl_.classList.toggle(
           'i-amphtml-story-ui-no-buttons',
           !canShowButtons
@@ -299,9 +314,9 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (
-      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
-    ) {
+    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+
+    if (shouldShowStoryUrlInfo(viewer)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -334,7 +349,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -342,7 +357,7 @@ export class SystemLayer {
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onAudioIconClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
-        this.onShareClick_();
+        this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
@@ -350,17 +365,17 @@ export class SystemLayer {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -368,7 +383,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.STORY_HAS_AUDIO_STATE,
-      hasAudio => {
+      (hasAudio) => {
         this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
@@ -376,7 +391,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
-      isMuted => {
+      (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
       true /** callToInitialize */
@@ -384,7 +399,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -392,7 +407,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      index => {
+      (index) => {
         this.onPageIndexUpdate_(index);
       },
       true /** callToInitialize */
@@ -400,7 +415,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -408,7 +423,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
-      audio => {
+      (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
       },
       true /** callToInitialize */
@@ -416,7 +431,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.HAS_SIDEBAR_STATE,
-      hasSidebar => {
+      (hasSidebar) => {
         this.onHasSidebarStateUpdate_(hasSidebar);
       },
       true /** callToInitialize */
@@ -424,7 +439,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
@@ -665,9 +680,11 @@ export class SystemLayer {
 
   /**
    * Handles click events on the share button and toggles the share menu.
+   * @param {!Event} event
    * @private
    */
-  onShareClick_() {
+  onShareClick_(event) {
+    event.preventDefault();
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
   }
@@ -731,7 +748,7 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
     });
   }
 

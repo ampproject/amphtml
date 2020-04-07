@@ -18,11 +18,14 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
+const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -30,14 +33,17 @@ const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
-const wrappers = require('../compile-wrappers');
-const {altMainBundles} = require('../../bundles.config');
+const wrappers = require('../compile/compile-wrappers');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
+const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {isTravisBuild} = require('../travis');
-const {thirdPartyFrames} = require('../config');
-const {transpileTs} = require('../typescript');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {EventEmitter} = require('events');
+const {isTravisBuild} = require('../common/travis');
+const {thirdPartyFrames} = require('../test-configs/config');
+const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -46,9 +52,16 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
+/**
+ * Used during minification to concatenate modules
+ */
 const MODULE_SEPARATOR = ';';
+
+/**
+ * Used during minification to concatenate extension bundles
+ */
 const EXTENSION_BUNDLE_MAP = {
   'amp-viz-vega.js': [
     'third_party/d3/d3.js',
@@ -58,224 +71,159 @@ const EXTENSION_BUNDLE_MAP = {
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
 };
 
+/**
+ * List of unminified targets to which AMP_CONFIG should be written
+ */
 const UNMINIFIED_TARGETS = [
-  'amp.js',
-  'amp-esm.js',
-  'amp-shadow.js',
-  'amp-inabox.js',
   'alp.max.js',
-  'integration.js',
+  'amp-inabox.js',
+  'amp-shadow.js',
+  'amp.js',
 ];
 
+/**
+ * List of minified targets to which AMP_CONFIG should be written
+ * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
+ * for details.
+ */
 const MINIFIED_TARGETS = [
-  'v0.js',
-  'v0-esm.js',
-  'shadow-v0.js',
-  'amp4ads-v0.js',
   'alp.js',
-  'f.js',
-];
+  'amp4ads-v0.js',
+  'shadow-v0.js',
+  'v0.js',
+].map(maybeToEsmName);
+
+/**
+ * Settings for the global Babelify transform while compiling unminified code
+ */
+const BABELIFY_GLOBAL_TRANSFORM = {
+  global: true, // Transform node_modules
+  /**
+   * Ignore devDependencies, except for 'chai-as-promised' which contains ES6 code.
+   * ES6 code is fine for most test environments, but not for integration tests
+   * running on SauceLabs since some older browsers need ES5.
+   */
+  ignore: devDependencies().filter(
+    (dep) => dep.indexOf('chai-as-promised') === -1
+  ),
+};
+
+/**
+ * Plugins used by Babelify while compiling unminified code
+ */
+const BABELIFY_PLUGINS = {
+  plugins: [
+    conf.getReplacePlugin(argv.esm || false),
+    conf.getJsonConfigurationPlugin(),
+  ],
+};
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
- * Compile all runtime targets in minified mode and drop them in dist/.
- */
-function compileAllMinifiedTargets() {
-  return compile(/* watch */ false, /* shouldMinify */ true);
-}
-
-/**
- * Compile all runtime targets in unminified mode and drop them in dist/.
- * @param {boolean} watch
- */
-function compileAllUnminifiedTargets(watch) {
-  return compile(/* watch */ watch);
-}
-
-/**
- * Compile and optionally minify the stylesheets and the scripts
- * and drop them in the dist folder
- *
- * @param {boolean} watch
- * @param {boolean} shouldMinify
+ * @param {!Object} jsBundles
+ * @param {string} name
+ * @param {?Object} extraOptions
  * @return {!Promise}
  */
-function compile(watch, shouldMinify) {
-  const promises = [
-    compileJs(
-      './3p/',
-      'integration.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'f.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'ampcontext-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'ampcontext-v0.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'iframe-transport-client-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'iframe-transport-client-v0.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'recaptcha.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'recaptcha.js',
-        watch,
-        minify: shouldMinify,
-        externs: [],
-        include3pDirectories: true,
-        includePolyfills: true,
-      }
-    ),
-    compileJs(
-      './extensions/amp-viewer-integration/0.1/examples/',
-      'amp-viewer-host.js',
-      './dist/v0/examples',
-      {
-        toName: 'amp-viewer-host.max.js',
-        minifiedName: 'amp-viewer-host.js',
-        incudePolyfills: true,
-        watch,
-        extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-        compilationLevel: 'WHITESPACE_ONLY',
-        minify: shouldMinify,
-      }
-    ),
-  ];
-
-  if (!argv.single_pass && (!watch || argv.with_shadow)) {
-    promises.push(
-      compileJs('./src/', 'amp-shadow.js', './dist', {
-        minifiedName: 'shadow-v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-      })
+function doBuildJs(jsBundles, name, extraOptions) {
+  const target = jsBundles[name];
+  if (target) {
+    return compileJs(
+      target.srcDir,
+      target.srcFilename,
+      extraOptions.minify ? target.minifiedDestDir : target.destDir,
+      {...target.options, ...extraOptions}
     );
+  } else {
+    return Promise.reject(red('Error:'), 'Could not find', cyan(name));
   }
+}
 
-  if (!watch || argv.with_video_iframe_integration) {
+/**
+ * Generates frames.html
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function bootstrapThirdPartyFrames(watch, minify) {
+  const startTime = Date.now();
+  const promises = [];
+  thirdPartyFrames.forEach((frameObject) => {
     promises.push(
-      compileJs('./src/', 'video-iframe-integration.js', './dist', {
-        minifiedName: 'video-iframe-integration-v0.js',
-        includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (!watch || argv.with_inabox) {
-    if (!argv.single_pass) {
-      promises.push(
-        // Entry point for inabox runtime.
-        compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-          toName: 'amp-inabox.js',
-          minifiedName: 'amp4ads-v0.js',
-          includePolyfills: true,
-          extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-          watch,
-          minify: shouldMinify,
-        })
-      );
-    }
-    promises.push(
-      // inabox-host
-      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-        toName: 'amp-inabox-host.js',
-        minifiedName: 'amp4ads-host-v0.js',
-        includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (argv.with_inabox_lite) {
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-        toName: 'amp-inabox-lite.js',
-        minifiedName: 'amp4ads-lite-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  thirdPartyFrames.forEach(frameObject => {
-    promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)
+      thirdPartyBootstrap(frameObject.max, frameObject.min, minify)
     );
   });
-
   if (watch) {
-    thirdPartyFrames.forEach(frameObject => {
-      gulpWatch(frameObject.max, function() {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify);
+    thirdPartyFrames.forEach((frameObject) => {
+      gulpWatch(frameObject.max, function () {
+        thirdPartyBootstrap(frameObject.max, frameObject.min, minify);
       });
     });
   }
+  await Promise.all(promises);
+  endBuildStep(
+    'Bootstrapped 3p frames into',
+    `dist.3p/${minify ? internalRuntimeVersion : 'current'}/`,
+    startTime
+  );
+}
 
-  return Promise.all(promises)
-    .then(() => {
-      return compileJs('./src/', 'amp.js', './dist', {
-        toName: 'amp.js',
-        minifiedName: 'v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-        wrapper: wrappers.mainBinary,
-        singlePassCompilation: argv.single_pass,
-        esmPassCompilation: argv.esm,
-      });
-    })
-    .then(() => {
-      if (!argv.single_pass) {
-        return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        });
-      } else {
-        return Promise.resolve();
-      }
-    });
+/**
+ * Compile and optionally minify the core runtime.
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function compileCoreRuntime(watch, minify) {
+  await doBuildJs(jsBundles, 'amp.js', {
+    watch,
+    minify,
+    wrapper: wrappers.mainBinary,
+    singlePassCompilation: argv.single_pass,
+    esmPassCompilation: argv.esm,
+    includeOnlyESMLevelPolyfills: argv.esm,
+  });
+}
+
+/**
+ * Compile and optionally minify the stylesheets and the scripts for the runtime
+ * and drop them in the dist folder
+ *
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function compileAllJs(minify) {
+  if (minify) {
+    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
+  } else {
+    log('Compiling JS with', cyan('browserify') + '...');
+  }
+  const startTime = Date.now();
+  const {watch} = argv;
+  await Promise.all([
+    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
+    doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ampcontext-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'iframe-transport-client-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-story-player.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
+  ]);
+  await compileCoreRuntime(watch, minify);
+  endBuildStep(
+    minify ? 'Minified' : 'Compiled',
+    'all runtime JS files',
+    startTime
+  );
 }
 
 /**
@@ -309,6 +257,14 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+function toEsmName(name) {
+  return name.replace(/\.js$/, '.mjs');
+}
+
+function maybeToEsmName(name) {
+  return argv.esm ? toEsmName(name) : name;
+}
+
 /**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
@@ -317,69 +273,96 @@ function appendToCompiledFile(srcFilename, destFilePath) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
+async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
+  const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const {minifiedName} = options;
-  return closureCompile(entryPoint, destDir, minifiedName, options)
-    .then(function() {
-      const destPath = path.join(destDir, minifiedName);
-      appendToCompiledFile(srcFilename, destPath);
-      fs.writeFileSync(
-        path.join(destDir, 'version.txt'),
-        internalRuntimeVersion
+  const minifiedName = maybeToEsmName(options.minifiedName);
+
+  if (options.watch) {
+    gulpWatch(entryPoint, async function () {
+      const compileComplete = await doCompileMinifiedJs(
+        /* continueOnError */ true
       );
-      if (options.latestName) {
-        fs.copySync(destPath, path.join(destDir, options.latestName));
-      }
-    })
-    .then(() => {
-      let name = minifiedName;
-      if (options.latestName) {
-        name += ` → ${options.latestName}`;
-      }
-      if (options.singlePassCompilation) {
-        altMainBundles.forEach(bundle => {
-          name += `, ${bundle.name}.js`;
-        });
-        name += ', and all extensions';
-      }
-      endBuildStep('Minified', name, startTime);
-    })
-    .then(() => {
-      if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
-        return enableLocalTesting(`${destDir}/${minifiedName}`);
-      }
-    })
-    .then(() => {
-      if (argv.fortesting && options.singlePassCompilation) {
-        const promises = [];
-        altMainBundles.forEach(bundle => {
-          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-        });
-        return Promise.all(promises);
+      if (options.onWatchBuild) {
+        options.onWatchBuild(compileComplete);
       }
     });
+  }
+
+  async function doCompileMinifiedJs(continueOnError) {
+    options.continueOnError = continueOnError;
+    options.errored = false;
+    await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
+
+    // If an incremental watch build fails, simply return.
+    if (options.errored) {
+      return;
+    }
+
+    const destPath = path.join(destDir, minifiedName);
+    appendToCompiledFile(srcFilename, destPath);
+    fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+    if (options.latestName) {
+      fs.copySync(
+        destPath,
+        path.join(destDir, maybeToEsmName(options.latestName))
+      );
+    }
+
+    let name = minifiedName;
+    if (options.latestName) {
+      name += ` → ${maybeToEsmName(options.latestName)}`;
+    }
+    if (options.singlePassCompilation) {
+      altMainBundles.forEach((bundle) => {
+        name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
+      });
+      name += ', and all extensions';
+    }
+    endBuildStep('Minified', name, timeInfo.startTime);
+
+    if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+      await applyAmpConfig(
+        maybeToEsmName(`${destDir}/${minifiedName}`),
+        /* localDev */ !!argv.fortesting
+      );
+    }
+
+    if (argv.noconfig || !options.singlePassCompilation) {
+      return;
+    }
+    return await Promise.all(
+      altMainBundles.map(({name}) =>
+        applyAmpConfig(
+          maybeToEsmName(`dist/${name}.js`),
+          /* localDev */ !!argv.fortesting
+        )
+      )
+    );
+  }
+  await doCompileMinifiedJs(options.continueOnError);
 }
 
 /**
  * Handles a browserify bundling error
  * @param {Error} err
- * @param {boolean} failOnError
- * @param {string} srcFilename
- * @param {string} startTime
+ * @param {boolean} continueOnError
+ * @param {string} destFilename
  */
-function handleBundleError(err, failOnError, srcFilename, startTime) {
+function handleBundleError(err, continueOnError, destFilename) {
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
     message = err.stack.replace(/    at[^]*/, '').trim();
   }
-  console.error(red(message));
-  if (failOnError) {
-    process.exit(1);
+  log(red('ERROR:'), message, '\n');
+  const reasonMessage = `Could not compile ${cyan(destFilename)}`;
+  if (continueOnError) {
+    log(red('ERROR:'), reasonMessage);
   } else {
-    endBuildStep('Error while compiling', srcFilename, startTime);
+    const reason = new Error(reasonMessage);
+    reason.showStack = false;
+    new EventEmitter().emit('error', reason);
   }
 }
 
@@ -405,6 +388,17 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
+ * Returns array of relative paths to "devDependencies" defined in package.json.
+ * @return {!Array<string>}
+ */
+function devDependencies() {
+  const file = fs.readFileSync('package.json', 'utf8');
+  const packageJson = JSON.parse(file);
+  const devDependencies = Object.keys(packageJson['devDependencies']);
+  return devDependencies.map((p) => `./node_modules/${p}`);
+}
+
+/**
  * Transforms a given JavaScript file entry point with browserify, and watches
  * it for changes (if required).
  * @param {string} srcDir
@@ -419,31 +413,47 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const wrapper = options.wrapper || wrappers.none;
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  let bundler = browserify({
+  // TODO: @jonathantyng remove browserifyOptions #22757
+  const browserifyOptions = {
     entries: entryPoint,
     debug: true,
-  }).transform(babelify);
+    fast: true,
+    ...options.browserifyOptions,
+  };
+
+  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
+
+  let bundler = browserify(browserifyOptions).transform(
+    babelify,
+    babelifyOptions
+  );
 
   if (options.watch) {
     bundler = watchify(bundler);
-    bundler.on('update', () => performBundle(/* failOnError */ false));
+    bundler.on('update', () => {
+      const bundleComplete = performBundle(/* continueOnError */ true);
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    });
   }
 
   /**
-   * @param {boolean} failOnError
+   * @param {boolean} continueOnError
    * @return {Promise}
    */
-  function performBundle(failOnError) {
+  function performBundle(continueOnError) {
     let startTime;
     return toPromise(
       bundler
         .bundle()
         .once('readable', () => (startTime = Date.now()))
-        .on('error', err =>
-          handleBundleError(err, failOnError, srcFilename, startTime)
+        .on('error', (err) =>
+          handleBundleError(err, continueOnError, destFilename)
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
+        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(
@@ -470,12 +480,15 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       })
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
-          return enableLocalTesting(`${destDir}/${destFilename}`);
+          return applyAmpConfig(
+            `${destDir}/${destFilename}`,
+            /* localDev */ true
+          );
         }
       });
   }
 
-  return performBundle(/* failOnError */ true);
+  return performBundle(options.continueOnError);
 }
 
 /**
@@ -504,12 +517,12 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileJs(srcDir, srcFilename, destDir, options) {
+async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -523,17 +536,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   let timeString = '(';
-  if (secs === 0) {
+  if (mins > 0) {
+    timeString += mins + ' m ' + secs + '.' + ms + ' s)';
+  } else if (secs === 0) {
     timeString += ms + ' ms)';
   } else {
     timeString += secs + '.' + ms + ' s)';
   }
-  if (!isTravisBuild()) {
-    log(stepName, cyan(targetName), green(timeString));
-  }
+  log(stepName, cyan(targetName), green(timeString));
 }
 
 /**
@@ -541,14 +555,14 @@ function endBuildStep(stepName, targetName, startTime) {
  * @param {string} command Command being run.
  */
 function printConfigHelp(command) {
+  log(
+    green('Building version'),
+    cyan(internalRuntimeVersion),
+    green('of the runtime with the'),
+    cyan(argv.config === 'canary' ? 'canary' : 'prod'),
+    green('AMP config.')
+  );
   if (!isTravisBuild()) {
-    log(
-      green('Building version'),
-      cyan(internalRuntimeVersion),
-      green('of the runtime for local testing with the'),
-      cyan(argv.config === 'canary' ? 'canary' : 'prod'),
-      green('AMP config.')
-    );
     log(
       green('⤷ Use'),
       cyan('--config={canary|prod}'),
@@ -563,31 +577,32 @@ function printConfigHelp(command) {
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!isTravisBuild()) {
-    for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line amphtml-internal/no-for-of-statement
-      if (argv._.includes(task)) {
-        log(
-          green('To skip building during future'),
-          cyan(task),
-          green('runs, use'),
-          cyan('--nobuild'),
-          green('with your'),
-          cyan(`gulp ${task}`),
-          green('command.')
-        );
-        return;
-      }
+  for (const task of NOBUILD_HELP_TASKS) {
+    // eslint-disable-line local/no-for-of-statement
+    if (argv._.includes(task)) {
+      log(
+        green('To skip building during future'),
+        cyan(task),
+        green('runs, use'),
+        cyan('--nobuild'),
+        green('with your'),
+        cyan(`gulp ${task}`),
+        green('command.')
+      );
+      return;
     }
   }
 }
 
 /**
- * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
+ * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * various runtime files.
  * @param {string} targetFile File to which the config is to be written.
+ * @param {boolean} localDev Whether or not to enable local development.
+ * @return {!Promise}
  */
-async function enableLocalTesting(targetFile) {
+async function applyAmpConfig(targetFile, localDev) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -597,7 +612,7 @@ async function enableLocalTesting(targetFile) {
       config,
       targetFile,
       baseConfigFile,
-      /* opt_localDev */ true,
+      /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
       /* opt_branch */ false,
       /* opt_fortesting */ !!argv.fortesting
@@ -613,7 +628,7 @@ async function enableLocalTesting(targetFile) {
  */
 function concatFilesToString(files) {
   return files
-    .map(function(filePath) {
+    .map(function (filePath) {
       return fs.readFileSync(filePath, 'utf8');
     })
     .join(MODULE_SEPARATOR);
@@ -625,17 +640,12 @@ function concatFilesToString(files) {
  *
  * @param {string} input
  * @param {string} outputName
- * @param {boolean} shouldMinify
+ * @param {boolean} minify
  * @return {!Promise}
  */
-function thirdPartyBootstrap(input, outputName, shouldMinify) {
-  const startTime = Date.now();
-  if (!shouldMinify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current'))).then(
-      () => {
-        endBuildStep('Processed', input, startTime);
-      }
-    );
+function thirdPartyBootstrap(input, outputName, minify) {
+  if (!minify) {
+    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -652,7 +662,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   return toPromise(
     file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
-      .on('end', function() {
+      .on('end', function () {
         const aliasToLatestBuild = 'dist.3p/current-min';
         if (fs.existsSync(aliasToLatestBuild)) {
           fs.unlinkSync(aliasToLatestBuild);
@@ -663,57 +673,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
           'dir'
         );
       })
-  ).then(() => {
-    endBuildStep('Processed', input, startTime);
-  });
-}
-
-/**
- * Build ALP JS.
- *
- * @param {!Object} options
- */
-function buildAlp(options) {
-  options = options || {};
-  return compileJs('./ads/alp/', 'install-alp.js', './dist/', {
-    toName: 'alp.max.js',
-    watch: options.watch,
-    minify: options.minify || argv.minify,
-    includePolyfills: true,
-    minifiedName: 'alp.js',
-  });
-}
-
-/**
- * Build Examiner JS.
- *
- * @param {!Object} options
- */
-function buildExaminer(options) {
-  options = options || {};
-  return compileJs('./src/examiner/', 'examiner.js', './dist/', {
-    toName: 'examiner.max.js',
-    watch: options.watch,
-    minify: options.minify || argv.minify,
-    includePolyfills: true,
-    minifiedName: 'examiner.js',
-  });
-}
-
-/**
- * Build web worker JS.
- *
- * @param {!Object} options
- */
-function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
-  return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
-    toName: 'ww.max.js',
-    minifiedName: 'ww.js',
-    includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
-  });
+  );
 }
 
 /**
@@ -738,22 +698,25 @@ function mkdirSync(path) {
  * @return {Promise}
  */
 function toPromise(readable) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
 }
 
 module.exports = {
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileAllMinifiedTargets,
-  compileAllUnminifiedTargets,
+  applyAmpConfig,
+  BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_PLUGINS,
+  bootstrapThirdPartyFrames,
+  compileAllJs,
+  compileCoreRuntime,
   compileJs,
   compileTs,
-  enableLocalTesting,
+  devDependencies,
+  doBuildJs,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,

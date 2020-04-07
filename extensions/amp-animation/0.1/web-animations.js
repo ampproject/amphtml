@@ -41,7 +41,7 @@ import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -62,6 +62,16 @@ let animIdCounter = 0;
 const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
+};
+
+/**
+ * Clip-path is an only CSS property we allow for animation that may require
+ * vendor prefix. And it's always "-webkit". Use a simple map to avoid
+ * expensive lookup for all other properties.
+ */
+const ADD_PROPS = {
+  'clip-path': '-webkit-clip-path',
+  'clipPath': '-webkit-clip-path',
 };
 
 /**
@@ -151,9 +161,9 @@ export class Builder {
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/owners-interface.OwnersInterface} owners
    */
-  constructor(win, rootNode, baseUrl, vsync, resources) {
+  constructor(win, rootNode, baseUrl, vsync, owners) {
     /** @const @private */
     this.win_ = win;
 
@@ -164,7 +174,7 @@ export class Builder {
     this.vsync_ = vsync;
 
     /** @const @private */
-    this.resources_ = resources;
+    this.owners_ = owners;
 
     /** @const @private {!Array<!Element>} */
     this.targets_ = [];
@@ -182,7 +192,7 @@ export class Builder {
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
   createRunner(spec, opt_args, opt_positionObserverData = null) {
-    return this.resolveRequests([], spec, opt_args).then(requests => {
+    return this.resolveRequests([], spec, opt_args).then((requests) => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
@@ -231,7 +241,7 @@ export class Builder {
   requireLayout(target) {
     if (!this.targets_.includes(target)) {
       this.targets_.push(target);
-      this.loaders_.push(this.resources_.requireLayout(target));
+      this.loaders_.push(this.owners_.requireLayout(target));
     }
   }
 
@@ -242,6 +252,7 @@ export class Builder {
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   createScanner_(path, target, index, vars, timing) {
     return new MeasureScanner(
@@ -398,7 +409,7 @@ export class MeasureScanner extends Scanner {
       animationElement.tagName == 'AMP-ANIMATION',
       `Element is not an animation: "${spec.animation}"`
     );
-    const otherSpecPromise = animationElement.getImpl().then(impl => {
+    const otherSpecPromise = animationElement.getImpl().then((impl) => {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
@@ -409,7 +420,7 @@ export class MeasureScanner extends Scanner {
         timing_: timing,
       } = this;
       const promise = otherSpecPromise
-        .then(otherSpec => {
+        .then((otherSpec) => {
           if (!otherSpec) {
             return;
           }
@@ -423,8 +434,8 @@ export class MeasureScanner extends Scanner {
             timing
           );
         })
-        .then(requests => {
-          requests.forEach(request => this.requests_.push(request));
+        .then((requests) => {
+          requests.forEach((request) => this.requests_.push(request));
         });
       this.deps_.push(promise);
     });
@@ -483,9 +494,12 @@ export class MeasureScanner extends Scanner {
           const toValue = isArray(value) ? value[0] : value;
           preparedValue = [fromValue, this.css_.resolveCss(toValue)];
         } else {
-          preparedValue = value.map(v => this.css_.resolveCss(v));
+          preparedValue = value.map((v) => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
+        if (prop in ADD_PROPS) {
+          keyframes[ADD_PROPS[prop]] = preparedValue;
+        }
       }
       return keyframes;
     }
@@ -519,6 +533,14 @@ export class MeasureScanner extends Scanner {
           }
         }
         keyframes.push(this.css_.resolveCssMap(frame));
+      }
+      for (let i = 0; i < keyframes.length; i++) {
+        const frame = keyframes[i];
+        for (const k in ADD_PROPS) {
+          if (k in frame) {
+            frame[ADD_PROPS[k]] = frame[k];
+          }
+        }
       }
       return keyframes;
     }
@@ -620,7 +642,7 @@ export class MeasureScanner extends Scanner {
     } else if (this.target_) {
       targets = [this.target_];
     }
-    targets.forEach(target => this.builder_.requireLayout(target));
+    targets.forEach((target) => this.builder_.requireLayout(target));
     return targets;
   }
 
@@ -635,7 +657,7 @@ export class MeasureScanner extends Scanner {
       return spec;
     }
     const result = map(spec);
-    spec.subtargets.forEach(subtargetSpec => {
+    spec.subtargets.forEach((subtargetSpec) => {
       const matcher = this.getMatcher_(subtargetSpec);
       if (matcher(target, index)) {
         Object.assign(result, subtargetSpec);
@@ -666,7 +688,7 @@ export class MeasureScanner extends Scanner {
     } else {
       // Match by selector, e.g. `:nth-child(2n+1)`.
       const specSelector = /** @type {string} */ (spec.selector);
-      matcher = target => {
+      matcher = (target) => {
         try {
           return matches(target, specSelector);
         } catch (e) {

@@ -156,14 +156,14 @@ function serialize(pairs) {
     return '';
   }
   return Object.keys(pairs)
-    .filter(key => {
+    .filter((key) => {
       const valid = KEY_VALIDATOR.test(key);
       if (!valid) {
         user().error(TAG, 'Invalid linker key: ' + key);
       }
       return valid;
     })
-    .map(key => key + DELIMITER + encode(pairs[key]))
+    .map((key) => key + DELIMITER + encode(pairs[key]))
     .join(DELIMITER);
 }
 
@@ -201,6 +201,7 @@ function getMinSinceEpoch() {
  * Function that encodesURIComponent but also tilde, since we are using it as
  * our delimiter.
  * @param {string} value
+ * @return {*} TODO(#23582): Specify return type
  */
 function encode(value) {
   return base64UrlEncodeFromString(String(value));

@@ -43,21 +43,17 @@ const TAG = 'AMP-AD';
  * Retrieves the publisher-specified refresh interval, if one were set. This
  * function first checks for appropriate slot attributes and then for
  * metadata tags, preferring whichever it finds first.
- * @param {!Element} element
- * @param {!Window} win
+ * @param {!AmpElement} element
+ * @param {!Window} unusedWin
  * @return {?number}
  * @visibleForTesting
  */
-export function getPublisherSpecifiedRefreshInterval(element, win) {
+export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
   if (refreshInterval) {
     return checkAndSanitizeRefreshInterval(refreshInterval);
   }
-  let metaTag;
-  const metaTagContent =
-    (metaTag = win.document.getElementsByName(METATAG_NAME)) &&
-    metaTag[0] &&
-    metaTag[0].getAttribute('content');
+  const metaTagContent = element.getAmpDoc().getMetaByName(METATAG_NAME);
   if (!metaTagContent) {
     return null;
   }
@@ -201,7 +197,7 @@ export class RefreshManager {
     /** @const @private {!Element} */
     this.element_ = a4a.element;
 
-    /** @const @private {string} */
+    /** @const @protected {string} */
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
@@ -213,7 +209,7 @@ export class RefreshManager {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @private {?(number|string)} */
+    /** @protected {?(number|string)} */
     this.refreshTimeoutId_ = null;
 
     /** @private {?(number|string)} */
@@ -255,7 +251,7 @@ export class RefreshManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -328,7 +324,7 @@ export class RefreshManager {
    *    refresh timer elapses successfully.
    */
   startRefreshTimer_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
         this.unobserve();

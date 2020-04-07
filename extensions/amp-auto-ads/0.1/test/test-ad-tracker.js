@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Utils from '../utils';
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
@@ -22,17 +23,15 @@ import {
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
-describes.realWin('ad-tracker', {amp: true}, env => {
+describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;
-  let resources;
   let container;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
 
-    resources = Services.resourcesForDoc(doc);
-    sandbox.stub(resources, 'getElementLayoutBox').callsFake(element => {
+    env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake((element) => {
       return Promise.resolve(element.layoutBox);
     });
 
@@ -52,9 +51,9 @@ describes.realWin('ad-tracker', {amp: true}, env => {
   }
 
   function checkMinSpacing(adTracker, tooNearPos, okPos) {
-    return adTracker.isTooNearAnAd(tooNearPos).then(tooNear => {
+    return adTracker.isTooNearAnAd(tooNearPos).then((tooNear) => {
       expect(tooNear).to.equal(true);
-      return adTracker.isTooNearAnAd(okPos).then(tooNear => {
+      return adTracker.isTooNearAnAd(okPos).then((tooNear) => {
         expect(tooNear).to.equal(false);
       });
     });
@@ -88,7 +87,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       [addAd(layoutRectLtwh(0, 0, 300, 50))],
       adConstraints
     );
-    return adTracker.isTooNearAnAd(149).then(tooNear => {
+    return adTracker.isTooNearAnAd(149).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -104,7 +103,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       [addAd(layoutRectLtwh(0, 100, 300, 50))],
       adConstraints
     );
-    return adTracker.isTooNearAnAd(1).then(tooNear => {
+    return adTracker.isTooNearAnAd(1).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -120,7 +119,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       [addAd(layoutRectLtwh(0, 0, 300, 50))],
       adConstraints
     );
-    return adTracker.isTooNearAnAd(25).then(tooNear => {
+    return adTracker.isTooNearAnAd(25).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
@@ -139,7 +138,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       ],
       adConstraints
     );
-    return adTracker.isTooNearAnAd(150).then(tooNear => {
+    return adTracker.isTooNearAnAd(150).then((tooNear) => {
       expect(tooNear).to.equal(false);
     });
   });
@@ -231,13 +230,13 @@ describes.realWin('ad-tracker', {amp: true}, env => {
       adConstraints
     );
     adTracker.addAd(addAd(layoutRectLtwh(0, 100, 300, 50)));
-    return adTracker.isTooNearAnAd(150).then(tooNear => {
+    return adTracker.isTooNearAnAd(150).then((tooNear) => {
       expect(tooNear).to.equal(true);
     });
   });
 });
 
-describes.realWin('getExistingAds', {amp: true}, env => {
+describes.realWin('getExistingAds', {amp: true}, (env) => {
   let win;
   let doc;
   let ampdoc;
@@ -267,7 +266,7 @@ describes.realWin('getExistingAds', {amp: true}, env => {
   });
 });
 
-describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, env => {
+describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, (env) => {
   let ampdoc;
 
   beforeEach(() => {
@@ -309,11 +308,8 @@ describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, env => {
   });
 
   it('should get from viewport values', () => {
-    const viewportMock = sandbox.mock(Services.viewportForDoc(ampdoc));
-    viewportMock
-      .expects('getHeight')
-      .returns(500)
-      .atLeast(1);
+    const viewportMock = env.sandbox.mock(Services.viewportForDoc(ampdoc));
+    viewportMock.expects('getHeight').returns(500).atLeast(1);
 
     const configObj = {
       adConstraints: {

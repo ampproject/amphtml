@@ -51,12 +51,9 @@ describe('Layout', () => {
       // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
-      'AMP-BRIGHTCOVE',
-      'AMP-DAILYMOTION',
       'AMP-EMBED',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
-      'AMP-FACEBOOK-LIKE',
       'AMP-FACEBOOK-PAGE',
       'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
@@ -65,8 +62,7 @@ describe('Layout', () => {
       'AMP-LIST',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-YOUTUBE',
-      'AMP-VIMEO',
+      'AMP-TWITTER',
 
       // matched by video player naming convention (fake)
       'AMP-FOO-PLAYER',
@@ -75,10 +71,13 @@ describe('Layout', () => {
       // matched by video player naming convention (actual)
       'AMP-JWPLAYER',
       'AMP-OOYALA-PLAYER',
-      'AMP-VIDEO',
       'AMP-VIDEO-IFRAME',
+      'AMP-YOUTUBE',
+      'AMP-VIMEO',
+      'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
     ];
-    elementsValidTagNames.forEach(function(tag) {
+    elementsValidTagNames.forEach(function (tag) {
       el.tagName = tag;
       expect(isLoadingAllowed(el)).to.be.true;
     });
@@ -88,11 +87,11 @@ describe('Layout', () => {
     const elementsInvalidTagNames = [
       'AMP-POSITION-OBSERVER',
       'AMP-BODYMOVIN-ANIMATION',
-      'AMP-TWITTER',
+      'AMP-VIDEO',
       'AMP-REDDIT',
       'AMP-GITHUB',
     ];
-    elementsInvalidTagNames.forEach(function(tag) {
+    elementsInvalidTagNames.forEach(function (tag) {
       el.tagName = tag;
       expect(isLoadingAllowed(el)).to.be.false;
     });
@@ -168,32 +167,32 @@ describe('Layout', () => {
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('10%');
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(10);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('10');
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(undefined);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(null);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('');
       }).to.throw(/Invalid length value/);
     });
@@ -210,27 +209,27 @@ describe('Layout', () => {
     expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
 
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(10);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent('10');
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(undefined);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(null);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent('');
       }).to.throw(/Invalid length or percent value/);
     });
@@ -284,7 +283,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/
+        /The "height" attribute is missing/
       );
     });
   });
@@ -317,9 +316,9 @@ describe('Layout', () => {
     div.setAttribute('height', 200);
     div.setAttribute('width', 300);
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         applyStaticLayout(div);
-      }).to.throw(/Expected width to be either absent or equal "auto"/);
+      }).to.throw(/The "width" attribute must be missing or "auto"/);
     });
   });
 
@@ -342,7 +341,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/
+        /The "height" attribute is missing/
       );
     });
   });
@@ -465,9 +464,9 @@ describe('Layout', () => {
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         applyStaticLayout(div);
-      }).to.throw(/Unknown layout: foo/);
+      }).to.throw(/Invalid "layout" value: foo/);
     });
   });
 
@@ -536,7 +535,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => {
         applyStaticLayout(pixel);
-      }).to.throw(/Invalid width value/);
+      }).to.throw(/Invalid "width" value: X/);
     });
   });
 
@@ -548,7 +547,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => {
         applyStaticLayout(pixel);
-      }).to.throw(/Invalid height value/);
+      }).to.throw(/Invalid "height" value: X/);
     });
   });
 

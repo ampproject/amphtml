@@ -23,11 +23,12 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const extend = require('util')._extend;
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
@@ -105,6 +106,7 @@ const NUM_BATCHES = 14;
 
 /**
  * Calculate the reviewer this week, based on rotation calendar
+ * @return {string}
  */
 function calculateReviewer() {
   const now = Date.now();
@@ -116,6 +118,7 @@ function calculateReviewer() {
 
 /**
  * Main function for auto triaging
+ * @return {!Promise|undefined}
  */
 function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
@@ -138,12 +141,12 @@ function process3pGithubPr() {
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  return BBPromise.all(arrayPromises)
-    .then(requests => [].concat.apply([], requests))
-    .then(issues => {
+  return Promise.all(arrayPromises)
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
       const allIssues = issues;
       const allTasks = [];
-      allIssues.forEach(function(issue) {
+      allIssues.forEach(function (issue) {
         allTasks.push(handleIssue(issue));
       });
       return Promise.all(allTasks);
@@ -154,7 +157,7 @@ function process3pGithubPr() {
 }
 
 function handleIssue(issue) {
-  return isQualifiedPR(issue).then(outcome => {
+  return isQualifiedPR(issue).then((outcome) => {
     return replyToPR(issue, outcome);
   });
 }
@@ -163,7 +166,7 @@ function handleIssue(issue) {
  * Fetches issues?page=${opt_page}
  *
  * @param {number=} opt_page
- * @return {!Promise<!Array<}
+ * @return {!Promise<!Array>}
  */
 function getIssues(opt_page) {
   // We need to use the issue API because assignee is only available with it.
@@ -176,7 +179,7 @@ function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const issues = JSON.parse(res.body);
     assert(Array.isArray(issues), 'issues must be an array.');
     return issues;
@@ -186,6 +189,7 @@ function getIssues(opt_page) {
 /**
  * API call to get all changed files of a pull request.
  * @param {!Object} pr
+ * @return {?Array<string>}
  */
 function getPullRequestFiles(pr) {
   const options = extend({}, defaultOption);
@@ -193,7 +197,7 @@ function getPullRequestFiles(pr) {
   options.url =
     'https://api.github.com/repos/ampproject/amphtml/pulls/' +
     `${number}/files`;
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const files = JSON.parse(res.body);
     if (!Array.isArray(files)) {
       return null;
@@ -205,6 +209,7 @@ function getPullRequestFiles(pr) {
 /**
  * Determine the type of a give pull request
  * @param {?Array<!Object>} files
+ * @return {number|null|undefined}
  */
 function analyzeChangedFiles(files) {
   if (!files) {
@@ -237,6 +242,7 @@ function analyzeChangedFiles(files) {
 /**
  * Determine if we need to reply to an issue
  * @param {!Object} issue
+ * @return {!Promise}
  */
 function isQualifiedPR(issue) {
   // All issues are opened has no assignee
@@ -253,7 +259,7 @@ function isQualifiedPR(issue) {
   // get pull request reviewer API is not working as expected. Skip
 
   // Get changed files of this PR
-  return getPullRequestFiles(issue).then(files => {
+  return getPullRequestFiles(issue).then((files) => {
     return analyzeChangedFiles(files);
   });
 }
@@ -262,6 +268,7 @@ function isQualifiedPR(issue) {
  * Auto reply
  * @param {!Object} pr
  * @param {ANALYZE_OUTCOME} outcome
+ * @return {!Promise}
  */
 function replyToPR(pr, outcome) {
   let promise = Promise.resolve();
@@ -284,6 +291,7 @@ function replyToPR(pr, outcome) {
  * API call to comment on a give issue.
  * @param {!Object} issue
  * @param {string} comment
+ * @return {!Promise}
  */
 function applyComment(issue, comment) {
   const {number} = issue;
@@ -310,6 +318,7 @@ function applyComment(issue, comment) {
  * API call to assign an issue with a list of assignees
  * @param {!Object} issue
  * @param {!Array<string>} assignees
+ * @return {!Promise}
  */
 function assignIssue(issue, assignees) {
   const {number} = issue;
@@ -331,6 +340,10 @@ function assignIssue(issue, assignees) {
   }
   return request(options);
 }
+
+module.exports = {
+  process3pGithubPr,
+};
 
 process3pGithubPr.description = 'Automatically triage 3P integration PRs';
 process3pGithubPr.flags = {

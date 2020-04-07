@@ -19,17 +19,24 @@ import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 const pageWidth = 800;
 const pageHeight = 600;
 
+/** Increase timeout for running on Travis macOS **/
+const testTimeout = 20000;
+
 describes.endtoend(
   'AMP carousel',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
+    experiments: [
+      'amp-base-carousel',
+      'amp-lightbox-gallery-base-carousel',
+      'layers',
+    ],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;
@@ -38,11 +45,12 @@ describes.endtoend(
       return controller.getElementProperty(el, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(async function () {
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
+    it('should render correctly', async function () {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 
       // We should have space for SLIDE_COUNT - 1 on either side + 1 for the
@@ -53,14 +61,16 @@ describes.endtoend(
       await waitForCarouselImg(controller, 0);
     });
 
-    it('should layout the two adjacent slides', async () => {
+    it('should layout the two adjacent slides', async function () {
+      this.timeout(testTimeout);
       // TODO(sparhami) Verify this is on the right of the 0th slide
       await waitForCarouselImg(controller, 1);
       // TODO(sparhami) Verify this is on the left of the 0th slide
       await waitForCarouselImg(controller, SLIDE_COUNT - 1);
     });
 
-    it('should snap when scrolling', async () => {
+    it('should snap when scrolling', async function () {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
 
@@ -73,13 +83,14 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
-    it('should reset the window after scroll', async () => {
+    it('should reset the window after scroll', async function () {
+      this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
       const firstSlide = await getSlide(controller, 0);
 
@@ -93,7 +104,7 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // Wait for the scrolling to settle
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       // The new scroll width/left should eventually be the same as before,
@@ -102,7 +113,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    it('should have the correct scroll position when resizing', async () => {
+    it('should have the correct scroll position when resizing', async function () {
+      this.timeout(testTimeout);
       // Note: 513 seems to be the smallest settable width.
       await controller.setWindowRect({
         width: 800,
@@ -132,8 +144,9 @@ describes.endtoend(
       });
     });
 
-    describe('looping', () => {
-      it('should show the last slide when looping', async () => {
+    describe('looping', function () {
+      it('should show the last slide when looping', async function () {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -146,12 +159,13 @@ describes.endtoend(
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const snappedScrollLeft = restingScrollLeft - slideWidth;
         const requestedScrollLeft = snappedScrollLeft - 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       });
 
-      it('should show the first slide when looping', async () => {
+      it('should show the first slide when looping', async function () {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -163,14 +177,14 @@ describes.endtoend(
         const slideWidth = await prop(lastSlide, 'offsetWidth');
         const restingScrollLeft = await prop(el, 'scrollLeft');
         const lastSlideScrollPos = restingScrollLeft - slideWidth;
-        await controller.scroll(el, {left: lastSlideScrollPos});
+        await controller.scrollTo(el, {left: lastSlideScrollPos});
         await expect(prop(el, 'scrollLeft')).to.equal(lastSlideScrollPos);
         await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
 
         // Go to the next slide by moving the slides width to the right.
         const snappedScrollLeft = restingScrollLeft + slideWidth;
         const requestedScrollLeft = snappedScrollLeft + 1;
-        await controller.scroll(el, {left: requestedScrollLeft});
+        await controller.scrollTo(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
       });
@@ -178,7 +192,8 @@ describes.endtoend(
       // When resting the last few slides should be translated to the left.
       // Make sure we can move all the way forwards to the last slide and that it
       // is in the right place.
-      it('should display slides correctly when moving forwards', async () => {
+      it('should display slides correctly when moving forwards', async function () {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
@@ -203,7 +218,8 @@ describes.endtoend(
       // When resting the first few slides should be translated to the right.
       // Make sure we can move all the way backwards to the second slide and that
       // it is in the right place.
-      it('should display slides correctly when moving backwards', async () => {
+      it('should display slides correctly when moving backwards', async function () {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(controller);
         const secondSlide = await getSlide(controller, 1);
 

@@ -37,7 +37,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let helpers;
     let createAnchorReplacementObj;
 
@@ -55,10 +55,11 @@ describes.fakeWin(
     });
 
     function setupTrackingService(skimOptions, trackingInfo) {
-      trackingInfo = Object.assign(
-        {pageImpressionId: 'page-imp-id', guid: 'guid'},
-        trackingInfo
-      );
+      trackingInfo = {
+        pageImpressionId: 'page-imp-id',
+        guid: 'guid',
+        ...trackingInfo,
+      };
       const trackingService = helpers.createTrackingWithStubAnalytics(
         skimOptions
       );

@@ -15,10 +15,10 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
-const {isTravisBuild} = require('../../travis');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -39,9 +39,10 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * Escapes a string of HTML elements to HTML entities.
  *
  * @param {string} html HTML as string to escape.
+ * @return {string}
  */
 function escapeHtml(html) {
-  return html.replace(HTML_ESCAPE_REGEX, c => HTML_ESCAPE_CHARS[c]);
+  return html.replace(HTML_ESCAPE_REGEX, (c) => HTML_ESCAPE_CHARS[c]);
 }
 
 /**
@@ -53,10 +54,9 @@ function escapeHtml(html) {
 function log(mode, ...messages) {
   switch (mode) {
     case 'verbose':
-      if (isTravisBuild()) {
-        return;
+      if (argv.verbose) {
+        fancyLog.info(colors.green('VERBOSE:'), ...messages);
       }
-      fancyLog.info(colors.green('VERBOSE:'), ...messages);
       break;
     case 'info':
       fancyLog.info(colors.green('INFO:'), ...messages);
@@ -71,11 +71,6 @@ function log(mode, ...messages) {
       process.exitCode = 1;
       fancyLog.error(colors.red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
-    case 'travis':
-      if (isTravisBuild()) {
-        messages.forEach(message => process.stdout.write(message));
-      }
-      break;
   }
 }
 
@@ -96,7 +91,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {hidden: true})
       )
     );
@@ -126,7 +121,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector => waitForSelectorExistence(page, selector))
+      selectors.map((selector) => waitForSelectorExistence(page, selector))
     );
   } catch (e) {
     throw new Error(
@@ -142,7 +137,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {visible: true})
       )
     );
@@ -232,7 +227,7 @@ async function waitForElementVisibility(page, selector, options) {
     // to check equality to both waitForVisible and waitForHidden.
     if (
       elementsAreVisible.every(
-        elementIsVisible => elementIsVisible == waitForVisible
+        (elementIsVisible) => elementIsVisible == waitForVisible
       )
     ) {
       return true;

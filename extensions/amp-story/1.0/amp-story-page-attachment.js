@@ -14,43 +14,19 @@
  * limitations under the License.
  */
 
-import {
-  Action,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
-import {AnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
-import {
-  HistoryState,
-  createShadowRootWithStyle,
-  setHistoryState,
-} from './utils';
-import {Layout} from '../../../src/layout';
+import {Action, StateProperty} from './amp-story-store-service';
+import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
+import {HistoryState, setHistoryState} from './utils';
 import {Services} from '../../../src/services';
-import {closest, isAmpElement} from '../../../src/dom';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
+import {closest, removeElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
-import {listen} from '../../../src/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
-
-/** @const {number} */
-const TOGGLE_THRESHOLD_PX = 50;
+import {toggle} from '../../../src/style';
 
 /** @const {string} */
-const DARK_THEME_CLASS = 'i-amphtml-story-page-attachment-theme-dark';
-
-/**
- * @enum {number}
- */
-const AttachmentState = {
-  CLOSED: 0,
-  DRAGGING_TO_CLOSE: 1,
-  DRAGGING_TO_OPEN: 2,
-  OPEN: 3,
-};
+const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 
 /**
  * @enum {string}
@@ -61,103 +37,36 @@ const AttachmentTheme = {
 };
 
 /**
- * Drawer's template.
- * @param {!Element} element
- * @return {!Element}
+ * @enum
  */
-const getTemplateEl = element => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-page-attachment">
-      <div class="i-amphtml-story-page-attachment-container">
-        <div class="i-amphtml-story-page-attachment-content"></div>
-      </div>
-    </div>`;
-};
-
-/**
- * Drawer's header template.
- * @param {!Element} element
- * @return {!Element}
- */
-const getHeaderEl = element => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-page-attachment-header">
-      <span
-          class="i-amphtml-story-page-attachment-close-button" role="button">
-      </span>
-      <span class="i-amphtml-story-page-attachment-title"></span>
-    </div>`;
+const AttachmentType = {
+  INLINE: 0,
+  REMOTE: 1,
 };
 
 /**
  * AMP Story page attachment.
  */
-export class AmpStoryPageAttachment extends AMP.BaseElement {
+export class AmpStoryPageAttachment extends DraggableDrawer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {!Array<!Element>} AMP components within the attachment. */
-    this.ampComponents_ = [];
-
-    /** @private {!./story-analytics.StoryAnalyticsService} */
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
-    /** @private {?Element} */
-    this.containerEl_ = null;
-
-    /** @private {?Element} */
-    this.contentEl_ = null;
-
-    /** @private {?Element} */
-    this.headerEl_ = null;
-
-    /** @type {!../../../src/service/history-impl.History} */
+    /** @private @const {!../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
 
-    /** @private {!AttachmentState} */
-    this.state_ = AttachmentState.CLOSED;
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
-
-    /** @private {boolean} */
-    this.ignoreCurrentSwipeYGesture_ = false;
-
-    /** @private {!Object} */
-    this.touchEventState_ = {
-      startX: 0,
-      startY: 0,
-      lastY: 0,
-      swipingUp: null,
-      isSwipeY: null,
-    };
-
-    /** @private {!Array<function()>} */
-    this.touchEventUnlisteners_ = [];
+    /** @private {?AttachmentType} */
+    this.type_ = null;
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
-  }
-
-  /** @override */
+  /**
+   * @override
+   */
   buildCallback() {
-    const templateEl = getTemplateEl(this.element);
-    const headerShadowRootEl = this.win.document.createElement('div');
-    this.headerEl_ = getHeaderEl(this.element);
-
-    if (this.element.hasAttribute('data-title')) {
-      this.headerEl_.querySelector(
-        '.i-amphtml-story-page-attachment-title'
-      ).textContent = this.element.getAttribute('data-title');
-    }
+    super.buildCallback();
 
     const theme = this.element.getAttribute('theme');
     if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
@@ -165,62 +74,116 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       this.element.classList.add(DARK_THEME_CLASS);
     }
 
-    createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
-    templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
+    // URL will be validated and resolved based on the canonical URL if relative
+    // when navigating.
+    const href = this.element.getAttribute('href');
+    this.type_ = href ? AttachmentType.REMOTE : AttachmentType.INLINE;
 
-    this.containerEl_ = dev().assertElement(
-      templateEl.querySelector('.i-amphtml-story-page-attachment-container')
-    );
-    this.contentEl_ = dev().assertElement(
-      this.containerEl_.querySelector(
-        '.i-amphtml-story-page-attachment-content'
-      )
-    );
-
-    while (this.element.firstChild) {
-      this.contentEl_.appendChild(this.element.firstChild);
+    if (this.type_ === AttachmentType.INLINE) {
+      this.buildInline_();
     }
 
-    this.element.appendChild(templateEl);
+    if (this.type_ === AttachmentType.REMOTE) {
+      this.buildRemote_();
+    }
 
-    // Ensures the content of the attachment won't be rendered/loaded until we
-    // actually need it.
-    toggle(this.containerEl_, false);
+    this.win.addEventListener('pageshow', (event) => {
+      // On browser back, Safari does not reload the page but resumes its cached
+      // version. This event's parameter lets us know when this happens so we
+      // can cleanup the remote opening animation.
+      if (event.persisted) {
+        this.closeInternal_(false /** shouldAnimate */);
+      }
+    });
+
     toggle(this.element, true);
   }
 
-  /** @override */
-  layoutCallback() {
-    this.initializeListeners_();
-
-    const walker = this.win.document.createTreeWalker(
-      this.element,
-      NodeFilter.SHOW_ELEMENT,
-      null /** filter */,
-      false /** entityReferenceExpansion */
+  /**
+   * Builds inline page attachment's UI.
+   * @private
+   */
+  buildInline_() {
+    this.headerEl_.appendChild(
+      htmlFor(this.element)`
+          <span class="i-amphtml-story-page-attachment-close-button"
+              role="button">
+          </span>`
     );
-    while (walker.nextNode()) {
-      const el = dev().assertElement(walker.currentNode);
-      if (isAmpElement(el)) {
-        this.ampComponents_.push(el);
-        this.setAsOwner(el);
-      }
+    this.headerEl_.appendChild(
+      htmlFor(this.element)`
+          <span class="i-amphtml-story-page-attachment-title"></span>`
+    );
+
+    if (this.element.hasAttribute('data-title')) {
+      this.headerEl_.querySelector(
+        '.i-amphtml-story-page-attachment-title'
+      ).textContent = this.element.getAttribute('data-title');
     }
-    return Promise.resolve();
+
+    const templateEl = this.element.querySelector(
+      '.i-amphtml-story-draggable-drawer'
+    );
+
+    while (this.element.firstChild && this.element.firstChild !== templateEl) {
+      this.contentEl_.appendChild(this.element.firstChild);
+    }
+
+    // Ensures the content of the attachment won't be rendered/loaded until we
+    // actually need it.
+    toggle(dev().assertElement(this.containerEl_), true);
   }
 
   /**
+   * Builds remote page attachment's UI.
    * @private
    */
+  buildRemote_() {
+    this.setDragCap_(48 /* pixels */);
+    this.setOpenThreshold_(150 /* pixels */);
+
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-attachment-remote'
+    );
+    this.element.classList.add('i-amphtml-story-page-attachment-remote');
+    this.contentEl_.appendChild(
+      htmlFor(this.element)`
+          <div class="i-amphtml-story-page-attachment-remote-content">
+            <span class="i-amphtml-story-page-attachment-remote-domain"></span>
+            <span class="i-amphtml-story-page-attachment-remote-icon"></span>
+          </div>`
+    );
+
+    const urlService = Services.urlForDoc(this.element);
+    const domain = urlService.getSourceOrigin(
+      this.element.getAttribute('href')
+    );
+    this.contentEl_.querySelector(
+      '.i-amphtml-story-page-attachment-remote-domain'
+    ).textContent = domain;
+  }
+
+  /**
+   * @override
+   */
   initializeListeners_() {
-    this.headerEl_
-      .querySelector('.i-amphtml-story-page-attachment-close-button')
-      .addEventListener('click', () => this.close_(), true /** useCapture */);
+    super.initializeListeners_();
+
+    const closeButtonEl = this.headerEl_.querySelector(
+      '.i-amphtml-story-page-attachment-close-button'
+    );
+    if (closeButtonEl) {
+      closeButtonEl.addEventListener(
+        'click',
+        () => this.close_(),
+        true /** useCapture */
+      );
+    }
 
     // Always open links in a new tab.
     this.contentEl_.addEventListener(
       'click',
-      event => {
+      (event) => {
         const {target} = event;
         if (target.tagName.toLowerCase() === 'a') {
           target.setAttribute('target', '_blank');
@@ -232,7 +195,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     // Closes the attachment on opacity background clicks.
     this.element.addEventListener(
       'click',
-      event => {
+      (event) => {
         if (
           event.target.tagName.toLowerCase() === 'amp-story-page-attachment'
         ) {
@@ -241,359 +204,123 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       },
       true /** useCapture */
     );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      uiState => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
-    );
   }
 
   /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE
-      ? this.startListeningForTouchEvents_()
-      : this.stopListeningForTouchEvents_();
-  }
-
-  /**
-   * @private
-   */
-  startListeningForTouchEvents_() {
-    // Enforced by AMP validation rules.
-    const storyPageEl = dev().assertElement(this.element.parentElement);
-
-    this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this), {
-        capture: true,
-      })
-    );
-    this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this), {
-        capture: true,
-      })
-    );
-    this.touchEventUnlisteners_.push(
-      listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this), {
-        capture: true,
-      })
-    );
-  }
-
-  /**
-   * @private
-   */
-  stopListeningForTouchEvents_() {
-    this.touchEventUnlisteners_.forEach(fn => fn());
-    this.touchEventUnlisteners_ = [];
-  }
-
-  /**
-   * Helper to retrieve the touch coordinates from a TouchEvent.
-   * @param {!Event} event
-   * @return {?{x: number, y: number}}
-   * @private
-   */
-  getClientTouchCoordinates_(event) {
-    const {touches} = event;
-    if (!touches || touches.length < 1) {
-      return null;
-    }
-
-    const {clientX: x, clientY: y} = touches[0];
-    return {x, y};
-  }
-
-  /**
-   * Handles touchstart events to detect swipeY interactions.
-   * @param {!Event} event
-   * @private
-   */
-  onTouchStart_(event) {
-    const coordinates = this.getClientTouchCoordinates_(event);
-    if (!coordinates) {
-      return;
-    }
-
-    this.touchEventState_.startX = coordinates.x;
-    this.touchEventState_.startY = coordinates.y;
-  }
-
-  /**
-   * Handles touchmove events to detect swipeY interactions.
-   * @param {!Event} event
-   * @private
-   */
-  onTouchMove_(event) {
-    if (this.touchEventState_.isSwipeY === false) {
-      return;
-    }
-
-    event.stopPropagation();
-
-    const coordinates = this.getClientTouchCoordinates_(event);
-    if (!coordinates) {
-      return;
-    }
-
-    const {x, y} = coordinates;
-
-    if (this.touchEventState_.isSwipeY === null) {
-      this.touchEventState_.isSwipeY =
-        Math.abs(this.touchEventState_.startY - y) >
-        Math.abs(this.touchEventState_.startX - x);
-      if (!this.touchEventState_.isSwipeY) {
-        return;
-      }
-    }
-
-    this.touchEventState_.swipingUp = y < this.touchEventState_.lastY;
-    this.touchEventState_.lastY = y;
-
-    this.onSwipeY_({
-      event,
-      data: {
-        swipingUp: this.touchEventState_.swipingUp,
-        deltaY: y - this.touchEventState_.startY,
-        last: false,
-      },
-    });
-  }
-
-  /**
-   * Handles touchend events to detect swipeY interactions.
-   * @param {!Event} event
-   * @private
-   */
-  onTouchEnd_(event) {
-    if (this.touchEventState_.isSwipeY === true) {
-      this.onSwipeY_({
-        event,
-        data: {
-          swipingUp: this.touchEventState_.swipingUp,
-          deltaY: this.touchEventState_.lastY - this.touchEventState_.startY,
-          last: true,
-        },
-      });
-    }
-
-    this.touchEventState_.startX = 0;
-    this.touchEventState_.startY = 0;
-    this.touchEventState_.lastY = 0;
-    this.touchEventState_.swipingUp = null;
-    this.touchEventState_.isSwipeY = null;
-  }
-
-  /**
-   * Handles swipeY events, detected by the touch events listeners.
-   * @param {{event: !Event, data: !Object}} gesture
-   * @private
-   */
-  onSwipeY_(gesture) {
-    const {data} = gesture;
-
-    if (this.ignoreCurrentSwipeYGesture_ === true) {
-      this.ignoreCurrentSwipeYGesture_ = !data.last;
-      return;
-    }
-
-    const {deltaY, swipingUp} = data;
-
-    // If the attachment is open, figure out if the user is trying to scroll the
-    // content, or actually close the attachment.
-    if (this.state_ === AttachmentState.OPEN) {
-      const isContentSwipe = this.isAttachmentContentDescendant_(
-        dev().assertElement(gesture.event.target)
-      );
-
-      // If user is swiping up, exit so the event bubbles up and maybe scrolls
-      // the attachment content.
-      // If user is swiping down and scrollTop is above zero, exit and let the
-      // user scroll the content.
-      // If user is swiping down and scrollTop is zero, don't exit and start
-      // dragging/closing the attachment.
-      if (
-        (isContentSwipe && deltaY < 0) ||
-        (isContentSwipe && deltaY > 0 && this.containerEl_./*OK*/ scrollTop > 0)
-      ) {
-        this.ignoreCurrentSwipeYGesture_ = true;
-        return;
-      }
-    }
-
-    gesture.event.preventDefault();
-
-    if (data.last === true) {
-      if (this.state_ === AttachmentState.DRAGGING_TO_CLOSE) {
-        !swipingUp && deltaY > TOGGLE_THRESHOLD_PX
-          ? this.close_()
-          : this.open();
-      }
-
-      if (this.state_ === AttachmentState.DRAGGING_TO_OPEN) {
-        swipingUp && -deltaY > TOGGLE_THRESHOLD_PX
-          ? this.open()
-          : this.close_();
-      }
-      return;
-    }
-
-    this.drag_(deltaY);
-  }
-
-  /**
-   * Whether the element is a descendant of attachment-content.
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isAttachmentContentDescendant_(element) {
-    return !!closest(
-      element,
-      el => {
-        return el.classList.contains('i-amphtml-story-page-attachment-content');
-      },
-      /* opt_stopAt */ this.element
-    );
-  }
-
-  /**
-   * Drags the attachment on the screen upon user interaction.
-   * @param {number} deltaY
-   * @private
-   */
-  drag_(deltaY) {
-    let translate;
-
-    switch (this.state_) {
-      case AttachmentState.CLOSED:
-      case AttachmentState.DRAGGING_TO_OPEN:
-        if (deltaY > 0) {
-          return;
-        }
-        this.state_ = AttachmentState.DRAGGING_TO_OPEN;
-        translate = `translate3d(0, calc(100% + ${deltaY}px), 0)`;
-        break;
-      case AttachmentState.OPEN:
-      case AttachmentState.DRAGGING_TO_CLOSE:
-        if (deltaY < 0) {
-          return;
-        }
-        this.state_ = AttachmentState.DRAGGING_TO_CLOSE;
-        translate = `translate3d(0, ${deltaY}px, 0)`;
-        break;
-    }
-
-    this.mutateElement(() => {
-      setImportantStyles(this.element, {
-        transform: translate,
-        transition: 'none',
-      });
-    });
-  }
-
-  /**
-   * Fully opens the attachment from its current position.
-   * @param {boolean=} shouldAnimate
+   * @override
    */
   open(shouldAnimate = true) {
-    if (this.state_ === AttachmentState.OPEN) {
+    if (this.state_ === DrawerState.OPEN) {
       return;
     }
 
-    this.state_ = AttachmentState.OPEN;
+    super.open(shouldAnimate);
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
-    this.mutateElement(() => {
-      resetStyles(this.element, ['transform', 'transition']);
+    // Don't create a new history entry for remote attachment as user is
+    // navigating away.
+    if (this.type_ !== AttachmentType.REMOTE) {
+      const currentHistoryState = /** @type {!Object} */ (getState(
+        this.win.history
+      ));
+      const historyState = {
+        ...currentHistoryState,
+        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
+          StateProperty.CURRENT_PAGE_ID
+        ),
+      };
+      this.historyService_.push(() => this.closeInternal_(), historyState);
+    }
 
-      if (!shouldAnimate) {
-        // Resets the 'transition' property, and removes this override in the
-        // next frame, after the element is positioned.
-        setImportantStyles(this.element, {transition: 'initial'});
-        this.mutateElement(() => resetStyles(this.element, ['transition']));
-      }
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
 
-      this.element.classList.add('i-amphtml-story-page-attachment-open');
-      toggle(dev().assertElement(this.containerEl_), true);
-    }).then(() => {
-      this.scheduleLayout(this.ampComponents_);
-      this.scheduleResume(this.ampComponents_);
-      this.updateInViewport(this.ampComponents_, true);
-    });
-
-    const currentHistoryState = /** @type {!Object} */ (getState(
-      this.win.history
-    ));
-    const historyState = Object.assign({}, currentHistoryState, {
-      [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
-        StateProperty.CURRENT_PAGE_ID
-      ),
-    });
-
-    this.historyService_.push(() => this.closeInternal_(), historyState);
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_ENTER);
+    if (this.type_ === AttachmentType.REMOTE) {
+      this.openRemote_();
+    }
   }
 
   /**
-   * Ensures the history state we added when opening the attachment is popped,
-   * and closes the attachment either directly, or through the onPop callback.
+   * Triggers a remote attachment opening animation, and redirects to the
+   * specified URL.
    * @private
+   */
+  openRemote_() {
+    const animationEl = this.win.document.createElement('div');
+    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+
+    this.mutateElement(() => {
+      storyEl.appendChild(animationEl);
+    }).then(() => {
+      // Give some time for the 120ms CSS animation to run (cf
+      // amp-story-page-attachment.css). The navigation itself will take some
+      // time, depending on the target and network conditions.
+      this.win.setTimeout(() => {
+        const navigationService = Services.navigationForDoc(this.getAmpDoc());
+        navigationService.navigateTo(
+          this.win,
+          this.element.getAttribute('href')
+        );
+      }, 50);
+    });
+  }
+
+  /**
+   * Ensures the history state we added when opening the drawer is popped,
+   * and closes the drawer either directly, or through the onPop callback.
+   * @override
    */
   close_() {
     switch (this.state_) {
-      // If the attachment was open, pop the history entry that was added, which
-      // will close the attachment through the onPop callback.
-      case AttachmentState.OPEN:
-      case AttachmentState.DRAGGING_TO_CLOSE:
+      // If the drawer was open, pop the history entry that was added, which
+      // will close the drawer through the onPop callback.
+      case DrawerState.OPEN:
+      case DrawerState.DRAGGING_TO_CLOSE:
         this.historyService_.goBack();
         break;
-      // If the attachment was not open, no history entry was added, so we can
-      // close the attachment directly.
-      case AttachmentState.DRAGGING_TO_OPEN:
+      // If the drawer was not open, no history entry was added, so we can
+      // close the drawer directly.
+      case DrawerState.DRAGGING_TO_OPEN:
         this.closeInternal_();
         break;
     }
   }
 
   /**
-   * Fully closes the attachment from its current position.
-   * @private
+   * @override
    */
-  closeInternal_() {
-    if (this.state_ === AttachmentState.CLOSED) {
+  closeInternal_(shouldAnimate = true) {
+    if (this.state_ === DrawerState.CLOSED) {
       return;
     }
 
-    this.state_ = AttachmentState.CLOSED;
+    super.closeInternal_(shouldAnimate);
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
-    this.mutateElement(() => {
-      resetStyles(this.element, ['transform', 'transition']);
-      this.element.classList.remove('i-amphtml-story-page-attachment-open');
-      // Note: if you change the duration here, you'll also have to change the
-      // animation duration in the CSS.
-      setTimeout(
-        () => toggle(dev().assertElement(this.containerEl_), false),
-        250
-      );
-    }).then(() => {
-      this.schedulePause(this.ampComponents_);
-      this.updateInViewport(this.ampComponents_, false);
-    });
+    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
+    const animationEl = storyEl.querySelector(
+      '.i-amphtml-story-page-attachment-expand'
+    );
+    if (animationEl) {
+      this.mutateElement(() => {
+        removeElement(dev().assertElement(animationEl));
+      });
+    }
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_EXIT);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
+    );
   }
 }

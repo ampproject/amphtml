@@ -61,12 +61,12 @@ function getConfigJson(element) {
 
 /**
  * @param {!Object} attribute
- * return {Object}
+ * @return {Object}
  */
 function parseAttribute(attribute) {
   const newAttr = {};
 
-  Object.keys(attribute).forEach(key => {
+  Object.keys(attribute).forEach((key) => {
     newAttr[key] = '^' + attribute[key] + '$';
   });
 

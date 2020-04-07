@@ -3,8 +3,9 @@
   "name": "gulp-visual-diff",
   "version": "0.1.0",
   "description": "Gulp visual diff",
-  "dependencies": {
-    "@percy/puppeteer": "0.4.0",
-    "puppeteer": "1.9.0"
+  "devDependencies": {
+    "@percy/agent": "0.26.2",
+    "@percy/puppeteer": "1.1.0",
+    "puppeteer": "2.1.1"
   }
 }

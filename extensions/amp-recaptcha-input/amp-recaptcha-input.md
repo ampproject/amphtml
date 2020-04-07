@@ -1,10 +1,11 @@
 ---
-$category@: media
+$category@: dynamic-content
 formats:
   - websites
 teaser:
   text: Appends a reCAPTCHA v3 token to AMP form submissions.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,25 +24,6 @@ limitations under the License.
 
 # amp-recaptcha-input
 
-Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> token to <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">AMP form</a> submissions.
-
-<table>
-<tr>
-<td width="40%"><strong>Required Script</strong></td>
-<td><code>&lt;script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js">&lt;/script></code></td>
-</tr>
-<tr>
-<td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-<td>nodisplay</td>
-</tr>
-<tr>
-<td width="40%"><strong>Examples</strong></td>
-<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
-</tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 This extension adds a parameter containing a recaptcha response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling `grecaptcha.execute` with the provided site key and action.
@@ -52,7 +34,7 @@ This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page corre
 
 **`<amp-recaptcha-input>` usage**
 
-```
+```html
 <form amp-form-attributes-go-here>
   ...
   <amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey=”reCAPTCHA_site_key" data-action="reCAPTCHA_example_action">
@@ -63,13 +45,13 @@ This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page corre
 
 **Corresponding `grecaptcha` call**
 
-```
+```js
 grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 ```
 
 **Corresponding AMP form submit body**
 
-```
+```js
 {
   ...other form params
   “reCAPTCHA_body_key”: “returned_reCAPTCHA_response_token”
@@ -95,6 +77,10 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
   <tr>
     <td width="40%"><strong>data-action (required)</strong></td>
     <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-global [optional]</strong></td>
+    <td>By default, the iframe loads the recaptcha api script using the <code>www.google.com</code> endpoint.  There are some situations when this is not accessible.  When the <code>data-global</code> attribute is included, the component will load the script from the <code>www.recaptcha.net</code> endpoint instead.  More information can be found in the <a href="https://developers.google.com/recaptcha/docs/faq#can-i-use-recaptcha-globally">reCAPTCHA FAQ</a>.</td>
   </tr>
 </table>
 

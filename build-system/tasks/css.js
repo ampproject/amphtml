@@ -18,13 +18,8 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
-const {
-  endBuildStep,
-  mkdirSync,
-  printNobuildHelp,
-  toPromise,
-} = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
+const {endBuildStep, mkdirSync, toPromise} = require('./helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -34,7 +29,6 @@ const {maybeUpdatePackages} = require('./update-packages');
  */
 async function css() {
   maybeUpdatePackages();
-  printNobuildHelp();
   return compileCss();
 }
 
@@ -60,17 +54,28 @@ const cssEntryPoints = [
     // than the JS file to avoid loading CSS as JS
     outCss: 'video-autoplay-out.css',
   },
+  {
+    // Publisher imported CSS for `src/amp-story-player.js`.
+    path: 'amp-story-player.css',
+    outJs: 'amp-story-player.css.js',
+    outCss: 'amp-story-player-v0.css',
+  },
+  {
+    // Internal CSS used for the iframes inside `src/amp-story-player.js`.
+    path: 'amp-story-player-iframe.css',
+    outJs: 'amp-story-player-iframe.css.js',
+    outCss: 'amp-story-player-iframe-v0.css',
+  },
 ];
 
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
- * @param {boolean=} opt_compileAll
  * @return {!Promise}
  */
-function compileCss(watch, opt_compileAll) {
+function compileCss(watch) {
   if (watch) {
-    gulpWatch('css/**/*.css', function() {
+    gulpWatch('css/**/*.css', function () {
       compileCss();
     });
   }
@@ -86,12 +91,15 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
-      // cssText is hardcoded in AmpCodingConvention.java
-      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
-        src: true,
-      })
+      file(
+        jsFilename,
+        '/** @noinline */ export const cssText = ' + JSON.stringify(css),
+        {
+          src: true,
+        }
+      )
         .pipe(gulp.dest('build'))
-        .on('end', function() {
+        .on('end', function () {
           mkdirSync('build');
           mkdirSync('build/css');
           if (append) {
@@ -108,9 +116,10 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outJs
    * @param {string} outCss
    * @param {boolean} append
+   * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
-    return jsifyCssAsync(`css/${path}`).then(css =>
+    return jsifyCssAsync(`css/${path}`).then((css) =>
       writeCss(css, outJs, outCss, append)
     );
   }
@@ -122,7 +131,7 @@ function compileCss(watch, opt_compileAll) {
 
   let promise = Promise.resolve();
 
-  cssEntryPoints.forEach(entryPoint => {
+  cssEntryPoints.forEach((entryPoint) => {
     const {path, outJs, outCss, append} = entryPoint;
     promise = promise.then(() =>
       writeCssEntryPoint(path, outJs, outCss, append)
@@ -130,12 +139,7 @@ function compileCss(watch, opt_compileAll) {
   });
 
   return promise
-    .then(() =>
-      buildExtensions({
-        compileOnlyCss: true,
-        compileAll: opt_compileAll,
-      })
-    )
+    .then(() => buildExtensions({compileOnlyCss: true}))
     .then(() => {
       endBuildStep('Recompiled all CSS files into', 'build/', startTime);
     });

@@ -19,13 +19,14 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;
   let parentEl;
   let shareMenu;
@@ -36,7 +37,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     isSystemShareSupported = false;
 
@@ -45,12 +48,12 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       isSystemShareSupported: () => isSystemShareSupported,
       loadRequiredExtensions: () => {},
     };
-    shareWidgetMock = sandbox.mock(shareWidget);
-    sandbox.stub(ShareWidget, 'create').returns(shareWidget);
+    shareWidgetMock = env.sandbox.mock(shareWidget);
+    env.sandbox.stub(ShareWidget, 'create').returns(shareWidget);
 
     // Making sure the vsync tasks run synchronously.
-    sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+    env.sandbox.stub(Services, 'vsyncFor').returns({
+      mutate: (fn) => fn(),
       run: (vsyncTaskSpec, vsyncState) => {
         vsyncTaskSpec.measure(vsyncState);
         vsyncTaskSpec.mutate(vsyncState);
@@ -58,7 +61,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function () {
+      return localizationService;
+    });
 
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
@@ -130,6 +135,21 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
 
+  it('should hide the share menu on escape key press', () => {
+    shareMenu.build();
+
+    const clickCallbackSpy = env.sandbox.spy();
+    win.addEventListener('keyup', clickCallbackSpy);
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    // Create escape keyup event.
+    const keyupEvent = new Event('keyup');
+    keyupEvent.keyCode = Keys.ESCAPE;
+    win.dispatchEvent(keyupEvent);
+
+    expect(clickCallbackSpy).to.have.been.calledOnce;
+  });
+
   it('should render the amp-social-share button if system share', () => {
     isSystemShareSupported = true;
 
@@ -160,7 +180,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    const clickCallbackSpy = sandbox.spy();
+    const clickCallbackSpy = env.sandbox.spy();
     shareMenu.element_.addEventListener('click', clickCallbackSpy);
 
     // Toggling the share menu dispatches a click event on the amp-social-share

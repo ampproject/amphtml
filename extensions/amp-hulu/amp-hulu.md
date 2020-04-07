@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a simple embedded Hulu video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,30 +24,15 @@ limitations under the License.
 
 # amp-hulu
 
-Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 ```html
-<amp-hulu width="412" height="213" layout="responsive"
-  data-eid="4Dk5F2PYTtrgciuvloH3UA">
+<amp-hulu
+  width="412"
+  height="213"
+  layout="responsive"
+  data-eid="4Dk5F2PYTtrgciuvloH3UA"
+>
 </amp-hulu>
 ```
 
@@ -59,10 +45,9 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

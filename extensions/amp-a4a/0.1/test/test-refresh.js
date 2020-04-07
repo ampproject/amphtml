@@ -26,7 +26,6 @@ import {Services} from '../../../../src/services';
 
 describe('refresh', () => {
   let mockA4a;
-  let sandbox;
   const config = {
     visiblePercentageMin: 50,
     totalTimeMin: 0,
@@ -38,21 +37,26 @@ describe('refresh', () => {
     div.setAttribute('style', 'width:1px; height:1px;');
     div.setAttribute('type', 'doubleclick');
     div.setAttribute(DATA_ATTR_NAME, '35');
-    sandbox.replaceGetter(div, 'isConnected', () => true);
+    window.sandbox.replaceGetter(div, 'isConnected', () => true);
+    div.getAmpDoc = () => {
+      return {
+        getMetaByName: (name) => {
+          const metaTag = window.document.head.querySelector(
+            `[name="${name}"]`
+          );
+          return metaTag ? metaTag.getAttribute('content') : null;
+        },
+      };
+    };
     return div;
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     mockA4a = {
       win: window,
       element: getTestElement(),
       refresh: () => {},
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('refresh-manager', () => {
@@ -93,7 +97,7 @@ describe('refresh', () => {
     });
 
     it('should call convertConfiguration_ and set proper units', () => {
-      const getConfigurationSpy = sandbox.spy(
+      const getConfigurationSpy = window.sandbox.spy(
         RefreshManager.prototype,
         'convertAndSanitizeConfiguration_'
       );
@@ -120,7 +124,7 @@ describe('refresh', () => {
       it('should stay in INITIAL state', () => {
         const ioEntry = {
           target: {
-            getAttribute: name => (name == DATA_MANAGER_ID_NAME ? '0' : null),
+            getAttribute: (name) => (name == DATA_MANAGER_ID_NAME ? '0' : null),
           },
           intersectionRatio: refreshManager.config_.visiblePercentageMin,
         };
@@ -157,7 +161,7 @@ describe('refresh', () => {
     it('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
-      const refreshSpy = sandbox.spy(mockA4a, 'refresh');
+      const refreshSpy = window.sandbox.spy(mockA4a, 'refresh');
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.
@@ -202,12 +206,12 @@ describe('refresh', () => {
         y: 0,
       });
 
-      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+      window.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
         return {
           getRect,
         };
       });
-      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+      window.sandbox.stub(Services, 'ampdoc').callsFake(() => {
         return {
           getRootNode: () => {
             return window.document;
@@ -226,10 +230,10 @@ describe('refresh', () => {
       mockA4a.getViewport = () => ({getRect});
 
       let resolver;
-      callbackPromise = new Promise(resolve => {
+      callbackPromise = new Promise((resolve) => {
         resolver = resolve;
       });
-      callback = entries => resolver(entries);
+      callback = (entries) => resolver(entries);
       observerWrapper = new RefreshIntersectionObserverWrapper(
         callback,
         mockA4a,
@@ -239,7 +243,7 @@ describe('refresh', () => {
 
     it('should invoke callback with intersection ratio 1', () => {
       observerWrapper.observe(mockA4a.element);
-      return callbackPromise.then(entries => {
+      return callbackPromise.then((entries) => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
         expect(entries[0].intersectionRatio).to.equal(1);
@@ -260,7 +264,7 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      return callbackPromise.then(entries => {
+      return callbackPromise.then((entries) => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
         expect(entries[0].intersectionRatio).to.equal(0.5);
@@ -268,7 +272,7 @@ describe('refresh', () => {
     });
 
     it('should not invoke callback', () => {
-      const callbackSpy = sandbox.spy(callback);
+      const callbackSpy = window.sandbox.spy(callback);
       observerWrapper.viewport_ = {
         getRect: () => ({
           top: 10,

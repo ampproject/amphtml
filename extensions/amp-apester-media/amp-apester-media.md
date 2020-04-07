@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Apester smart unit.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,42 +24,23 @@ limitations under the License.
 
 # amp-apester-media
 
-Displays a <a href="https://apester.com/">Apester</a> smart unit.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td> <code>&lt;script async custom-element="amp-apester-media" src="https://cdn.ampproject.org/v0/amp-apester-media-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>
-    fill, fixed, fixed-height, flex-item, nodisplay, responsive
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Examples
 
 Single Mode:
+
 ```html
-<amp-apester-media
-        height="390"
-        data-apester-media-id="#">
-</amp-apester-media>
+<amp-apester-media height="390" data-apester-media-id="#"> </amp-apester-media>
 ```
 
 Playlist Mode:
+
 ```html
-<amp-apester-media
-        height="390"
-        data-apester-channel-token="#">
+<amp-apester-media height="390" data-apester-channel-token="#">
 </amp-apester-media>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-apester-media-id</strong></td>
@@ -69,7 +51,6 @@ Playlist Mode:
     <td>This attribute is required for playlist mode, and it represents the token of the channel (string value).</td>
   </tr>
 </table>
-
 
 ## Validation
 

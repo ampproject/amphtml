@@ -47,7 +47,7 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?Promise} */
@@ -106,7 +106,7 @@ class AmpImaVideo extends AMP.BaseElement {
     );
     if (childElements.length > 0) {
       const children = [];
-      childElements.forEach(child => {
+      childElements.forEach((child) => {
         // Save the first source and first track to preconnect.
         if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
           this.preconnectSource_ = child.src;
@@ -133,23 +133,25 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    const {element, preconnect} = this;
+    const {element} = this;
+    const preconnect = Services.preconnectFor(this.win);
     preconnect.preload(
+      this.getAmpDoc(),
       'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
       'script'
     );
     const source = element.getAttribute('data-src');
     if (source) {
-      preconnect.url(source);
+      preconnect.url(this.getAmpDoc(), source);
     }
     if (this.preconnectSource_) {
-      preconnect.url(this.preconnectSource_);
+      preconnect.url(this.getAmpDoc(), this.preconnectSource_);
     }
     if (this.preconnectTrack_) {
-      preconnect.url(this.preconnectTrack_);
+      preconnect.url(this.getAmpDoc(), this.preconnectTrack_);
     }
-    preconnect.url(element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, preconnect);
+    preconnect.url(this.getAmpDoc(), element.getAttribute('data-tag'));
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -169,7 +171,7 @@ class AmpImaVideo extends AMP.BaseElement {
     const consentPromise = consentPolicyId
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
-    return consentPromise.then(initialConsentState => {
+    return consentPromise.then((initialConsentState) => {
       const iframe = getIframe(
         win,
         element,
@@ -190,7 +192,7 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_ = deferred.promise;
       this.playerReadyResolver_ = deferred.resolve;
 
-      this.unlistenMessage_ = listen(this.win, 'message', e =>
+      this.unlistenMessage_ = listen(this.win, 'message', (e) =>
         this.handlePlayerMessage_(/** @type {!Event} */ (e))
       );
 
@@ -242,18 +244,20 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    */
   sendCommand_(command, opt_args) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
+    if (this.playerReadyPromise_) {
       this.playerReadyPromise_.then(() => {
-        this.iframe_.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'command',
-              'func': command,
-              'args': opt_args || '',
-            })
-          ),
-          '*'
-        );
+        if (this.iframe_ && this.iframe_.contentWindow) {
+          this.iframe_.contentWindow./*OK*/ postMessage(
+            JSON.stringify(
+              dict({
+                'event': 'command',
+                'func': command,
+                'args': opt_args || '',
+              })
+            ),
+            '*'
+          );
+        }
       });
     }
     // If we have an unlistener for this command, call it.
@@ -286,12 +290,18 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
+      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {
       this.isFullscreen_ = !!eventData['isFullscreen'];
       return;
     }
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.pause();
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
@@ -387,6 +397,6 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpImaVideo);
 });

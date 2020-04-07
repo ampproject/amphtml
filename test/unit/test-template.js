@@ -22,7 +22,7 @@ import {
 import {Services} from '../../src/services';
 import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
 
-describes.fakeWin('Template', {amp: true}, env => {
+describes.realWin('Template', {amp: true}, (env) => {
   let templates;
   let doc;
   let win;
@@ -33,13 +33,12 @@ describes.fakeWin('Template', {amp: true}, env => {
     installTemplatesService(win);
     templates = Services.templatesFor(win);
     doc = win.document;
-    container = document.createElement('div');
-    document.body.appendChild(container);
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
   });
 
   afterEach(() => {
     resetServiceForTesting(win, 'templates');
-    document.body.removeChild(container);
   });
 
   class TemplateImpl extends BaseTemplate {
@@ -78,7 +77,7 @@ describes.fakeWin('Template', {amp: true}, env => {
       templateElement.getAttribute('type'),
       TemplateImpl
     );
-    return templates.renderTemplate(templateElement, {value: 1}).then(res => {
+    return templates.renderTemplate(templateElement, {value: 1}).then((res) => {
       expect(res.textContent).to.equal('abc1');
     });
   });
@@ -100,7 +99,7 @@ describes.fakeWin('Template', {amp: true}, env => {
         templateElement.parentElement.removeChild(templateElement);
         return templates.renderTemplate(templateElement, {value: 2});
       })
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc2');
       });
   });
@@ -114,7 +113,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     );
     return templates
       .renderTemplateArray(templateElement, [{value: 1}, {value: 2}])
-      .then(res => {
+      .then((res) => {
         expect(res).to.have.length.of(2);
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
@@ -148,7 +147,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     );
     doc.body.appendChild(scriptElement);
     let result = undefined;
-    templates.renderTemplate(templateElement, {value: 0}).then(res => {
+    templates.renderTemplate(templateElement, {value: 0}).then((res) => {
       result = res;
     });
     return Promise.resolve().then(() => {
@@ -172,7 +171,7 @@ describes.fakeWin('Template', {amp: true}, env => {
       templateElement.getAttribute('type'),
       TemplateImpl
     );
-    return p.then(res => {
+    return p.then((res) => {
       expect(res.textContent).to.equal('abc1');
     });
   });
@@ -194,12 +193,12 @@ describes.fakeWin('Template', {amp: true}, env => {
     );
     // This is just a complicated way to say Promise -> all.
     return p1
-      .then(res1 => {
-        return p2.then(res2 => {
+      .then((res1) => {
+        return p2.then((res2) => {
           return [res1, res2];
         });
       })
-      .then(res => {
+      .then((res) => {
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
       });
@@ -218,7 +217,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     doc.body.appendChild(parentElement);
     return templates
       .findAndRenderTemplate(parentElement, {value: 1})
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc1');
       });
   });
@@ -274,7 +273,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     container.appendChild(parentElement);
     return templates
       .findAndRenderTemplate(parentElement, {value: 1})
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc1');
       });
   });
@@ -330,7 +329,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     doc.body.appendChild(parentElement);
     return templates
       .findAndRenderTemplateArray(parentElement, [{value: 1}, {value: 2}])
-      .then(res => {
+      .then((res) => {
         expect(res).to.have.length.of(2);
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
@@ -338,7 +337,7 @@ describes.fakeWin('Template', {amp: true}, env => {
   });
 });
 
-describes.fakeWin('BaseTemplate', {}, env => {
+describes.realWin('BaseTemplate', {amp: true}, (env) => {
   let win;
   let doc;
   let templateElement;
@@ -347,11 +346,7 @@ describes.fakeWin('BaseTemplate', {}, env => {
     win = env.win;
     doc = win.document;
     templateElement = doc.createElement('div');
-    document.body.appendChild(templateElement);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(templateElement);
+    doc.body.appendChild(templateElement);
   });
 
   it('should require render override', () => {

@@ -62,12 +62,13 @@ export class AmpAccessIframeApi {
     this.connectedResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.connectedPromise_ = new Promise(resolve => {
+    this.connectedPromise_ = new Promise((resolve) => {
       this.connectedResolver_ = resolve;
     });
   }
 
   /**
+   * @return {*} TODO(#23582): Specify return type
    */
   connect() {
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -92,7 +93,7 @@ export class AmpAccessIframeApi {
       // Response to "connect" command.
       this.config_ = payload['config'];
       this.protocol_ = payload['protocol'];
-      const promise = new Promise(resolve => {
+      const promise = new Promise((resolve) => {
         resolve(
           this.controller_.connect(
             this.messenger_.getTargetOrigin(),
@@ -109,7 +110,7 @@ export class AmpAccessIframeApi {
       return;
     }
     if (cmd == 'authorize') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(this.controller_.authorize());
       });
     }
@@ -117,14 +118,17 @@ export class AmpAccessIframeApi {
       if (!this.controller_.pingback) {
         return null;
       }
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(this.controller_.pingback());
       }).then(() => {});
     }
   }
 }
 
-/** @package Visible for testing. */
+/**
+ * @package Visible for testing.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getAccessControllerForTesting() {
   return AccessController;
 }

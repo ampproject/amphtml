@@ -77,7 +77,7 @@ export class FontLoader {
           this.fontLoadResolved_ = true;
           this.dispose_();
         },
-        reason => {
+        (reason) => {
           this.fontLoadRejected_ = true;
           this.dispose_();
           throw reason;
@@ -155,6 +155,7 @@ export class FontLoader {
    * Font download is detected by comparing the elements height and width with
    * measurements between default fonts and custom font.
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   loadWithPolyfill_() {
     return new Promise((resolve, reject) => {
@@ -168,7 +169,7 @@ export class FontLoader {
             resolve();
           } else if (this.fontLoadRejected_) {
             reject(new Error('Font loading timed out.'));
-          } else if (comparators.some(comparator => comparator.compare())) {
+          } else if (comparators.some((comparator) => comparator.compare())) {
             resolve();
           } else {
             vsyncTask();
@@ -205,7 +206,7 @@ export class FontLoader {
     });
 
     const comparators = DEFAULT_FONTS_.map(
-      defaultFont =>
+      (defaultFont) =>
         new FontComparator(
           containerElement,
           this.fontConfig_.family,

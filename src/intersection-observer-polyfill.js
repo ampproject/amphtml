@@ -131,7 +131,7 @@ export class IntersectionObserverApi {
     /** @private {?function()} */
     this.unlistenOnDestroy_ = null;
 
-    /** @private {!./service/viewport/viewport-impl.Viewport} */
+    /** @private {!./service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */
@@ -145,7 +145,7 @@ export class IntersectionObserverApi {
     );
 
     this.intersectionObserver_ = new IntersectionObserverPolyfill(
-      entries => {
+      (entries) => {
         // Remove target info from cross origin iframe.
         for (let i = 0; i < entries.length; i++) {
           delete entries[i]['target'];

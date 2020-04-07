@@ -18,7 +18,6 @@ import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '../../src/service/timer-impl';
 
 describe('FocusHistory', () => {
-  let sandbox;
   let clock;
   let testDoc;
   let eventListeners;
@@ -27,8 +26,7 @@ describe('FocusHistory', () => {
   let focusHistory;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     eventListeners = {};
     testDoc = {
@@ -52,10 +50,6 @@ describe('FocusHistory', () => {
     };
     installTimerService(testWindow);
     focusHistory = new FocusHistory(testWindow, 10000);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should subscribe to focus events', () => {

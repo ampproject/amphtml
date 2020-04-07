@@ -30,19 +30,17 @@ describes.realWin(
     amp: true,
     runtimeOn: true,
   },
-  env => {
-    let sandbox;
+  (env) => {
     let win;
     let doc;
     let setCookieSpy;
     let element;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
-      setCookieSpy = sandbox.spy();
+      setCookieSpy = env.sandbox.spy();
       win = env.win;
       doc = win.document;
-      sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
         setCookieSpy(name, value);
       });
       element = doc.createElement('div');
@@ -57,7 +55,7 @@ describes.realWin(
       it('Resolve when no config', () => {
         const config = dict({});
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -69,7 +67,7 @@ describes.realWin(
         });
         expectAsyncConsoleError(TAG + ' cookies config must be an object');
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -88,7 +86,7 @@ describes.realWin(
         doc.body.appendChild(parent);
         parent.appendChild(element);
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -108,14 +106,14 @@ describes.realWin(
         installLinkerReaderService(mockWin);
         installVariableServiceForTesting(doc);
         const cookieWriter = new CookieWriter(mockWin, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
       });
 
       it('Resolve when in inabox ad', () => {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const config = dict({
           'cookies': {
             'testId': {
@@ -124,7 +122,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -140,7 +138,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -151,7 +149,7 @@ describes.realWin(
           'cookies': {},
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -167,7 +165,7 @@ describes.realWin(
           TAG + ' cookieValue must be configured in an object'
         );
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -185,7 +183,7 @@ describes.realWin(
           TAG + ' value is required in the cookieValue object'
         );
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -200,7 +198,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -209,7 +207,7 @@ describes.realWin(
   }
 );
 
-describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
+describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
   let win;
   let clock;
   let doc;
@@ -237,7 +235,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     ).callsFake((name, id) => {
       return `${name}-${id}`;
     });
-    win.location = 'https://example.com/?a=123&b=567';
+    win.location = 'https://example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -272,7 +270,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should write cookie under eTLD+1 domain with right exp.', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -286,14 +284,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=123; path=/; domain=example.com; ' +
+        'aCookie=123; path=/; domain=example.test; ' +
           'expires=Tue, 01 Jan 2019 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (number value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -308,14 +306,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (string value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -330,14 +328,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (decimal value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -353,14 +351,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
 
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (zero value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -375,14 +373,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 01 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (negative value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -397,14 +395,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 25 Dec 2017 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with default expiration (invalid string value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -420,7 +418,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     return allowConsoleError(() => {
       return cookieWriter.write().then(() => {
         expect(win.document.lastSetCookieRaw).to.equal(
-          'aCookie=testValue; path=/; domain=example.com; ' +
+          'aCookie=testValue; path=/; domain=example.test; ' +
             'expires=Tue, 01 Jan 2019 08:00:00 GMT'
         );
       });
@@ -428,7 +426,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should not write empty cookie', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -447,7 +445,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should not write cookie if macro is mal-formatted', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,

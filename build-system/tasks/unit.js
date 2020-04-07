@@ -18,13 +18,13 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   shouldNotRun,
 } = require('./runtime-test/helpers');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
+const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 
@@ -40,6 +40,7 @@ class Runner extends RuntimeTestRunner {
     }
 
     await css();
+    await compileJison();
   }
 }
 
@@ -49,7 +50,6 @@ async function unit() {
   }
 
   maybePrintArgvMessages();
-  refreshKarmaWdCache();
 
   if (argv.local_changes && !getUnitTestsToRun()) {
     return;

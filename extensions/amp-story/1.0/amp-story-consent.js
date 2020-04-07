@@ -114,7 +114,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   attrs: dict({'class': 'i-amphtml-story-consent-vendors'}),
                   children:
                     config.vendors &&
-                    config.vendors.map(vendor => ({
+                    config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
                       children: [],
@@ -257,13 +257,13 @@ export class AmpStoryConsent extends AMP.BaseElement {
   initializeListeners_() {
     this.storyConsentEl_.addEventListener(
       'click',
-      event => this.onClick_(event),
+      (event) => this.onClick_(event),
       true /** useCapture */
     );
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -326,11 +326,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         'type="application/json"'
     );
 
-    this.storyConsentConfig_ = Object.assign(
-      {},
-      DEFAULT_OPTIONAL_PARAMETERS,
-      /** @type {Object} */ (parseJson(storyConsentScript.textContent))
-    );
+    this.storyConsentConfig_ = {
+      ...DEFAULT_OPTIONAL_PARAMETERS,
+      ...parseJson(storyConsentScript.textContent),
+    };
 
     user().assertString(
       this.storyConsentConfig_.title,
@@ -385,10 +384,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     // If using amp-access with amp-geo, only set the consent id if the user is
     // in the expected geo group.
     if (policy['promptIfUnknownForGeoGroup']) {
-      Services.geoForDocOrNull(this.element).then(geo => {
+      Services.geoForDocOrNull(this.element).then((geo) => {
         const geoGroup = policy['promptIfUnknownForGeoGroup'];
-        const matchedGeoGroups =
-          /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        const matchedGeoGroups = /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }

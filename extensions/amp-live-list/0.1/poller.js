@@ -52,7 +52,7 @@ export class Poller {
 
     /**
      * For testing purposes.
-     * @private {?Promise}
+     * @visibleForTesting {?Promise}
      */
     this.lastWorkPromise_ = null;
   }
@@ -132,7 +132,7 @@ export class Poller {
           }
           this.poll_();
         })
-        .catch(err => {
+        .catch((err) => {
           if (err.retriable) {
             if (!this.backoffClock_) {
               this.backoffClock_ = exponentialBackoffClock();

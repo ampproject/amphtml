@@ -39,17 +39,12 @@ const WHITELISTED_VARIABLES = [
   'COUNTER',
   'DOCUMENT_CHARSET',
   'DOCUMENT_REFERRER',
-  'FIRST_CONTENTFUL_PAINT',
-  'FIRST_VIEWPORT_READY',
-  'MAKE_BODY_VISIBLE',
   'PAGE_VIEW_ID',
   'RANDOM',
   'SCREEN_COLOR_DEPTH',
   'SCREEN_HEIGHT',
   'SCREEN_WIDTH',
   'SCROLL_HEIGHT',
-  'SCROLL_LEFT',
-  'SCROLL_TOP',
   'SCROLL_WIDTH',
   'SHARE_TRACKING_INCOMING',
   'SHARE_TRACKING_OUTGOING',
@@ -59,7 +54,6 @@ const WHITELISTED_VARIABLES = [
   'SOURCE_URL',
   'TIMESTAMP',
   'TIMEZONE',
-  'TIMEZONE_CODE',
   'TITLE',
   'TOTAL_ENGAGED_TIME',
   'USER_AGENT',
@@ -73,14 +67,14 @@ const WHITELISTED_VARIABLES = [
 /** Provides A4A specific variable substitution. */
 export class A4AVariableSource extends VariableSource {
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} parentAmpdoc
    * @param  {!Window} embedWin
    */
-  constructor(ampdoc, embedWin) {
-    super(ampdoc);
+  constructor(parentAmpdoc, embedWin) {
+    super(parentAmpdoc);
 
     // Use parent URL replacements service for fallback.
-    const headNode = ampdoc.getHeadNode();
+    const headNode = parentAmpdoc.getHeadNode();
     const urlReplacements = Services.urlReplacementsForDoc(headNode);
 
     /** @private {VariableSource} global variable source for fallback. */

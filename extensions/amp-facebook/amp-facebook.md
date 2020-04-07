@@ -3,8 +3,9 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Facebook post or video.
+  text: Displays a Facebook post, video or comment.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,79 +24,41 @@ limitations under the License.
 
 # amp-facebook
 
-Displays a Facebook post, video or comment.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook/">annotated amp-facebook</a> example.</td>
-  </tr>
-</table>
-
 ## Overview
 
 You can use the `amp-facebook` component to embed a Facebook post, a Facebook video or a comment on a Facebook post.
 
 #### Example: Embedding a post
 
-Code:
-```html
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="310"
     layout="responsive"
     data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
 </amp-facebook>
-```
-Renders as:
-<amp-facebook width="552" height="310"
-    layout="responsive"
-    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
-</amp-facebook>
+[/sourcecode][/example]
 
 #### Example: Embedding a video
 
-Code:
-```html
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="476" height="316"
     layout="responsive"
     data-embed-as="video"
     data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
-```
-Renders as:
-<amp-facebook width="476" height="316"
-    layout="responsive"
-    data-embed-as="video"
-    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
-</amp-facebook>
+[/sourcecode][/example]
 
 #### Example: Embedding a comment on a post
 
-Code:
-```html
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="500"
     layout="responsive"
     data-embed-type="comment"
     data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
 </amp-facebook>
-
-```
-Renders as:
-<amp-facebook width="552" height="500"
-    layout="responsive"
-    data-embed-type="comment"
-    data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
-</amp-facebook>
-
+[/sourcecode][/example]
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
@@ -107,7 +70,7 @@ Renders as:
 <br><br>
 Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
 <br><br>
-The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments</a>.
+The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments</a>.
 <br><br>
 Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</td>
   </tr>
@@ -131,7 +94,7 @@ For details on strings accepted here please visit the <a href="https://developer
     </tr>
     <tr>
        <td width="40%"><strong>common attributes</strong></td>
-       <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+       <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
      </tr>
 </table>
 

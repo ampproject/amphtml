@@ -109,11 +109,11 @@ export function layoutRectFromDomRect(rect) {
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
+ * @param {!LayoutRectDef|!ClientRect} r1
+ * @param {!LayoutRectDef|!ClientRect} r2
  * @return {boolean}
  */
-export function layoutRectsOverlap(r1, r2) {
+export function rectsOverlap(r1, r2) {
   return (
     r1.top <= r2.bottom &&
     r2.top <= r1.bottom &&
@@ -171,7 +171,7 @@ export function layoutRectsRelativePos(r1, r2) {
  * Determines if any portion of a layoutBox would be onscreen in the given
  * viewport, when scrolled to the specified position.
  * @param {!LayoutRectDef} layoutBox
- * @param {!./service/viewport/viewport-impl.Viewport} viewport
+ * @param {!./service/viewport/viewport-interface.ViewportInterface} viewport
  * @param {number} scrollPos
  * @return {RelativePositions}
  */
@@ -188,7 +188,7 @@ export function layoutPositionRelativeToScrolledViewport(
       right: viewport.getWidth(),
     })
   );
-  if (layoutRectsOverlap(layoutBox, scrollLayoutBox)) {
+  if (rectsOverlap(layoutBox, scrollLayoutBox)) {
     return RelativePositions.INSIDE;
   } else {
     return layoutRectsRelativePos(layoutBox, scrollLayoutBox);

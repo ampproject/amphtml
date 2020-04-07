@@ -18,59 +18,33 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('../mocha-ci-reporter');
-const config = require('../../config');
+const config = require('../../test-configs/config');
 const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
-const tryConnect = require('try-net-connect');
+const path = require('path');
+const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
 const {cyan} = require('ansi-colors');
-const {execOrDie, execScriptAsync} = require('../../exec');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
+const {startServer, stopServer} = require('../serve');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
 const PORT = 8000;
-const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = 2;
+const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-let webServerProcess_;
-
-function installPackages_() {
-  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
-}
-
-function buildRuntime_() {
-  execOrDie('gulp clean');
-  execOrDie('gulp dist --fortesting');
-}
-
-function launchWebServer_() {
-  webServerProcess_ = execScriptAsync(
-    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
-    {stdio: 'ignore'}
+async function launchWebServer_() {
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: true}
   );
-
-  let resolver;
-  const deferred = new Promise(resolverIn => {
-    resolver = resolverIn;
-  });
-
-  tryConnect({
-    host: HOST,
-    port: PORT,
-    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', () => {
-    return resolver(webServerProcess_);
-  });
-
-  return deferred;
 }
 
-async function cleanUp_() {
-  if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGKILL');
-  }
+function cleanUp_() {
+  stopServer();
 }
 
 function createMocha_() {
@@ -88,11 +62,11 @@ function createMocha_() {
 
 async function e2e() {
   // install e2e-specific modules
-  installPackages_();
+  installPackages(__dirname);
 
   // set up promise to return to gulp.task()
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
@@ -106,7 +80,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime_();
+    buildMinifiedRuntime();
   }
 
   // start up web server
@@ -114,17 +88,18 @@ async function e2e() {
 
   // run tests
   if (!argv.watch) {
+    log('Running tests...');
     const mocha = createMocha_();
 
     // specify tests to run
     if (argv.files) {
-      glob.sync(argv.files).forEach(file => {
+      glob.sync(argv.files).forEach((file) => {
         delete require.cache[file];
         mocha.addFile(file);
       });
     } else {
-      config.e2eTestPaths.forEach(path => {
-        glob.sync(path).forEach(file => {
+      config.e2eTestPaths.forEach((path) => {
+        glob.sync(path).forEach((file) => {
           delete require.cache[file];
           mocha.addFile(file);
         });
@@ -132,9 +107,9 @@ async function e2e() {
     }
 
     await reportTestStarted();
-    mocha.run(async failures => {
+    mocha.run(async (failures) => {
       // end web server
-      await cleanUp_();
+      cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
@@ -144,13 +119,13 @@ async function e2e() {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');
-    watcher.on('change', ({path}) => {
-      log('Detected a change in', cyan(path));
+    watcher.on('change', (file) => {
+      log('Detected a change in', cyan(file));
       log('Running tests...');
       // clear file from node require cache if running test again
-      delete require.cache[path];
+      delete require.cache[path.resolve(file)];
       const mocha = createMocha_();
-      mocha.files = [path];
+      mocha.files = [file];
       mocha.run();
     });
   }
@@ -166,7 +141,9 @@ e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
-    '`chrome`, `firefox`.',
+    '`chrome`, `firefox`, `safari`.',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
@@ -175,4 +152,5 @@ e2e.flags = {
     '  The automation engine that orchestrates the browser. ' +
     'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': '  Runs the browser in headless mode',
+  'debug': '  Prints debugging information while running tests',
 };

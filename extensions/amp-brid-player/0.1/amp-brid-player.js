@@ -55,6 +55,12 @@ class AmpBridPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.playerID_ = '';
 
+    /** @private {?number}  */
+    this.currentTime_ = 0;
+
+    /** @private {?number}  */
+    this.duration_ = 0;
+
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
@@ -79,8 +85,16 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://services.brid.tv', opt_onLayout);
-    this.preconnect.url('https://cdn.brid.tv', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://services.brid.tv',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdn.brid.tv',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -278,14 +292,24 @@ class AmpBridPlayer extends AMP.BaseElement {
         'ready': VideoEvents.LOAD,
         'play': VideoEvents.PLAYING,
         'pause': VideoEvents.PAUSE,
+        'ended': VideoEvents.ENDED,
+        'adStart': VideoEvents.AD_START,
+        'adEnd': VideoEvents.AD_END,
+        'loadedmetadata': VideoEvents.LOADEDMETADATA,
       });
-      return;
     }
 
     if (params[2] == 'volume') {
       this.volume_ = parseFloat(params[3]);
       element.dispatchCustomEvent(mutedOrUnmutedEvent(this.volume_ <= 0));
-      return;
+    }
+
+    if (params[2] == 'currentTime') {
+      this.currentTime_ = parseFloat(params[3]);
+    }
+
+    if (params[2] == 'duration') {
+      this.duration_ = parseFloat(params[3]);
     }
   }
 
@@ -376,14 +400,12 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return /** @type {number} */ (this.currentTime_);
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return /** @type {number} */ (this.duration_);
   }
 
   /** @override */
@@ -398,6 +420,6 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBridPlayer);
 });

@@ -54,7 +54,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -67,7 +67,7 @@ export function fetchPolyfill(input, init = {}) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -149,6 +149,9 @@ class FetchResponse {
 
     /** @type {?ReadableStream} */
     this.body = null;
+
+    /** @type {string|null} */
+    this.url = xhr.responseURL;
   }
 
   /**
@@ -260,29 +263,23 @@ export class Response extends FetchResponse {
    */
   constructor(body, init = {}) {
     const lowercasedHeaders = map();
-    const data = Object.assign(
-      {
-        status: 200,
-        statusText: 'OK',
-        responseText: body ? String(body) : '',
-        /**
-         * @param {string} name
-         * @return {string}
-         */
-        getResponseHeader(name) {
-          const headerName = String(name).toLowerCase();
-          return hasOwn(lowercasedHeaders, headerName)
-            ? lowercasedHeaders[headerName]
-            : null;
-        },
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: body ? String(body) : '',
+      getResponseHeader(name) {
+        const headerName = String(name).toLowerCase();
+        return hasOwn(lowercasedHeaders, headerName)
+          ? lowercasedHeaders[headerName]
+          : null;
       },
-      init
-    );
+      ...init,
+    };
 
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      init.headers.forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] = String(

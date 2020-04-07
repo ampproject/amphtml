@@ -31,7 +31,7 @@ export function svknative(global, data) {
   s.setAttribute('data-key', scriptKey);
   global.document.getElementById('c').appendChild(s);
 
-  (function(w, a) {
+  (function (w, a) {
     (w[a] = w[a] || []).push({
       'script_key': scriptKey,
       'settings': {

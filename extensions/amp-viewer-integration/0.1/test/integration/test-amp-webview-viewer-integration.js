@@ -17,18 +17,16 @@
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
 import {WebviewViewerForTesting} from '../../webview-viewer-for-testing.js';
 
-describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
+describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
-  describe.skip('Handshake', function() {
+  describe.skip('Handshake', function () {
     let viewerEl;
     let viewer;
 
     beforeEach(() => {
       const loc = window.location;
-      const ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${
-        loc.port
-      }${ampDocSrc}`;
+      const ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);
@@ -47,8 +45,8 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should handle unload correctly', () => {
-      viewer.waitForDocumentLoaded().then(() => {
-        const stub = sandbox.stub(viewer, 'handleUnload_');
+      return viewer.waitForDocumentLoaded().then(() => {
+        const stub = env.sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });
@@ -65,15 +63,16 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
         },
       },
     },
-    env => {
+    (env) => {
       let integr;
 
       beforeEach(() => {
+        env.sandbox.useFakeTimers();
         integr = new AmpViewerIntegration(env.win);
       });
 
       it('should set source and origin for webview', () => {
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(integr, 'webviewPreHandshakePromise_')
           .callsFake(() => new Promise(() => {}));
         integr.init();

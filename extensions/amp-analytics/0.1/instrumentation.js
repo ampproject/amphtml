@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryEventTracker,
+  AnalyticsEvent,
+  AnalyticsEventType,
+  CustomEventTracker,
+  getTrackerKeyName,
+} from './events';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsEvent, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {Services} from '../../../src/services';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
@@ -29,7 +36,7 @@ const PROP = '__AMP_AN_ROOT';
 
 /**
  * @implements {../../../src/service.Disposable}
- * @private
+ * @package
  * @visibleForTesting
  */
 export class InstrumentationService {
@@ -41,12 +48,12 @@ export class InstrumentationService {
     this.ampdoc = ampdoc;
 
     /** @const */
-    this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
+    this.root_ = this.findRoot_(ampdoc.getRootNode());
   }
 
   /** @override */
   dispose() {
-    this.ampdocRoot_.dispose();
+    this.root_.dispose();
   }
 
   /**
@@ -67,6 +74,19 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {string} trackerName
+   * @private
+   */
+  getTrackerClass_(trackerName) {
+    switch (trackerName) {
+      case AnalyticsEventType.STORY:
+        return AmpStoryEventTracker;
+      default:
+        return CustomEventTracker;
+    }
+  }
+
+  /**
    * Triggers the analytics event with the specified type.
    *
    * @param {!Element} target
@@ -74,12 +94,12 @@ export class InstrumentationService {
    * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   triggerEventForTarget(target, eventType, opt_vars) {
-    // TODO(dvoytenko): rename to `triggerEvent`.
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
-    const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
-      'custom',
-      CustomEventTracker
+    const trackerName = getTrackerKeyName(eventType);
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
+      trackerName,
+      this.getTrackerClass_(trackerName)
     ));
     tracker.trigger(event);
   }
@@ -89,24 +109,21 @@ export class InstrumentationService {
    * @return {!./analytics-root.AnalyticsRoot}
    */
   findRoot_(context) {
-    // FIE
-    const frame = getParentWindowFrameElement(context, this.ampdoc.win);
-    if (frame) {
-      const embed = getFriendlyIframeEmbedOptional(frame);
-      if (embed) {
-        const embedNotNull = embed;
-        return this.getOrCreateRoot_(embed, () => {
-          return new EmbedAnalyticsRoot(
-            this.ampdoc,
-            embedNotNull,
-            this.ampdocRoot_
-          );
-        });
-      }
+    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
+    // `ampdoc.getParent()`.
+    const ampdoc = Services.ampdoc(context);
+    const frame = getParentWindowFrameElement(context);
+    const embed = frame && getFriendlyIframeEmbedOptional(frame);
+    if (ampdoc == this.ampdoc && !embed && this.root_) {
+      // Main root already exists.
+      return this.root_;
     }
-
-    // Ampdoc root
-    return this.ampdocRoot_;
+    return this.getOrCreateRoot_(embed || ampdoc, () => {
+      if (embed) {
+        return new EmbedAnalyticsRoot(ampdoc, embed);
+      }
+      return new AmpdocAnalyticsRoot(ampdoc);
+    });
   }
 
   /**

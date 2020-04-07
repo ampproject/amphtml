@@ -43,6 +43,7 @@
         <span>Your email</span>
         <input type="email" name="email" required>
       </label>
+      <input type="button" name="button">
       <input type="submit" value="Subscribe">
     </fieldset>
     <div submit-success>
@@ -81,6 +82,15 @@
     <input name="googlesearch">
     <input type="submit" value="OK">
   </form>
+  <!-- Invalid: only absolute URL is allowed. -->
+  <form method="GET" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <form method="POST" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
   <!-- Invalid: the action and target attributes are disallowed. -->
   <form method="GET"
     action="/components/amp-form/submit-form"
@@ -90,9 +100,8 @@
     </div>
     <input type="submit" value="OK">
   </form>
-  <!-- Invalid: input can not be type="button|file|image". -->
+  <!-- Invalid: input can not be type="file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe">
-    <input type="button" name="button">
     <input type="image" name="image">
   </form>
   <!-- Invalid: input can not be type="password" -->

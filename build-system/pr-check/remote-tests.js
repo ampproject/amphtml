@@ -32,12 +32,11 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -48,14 +47,15 @@ async function main() {
 
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp unit --nobuild --saucelabs');
-    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+    timedExecOrDie(
+      'gulp integration --nobuild --compiled --saucelabs --stable'
+    );
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
 
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
@@ -84,7 +84,12 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --saucelabs --stable'
+      );
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --saucelabs --beta'
+      );
     }
     stopSauceConnect(FILENAME);
   }

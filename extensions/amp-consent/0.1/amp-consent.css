@@ -32,7 +32,7 @@
 
 amp-consent {
   /* Fixed to make position independent of page other elements. */
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 0;
   overflow: hidden !important;
@@ -85,6 +85,15 @@ amp-consent.amp-hidden {
   animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
 }
 
+.i-amphtml-consent-alertdialog {
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  left: -10000px;
+  top: auto;
+}
+
 .i-amphtml-consent-ui-fill {
   position: absolute;
   top: 0;
@@ -102,6 +111,9 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   height: 100vh !important;
   padding: 0px !important;
   margin: 0px !important;
+
+  /**Scrolling support/UX for iOS**/
+  overflow: auto !important;
 
   transform: translate3d(0px, 100vh, 0px) !important;
 }

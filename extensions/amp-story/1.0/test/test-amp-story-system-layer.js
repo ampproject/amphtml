@@ -22,7 +22,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story system layer', {amp: true}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   let win;
   let storeService;
   let systemLayer;
@@ -33,30 +33,34 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     win = env.win;
 
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function () {
+      return localizationService;
+    });
 
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
-      build: sandbox.stub().returns(progressBarRoot),
-      getRoot: sandbox.stub().returns(progressBarRoot),
-      updateProgress: sandbox.spy(),
+      build: env.sandbox.stub().returns(progressBarRoot),
+      getRoot: env.sandbox.stub().returns(progressBarRoot),
+      updateProgress: env.sandbox.spy(),
     };
 
-    sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
+    env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+    env.sandbox.stub(Services, 'vsyncFor').returns({
+      mutate: (fn) => fn(),
     });
 
-    systemLayer = new SystemLayer(win);
+    systemLayer = new SystemLayer(win, win.document.body);
   });
 
   it('should build UI', () => {
-    const initializeListeners = sandbox
+    const initializeListeners = env.sandbox
       .stub(systemLayer, 'initializeListeners_')
       .callsFake(NOOP);
 
@@ -69,10 +73,10 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
   it.skip('should attach event handlers', () => {
-    const rootMock = {addEventListener: sandbox.spy()};
+    const rootMock = {addEventListener: env.sandbox.spy()};
 
-    sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
-    sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
     systemLayer.initializeListeners_();
 
@@ -125,5 +129,16 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     expect(systemLayer.getShadowRoot()).to.have.class('i-amphtml-story-hidden');
+  });
+
+  it('should link the share button to the canonical URL', () => {
+    systemLayer.build();
+    const shareButton = systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-share-control');
+    expect(shareButton).to.not.be.null;
+    expect(shareButton.tagName).to.equal('A');
+    // Default "canonical"
+    expect(shareButton.href).to.equal('http://localhost:9876/context.html');
   });
 });

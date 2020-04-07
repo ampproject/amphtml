@@ -15,10 +15,13 @@
  */
 
 @import './amp-story-access.css';
+@import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-panels.css';
+@import './amp-story-draggable-drawer.css';
 @import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
+@import './amp-story-vertical.css';
 @import './pagination-buttons.css';
 
 /** Common */
@@ -28,7 +31,7 @@ amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   -webkit-touch-callout: none !important;
 }
 
-amp-consent {
+amp-story amp-consent {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -36,6 +39,23 @@ amp-consent {
   width: 100% !important;
   background: none !important;
   z-index: initial !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/**
+ * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
+ * because of amp-story-shadow-reset.css. Use display: none instead.
+ */
+amp-consent.amp-hidden {
+  display: none !important;
 }
 
 .i-amphtml-story-system-reset,
@@ -126,6 +146,11 @@ amp-story[standalone] {
   min-width: initial !important;
 }
 
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
+}
+
 amp-story[standalone]:-webkit-full-screen {
   height: 100vh !important;
   max-height: none !important;
@@ -177,6 +202,8 @@ amp-story-page {
   right: 0 !important;
   top: 0 !important;
   opacity: 1 !important;
+  /** Required by Chrome to consider touch events on story-pages as user gestures. */
+  touch-action: none !important;
   transition: none !important;
   z-index: 0 !important;
 }
@@ -198,21 +225,17 @@ amp-story-page[active] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
-[desktop] .i-amphtml-story-sidebar[open] {
-  max-width: 320px !important;
+[desktop] .i-amphtml-story-sidebar {
+  min-width: 25% !important;
+  max-width: 600px !important;
 }
 
 .i-amphtml-story-sidebar {
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
+  min-width: 75% !important;
+  max-width: 360px !important;
   animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
   animation-duration: 0.2s !important;
   animation-name: i-amphtml-sidebar-slide-out-right;
-}
-
-.i-amphtml-story-fallback amp-story-page {
-  display: none !important;
 }
 
 /* Setting `translateY` distances as a trick so that the runtime schedules
@@ -286,11 +309,11 @@ amp-story-page [data-text-background-color] {
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  opacity: 0.75 !important;
+  opacity: 1 !important;
   display: block !important;
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
-  background-color: #000 !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
   visibility: visible;
   z-index: 100003 !important;
   transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
@@ -350,13 +373,11 @@ amp-story-grid-layer {
 }
 
 /**
- * Adds a width limit to make sure amp-twitter element only takes required
- * space, otherwise it takes whole width and causes a tooltip trigger in blank
- * space.
- * See #22334
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
  */
-amp-story-grid-layer amp-twitter {
-  max-width: 500px !important;
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+  display: none !important;
 }
 
 amp-story-grid-layer > * {
@@ -426,6 +447,13 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   grid-template-areas: "upper-third"
                        "middle-third"
                        "lower-third" !important;
+}
+
+.i-amphtml-story-grid-template-aspect {
+  margin: auto;
+  width: var(--i-amphtml-story-layer-width, 100%);
+  height: var(--i-amphtml-story-layer-height, 100%);
+  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
 }
 
 /**
@@ -669,6 +697,7 @@ amp-story .amp-video-eq,
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   animation-iteration-count: infinite !important;
   opacity: 1 !important;
+  filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25)) !important;
 }
 
 @keyframes fill-unfill-rotate {
@@ -751,6 +780,7 @@ amp-story .amp-video-eq,
   to { transform: rotate(-130deg) }
 }
 
+.i-amphtml-story-page-error,
 .i-amphtml-story-page-play-button {
   display: flex !important;
   align-items: center !important;
@@ -798,17 +828,20 @@ amp-story .amp-video-eq,
   }
 }
 
+.i-amphtml-story-page-error[hidden],
 .i-amphtml-story-page-play-button[hidden] {
   display: none !important;
 }
 
+.i-amphtml-story-page-error-label,
 .i-amphtml-story-page-play-label {
   color: #fff !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
 
+.i-amphtml-story-page-error-icon,
 .i-amphtml-story-page-play-icon {
   display: inline-block !important;
   height: 24px !important;
@@ -816,153 +849,53 @@ amp-story .amp-video-eq,
   margin: 0 8px !important;
   border-radius: 24px !important;
   filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+}
+
+.i-amphtml-story-page-error-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
+}
+
+.i-amphtml-story-page-play-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
 }
 
-/** amp-story-page open attachment message. */
-
-@keyframes open-attachment-fly-in {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+amp-story-quiz {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
+  --reaction-accent-color: #005AF0;
+  --reaction-prompt-text-color: white;
+  --reaction-option-text-color: #5F6368;
+  --reaction-theme-background: white !important;
+  --reaction-theme-border: #DADCE0 !important;
+  --reaction-theme-shading: #ECEDEF !important;
+  --reaction-chip-radius: 32px !important;
+  --reaction-chip-shadow: none !important;
+  --reaction-answer-choice-border: var(--reaction-accent-color) !important;
+  --reaction-answer-choice-background: white !important;
 }
 
-@keyframes open-attachment-icon {
-  0% {
-    transform: translateY(14px);
-  }
-  to {
-    transform: translateY(0);
-  }
+amp-story-quiz[theme="dark"] {
+  --reaction-option-text-color: white;
+  --reaction-theme-background: #202124 !important;
+  --reaction-theme-border: #3C4043 !important;
+  --reaction-theme-shading: #3C4043 !important;
 }
 
-@keyframes open-attachment-icon-explode {
-  0% {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.12);
-  }
+amp-story-quiz[chip-corner="sharp"] {
+  --reaction-chip-radius: 8px !important;
+  --reaction-answer-choice-border: transparent !important;
+  --reaction-answer-choice-background: transparent !important;
 }
 
-@keyframes open-attachment-icon-color {
-  0% {
-    background: #fff;
-  }
-  to {
-    background: rgba(0, 0, 0, 0.87);
-    text-shadow: none;
-  }
+amp-story-quiz[chip-style="shadow"] {
+  --reaction-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.12) !important;
+  --reaction-theme-border: rgba(0, 0, 0, 0) !important;
 }
 
-@keyframes open-attachment-bar-left {
-  0% {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-30deg);
-  }
-}
-
-@keyframes open-attachment-bar-right {
-  0% {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(30deg);
-  }
-}
-
-/**
- * Hiding the element and only showing it on the active page so the animation
- * triggers every time the page becomes active.
- */
-amp-story-page .i-amphtml-story-page-open-attachment {
-  display: none !important;
-}
-
-amp-story-page[active] .i-amphtml-story-page-open-attachment {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: column !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
-  pointer-events: none !important;
-  z-index: 3 !important;
-  animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment > * {
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-icon {
-  display: block !important;
-  height: 32px !important;
-  width: 32px !important;
-  cursor: pointer !important;
-  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  height: 100% !important;
-  width: 100% !important;
-  background: #FFF !important;
-  border-radius: 100% !important;
-  z-index: -1 !important;
-  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right {
-  position: absolute !important;
-  display: block !important;
-  height: 3px !important;
-  width: 12px !important;
-  border-radius: 3px !important;
-  top: 14px !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left {
-  left: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
-             open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-right {
-  right: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
-             open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-label {
-  position: relative !important;
-  padding: 0 24px !important;
-  height: 40px !important;
-  max-width: calc(100% - 48px) !important;
-  color: #FFF !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 15px !important;
-  font-weight: bold !important;
-  letter-spacing: 0.3px;
-  line-height: 40px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
-  white-space: nowrap !important;
+amp-story-quiz[chip-style="shadow"][theme="dark"] {
+  --reaction-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3) !important;
 }

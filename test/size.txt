@@ -18,11 +18,8 @@
  367 kB   |   12.1 kB   |   4.88 kB   |   v0/amp-ad-exit-0.1.js
  926 kB   |   70.9 kB   |   24.8 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
  848 kB   |   52.6 kB   |   18.5 kB   |   v0/amp-ad-network-adzerk-impl-0.1.js
- 832 kB   |   51.5 kB   |   18.3 kB   |   v0/amp-ad-network-cloudflare-impl-0.1.js
 1.12 MB   |    102 kB   |   34.8 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
  832 kB   |   51.6 kB   |   18.3 kB   |   v0/amp-ad-network-fake-impl-0.1.js
- 828 kB   |   50.4 kB   |   17.9 kB   |   v0/amp-ad-network-gmossp-impl-0.1.js
- 828 kB   |   50.2 kB   |   17.9 kB   |   v0/amp-ad-network-triplelift-impl-0.1.js
  433 kB   |   18.2 kB   |   7.32 kB   |   v0/amp-addthis-0.1.js
  969 kB   |    107 kB   |   33.4 kB   |   v0/amp-analytics-0.1.js
  112 kB   |   4.08 kB   |   1.99 kB   |   v0/amp-anim-0.1.js

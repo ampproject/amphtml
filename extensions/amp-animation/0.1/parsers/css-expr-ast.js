@@ -224,7 +224,7 @@ export class CssConcatNode extends CssNode {
 
   /** @override */
   css() {
-    return this.array_.map(node => node.css()).join(' ');
+    return this.array_.map((node) => node.css()).join(' ');
   }
 
   /** @override */
@@ -599,7 +599,7 @@ export class CssFuncNode extends CssNode {
 
   /** @override */
   css() {
-    const args = this.args_.map(node => node.css()).join(',');
+    const args = this.args_.map((node) => node.css()).join(',');
     return `${this.name_}(${args})`;
   }
 
@@ -664,7 +664,7 @@ export class CssTranslateNode extends CssFuncNode {
         ? ['w', 'h', 'z']
         : null
     );
-    /** @const @private {string} */
+    /** @const @protected {string} */
     this.suffix_ = suffix;
   }
 }

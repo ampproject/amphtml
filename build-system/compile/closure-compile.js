@@ -15,9 +15,11 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('google-closure-compiler');
-const colors = require('ansi-colors');
-const {closureNailgunPort} = require('../tasks/nailgun');
+const log = require('fancy-log');
+const {cyan, red, yellow} = require('ansi-colors');
+const {EventEmitter} = require('events');
 const {highlight} = require('cli-highlight');
 
 let compilerErrors = '';
@@ -27,81 +29,127 @@ let compilerErrors = '';
  * dropping the closure compiler plugin's logging prefix and then syntax
  * highlighting the error text.
  * @param {string} message
+ * @return {string}
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
   message = message.replace(closurePluginLoggingPrefix, '');
   message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  message = message.replace(/WARNING/g, yellow('WARNING'));
+  message = message.replace(/ERROR/g, red('ERROR'));
   return message;
 }
 
-exports.handleCompilerError = function(outputFilename) {
-  handleError(
-    colors.red('Compilation failed for ') +
-      colors.cyan(outputFilename) +
-      colors.red(':')
-  );
-};
+/**
+ * Handles a closure error during multi-pass compilation. Optionally doesn't
+ * emit a fatal error when compilation fails and signals the error so subsequent
+ * operations can be skipped (used in watch mode).
+ *
+ * @param {Error} err
+ * @param {string} outputFilename
+ * @param {?Object} options
+ * @param {?Function} resolve
+ */
+function handleCompilerError(err, outputFilename, options, resolve) {
+  logError(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
+  if (options && options.continueOnError) {
+    options.errored = true;
+    if (resolve) {
+      resolve();
+    }
+  } else {
+    emitError(err);
+  }
+}
 
-exports.handleTypeCheckError = function() {
-  handleError(colors.red('Type checking failed:'));
-};
+/**
+ * Handles a closure error during type checking
+ *
+ * @param {Error} err
+ */
+function handleTypeCheckError(err) {
+  logError(red('Type checking failed:'));
+  emitError(err);
+}
 
-exports.handleSinglePassCompilerError = function() {
-  handleError(colors.red('Single pass compilation failed:'));
-};
+/**
+ * Handles a closure error during single-pass compilation
+ *
+ * @param {Error} err
+ */
+function handleSinglePassCompilerError(err) {
+  logError(red('Single pass compilation failed:'));
+  emitError(err);
+}
+
+/**
+ * Emits an error to the caller
+ *
+ * @param {Error} err
+ */
+function emitError(err) {
+  err.showStack = false;
+  new EventEmitter().emit('error', err);
+}
 
 /**
  * Prints an error message when compilation fails
  * @param {string} message
  */
-function handleError(message) {
-  console./*OK*/ error(
-    `${message}\n` + formatClosureCompilerError(compilerErrors)
-  );
+function logError(message) {
+  log(`${message}\n` + formatClosureCompilerError(compilerErrors));
 }
 
 /**
  * @param {Array<string>} compilerOptions
+ * @param {?string} nailgunPort
  * @return {stream.Writable}
  */
-exports.gulpClosureCompile = function(compilerOptions) {
+function gulpClosureCompile(compilerOptions, nailgunPort) {
   const initOptions = {
     extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
   };
   const pluginOptions = {
     platform: ['java'], // Override the binary used by closure compiler
-    logger: errors => (compilerErrors = errors), // Capture compiler errors
+    logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
   if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
     // For single-pass compilation, use the default compiler.jar
-    // TODO(rsimha): Use the native compiler instead of compiler.jar once a fix
-    // is checked in for https://github.com/google/closure-compiler/issues/3041
     closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../third_party/closure-compiler/compiler.jar'
+      '../../node_modules/google-closure-compiler-java/compiler.jar'
     );
   } else {
-    // On Mac OS and Linux, speed up compilation using nailgun.
+    // On Mac OS and Linux, speed up compilation using nailgun (unless the
+    // --disable_nailgun flag was passed in)
     // See https://github.com/facebook/nailgun.
-    if (process.platform == 'darwin' || process.platform == 'linux') {
+    if (
+      !argv.disable_nailgun &&
+      (process.platform == 'darwin' || process.platform == 'linux')
+    ) {
       compilerOptions = [
         '--nailgun-port',
-        closureNailgunPort,
+        nailgunPort,
         'org.ampproject.AmpCommandLineRunner',
         '--',
       ].concat(compilerOptions);
       pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
       initOptions.extraArguments = null; // Already part of nailgun-server
     } else {
-      // For other platforms, use AMP's custom runner.jar
+      // For other platforms, or if nailgun is explicitly disabled, use AMP's
+      // custom runner.jar
       closureCompiler.compiler.JAR_PATH = require.resolve(
-        '../runner/dist/runner.jar'
+        `../runner/dist/${nailgunPort}/runner.jar`
       );
     }
   }
 
   return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
+}
+
+module.exports = {
+  gulpClosureCompile,
+  handleCompilerError,
+  handleSinglePassCompilerError,
+  handleTypeCheckError,
 };

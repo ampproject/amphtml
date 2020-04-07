@@ -32,7 +32,7 @@ import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from './utils';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -111,7 +111,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   attrs: dict({'class': 'i-amphtml-story-consent-vendors'}),
                   children:
                     config.vendors &&
-                    config.vendors.map(vendor => ({
+                    config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
                       children: [],
@@ -248,7 +248,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   initializeListeners_() {
     this.storyConsentEl_.addEventListener(
       'click',
-      event => this.onClick_(event),
+      (event) => this.onClick_(event),
       true /** useCapture */
     );
 
@@ -292,9 +292,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
       );
     };
 
-    this.element
-      .getResources()
-      .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ measureMutateElement(
+      devAssert(this.storyConsentEl_),
+      measurer,
+      mutator
+    );
   }
 
   /**
@@ -311,11 +313,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         'type="application/json"'
     );
 
-    this.storyConsentConfig_ = Object.assign(
-      {},
-      DEFAULT_OPTIONAL_PARAMETERS,
-      /** @type {Object} */ (parseJson(storyConsentScript.textContent))
-    );
+    this.storyConsentConfig_ = {
+      ...DEFAULT_OPTIONAL_PARAMETERS,
+      ...parseJson(storyConsentScript.textContent),
+    };
 
     user().assertString(
       this.storyConsentConfig_.title,

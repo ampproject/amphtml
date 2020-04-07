@@ -87,7 +87,7 @@ export class AmpFormTextarea {
     this.unlisteners_ = [];
 
     this.unlisteners_.push(
-      listen(root, 'input', e => {
+      listen(root, 'input', (e) => {
         const element = dev().assertElement(e.target);
         if (
           element.tagName != 'TEXTAREA' ||
@@ -101,7 +101,7 @@ export class AmpFormTextarea {
     );
 
     this.unlisteners_.push(
-      listen(root, 'mousedown', e => {
+      listen(root, 'mousedown', (e) => {
         if (e.which != 1) {
           return;
         }
@@ -125,7 +125,7 @@ export class AmpFormTextarea {
     );
     const throttledResize = throttle(
       this.win_,
-      e => {
+      (e) => {
         if (e.relayoutAll) {
           resizeTextareaElements(cachedTextareaElements);
         }
@@ -141,7 +141,7 @@ export class AmpFormTextarea {
    * Cleanup any consumed resources
    */
   dispose() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
   }
 }
 
@@ -153,8 +153,8 @@ export class AmpFormTextarea {
  */
 export function handleInitialOverflowElements(textareas) {
   return Promise.all(
-    toArray(textareas).map(element => {
-      return getHasOverflow(element).then(hasOverflow => {
+    toArray(textareas).map((element) => {
+      return getHasOverflow(element).then((hasOverflow) => {
         if (hasOverflow) {
           user().warn(
             'AMP-FORM',
@@ -176,8 +176,8 @@ export function handleInitialOverflowElements(textareas) {
  * @visibleForTesting
  */
 export function getHasOverflow(element) {
-  const resources = Services.resourcesForDoc(element);
-  return resources.measureElement(() => {
+  const mutator = Services.mutatorForDoc(element);
+  return mutator.measureElement(() => {
     return element./*OK*/ scrollHeight > element./*OK*/ clientHeight;
   });
 }
@@ -187,7 +187,7 @@ export function getHasOverflow(element) {
  * @param {!IArrayLike<!Element>} elements
  */
 function resizeTextareaElements(elements) {
-  iterateCursor(elements, element => {
+  iterateCursor(elements, (element) => {
     if (
       element.tagName != 'TEXTAREA' ||
       !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)
@@ -206,16 +206,16 @@ function resizeTextareaElements(elements) {
  * @param {!Element} element
  */
 function handleTextareaDrag(element) {
-  const resources = Services.resourcesForDoc(element);
+  const mutator = Services.mutatorForDoc(element);
 
   Promise.all([
-    resources.measureElement(() => element./*OK*/ scrollHeight),
+    mutator.measureElement(() => element./*OK*/ scrollHeight),
     listenOncePromise(element, 'mouseup'),
-  ]).then(results => {
+  ]).then((results) => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
-    return resources.measureMutateElement(
+    return mutator.measureMutateElement(
       element,
       () => {
         heightMouseUp = element./*OK*/ scrollHeight;
@@ -248,7 +248,7 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  * @visibleForTesting
  */
 export function maybeResizeTextarea(element) {
-  const resources = Services.resourcesForDoc(element);
+  const mutator = Services.mutatorForDoc(element);
   const win = /** @type {!Window} */ (devAssert(
     element.ownerDocument.defaultView
   ));
@@ -263,7 +263,7 @@ export function maybeResizeTextarea(element) {
   // element's content, or 2. the element itself.
   const minScrollHeightPromise = getShrinkHeight(element);
 
-  return resources.measureMutateElement(
+  return mutator.measureMutateElement(
     element,
     () => {
       const computed = computedStyle(win, element);
@@ -286,7 +286,7 @@ export function maybeResizeTextarea(element) {
       }
     },
     () => {
-      return minScrollHeightPromise.then(minScrollHeight => {
+      return minScrollHeightPromise.then((minScrollHeight) => {
         const height = minScrollHeight + offset;
         // Prevent the scrollbar from appearing
         // unless the text is beyond the max-height
@@ -319,7 +319,7 @@ function getShrinkHeight(textarea) {
   const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
   const win = /** @type {!Window} */ (devAssert(doc.defaultView));
   const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
-  const resources = Services.resourcesForDoc(textarea);
+  const mutator = Services.mutatorForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
   clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
@@ -328,7 +328,7 @@ function getShrinkHeight(textarea) {
   let resultingHeight = 0;
   let shouldKeepTop = false;
 
-  return resources
+  return mutator
     .measureMutateElement(
       body,
       () => {
@@ -354,7 +354,7 @@ function getShrinkHeight(textarea) {
       }
     )
     .then(() => {
-      return resources.measureMutateElement(
+      return mutator.measureMutateElement(
         body,
         () => {
           resultingHeight = clone./*OK*/ scrollHeight;

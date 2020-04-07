@@ -23,11 +23,10 @@ describes.realWin(
       extensions: ['amp-access-scroll'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
-    let sandbox;
     let accessSource;
     let readDepthTracker;
 
@@ -35,7 +34,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox = env.sandbox;
 
       // Undefined initialization params for AccessSource
       let scheduleViewFn, onReauthorizeFn;
@@ -69,12 +67,12 @@ describes.realWin(
       );
 
       // Stub viewport to fake paragraph positions
-      sandbox
+      env.sandbox
         .stub(readDepthTracker.viewport_, 'getClientRectAsync')
         .callsFake(returnRectPosition);
 
       // Stub updateLastRead_ call to check content sent
-      sandbox.stub(readDepthTracker, 'updateLastRead_');
+      env.sandbox.stub(readDepthTracker, 'updateLastRead_');
     });
 
     function returnRectPosition(paragraph) {

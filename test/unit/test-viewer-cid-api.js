@@ -18,16 +18,14 @@ import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {dict} from '../../src/utils/object';
 import {mockServiceForDoc} from '../../testing/test-helper';
 
-describes.realWin('viewerCidApi', {amp: true}, env => {
+describes.realWin('viewerCidApi', {amp: true}, (env) => {
   let ampdoc;
   let api;
-  let sandbox;
   let viewerMock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
-    viewerMock = mockServiceForDoc(sandbox, ampdoc, 'viewer', [
+    viewerMock = mockServiceForDoc(env.sandbox, ampdoc, 'viewer', [
       'sendMessageAwaitResponse',
       'hasCapability',
       'isTrustedViewer',
@@ -63,7 +61,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       );
       return api
         .getScopedCid(used ? 'api-key' : undefined, 'AMP_ECID_GOOGLE')
-        .then(cid => {
+        .then((cid) => {
           expect(cid).to.equal('client-id-from-viewer');
           const payload = dict({
             'scope': 'AMP_ECID_GOOGLE',

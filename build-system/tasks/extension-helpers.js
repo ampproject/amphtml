@@ -18,34 +18,56 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
-const wrappers = require('../compile-wrappers');
+const wrappers = require('../compile/compile-wrappers');
 const {
-  aliasBundles,
+  extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
-  verifyExtensionAliasBundles,
-} = require('../../bundles.config');
-const {compileJs, mkdirSync} = require('./helpers');
-const {isTravisBuild} = require('../travis');
+} = require('../compile/bundles.config');
+const {endBuildStep} = require('./helpers');
+const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Extensions to build when `--extensions=minimal_set`.
- * @private @const {!Array<string>}
+ * Extensions to build when `--extensions=inabox`.
+ * See AMPHTML ads spec for supported extensions:
+ * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
  */
-const MINIMAL_EXTENSION_SET = [
-  'amp-ad',
-  'amp-ad-network-adsense-impl',
+const INABOX_EXTENSION_SET = [
+  'amp-accordion',
+  'amp-ad-exit',
   'amp-analytics',
+  'amp-anim',
+  'amp-animation',
   'amp-audio',
-  'amp-image-lightbox',
+  'amp-bind',
+  'amp-carousel',
+  'amp-fit-text',
+  'amp-font',
+  'amp-form',
+  'amp-layout',
   'amp-lightbox',
-  'amp-sidebar',
+  'amp-mustache',
+  'amp-position-observer',
+  'amp-social-share',
   'amp-video',
+
+  // the following extensions are not supported in AMPHTML ads spec
+  // but commonly used in AMPHTML ads related debugging.
+  'amp-ad',
+  'amp-ad-network-fake-impl',
 ];
+
+/**
+ * Default extensions that should always be built. These are always or almost
+ * always loaded by runtime.
+ */
+const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
 
 /**
  * @typedef {{
@@ -54,14 +76,13 @@ const MINIMAL_EXTENSION_SET = [
  *   hasCss: ?boolean,
  *   loadPriority: ?string,
  *   cssBinaries: ?Array<string>,
- *   extraGlobs?Array<string>,
+ *   extraGlobs: ?Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 // All declared extensions.
 const extensions = {};
-const extensionAliasFilePath = {};
 
 // All extensions to build
 let extensionsToBuild = null;
@@ -74,16 +95,30 @@ const adVendors = [];
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
+ * @param {!Object} extensionsObject
+ * @param {boolean} includeLatest
  */
-function declareExtension(name, version, latestVersion, options) {
+function declareExtension(
+  name,
+  version,
+  latestVersion,
+  options,
+  extensionsObject,
+  includeLatest
+) {
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
-  versions.forEach(v => {
-    extensions[`${name}-${v}`] = Object.assign(
-      {name, version: v, latestVersion},
-      defaultOptions,
-      options
-    );
+  versions.forEach((v) => {
+    extensionsObject[`${name}-${v}`] = {
+      name,
+      version: v,
+      latestVersion,
+      ...defaultOptions,
+      ...options,
+    };
+    if (includeLatest && v == latestVersion) {
+      extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
+    }
   });
   if (name.startsWith('amp-ad-network-')) {
     // Get the ad network name. All ad network extensions are named
@@ -94,142 +129,142 @@ function declareExtension(name, version, latestVersion, options) {
 }
 
 /**
- * Initializes all extensions from bundles.config.js if not already done.
+ * Initializes all extensions from build-system/compile/bundles.config.js if not
+ * already done and populates the given extensions object.
+ * @param {?Object} extensionsObject
+ * @param {?boolean} includeLatest
  */
-function maybeInitializeExtensions() {
-  if (Object.keys(extensions).length === 0) {
+function maybeInitializeExtensions(
+  extensionsObject = extensions,
+  includeLatest = false
+) {
+  if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
-    extensionBundles.forEach(c => {
-      declareExtension(c.name, c.version, c.latestVersion, c.options);
-    });
-  }
-
-  if (Object.keys(extensionAliasFilePath).length === 0) {
-    verifyExtensionAliasBundles();
-    aliasBundles.forEach(c => {
-      declareExtensionVersionAlias(
+    extensionBundles.forEach((c) => {
+      declareExtension(
         c.name,
         c.version,
         c.latestVersion,
-        c.options
+        c.options,
+        extensionsObject,
+        includeLatest
       );
     });
   }
 }
 
 /**
- * This function is used for declaring deprecated extensions. It simply places
- * the current version code in place of the latest versions. This has the
- * ability to break an extension version, so please be sure that this is the
- * correct one to use.
- * @param {string} name
- * @param {string} version E.g. 0.1
- * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption} options extension options object.
+ * Set the extensions to build from example documents
+ * (for internal use by `gulp performance`)
+ *
+ * @param {Array<string>} examples Path to example documents
  */
-function declareExtensionVersionAlias(name, version, latestVersion, options) {
-  extensionAliasFilePath[name + '-' + version + '.js'] = {
-    'name': name,
-    'file': name + '-' + latestVersion + '.js',
-  };
-  extensionAliasFilePath[name + '-' + version + '.js.map'] = {
-    'name': name,
-    'file': name + '-' + latestVersion + '.js.map',
-  };
-  if (options.hasCss) {
-    extensionAliasFilePath[name + '-' + version + '.css'] = {
-      'name': name,
-      'file': name + '-' + latestVersion + '.css',
-    };
-  }
-  if (options.cssBinaries) {
-    options.cssBinaries.forEach(cssBinaryName => {
-      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
-        'name': cssBinaryName,
-        'file': cssBinaryName + '-' + latestVersion + '.css',
-      };
-    });
-  }
+function setExtensionsToBuildFromDocuments(examples) {
+  extensionsToBuild = dedupe([
+    ...DEFAULT_EXTENSION_SET,
+    ...getExtensionsFromArg(examples.join(',')),
+  ]);
 }
 
 /**
- * Process the command line arguments --extensions and --extensions_from
- * and return a list of the referenced extensions.
+ * Process the command line arguments --noextensions, --extensions, and
+ * --extensions_from and return a list of the referenced extensions.
+ *
+ * @param {boolean=} preBuild
  * @return {!Array<string>}
  */
-function getExtensionsToBuild() {
+function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-
-  extensionsToBuild = [];
-
-  if (!!argv.extensions) {
-    if (argv.extensions === 'minimal_set') {
-      argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  if (argv.extensions) {
+    if (typeof argv.extensions !== 'string') {
+      log(red('ERROR:'), 'Missing list of extensions.');
+      process.exit(1);
+    } else if (argv.extensions === 'inabox') {
+      argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    extensionsToBuild = argv.extensions.split(',');
+    const explicitExtensions = argv.extensions.replace(/\s/g, '').split(',');
+    extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
   }
-
-  if (!!argv.extensions_from) {
+  if (argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-
+  if (
+    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+  ) {
+    const allExtensions = [];
+    for (const extension in extensions) {
+      allExtensions.push(extensions[extension].name);
+    }
+    extensionsToBuild = dedupe(extensionsToBuild.concat(allExtensions));
+  }
   return extensionsToBuild;
 }
 
 /**
  * Parses the --extensions, --extensions_from, and the --noextensions flags,
- * and prints a helpful message that lets the developer know how to build the
- * runtime with a list of extensions, all the extensions used by a test file,
- * or no extensions at all.
+ * and prints a helpful message that lets the developer know how to (pre)build
+ * the runtime with a list of extensions, all the extensions used by a test
+ * file, or no extensions at all.
+ * @param {boolean=} preBuild
  */
-function parseExtensionFlags() {
-  if (!isTravisBuild()) {
-    const noExtensionsMessage =
-      green('⤷ Use ') +
-      cyan('--noextensions ') +
-      green('to skip building extensions.');
-    const extensionsMessage =
-      green('⤷ Use ') +
-      cyan('--extensions=amp-foo,amp-bar ') +
-      green('to choose which extensions to build.');
-    const minimalSetMessage =
-      green('⤷ Use ') +
-      cyan('--extensions=minimal_set ') +
-      green('to build just the extensions needed to load ') +
-      cyan('article.amp.html') +
-      green('.');
-    const extensionsFromMessage =
-      green('⤷ Use ') +
-      cyan('--extensions_from=examples/foo.amp.html ') +
-      green('to build extensions from example docs.');
-    if (argv.extensions) {
-      if (typeof argv.extensions !== 'string') {
-        log(red('ERROR:'), 'Missing list of extensions.');
-        log(noExtensionsMessage);
-        log(extensionsMessage);
-        log(minimalSetMessage);
-        log(extensionsFromMessage);
-        process.exit(1);
-      }
-      argv.extensions = argv.extensions.replace(/\s/g, '');
-    }
+function parseExtensionFlags(preBuild = false) {
+  if (isTravisBuild()) {
+    return;
+  }
 
-    if (argv.extensions || argv.extensions_from) {
+  const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const coreRuntimeOnlyMessage =
+    green('⤷ Use ') +
+    cyan('--core_runtime_only ') +
+    green('to build just the core runtime.');
+  const noExtensionsMessage =
+    green('⤷ Use ') +
+    cyan('--noextensions ') +
+    green('to skip building extensions.');
+  const extensionsMessage =
+    green('⤷ Use ') +
+    cyan('--extensions=amp-foo,amp-bar ') +
+    green(`to choose which extensions to ${buildOrPreBuild}.`);
+  const inaboxSetMessage =
+    green('⤷ Use ') +
+    cyan('--extensions=inabox ') +
+    green(`to ${buildOrPreBuild} just the extensions needed to load AMP ads.`);
+  const extensionsFromMessage =
+    green('⤷ Use ') +
+    cyan('--extensions_from=examples/foo.amp.html ') +
+    green(`to ${buildOrPreBuild} just the extensions needed to load `) +
+    cyan('foo.amp.html') +
+    green('.');
+
+  if (argv.core_runtime_only) {
+    log(green('Building just the core runtime.'));
+  } else if (preBuild) {
+    log(
+      green('Pre-building extension(s):'),
+      cyan(getExtensionsToBuild(preBuild).join(', '))
+    );
+    log(extensionsMessage);
+    log(inaboxSetMessage);
+    log(extensionsFromMessage);
+  } else {
+    if (argv.noextensions) {
+      log(green('Not building any AMP extensions.'));
+    } else if (argv.extensions || argv.extensions_from) {
       log(
         green('Building extension(s):'),
         cyan(getExtensionsToBuild().join(', '))
       );
-    } else if (argv.noextensions) {
-      log(green('Not building any AMP extensions.'));
     } else {
       log(green('Building all AMP extensions.'));
     }
+    log(coreRuntimeOnlyMessage);
     log(noExtensionsMessage);
     log(extensionsMessage);
-    log(minimalSetMessage);
+    log(inaboxSetMessage);
     log(extensionsFromMessage);
   }
 }
@@ -247,7 +282,7 @@ function getExtensionsFromArg(examples) {
 
   const extensions = [];
 
-  examples.split(',').forEach(example => {
+  examples.split(',').forEach((example) => {
     const html = fs.readFileSync(example, 'utf8');
     const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
     const extensionNameMatchIndex = 2;
@@ -279,7 +314,7 @@ function getExtensionsFromArg(examples) {
  */
 function dedupe(arr) {
   const map = Object.create(null);
-  arr.forEach(item => (map[item] = true));
+  arr.forEach((item) => (map[item] = true));
   return Object.keys(map);
 }
 
@@ -289,37 +324,74 @@ function dedupe(arr) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensions(options) {
-  maybeInitializeExtensions();
-  if (!!argv.noextensions && !options.compileAll) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = options.compileAll ? [] : getExtensionsToBuild();
-
+async function buildExtensions(options) {
+  const startTime = Date.now();
+  maybeInitializeExtensions(extensions, /* includeLatest */ false);
+  const extensionsToBuild = getExtensionsToBuild();
   const results = [];
-  for (const key in extensions) {
+  for (const extension in extensions) {
     if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensions[key].name) == -1
+      options.compileOnlyCss ||
+      extensionsToBuild.includes(extensions[extension].name)
     ) {
-      continue;
+      results.push(doBuildExtension(extensions, extension, options));
     }
-    const e = extensions[key];
-    let o = Object.assign({}, options);
-    o = Object.assign(o, e);
-    results.push(
-      buildExtension(
-        e.name,
-        e.version,
-        e.latestVersion,
-        e.hasCss,
-        o,
-        e.extraGlobs
-      )
+  }
+  await Promise.all(results);
+  if (!options.compileOnlyCss && !argv.single_pass) {
+    endBuildStep(
+      options.minify ? 'Minified all' : 'Compiled all',
+      'extensions',
+      startTime
     );
   }
-  return Promise.all(results);
+}
+
+/**
+ * Builds a single extension after extracting its settings.
+ * @param {!Object} extensions
+ * @param {string} extension
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+async function doBuildExtension(extensions, extension, options) {
+  const e = extensions[extension];
+  let o = {...options};
+  o = Object.assign(o, e);
+  await buildExtension(
+    e.name,
+    e.version,
+    e.latestVersion,
+    e.hasCss,
+    o,
+    e.extraGlobs
+  );
+}
+
+/**
+ * Watches the contents of an extension directory. When a file in the given path
+ * changes, the extension is rebuilt.
+ *
+ * @param {string} path
+ * @param {string} name
+ * @param {string} version
+ * @param {string} latestVersion
+ * @param {boolean} hasCss
+ * @param {?Object} options
+ */
+function watchExtension(path, name, version, latestVersion, hasCss, options) {
+  watch(path + '/**/*', function () {
+    const bundleComplete = buildExtension(
+      name,
+      version,
+      latestVersion,
+      hasCss,
+      {...options, continueOnError: true}
+    );
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  });
 }
 
 /**
@@ -339,49 +411,50 @@ function buildExtensions(options) {
  * @param {string} latestVersion Latest version of the extension.
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} opt_extraGlobs
+ * @param {!Array=} extraGlobs
  * @return {!Promise}
  */
-function buildExtension(
+async function buildExtension(
   name,
   version,
   latestVersion,
   hasCss,
   options,
-  opt_extraGlobs
+  extraGlobs
 ) {
   options = options || {};
-  options.extraGlobs = opt_extraGlobs;
+  options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
-    return Promise.resolve();
+    return;
   }
-  // Use a separate watcher for extensions to copy / inline CSS and compile JS
-  // instead of relying on the watcher used by compileUnminifiedJs, which only
-  // recompiles JS.
   const path = 'extensions/' + name + '/' + version;
-  const optionsCopy = Object.create(options);
+
+  // Use a separate watcher for extensions to copy / inline CSS and compile JS
+  // instead of relying on the watchers used by compileUnminifiedJs and
+  // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
-    optionsCopy.watch = false;
-    watch(path + '/*', function() {
-      buildExtension(name, version, latestVersion, hasCss, optionsCopy);
-    });
+    options.watch = false;
+    watchExtension(path, name, version, latestVersion, hasCss, options);
+    // When an ad network extension is being watched, also watch amp-a4a.
+    if (name.match(/amp-ad-network-.*-impl/)) {
+      const a4aPath = `extensions/amp-a4a/${version}`;
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
+    }
   }
-  let promise = Promise.resolve();
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, optionsCopy);
+    await buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
-      return promise;
+      return;
     }
   }
-  return promise.then(() => {
-    if (argv.single_pass) {
-      return Promise.resolve();
-    } else {
-      return buildExtensionJs(path, name, version, latestVersion, optionsCopy);
-    }
-  });
+  if (name === 'amp-analytics') {
+    await vendorConfigs(options);
+  }
+  if (!argv.single_pass) {
+    await buildExtensionJs(path, name, version, latestVersion, options);
+  }
 }
 
 /**
@@ -389,6 +462,7 @@ function buildExtension(
  * @param {string} name
  * @param {string} version
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExtensionCss(path, name, version, options) {
   /**
@@ -404,18 +478,29 @@ function buildExtensionCss(path, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+  const aliasBundle = extensionAliasBundles[name];
+  const isAliased = aliasBundle && aliasBundle.version == version;
+
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
-    writeCssBinaries.bind(null, `${name}-${version}.css`)
+    (mainCss) => {
+      writeCssBinaries(`${name}-${version}.css`, mainCss);
+      if (isAliased) {
+        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
+      }
+    }
   );
 
   if (Array.isArray(options.cssBinaries)) {
     promises.push.apply(
       promises,
-      options.cssBinaries.map(function(name) {
-        return jsifyCssAsync(`${path}/${name}.css`).then(css =>
-          writeCssBinaries(`${name}-${version}.css`, css)
-        );
+      options.cssBinaries.map(function (name) {
+        return jsifyCssAsync(`${path}/${name}.css`).then((css) => {
+          writeCssBinaries(`${name}-${version}.css`, css);
+          if (isAliased) {
+            writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
+          }
+        });
       })
     );
   }
@@ -435,9 +520,9 @@ function buildExtensionCss(path, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionJs(path, name, version, latestVersion, options) {
+async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
-  return compileJs(
+  await compileJs(
     path + '/',
     filename,
     './dist/v0',
@@ -445,6 +530,7 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: version === latestVersion ? `${name}-latest.js` : '',
+      esmPassCompilation: argv.esm || false,
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -454,23 +540,43 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
         ? ''
         : wrappers.extension(name, options.loadPriority),
     })
-  ).then(() => {
-    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
-    if (name === 'amp-script') {
-      // TODO(choumx): Compile this when worker-dom externs are available.
-      const dir = 'node_modules/@ampproject/worker-dom/dist/';
-      const file = `dist/v0/amp-script-worker-${version}`;
-      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
-      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
-    }
-  });
+  );
+
+  // If an incremental watch build fails, simply return.
+  if (options.errored) {
+    return;
+  }
+
+  const aliasBundle = extensionAliasBundles[name];
+  const isAliased = aliasBundle && aliasBundle.version == version;
+  if (isAliased) {
+    const src = maybeToEsmName(
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
+    );
+    const dest = maybeToEsmName(
+      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+    );
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+  }
+
+  if (name === 'amp-script') {
+    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
+    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
+    const file = `dist/v0/amp-script-worker-${version}`;
+    // The "js" output is minified and transpiled to ES5.
+    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
+    // The "mjs" output is unminified ES6 and has debugging flags enabled.
+    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+  }
 }
 
 module.exports = {
   buildExtensions,
+  doBuildExtension,
   extensions,
-  extensionAliasFilePath,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
+  setExtensionsToBuildFromDocuments,
 };

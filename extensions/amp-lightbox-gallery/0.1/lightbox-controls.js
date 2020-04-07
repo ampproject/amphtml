@@ -88,8 +88,8 @@ export class LightboxControls {
     const actionStrings = Object.values(LightboxControlsAction);
     devAssert(
       toArray(el.querySelectorAll('[data-action]'))
-        .map(div => div.getAttribute('data-action'))
-        .every(action => actionStrings.includes(action)),
+        .map((div) => div.getAttribute('data-action'))
+        .every((action) => actionStrings.includes(action)),
       'Action for a button does not map to enum.'
     );
 
@@ -108,10 +108,10 @@ export class LightboxControls {
     /** @private @const */
     this.element_ = element;
 
-    /** @private @const */
+    /** @protected @const */
     this.measureMutateElement_ = measureMutateElement;
 
-    this.element_.addEventListener('click', event => {
+    this.element_.addEventListener('click', (event) => {
       this.handleClick_(event);
     });
   }

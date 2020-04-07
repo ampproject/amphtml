@@ -27,6 +27,9 @@ export class Platform {
   constructor(win) {
     /** @const @private {!Navigator} */
     this.navigator_ = /** @type {!Navigator} */ (win.navigator);
+
+    /** @const @private */
+    this.win_ = win;
   }
 
   /**
@@ -129,7 +132,11 @@ export class Platform {
    * @return {boolean}
    */
   isStandalone() {
-    return this.isIos() && this.navigator_.standalone;
+    return (
+      (this.isIos() && this.navigator_.standalone) ||
+      (this.isChrome() &&
+        this.win_.matchMedia('(display-mode: standalone)').matches)
+    );
   }
 
   /**
@@ -225,5 +232,5 @@ export class Platform {
  * @param {!Window} window
  */
 export function installPlatformService(window) {
-  return registerServiceBuilder(window, 'platform', Platform);
+  registerServiceBuilder(window, 'platform', Platform);
 }

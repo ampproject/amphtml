@@ -66,7 +66,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfigDef;
+let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
@@ -79,18 +79,18 @@ let LaterpayConfigDef;
  *   validity_value: number
  * }}
  */
-let PurchaseOptionDef;
+let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @typedef {{
  *   access: boolean,
  *   apl: string,
- *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: (!Array<PurchaseOptionDef>|undefined),
- *   subscriptions: (!Array<PurchaseOptionDef>|undefined)
+ *   premiumcontent: !PurchaseOption_0_1_Def,
+ *   timepasses: (!Array<PurchaseOption_0_1_Def>|undefined),
+ *   subscriptions: (!Array<PurchaseOption_0_1_Def>|undefined)
  * }}
  */
-let PurchaseConfigDef;
+let PurchaseConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
@@ -107,13 +107,13 @@ export class LaterpayVendor {
     /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
+    /** @const @private {!JsonObject} For shape see LaterpayConfig_0_1_Def */
     this.laterpayConfig_ = this.accessSource_.getAdapterConfig();
 
-    /** @private {?JsonObject} For shape see PurchaseConfigDef */
+    /** @private {?JsonObject} For shape see PurchaseConfig_0_1_Def */
     this.purchaseConfig_ = null;
 
     /** @private {?Function} */
@@ -191,7 +191,7 @@ export class LaterpayVendor {
    */
   authorize() {
     return this.getPurchaseConfig_().then(
-      response => {
+      (response) => {
         if (response.status === 204) {
           throw user().createError(
             'No merchant domains have been matched for this ' +
@@ -205,7 +205,7 @@ export class LaterpayVendor {
         this.emptyContainer_();
         return {access: response.access};
       },
-      err => {
+      (err) => {
         if (!err || !err.response) {
           throw err;
         }
@@ -216,7 +216,7 @@ export class LaterpayVendor {
         return response
           .json()
           .catch(() => undefined)
-          .then(responseJson => {
+          .then((responseJson) => {
             this.purchaseConfig_ = responseJson;
             // empty before rendering, in case authorization is being called
             // again with the same state
@@ -241,10 +241,10 @@ export class LaterpayVendor {
       /* useAuthData */ false
     );
     return urlPromise
-      .then(url => {
+      .then((url) => {
         return this.accessSource_.getLoginUrl(url);
       })
-      .then(url => {
+      .then((url) => {
         dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(
@@ -253,7 +253,7 @@ export class LaterpayVendor {
               credentials: 'include',
             })
           )
-          .then(res => res.json());
+          .then((res) => res.json());
       });
   }
 
@@ -344,17 +344,17 @@ export class LaterpayVendor {
     listContainer.appendChild(
       this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
     );
-    this.purchaseConfig_['timepasses'].forEach(timepass => {
+    this.purchaseConfig_['timepasses'].forEach((timepass) => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
-    this.purchaseConfig_['subscriptions'].forEach(subscription => {
+    this.purchaseConfig_['subscriptions'].forEach((subscription) => {
       listContainer.appendChild(this.createPurchaseOption_(subscription));
     });
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_['defaultButton'];
     this.purchaseButton_ = purchaseButton;
-    this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
+    this.purchaseButtonListener_ = listen(purchaseButton, 'click', (ev) => {
       const {value} = this.selectedPurchaseOption_;
       const purchaseType = this.selectedPurchaseOption_.dataset['purchaseType'];
       this.handlePurchase_(ev, value, purchaseType);
@@ -413,7 +413,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_1_Def
    * @return {!Element}
    * @private
    */
@@ -439,7 +439,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!JsonObject} option Shape: PurchaseOptionDef
+   * @param {!JsonObject} option Shape: PurchaseOption_0_1_Def
    * @return {!Element}
    * @private
    */
@@ -505,7 +505,7 @@ export class LaterpayVendor {
     const a = this.createElement_('a');
     a.href = href;
     a.textContent = this.i18n_['alreadyPurchasedLink'];
-    this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
+    this.alreadyPurchasedListener_ = listen(a, 'click', (ev) => {
       this.handlePurchase_(ev, href, 'alreadyPurchased');
     });
     p.appendChild(a);
@@ -552,7 +552,7 @@ export class LaterpayVendor {
       purchaseUrl,
       /* useAuthData */ false
     );
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       dev().fine(TAG, 'Authorization URL: ', url);
       this.accessSource_.loginWithUrl(url, purchaseType);
     });

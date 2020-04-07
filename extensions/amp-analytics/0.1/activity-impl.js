@@ -83,17 +83,16 @@ class ActivityHistory {
    * @param {ActivityEventDef} activityEvent
    */
   push(activityEvent) {
-    if (!this.prevActivityEvent_) {
-      this.prevActivityEvent_ = activityEvent;
-    }
-
-    if (this.prevActivityEvent_.time < activityEvent.time) {
+    if (
+      this.prevActivityEvent_ &&
+      this.prevActivityEvent_.time < activityEvent.time
+    ) {
       this.totalEngagedTime_ += findEngagedTimeBetween(
         this.prevActivityEvent_,
         activityEvent.time
       );
-      this.prevActivityEvent_ = activityEvent;
     }
+    this.prevActivityEvent_ = activityEvent;
   }
 
   /**
@@ -115,7 +114,7 @@ class ActivityHistory {
 
 /**
  * Array of event types which will be listened for on the document to indicate
- * activity. Other activities are also observed on the Viewer and Viewport
+ * activity. Other activities are also observed on the AmpDoc and Viewport
  * objects. See {@link setUpActivityListeners_} for listener implementation.
  * @private @const {Array<string>}
  */
@@ -126,6 +125,13 @@ const ACTIVE_EVENT_TYPES = [
   'keydown',
   'keyup',
 ];
+/**
+ * Array of event types which will be listened for on the document to indicate
+ * leave from document. Other activities are also observed on the AmpDoc and Viewport
+ * objects. See {@link setUpActivityListeners_} for listener implementation.
+ * @private @const {Array<string>}
+ */
+const INACTIVE_EVENT_TYPES = ['mouseleave'];
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
@@ -138,8 +144,8 @@ export class Activity {
   /**
    * Activity tracks basic user activity on the page.
    *  - Listeners are not registered on the activity event types until the
-   *    Viewer's `whenFirstVisible` is resolved.
-   *  - When the `whenFirstVisible` of Viewer is resolved, a first activity
+   *    AmpDoc's `whenFirstVisible` is resolved.
+   *  - When the `whenFirstVisible` of AmpDoc is resolved, a first activity
    *    is recorded.
    *  - The first activity in any second causes all other activities to be
    *    ignored. This is similar to debounce functionality since some events
@@ -163,6 +169,9 @@ export class Activity {
 
     /** @private @const {function()} */
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
+
+    /** @private @const {function()} */
+    this.boundHandleInactive_ = this.handleInactive_.bind(this);
 
     /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
@@ -189,13 +198,10 @@ export class Activity {
     /** @private @const {!ActivityHistory} */
     this.activityHistory_ = new ActivityHistory();
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
-
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    this.viewer_.whenFirstVisible().then(this.start_.bind(this));
+    this.ampdoc.whenFirstVisible().then(this.start_.bind(this));
   }
 
   /** @private */
@@ -207,7 +213,10 @@ export class Activity {
     this.setUpActivityListeners_();
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {number}
+   */
   getTimeSinceStart_() {
     const timeSinceStart = Date.now() - this.startTime_;
     // Ensure that a negative time is never returned. This may cause loss of
@@ -228,24 +237,38 @@ export class Activity {
 
   /** @private */
   setUpActivityListeners_() {
-    for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
-      this.unlistenFuncs_.push(
-        listen(
-          this.ampdoc.getRootNode(),
-          ACTIVE_EVENT_TYPES[i],
-          this.boundHandleActivity_
-        )
-      );
-    }
+    this.setUpListenersFromArray_(
+      this.ampdoc.getRootNode(),
+      ACTIVE_EVENT_TYPES,
+      this.boundHandleActivity_
+    );
+
+    this.setUpListenersFromArray_(
+      this.ampdoc.getRootNode(),
+      INACTIVE_EVENT_TYPES,
+      this.boundHandleInactive_
+    );
 
     this.unlistenFuncs_.push(
-      this.viewer_.onVisibilityChanged(this.boundHandleVisibilityChange_)
+      this.ampdoc.onVisibilityChanged(this.boundHandleVisibilityChange_)
     );
 
     // Viewport.onScroll does not return an unlisten function.
     // TODO(britice): If Viewport is updated to return an unlisten function,
     // update this to capture the unlisten function.
     this.viewport_.onScroll(this.boundHandleActivity_);
+  }
+
+  /**
+   *  @private
+   *  @param {!EventTarget} target
+   *  @param {Array<string>} events
+   *  @param {function()} listener
+   */
+  setUpListenersFromArray_(target, events, listener) {
+    for (let i = 0; i < events.length; i++) {
+      this.unlistenFuncs_.push(listen(target, events[i], listener));
+    }
   }
 
   /** @private */
@@ -290,7 +313,7 @@ export class Activity {
 
   /** @private */
   handleVisibilityChange_() {
-    if (this.viewer_.isVisible()) {
+    if (this.ampdoc.isVisible()) {
       this.handleActivity_();
     } else {
       this.handleInactive_();

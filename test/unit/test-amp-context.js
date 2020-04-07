@@ -23,11 +23,9 @@ describe('3p ampcontext.js', () => {
   let windowPostMessageSpy;
   let windowMessageHandler;
   let win;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    windowPostMessageSpy = sandbox.spy();
+    windowPostMessageSpy = window.sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
         expect(eventType).to.equal('message');
@@ -39,7 +37,7 @@ describe('3p ampcontext.js', () => {
 
       // setTimeout is needed for nextTick.
       // makes nextTick behavior synchronous for test assertions.
-      setTimeout: cb => cb(),
+      setTimeout: (cb) => cb(),
 
       // we don't care about window events for these tests since that behavior
       // is deprecated.
@@ -53,7 +51,6 @@ describe('3p ampcontext.js', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     win = undefined;
     windowMessageHandler = undefined;
   });
@@ -169,7 +166,7 @@ describe('3p ampcontext.js', () => {
   it('should be able to send an intersection observer request', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = sandbox.spy();
+    const callbackSpy = window.sandbox.spy();
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
@@ -200,10 +197,7 @@ describe('3p ampcontext.js', () => {
 
     // window.context should have received intersection observer postMessage
     // back, and should have called the callback function
-    // TODO(alanorozco): Called twice for backwards compatibility with
-    // window.context. This behavior is deprecated and this test should be
-    // changed when removed.
-    expect(callbackSpy).to.be.calledTwice;
+    expect(callbackSpy).to.be.calledOnce;
     expect(callbackSpy).to.be.calledWith('changes');
 
     // Stop listening for intersection observer messages
@@ -211,17 +205,13 @@ describe('3p ampcontext.js', () => {
 
     // Send intersection observer message
     windowMessageHandler(message);
-
-    // TODO(alanorozco): Called twice for backwards compatibility with
-    // window.context. This behavior is deprecated and this test should be
-    // changed when removed.
-    expect(callbackSpy).to.be.calledTwice;
+    expect(callbackSpy).to.be.calledOnce;
   });
 
   it('should send a pM and set callback when onPageVisibilityChange()', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
-    const callbackSpy = sandbox.spy();
+    const callbackSpy = window.sandbox.spy();
     const stopObserving = context.onPageVisibilityChange(callbackSpy);
 
     // window.context should have sent postMessage asking for visibility
@@ -268,8 +258,8 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = sandbox.spy();
-    const deniedCallbackSpy = sandbox.spy();
+    const successCallbackSpy = window.sandbox.spy();
+    const deniedCallbackSpy = window.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);
@@ -315,8 +305,8 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
-    const successCallbackSpy = sandbox.spy();
-    const deniedCallbackSpy = sandbox.spy();
+    const successCallbackSpy = window.sandbox.spy();
+    const deniedCallbackSpy = window.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);

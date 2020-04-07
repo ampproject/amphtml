@@ -16,7 +16,6 @@
 
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
-import {createElementWithAttributes} from '../../../src/dom';
 import {macroTask} from '../../../testing/yield';
 
 describes.realWin(
@@ -26,7 +25,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let variableSource;
 
     beforeEach(() => {
@@ -100,12 +99,9 @@ describes.realWin(
       };
 
       function createExpanderWithWhitelist(whitelist, mockBindings) {
-        env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-allowed-url-macros',
-            content: whitelist,
-          })
-        );
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'amp-allowed-url-macros': whitelist,
+        });
 
         variableSource = new GlobalVariableSource(env.ampdoc);
         return new Expander(variableSource, mockBindings);
@@ -152,15 +148,14 @@ describes.realWin(
         CLIENT_ID: mockClientIdFn, // fn resolving to promise
         CANONICAL_URL: 'www.google.com', // string
         RANDOM: () => 123456, // number
-        TRIM: str => str.trim(), // fn
-        UPPERCASE: str => str.toUpperCase(),
-        LOWERCASE: str => str.toLowerCase(),
+        TRIM: (str) => str.trim(), // fn
+        UPPERCASE: (str) => str.toUpperCase(),
+        LOWERCASE: (str) => str.toLowerCase(),
         CONCAT: (a, b) => a + '-' + b,
         CAT_THREE: (a, b, c) => a + b + c,
         ASYNC: Promise.resolve('hello'),
-        ASYNCFN: arg => Promise.resolve(arg),
+        ASYNCFN: (arg) => Promise.resolve(arg),
         BROKEN: () => undefined,
-        ANCESTOR_ORIGIN: () => Promise.resolve('https://www.google.com@foo'),
         TITLE: 'hello world ',
       };
 
@@ -255,10 +250,20 @@ describes.realWin(
           input: 'title=TRIM(TITLE)',
           output: 'title=hello%20world',
         },
+        {
+          description: 'should handle backticks inside args',
+          input: 'CONCAT(he`llo`, world)',
+          output: 'hello-world',
+        },
+        {
+          description: 'should handle backticks inside args w/ macros',
+          input: 'TRIM(CANONICAL_URL` `CANONICAL_URL)',
+          output: 'www.google.com%20www.google.com',
+        },
       ];
 
       describe('called asyncronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -278,15 +283,6 @@ describes.realWin(
             ).to.eventually.equal(expected);
           });
 
-          it('throws on bad input with back ticks', () => {
-            const url = 'CONCAT(bad`hello`, world)';
-            allowConsoleError(() => {
-              expect(() => {
-                new Expander(variableSource, mockBindings).expand(url);
-              }).to.throw(/bad/);
-            });
-          });
-
           it('should handle tokens with parenthesis next to each other', () => {
             const url =
               'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
@@ -295,19 +291,11 @@ describes.realWin(
               new Expander(variableSource, mockBindings).expand(url)
             ).to.eventually.equal(expected);
           });
-
-          it('should not encode NOENCODE_WHITELIST', () => {
-            const url = 'ANCESTOR_ORIGIN';
-            const expected = 'https://www.google.com@foo';
-            return expect(
-              new Expander(variableSource, mockBindings).expand(url)
-            ).to.eventually.equal(expected);
-          });
         });
       });
 
       describe('called synchronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -322,20 +310,6 @@ describes.realWin(
         });
 
         describe('unique cases', () => {
-          it('throws on bad input with back ticks', () => {
-            const url = 'CONCAT(bad`hello`, world)';
-            allowConsoleError(() => {
-              expect(() => {
-                new Expander(
-                  variableSource,
-                  mockBindings,
-                  /* opt_collectVars */ undefined,
-                  /* opt_sync */ true
-                ).expand(url);
-              }).to.throw(/bad/);
-            });
-          });
-
           // Console errors allowed for these tests because anytime an async
           // function is called with the sync flag we user.error()
           it('should resolve promise to empty string', () => {
@@ -457,9 +431,9 @@ describes.realWin(
         ];
 
         describe('called asyncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
-            it(description, function*() {
+            it(description, function* () {
               const vars = {};
               new Expander(
                 variableSource,
@@ -472,7 +446,7 @@ describes.realWin(
             });
           });
 
-          it('should handle async functions', function*() {
+          it('should handle async functions', function* () {
             const vars = {};
             const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
             new Expander(
@@ -489,7 +463,7 @@ describes.realWin(
         });
 
         describe('called syncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
             it(description, () => {
               const vars = {};

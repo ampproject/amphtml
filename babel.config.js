@@ -26,31 +26,97 @@
 'use strict';
 
 const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/travis');
+const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
-// eslint-disable-next-line amphtml-internal/no-module-exports
-module.exports = function(api) {
-  api.cache(true);
-  // Single pass builds do not use any of the default settings below.
-  if (argv._.includes('dist') && argv.single_pass) {
-    return {};
+const isClosureCompiler =
+  argv._.includes('dist') ||
+  argv._.includes('check-types') ||
+  (argv._.length == 0 && argv.compiled);
+const {esm} = argv;
+
+const targets = (esm) => {
+  if (esm) {
+    return {'esmodules': true};
   }
-  return {
-    'presets': [
+
+  if (isTravisBuild()) {
+    return {'browsers': ['Last 2 versions', 'safari >= 9']};
+  }
+
+  return {'browsers': ['Last 2 versions']};
+};
+
+const plugins = (esm) => {
+  const leadingComments =
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments';
+  const reactConstantElements =
+    '@babel/plugin-transform-react-constant-elements';
+  const transformJSX = [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ];
+  const transformClasses = [
+    '@babel/plugin-transform-classes',
+    {
+      loose: false,
+    },
+  ];
+
+  if (esm) {
+    return [leadingComments, reactConstantElements, transformJSX];
+  }
+
+  return [
+    leadingComments,
+    reactConstantElements,
+    transformClasses,
+    transformJSX,
+  ];
+};
+
+const presets = (esm) => {
+  if (esm) {
+    return [
       [
-        '@babel/env',
+        '@babel/preset-env',
         {
-          'modules': 'commonjs',
-          'loose': true,
-          'targets': {
-            'browsers': isTravisBuild()
-              ? ['Last 2 versions', 'safari >= 9']
-              : ['Last 2 versions'],
-          },
+          'modules': false,
+          'targets': targets(esm),
+          'bugfixes': true,
         },
       ],
+    ];
+  }
+
+  return [
+    [
+      '@babel/preset-env',
+      {
+        'modules': isClosureCompiler ? false : 'commonjs',
+        'loose': true,
+        'targets': targets(esm),
+      },
     ],
+  ];
+};
+
+// eslint-disable-next-line local/no-module-exports
+module.exports = function (api) {
+  api.cache(true);
+  // Closure Compiler builds do not use any of the default settings below until its
+  // an esm build. (Both Multipass and Singlepass)
+  if (isClosureCompiler && !esm) {
+    return {};
+  }
+
+  return {
+    'plugins': plugins(esm),
+    'presets': presets(esm),
     'compact': false,
     'sourceType': 'module',
   };

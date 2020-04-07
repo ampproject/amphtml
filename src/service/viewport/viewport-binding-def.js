@@ -1,5 +1,4 @@
 import {computedStyle} from '../../style';
-import {isExperimentOn} from '../../experiments';
 
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
@@ -19,7 +18,7 @@ import {isExperimentOn} from '../../experiments';
 
 /**
  * ViewportBindingDef is an interface that defines an underlying technology
- * behind the {@link Viewport}.
+ * behind the {@link ViewportInterface}.
  * @interface
  */
 export class ViewportBindingDef {
@@ -180,9 +179,15 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
+   * @param {!ClientRect=} unusedPremeasuredRect
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+  getLayoutRect(
+    unusedEl,
+    unusedScrollLeft,
+    unusedScrollTop,
+    unusedPremeasuredRect
+  ) {}
 
   /**
    * Returns the client rect of the current window.
@@ -205,25 +210,28 @@ export class ViewportBindingDef {
 }
 
 /**
- * Returns the margin-bottom of the last child of `element` with non-zero
- * height, if any. Otherwise, returns 0.
+ * Returns the margin-bottom of the last child of `element` that affects
+ * document height (is static/relative position with non-zero height),
+ * if any. Otherwise, returns 0.
+ *
+ * TODO(choumx): This is a weird location, so refactor to improve code sharing
+ * among implementations of ViewportBindingDef generally.
  *
  * @param {!Window} win
  * @param {!Element} element
  * @return {number}
  */
 export function marginBottomOfLastChild(win, element) {
-  if (!isExperimentOn(win, 'margin-bottom-in-content-height')) {
-    return 0;
-  }
-  let n = element.lastElementChild;
-  while (n) {
+  let style;
+  for (let n = element.lastElementChild; n; n = n.previousElementSibling) {
     const r = n./*OK*/ getBoundingClientRect();
     if (r.height > 0) {
-      break;
-    } else {
-      n = n.previousElementSibling;
+      const s = computedStyle(win, n);
+      if (s.position == 'static' || s.position == 'relative') {
+        style = s;
+        break;
+      }
     }
   }
-  return n ? parseInt(computedStyle(win, n).marginBottom, 10) : 0;
+  return style ? parseInt(style.marginBottom, 10) : 0;
 }

@@ -25,7 +25,7 @@ const postcssImport = require('postcss-import');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const cssprefixer = autoprefixer({
-  browsers: [
+  overrideBrowserslist: [
     'last 5 ChromeAndroid versions',
     'last 5 iOS versions',
     'last 3 FirefoxAndroid versions',
@@ -88,8 +88,8 @@ function transformCss(filename, opt_cssnano) {
  *    processing
  */
 function jsifyCssAsync(filename) {
-  return transformCss(filename).then(function(result) {
-    result.warnings().forEach(function(warn) {
+  return transformCss(filename).then(function (result) {
+    result.warnings().forEach(function (warn) {
       log(colors.red(warn.toString()));
     });
     const {css} = result;

@@ -19,7 +19,6 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {user, userAssert} from '../../../src/log';
@@ -80,16 +79,6 @@ export class ConsentPolicyManager {
   }
 
   /**
-   * Is Multi-consent experiment enabled?
-   *
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  static isMultiSupported(win) {
-    return isExperimentOn(win, 'multi-consent');
-  }
-
-  /**
    *
    * @param {string} consentInstanceId
    */
@@ -147,7 +136,7 @@ export class ConsentPolicyManager {
         // Has initial consent state value. Evaluate immediately
         instance.evaluate(this.consentState_);
       }
-      this.consentStateChangeObservables_.add(state => {
+      this.consentStateChangeObservables_.add((state) => {
         instance.evaluate(state);
       });
       this.consentPromptInitiated_.promise.then(() => {
@@ -162,9 +151,9 @@ export class ConsentPolicyManager {
    */
   init_() {
     // Set up handler to listen to consent instance value change.
-    this.ConsentStateManagerPromise_.then(manager => {
+    this.ConsentStateManagerPromise_.then((manager) => {
       manager.whenConsentReady().then(() => {
-        manager.onConsentStateChange(info => {
+        manager.onConsentStateChange((info) => {
           this.consentStateChangeHandler_(info);
           if (this.consentValueInitiatedResolver_) {
             this.consentValueInitiatedResolver_();
@@ -274,7 +263,7 @@ export class ConsentPolicyManager {
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
-      .then(manager => {
+      .then((manager) => {
         return manager.getConsentInstanceSharedData();
       });
   }

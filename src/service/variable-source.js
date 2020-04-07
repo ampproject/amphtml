@@ -17,6 +17,7 @@ import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
+import {whenDocumentComplete} from '../document-ready';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
@@ -31,6 +32,47 @@ export let AsyncResolverDef;
 let ReplacementDef;
 
 /**
+ * A list of events that the navTiming needs to wait for.
+ * Sort event in order
+ * @enum {number}
+ */
+const WAITFOR_EVENTS = {
+  VIEWER_FIRST_VISIBLE: 1,
+  DOCUMENT_COMPLETE: 2,
+  LOAD: 3,
+  LOAD_END: 4,
+};
+
+/**
+ * A list of events on which event they should wait
+ * @const {!Object<string, WAITFOR_EVENTS>}
+ */
+const NAV_TIMING_WAITFOR_EVENTS = {
+  // ready on viewer first visible
+  'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'fetchStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'secureConnectionStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'requestStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  // ready on document complte
+  'domLoading': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domInteractive': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domContentLoaded': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domComplete': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  // ready on load
+  'loadEventStart': WAITFOR_EVENTS.LOAD,
+  // ready on load complete
+  'loadEventEnd': WAITFOR_EVENTS.LOAD_END,
+};
+
+/**
  * Returns navigation timing information based on the start and end events.
  * The data for the timing events is retrieved from performance.timing API.
  * If start and end events are both given, the result is the difference between
@@ -42,18 +84,37 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  const timer = Services.timerFor(win);
-  return (
-    loadPromise(win)
-      // performance.timing.loadEventEnd returns 0 before the load event handler
-      // has terminated, that's when the load event is completed.
-      // To wait for the event handler to terminate, wait 1 ms and defer to the
-      // event loop.
-      .then(() => timer.promise(1))
-      .then(() => {
-        return getTimingDataSync(win, startEvent, endEvent);
-      })
-  );
+  // Fallback to load event if we don't know what to wait for
+  const startWaitForEvent =
+    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
+  const endWaitForEvent = endEvent
+    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
+    : startWaitForEvent;
+
+  const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
+
+  // set wait for onload to be default
+  let readyPromise;
+  if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
+    readyPromise = Promise.resolve();
+  } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
+    readyPromise = whenDocumentComplete(win.document);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {
+    readyPromise = loadPromise(win);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD_END) {
+    // performance.timing.loadEventEnd returns 0 before the load event handler
+    // has terminated, that's when the load event is completed.
+    // To wait for the event handler to terminate, wait 1ms and defer to the
+    // event loop.
+    const timer = Services.timerFor(win);
+    readyPromise = loadPromise(win).then(() => timer.promise(1));
+  }
+
+  devAssert(readyPromise, 'waitForEvent not supported ' + waitForEvent);
+
+  return readyPromise.then(() => {
+    return getTimingDataSync(win, startEvent, endEvent);
+  });
 }
 
 /**
@@ -93,7 +154,6 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @param {!Window} win
  * @param {string} attribute
  * @return {ResolverReturnDef}
- * @private
  */
 export function getNavigationData(win, attribute) {
   const navigationInfo = win['performance'] && win['performance']['navigation'];
@@ -212,12 +272,13 @@ export class VariableSource {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   * @return {!RegExp}
    */
   getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
-    const all = Object.assign({}, this.replacements_, opt_bindings);
+    const all = {...this.replacements_, ...opt_bindings};
     return this.buildExpr_(Object.keys(all), opt_whiteList);
   }
 
@@ -233,12 +294,12 @@ export class VariableSource {
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
-      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+      keys = keys.filter((key) => this.getUrlMacroWhitelist_().includes(key));
     }
     // If a whitelist is passed into the call to GlobalVariableSource.expand_
     // then we only resolve values contained in the whitelist.
     if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
+      keys = keys.filter((key) => opt_whiteList[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -249,7 +310,7 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     // Keys that start with a `$` need to be escaped so that they do not
     // interfere with the regex that is constructed.
-    const escaped = keys.map(key => {
+    const escaped = keys.map((key) => {
       if (key[0] === '$') {
         return '\\' + key;
       }
@@ -278,15 +339,10 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    const {head} = this.ampdoc.getRootNode();
-    if (!head) {
-      return null;
-    }
-
     // A meta[name="amp-allowed-url-macros"] tag, if present,
     // contains, in its content attribute, a whitelist of variable substitution.
-    const meta = head.querySelector('meta[name="amp-allowed-url-macros"]');
-    if (!meta) {
+    const meta = this.ampdoc.getMetaByName('amp-allowed-url-macros');
+    if (meta === null) {
       return null;
     }
 
@@ -295,9 +351,8 @@ export class VariableSource {
      * @private {?Array<string>}
      */
     this.variableWhitelist_ = meta
-      .getAttribute('content')
       .split(',')
-      .map(variable => variable.trim());
+      .map((variable) => variable.trim());
     return this.variableWhitelist_;
   }
 }

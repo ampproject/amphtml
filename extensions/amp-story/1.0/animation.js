@@ -79,22 +79,11 @@ class AnimationRunner {
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/timer-impl.Timer} timer
    * @param {!AnimationSequence} sequence
    */
-  constructor(
-    page,
-    animationDef,
-    webAnimationBuilderPromise,
-    vsync,
-    timer,
-    sequence
-  ) {
+  constructor(page, animationDef, webAnimationBuilderPromise, vsync, sequence) {
     /** @private @const */
     this.page_ = page;
-
-    /** @private @const */
-    this.timer_ = timer;
 
     /** @private @const */
     this.vsync_ = vsync;
@@ -128,14 +117,14 @@ class AnimationRunner {
      * @private @const {!Promise<
      *    !../../amp-animation/0.1/runners/animation-runner.AnimationRunner>}
      */
-    this.runnerPromise_ = this.getWebAnimationDef_().then(webAnimDef =>
-      webAnimationBuilderPromise.then(builder =>
+    this.runnerPromise_ = this.getWebAnimationDef_().then((webAnimDef) =>
+      webAnimationBuilderPromise.then((builder) =>
         builder.createRunner(webAnimDef)
       )
     );
 
     /** @private @const {!Promise<!Object<string, *>>} */
-    this.firstFrameProps_ = this.keyframes_.then(keyframes =>
+    this.firstFrameProps_ = this.keyframes_.then((keyframes) =>
       omit(keyframes[0], ['offset'])
     );
 
@@ -148,7 +137,7 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    this.keyframes_.then(keyframes =>
+    this.keyframes_.then((keyframes) =>
       devAssert(
         !keyframes[0].offset,
         'First keyframe offset for animation preset should be 0 or undefined'
@@ -160,7 +149,7 @@ class AnimationRunner {
       'Negative delays are not allowed in amp-story entrance animations.'
     );
 
-    this.runnerPromise_.then(runner => this.onRunnerReady_(runner));
+    this.runnerPromise_.then((runner) => this.onRunnerReady_(runner));
   }
 
   /**
@@ -201,9 +190,10 @@ class AnimationRunner {
    * @private
    */
   getWebAnimationDef_() {
-    return this.keyframes_.then(keyframes => ({
+    return this.keyframes_.then((keyframes) => ({
       keyframes,
       target: this.target_,
+      delay: `${this.delay_}ms`,
       duration: `${this.duration_}ms`,
       easing: this.easing_,
       fill: 'forwards',
@@ -220,7 +210,7 @@ class AnimationRunner {
       this.runner_.cancel();
     }
 
-    return this.firstFrameProps_.then(firstFrameProps =>
+    return this.firstFrameProps_.then((firstFrameProps) =>
       this.vsync_.mutatePromise(() => {
         setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
       })
@@ -247,10 +237,6 @@ class AnimationRunner {
       const startAfterId = /** @type {string} */ (this.animationDef_
         .startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
-    }
-
-    if (this.delay_) {
-      promise = promise.then(() => this.timer_.promise(this.delay_));
     }
 
     return promise;
@@ -283,6 +269,12 @@ class AnimationRunner {
 
   /** Pauses the animation. */
   pause() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
     if (this.runner_) {
       devAssert(this.runner_).pause();
     }
@@ -290,6 +282,12 @@ class AnimationRunner {
 
   /** Resumes the animation. */
   resume() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
     if (this.runner_) {
       devAssert(this.runner_).resume();
     }
@@ -300,7 +298,9 @@ class AnimationRunner {
    * @private
    */
   finishWhenReady_(runner) {
-    if (runner.getPlayState() == WebAnimationPlayState.RUNNING) {
+    if (this.runner_) {
+      // Init or no-op if the runner was already running.
+      runner.start();
       runner.finish();
     }
   }
@@ -372,7 +372,7 @@ class AnimationRunner {
   onRunnerReady_(runner) {
     this.runner_ = runner;
 
-    runner.onPlayStateChanged(state => {
+    runner.onPlayStateChanged((state) => {
       if (state == WebAnimationPlayState.FINISHED) {
         this.notifyFinish_();
       }
@@ -428,9 +428,6 @@ export class AnimationManager {
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
-    this.timer_ = Services.timerFor(this.ampdoc_.win);
-
-    /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     /** @private {?Array<!Promise<!AnimationRunner>>} */
@@ -457,18 +454,18 @@ export class AnimationManager {
    */
   applyFirstFrame() {
     return Promise.all(
-      this.getOrCreateRunners_().map(runner => runner.applyFirstFrame())
+      this.getOrCreateRunners_().map((runner) => runner.applyFirstFrame())
     );
   }
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    this.getRunners_().forEach(runner => runner.start());
+    this.getRunners_().forEach((runner) => runner.start());
   }
 
   /** Skips all entrance animations for the page. */
   finishAll() {
-    this.getRunners_().forEach(runner => runner.finish());
+    this.getRunners_().forEach((runner) => runner.finish());
   }
 
   /** Cancels all entrance animations for the page. */
@@ -477,7 +474,7 @@ export class AnimationManager {
       // nothing to cancel when the first frame has not been applied yet.
       return;
     }
-    this.getRunners_().forEach(runner => runner.cancel());
+    this.getRunners_().forEach((runner) => runner.cancel());
   }
 
   /** Pauses all animations in the page. */
@@ -485,7 +482,7 @@ export class AnimationManager {
     if (!this.runners_) {
       return;
     }
-    this.getRunners_().forEach(runner => runner.pause());
+    this.getRunners_().forEach((runner) => runner.pause());
   }
 
   /** Resumes all animations in the page. */
@@ -493,15 +490,22 @@ export class AnimationManager {
     if (!this.runners_) {
       return;
     }
-    this.getRunners_().forEach(runner => runner.resume());
+    this.getRunners_().forEach((runner) => runner.resume());
   }
 
-  /** Determines if there is an entrance animation running. */
+  /**
+   * Determines if there is an entrance animation running.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   hasAnimationStarted() {
-    return this.getRunners_().some(runner => runner.hasStarted());
+    return this.getRunners_().some((runner) => runner.hasStarted());
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
@@ -514,7 +518,7 @@ export class AnimationManager {
     if (!this.runners_) {
       this.runners_ = Array.prototype.map.call(
         scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
-        el => this.createRunner_(el)
+        (el) => this.createRunner_(el)
       );
     }
     return devAssert(this.runners_);
@@ -533,7 +537,6 @@ export class AnimationManager {
       animationDef,
       devAssert(this.builderPromise_),
       this.vsync_,
-      this.timer_,
       this.sequence_
     );
   }
@@ -591,7 +594,7 @@ export class AnimationManager {
     return Services.extensionsFor(this.ampdoc_.win)
       .installExtensionForDoc(this.ampdoc_, 'amp-animation')
       .then(() => Services.webAnimationServiceFor(this.root_))
-      .then(webAnimationService => webAnimationService.createBuilder());
+      .then((webAnimationService) => webAnimationService.createBuilder());
   }
 
   /**
@@ -680,7 +683,11 @@ class AnimationSequence {
     this.subscriptionResolvers_ = map();
   }
 
-  /** Decouples constructor for testing. */
+  /**
+   * Decouples constructor for testing.
+   *
+   * @return {!AnimationSequence}
+   */
   static create() {
     return new AnimationSequence();
   }

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {FrameOverlayManager} from './frame-overlay-manager';
 import {
   MessageType,
   deserializeMessage,
   serializeMessage,
 } from '../../src/3p-frame-messaging';
-import {PositionObserver} from './position-observer';
 import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
+import {getFrameOverlayManager} from './frame-overlay-manager';
+import {getPositionObserver} from './position-observer';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -80,20 +80,23 @@ export class InaboxMessagingHost {
    * @param {!Array<!HTMLIFrameElement>} iframes
    */
   constructor(win, iframes) {
+    // We want to measure elements relative to the top viewport if possible.
+    const hostWin = canInspectWindow(win.top) ? win.top : win;
+
     /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
 
     /** @private {!Object<string,!AdFrameDef>} */
     this.iframeMap_ = Object.create(null);
 
-    /** @private {!PositionObserver} */
-    this.positionObserver_ = new PositionObserver(win);
+    /** @private {!./position-observer.PositionObserver} */
+    this.positionObserver_ = getPositionObserver(hostWin);
 
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();
 
-    /** @private {!FrameOverlayManager} */
-    this.frameOverlayManager_ = new FrameOverlayManager(win);
+    /** @private {!./frame-overlay-manager.FrameOverlayManager} */
+    this.frameOverlayManager_ = getFrameOverlayManager(hostWin);
 
     this.msgObservable_.listen(
       MessageType.SEND_POSITIONS,
@@ -163,16 +166,15 @@ export class InaboxMessagingHost {
    * @param {!HTMLIFrameElement} iframe
    * @param {!Object} request
    * @param {!Window} source
-   * @param {string} origin
+   * @param {string} unusedOrigin
    * @return {boolean}
    */
-  handleSendPositions_(iframe, request, source, origin) {
+  handleSendPositions_(iframe, request, source, unusedOrigin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect = this.positionObserver_.getTargetRect(iframe);
     this.sendPosition_(
       request,
       source,
-      origin,
       dict({
         'viewportRect': viewportRect,
         'targetRect': targetRect,
@@ -182,13 +184,8 @@ export class InaboxMessagingHost {
     devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
       this.iframeMap_[request.sentinel].observeUnregisterFn ||
-      this.positionObserver_.observe(iframe, data =>
-        this.sendPosition_(
-          request,
-          source,
-          origin,
-          /** @type {?JsonObject} */ (data)
-        )
+      this.positionObserver_.observe(iframe, (data) =>
+        this.sendPosition_(request, source, /** @type {?JsonObject} */ (data))
       );
     return true;
   }
@@ -197,14 +194,18 @@ export class InaboxMessagingHost {
    *
    * @param {!Object} request
    * @param {!Window} source
-   * @param {string} origin
    * @param {?JsonObject} data
    */
-  sendPosition_(request, source, origin, data) {
+  sendPosition_(request, source, data) {
     dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
-      origin
+      // We don't need to restrict what origin we send the data to because (a)
+      // we've already verified that this iframe is whitelisted and allowed to
+      // learn its position, and (b) we're post messaging back directly to the
+      // requesting frame.  If we did restrict the origin this would not work
+      // with implementations that use a null origin to render ads.
+      '*'
     );
   }
 
@@ -219,7 +220,7 @@ export class InaboxMessagingHost {
    * 2. Disable zoom and scroll on parent doc
    */
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.expandFrame(iframe, boxRect => {
+    this.frameOverlayManager_.expandFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
@@ -244,7 +245,7 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
+    this.frameOverlayManager_.collapseFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,

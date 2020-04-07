@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
@@ -55,7 +60,7 @@ export class CtaLinkComponent {
         'inside it.'
     );
 
-    links.forEach(ctaLink => {
+    links.forEach((ctaLink) => {
       userAssert(
         'text' in ctaLink && 'url' in ctaLink,
         'Links in CTA link component must contain `text` field and a `url`.'
@@ -81,8 +86,8 @@ export class CtaLinkComponent {
   }
 
   /** @override */
-  buildElement(ctaLinksData, doc) {
-    const html = htmlFor(doc);
+  buildElement(ctaLinksData, win, data) {
+    const html = htmlFor(win.document);
     const container = html`
       <div
         class="i-amphtml-story-bookend-cta-link-wrapper
@@ -95,9 +100,17 @@ export class CtaLinkComponent {
         <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText"></div>
       </a>
     `;
-    ctaLinksData['links'].forEach(currentLink => {
+    ctaLinksData['links'].forEach((currentLink) => {
       const el = linkSeed.cloneNode(/* deep */ true);
-      addAttributesToElement(el, dict({'href': currentLink['url']}));
+      addAttributesToElement(
+        el,
+        dict({
+          'href': resolveRelativeUrl(
+            currentLink['url'],
+            getSourceUrl(win.location)
+          ),
+        })
+      );
 
       if (currentLink['amphtml'] === true) {
         addAttributesToElement(el, dict({'rel': 'amphtml'}));
@@ -105,6 +118,11 @@ export class CtaLinkComponent {
 
       const refs = htmlRefs(el);
       refs['linkText'].textContent = currentLink['text'];
+
+      el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+        position: data.position,
+        type: BOOKEND_COMPONENT_TYPES.CTA_LINK,
+      };
 
       container.appendChild(el);
     });

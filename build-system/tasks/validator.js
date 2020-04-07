@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrDie} = require('../exec');
+const {execOrDie} = require('../common/exec');
 
 let validatorArgs = '';
 if (argv.update_tests) {
@@ -43,4 +43,11 @@ module.exports = {
 };
 
 validator.description = 'Builds and tests the AMP validator.';
+validator.flags = {
+  'update_tests': '  Updates validation test output files',
+};
+
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
+validatorWebui.flags = {
+  'update_tests': '  Updates validation test output files',
+};

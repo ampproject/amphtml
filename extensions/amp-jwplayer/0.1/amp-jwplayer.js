@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
@@ -53,9 +55,17 @@ class AmpJWPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // Host that serves player configuration and content redirects
-    this.preconnect.url('https://content.jwplatform.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://content.jwplatform.com',
+      onLayout
+    );
     // CDN which hosts jwplayer assets
-    this.preconnect.url('https://ssl.p.jwpcdn.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://ssl.p.jwpcdn.com',
+      onLayout
+    );
   }
 
   /** @override */
@@ -65,6 +75,8 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     const {element} = this;
     this.contentid_ = userAssert(
       element.getAttribute('data-playlist-id') ||
@@ -81,9 +93,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     );
 
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
-    this.contentContextual_ =
-      element.getAttribute('data-content-contextual') || '';
-    this.contentRecency_ = element.getAttribute('data-content-recency') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
   }
 
@@ -160,6 +169,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
   /**
    *
+   * @return {*} TODO(#23582): Specify return type
    */
   getContextualVal() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
@@ -175,6 +185,6 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-jwplayer', '0.1', AMP => {
+AMP.extension('amp-jwplayer', '0.1', (AMP) => {
   AMP.registerElement('amp-jwplayer', AmpJWPlayer);
 });

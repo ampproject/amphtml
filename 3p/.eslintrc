@@ -1,5 +1,5 @@
 {
   "rules": {
-    "amphtml-internal/no-style-display": 0
+    "local/no-style-display": 0
   }
 }

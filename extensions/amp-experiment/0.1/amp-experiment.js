@@ -30,18 +30,35 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    /*
+     * Prerender is allowed because the client_id is only used to calculate
+     * the variant bucket.
+     * In the case where a client_id is first generated
+     * during prerender, the base cid will be stored in the AMP viewer domain.
+     */
+    return true;
+  }
+
+  /** @override */
+  isBuildRenderBlocking() {
+    // variantService is render blocking
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     return getServicePromiseForDoc(this.getAmpDoc(), 'variant').then(
-      variantsService => {
+      (variantsService) => {
         try {
           const config = this.getConfig_();
           const results = Object.create(null);
-          const variants = Object.keys(config).map(experimentName => {
+          const variants = Object.keys(config).map((experimentName) => {
             return allocateVariant(
               this.getAmpDoc(),
               experimentName,
               config[experimentName]
-            ).then(variantName => {
+            ).then((variantName) => {
               results[experimentName] = variantName;
             });
           });
@@ -85,7 +102,7 @@ export class AmpExperiment extends AMP.BaseElement {
    */
   addToBody_(experiments) {
     const doc = this.getAmpDoc();
-    return doc.waitForBodyOpen().then(body => {
+    return doc.waitForBodyOpen().then((body) => {
       for (const name in experiments) {
         if (experiments[name]) {
           body.setAttribute(
@@ -99,7 +116,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('variant', Variants);
   AMP.registerElement(TAG, AmpExperiment);
 });

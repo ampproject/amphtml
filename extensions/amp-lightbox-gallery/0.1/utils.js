@@ -17,6 +17,7 @@
  * @fileoverview Description of this file.
  */
 import {Services} from '../../../src/services';
+import {padStart} from '../../../src/string';
 /**
  * Runs a delay after deferring to the event loop. This is useful to call from
  * within an animation frame, as you can be sure that at least duration
@@ -38,28 +39,10 @@ export function delayAfterDeferringToEventLoop(win, duration) {
 }
 
 /**
- * Pads the beginning of a string with a substring to a target length.
- * @param {string} s
- * @param {number} targetLength
- * @param {string} padString
- */
-function padStart(s, targetLength, padString) {
-  if (s.length >= targetLength) {
-    return s;
-  }
-  targetLength = targetLength - s.length;
-  let padding = padString;
-  while (targetLength > padding.length) {
-    padding += padString;
-  }
-  return padding.slice(0, targetLength) + s;
-}
-
-/**
  * Converts seconds to a timestamp formatted string.
  * @param {number} seconds
  * @return {string}
- * @private
+ * @package
  */
 export function secondsToTimestampString(seconds) {
   const h = Math.floor(seconds / 3600);

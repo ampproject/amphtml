@@ -24,7 +24,6 @@ import {
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -42,7 +41,7 @@ const RESIZE_THROTTLE_MS = 300;
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = element => {
+const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="
         i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
@@ -118,11 +117,6 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-
-    if (!this.overlayEl_) {
-      return;
-    }
-
     this.localizationService_ = Services.localizationService(this.win_);
 
     this.isBuilt_ = true;
@@ -155,7 +149,7 @@ export class ViewportWarningLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -163,7 +157,7 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(
       StateProperty.VIEWPORT_WARNING_STATE,
-      viewportWarningState => {
+      (viewportWarningState) => {
         this.onViewportWarningStateUpdate_(viewportWarningState);
       },
       true /** callToInitialize */
@@ -238,7 +232,7 @@ export class ViewportWarningLayer {
 
   /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {?Element} template
+   * @return {!Element} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
@@ -250,12 +244,8 @@ export class ViewportWarningLayer {
       return template;
     }
 
-    if (!isExperimentOn(this.win_, 'disable-amp-story-desktop')) {
-      iconEl.classList.add('i-amphtml-desktop-size-icon');
-      return template;
-    }
-
-    return null;
+    iconEl.classList.add('i-amphtml-desktop-size-icon');
+    return template;
   }
 
   /**

@@ -23,4 +23,3 @@ const falsey = false;
 let result =
 /** @type {boolean} */
 (false);
-let result2 = undefined;

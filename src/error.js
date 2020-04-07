@@ -64,12 +64,18 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 /**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const NEW_ERROR_REPORT_URL_FREQ = 0.2;
+
+/**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
-let accumulatedErrorMessages = self.AMPErrors || [];
+let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
-self.AMPErrors = accumulatedErrorMessages;
+self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements
@@ -92,7 +98,7 @@ function pushLimit(array, element, limit) {
  * @param {function()} work the function to execute after backoff
  * @return {number} the setTimeout id
  */
-let reportingBackoff = function(work) {
+let reportingBackoff = function (work) {
   // Set reportingBackoff as the lazy-created function. JS Vooodoooo.
   reportingBackoff = exponentialBackoff(1.5);
   return reportingBackoff(work);
@@ -165,7 +171,7 @@ export function reportError(error, opt_associatedElement) {
     }
     // Report if error is not an expected type.
     if (!isValidError && getMode().localDev && !getMode().test) {
-      setTimeout(function() {
+      setTimeout(function () {
         const rethrow = new Error(
           '_reported_ Error reported incorrectly: ' + error
         );
@@ -218,7 +224,7 @@ export function reportError(error, opt_associatedElement) {
       error
     );
   } catch (errorReportingError) {
-    setTimeout(function() {
+    setTimeout(function () {
       throw errorReportingError;
     });
   }
@@ -281,7 +287,7 @@ export function isBlockedByConsent(errorOrMessage) {
  */
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (onError);
-  win.addEventListener('unhandledrejection', event => {
+  win.addEventListener('unhandledrejection', (event) => {
     if (
       event.reason &&
       (event.reason.message === CANCELLED ||
@@ -333,9 +339,19 @@ function onError(message, filename, line, col, error) {
     hasNonAmpJs
   );
   if (data) {
-    reportingBackoff(() =>
-      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data))
-    );
+    reportingBackoff(() => {
+      try {
+        return reportErrorToServerOrViewer(
+          this,
+          /** @type {!JsonObject} */
+          (data)
+        ).catch(() => {
+          // catch async errors to avoid recursive errors.
+        });
+      } catch (e) {
+        // catch async errors to avoid recursive errors.
+      }
+    });
   }
 }
 
@@ -349,10 +365,17 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
-  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+  return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      // Override the errorReportingUrl to test the new error reporting endpoint.
+      const newErrorReportingUrl =
+        'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
+      const url =
+        IS_ESM || Math.random() < NEW_ERROR_REPORT_URL_FREQ
+          ? newErrorReportingUrl
+          : urls.errorReporting;
+      xhr.open('POST', url, true);
       xhr.send(JSON.stringify(data));
     }
   });
@@ -377,23 +400,20 @@ export function maybeReportErrorToViewer(win, data) {
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve(false);
   }
-  const ampdocSingle = ampdocService.getAmpDoc();
+  const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve(false);
   }
-
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-
-  return viewer.isTrustedViewer().then(viewerTrusted => {
+  return viewer.isTrustedViewer().then((viewerTrusted) => {
     if (!viewerTrusted) {
       return false;
     }
-
     viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
@@ -412,6 +432,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
     'el': errorReportData['el'], // tagName
+    'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'jse': errorReportData['jse'], // detectedJsEngine
   });
@@ -516,7 +537,10 @@ export function getErrorReportData(
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (self.context && self.context.location) {
+  if (IS_ESM) {
+    runtime = 'esm';
+    data['esm'] = '1';
+  } else if (self.context && self.context.location) {
     data['3p'] = '1';
     runtime = '3p';
   } else if (getMode().runtime) {
@@ -646,7 +670,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
 export function detectJsEngineFromStack() {
   /** @constructor */
   function Fn() {}
-  Fn.prototype.t = function() {
+  Fn.prototype.t = function () {
     throw new Error('message');
   };
   const object = new Fn();
@@ -707,8 +731,6 @@ export function reportErrorToAnalytics(error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = Services.ampdocServiceFor(win)
-    .getAmpDoc()
-    .getRootNode();
+  const root = Services.ampdocServiceFor(win).getSingleDoc().getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

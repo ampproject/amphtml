@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
-
 import {user, userAssert} from '../../../src/log';
 
 // Popup options
@@ -30,7 +30,7 @@ const POP =
 
 /**
  * Pinterest Pin Widget
- * @attr data-url: the source url for the Pin
+ * data-url: the source url for the Pin
  */
 export class PinWidget {
   /** @param {!Element} rootElement */
@@ -48,6 +48,15 @@ export class PinWidget {
     this.layout = '';
   }
 
+  /**
+   * Handle keypress if Enter or Space for accessibility.
+   * @param {Event} event
+   */
+  handleKeyDown(event) {
+    if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
+      this.handleClick(event);
+    }
+  }
   /**
    * Override the default href click handling to log and open popup
    * @param {Event} event
@@ -77,8 +86,8 @@ export class PinWidget {
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr
       .fetchJson(baseUrl + query, {})
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         try {
           return /** @type {JsonObject} */ (json)['data'][0];
         } catch (e) {
@@ -89,6 +98,7 @@ export class PinWidget {
 
   /**
    * @param {!JsonObject} pin
+   * @return {*} TODO(#23582): Specify return type
    */
   renderPin(pin) {
     // start setting our class name
@@ -150,6 +160,9 @@ export class PinWidget {
           '/repin/x/?amp=1&guid=' +
           Util.guid,
         'textContent': 'Save',
+        'role': 'button',
+        'aria-label': 'Repin this image: ' + this.alt,
+        'tabindex': '0',
       },
     });
     container.appendChild(repin);
@@ -188,6 +201,7 @@ export class PinWidget {
           'img': {
             'className': '-amp-pinterest-embed-pin-text-icon-attrib',
             'src': pin['attribution']['provider_icon_url'],
+            'alt': 'from ' + pin['attribution']['provider_name'],
           },
         })
       );
@@ -293,6 +307,8 @@ export class PinWidget {
 
     // listen for clicks
     structure.addEventListener('click', this.handleClick.bind(this));
+    // Handle Space and Enter while selected for a11y
+    structure.addEventListener('keypress', this.handleKeyDown.bind(this));
 
     // done
     return structure;

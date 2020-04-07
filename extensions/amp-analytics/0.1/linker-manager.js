@@ -82,6 +82,7 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
+   * @return {*} TODO(#23582): Specify return type
    */
   init() {
     if (!isObject(this.config_)) {
@@ -94,12 +95,12 @@ export class LinkerManager {
       /** @type {!JsonObject} */ (this.config_)
     );
     // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = Object.keys(this.config_).map(name => {
+    this.allLinkerPromises_ = Object.keys(this.config_).map((name) => {
       const ids = this.config_[name]['ids'];
       // Keys for linker data.
       const keys = Object.keys(ids);
       // Expand the value of each key value pair (if necessary).
-      const valuePromises = keys.map(key => {
+      const valuePromises = keys.map((key) => {
         const expansionOptions = new ExpansionOptions(
           this.vars_,
           /* opt_iterations */ undefined,
@@ -108,7 +109,7 @@ export class LinkerManager {
         return this.expandTemplateWithUrlParams_(ids[key], expansionOptions);
       });
 
-      return Promise.all(valuePromises).then(values => {
+      return Promise.all(valuePromises).then((values) => {
         // Rejoin each key with its expanded value.
         const expandedIds = {};
         values.forEach((value, i) => {
@@ -118,6 +119,7 @@ export class LinkerManager {
           }
         });
         this.resolvedIds_[name] = expandedIds;
+        return expandedIds;
       });
     });
 
@@ -127,10 +129,10 @@ export class LinkerManager {
         if (!element.href || event.type !== 'click') {
           return;
         }
-        this.maybeWriteHref_(element);
+        element.href = this.applyLinkers_(element.href);
       }, Priority.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
-        url => this.applyLinkers_(url),
+        (url) => this.applyLinkers_(url),
         Priority.ANALYTICS_LINKER
       );
     }
@@ -138,19 +140,6 @@ export class LinkerManager {
     this.enableFormSupport_();
 
     return Promise.all(this.allLinkerPromises_);
-  }
-
-  /**
-   * Applys any matching linkers to the elements href. If no linkers exist,
-   * will not set href.
-   * @param {!Element} element
-   */
-  maybeWriteHref_(element) {
-    const {href} = element;
-    const maybeDecoratedUrl = this.applyLinkers_(href);
-    if (href !== maybeDecoratedUrl) {
-      element.href = maybeDecoratedUrl;
-    }
   }
 
   /**
@@ -172,7 +161,7 @@ export class LinkerManager {
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
-    const linkerNames = Object.keys(config).filter(key => {
+    const linkerNames = Object.keys(config).filter((key) => {
       const value = config[key];
       const isLinkerConfig = isObject(value);
       if (!isLinkerConfig) {
@@ -183,8 +172,8 @@ export class LinkerManager {
 
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
-    linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+    linkerNames.forEach((name) => {
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(
@@ -217,34 +206,46 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    const bindings = this.variableService_.getMacros();
+    const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
-      .expandTemplate(template, expansionOptions)
-      .then(expanded => {
+      .expandTemplate(template, expansionOptions, this.element_)
+      .then((expanded) => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);
       });
   }
 
   /**
-   * If the document has existing cid meta tag they do not need to explicity
+   * If the document has existing cid meta tag they do not need to explicitly
    * opt-in to use linker.
    * @return {boolean}
    * @private
    */
   isLegacyOptIn_() {
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/ querySelector(
-      'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-    );
+    if (this.type_ !== 'googleanalytics') {
+      return false;
+    }
+
     if (
-      !optInMeta ||
-      optInMeta.hasAttribute(LINKER_CREATED) ||
-      this.type_ !== 'googleanalytics'
+      this.ampdoc_.getMetaByName('amp-google-client-id-api') !==
+      'googleanalytics'
     ) {
       return false;
     }
 
-    optInMeta.setAttribute(LINKER_CREATED, '');
+    const headNode = this.ampdoc_.getHeadNode();
+    const linkerCreatedEl =
+      headNode instanceof ShadowRoot
+        ? this.ampdoc_.getBody()
+        : headNode.querySelector(
+            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
+          );
+
+    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
+      return false;
+    }
+
+    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
     return true;
   }
 
@@ -312,6 +313,7 @@ export class LinkerManager {
    * @param {string} url
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
+   * @return {*} TODO(#23582): Specify return type
    */
   isDomainMatch_(url, name, domains) {
     const {hostname} = this.urlService_.parse(url);
@@ -392,7 +394,7 @@ export class LinkerManager {
       return;
     }
 
-    this.formSubmitService_.then(formService => {
+    this.formSubmitService_.then((formService) => {
       this.formSubmitUnlistener_ = formService.beforeSubmit(
         this.handleFormSubmit_.bind(this)
       );
@@ -426,6 +428,7 @@ export class LinkerManager {
    * @param {!Element} form
    * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
+   * @return {*} TODO(#23582): Specify return type
    */
   addDataToForm_(form, actionXhrMutator, linkerName) {
     const ids = this.resolvedIds_[linkerName];
@@ -503,6 +506,7 @@ function getBaseDomain(domain) {
 /**
  * Escape any regex flags other than `*`
  * @param {string} str
+ * @return {*} TODO(#23582): Specify return type
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');

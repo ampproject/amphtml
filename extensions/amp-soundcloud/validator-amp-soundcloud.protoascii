@@ -21,7 +21,7 @@ tags: {  # amp-soundcloud
     name: "amp-soundcloud"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -55,6 +55,12 @@ tags: {  # <amp-soundcloud>
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
   }
 }

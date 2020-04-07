@@ -23,22 +23,28 @@ limitations under the License.
 Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 ```html
-<amp-ad width="320" height="50"
-    type="eas"
-    data-eas-domain="eas4.emediate.eu"
-    data-eas-cu="12345">
+<amp-ad
+  width="320"
+  height="50"
+  type="eas"
+  data-eas-domain="eas4.emediate.eu"
+  data-eas-cu="12345"
+>
 </amp-ad>
 ```
 
 ### With targeting parameters
 
 ```html
-<amp-ad width="320" height="50"
-    type="eas"
-    data-eas-domain="eas4.emediate.eu"
-    data-eas-cu="12345"
-    data-eas-EASTsomename="somevalue"
-    data-eas-kw1="somekeyword">
+<amp-ad
+  width="320"
+  height="50"
+  type="eas"
+  data-eas-domain="eas4.emediate.eu"
+  data-eas-cu="12345"
+  data-eas-EASTsomename="somevalue"
+  data-eas-kw1="somekeyword"
+>
 </amp-ad>
 ```
 
@@ -51,9 +57,3 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 ### Optional parameters
 
 - `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.
-
-
-
-
-
-

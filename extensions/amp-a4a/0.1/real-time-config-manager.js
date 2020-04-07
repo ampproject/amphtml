@@ -98,7 +98,7 @@ export class RealTimeConfigManager {
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
 
-    /** @private !../../../src/service/ampdoc-impl.AmpDoc */
+    /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = this.a4aElement_.getAmpDoc();
 
     /** @private {?CONSENT_POLICY_STATE} */
@@ -148,8 +148,8 @@ export class RealTimeConfigManager {
    * Converts a URL into its corresponding shortened callout string.
    * We also truncate to a maximum length of 50 characters.
    * For instance, if we are passed
-   * "https://example.com/example.php?foo=a&bar=b, then we return
-   * example.com/example.php
+   * "https://example.test/example.php?foo=a&bar=b, then we return
+   * example.test/example.php
    * @param {string} url
    * @return {string}
    */
@@ -250,11 +250,11 @@ export class RealTimeConfigManager {
     }
 
     const isGloballyValid = this.isValidCalloutForConsentState(this.rtcConfig_);
-    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter(url =>
+    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter((url) =>
       this.isValidCalloutForConsentState(url, isGloballyValid)
     );
 
-    Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
+    Object.keys(this.rtcConfig_.vendors || {}).forEach((vendor) => {
       if (
         !this.isValidCalloutForConsentState(
           this.rtcConfig_.vendors[vendor],
@@ -270,6 +270,7 @@ export class RealTimeConfigManager {
    * Assigns constant macros that should exist for all RTC to object of custom
    * per-network macros.
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
+   * @return {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>}
    */
   assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
@@ -285,7 +286,7 @@ export class RealTimeConfigManager {
   handleRtcForCustomUrls(customMacros) {
     // For each publisher defined URL, inflate the url using the macros,
     // and send the RTC request.
-    (this.rtcConfig_.urls || []).forEach(urlObj => {
+    (this.rtcConfig_.urls || []).forEach((urlObj) => {
       let url, errorReportingUrl;
       if (isObject(urlObj)) {
         url = urlObj.url;
@@ -306,7 +307,7 @@ export class RealTimeConfigManager {
   handleRtcForVendorUrls(customMacros) {
     // For each vendor the publisher has specified, inflate the vendor
     // url if it exists, and send the RTC request.
-    Object.keys(this.rtcConfig_.vendors || []).forEach(vendor => {
+    Object.keys(this.rtcConfig_.vendors || []).forEach((vendor) => {
       const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
       const url = vendorObject ? vendorObject.url : '';
       const errorReportingUrl =
@@ -330,7 +331,7 @@ export class RealTimeConfigManager {
         ? this.rtcConfig_.vendors[vendor]['macros']
         : this.rtcConfig_.vendors[vendor];
       const validVendorMacros = {};
-      Object.keys(vendorMacros).forEach(macro => {
+      Object.keys(vendorMacros).forEach((macro) => {
         if (!(vendorObject.macros && vendorObject.macros.includes(macro))) {
           user().error(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
         } else {
@@ -369,8 +370,9 @@ export class RealTimeConfigManager {
      * async call. Thus, however long the URL replacement took is treated as a
      * time penalty.
      * @param {string} url
+     * @return {*} TODO(#23582): Specify return type
      */
-    const send = url => {
+    const send = (url) => {
       if (Object.keys(this.seenUrls_).length == MAX_RTC_CALLOUTS) {
         return this.buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
@@ -406,7 +408,7 @@ export class RealTimeConfigManager {
     };
 
     const whitelist = {};
-    Object.keys(macros).forEach(key => (whitelist[key] = true));
+    Object.keys(macros).forEach((key) => (whitelist[key] = true));
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(
       Services.timerFor(this.win_)
@@ -416,12 +418,12 @@ export class RealTimeConfigManager {
             this.a4aElement_.element
           ).expandUrlAsync(url, macros, whitelist)
         )
-        .then(url => {
+        .then((url) => {
           checkStillCurrent();
           timeoutMillis -= urlReplacementStartTime - Date.now();
           return send(url);
         })
-        .catch(error => {
+        .catch((error) => {
           return isCancellation(error)
             ? undefined
             : this.buildErrorResponse_(
@@ -474,9 +476,9 @@ export class RealTimeConfigManager {
             url,
             {credentials: 'include'}
           )
-          .then(res => {
+          .then((res) => {
             checkStillCurrent();
-            return res.text().then(text => {
+            return res.text().then((text) => {
               checkStillCurrent();
               const rtcTime = Date.now() - this.rtcStartTime_;
               // An empty text response is allowed, not an error.
@@ -495,7 +497,7 @@ export class RealTimeConfigManager {
             });
           })
       )
-      .catch(error => {
+      .catch((error) => {
         return isCancellation(error)
           ? undefined
           : this.buildErrorResponse_(
@@ -543,7 +545,7 @@ export class RealTimeConfigManager {
         rtcConfig['vendors'] || rtcConfig['urls'],
         'RTC Config must specify vendors or urls'
       );
-      Object.keys(rtcConfig).forEach(key => {
+      Object.keys(rtcConfig).forEach((key) => {
         switch (key) {
           case 'vendors':
             userAssert(isObject(rtcConfig[key]), 'RTC invalid vendors');
@@ -560,7 +562,7 @@ export class RealTimeConfigManager {
                   `using default timeout ${defaultTimeoutMillis}ms`
               );
               timeout = undefined;
-            } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
+            } else if (timeout > defaultTimeoutMillis || timeout < 0) {
               user().warn(
                 TAG,
                 `Invalid RTC timeout: ${timeout}ms, ` +
@@ -580,7 +582,7 @@ export class RealTimeConfigManager {
       ) {
         return false;
       }
-      const validateErrorReportingUrl = urlObj => {
+      const validateErrorReportingUrl = (urlObj) => {
         const errorUrl = urlObj['errorReportingUrl'];
         if (
           errorUrl &&
@@ -590,7 +592,7 @@ export class RealTimeConfigManager {
           urlObj['errorReportingUrl'] = undefined;
         }
       };
-      (rtcConfig['urls'] || []).forEach(urlObj => {
+      (rtcConfig['urls'] || []).forEach((urlObj) => {
         if (isObject(urlObj)) {
           validateErrorReportingUrl(urlObj);
         }

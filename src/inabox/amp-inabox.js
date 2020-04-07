@@ -22,31 +22,28 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {installAmpdocServicesForInabox} from './inabox-services';
 import {
-  installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
-import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -72,37 +69,30 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  // TODO(lannka): remove ampDocCss for inabox rendering #22418
-  const fullCss =
-    ampDocCss +
-    ampSharedCss +
-    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
-    fullCss,
+    ampSharedCss +
+      'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
       startupChunk(self.document, function services() {
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
-        installIframeMessagingClient(self);
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
-        installViewerServiceForDoc(ampdoc);
-        installInaboxViewportService(ampdoc);
-        installAmpdocServices(ampdoc);
+        installAmpdocServicesForInabox(ampdoc);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
-        maybeTrackImpression(self);
+        doNotTrackImpression();
         registerIniLoadListener(ampdoc);
       });
       startupChunk(self.document, function builtins() {
@@ -116,11 +106,15 @@ startupChunk(self.document, function initial() {
         // Pre-stub already known elements.
         stubElementsForDoc(ampdoc);
       });
-      startupChunk(self.document, function final() {
-        Navigation.installAnchorClickInterceptor(ampdoc, self);
-        maybeValidate(self);
-        makeBodyVisible(self.document);
-      });
+      startupChunk(
+        self.document,
+        function final() {
+          Navigation.installAnchorClickInterceptor(ampdoc, self);
+          maybeValidate(self);
+          makeBodyVisible(self.document);
+        },
+        /* makes the body visible */ true
+      );
       startupChunk(self.document, function finalTick() {
         perf.tick('e_is');
         Services.resourcesForDoc(ampdoc).ampInitComplete();

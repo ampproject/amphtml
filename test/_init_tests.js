@@ -20,7 +20,9 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
-import {adopt} from '../src/runtime';
+import {adoptWithMultidocDeps} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
+import {configure as configureEnzyme} from 'enzyme';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -36,6 +38,8 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -44,6 +48,7 @@ let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
+let consoleInfoLogWarnSandbox;
 const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
@@ -59,7 +64,8 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adoptWithMultidocDeps(window);
+configureEnzyme({adapter: new PreactEnzyme()});
 
 // Override AMP.extension to buffer extension installers.
 /**
@@ -68,7 +74,7 @@ adopt(window);
  * @param {function(!Object)} installer
  * @const
  */
-global.AMP.extension = function(name, version, installer) {
+global.AMP.extension = function (name, version, installer) {
   describes.bufferExtension(`${name}:${version}`, installer);
 };
 
@@ -148,19 +154,15 @@ class TestConfig {
   }
 
   skipIfPropertiesObfuscated() {
-    return this.skip(function() {
+    return this.skip(function () {
       return window.__karma__.config.amp.propertiesObfuscated;
     });
   }
 
   skipSinglePass() {
-    return this.skip(function() {
+    return this.skip(function () {
       return window.__karma__.config.amp.singlePass;
     });
-  }
-
-  skipWindows() {
-    return this.skip(() => this.platform.isWindows());
   }
 
   enableIe() {
@@ -213,7 +215,7 @@ class TestConfig {
     if (!window.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
-    this.configTasks.push(mocha => {
+    this.configTasks.push((mocha) => {
       mocha.retries(times);
     });
     return this;
@@ -239,8 +241,8 @@ class TestConfig {
     }
 
     const tasks = this.configTasks;
-    this.runner(desc, function() {
-      tasks.forEach(task => {
+    this.runner(desc, function () {
+      tasks.forEach((task) => {
         task(this);
       });
       return fn.apply(this, arguments);
@@ -248,13 +250,13 @@ class TestConfig {
   }
 }
 
-describe.configure = function() {
+describe.configure = function () {
   return new TestConfig(describe);
 };
 
 installYieldIt(it);
 
-it.configure = function() {
+it.configure = function () {
   return new TestConfig(it);
 };
 
@@ -311,13 +313,13 @@ function warnForConsoleError() {
     .stub(console, 'error')
     .callsFake(printWarning);
 
-  self.expectAsyncConsoleError = function(message, repeat = 1) {
+  self.expectAsyncConsoleError = function (message, repeat = 1) {
     expectedAsyncErrors.push.apply(
       expectedAsyncErrors,
       Array(repeat).fill(message)
     );
   };
-  self.allowConsoleError = function(func) {
+  self.allowConsoleError = function (func) {
     consoleErrorStub.reset();
     consoleErrorStub.callsFake(() => {});
     const result = func();
@@ -363,9 +365,10 @@ function restoreConsoleError() {
 function maybeStubConsoleInfoLogWarn() {
   const {verboseLogging} = window.__karma__.config;
   if (!verboseLogging) {
-    sinon.sandbox.stub(console, 'info').callsFake(() => {});
-    sinon.sandbox.stub(console, 'log').callsFake(() => {});
-    sinon.sandbox.stub(console, 'warn').callsFake(() => {});
+    consoleInfoLogWarnSandbox = sinon.createSandbox();
+    consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
   }
 }
 
@@ -373,24 +376,24 @@ function maybeStubConsoleInfoLogWarn() {
  * Used to precent asynchronous throwing of errors during each test.
  */
 function preventAsyncErrorThrows() {
-  self.stubAsyncErrorThrows = function() {
+  self.stubAsyncErrorThrows = function () {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
-      self.reportError(error);
+      self.__AMP_REPORT_ERROR(error);
       throw error;
     });
   };
-  self.restoreAsyncErrorThrows = function() {
+  self.restoreAsyncErrorThrows = function () {
     rethrowAsyncSandbox.restore();
   };
   setReportError(reportError);
   stubAsyncErrorThrows();
 }
 
-before(function() {
+before(function () {
   // This is a more robust version of `this.skip()`. See #17245.
-  this.skipTest = function() {
+  this.skipTest = function () {
     if (this._runnable.title != '"before all" hook') {
       throw new Error('skipTest() can only be called from within before()');
     }
@@ -399,11 +402,11 @@ before(function() {
   };
 });
 
-beforeEach(function() {
+beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  window.sandbox = sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -413,14 +416,14 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
+  const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
@@ -429,11 +432,14 @@ function beforeTest() {
 /**
  * Global cleanup of tags added during tests. Cool to add more to selector.
  */
-afterEach(function() {
+afterEach(function () {
   that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
-  sinon.sandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  window.sandbox.restore();
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
@@ -455,7 +461,8 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
+  delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {
     for (let i = initialWindowState.length; i < windowState.length; ++i) {
@@ -482,9 +489,12 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
+  cancelTimersForTesting();
 });
 
-chai.Assertion.addMethod('attribute', function(attr) {
+chai.use(require('chai-as-promised')); // eslint-disable-line 
+
+chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
@@ -496,7 +506,7 @@ chai.Assertion.addMethod('attribute', function(attr) {
   );
 });
 
-chai.Assertion.addMethod('class', function(className) {
+chai.Assertion.addMethod('class', function (className) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
@@ -508,7 +518,7 @@ chai.Assertion.addMethod('class', function(className) {
   );
 });
 
-chai.Assertion.addProperty('visible', function() {
+chai.Assertion.addProperty('visible', function () {
   const obj = this._obj;
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
@@ -530,7 +540,7 @@ chai.Assertion.addProperty('visible', function() {
   );
 });
 
-chai.Assertion.addProperty('hidden', function() {
+chai.Assertion.addProperty('hidden', function () {
   const obj = this._obj;
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
@@ -551,7 +561,7 @@ chai.Assertion.addProperty('hidden', function() {
   );
 });
 
-chai.Assertion.addMethod('display', function(display) {
+chai.Assertion.addMethod('display', function (display) {
   const obj = this._obj;
   const value = window.getComputedStyle(obj).getPropertyValue('display');
   const tagName = obj.tagName.toLowerCase();
@@ -564,7 +574,7 @@ chai.Assertion.addMethod('display', function(display) {
   );
 });
 
-chai.Assertion.addMethod('jsonEqual', function(compare) {
+chai.Assertion.addMethod('jsonEqual', function (compare) {
   const obj = this._obj;
   const a = stringify(compare);
   const b = stringify(obj);

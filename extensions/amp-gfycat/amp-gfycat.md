@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a Gfycat video GIF.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,41 +25,17 @@ limitations under the License.
 
 # amp-gfycat
 
-Displays a <a href="https://gfycat.com/">Gfycat</a> video GIF.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-gfycat" src="https://cdn.ampproject.org/v0/amp-gfycat-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-      <li><a href="https://ampbyexample.com/components/amp-gfycat/">Annotated code example for amp-gfycat</a></li>
-      <li>Other example: <a href="https://github.com/ampproject/amphtml/blob/master/examples/gfycat.amp.html">Source</a>,
-      <a href="https://cdn.rawgit.com/ampproject/amphtml/master/examples/gfycat.amp.html">Rendered</a></li>
-    </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the Gfycat embedded in responsive layouts.
 
 ```html
 <amp-gfycat
-    data-gfyid="TautWhoppingCougar"
-    width="640"
-    height="360"
-    layout="responsive">
+  data-gfyid="TautWhoppingCougar"
+  width="640"
+  height="360"
+  layout="responsive"
+>
 </amp-gfycat>
 ```
 
@@ -83,35 +60,37 @@ To specify the width and height in the code, copy it from the embed URL:
 Example: Finding the actual width and height
 
 ```html
-<iframe src='https://gfycat.com/ifr/TautWhoppingCougar'
-        frameborder='0' scrolling='no' width='640'
-        height='360' allowfullscreen>
+<iframe
+  src="https://gfycat.com/ifr/TautWhoppingCougar"
+  frameborder="0"
+  scrolling="no"
+  width="640"
+  height="360"
+  allowfullscreen
+>
 </iframe>
 ```
 
 ##### noautoplay
 
 By default, a video autoplays.
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* if the user has interacted with the video (e.g., pauses/resumes), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-You can turn off autoplay by setting the  `noautoplay` attribute.
+- when the video is scrolled out of view, the video is paused
+- when the video is scrolled into view, the video resumes playback
+- if the user has interacted with the video (e.g., pauses/resumes), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+
+You can turn off autoplay by setting the `noautoplay` attribute.
 
 Example: Turning off autoplay
 
 ```html
-  <amp-gfycat
-          data-gfyid="TautWhoppingCougar"
-          width="640"
-          height="360"
-          noautoplay>
-  </amp-gfycat>
+<amp-gfycat data-gfyid="TautWhoppingCougar" width="640" height="360" noautoplay>
+</amp-gfycat>
 ```
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 

@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {
   maybePrintArgvMessages,
-  refreshKarmaWdCache,
   shouldNotRun,
 } = require('./runtime-test/helpers');
 const {
@@ -48,7 +47,6 @@ async function a4a() {
   }
 
   maybePrintArgvMessages();
-  refreshKarmaWdCache();
 
   const config = new RuntimeTestConfig('a4a');
   const runner = new Runner(config);

@@ -78,7 +78,7 @@ export class AmpWebPushPermissionDialog {
   requestNotificationPermission() {
     return new Promise((resolve, reject) => {
       try {
-        this.window_.Notification.requestPermission(permission =>
+        this.window_.Notification.requestPermission((permission) =>
           resolve(permission)
         );
       } catch (e) {
@@ -147,7 +147,7 @@ export class AmpWebPushPermissionDialog {
   onPermissionDenied_() {
     navigator.permissions
       .query({name: 'notifications'})
-      .then(permissionStatus => {
+      .then((permissionStatus) => {
         permissionStatus.onchange = () => {
           this.storeNotificationPermission_();
           switch (this.window_.Notification.permission) {
@@ -227,10 +227,13 @@ export class AmpWebPushPermissionDialog {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   onPermissionDefaultOrGranted_() {
     // Prompt for permissions
-    return this.requestNotificationPermission().then(permission => {
+    return this.requestNotificationPermission().then((permission) => {
       this.storeNotificationPermission_();
       if (this.isCurrentDialogPopup()) {
         this.ampMessenger_.connect(opener, '*');
@@ -240,7 +243,7 @@ export class AmpWebPushPermissionDialog {
             WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
             permission
           )
-          .then(result => {
+          .then((result) => {
             const message = result[0];
             if (message && message.closeFrame) {
               this.closeDialog();

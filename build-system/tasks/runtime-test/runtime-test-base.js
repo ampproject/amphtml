@@ -19,17 +19,21 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
 const {
   createKarmaServer,
   getAdTypes,
-  runTestInBatches,
-  startTestServer,
+  runTestInSauceLabs,
 } = require('./helpers');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
+const {app} = require('../../server/test-server');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
+const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
 /**
@@ -50,9 +54,10 @@ function updateBrowsers(config) {
         browsers: [
           'SL_Chrome',
           'SL_Firefox',
-          'SL_Edge_17',
+          'SL_Edge',
           'SL_Safari_12',
-          'SL_IE_11',
+          'SL_Safari_11',
+          'SL_IE',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',
           //'SL_iOS_11',
@@ -71,7 +76,7 @@ function updateBrowsers(config) {
 
   const chromeFlags = [];
   if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
+    argv.chrome_flags.split(',').forEach((flag) => {
       chromeFlags.push('--'.concat(flag));
     });
   }
@@ -122,7 +127,7 @@ function getFiles(testType) {
 
   switch (testType) {
     case 'unit':
-      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
+      files = testConfig.commonUnitTestPaths;
       if (argv.files) {
         return files.concat(argv.files);
       }
@@ -142,7 +147,7 @@ function getFiles(testType) {
       return files.concat(testConfig.integrationTestPaths);
 
     case 'a4a':
-      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
+      return testConfig.a4aTestPaths;
 
     default:
       throw new Error(`Test type ${testType} was not recognized`);
@@ -156,7 +161,7 @@ function getFiles(testType) {
  */
 function updateReporters(config) {
   if (
-    (argv.testnames || argv.local_changes || argv.files) &&
+    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
     !isTravisBuild()
   ) {
     config.reporters = ['mocha'];
@@ -183,16 +188,16 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.browserify.configure = function(bundle) {
-      bundle.on('prebundle', function() {
+    this.browserify.configure = function (bundle) {
+      bundle.on('prebundle', function () {
         log(
           green('Transforming tests with'),
           cyan('browserify') + green('...')
         );
       });
-      bundle.on('transform', function(tr) {
+      bundle.on('transform', function (tr) {
         if (tr instanceof babelify) {
-          tr.once('babelify', function() {
+          tr.once('babelify', function () {
             process.stdout.write('.');
           });
         }
@@ -208,8 +213,6 @@ class RuntimeTestConfig {
       mochaTimeout: this.client.mocha.timeout,
       propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
-      testOnIe:
-        this.browsers.includes('IE') || this.browsers.includes('SL_IE_11'),
     };
 
     if (argv.coverage && this.testType != 'a4a') {
@@ -222,20 +225,25 @@ class RuntimeTestConfig {
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
 
-      const plugin = [
+      const instanbulPlugin = [
         'istanbul',
         {
           exclude: [
             'ads/**/*.js',
+            'build-system/**/*.js',
+            'extensions/**/test/**/*.js',
             'third_party/**/*.js',
             'test/**/*.js',
-            'extensions/**/test/**/*.js',
             'testing/**/*.js',
           ],
         },
       ];
+      // don't overwrite existing plugins
+      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
-      this.browserify.transform = [['babelify', {plugins: [plugin]}]];
+      this.browserify.transform = [
+        ['babelify', {...this.babelifyConfig, plugins}],
+      ];
     }
   }
 }
@@ -252,32 +260,30 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // TODO(alanorozco): Come up with a more elegant check?
-    global.AMP_TESTING = true;
-    process.env.SERVE_MODE = argv.compiled ? 'compiled' : 'default';
-
     await this.maybeBuild();
-
-    const testServer = startTestServer(this.config.client.testServerPort);
+    await startServer({
+      name: 'AMP Test Server',
+      host: 'localhost',
+      port: this.config.client.testServerPort,
+      middleware: () => [app],
+    });
     const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
 
-    this.env = new Map()
-      .set('handlerProcess', handlerProcess)
-      .set('testServer', testServer);
+    this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
   async run() {
     reportTestStarted();
 
     if (argv.saucelabs) {
-      this.exitCode = await runTestInBatches(this.config);
+      this.exitCode = await runTestInSauceLabs(this.config);
     } else {
       this.exitCode = await createKarmaServer(this.config);
     }
   }
 
   async teardown() {
-    this.env.get('testServer').emit('kill');
+    stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
     if (this.exitCode != 0) {

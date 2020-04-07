@@ -21,10 +21,13 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width="600" height="320"
-    type="bringhub"
-    layout="responsive"
-    heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px">
+<amp-embed
+  width="600"
+  height="320"
+  type="bringhub"
+  layout="responsive"
+  heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px"
+>
 </amp-embed>
 ```
 

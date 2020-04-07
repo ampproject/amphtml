@@ -28,7 +28,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;
@@ -78,7 +78,7 @@ describes.endtoend(
       const snappedScrollTop = scrollTop + slideHeight;
       const requestedScrollTop = snappedScrollTop + 1;
 
-      await controller.scroll(el, {top: requestedScrollTop});
+      await controller.scrollTo(el, {top: requestedScrollTop});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(rect(firstSlide)).to.include({y: carouselTop - slideHeight});

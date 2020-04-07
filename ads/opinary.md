@@ -19,19 +19,20 @@ limitations under the License.
 ## Example
 
 ```html
-  <amp-embed width="500" height="500" 
-    type="opinary"
-    layout="intrinsic"
-    data-client="test-success">
-  </amp-embed>
+<amp-embed
+  width="500"
+  height="500"
+  type="opinary"
+  layout="intrinsic"
+  data-client="test-success"
+>
+</amp-embed>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 
 - `data-client` - the publishers name in the Opinary AMS system
-
-

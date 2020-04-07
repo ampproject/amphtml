@@ -45,7 +45,7 @@ export class Variants {
    * @restricted
    */
   init(variants) {
-    variants.then(result => this.variantsDeferred_.resolve(result));
+    variants.then((result) => this.variantsDeferred_.resolve(result));
   }
 
   /**
@@ -71,7 +71,7 @@ export class Variants {
  * Allocates the current page view to an experiment variant based on the given
  * experiment from the config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!../../../src/service/viewer-impl.Viewer} viewer
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
  * @param {string} experimentName
  * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}
@@ -86,9 +86,9 @@ export function allocateVariant(
   validateExperiment(experimentName, experimentObject);
 
   // Variant can be overridden from URL fragment.
-  const override = viewer.getParam(ATTR_PREFIX + experimentName);
+  const override = ampdoc.getParam(ATTR_PREFIX + experimentName);
   if (override && hasOwn(experimentObject['variants'], override)) {
-    return Promise.resolve(/** @type {?string} */ (override));
+    return Promise.resolve(override);
   }
 
   const sticky = experimentObject['sticky'] !== false;
@@ -99,10 +99,10 @@ export function allocateVariant(
   if (sticky && experimentObject['consentNotificationId']) {
     const element = ampdoc.getHeadNode();
     hasConsentPromise = Services.userNotificationManagerForDoc(element)
-      .then(manager =>
+      .then((manager) =>
         manager.getNotification(experimentObject['consentNotificationId'])
       )
-      .then(userNotification => {
+      .then((userNotification) => {
         userAssert(
           userNotification,
           'Notification not found: ' +
@@ -112,13 +112,13 @@ export function allocateVariant(
       });
   }
 
-  return hasConsentPromise.then(hasConsent => {
+  return hasConsentPromise.then((hasConsent) => {
     if (!hasConsent) {
       return null;
     }
     const group = experimentObject['group'] || experimentName;
     return getBucketTicket(ampdoc, group, sticky ? cidScope : null).then(
-      ticket => {
+      (ticket) => {
         let upperBound = 0;
 
         // Loop through keys in a specific order since the default object key
@@ -185,7 +185,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
     return Promise.resolve(ampdoc.win.Math.random() * 100);
   }
 
-  const cidPromise = Services.cidForDoc(ampdoc).then(cidService =>
+  const cidPromise = Services.cidForDoc(ampdoc).then((cidService) =>
     cidService.get(
       {
         scope: dev().assertString(opt_cidScope),
@@ -196,8 +196,8 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
   );
 
   return Promise.all([cidPromise, Services.cryptoFor(ampdoc.win)])
-    .then(results => results[1].uniform(group + ':' + results[0]))
-    .then(hash => hash * 100);
+    .then((results) => results[1].uniform(group + ':' + results[0]))
+    .then((hash) => hash * 100);
 }
 
 /**

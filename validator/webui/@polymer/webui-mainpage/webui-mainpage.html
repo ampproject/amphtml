@@ -39,7 +39,7 @@
       '\x3Chtml ⚡>\n' +
       '\x3Chead>\n' +
       '  \x3Cmeta charset="utf-8">\n' +
-      '  \x3Clink rel="canonical" href="self.html" />\n' +
+      '  \x3Clink rel="canonical" href="self.html">\n' +
       '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
       '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
       '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
@@ -89,7 +89,7 @@
       '\x3Chtml ⚡ actions>\n' +
       '\x3Chead>\n' +
       '  \x3Cmeta charset="utf-8">\n' +
-      '  \x3Clink rel="canonical" href="self.html" />\n' +
+      '  \x3Clink rel="canonical" href="self.html">\n' +
       '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
       '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
       '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
@@ -149,16 +149,10 @@
             // Polymer icons (https://elements.polymer-project.org/elements/iron-icons?view=demo:demo/index.html&active=iron-icons).
             var error = validationResult.errors[ii];
             error.message = amp.validator.renderErrorMessage(error);
-            error.category = amp.validator.categorizeError(error);
             error.icon = error.severity.toLowerCase();
             error.isError = error.severity === 'ERROR';
             error.isWarning = error.severity === 'WARNING';
             listbox.addError(error);
-
-            if (listbox.getFilter() !== undefined &&
-                listbox.getFilter() !== error.category) {
-              continue;
-            }
 
             // Create a dom element for the inline display of errors
             // inside the editor. TODO(powdercloud): Make this a Polymer
@@ -310,10 +304,6 @@
         // minimum valid AMP document.
         else if (params.hasOwnProperty('url') && params['url']) {
           this.$.urlForm.setURLAndValidate(params['url']);
-          // If filter=<error_category> was provided, filter error-list.
-          if (params.hasOwnProperty('filter') && params['filter']) {
-            listbox.setFilter(params['filter']);
-          }
         } else if (params.hasOwnProperty('htmlFormat') &&
                    params['htmlFormat'] === 'AMP4ADS' ) {
           urlForm.setHtmlFormat('AMP4ADS');

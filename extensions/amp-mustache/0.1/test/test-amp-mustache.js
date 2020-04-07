@@ -28,18 +28,17 @@ describes.repeated(
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
   (name, variant) => {
-    let sandbox;
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+      const getServiceForDocStub = window.sandbox.stub(
+        service,
+        'getServiceForDoc'
+      );
       getServiceForDocStub.returns({
-        hasCapability: unused => viewerCanRenderTemplates,
+        hasCapability: (unused) => viewerCanRenderTemplates,
       });
     });
-
-    afterEach(() => sandbox.restore());
 
     let innerHtmlSetup;
     let template;
@@ -57,14 +56,14 @@ describes.repeated(
       template = new AmpMustache(templateElement);
       isTemplateTypeScript = templateType == 'script';
       isTemplateType = templateType == 'template';
-      textContentSetup = contents => {
+      textContentSetup = (contents) => {
         if (isTemplateType) {
           templateElement.content.textContent = contents;
         } else if (isTemplateTypeScript) {
           templateElement.textContent = contents;
         }
       };
-      innerHtmlSetup = html => {
+      innerHtmlSetup = (html) => {
         if (isTemplateType) {
           templateElement./*OK*/ innerHTML = html;
         } else if (isTemplateTypeScript) {
@@ -460,6 +459,7 @@ describes.repeated(
         const result = template.render({
           value:
             '<table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -472,6 +472,7 @@ describes.repeated(
         });
         expect(result./*OK*/ innerHTML).to.equal(
           'value = <table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -574,14 +575,14 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        sandbox.spy(mustache, 'parse');
+        window.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still sanitize html', () => {
-        sandbox.spy(sanitizer, 'sanitizeHtml');
-        sandbox.spy(mustache, 'render');
+        window.sandbox.spy(sanitizer, 'sanitizeHtml');
+        window.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
         expect(sanitizer.sanitizeHtml).to.have.been.called;

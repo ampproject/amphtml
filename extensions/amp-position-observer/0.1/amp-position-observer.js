@@ -61,7 +61,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -112,8 +112,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(this.init_.bind(this));
+    this.getAmpDoc().whenFirstVisible().then(this.init_.bind(this));
 
     this.runOnce_ = this.element.hasAttribute('once');
   }
@@ -352,14 +351,17 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     let scene;
     if (this.targetId_) {
       scene = user().assertElement(
-        this.getAmpDoc().getElementById(this.targetId_),
+        // TODO(#22733): Change back to this.getAmpDoc once ampdoc-fie
+        // experiment is launched.
+        this.win.document.getElementById(this.targetId_),
         'No element found with id:' + this.targetId_
       );
     } else {
       scene = this.element.parentNode;
     }
-    // Hoist body to documentElement.
-    if (this.getAmpDoc().getBody() == scene) {
+    // Hoist body to documentElement, expected to work for both ampdoc and
+    // amp4ads in friendly iframe.
+    if (this.win.document.body === scene) {
       scene = this.win.document.documentElement;
     }
 
@@ -428,6 +430,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Readjusts the given rect using the configured exclusion margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
    * @private
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    */
   applyMargins_(rect) {
     devAssert(rect);
@@ -480,7 +483,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @protected
    */
   maybeUninstallPositionObserver_() {
     if (this.positionObserver_) {
@@ -491,6 +494,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVisibilityObserver);
 });

@@ -20,12 +20,7 @@ describe('form-submit-service', () => {
   let submitService;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     submitService = new FormSubmitService();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('firing without callbacks should not break', () => {
@@ -33,7 +28,7 @@ describe('form-submit-service', () => {
   });
 
   it('should register & fire one callback', () => {
-    const cb = sandbox.spy();
+    const cb = window.sandbox.spy();
     submitService.beforeSubmit(cb);
 
     const fakeFormEl = {};
@@ -44,7 +39,7 @@ describe('form-submit-service', () => {
   });
 
   it('should register & fire many callbacks', () => {
-    const cb = sandbox.spy();
+    const cb = window.sandbox.spy();
     submitService.beforeSubmit(cb);
     submitService.beforeSubmit(cb);
     submitService.beforeSubmit(cb);

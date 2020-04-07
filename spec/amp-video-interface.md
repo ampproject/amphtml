@@ -7,18 +7,31 @@ or partially.
 This document describes all the features (**work in progress, incomplete**) that
 these players implement.
 
-These players include:
+## Players
 
-- [amp-3q-player](https://www.ampproject.org/docs/reference/components/amp-3q-player)
-- [amp-brid-player](https://www.ampproject.org/docs/reference/components/amp-brid-player)
-- [amp-dailymotion](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
-- [amp-gfycat](https://www.ampproject.org/docs/reference/components/amp-gfycat)
-- [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video)
-- [amp-nexxtv-player](https://www.ampproject.org/docs/reference/components/amp-nexxtv-player)
-- [amp-ooyala-player](https://www.ampproject.org/docs/reference/components/amp-ooyala-player)
-- [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-- [amp-wistia-player](https://www.ampproject.org/docs/reference/components/amp-wistia-player)
-- [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
+### Generic
+
+- [amp-video](https://amp.dev/documentation/components/amp-video)
+- [amp-video-iframe](https://amp.dev/documentation/components/amp-video-iframe)
+
+### For 3rd party services
+
+- [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
+- [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
+- [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
+- [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+- [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
+- [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
+- [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+- [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
+- [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
+- [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
+- [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
+- [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
+- [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
+- [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
+- [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
+- [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
 
 <a id="analytics"></a>
 
@@ -40,7 +53,7 @@ If this attribute is present, and the browser supports autoplay:
 - when the user taps the video, the video is unmuted
 - if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
+For an example, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-video/#autoplay).
 
 <a id="docking"></a>
 
@@ -60,8 +73,12 @@ component's visual area.
 In order to use this attribute, the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking)
 extension script must be present:
 
-```
-<script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+```html
+<script
+  async
+  custom-element="amp-video-docking"
+  src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"
+></script>
 ```
 
 For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)
@@ -84,4 +101,4 @@ fullscreen. These heuristics are applied as follows, in descending priority:
 2. If the visible percentage of the video is higher.
 3. If a video is closer to the center of the viewport.
 4. Everything else failing, select the video that is closest to the top of the
-viewport.
+   viewport.

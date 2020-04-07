@@ -59,7 +59,7 @@ export function twitter(global, data) {
     justifyContent: 'center',
   });
   global.document.getElementById('c').appendChild(tweet);
-  getTwttr(global, function(twttr) {
+  getTwttr(global, function (twttr) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
@@ -67,22 +67,22 @@ export function twitter(global, data) {
     if (data.tweetid) {
       twttr.widgets
         .createTweet(cleanupTweetId_(data.tweetid), tweet, data)
-        ./*OK*/ then(el => tweetCreated(twttr, el));
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
     } else if (data.momentid) {
       twttr.widgets
         .createMoment(data.momentid, tweet, data)
-        ./*OK*/ then(el => tweetCreated(twttr, el));
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
     } else if (data.timelineSourceType) {
       // Extract properties starting with 'timeline'.
       const timelineData = Object.keys(data)
-        .filter(prop => startsWith(prop, 'timeline'))
+        .filter((prop) => startsWith(prop, 'timeline'))
         .reduce((newData, prop) => {
           newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
           return newData;
         }, {});
       twttr.widgets
         .createTimeline(timelineData, tweet, data)
-        ./*OK*/ then(el => tweetCreated(twttr, el));
+        ./*OK*/ then((el) => tweetCreated(twttr, el));
     }
   });
 
@@ -98,7 +98,7 @@ export function twitter(global, data) {
     }
 
     resize(el);
-    twttr.events.bind('resize', event => {
+    twttr.events.bind('resize', (event) => {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
       if (el === event.target) {
@@ -126,6 +126,7 @@ export function twitter(global, data) {
   /**
    * @param {string} input
    * @param {string} prefix
+   * @return {*} TODO(#23582): Specify return type
    */
   function stripPrefixCamelCase(input, prefix) {
     const stripped = input.replace(new RegExp('^' + prefix), '');
@@ -136,6 +137,7 @@ export function twitter(global, data) {
 /**
  * @param {string} tweetid
  * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function cleanupTweetId_(tweetid) {
   // 1)

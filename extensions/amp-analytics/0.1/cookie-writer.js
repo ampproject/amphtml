@@ -16,11 +16,9 @@
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
-import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '../../../src/types';
-import {isProxyOrigin} from '../../../src/url';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
@@ -59,7 +57,7 @@ export class CookieWriter {
     this.config_ = config;
 
     /** @const @private {!JsonObject} */
-    this.bindings_ = variableServiceForDoc(element).getMacros();
+    this.bindings_ = variableServiceForDoc(element).getMacros(element);
   }
 
   /**
@@ -90,12 +88,7 @@ export class CookieWriter {
    */
   init_() {
     // TODO: Need the consider the case for shadow doc.
-    if (
-      isInFie(this.element_) ||
-      isProxyOrigin(this.win_.location) ||
-      getMode(this.win_).runtime == 'inabox'
-    ) {
-      // Disable cookie writer in friendly iframe and proxy origin and inabox.
+    if (!isCookieAllowed(this.win_, this.element_)) {
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
       return Promise.resolve();
@@ -216,7 +209,7 @@ export class CookieWriter {
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
       .expandStringAsync(cookieValue, this.bindings_)
-      .then(value => {
+      .then((value) => {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
@@ -226,7 +219,7 @@ export class CookieWriter {
           });
         }
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'Error expanding cookie string', e);
       });
   }

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Brightcove Video Cloud or Perform player.
 ---
+
 <!---
 Copyright 2015 Brightcove. All Rights Reserved.
 
@@ -23,26 +24,7 @@ limitations under the License.
 
 # amp-brightcove
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>An <code>amp-brightcove</code> component displays the Brightcove Player as used in Brightcove's <a href="https://www.brightcove.com/en/online-video-platform">Video Cloud</a> or <a href="https://www.brightcove.com/en/player">Brightcove Player</a>.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-brightcove/">Annotated code example for amp-brightcove</a></td>
-  </tr>
-</table>
-
-[TOC]
+An `amp-brightcove` component displays the Brightcove Player as used in Brightcove's [Video Cloud](https://www.brightcove.com/en/online-video-platform) or [Brightcove Player](https://www.brightcove.com/en/player).
 
 ## Example
 
@@ -52,16 +34,19 @@ Example:
 
 ```html
 <amp-brightcove
-    data-account="12345"
-    data-player="default"
-    data-embed="default"
-    data-video-id="1234"
-    layout="responsive"
-    width="480" height="270">
+  data-account="12345"
+  data-player="default"
+  data-embed="default"
+  data-video-id="1234"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-brightcove>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-account</strong></td>
@@ -106,7 +91,7 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
   <tr>
     <td width="40%"><strong>dock</strong></td>
@@ -114,7 +99,6 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
     For more details, see <a href="https://amp.dev/documentation/components/amp-video-docking">documentation on the docking extension itself.</a></td>
   </tr>
 </table>
-
 
 ## Player configuration
 

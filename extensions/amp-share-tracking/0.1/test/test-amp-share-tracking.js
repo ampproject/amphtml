@@ -29,7 +29,7 @@ describes.fakeWin(
       extensions: ['amp-share-tracking'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
     let historyGetFragmentStub;
@@ -40,13 +40,16 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      historyGetFragmentStub = sandbox.stub(History.prototype, 'getFragment');
-      historyUpdateFragmentStub = sandbox.stub(
+      historyGetFragmentStub = env.sandbox.stub(
+        History.prototype,
+        'getFragment'
+      );
+      historyUpdateFragmentStub = env.sandbox.stub(
         History.prototype,
         'updateFragment'
       );
-      xhrStub = sandbox.stub(Xhr.prototype, 'fetchJson');
-      randomBytesStub = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
+      xhrStub = env.sandbox.stub(Xhr.prototype, 'fetchJson');
+      randomBytesStub = env.sandbox.stub(bytes, 'getCryptoRandomBytesArray');
       toggleExperiment(win, 'amp-share-tracking', true);
     });
 
@@ -72,7 +75,7 @@ describes.fakeWin(
       historyGetFragmentStub.onFirstCall().returns(Promise.resolve('.12345'));
       const ampShareTracking = getAmpShareTracking();
       return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-        fragments => {
+        (fragments) => {
           expect(historyGetFragmentStub).to.be.calledOnce;
           expect(fragments.incomingFragment).to.equal('12345');
         }
@@ -88,7 +91,7 @@ describes.fakeWin(
           .returns(Promise.resolve('.12345&key=value'));
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(fragments.incomingFragment).to.equal('12345');
           }
@@ -100,7 +103,7 @@ describes.fakeWin(
       historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
       const ampShareTracking = getAmpShareTracking();
       return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-        fragments => {
+        (fragments) => {
           expect(historyGetFragmentStub).to.be.calledOnce;
           expect(fragments.incomingFragment).to.equal('');
         }
@@ -111,7 +114,7 @@ describes.fakeWin(
       historyGetFragmentStub.onFirstCall().returns(Promise.resolve('12345'));
       const ampShareTracking = getAmpShareTracking();
       return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-        fragments => {
+        (fragments) => {
           expect(historyGetFragmentStub).to.be.calledOnce;
           expect(fragments.incomingFragment).to.equal('');
         }
@@ -129,7 +132,7 @@ describes.fakeWin(
           .returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             // the base64url of byte array [1, 2, 3, 4, 5, 6]
             expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
@@ -151,7 +154,7 @@ describes.fakeWin(
           .returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             // the base64url of byte array [1, 2, 3, 4, 5, 6]
             expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
@@ -176,7 +179,7 @@ describes.fakeWin(
           .returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             // the base64url of byte array [1, 2, 3, 4, 5, 6]
             expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
@@ -192,11 +195,11 @@ describes.fakeWin(
         'is provided and fallback to Math.random generation',
       () => {
         historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-        sandbox.stub(Math, 'random').returns(0.123456789123456789);
+        env.sandbox.stub(Math, 'random').returns(0.123456789123456789);
         randomBytesStub.onFirstCall().returns(null);
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
             expect(historyUpdateFragmentStub.withArgs('.H5rdN8Eh')).to.be
@@ -221,7 +224,7 @@ describes.fakeWin(
         );
         const ampShareTracking = getAmpShareTracking('http://foo.bar');
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(fragments.outgoingFragment).to.equal('54321');
             expect(historyUpdateFragmentStub.withArgs('.54321')).to.be
@@ -249,7 +252,7 @@ describes.fakeWin(
         );
         const ampShareTracking = getAmpShareTracking('http://foo.bar');
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(historyUpdateFragmentStub).to.not.be.called;
             expect(fragments.outgoingFragment).to.equal('');
@@ -279,7 +282,7 @@ describes.fakeWin(
           body: {},
         });
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(historyUpdateFragmentStub.withArgs('.54321')).to.be
               .calledOnce;
@@ -308,7 +311,7 @@ describes.fakeWin(
         );
         const ampShareTracking = getAmpShareTracking('http://foo.bar');
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(
-          fragments => {
+          (fragments) => {
             expect(historyGetFragmentStub).to.be.calledOnce;
             expect(historyUpdateFragmentStub).to.not.be.called;
             expect(fragments.outgoingFragment).to.equal('');

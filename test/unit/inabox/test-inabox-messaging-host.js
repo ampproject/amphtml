@@ -18,7 +18,7 @@ import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
-describes.realWin('inabox-host:messaging', {}, env => {
+describes.realWin('inabox-host:messaging', {}, (env) => {
   let win;
   let host;
   let iframe1;
@@ -211,20 +211,24 @@ describes.realWin('inabox-host:messaging', {}, env => {
     let postMessageSpy;
 
     beforeEach(() => {
-      iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
+      iframe1.contentWindow.postMessage = postMessageSpy = env.sandbox.stub();
     });
 
     it('should send position back', () => {
-      sandbox.stub(host.positionObserver_, 'getViewportRect').callsFake(() => {
-        return layoutRectLtwh(10, 10, 100, 100);
-      });
-      sandbox.stub(host.positionObserver_, 'observe').callsFake(() => {});
+      env.sandbox
+        .stub(host.positionObserver_, 'getViewportRect')
+        .callsFake(() => {
+          return layoutRectLtwh(10, 10, 100, 100);
+        });
+      env.sandbox.stub(host.positionObserver_, 'observe').callsFake(() => {});
       iframe1.getBoundingClientRect = () => {
         return layoutRectLtwh(5, 5, 20, 20);
       };
-      sandbox.stub(host.positionObserver_, 'getTargetRect').callsFake(() => {
-        return iframe1.getBoundingClientRect();
-      });
+      env.sandbox
+        .stub(host.positionObserver_, 'getTargetRect')
+        .callsFake(() => {
+          return iframe1.getBoundingClientRect();
+        });
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
@@ -243,7 +247,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         viewportRect: layoutRectLtwh(10, 10, 100, 100),
         targetRect: layoutRectLtwh(5, 5, 20, 20),
       });
-      expect(targetOrigin).to.equal('www.example.com');
+      expect(targetOrigin).to.equal('*');
     });
   });
 
@@ -262,7 +266,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         getTargetRect() {},
       };
 
-      iframe1.contentWindow.postMessage = postMessageSpy = sandbox.stub();
+      iframe1.contentWindow.postMessage = postMessageSpy = env.sandbox.stub();
     });
 
     it('should postMessage on position change', () => {
@@ -287,7 +291,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         sentinel: '0-123',
         x: 1,
       });
-      expect(targetOrigin).to.equal('www.example.com');
+      expect(targetOrigin).to.equal('*');
     });
 
     it('should not double register', () => {
@@ -323,13 +327,13 @@ describes.realWin('inabox-host:messaging', {}, env => {
     let iframePostMessageSpy;
 
     beforeEach(() => {
-      iframe1.contentWindow.postMessage = iframePostMessageSpy = sandbox.stub();
+      iframe1.contentWindow.postMessage = iframePostMessageSpy = env.sandbox.stub();
     });
 
     it('should accept request and expand', () => {
       const boxRect = {a: 1, b: 2}; // we don't care
 
-      const expandFrame = sandbox
+      const expandFrame = env.sandbox
         ./*OK*/ stub(host.frameOverlayManager_, 'expandFrame')
         .callsFake((iframe, callback) => {
           callback(boxRect);
@@ -350,7 +354,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         iframePostMessageSpy.getCall(0).args[0]
       );
 
-      expect(expandFrame).calledWith(iframe1, sinon.match.any);
+      expect(expandFrame).calledWith(iframe1, env.sandbox.match.any);
       expect(message.type).to.equal('full-overlay-frame-response');
       expect(message.success).to.be.true;
       expect(message.boxRect).to.deep.equal(boxRect);
@@ -359,7 +363,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     it('should accept reset request and collapse', () => {
       const boxRect = {c: 1, d: 2}; // we don't care
 
-      const collapseFrame = sandbox
+      const collapseFrame = env.sandbox
         ./*OK*/ stub(host.frameOverlayManager_, 'collapseFrame')
         .callsFake((iframe, callback) => {
           callback(boxRect);
@@ -380,7 +384,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         iframePostMessageSpy.getCall(0).args[0]
       );
 
-      expect(collapseFrame).calledWith(iframe1, sinon.match.any);
+      expect(collapseFrame).calledWith(iframe1, env.sandbox.match.any);
       expect(message.type).to.equal('cancel-full-overlay-frame-response');
       expect(message.success).to.be.true;
       expect(message.boxRect).to.deep.equal(boxRect);
@@ -421,12 +425,12 @@ describes.realWin('inabox-host:messaging', {}, env => {
   }
 
   function breakCanInspectWindowForWindow(win) {
-    Object.defineProperty(win['location'], 'href', {
+    env.sandbox.defineProperty(win['location'], 'href', {
       get: () => {
         throw new Error('Error!!');
       },
     });
-    Object.defineProperty(win, 'test', {
+    env.sandbox.defineProperty(win, 'test', {
       get: () => {
         throw new Error('Error!!');
       },
@@ -552,7 +556,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
       const iframeObjC = createNestedIframeMocks(6, 0);
       const frameMockC = iframeObjC.topWin.document.querySelectorAll()[0];
-      const observeUnregisterMock = sandbox.spy();
+      const observeUnregisterMock = env.sandbox.spy();
       host = new InaboxMessagingHost(win, [frameMockA, frameMockB, frameMockC]);
       host.getFrameElement_(iframeObjA.source, 'sentinelA');
       host.getFrameElement_(iframeObjB.source, 'sentinelB');

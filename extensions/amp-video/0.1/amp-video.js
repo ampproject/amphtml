@@ -55,16 +55,15 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'disableremoteplayback',
-  'poster',
   'controlsList',
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behavior is managed by
+ * Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
-const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'poster', 'preload'];
 
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
@@ -108,7 +107,11 @@ class AmpVideo extends AMP.BaseElement {
     const videoSrc = this.getVideoSourceForPreconnect_();
     if (videoSrc) {
       this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
-      this.preconnect.url(videoSrc, opt_onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        videoSrc,
+        opt_onLayout
+      );
     }
   }
 
@@ -116,10 +119,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN. Set this value
-    // in `firstAttachedCallback` since `buildCallback` is too late and the
-    // element children may not be available in the constructor.
-    this.prerenderAllowed_ = this.hasAnyCachedSources_();
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image. Set this value in `firstAttachedCallback` since
+    // `buildCallback` is too late and the element children may not be available
+    // in the constructor.
+    const posterAttr = this.element.getAttribute('poster');
+    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -163,9 +168,13 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string}
+   * @return {?string}
    */
   getVideoSourceForPreconnect_() {
+    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
+      const source = this.getFirstCachedSource_();
+      return (source && source.getAttribute('src')) || null;
+    }
     let videoSrc = this.element.getAttribute('src');
     if (!videoSrc) {
       const source = elementByTag(this.element, 'source');
@@ -209,10 +218,7 @@ class AmpVideo extends AMP.BaseElement {
     this.applyFillContent(this.video_, true);
     propagateObjectFitStyles(this.element, this.video_);
 
-    this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
-
-    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -238,7 +244,7 @@ class AmpVideo extends AMP.BaseElement {
       return;
     }
     ['i-amphtml-disable-mediasession', 'i-amphtml-poolbound'].forEach(
-      className => {
+      (className) => {
         element.classList.add(className);
       }
     );
@@ -256,7 +262,7 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
-      value => mutations[value] !== undefined
+      (value) => mutations[value] !== undefined
     );
     this.propagateAttributes(
       attrs,
@@ -308,19 +314,23 @@ class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
 
+    this.createPosterForAndroidBug_();
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
+
     this.propagateCachedSources_();
 
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
+    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      viewer.whenFirstVisible().then(() => {
-        this.propagateLayoutChildren_();
-      });
+      this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.propagateLayoutChildren_();
+        });
     } else {
       this.propagateLayoutChildren_();
     }
@@ -363,7 +373,7 @@ class AmpVideo extends AMP.BaseElement {
 
     // Only cached sources are added during prerender.
     // Origin sources will only be added when document becomes visible.
-    sources.forEach(source => {
+    sources.forEach((source) => {
       if (this.isCachedByCDN_(source)) {
         this.video_.appendChild(source);
       }
@@ -388,7 +398,7 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
 
-    sources.forEach(source => {
+    sources.forEach((source) => {
       // Cached sources should have been moved from <amp-video> to <video>.
       devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
@@ -398,7 +408,7 @@ class AmpVideo extends AMP.BaseElement {
     // To handle cases where cached source may 404 if not primed yet,
     // duplicate the `origin` Urls for cached sources and insert them after each
     const cached = toArray(this.video_.querySelectorAll('[amp-orig-src]'));
-    cached.forEach(cachedSource => {
+    cached.forEach((cachedSource) => {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
@@ -410,7 +420,7 @@ class AmpVideo extends AMP.BaseElement {
     });
 
     const tracks = toArray(childElementsByTag(element, 'track'));
-    tracks.forEach(track => {
+    tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
   }
@@ -448,15 +458,23 @@ class AmpVideo extends AMP.BaseElement {
    * @return {boolean}
    */
   hasAnyCachedSources_() {
+    return !!this.getFirstCachedSource_();
+  }
+
+  /**
+   * @private
+   * @return {?Element}
+   */
+  getFirstCachedSource_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
-        return true;
+        return sources[i];
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -760,6 +778,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVideo);
 });

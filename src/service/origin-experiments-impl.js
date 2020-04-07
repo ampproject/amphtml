@@ -91,7 +91,7 @@ export class OriginExperiments {
     }
     const {win} = this.ampdoc_;
     const crypto = Services.cryptoFor(win);
-    return crypto.importPkcsKey(publicJwk).then(publicKey => {
+    return crypto.importPkcsKey(publicJwk).then((publicKey) => {
       const promises = [];
       for (let i = 0; i < metas.length; i++) {
         const meta = metas[i];
@@ -99,7 +99,7 @@ export class OriginExperiments {
         if (token) {
           const p = this.tokenMaster_
             .verifyToken(token, win.location, publicKey)
-            .catch(error => {
+            .catch((error) => {
               user().error(TAG, 'Failed to verify experiment token:', error);
             });
           promises.push(p);
@@ -114,7 +114,7 @@ export class OriginExperiments {
 
 /**
  * Handles key generation and token signing/verifying.
- * @protected
+ * @package
  */
 export class TokenMaster {
   /**
@@ -135,13 +135,11 @@ export class TokenMaster {
    * @protected
    */
   generateKeys() {
-    const generationAlgo = Object.assign(
-      {
-        modulusLength: 2048,
-        publicExponent: Uint8Array.of(1, 0, 1),
-      },
-      this.crypto_.pkcsAlgo
-    );
+    const generationAlgo = {
+      modulusLength: 2048,
+      publicExponent: Uint8Array.of(1, 0, 1),
+      ...this.crypto_.pkcsAlgo,
+    };
     return this.crypto_.subtle.generateKey(
       /** @type {{name: string}} */ (generationAlgo),
       /* extractable */ true,
@@ -160,7 +158,7 @@ export class TokenMaster {
   generateToken(version, json, privateKey) {
     const config = stringToBytes(JSON.stringify(json));
     const data = this.prepend_(version, config);
-    return this.sign_(data, privateKey).then(signature => {
+    return this.sign_(data, privateKey).then((signature) => {
       return this.append_(data, new Uint8Array(signature));
     });
   }
@@ -175,7 +173,7 @@ export class TokenMaster {
    * @protected
    */
   verifyToken(token, location, publicKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let i = 0;
       const bytes = stringToBytes(atob(token));
 
@@ -202,7 +200,7 @@ export class TokenMaster {
       const signature = bytes.subarray(i);
 
       resolve(
-        this.verify_(signature, data, publicKey).then(verified => {
+        this.verify_(signature, data, publicKey).then((verified) => {
           if (!verified) {
             throw new Error('Failed to verify token signature.');
           }

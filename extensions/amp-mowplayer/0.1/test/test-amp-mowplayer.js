@@ -19,9 +19,8 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
 
-const EXAMPLE_VIDEOID = 'myfwarfx4tb';
-const EXAMPLE_VIDEOID_URL =
-  'https://cdn.mowplayer.com/player.html?code=myfwarfx4tb';
+const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
+const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
 
 describes.realWin(
   'amp-mowplayer',
@@ -30,7 +29,7 @@ describes.realWin(
       extensions: ['amp-mowplayer'],
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
     let win, doc;
     let timer;
@@ -67,7 +66,7 @@ describes.realWin(
         .then(() => {
           const mpIframe = mp.querySelector('iframe');
           mp.implementation_.handleMowMessage_({
-            origin: 'https://cdn.mowplayer.com',
+            origin: 'https://mowplayer.com',
             source: mpIframe.contentWindow,
             data: JSON.stringify({event: 'onReady'}),
           });
@@ -75,7 +74,7 @@ describes.realWin(
         .then(() => mp);
     }
 
-    describe('with data-mediaid', function() {
+    describe('with data-mediaid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 
@@ -87,7 +86,7 @@ describes.realWin(
     function runTestsForDatasource(datasource) {
       it('renders', () => {
         return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(
-          mp => {
+          (mp) => {
             const iframe = mp.querySelector('iframe');
             expect(iframe).to.not.be.null;
             expect(iframe.tagName).to.equal('IFRAME');
@@ -104,7 +103,7 @@ describes.realWin(
         ));
 
       it('should send events from mowplayer to the amp element', () => {
-        return getMowPlayer({'data-mediaid': datasource}).then(mp => {
+        return getMowPlayer({'data-mediaid': datasource}).then((mp) => {
           const iframe = mp.querySelector('iframe');
 
           return Promise.resolve()
@@ -150,7 +149,7 @@ describes.realWin(
 
     function sendFakeInfoDeliveryMessage(mp, iframe, info) {
       mp.implementation_.handleMowMessage_({
-        origin: 'https://cdn.mowplayer.com',
+        origin: 'https://mowplayer.com',
         source: iframe.contentWindow,
         data: JSON.stringify({
           event: 'infoDelivery',

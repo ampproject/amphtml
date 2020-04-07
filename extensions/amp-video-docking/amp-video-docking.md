@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,27 +23,6 @@ limitations under the License.
 -->
 
 # amp-video-docking
-
-[TOC]
-
-Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://ampbyexample.com/advanced/advanced_video_docking/">Advanced video docking</a> with multiple targets, event triggers and media queries.</li>
-    </ul></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
 
 ## Behavior
 
@@ -73,7 +53,7 @@ Currently, the supported players are:
 
 ### Triggering conditions
 
-Note that the video won't be docked unless it's playing *manually*. This means:
+Note that the video won't be docked unless it's playing _manually_. This means:
 
 - If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
 - If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
@@ -93,7 +73,7 @@ On scroll, the video will minimize to an automatically calculated corner or to a
 When setting the `dock` attribute with an empty value, the video will dock to a corner defined by the extension:
 
 ```html
-<amp-video src="my-video.mp4" ... dock>
+<amp-video src="my-video.mp4" ... dock></amp-video>
 ```
 
 By default, the video will be minimized to the top-right corner. It will be sized at 30% of the viewport's width, no less than 180 pixels wide. If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner. When in this mode, users can drag the docked video to snap to either corner.
@@ -104,15 +84,17 @@ When setting the `dock` attribute to a non-empty value, the video will dock to t
 
 ```html
 <amp-layout id="my-dock-slot" ...>
-<amp-video src="my-video.mp4" ... dock="#my-dock-slot">
+  <amp-video src="my-video.mp4" ... dock="#my-dock-slot"></amp-video
+></amp-layout>
 ```
+
 The slot element must always be an [`amp-layout`](https://amp.dev/documentation/components/amp-layout), which allows us to leverage the [AMP layout system](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/) in order to keep the same sizing properties between the slot and the video.
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 
 ### <a id="combined-targets"></a> Combining corner and custom position behavior
 
-Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
 
 ## Events
 
@@ -120,7 +102,7 @@ Custom positioning will be rejected when the element target is not visible. This
 
 When the video becomes docked or undocked by scrolling, the [low-trust events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) `dock` and `undock` are triggered respectively.
 
-These can, for example, trigger an [`amp-animation`](https://amp.dev/documentation/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://ampbyexample.com/advanced/advanced_video_docking/)
+These can, for example, trigger an [`amp-animation`](https://amp.dev/documentation/components/amp-animation) that slides content in order to make room for the docked element. For an example where events trigger animations required for docking, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
 
 ### Event source
 
@@ -155,6 +137,20 @@ References a layer that draws an overlay background over the video and under
 the controls. It's displayed only when the controls are displayed. Its
 background can be overridden or removed.
 
+#### `.amp-video-docked-main-button-group`
+
+A controls group that contains a set of buttons. Only one of these elements are
+displayed at a time depending on the state of the video:
+
+- The **playback** set is displayed on most scenarios and contains play/pause,
+  mute/unmute and fullscreen buttons.
+
+- The **scroll back** set only contains a button to scroll the document back
+  to the video's inline position. This is displayed during ad playback in order
+  to allow user interaction.
+
+The dismiss button is **not** part of a controls set and is always displayed.
+
 #### `.amp-docked-video-button-group`
 
 A button "group" that usually contains two buttons, with only one displayed at
@@ -186,6 +182,24 @@ Represents the `unmute` button.
 #### `.amp-docked-video-fullscreen`
 
 Represents the `fullscreen` button.
+
+#### `.amp-docked-video-scroll-back`
+
+Represents a button to scroll the document back to the video's inline position
+during ad playback to allow user interaction.
+
+This button is different from the other control buttons in that the
+`amp-small`/`amp-large` classnames on the `.amp-docked-video-controls` container
+do not affect it. Because it's the only button in its set, it's also larger than
+the others, at 64 by 64 pixels. Other control buttons are sized at 40 by 40
+pixels.
+
+The icon for this button (set through the `background-image` CSS property)
+changes depending on the relative direction of the docked area. When the video
+docks from left-to-right, the `.amp-docked-video-controls` container gets no
+additional classnames, but it will get the `amp-rtl` classname when the video
+docks in the opposite direction. This allows the button to be drawn with an
+arrow pointing in the correct direction.
 
 #### `.amp-video-docked-placeholder-background`
 

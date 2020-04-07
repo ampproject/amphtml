@@ -28,6 +28,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
@@ -46,7 +47,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -233,20 +233,26 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect, this.config.remoteHTMLDisabled);
+    preloadBootstrap(
+      this.win,
+      this.getAmpDoc(),
+      preconnect,
+      this.config.remoteHTMLDisabled
+    );
     if (typeof this.config.prefetch == 'string') {
-      this.preconnect.preload(this.config.prefetch, 'script');
+      preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach(p => {
-        this.preconnect.preload(p, 'script');
+      this.config.prefetch.forEach((p) => {
+        preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
-      this.preconnect.url(this.config.preconnect, opt_onLayout);
+      preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach(p => {
-        this.preconnect.url(p, opt_onLayout);
+      this.config.preconnect.forEach((p) => {
+        preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -254,7 +260,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (src) {
       // We only preconnect to the src because we cannot know whether the URL
       // will have caching headers set.
-      this.preconnect.url(src);
+      preconnect.url(this.getAmpDoc(), src);
     }
   }
 
@@ -281,12 +287,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run(
         {
-          measure: state => {
+          measure: (state) => {
             state.direction = computedStyle(this.win, this.element)[
               'direction'
             ];
           },
-          mutate: state => {
+          mutate: (state) => {
             if (state.direction == 'rtl') {
               setStyle(this.element, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -348,11 +354,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
-    const consentStringPromise =
-      consentPolicyId && isConsentV2Experiment
-        ? getConsentPolicyInfo(this.element, consentPolicyId)
-        : Promise.resolve(null);
+    const consentStringPromise = consentPolicyId
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
@@ -362,7 +366,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then(consents => {
+    ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
       // ampcontext.js and this file are compiled in different compilation unit
@@ -377,9 +381,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'initialConsentState': consents[1],
         'consentSharedData': consents[2],
       });
-      if (isConsentV2Experiment) {
-        opt_context['initialConsentValue'] = consents[3];
-      }
+      opt_context['initialConsentValue'] = consents[3];
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them
@@ -409,6 +411,27 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  unlayoutOnPause() {
+    return (
+      !this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.isPausable()
+    );
+  }
+
+  /** @override  */
+  pauseCallback() {
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.setPaused(true);
+    }
+  }
+
+  /** @override  */
+  resumeCallback() {
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.setPaused(false);
+    }
+  }
+
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
@@ -418,11 +441,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.xOriginIframeHandler_ = null;
     }
     return true;
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
   }
 
   /**

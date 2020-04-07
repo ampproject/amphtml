@@ -20,10 +20,11 @@ import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PaginationButtons} from '../pagination-buttons';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
+const IDENTITY_FN = (x) => x;
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
@@ -35,7 +36,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;
@@ -93,22 +94,19 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(
-        win,
-        'localization-v01',
-        () => localizationService
-      );
+      registerServiceBuilder(win, 'localization-v01', function () {
+        return localizationService;
+      });
 
       AmpStory.isBrowserSupported = () => true;
       story = new AmpStory(element);
       // TODO(alanorozco): Test active page event triggers once the stubbable
       // `Services` module is part of the amphtml-story repo.
-      // sandbox.stub(element.implementation_,
+      // env.sandbox.stub(element.implementation_,
       // 'triggerActiveEventForPage_').callsFake(NOOP);
     });
 
     afterEach(() => {
-      sandbox.restore();
       element.remove();
     });
 
@@ -131,11 +129,11 @@ describes.realWin(
           const pageElements = story.element.getElementsByTagName(
             'amp-story-page'
           );
-          const pages = Array.from(pageElements).map(el => el.getImpl());
+          const pages = Array.from(pageElements).map((el) => el.getImpl());
 
           return Promise.all(pages);
         })
-        .then(pages => {
+        .then((pages) => {
           // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             i === 0
@@ -149,7 +147,7 @@ describes.realWin(
       const firstPageId = 'cover';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const updateActivePageStub = sandbox.stub(
+      const updateActivePageStub = env.sandbox.stub(
         story.navigationState_,
         'updateActivePage'
       );
@@ -166,8 +164,8 @@ describes.realWin(
     it('should preload the bookend if navigating to the last page', () => {
       createPages(story.element, 1, ['cover']);
 
-      const buildBookendStub = sandbox.stub(story.bookend_, 'build');
-      const loadBookendStub = sandbox
+      const buildBookendStub = env.sandbox.stub(story.bookend_, 'build');
+      const loadBookendStub = env.sandbox
         .stub(story.bookend_, 'loadConfig')
         .resolves({});
 
@@ -180,8 +178,8 @@ describes.realWin(
     it('should not preload the bookend if not on the last page', () => {
       createPages(story.element, 2, ['cover']);
 
-      const buildBookendStub = sandbox.stub(story.bookend_, 'build');
-      const loadBookendStub = sandbox
+      const buildBookendStub = env.sandbox.stub(story.bookend_, 'build');
+      const loadBookendStub = env.sandbox
         .stub(story.bookend_, 'loadConfig')
         .resolves({});
 
@@ -194,8 +192,8 @@ describes.realWin(
     it('should prerender/load the share menu', () => {
       createPages(story.element, 1, ['cover']);
 
-      sandbox.stub(story.bookend_, 'build');
-      const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+      env.sandbox.stub(story.bookend_, 'build');
+      const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
 
       return story.layoutCallback().then(() => {
         expect(buildShareMenuStub).to.have.been.calledOnce;
@@ -207,8 +205,8 @@ describes.realWin(
 
       story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
 
-      sandbox.stub(story.bookend_, 'build');
-      const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+      env.sandbox.stub(story.bookend_, 'build');
+      const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
 
       return story.layoutCallback().then(() => {
         expect(buildShareMenuStub).to.not.have.been.called;
@@ -217,7 +215,7 @@ describes.realWin(
 
     // TODO(#11639): Re-enable this test.
     it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
-      const hideBookendStub = sandbox.stub(
+      const hideBookendStub = env.sandbox.stub(
         element.implementation_,
         'hideBookend_',
         NOOP
@@ -251,17 +249,14 @@ describes.realWin(
 
       const page = win.document.createElement('div');
 
-      const updateProgressBarStub = sandbox
+      const updateProgressBarStub = env.sandbox
         .stub(impl.systemLayer_, 'updateProgressBar')
         .callsFake(NOOP);
 
       appendEmptyPage(element, /* opt_active */ true);
 
-      sandbox.stub(impl, 'getPageCount').returns(count);
-      sandbox
-        .stub(impl, 'getPageIndex')
-        .withArgs(page)
-        .returns(index);
+      env.sandbox.stub(impl, 'getPageCount').returns(count);
+      env.sandbox.stub(impl, 'getPageIndex').withArgs(page).returns(index);
 
       impl.switchTo_(page);
 
@@ -273,8 +268,9 @@ describes.realWin(
     it.skip('should pause/resume pages when switching pages', () => {
       const impl = element.implementation_;
       const pages = createPages(element, 5);
-      impl.schedulePause = sandbox.spy();
-      impl.scheduleResume = sandbox.spy();
+      const owners = Services.ownersForDoc(impl.element);
+      owners.schedulePause = env.sandbox.spy();
+      owners.scheduleResume = env.sandbox.spy();
 
       const oldPage = pages[0];
       const newPage = pages[1];
@@ -282,8 +278,14 @@ describes.realWin(
       element.build();
 
       return impl.switchTo_(newPage).then(() => {
-        expect(impl.schedulePause).to.have.been.calledWith(oldPage);
-        expect(impl.scheduleResume).to.have.been.calledWith(newPage);
+        expect(owners.schedulePause).to.have.been.calledWith(
+          impl.element,
+          oldPage
+        );
+        expect(owners.scheduleResume).to.have.been.calledWith(
+          impl.element,
+          newPage
+        );
       });
     });
 
@@ -297,9 +299,9 @@ describes.realWin(
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      sandbox
+      env.sandbox
         .stub(element.implementation_, 'mutateElement')
-        .callsFake(mutator => {
+        .callsFake((mutator) => {
           mutator();
           return Promise.resolve();
         });
@@ -328,10 +330,12 @@ describes.realWin(
 
     it('builds and attaches pagination buttons ', () => {
       const paginationButtonsStub = {
-        attach: sandbox.spy(),
-        onNavigationStateChange: sandbox.spy(),
+        attach: env.sandbox.spy(),
+        onNavigationStateChange: env.sandbox.spy(),
       };
-      sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
+      env.sandbox
+        .stub(PaginationButtons, 'create')
+        .returns(paginationButtonsStub);
       story.buildPaginationButtonsForTesting();
       expect(paginationButtonsStub.attach).to.have.been.calledWith(
         story.element
@@ -341,7 +345,9 @@ describes.realWin(
     it.skip('toggles `i-amphtml-story-landscape` based on height and width', () => {
       story.element.style.width = '11px';
       story.element.style.height = '10px';
-      const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+      const isDesktopStub = env.sandbox
+        .stub(story, 'isDesktop_')
+        .returns(false);
       story.vsync_ = {
         run: (task, state) => {
           if (task.measure) {
@@ -368,7 +374,7 @@ describes.realWin(
       const firstPageId = 'page-one';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
+      const dispatchStub = env.sandbox.stub(story.storeService_, 'dispatch');
 
       return story.layoutCallback().then(() => {
         expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
@@ -381,7 +387,7 @@ describes.realWin(
     it('should update page id in browser history', () => {
       // Have to stub this because tests run in iframe and you can't write
       // history from another domain (about:srcdoc)
-      const replaceStub = sandbox.stub(win.history, 'replaceState');
+      const replaceStub = env.sandbox.stub(win.history, 'replaceState');
       const firstPageId = 'page-zero';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
@@ -398,7 +404,7 @@ describes.realWin(
     it('should NOT update page id in browser history if ad', () => {
       // Have to stub this because tests run in iframe and you can't write
       // history from another domain (about:srcdoc)
-      const replaceStub = sandbox.stub(win.history, 'replaceState');
+      const replaceStub = env.sandbox.stub(win.history, 'replaceState');
       const firstPageId = 'i-amphtml-ad-page-1';
       const pageCount = 2;
       const pages = createPages(story.element, pageCount, [
@@ -423,7 +429,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;

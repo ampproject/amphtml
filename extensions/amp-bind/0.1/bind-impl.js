@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -26,21 +27,24 @@ import {
   iterateCursor,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, remove} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
+/** @const {string} */
 const TAG = 'amp-bind';
 
 /**
@@ -55,6 +59,20 @@ const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
  * @type {number}
  */
 const MAX_MERGE_DEPTH = 10;
+
+/** @const {!Object<string, !Object<string, boolean>>} */
+const FORM_VALUE_PROPERTIES = {
+  'INPUT': {
+    'checked': true,
+    'value': true,
+  },
+  'OPTION': {
+    'selected': true,
+  },
+  'TEXTAREA': {
+    'text': true,
+  },
+};
 
 /**
  * A bound property, e.g. [property]="expression".
@@ -83,6 +101,12 @@ const BIND_ONLY_ATTRIBUTES = map({
 });
 
 /**
+ * Elements that opt-out of tree walking in favor of rescan() with {fast: true}.
+ * @const {!Array<string>}
+ */
+const FAST_RESCAN_TAGS = ['AMP-LIST'];
+
+/**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
  * scanning for bindings to evaluating expressions to mutating elements.
  * @implements {../../../src/service.EmbeddableService}
@@ -94,6 +118,8 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
+
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -152,8 +178,8 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /**
      * The current values of all bound expressions on the page.
@@ -167,29 +193,32 @@ export class Bind {
     /** @private {?./bind-validator.BindValidator} */
     this.validator_ = null;
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
+
+    /** @const @private {!Promise<!Document>} */
+    this.rootNodePromise_ = ampdoc.whenFirstVisible().then(() => {
+      if (opt_win) {
+        // In FIE, scan the document node of the iframe window.
+        const {document} = opt_win;
+        return whenDocumentReady(document).then(() => document);
+      } else {
+        // Otherwise, scan the root node of the ampdoc.
+        return ampdoc.whenReady().then(() => ampdoc.getRootNode());
+      }
+    });
 
     /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_
-      .whenFirstVisible()
-      .then(() => {
-        if (opt_win) {
-          // In FIE, scan the document node of the iframe window.
-          const {document} = opt_win;
-          return whenDocumentReady(document).then(() => document);
-        } else {
-          // Otherwise, scan the root node of the ampdoc.
-          return ampdoc.whenReady().then(() => ampdoc.getRootNode());
-        }
-      })
-      .then(root => {
-        return this.initialize_(root);
-      });
+    this.initializePromise_ = this.rootNodePromise_.then((root) =>
+      this.initialize_(root)
+    );
+
+    /** @const @private {!Deferred} */
+    this.addMacrosDeferred_ = new Deferred();
 
     /** @private {Promise} */
     this.setStatePromise_ = null;
@@ -200,7 +229,7 @@ export class Bind {
     // Install debug tools.
     const g = self.AMP;
     g.printState = g.printState || this.debugPrintState_.bind(this);
-    g.setState = g.setState || (state => this.setState(state));
+    g.setState = g.setState || ((state) => this.setState(state));
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
@@ -222,14 +251,13 @@ export class Bind {
 
   /**
    * Merges `state` into the current state and immediately triggers an
-   * evaluation unless `opt_skipEval` is false.
+   * evaluation unless `skipEval` is false.
    * @param {!JsonObject} state
-   * @param {boolean=} opt_skipEval
-   * @param {boolean=} opt_skipAmpState
+   * @param {!BindSetStateOptionsDef} opts options bag
    * @return {!Promise}
    */
-  setState(state, opt_skipEval, opt_skipAmpState) {
-    dev().info(TAG, 'setState:', state);
+  setState(state, opts = {}) {
+    dev().info(TAG, 'setState (init=%s):', opts.skipEval, state);
 
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
@@ -237,13 +265,18 @@ export class Bind {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
-    if (opt_skipEval) {
+    if (opts.skipEval) {
       return Promise.resolve();
     }
 
     const promise = this.initializePromise_
       .then(() => this.evaluate_())
-      .then(results => this.apply_(results, opt_skipAmpState));
+      .then((results) =>
+        this.apply_(results, {
+          skipAmpState: opts.skipAmpState,
+          constrain: opts.constrain,
+        })
+      );
 
     if (getMode().test) {
       promise.then(() => {
@@ -315,11 +348,37 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', expression);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-      .then(result => this.setState(result))
+    return this.evaluateExpression_(expression, scope).then((result) =>
+      this.setStateAndUpdateHistory_(result)
+    );
+  }
+
+  /**
+   * Sanitizes a state object and merges the resulting object into the current
+   * state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   */
+  setStateWithObject(state) {
+    // Sanitize and copy state
+    const result = this.copyJsonObject_(state);
+    if (!result) {
+      return Promise.reject('Invalid state');
+    }
+    return this.setStateAndUpdateHistory_(result);
+  }
+
+  /**
+   * Merges a state object into the current global state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   * @private
+   */
+  setStateAndUpdateHistory_(state) {
+    dev().info(TAG, 'setState:', state);
+    this.setStatePromise_ = this.setState(state)
       .then(() => this.getDataForHistory_())
-      .then(data => {
+      .then((data) => {
         // Don't bother calling History.replace with empty data.
         if (data) {
           this.history_.replace(data);
@@ -338,11 +397,11 @@ export class Bind {
    */
   pushStateWithExpression(expression, scope) {
     dev().info(TAG, 'pushState:', expression);
-    return this.evaluateExpression_(expression, scope).then(result => {
+    return this.evaluateExpression_(expression, scope).then((result) => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
       const oldState = map();
-      Object.keys(result).forEach(variable => {
+      Object.keys(result).forEach((variable) => {
         const value = this.state_[variable];
         // Store a deep copy of `value` to make sure `oldState` isn't
         // modified by subsequent setState() actions.
@@ -352,7 +411,7 @@ export class Bind {
       const onPop = () => this.setState(oldState);
       return this.setState(result)
         .then(() => this.getDataForHistory_())
-        .then(data => {
+        .then((data) => {
           this.history_.push(onPop, data);
         });
     });
@@ -374,109 +433,165 @@ export class Bind {
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
-    return this.viewer_.isTrustedViewer().then(trusted => {
+    return this.viewer_.isTrustedViewer().then((trusted) => {
       return trusted ? data : null;
     });
   }
 
   /**
-   * Removes bindings from `removed` elements and scans `added` for bindings.
-   * Then, evaluates all expressions and applies results to `added` elements.
-   * Does _not_ mutate any other elements.
+   * Removes bindings from `removedElements` and adds new bindings in
+   * `addedElements`.
    *
-   * Returned promise is resolved when all operations complete.
-   * If they don't complete within `timeout` ms, the promise is rejected.
+   * If `options.update` is true, evaluates and applies changes to
+   * `addedElements` after adding new bindings.
    *
-   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   * If `options.fast` is true, uses a faster scan method that requires
+   * (1) elements with bindings to have the attribute `i-amphtml-binding` and
+   * (2) the parent element tag name be listed in FAST_RESCAN_TAGS.
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number=} opt_timeout Timeout in milliseconds.
-   * @return {!Promise}
+   * @param {BindRescanOptionsDef=} options
+   * @return {!Promise} Resolved when all operations complete. If they don't
+   * complete within `options.timeout` (default=2000), promise is rejected.
    */
-  scanAndApply(addedElements, removedElements, opt_timeout) {
-    // TODO(choumx): Dependency on init may be removed if we skip elements
-    // with .i-amphtml-binding during tree walk and extract macro setup.
-    return this.initializePromise_.then(() => {
-      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+  rescan(addedElements, removedElements, options = {}) {
+    // * In non-fast mode, wait for initial tree walk to avoid racy double
+    //   scanning of `addedElements` which may cause duplicate bindings.
+    // * In fast mode, the initial tree walk skips subtrees of FAST_RESCAN_TAGS
+    //   so only wait for <amp-bind-macro> setup (much faster!).
+    const waitFor = options.fast
+      ? this.addMacrosDeferred_.promise
+      : this.initializePromise_;
+
+    return waitFor.then(() =>
+      this.timer_.timeoutPromise(
+        options.timeout || 2000,
+        this.rescan_(addedElements, removedElements, options),
+        'Timed out waiting for amp-bind to rescan.'
+      )
+    );
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {!BindRescanOptionsDef} options
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, options) {
+    dev().info(TAG, 'rescan: ', addedElements, removedElements, options);
+
+    const rescanPromise = options.fast
+      ? this.fastScan_(addedElements, removedElements)
+      : this.slowScan_(addedElements, removedElements);
+
+    return rescanPromise.then(() => {
+      if (options.update) {
+        return this.evaluate_().then((results) =>
+          this.apply_(results, {constrain: addedElements})
+        );
+      }
     });
   }
 
   /**
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout
    * @return {!Promise}
    * @private
    */
-  rescan_(addedElements, removedElements, timeout) {
-    dev().info(TAG, 'rescan:', addedElements, removedElements);
-    /**
-     * Helper function for cleaning up bindings in removed elements.
-     * @param {number} added
-     * @return {!Promise}
-     */
-    const cleanup = added => {
-      this.removeBindingsForNodes_(removedElements).then(removed => {
-        dev().info(
-          TAG,
-          '⤷',
-          'Δ:',
-          added - removed,
-          ', ∑:',
-          this.numberOfBindings()
-        );
-      });
-      return Promise.resolve();
-    };
-    // Early-out if max number of bindings has already been exceeded.
-    // This can happen since we purge old bindings in `removedElements`
-    // _after_ adding new ones (rather than before) as an optimization.
-    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-      this.emitMaxBindingsExceededError_();
-      return cleanup(0);
-    }
+  fastScan_(addedElements, removedElements) {
+    // Sync remove bindings from internal state first, but don't chain on
+    // returned promise (worker message) as an optimization.
+    const removePromise = this.removeBindingsForNodes_(removedElements);
+
+    // Scan `addedElements` and descendants for bindings.
     const bindings = [];
-    // Scan `addedElements` and their children for elements with bindings.
-    const elementsToScan = addedElements.slice();
-    addedElements.forEach(el => {
+    const elementsToScan = addedElements.filter((el) =>
+      el.hasAttribute('i-amphtml-binding')
+    );
+    addedElements.forEach((el) => {
       const children = el.querySelectorAll('[i-amphtml-binding]');
       Array.prototype.push.apply(elementsToScan, children);
     });
-    elementsToScan.forEach(el => {
-      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
-    });
-    const added = bindings.length;
-    // Early-out if there are no elements to add -- just clean up `removed`.
-    if (added === 0) {
-      return cleanup(0);
+    const quota = this.maxNumberOfBindings_ - this.numberOfBindings();
+    for (let i = 0; i < elementsToScan.length; i++) {
+      const el = elementsToScan[i];
+      if (this.scanElement_(el, quota - bindings.length, bindings)) {
+        break;
+      }
     }
-    const promise = this.sendBindingsToWorker_(bindings)
-      .then(() => {
-        return this.evaluate_().then(results =>
-          this.applyElements_(results, addedElements)
-        );
-      })
-      .then(() => {
-        // Remove bindings at the end to reduce evaluation/apply latency.
-        cleanup(added);
-      });
-    return this.timer_.timeoutPromise(
-      timeout,
-      promise,
-      'Timed out waiting for amp-bind to process rendered template.'
-    );
+
+    removePromise.then((removed) => {
+      dev().info(
+        TAG,
+        'rescan.fast: delta=%s, total=%s',
+        bindings.length - removed,
+        this.numberOfBindings()
+      );
+    });
+
+    if (bindings.length > 0) {
+      return this.sendBindingsToWorker_(bindings);
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+  /**
+   * Returns a copy of the global state for a given field-based expression,
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {*}
+   */
+  getState(expr) {
+    const value = expr ? getValueForExpr(this.state_, expr) : undefined;
+    if (isObject(value) || isArray(value)) {
+      return this.copyJsonObject_(/** @type {JsonObject} */ (value));
+    }
+    return value;
+  }
+
+  /**
+   * Returns a copy of the global state for an expression, after waiting for its
+   * associated 'amp-state' element to finish fetching data. If there is no
+   * corresponding 'amp-state' element in the DOM, then reject.
+   *
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {!Promise<*>}
+   */
+  getStateAsync(expr) {
+    const stateId = /^[^.]*/.exec(expr)[0];
+    return this.rootNodePromise_.then((root) => {
+      const ampStateEl = root.querySelector(
+        `#${escapeCssSelectorIdent(stateId)}`
+      );
+      if (!ampStateEl) {
+        throw new Error(`#${stateId} does not exist.`);
+      }
+
+      return whenUpgradedToCustomElement(ampStateEl)
+        .then((el) => el.getImpl(true))
+        .then((ampState) => ampState.getFetchingPromise())
+        .catch(() => {})
+        .then(() => this.getState(expr));
+    });
   }
 
   /**
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
-   * @return {string}
+   * @return {?string}
    */
   getStateValue(expr) {
     const value = getValueForExpr(this.state_, expr);
-    if (isObject(value) || isArray(value)) {
+    if (value === undefined || value === null) {
+      return null;
+    } else if (isObject(value) || isArray(value)) {
       return JSON.stringify(/** @type {JsonObject} */ (value));
     } else {
       return String(value);
@@ -491,7 +606,7 @@ export class Bind {
    */
   initialize_(root) {
     // Disallow URL property bindings in AMP4EMAIL.
-    const allowUrlProperties = !this.isAmp4Email_();
+    const allowUrlProperties = !isAmp4Email(this.localWin_.document);
     this.validator_ = new BindValidator(allowUrlProperties);
 
     // The web worker's evaluator also has an instance of BindValidator
@@ -499,27 +614,25 @@ export class Bind {
     return this.ww_('bind.init', [allowUrlProperties])
       .then(() => {
         return Promise.all([
-          this.addMacros_(),
+          this.addMacros_().then(() => this.addMacrosDeferred_.resolve()),
           this.addBindingsForNodes_([root]),
         ]);
       })
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
-        root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
+        root.addEventListener(AmpEvents.DOM_UPDATE, (e) =>
+          this.onDomUpdate_(e)
+        );
       })
       .then(() => {
         const ampStates = root.querySelectorAll('AMP-STATE');
         // Force all query-able <amp-state> elements to parse local data instead
         // of waiting for runtime to build them all.
         const whenBuilt = false;
-        const whenParsed = toArray(ampStates).map(el => {
+        const whenParsed = toArray(ampStates).map((el) => {
           return whenUpgradedToCustomElement(el)
             .then(() => el.getImpl(whenBuilt))
-            .then(impl => impl.parseAndUpdate());
+            .then((impl) => impl.parseAndUpdate());
         });
         return Promise.all(whenParsed);
       })
@@ -528,18 +641,12 @@ export class Bind {
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-      });
-  }
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isAmp4Email_() {
-    const html = this.localWin_.document.documentElement;
-    const amp4email =
-      html.hasAttribute('amp4email') || html.hasAttribute('⚡4email');
-    return amp4email;
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then((results) => this.verify_(results));
+        }
+      });
   }
 
   /**
@@ -576,7 +683,7 @@ export class Bind {
   premutate_(data) {
     const ignoredKeys = [];
     return this.initializePromise_.then(() => {
-      Object.keys(data['state']).forEach(key => {
+      Object.keys(data['state']).forEach((key) => {
         if (!this.overridableKeys_.includes(key)) {
           delete data['state'][key];
           ignoredKeys.push(key);
@@ -613,14 +720,14 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    // TODO(choumx, #17194): Query selector can miss elements when the body
-    // is streamed. This should be done at the custom element level.
+    // TODO(choumx, #17194): One-time query selector can miss dynamically
+    // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
-    iterateCursor(elements, element => {
+    iterateCursor(elements, (element) => {
       const argumentNames = (element.getAttribute('arguments') || '')
         .split(',')
-        .map(s => s.trim());
+        .map((s) => s.trim());
       macros.push({
         id: element.getAttribute('id'),
         argumentNames,
@@ -630,7 +737,7 @@ export class Bind {
     if (macros.length == 0) {
       return Promise.resolve(0);
     } else {
-      return this.ww_('bind.addMacros', [macros]).then(errors => {
+      return this.ww_('bind.addMacros', [macros]).then((errors) => {
         // Report macros that failed to parse (e.g. expression size exceeded).
         errors.forEach((e, i) => {
           this.reportWorkerError_(
@@ -656,15 +763,19 @@ export class Bind {
    * @private
    */
   addBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // For each node, scan it for bindings and store them.
-    const scanPromises = nodes.map(node => {
+    const scanPromises = nodes.map((node) => {
       // Limit number of total bindings (unless in local manual testing).
       const limit =
         getMode().localDev && !getMode().test
           ? Number.POSITIVE_INFINITY
           : this.maxNumberOfBindings_ - this.numberOfBindings();
 
-      return this.scanNode_(node, limit).then(results => {
+      return this.scanNode_(node, limit).then((results) => {
         const {bindings, limitExceeded} = results;
         if (limitExceeded) {
           this.emitMaxBindingsExceededError_();
@@ -675,7 +786,7 @@ export class Bind {
 
     // Once all scans are complete, combine the bindings and ask web-worker to
     // evaluate expressions in a single RPC.
-    return Promise.all(scanPromises).then(results => {
+    return Promise.all(scanPromises).then((results) => {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
@@ -699,9 +810,9 @@ export class Bind {
    * @return {!Promise<number>}
    */
   sendBindingsToWorker_(bindings) {
-    return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+    return this.ww_('bind.addBindings', [bindings]).then((parseErrors) => {
       // Report each parse error.
-      Object.keys(parseErrors).forEach(expressionString => {
+      Object.keys(parseErrors).forEach((expressionString) => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           this.reportWorkerError_(
@@ -726,8 +837,12 @@ export class Bind {
    * @private
    */
   removeBindingsForNodes_(nodes) {
+    if (!nodes.length) {
+      return Promise.resolve(0);
+    }
+
     // Eliminate bound elements that are descendants of `nodes`.
-    remove(this.boundElements_, boundElement => {
+    remove(this.boundElements_, (boundElement) => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].contains(boundElement.element)) {
           return true;
@@ -741,7 +856,7 @@ export class Bind {
     const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
-      remove(elements, element => {
+      remove(elements, (element) => {
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i].contains(element)) {
             return true;
@@ -807,11 +922,17 @@ export class Bind {
       if (this.scanElement_(element, remainingQuota, bindings)) {
         limitExceeded = true;
       }
-      return !walker.nextNode() || limitExceeded;
+      // Elements in FAST_RESCAN_TAGS opt-out of "slow" tree walking in favor of
+      // rescan() with {fast: true} for better performance. Note that only
+      // children are opted-out (e.g. amp-list children, not amp-list itself).
+      const next = FAST_RESCAN_TAGS.includes(node.nodeName)
+        ? this.skipSubtree_(walker)
+        : walker.nextNode();
+      return !next || limitExceeded;
     };
 
-    return new Promise(resolve => {
-      const chunktion = idleDeadline => {
+    return new Promise((resolve) => {
+      const chunktion = (idleDeadline) => {
         let completed = false;
         // If `requestIdleCallback` is available, scan elements until
         // idle time runs out.
@@ -839,6 +960,23 @@ export class Bind {
   }
 
   /**
+   * Skips the subtree at the walker's current node and returns the next node
+   * in document order, if any. Otherwise, returns null.
+   * @param {!TreeWalker} walker
+   * @return {?Node}
+   * @private
+   */
+  skipSubtree_(walker) {
+    for (let n = walker.currentNode; n; n = walker.parentNode()) {
+      const sibling = walker.nextSibling();
+      if (sibling) {
+        return sibling;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Scans the element for bindings and adds up to |quota| to `outBindings`.
    * Also updates ivars `boundElements_` and `expressionToElements_`.
    * @param {!Element} element
@@ -858,7 +996,7 @@ export class Bind {
       this.boundElements_.push({element, boundProperties});
     }
     const {tagName} = element;
-    boundProperties.forEach(boundProperty => {
+    boundProperties.forEach((boundProperty) => {
       const {property, expressionString} = boundProperty;
       outBindings.push({tagName, property, expressionString});
       if (!this.expressionToElements_[expressionString]) {
@@ -940,7 +1078,7 @@ export class Bind {
         Object.assign(scope, this.state_);
         return this.ww_('bind.evaluateExpression', [expression, scope]);
       })
-      .then(returnValue => {
+      .then((returnValue) => {
         const {result, error} = returnValue;
         if (error) {
           // Throw to reject promise.
@@ -961,10 +1099,10 @@ export class Bind {
    */
   evaluate_() {
     const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
-    return evaluatePromise.then(returnValue => {
+    return evaluatePromise.then((returnValue) => {
       const {results, errors} = returnValue;
       // Report evaluation errors.
-      Object.keys(errors).forEach(expressionString => {
+      Object.keys(errors).forEach((expressionString) => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
           const evalError = errors[expressionString];
@@ -998,7 +1136,7 @@ export class Bind {
     // Collate strings containing details of verification mismatches to return.
     const mismatches = {};
 
-    this.boundElements_.forEach(boundElement => {
+    this.boundElements_.forEach((boundElement) => {
       const {element, boundProperties} = boundElement;
 
       // If provided, filter elements that are _not_ children of `opt_elements`.
@@ -1006,7 +1144,7 @@ export class Bind {
         return;
       }
 
-      boundProperties.forEach(boundProperty => {
+      boundProperties.forEach((boundProperty) => {
         const newValue = results[boundProperty.expressionString];
         if (newValue === undefined) {
           return;
@@ -1066,14 +1204,14 @@ export class Bind {
    */
   calculateUpdates_(boundProperties, results) {
     const updates = [];
-    boundProperties.forEach(boundProperty => {
+    boundProperties.forEach((boundProperty) => {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
       // Support equality checks for arrays of objects containing arrays.
       // Useful for rendering amp-list with amp-bind state via [src].
       if (
         newValue === undefined ||
-        deepEquals(newValue, previousResult, /* depth */ 10)
+        deepEquals(newValue, previousResult, /* depth */ 20)
       ) {
       } else {
         boundProperty.previousResult = newValue;
@@ -1084,39 +1222,37 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to all elements in the document.
+   * Applies expression results to elements in the document.
+   *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {boolean=} opt_skipAmpState
+   * @param {Object} opts options bag
+   * @param {boolean=} opts.skipAmpState
+   * @param {Array<!Element>=} opts.constrain restricts the application to children of specified elements.
    * @return {!Promise}
    * @private
    */
-  apply_(results, opt_skipAmpState) {
-    const promises = this.boundElements_.map(boundElement => {
+  apply_(results, opts) {
+    const promises = [];
+
+    this.boundElements_.forEach((boundElement) => {
       // If this evaluation is triggered by an <amp-state> mutation, we must
       // ignore updates to any <amp-state> element to prevent update cycles.
-      if (opt_skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
-        return Promise.resolve();
+      if (opts.skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
+        return;
       }
-      return this.applyBoundElement_(results, boundElement);
-    });
-    return Promise.all(promises);
-  }
 
-  /**
-   * Applies expression results to only given elements and their descendants.
-   * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Array<!Element>} elements
-   * @return {!Promise}
-   */
-  applyElements_(results, elements) {
-    const promises = [];
-    this.boundElements_.forEach(boundElement => {
-      elements.forEach(element => {
-        if (element.contains(boundElement.element)) {
-          promises.push(this.applyBoundElement_(results, boundElement));
-        }
-      });
+      // If this is a constrained application, then restrict to specified
+      // elements and their subtrees.
+      if (
+        opts.constrain &&
+        !opts.constrain.some((el) => el.contains(boundElement.element))
+      ) {
+        return;
+      }
+
+      promises.push(this.applyBoundElement_(results, boundElement));
     });
+
     return Promise.all(promises);
   }
 
@@ -1132,29 +1268,31 @@ export class Bind {
     if (updates.length === 0) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       const mutations = map();
       let width, height;
 
-      updates.forEach(update => {
+      updates.forEach((update) => {
         const {boundProperty, newValue} = update;
+        const {property} = boundProperty;
         const mutation = this.applyBinding_(boundProperty, element, newValue);
+
         if (mutation) {
           mutations[mutation.name] = mutation.value;
-          const {property} = boundProperty;
           if (property == 'width') {
             width = isFiniteNumber(newValue) ? Number(newValue) : width;
           } else if (property == 'height') {
             height = isFiniteNumber(newValue) ? Number(newValue) : height;
           }
         }
+
+        this.dispatchFormValueChangeEventIfNecessary_(element, property);
       });
 
       if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/ changeSize(element, height, width);
+        this.mutator_.forceChangeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {
@@ -1173,6 +1311,36 @@ export class Bind {
         }
       }
     });
+  }
+
+  /**
+   * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` if the element's changed
+   * property represents the value of a form field.
+   * @param {!Element} element
+   * @param {string} property
+   */
+  dispatchFormValueChangeEventIfNecessary_(element, property) {
+    const isPropertyAFormValue = FORM_VALUE_PROPERTIES[element.tagName];
+    if (!isPropertyAFormValue || !isPropertyAFormValue[property]) {
+      return;
+    }
+
+    // The native `InputEvent` is dispatched at the parent `<select>` when its
+    // selected `<option>` changes.
+    const dispatchAt =
+      element.tagName === 'OPTION'
+        ? closestAncestorElementBySelector(element, 'SELECT')
+        : element;
+
+    if (dispatchAt) {
+      const ampValueChangeEvent = createCustomEvent(
+        this.localWin_,
+        AmpEvents.FORM_VALUE_CHANGE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      dispatchAt.dispatchEvent(ampValueChangeEvent);
+    }
   }
 
   /**
@@ -1261,6 +1429,11 @@ export class Bind {
             // when a child option[selected] attribute changes.
             this.updateSelectForSafari_(element, property, newValue);
           }
+        } else if (typeof newValue === 'object' && newValue !== null) {
+          // If newValue is an object or array (e.g. amp-list[src] binding),
+          // don't bother updating the element since attribute values like
+          // "[Object object]" have no meaning in the DOM.
+          mutated = true;
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
             element,
@@ -1427,13 +1600,15 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const target = dev().assertElement(event.target);
-    // Skip amp-list since there's already a custom integration for it.
+    // TODO(choumx): Consider removing this check now that slowScan_() skips
+    // FAST_RESCAN_TAGS internally, and because this makes an assumption about
+    // the DOM structure of the EventTarget.
     const parent = target.parentNode;
-    if (parent && parent.tagName == 'AMP-LIST') {
+    if (parent && FAST_RESCAN_TAGS.includes(parent.nodeName)) {
       return;
     }
     dev().info(TAG, 'dom_update:', target);
-    this.removeThenAdd_([target], [target]).then(() => {
+    this.slowScan_([target], [target], 'dom_update.end').then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
@@ -1442,28 +1617,27 @@ export class Bind {
    * Removes bindings for nodes in `remove`, then scans for bindings in `add`.
    * Return promise that resolves upon completion with struct containing number
    * of removed and added bindings.
-   * @param {!Array<!Node>} remove
-   * @param {!Array<!Node>} add
-   * @return {!Promise<{added: number, removed: number}>}
+   * @param {!Array<!Node>} addedNodes
+   * @param {!Array<!Node>} removedNodes
+   * @param {string=} label
+   * @return {!Promise}
    * @private
    */
-  removeThenAdd_(remove, add) {
+  slowScan_(addedNodes, removedNodes, label = 'rescan.slow') {
     let removed = 0;
-    return this.removeBindingsForNodes_(remove)
-      .then(r => {
+    return this.removeBindingsForNodes_(removedNodes)
+      .then((r) => {
         removed = r;
-        return this.addBindingsForNodes_(add);
+        return this.addBindingsForNodes_(addedNodes);
       })
-      .then(added => {
+      .then((added) => {
         dev().info(
           TAG,
-          '⤷',
-          'Δ:',
+          '%s: delta=%s, total=%s',
+          label,
           added - removed,
-          ', ∑:',
           this.numberOfBindings()
         );
-        return {added, removed};
       });
   }
 
@@ -1574,7 +1748,7 @@ export class Bind {
    * @private
    */
   debugPrintElement_(element) {
-    const index = findIndex(this.boundElements_, boundElement => {
+    const index = findIndex(this.boundElements_, (boundElement) => {
       return boundElement.element == element;
     });
     if (index < 0) {
@@ -1584,12 +1758,12 @@ export class Bind {
     // Evaluate expressions in bindings in `element`.
     const promises = [];
     const {boundProperties} = this.boundElements_[index];
-    boundProperties.forEach(boundProperty => {
+    boundProperties.forEach((boundProperty) => {
       const {expressionString} = boundProperty;
       promises.push(this.evaluateExpression_(expressionString, this.state_));
     });
     // Print the map of attribute to expression value for `element`.
-    Promise.all(promises).then(results => {
+    Promise.all(promises).then((results) => {
       const output = map();
       boundProperties.forEach((boundProperty, i) => {
         const {property} = boundProperty;
@@ -1603,7 +1777,7 @@ export class Bind {
    * @param {string} expression
    */
   debugEvaluate_(expression) {
-    this.evaluateExpression_(expression, this.state_).then(result => {
+    this.evaluateExpression_(expression, this.state_).then((result) => {
       user().info(TAG, result);
     });
   }

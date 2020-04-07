@@ -20,7 +20,7 @@ describe('ResponsiveAttributes', () => {
   let matchMediaStub;
 
   beforeEach(() => {
-    matchMediaStub = sandbox.stub(window, 'matchMedia');
+    matchMediaStub = window.sandbox.stub(window, 'matchMedia');
     matchMediaStub.returns({matches: false});
     matchMediaStub.withArgs('').returns({matches: true});
   });
@@ -29,7 +29,7 @@ describe('ResponsiveAttributes', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
     matchMediaStub.withArgs('(min-width: 300px)').returns({matches: true});
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -45,7 +45,7 @@ describe('ResponsiveAttributes', () => {
   it('should pass non-matching media queries', () => {
     matchMediaStub.withArgs('(min-width: 300px)').returns({matches: true});
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -59,7 +59,7 @@ describe('ResponsiveAttributes', () => {
   });
 
   it('should fall back to the default value', () => {
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -73,7 +73,7 @@ describe('ResponsiveAttributes', () => {
   });
 
   it('should handle empty groups', () => {
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -86,7 +86,7 @@ describe('ResponsiveAttributes', () => {
   it('should update when the matching value changes', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -111,7 +111,7 @@ describe('ResponsiveAttributes', () => {
       },
     });
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -130,7 +130,7 @@ describe('ResponsiveAttributes', () => {
   });
 
   it('should clear onchange when the attribute value changes', async () => {
-    const onchangeSpy = sandbox.spy();
+    const onchangeSpy = window.sandbox.spy();
 
     matchMediaStub.withArgs('(min-width: 600px)').returns({
       matches: false,
@@ -139,7 +139,7 @@ describe('ResponsiveAttributes', () => {
       },
     });
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });
@@ -157,7 +157,7 @@ describe('ResponsiveAttributes', () => {
   it('should handle number values', () => {
     matchMediaStub.withArgs('(min-width: 600px)').returns({matches: true});
 
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const ra = new ResponsiveAttributes({
       'one': spy,
     });

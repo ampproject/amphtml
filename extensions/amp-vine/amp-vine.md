@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Vine simple embed.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,33 +24,12 @@ limitations under the License.
 
 # amp-vine
 
-Displays a Vine simple embed.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vine/">Annotated code example for amp-vine</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 A Vine simple embed has equal width and height:
 
 ```html
-<amp-vine width="400" height="400"
-  data-vineid="MdKjXez002d">
-</amp-vine>
+<amp-vine width="400" height="400" data-vineid="MdKjXez002d"> </amp-vine>
 ```
 
 ## Attributes

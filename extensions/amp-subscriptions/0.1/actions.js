@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionStatus} from './analytics';
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -68,7 +69,7 @@ export class Actions {
       promises.push(
         this.urlBuilder_
           .buildUrl(this.actionsConfig_[k], /* useAuthData */ true)
-          .then(url => {
+          .then((url) => {
             this.builtActionUrlMap_[k] = url;
           })
       );
@@ -116,25 +117,25 @@ export class Actions {
 
     dev().fine(TAG, 'Start action: ', url, action);
 
-    this.analytics_.actionEvent(LOCAL, action, 'started');
+    this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
-      .then(result => {
+      .then((result) => {
         dev().fine(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
         const query = parseQueryString(result);
         const s = query['success'];
         const success = s == 'true' || s == 'yes' || s == '1';
         if (success) {
-          this.analytics_.actionEvent(LOCAL, action, 'success');
+          this.analytics_.actionEvent(LOCAL, action, ActionStatus.SUCCESS);
         } else {
-          this.analytics_.actionEvent(LOCAL, action, 'rejected');
+          this.analytics_.actionEvent(LOCAL, action, ActionStatus.REJECTED);
         }
         return success || !s;
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().fine(TAG, 'Action failed: ', action, reason);
-        this.analytics_.actionEvent(LOCAL, action, 'failed');
+        this.analytics_.actionEvent(LOCAL, action, ActionStatus.FAILED);
         if (this.actionPromise_ == actionPromise) {
           this.actionPromise_ = null;
         }
