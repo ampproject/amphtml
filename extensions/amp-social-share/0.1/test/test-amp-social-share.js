@@ -355,5 +355,17 @@ describes.realWin(
         expect(el.getAttribute('tabindex')).to.equal('0');
       });
     });
+
+    describe('[type=system]', () => {
+      it('should not throw if navigator.share fails', async () => {
+        Object.defineProperty(env.win, 'navigator', {
+          value: {share: env.sandbox.spy(() => Promise.reject())},
+        });
+        const element = await getShare('system');
+        const implementation = await element.getImpl();
+        expect(() => implementation.handleActivation_()).to.not.throw();
+        expect(env.win.navigator.share).to.have.been.calledOnce;
+      });
+    });
   }
 );
