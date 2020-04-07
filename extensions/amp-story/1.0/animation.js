@@ -122,23 +122,20 @@ class AnimationRunner {
     );
 
     /**
-     * Evaluated set of CSS properties for first keyframe.
-     * This is the same as filling backwards, except it evaluates before
-     * amp-animation is ready so that the fill mode won't be raced.
+     * Evaluated set of CSS properties for first animation frame.
      * @private @const {!Promise<?Object<string, *>>}
      */
     this.firstFrameProps_ = this.webAnimationDefPromise_.then(
       (animationDef) => {
         const {keyframes} = animationDef;
         if (!this.presetTarget_) {
-          // It's not possible to backfill the first frame unless it's
-          // explicitly defined by the resulting config, and doesn't use any
-          // CSS extensions or special <amp-animation> syntax.
-          // If <amp-story> is rendered before the amp-animation extension
-          // loads, this could cause a visual jump from CSS state that doesn't
-          // match the result of how amp-animation resolves the first frame.
-          // This depends on the author properly setting their CSS so that the
-          // initial element's state looks like the first animation frame.
+          // It's only possible to backfill the first frame if we can define it
+          // as native CSS. <amp-animation> has CSS extensions and can have
+          // keyframes defined in a way that prevents us from doing this.
+          //
+          // To avoid visual jumps, this depends on the author properly
+          // defining their CSS so that the initial visual state matches the
+          // initial animation frame.
           return null;
         }
         devAssert(
@@ -174,25 +171,22 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      // TODO(alanorozco): All these could be consumed by a preset using
-      // amp-animation CSS extensions or var()s. That removes the need for:
-      // 1. this measurement
-      // 2. animate-in presets having their keyframes evaluated from functions.
-      // Caveat:
-      // - We historically calculate these from <amp-story> and resolve since
-      //   we explicitly backfill the first animation frame via CSS to prevent
-      //   visual jumps (see applyFirstFrame), unless we assume that
-      //   amp-animation most likely loads first (see firstFrameProps_).
-      // Notes:
-      // - We don't care about unscaledClientRect, since that's required to
-      //   support an abandoned experiment (amp-story-page-scaling).
-      // - targetWidth/targetHeight are already available as width()/height()
-      // - pageWidth/pageHeight should be exposed as vw/vh
-      // - targetX/targetY should be exposed somehow (?)
+      // TODO(alanorozco): Remove unscaledClientRect. It was required only to
+      // for an abandoned experiment (amp-story-page-scaling).
       const target = dev().assertElement(this.presetTarget_);
       const targetRect = unscaledClientRect(target);
       const pageRect = unscaledClientRect(this.page_);
 
+      // TODO(alanorozco): Expose equivalents to <amp-animation>
+      // - targetWidth/targetHeight are already available as width()/height()
+      // - pageWidth/pageHeight should be exposed as vw/vh
+      // - targetX/targetY should be exposed somehow (?)
+      //
+      // TODO(alanorozco): After exposing these to <amp-animation> syntax, we
+      // can get rid of this entire method (and this async chain!) if we ensure
+      // that presets avoid visual jumps either via:
+      // a) default styles and/or
+      // b) by not using special <amp-animation> syntax in keyframes.
       return /** @type {!StoryAnimationDimsDef} */ ({
         pageWidth: pageRect.width,
         pageHeight: pageRect.height,
@@ -210,7 +204,7 @@ class AnimationRunner {
    * @return {!Promise<!WebKeyframesDef>}
    * @private
    */
-  evaluateKeyframes_(keyframesOrCreateFn) {
+  resolvePresetKeyframes_(keyframesOrCreateFn) {
     if (typeof keyframesOrCreateFn !== 'function') {
       return Promise.resolve(keyframesOrCreateFn);
     }
@@ -230,7 +224,7 @@ class AnimationRunner {
       return Promise.resolve(/** @type {!WebAnimationDef} */ (animationDef));
     }
     const {target, delay, duration, easing} = animationDef;
-    return this.evaluateKeyframes_(preset.keyframes).then((keyframes) => ({
+    return this.resolvePresetKeyframes_(preset.keyframes).then((keyframes) => ({
       target,
       easing,
       keyframes,
@@ -240,7 +234,15 @@ class AnimationRunner {
     }));
   }
 
-  /** @return {!Promise<void>} */
+  /**
+   * Applies the first animation frame as CSS props. This is similar to filling
+   * the animation backwards, except:
+   * - it evaluates before amp-animation is ready to prevent a race and cause
+   *   a visual jump before being able to fill the first frame
+   * - it allows for sequencing before an animation has started, like with
+   *   `animate-in-after`.
+   * @return {!Promise<void>}
+   */
   applyFirstFrame() {
     if (this.hasStarted()) {
       return Promise.resolve();
@@ -252,6 +254,8 @@ class AnimationRunner {
 
     return this.firstFrameProps_.then((firstFrameProps) => {
       if (!firstFrameProps) {
+        // These are only available when they can be evaluated. They can't
+        // when using <amp-animation> definitions.
         return;
       }
       return this.vsync_.mutatePromise(() => {
@@ -579,11 +583,16 @@ export class AnimationManager {
   }
 
   /**
+   * Gets animation definitions.
+   * These are either from an <amp-animation> config (WebAnimationDefs), or
+   * resolved from presets via animate-in attributes (StoryAnimationDefs).
+   * If a root element contains both kinds of definitions, they'll run
+   * concurrently.
    * @return {!Array<!WebAnimationDef|!StoryAnimationDef>}
    * @private
    */
   getAnimationDefs_() {
-    // Preset defined, e.g. animate-in.
+    // From preset
     const animationDefs = Array.prototype.map.call(
       scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
       (el) => this.createAnimationDef(el, this.getPreset_(el))
@@ -603,7 +612,6 @@ export class AnimationManager {
    */
   createAnimationDef(el, preset) {
     const animationDef = {
-      // Passing preset since we may evaluate a function for keyframes.
       preset,
       target: el,
       delay: preset.delay || 0,
