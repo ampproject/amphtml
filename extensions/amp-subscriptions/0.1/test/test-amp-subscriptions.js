@@ -134,19 +134,16 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       .returns({then: (fn) => fn(isStory)});
   });
 
-  it('should call `whenConfigsAreProcessed_` on start', async () => {
+  it('should call `initialize_` on start', async () => {
     const localPlatformStub = env.sandbox.stub(
       subscriptionService,
       'initializeLocalPlatforms_'
     );
-    const initializeStub = env.sandbox.spy(
-      subscriptionService,
-      'whenConfigsAreProcessed_'
-    );
+    const initializeStub = env.sandbox.spy(subscriptionService, 'initialize_');
     subscriptionService.start();
     expect(initializeStub).to.be.calledOnce;
 
-    await subscriptionService.whenConfigsAreProcessed_();
+    await subscriptionService.initialize_();
     expect(analyticsEventStub).to.be.calledWith(
       SubscriptionAnalyticsEvents.STARTED
     );
@@ -162,7 +159,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       );
 
       subscriptionService.start();
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       // Should show loading on the page
       expect(renderLoadingStub).to.be.calledWith(true);
       // Should setup platform store
@@ -180,17 +177,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'delegateAuthToViewer_'
       );
-      env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
-        .callsFake(() => {
-          subscriptionService.platformConfig_ = platformConfig;
-          subscriptionService.pageConfig_ = pageConfig;
-          subscriptionService.doesViewerProvideAuth_ = true;
-          return Promise.resolve();
-        });
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = platformConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        subscriptionService.doesViewerProvideAuth_ = true;
+        return Promise.resolve();
+      });
       subscriptionService.start();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       expect(authFlowStub.withArgs(false)).to.be.calledOnce;
       expect(delegateStub).to.be.calledOnce;
     });
@@ -200,13 +195,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'processGrantState_'
       );
-      env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
-        .callsFake(() => {
-          subscriptionService.platformConfig_ = freePlatformConfig;
-          subscriptionService.pageConfig_ = pageConfig;
-          return Promise.resolve();
-        });
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = freePlatformConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
       subscriptionService.start();
       await flush();
 
@@ -218,13 +211,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'processGrantState_'
       );
-      env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
-        .callsFake(() => {
-          subscriptionService.platformConfig_ = platformConfig;
-          subscriptionService.pageConfig_ = freePageConfig;
-          return Promise.resolve();
-        });
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = platformConfig;
+        subscriptionService.pageConfig_ = freePageConfig;
+        return Promise.resolve();
+      });
       subscriptionService.start();
       await flush();
 
@@ -248,7 +239,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       );
       subscriptionService.start();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       expect(authFlowStub.withArgs(false /** doPlatformActivation*/)).to.be
         .calledOnce;
       expect(delegateStub).to.not.be.called;
@@ -296,12 +287,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   });
 
   it('should discover page configuration', async () => {
-    await subscriptionService.whenConfigsAreProcessed_();
+    await subscriptionService.initialize_();
     expect(subscriptionService.pageConfig_).to.equal(pageConfig);
   });
 
   it('should search ampdoc-scoped config', async () => {
-    await subscriptionService.whenConfigsAreProcessed_();
+    await subscriptionService.initialize_();
     expect(configResolver.doc_.ampdoc_).to.equal(ampdoc);
   });
 
@@ -328,7 +319,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     subscriptionService.platformConfig_ = platformConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
 
-    await subscriptionService.whenConfigsAreProcessed_();
+    await subscriptionService.initialize_();
     expect(factoryStub).to.be.calledOnce;
     expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
     expect(factoryStub.getCall(0).args[1]).to.be.equal(
@@ -437,7 +428,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       resolveRequiredPromises({
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
@@ -475,7 +466,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       resolveRequiredPromises(
         {
           granted: false,
@@ -520,7 +511,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       resolveRequiredPromises({
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
@@ -538,7 +529,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       resolveRequiredPromises({granted: false});
       const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
       env.sandbox.stub(localPlatform, 'activate');
@@ -579,7 +570,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'performPingback_'
       );
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
@@ -634,7 +625,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         'reportPlatformFailureAndFallback'
       );
       subscriptionService
-        .whenConfigsAreProcessed_()
+        .initialize_()
         .then(() => subscriptionService.fetchEntitlements_(platform))
         .catch(() => {
           expect(failureStub).to.be.calledOnce;
@@ -651,7 +642,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         'reportPlatformFailureAndFallback'
       );
       const promise = subscriptionService
-        .whenConfigsAreProcessed_()
+        .initialize_()
         .then(() => subscriptionService.fetchEntitlements_(platform))
         .catch(() => {
           expect(failureStub).to.be.calledOnce;
@@ -674,7 +665,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.platformStore_,
         'resolveEntitlement'
       );
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
 
       await subscriptionService.fetchEntitlements_(platform);
       expect(resolveStub).to.be.calledOnce;
@@ -723,7 +714,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
         .callsFake(() => true);
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
 
       const ent = await subscriptionService.fetchEntitlements_(platform);
       expect(ent).to.be.deep.equal(Entitlement.empty('local'));
@@ -733,7 +724,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const getEntitlementsStub = env.sandbox
         .stub(subscriptionService, 'getEntitlements_')
         .returns(Promise.resolve(new Entitlement.empty('local')));
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
 
       await subscriptionService.fetchEntitlements_(platform);
       expect(getEntitlementsStub).to.be.called;
@@ -744,7 +735,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'getEntitlements_'
       );
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       // Mark page as free.
       subscriptionService.platformConfig_ = freePlatformConfig;
 
@@ -826,13 +817,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const platformFactoryStub = env.sandbox.stub().callsFake(() => ({
         getServiceId: () => 'platform1',
       }));
-      env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
-        .callsFake(() => {
-          subscriptionService.platformConfig_ = freePlatformConfig;
-          subscriptionService.pageConfig_ = pageConfig;
-          return Promise.resolve();
-        });
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = freePlatformConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
       subscriptionService.start();
 
       await subscriptionService.registerPlatform(
@@ -852,7 +841,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.platformConfig_ = platformConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
       env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
+        .stub(subscriptionService, 'initialize_')
         .callsFake(() => Promise.resolve());
       sendMessageAwaitResponsePromise = Promise.resolve();
       env.sandbox
@@ -871,7 +860,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.doesViewerProvideAuth_ = false;
         subscriptionService.start();
 
-        await subscriptionService.whenConfigsAreProcessed_();
+        await subscriptionService.initialize_();
         expect(
           subscriptionService.platformStore_.getLocalPlatform()
         ).to.be.instanceOf(LocalSubscriptionRemotePlatform);
@@ -884,7 +873,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       async () => {
         subscriptionService.start();
 
-        await subscriptionService.whenConfigsAreProcessed_();
+        await subscriptionService.initialize_();
         expect(
           subscriptionService.platformStore_.getLocalPlatform()
         ).to.be.instanceOf(ViewerSubscriptionPlatform);
@@ -894,7 +883,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     it('should not fetch entitlements for any platform other than local', async () => {
       subscriptionService.start();
 
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       subscriptionService.registerPlatform(
         'google.subscription',
         new SubscriptionPlatform()
@@ -913,7 +902,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           () => new SubscriptionPlatform()
         );
 
-        await subscriptionService.whenConfigsAreProcessed_();
+        await subscriptionService.initialize_();
         expect(fetchEntitlementsStub).to.be.called;
       }
     );
@@ -954,7 +943,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         rejecter = reject;
       });
       subscriptionService.start();
-      await subscriptionService.whenConfigsAreProcessed_();
+      await subscriptionService.initialize_();
       // Local platform store not created until initialization.
       const platformStore = subscriptionService.platformStore_;
       const stub = env.sandbox.stub(
@@ -1236,13 +1225,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
 
     it('should resolve authdata on free pages', async () => {
-      env.sandbox
-        .stub(subscriptionService, 'whenConfigsAreProcessed_')
-        .callsFake(() => {
-          subscriptionService.platformConfig_ = platformConfig;
-          subscriptionService.pageConfig_ = freePageConfig;
-          return Promise.resolve();
-        });
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = platformConfig;
+        subscriptionService.pageConfig_ = freePageConfig;
+        return Promise.resolve();
+      });
       subscriptionService.start();
 
       await expect(
