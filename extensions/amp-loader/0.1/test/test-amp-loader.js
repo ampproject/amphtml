@@ -1,15 +1,16 @@
+import {LoaderService} from '../amp-loader';
 
-describes.fakeWin(
-  'amp-loader',
-  {
-    amp: {
-      extensions: ['amp-loader'],
-    },
-  },
-  function (env) {
+describes.fakeWin('amp-loader', {amp: true}, function (env) {
+  let doc = env.win.document;
+  let loaderService;
+  let el;
+  beforeEach(() => {
+    el = doc.createElement();
+    loaderService = new LoaderService();
+  });
 
-    it('should let me make a test', () => {
-        expect(true).ok;
-    })
-  }
-);
+  describe('initializeLoader', () => {
+    it('sets loader-delay-offset', () => {});
+    it('loader-delay-offset can never be more than 600ms', () => {});
+  });
+});
