@@ -356,48 +356,31 @@ function getTestConfig() {
 }
 
 /**
- * Main entry point. Returns different babel configs based on the caller.
+ * Mapping of babel transform callers to the their corresponding babel configs.
+ */
+const babelTransforms = new Map([
+  ['dep-check', getDepCheckConfig()],
+  ['unminified', getUnminifiedConfig()],
+  ['pre-closure', getPreClosureConfig()],
+  ['post-closure', getPostClosureConfig()],
+  ['single-pass', getSinglePassConfig()],
+  ['test', getTestConfig()],
+]);
+
+/**
+ * Main entry point. Returns babel config corresponding to the caller.
  *
  * @param {!Object} api
  * @return {!Object}
  */
 module.exports = function (api) {
-  /**
-   * Identifies the caller of a babel transform.
-   *
-   * @param {string} name
-   * @return {boolean}
-   */
-  function calledBy(name) {
-    return api.caller((caller) => !!(caller && caller.name === name));
-  }
-
-  /**
-   * Throws an error when an unrecognized mode is encountered.
-   */
-  function throwError() {
-    const err = new Error('Unrecognized Babel mode.');
+  const caller = api.caller((caller) => caller.name);
+  if (babelTransforms.has(caller)) {
+    console.log('found caller', caller);
+    return babelTransforms.get(caller);
+  } else {
+    const err = new Error('Unrecognized Babel caller (see babel.config.js).');
     err.showStack = false;
     throw err;
   }
-
-  if (calledBy('dep-check')) {
-    return getDepCheckConfig();
-  }
-  if (calledBy('unminified')) {
-    return getUnminifiedConfig();
-  }
-  if (calledBy('pre-closure')) {
-    return getPreClosureConfig();
-  }
-  if (calledBy('post-closure')) {
-    return getPostClosureConfig();
-  }
-  if (calledBy('single-pass')) {
-    return getSinglePassConfig();
-  }
-  if (calledBy('test')) {
-    return getTestConfig();
-  }
-  throwError();
 };
