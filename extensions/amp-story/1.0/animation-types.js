@@ -48,6 +48,7 @@ export let StoryAnimationPresetDef;
  *  preset: !StoryAnimationPresetDef,
  *  duration: (number|undefined),
  *  delay: (number|undefined),
+ *  easing: (string|undefined),
  * }}
  */
 export let StoryAnimationDef;

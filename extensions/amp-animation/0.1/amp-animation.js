@@ -20,16 +20,15 @@ import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
+import {parseAmpAnimationConfig} from './parse-animation-config';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -69,36 +68,35 @@ export class AmpAnimation extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
+    const {element} = this;
 
     // Trigger.
-    const trigger = this.element.getAttribute('trigger');
+    const trigger = element.getAttribute('trigger');
+
     if (trigger) {
-      this.triggerOnVisibility_ = userAssert(
+      userAssert(
         trigger == 'visibility',
         'Only allowed value for "trigger" is "visibility": %s',
-        this.element
+        element
       );
+
+      const isBodyChild =
+        element.parentNode == element.ownerDocument.body ||
+        element.parentNode == ampdoc.getBody();
+
+      if (isBodyChild) {
+        this.triggerOnVisibility_ = true;
+      } else {
+        // TODO(alanorozco): The only possible parent for
+        // amp-animation[trigger=visibility] other than <body> is
+        // <amp-story-page>. Stories coordinate animations, so we bail out in
+        // this case. For other container elements that may be supported in the
+        // future, this shouldn't short-circuit.
+        return;
+      }
     }
 
-    // TODO(dvoytenko): Remove once we support direct parent visibility.
-    if (trigger == 'visibility') {
-      userAssert(
-        this.element.parentNode == this.element.ownerDocument.body ||
-          this.element.parentNode == ampdoc.getBody(),
-        '%s is only allowed as a direct child of <body> element when trigger' +
-          ' is visibility. This restriction will be removed soon.',
-        TAG
-      );
-    }
-
-    // Parse config.
-    const scriptElement = userAssert(
-      childElementByTag(this.element, 'script'),
-      '"<script type=application/json>" must be present'
-    );
-    this.configJson_ = tryParseJson(scriptElement.textContent, (error) => {
-      throw user().createError('failed to parse animation script', error);
-    });
+    this.configJson_ = parseAmpAnimationConfig(element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`

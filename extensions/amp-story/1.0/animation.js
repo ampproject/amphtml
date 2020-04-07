@@ -16,20 +16,29 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {
-  KeyframesDef,
   KeyframesOrFilterFnDef,
   StoryAnimationDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
 import {Services} from '../../../src/services';
-import {WebAnimationPlayState} from '../../amp-animation/0.1/web-animation-types';
+import {
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+} from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {
+  childElementByTag,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
+import {getLengthNumeral} from '../../../src/layout';
 import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {parseAmpAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -61,7 +70,10 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  * TODO(alanorozco): maybe memoize?
  */
 export function hasAnimations(element) {
-  return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
+  return (
+    !!childElementByTag(element, 'amp-animation') ||
+    !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR)
+  );
 }
 
 /** @enum {number} */
@@ -74,10 +86,8 @@ const PlaybackActivity = {
 class AnimationRunner {
   /**
    * @param {!Element} page
-   * @param {!StoryAnimationDef} animationDef
-   * @param {!Promise<
-   *    !../../amp-animation/0.1/web-animations.Builder
-   * >} webAnimationBuilderPromise
+   * @param {!WebAnimationDef|!StoryAnimationDef} animationDef
+   * @param {!Promise<!../../amp-animation/0.1/web-animations.Builder>} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!AnimationSequence} sequence
    */
@@ -88,44 +98,49 @@ class AnimationRunner {
     /** @private @const */
     this.vsync_ = vsync;
 
-    /** @private @const */
-    this.target_ = dev().assertElement(animationDef.target);
+    const {target} = animationDef;
+
+    /** @private @const {!Element|undefined} */
+    this.target_ = target && dev().assertElement(target);
 
     /** @private @const */
     this.sequence_ = sequence;
 
-    /** @private @const */
-    this.animationDef_ = animationDef;
+    /** @private @const {string|undefined} */
+    this.startAfterId_ = animationDef.startAfterId;
 
-    /** @private @const */
-    this.presetDef_ = animationDef.preset;
-
-    /** @private @const */
-    this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
-
-    /** @private @const */
-    this.delay_ = animationDef.delay || this.presetDef_.delay || 0;
-
-    /** @private @const */
-    this.duration_ = animationDef.duration || this.presetDef_.duration || 0;
-
-    /** @private @const */
-    this.easing_ =
-      animationDef.easing || this.presetDef_.easing || DEFAULT_EASING;
+    /** @private @const {!Promise<!WebAnimationDef>} */
+    this.webAnimationDefPromise_ = this.getWebAnimationDef_(animationDef);
 
     /**
      * @private @const {!Promise<
      *    !../../amp-animation/0.1/runners/animation-runner.AnimationRunner>}
      */
-    this.runnerPromise_ = this.getWebAnimationDef_().then((webAnimDef) =>
+    this.runnerPromise_ = this.webAnimationDefPromise_.then((webAnimDef) =>
       webAnimationBuilderPromise.then((builder) =>
         builder.createRunner(webAnimDef)
       )
     );
 
-    /** @private @const {!Promise<!Object<string, *>>} */
-    this.firstFrameProps_ = this.keyframes_.then((keyframes) =>
-      omit(keyframes[0], ['offset'])
+    /**
+     * Evaluated set of CSS properties for first keyframe.
+     * This is the same as filling backwards, except it evaluates before
+     * amp-animation is ready so that the fill mode won't be raced.
+     * @private @const {!Promise<?Object<string, *>>}
+     */
+    this.firstFrameProps_ = this.webAnimationDefPromise_.then(
+      (animationDef) => {
+        const {keyframes} = animationDef;
+        const isPreset = this.target_ && Array.isArray(keyframes);
+        if (!isPreset) {
+          return null;
+        }
+        devAssert(
+          !keyframes[0].offset,
+          'First keyframe offset for animation preset should be 0 or undefined'
+        );
+        return omit(keyframes[0], ['offset']);
+      }
     );
 
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
@@ -137,17 +152,16 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    this.keyframes_.then((keyframes) =>
-      devAssert(
-        !keyframes[0].offset,
-        'First keyframe offset for animation preset should be 0 or undefined'
-      )
-    );
-
-    userAssert(
-      this.delay_ >= 0,
-      'Negative delays are not allowed in amp-story entrance animations.'
-    );
+    // TODO(alanorozco): This check should only be for preset animations,
+    // since they have their first frame filled (negative delays wrap around, so
+    // we can't realistically evaluate the correct state for CSS props.)
+    const {delay} = animationDef;
+    if (delay) {
+      userAssert(
+        parseInt(getLengthNumeral(delay.toString()) || 0, 10) >= 0,
+        'Negative delays are not allowed in amp-story animations.'
+      );
+    }
 
     this.runnerPromise_.then((runner) => this.onRunnerReady_(runner));
   }
@@ -158,7 +172,18 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      const targetRect = unscaledClientRect(this.target_);
+      // TODO(alanorozco): All these could be consumed by a preset using
+      // amp-animation CSS extensions or var()s. That removes the need for:
+      // 1. this measurement
+      // 2. animate-in presets having their keyframes evaluated from functions.
+      // Notes:
+      // - We don't care about unscaledClientRect, since that's required to
+      //   support an abandoned experiment (amp-story-page-scaling).
+      // - targetWidth/targetHeight are already available as width()/height()
+      // - pageWidth/pageHeight should be exposed as vw/vh
+      // - targetX/targetY should be exposed somehow (?)
+
+      const targetRect = unscaledClientRect(dev().assertElement(this.target_));
       const pageRect = unscaledClientRect(this.page_);
 
       return /** @type {!StoryAnimationDimsDef} */ ({
@@ -173,11 +198,15 @@ class AnimationRunner {
   }
 
   /**
+   * Evaluates a preset's keyframes function using dimensions.
+   * TODO(alanorozco): It might be possible to forgo function evaluation if
+   * we define preset keyframes how amp-animation wants them. In order to this
+   * we have to ensure amp-animation provides what getDims() does.
    * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
-   * @return {!Promise<!KeyframesDef>}
+   * @return {!Promise<!WebKeyframesDef>}
    * @private
    */
-  filterKeyframes_(keyframesArrayOrFn) {
+  evaluateKeyframes_(keyframesArrayOrFn) {
     if (Array.isArray(keyframesArrayOrFn)) {
       return Promise.resolve(keyframesArrayOrFn);
     }
@@ -185,17 +214,24 @@ class AnimationRunner {
   }
 
   /**
-   * @return {!Promise<
-   *   !../../amp-animation/0.1/web-animation-types.WebKeyframeAnimationDef>}
-   * @private
+   * Normalizes an animation definition into a WebAnimationDef to consume.
+   * @param {!StoryAnimationDef|!WebAnimationDef} animationDef
+   * @return {!Promise<!WebAnimationDef>}
    */
-  getWebAnimationDef_() {
-    return this.keyframes_.then((keyframes) => ({
+  getWebAnimationDef_(animationDef) {
+    const {preset} = animationDef;
+    if (!preset) {
+      // This is an amp-animation config, formed like the WebAnimations
+      // Builder already wants it.
+      return Promise.resolve(/** @type {!WebAnimationDef} */ (animationDef));
+    }
+    const {target, delay, duration, easing} = animationDef;
+    return this.evaluateKeyframes_(preset.keyframes).then((keyframes) => ({
+      target,
+      easing,
       keyframes,
-      target: this.target_,
-      delay: `${this.delay_}ms`,
-      duration: `${this.duration_}ms`,
-      easing: this.easing_,
+      delay: `${delay}ms`,
+      duration: `${duration}ms`,
       fill: 'forwards',
     }));
   }
@@ -210,11 +246,17 @@ class AnimationRunner {
       this.runner_.cancel();
     }
 
-    return this.firstFrameProps_.then((firstFrameProps) =>
-      this.vsync_.mutatePromise(() => {
-        setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
-      })
-    );
+    return this.firstFrameProps_.then((firstFrameProps) => {
+      if (!firstFrameProps) {
+        return;
+      }
+      return this.vsync_.mutatePromise(() => {
+        setStyles(
+          dev().assertElement(this.target_),
+          assertDoesNotContainDisplay(devAssert(firstFrameProps))
+        );
+      });
+    });
   }
 
   /** Starts or resumes the animation. */
@@ -231,15 +273,11 @@ class AnimationRunner {
    * @private
    */
   getStartWaitPromise_() {
-    let promise = Promise.resolve();
-
-    if (this.animationDef_.startAfterId) {
-      const startAfterId = /** @type {string} */ (this.animationDef_
-        .startAfterId);
-      promise = promise.then(() => this.sequence_.waitFor(startAfterId));
+    if (this.startAfterId_) {
+      return this.sequence_.waitFor(this.startAfterId_);
     }
 
-    return promise;
+    return Promise.resolve();
   }
 
   /**
@@ -402,7 +440,7 @@ class AnimationRunner {
 
   /** @private */
   notifyFinish_() {
-    if (this.target_.id) {
+    if (this.target_ && this.target_.id) {
       this.sequence_.notifyFinish(this.target_.id);
     }
   }
@@ -430,7 +468,7 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
-    /** @private {?Array<!Promise<!AnimationRunner>>} */
+    /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
     /** @private */
@@ -494,17 +532,16 @@ export class AnimationManager {
   }
 
   /**
-   * Determines if there is an entrance animation running.
-   *
-   * @return {*} TODO(#23582): Specify return type
+   * Determines if there is an animation running.
+   * @return {boolean}
    */
   hasAnimationStarted() {
     return this.getRunners_().some((runner) => runner.hasStarted());
   }
 
   /**
+   * @return {!Array<!AnimationRunner>}
    * @private
-   * @return {*} TODO(#23582): Specify return type
    */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
@@ -516,22 +553,18 @@ export class AnimationManager {
    */
   getOrCreateRunners_() {
     if (!this.runners_) {
-      this.runners_ = Array.prototype.map.call(
-        scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
-        (el) => this.createRunner_(el)
+      this.runners_ = this.getAnimationDefs_().map((animationDef) =>
+        this.createRunner_(animationDef)
       );
     }
     return devAssert(this.runners_);
   }
 
   /**
-   * @param {!Element} el
+   * @param {!WebAnimationDef|!StoryAnimationDef} animationDef
    * @return {!AnimationRunner}
    */
-  createRunner_(el) {
-    const preset = this.getPreset_(el);
-    const animationDef = this.createAnimationDef(el, preset);
-
+  createRunner_(animationDef) {
     return new AnimationRunner(
       this.root_,
       animationDef,
@@ -542,12 +575,37 @@ export class AnimationManager {
   }
 
   /**
+   * @return {!Array<!WebAnimationDef|!StoryAnimationDef>}
+   * @private
+   */
+  getAnimationDefs_() {
+    // Preset defined, e.g. animate-in.
+    const animationDefs = Array.prototype.map.call(
+      scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
+      (el) => this.createAnimationDef(el, this.getPreset_(el))
+    );
+    // <amp-animation>
+    const ampAnimationElement = childElementByTag(this.root_, 'amp-animation');
+    if (ampAnimationElement) {
+      animationDefs.push(parseAmpAnimationConfig(ampAnimationElement));
+    }
+    return animationDefs;
+  }
+
+  /**
    * @param {!Element} el
    * @param {!StoryAnimationPresetDef} preset
    * @return {!StoryAnimationDef}
    */
   createAnimationDef(el, preset) {
-    const animationDef = {target: el, preset};
+    const animationDef = {
+      // Passing preset since we may evaluate a function for keyframes.
+      preset,
+      target: el,
+      delay: preset.delay || 0,
+      duration: preset.duration || 0,
+      easing: preset.easing || DEFAULT_EASING,
+    };
 
     if (el.hasAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME)) {
       animationDef.duration = timeStrToMillis(
