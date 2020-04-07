@@ -123,7 +123,7 @@ export class SubscriptionService {
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {!Object<string, ?Promise<string>>} */
-    this.readerIdPromiseMap_ = {};
+    this.serviceIdToReaderIdPromiseMap_ = {};
 
     /** @private {!CryptoHandler} */
     this.cryptoHandler_ = new CryptoHandler(ampdoc);
@@ -246,19 +246,19 @@ export class SubscriptionService {
    * @return {!Promise<string>}
    */
   getReaderId(serviceId) {
-    let readerId = this.readerIdPromiseMap_[serviceId];
-    if (!readerId) {
+    let readerIdPromise = this.serviceIdToReaderIdPromiseMap_[serviceId];
+    if (!readerIdPromise) {
       const consent = Promise.resolve();
       // Scope is kept "amp-access" by default to avoid unnecessary CID
       // rotation.
       const scope =
         'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
-      readerId = this.cid_.then((cid) =>
+      readerIdPromise = this.cid_.then((cid) =>
         cid.get({scope, createCookieIfNotPresent: true}, consent)
       );
-      this.readerIdPromiseMap_[serviceId] = readerId;
+      this.serviceIdToReaderIdPromiseMap_[serviceId] = readerIdPromise;
     }
-    return readerId;
+    return readerIdPromise;
   }
 
   /**
