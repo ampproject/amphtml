@@ -48,7 +48,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     'scenic-2017.appspot.com:product2',
   ];
 
-  const serviceConfig = {
+  const platformConfig = {
     services: [
       {
         authorizationUrl: 'https://lipsum.com/authorize',
@@ -107,7 +107,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     element = win.document.createElement('script');
     element.id = 'amp-subscriptions';
     element.setAttribute('type', 'json');
-    element.innerHTML = JSON.stringify(serviceConfig);
+    element.innerHTML = JSON.stringify(platformConfig);
 
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
@@ -121,7 +121,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       });
     env.sandbox
       .stub(subscriptionService, 'getPlatformConfig_')
-      .callsFake(() => Promise.resolve(serviceConfig));
+      .callsFake(() => Promise.resolve(platformConfig));
     analyticsEventStub = env.sandbox.stub(
       subscriptionService.subscriptionAnalytics_,
       'event'
@@ -183,7 +183,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = serviceConfig;
+          subscriptionService.platformConfig_ = platformConfig;
           subscriptionService.pageConfig_ = pageConfig;
           subscriptionService.doesViewerProvideAuth_ = true;
           return Promise.resolve();
@@ -221,7 +221,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = serviceConfig;
+          subscriptionService.platformConfig_ = platformConfig;
           subscriptionService.pageConfig_ = freePageConfig;
           return Promise.resolve();
         });
@@ -306,7 +306,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   });
 
   it('should add subscription platform while registering it', async () => {
-    const serviceData = serviceConfig['services'][1];
+    const serviceData = platformConfig['services'][1];
     const platform = new SubscriptionPlatform();
     const entitlementData = {
       source: 'local',
@@ -325,7 +325,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       .callsFake(() => Promise.resolve(entitlement));
     platform.getServiceId = env.sandbox.stub().callsFake(() => 'local');
 
-    subscriptionService.platformConfig_ = serviceConfig;
+    subscriptionService.platformConfig_ = platformConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
 
     await subscriptionService.whenConfigsAreProcessed_();
@@ -352,7 +352,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     it('should return json inside script#amp-subscriptions tag ', async () => {
       subscriptionService.getPlatformConfig_.restore();
       const config = await subscriptionService.getPlatformConfig_();
-      expect(JSON.stringify(config)).to.be.equal(JSON.stringify(serviceConfig));
+      expect(JSON.stringify(config)).to.be.equal(
+        JSON.stringify(platformConfig)
+      );
     });
   });
 
@@ -361,7 +363,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       'should put `LocalSubscriptionRemotePlatform` for every service config' +
         ' with authorization Url',
       () => {
-        const service = serviceConfig.services[0];
+        const service = platformConfig.services[0];
         subscriptionService.serviceAdapter_ = new ServiceAdapter(
           subscriptionService
         );
@@ -613,7 +615,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.pageConfig_ = pageConfig;
       platform = localSubscriptionPlatformFactory(
         ampdoc,
-        serviceConfig.services[0],
+        platformConfig.services[0],
         serviceAdapter
       );
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -686,11 +688,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
 
     it('should reset platform on re-authorization', async () => {
-      const service = serviceConfig.services[0];
+      const service = platformConfig.services[0];
       subscriptionService.serviceAdapter_ = new ServiceAdapter(
         subscriptionService
       );
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
@@ -757,7 +759,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.pageConfig_ = pageConfig;
       platform = localSubscriptionPlatformFactory(
         ampdoc,
-        serviceConfig.services[0],
+        platformConfig.services[0],
         new ServiceAdapter(subscriptionService)
       );
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -847,7 +849,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
@@ -1057,9 +1059,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   describe('initializePlatformStore_', () => {
     it('should initialize platform store with the given ids', () => {
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.platformConfig_ = platformConfig;
       const entitlement = Entitlement.parseFromJson(
-        serviceConfig.fallbackEntitlement
+        platformConfig.fallbackEntitlement
       );
       subscriptionService.initializePlatformStore_(['local']);
       expect(subscriptionService.platformStore_.serviceIds_).to.be.deep.equal([
@@ -1237,7 +1239,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       env.sandbox
         .stub(subscriptionService, 'whenConfigsAreProcessed_')
         .callsFake(() => {
-          subscriptionService.platformConfig_ = serviceConfig;
+          subscriptionService.platformConfig_ = platformConfig;
           subscriptionService.pageConfig_ = freePageConfig;
           return Promise.resolve();
         });
