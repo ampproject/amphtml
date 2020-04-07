@@ -15,7 +15,11 @@ Replace/remove all of the text in brackets, including this text.
 Details
 ---
 
-**Error report:** [link](go/ampe/<Error_ID>)
+<!--
+Remove the backticks around the link below and replace Error_ID with the ID from
+the Cloud Error Reporting URL.
+-->
+**Error report:** [link](`go/ampe/<Error_ID>`)
 **First seen:** <First seen date> <!--
 Select "1 day" on the error details page for the error and record the
 occurrences.
