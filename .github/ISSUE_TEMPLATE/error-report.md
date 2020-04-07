@@ -11,6 +11,7 @@ assignees: ''
 Details
 ---
 
+**Error report:** go/ampe/<Error ID>
 **First seen:** <First seen date>
 <!--
 Select "1 day" on the error details page for the error and record the
