@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {ignoredGlobalModules} = require('./ignored-global-modules');
+const {devDependencies} = require('./dev-dependencies');
 
 /**
  * Gets the config for babel transforms run during `gulp dep-check`.
@@ -49,7 +49,7 @@ function getDepCheckConfig() {
   const depCheckPresets = [presetEnv];
   return {
     compact: false,
-    ignore: ignoredGlobalModules,
+    ignore: devDependencies,
     plugins: depCheckPlugins,
     presets: depCheckPresets,
     sourceType: 'module',

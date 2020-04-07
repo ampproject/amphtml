@@ -66,7 +66,7 @@ module.exports = {
     debug: true,
     fast: true,
     basedir: __dirname + '/../../',
-    transform: [['babelify', {caller: {name: 'test'}}]],
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
   },

@@ -22,22 +22,13 @@ const fs = require('fs');
  *
  * @return {!Array<string>}
  */
-function devDependencies() {
+function getDevDependencies() {
   const file = fs.readFileSync('package.json', 'utf8');
   const packageJson = JSON.parse(file);
   const devDependencies = Object.keys(packageJson['devDependencies']);
   return devDependencies.map((p) => `./node_modules/${p}`);
 }
 
-/**
- * Ignore devDependencies except for 'chai-as-promised' which contains ES6 code.
- * ES6 code is fine for most test environments, but not for integration tests
- * running on SauceLabs since some older browsers need ES5.
- */
-const ignoredGlobalModules = devDependencies().filter(
-  (dep) => dep.indexOf('chai-as-promised') === -1
-);
-
 module.exports = {
-  ignoredGlobalModules,
+  devDependencies: getDevDependencies(),
 };

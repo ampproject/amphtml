@@ -318,7 +318,7 @@ exports.getGraph = function (entryModules, config) {
   const b = browserify(entryModules, browserifyOptions)
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
-    .transform(babelify, {caller: {name: 'pre-closure'}});
+    .transform(babelify, {caller: {name: 'pre-closure'}, global: true});
 
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree

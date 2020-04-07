@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {ignoredGlobalModules} = require('./ignored-global-modules');
+const {devDependencies} = require('./dev-dependencies');
 const {replacePlugin} = require('./replace-plugin');
 
 /**
@@ -52,10 +52,9 @@ function getUnminifiedConfig() {
   const unminifiedPresets = [presetEnv];
   return {
     compact: false,
-    ignore: ignoredGlobalModules,
+    ignore: devDependencies,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
-    sourceType: 'module',
   };
 }
 

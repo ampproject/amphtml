@@ -386,6 +386,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
   let bundler = browserify(browserifyOptions).transform(babelify, {
     caller: {name: 'unminified'},
+    global: true,
   });
 
   if (options.watch) {

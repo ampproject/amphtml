@@ -212,7 +212,7 @@ function getGraph(entryModule) {
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
-  }).transform(babelify, {caller: {name: 'dep-check'}});
+  }).transform(babelify, {caller: {name: 'dep-check'}, global: true});
 
   bundler.pipeline.get('deps').push(
     through.obj(function (row, enc, next) {
