@@ -19,9 +19,9 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {ampToolboxCacheUrl} from '@ampproject/toolbox-cache-url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';

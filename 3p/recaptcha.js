@@ -17,7 +17,6 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {
   dev,
@@ -30,6 +29,7 @@ import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
+import ampToolbox from '@ampproject/toolbox-cache-url';
 
 /**
  * @fileoverview
@@ -219,11 +219,9 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
     return compareCurlsDomain(win, curlsSubdomain, data.origin);
   }
 
-  return ampToolboxCacheUrl
-    .createCurlsSubdomain(data.origin)
-    .then((curlsSubdomain) => {
-      return compareCurlsDomain(win, curlsSubdomain, data.origin);
-    });
+  return ampToolbox.createCurlsSubdomain(data.origin).then((curlsSubdomain) => {
+    return compareCurlsDomain(win, curlsSubdomain, data.origin);
+  });
 }
 
 /**
