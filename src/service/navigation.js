@@ -567,6 +567,11 @@ export class Navigation {
       ) {
         this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
       }
+
+      if (this.navigateToUrlWithViewer(to, 'external nav')) {
+        console.log('from: ' + from + ', to: ' + to + ', target: ' + target);
+        e.preventDefault();
+      }
     }
   }
 
@@ -738,6 +743,29 @@ export class Navigation {
     const baseHref =
       getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
     return this.parseUrl_(baseHref);
+  }
+
+  /**
+   * Requests navigation through a Viewer to the given destination. If the viewer does
+   * not support this operation, does nothing.
+   * @param {string} url A URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  navigateToUrlWithViewer(url, requestedBy) {
+    if (this.viewer_.hasCapability('interceptNavigation')) {
+      this.viewer_.sendMessage(
+        'navigateTo',
+        dict({
+          'url': url,
+          'requestedBy': requestedBy,
+        })
+      );
+      return true;
+    }
+    return false;
   }
 }
 
