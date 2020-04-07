@@ -140,8 +140,8 @@ export class SubscriptionService {
 
       userAssert(this.pageConfig_, 'Page config is null');
 
-      if (this.isPageUnlocked_()) {
-        // If the page is not locked then we treat it as granted and show any
+      if (this.isPageFree_()) {
+        // If the page is free then we treat it as granted and show any
         // subscriptions content sections.
         this.processGrantState_(true);
       }
@@ -198,7 +198,7 @@ export class SubscriptionService {
   getAuthdataField(field) {
     return this.initialize_()
       .then(() => {
-        if (this.isPageUnlocked_()) {
+        if (this.isPageFree_()) {
           return new Entitlement({
             source: '',
             raw: '',
@@ -458,7 +458,7 @@ export class SubscriptionService {
    */
   processGrantState_(grantState) {
     // Don't show paywalls on free pages.
-    if (this.isPageUnlocked_()) {
+    if (this.isPageFree_()) {
       grantState = true;
     }
 
@@ -529,7 +529,7 @@ export class SubscriptionService {
    */
   fetchEntitlements_(subscriptionPlatform) {
     // Don't fetch entitlements on free pages.
-    if (this.isPageUnlocked_()) {
+    if (this.isPageFree_()) {
       return Promise.resolve();
     }
 
@@ -709,11 +709,11 @@ export class SubscriptionService {
   }
 
   /**
-   * Returns true if page is unlocked.
+   * Returns true if page is free.
    * @return {boolean}
    * @private
    */
-  isPageUnlocked_() {
+  isPageFree_() {
     return !this.pageConfig_.isLocked() || this.platformConfig_['alwaysGrant'];
   }
 }
