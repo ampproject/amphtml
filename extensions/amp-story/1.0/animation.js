@@ -15,13 +15,13 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {
-  KeyframesOrFilterFnDef,
   StoryAnimationDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
+  WebKeyframesCreateFnDef,
 } from './animation-types';
-import {Services} from '../../../src/services';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -206,15 +206,15 @@ class AnimationRunner {
 
   /**
    * Evaluates a preset's keyframes function using dimensions.
-   * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
+   * @param {!WebKeyframesDef|!WebKeyframesCreateFnDef} keyframesOrCreateFn
    * @return {!Promise<!WebKeyframesDef>}
    * @private
    */
-  evaluateKeyframes_(keyframesArrayOrFn) {
-    if (Array.isArray(keyframesArrayOrFn)) {
-      return Promise.resolve(keyframesArrayOrFn);
+  evaluateKeyframes_(keyframesOrCreateFn) {
+    if (typeof keyframesOrCreateFn !== 'function') {
+      return Promise.resolve(keyframesOrCreateFn);
     }
-    return this.getDims().then(keyframesArrayOrFn);
+    return this.getDims().then(keyframesOrCreateFn);
   }
 
   /**
