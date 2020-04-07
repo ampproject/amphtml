@@ -199,9 +199,8 @@ class AnimationRunner {
 
   /**
    * Evaluates a preset's keyframes function using dimensions.
-   * TODO(alanorozco): It might be possible to forgo function evaluation if
-   * we define preset keyframes how amp-animation wants them. In order to this
-   * we have to ensure amp-animation provides what getDims() does.
+   * TODO(alanorozco): We can remove keyframe function evaluation if we define
+   * preset keyframes how amp-animation wants them. See getDims().
    * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
    * @return {!Promise<!WebKeyframesDef>}
    * @private
@@ -221,8 +220,10 @@ class AnimationRunner {
   getWebAnimationDef_(animationDef) {
     const {preset} = animationDef;
     if (!preset) {
-      // This is an amp-animation config, formed like the WebAnimations
-      // Builder already wants it.
+      // This is an amp-animation config, so it's already formed how the
+      // WebAnimations Builder already wants it.
+      // TODO(alanorozco): We can simplify this and make it sync if we define
+      // preset keyframes how amp-animation wants them. See getDims().
       return Promise.resolve(/** @type {!WebAnimationDef} */ (animationDef));
     }
     const {target, delay, duration, easing} = animationDef;
