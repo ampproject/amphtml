@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+function without() {}
+
 'use strict';
 
 function named() {
