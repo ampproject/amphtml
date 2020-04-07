@@ -64,8 +64,11 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private {?Promise} */
-    this.initialized_ = null;
+    /**
+     * Resolves when page and platform configs are processed.
+     * @private {?Promise}
+     */
+    this.whenConfigsAreProcessedPromise_ = null;
 
     /** @private @const {!Renderer} */
     this.renderer_ = new Renderer(ampdoc);
@@ -134,7 +137,7 @@ export class SubscriptionService {
    * @return {SubscriptionService}
    */
   start() {
-    this.initialize_().then(() => {
+    this.whenConfigsAreProcessed_().then(() => {
       this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
 
@@ -183,7 +186,9 @@ export class SubscriptionService {
 
   /** @override from AccessVars */
   getAccessReaderId() {
-    return this.initialize_().then(() => this.getReaderId('local'));
+    return this.whenConfigsAreProcessed_().then(() =>
+      this.getReaderId('local')
+    );
   }
 
   /**
@@ -196,7 +201,7 @@ export class SubscriptionService {
 
   /** @override from AccessVars */
   getAuthdataField(field) {
-    return this.initialize_()
+    return this.whenConfigsAreProcessed_()
       .then(() => {
         if (this.isPageFree_()) {
           return new Entitlement({
@@ -282,7 +287,7 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
-    return this.initialize_().then(() => {
+    return this.whenConfigsAreProcessed_().then(() => {
       if (this.doesViewerProvideAuth_) {
         return; // External platforms should not register if viewer provides auth
       }
@@ -331,7 +336,7 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   resetPlatforms() {
-    return this.initialize_().then(() => {
+    return this.whenConfigsAreProcessed_().then(() => {
       this.platformStore_ = this.platformStore_.resetPlatformStore();
       this.renderer_.toggleLoading(true);
 
@@ -403,14 +408,15 @@ export class SubscriptionService {
   }
 
   /**
+   * Returns promise that resolves when page and platform configs are processed.
    * @return {!Promise}
    * @private
    */
-  initialize_() {
-    if (!this.initialized_) {
+  whenConfigsAreProcessed_() {
+    if (!this.whenConfigsAreProcessedPromise_) {
       const doc = new DocImpl(this.ampdoc_);
       const pageConfigResolver = new PageConfigResolver(doc);
-      this.initialized_ = Promise.all([
+      this.whenConfigsAreProcessedPromise_ = Promise.all([
         this.getPlatformConfig_(),
         pageConfigResolver.resolveConfig(),
       ]).then((promiseValues) => {
@@ -420,7 +426,7 @@ export class SubscriptionService {
         this.pageConfig_ = promiseValues[1];
       });
     }
-    return this.initialized_;
+    return this.whenConfigsAreProcessedPromise_;
   }
 
   /**
