@@ -912,6 +912,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
+      console.log(this.rootNode_./*OK*/ querySelectorAll(selector));
       return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);

@@ -31,7 +31,7 @@
     <amp-story standalone>
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
-          <strong class="rotate">rotate with amp-animation</strong>
+          <strong class="animate">rotate with amp-animation</strong>
           <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
           <div animate-in="fly-in-top" animate-in-after="first">
             fly-in with animate-in, after the previous element
@@ -44,7 +44,7 @@
         <amp-animation trigger="visibility" layout="nodisplay">
           <script type="application/json">
             {
-              "selector": ".rotate",
+              "selector": ".animate",
               "duration": "1s",
               "keyframes": {"transform": "rotate(360deg)"}
             }
@@ -54,7 +54,7 @@
 
       <amp-story-page id="page1">
         <amp-story-grid-layer template="vertical">
-          <strong class="bounce">bounce forward with amp-animation</strong>
+          <strong class="animate">bounce forward with amp-animation</strong>
           <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
           <div animate-in="fly-in-top" animate-in-after="first">
             fly-in with animate-in, after the previous element
@@ -67,7 +67,7 @@
         <amp-animation trigger="visibility" layout="nodisplay">
           <script type="application/json">
             {
-              "selector": ".bounce",
+              "selector": ".animate",
               "duration": "0.5s",
               "keyframes": [
                 {"transform": "scale(1)"},

@@ -35,7 +35,6 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {getLengthNumeral} from '../../../src/layout';
 import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
 import {parseAmpAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
@@ -657,7 +656,9 @@ export class AnimationManager {
     return Services.extensionsFor(this.ampdoc_.win)
       .installExtensionForDoc(this.ampdoc_, 'amp-animation')
       .then(() => Services.webAnimationServiceFor(this.root_))
-      .then((webAnimationService) => webAnimationService.createBuilder());
+      .then((webAnimationService) =>
+        webAnimationService.createBuilder(this.root_)
+      );
   }
 
   /**
