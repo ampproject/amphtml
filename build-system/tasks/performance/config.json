@@ -4,11 +4,25 @@
   "handlers": [
     {
       "handlerName": "defaultHandler",
-      "urls": []
+      "urls": [
+        {
+          "url": "localhost:8000/defaultTest.html",
+          "location": "/test/manual/performancePages/defaultTest.html"
+        }
+      ]
     },
     {
       "handlerName": "analyticsHandler",
-      "urls": [],
+      "urls": [
+        {
+          "url": "localhost:8000/analyticsTestPage1.html",
+          "location": "/test/manual/amp-analytics/analyticsTestPage1.html"
+        },
+        {
+          "url": "localhost:8000/analyticsTestPage2.html",
+          "location": "/test/manual/amp-analytics/analyticsTestPage2.html"
+        }
+      ],
       "timeout": 2000,
       "extraUrlParam": {
         "analytics": "amp-analytics-performance-param"
