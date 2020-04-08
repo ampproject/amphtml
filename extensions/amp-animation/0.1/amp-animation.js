@@ -90,7 +90,7 @@ export class AmpAnimation extends AMP.BaseElement {
       );
     }
 
-    this.configJson_ = parseAnimationConfig(element);
+    this.configJson_ = parseAnimationConfig(this.element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
