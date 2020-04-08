@@ -135,30 +135,11 @@ module.exports = function ({types: t}) {
           return;
         }
 
-<<<<<<< Updated upstream
         if (conversions > 0) {
           // Otherwise, any conversions of members requires replacing the existing TemplateLiteral
           newExpressions = newExpressions.filter(Boolean);
           path.replaceWith(t.templateLiteral(newQuasis, newExpressions));
         }
-=======
-        const {value} = e;
-        let node = t.valueToNode(e.value);
-
-        // eslint-disable-next-line local/no-es2015-number-props
-        if (typeof value === 'number' && !Number.isFinite(value)) {
-          // eslint-disable-next-line local/no-es2015-number-props
-          if (Number.isNaN(value)) {
-            node = t.identifier('NaN');
-          } else if (value === Infinity) {
-            node = t.identifier('Infinity');
-          } else {
-            node = t.unaryExpression('-', t.identifier('Infinity'));
-          }
-        }
-
-        path.replaceWith(node);
->>>>>>> Stashed changes
       },
     },
   };
