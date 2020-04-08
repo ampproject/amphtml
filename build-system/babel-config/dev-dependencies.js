@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs');
+const packageJson = require('../../package.json');
 
 /**
  * Gets relative paths to all the devDependencies defined in package.json.
@@ -23,10 +23,9 @@ const fs = require('fs');
  * @return {!Array<string>}
  */
 function getDevDependencies() {
-  const file = fs.readFileSync('package.json', 'utf8');
-  const packageJson = JSON.parse(file);
-  const devDependencies = Object.keys(packageJson['devDependencies']);
-  return devDependencies.map((p) => `./node_modules/${p}`);
+  return Object.keys(packageJson.devDependencies).map(
+    (dependency) => `./node_modules/${dependency}`
+  );
 }
 
 module.exports = {

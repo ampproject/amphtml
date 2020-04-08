@@ -52,7 +52,6 @@ function getDepCheckConfig() {
     ignore: devDependencies,
     plugins: depCheckPlugins,
     presets: depCheckPresets,
-    sourceType: 'module',
   };
 }
 

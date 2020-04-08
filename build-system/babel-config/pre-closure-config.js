@@ -100,9 +100,6 @@ function getPreClosureConfig() {
     plugins: preClosurePlugins,
     retainLines: true,
   };
-  if (argv.esm) {
-    preClosureConfig.sourceType = 'module';
-  }
   return preClosureConfig;
 }
 
