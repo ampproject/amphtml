@@ -58,6 +58,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   let element;
   let entitlementResponse;
   let win;
+  let navigator;
 
   beforeEach(() => {
     win = env.win;
@@ -69,6 +70,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
+    navigator = Services.navigationForDoc(ampdoc);
     ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = env.sandbox.mock(serviceAdapter);
@@ -816,26 +818,25 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       expect(platform.pingback(entitlements)).to.be.undefined;
     });
 
-    it('should call pingback method when urls present', async () => {
+    it('should redirect to new account creation page when associated account present', async () => {
       const HAS_ACCOUNT_URL = "https://fakeUrl.com/hasAccount";
       const CREATE_ACCOUNT_URL = "https://fakeUrl.com/createAccount";
       platform = new GoogleSubscriptionsPlatform(ampdoc, {
         "hasAssociatedAccountUrl": HAS_ACCOUNT_URL,
-        "createOrUpdateAccountUrl": CREATE_ACCOUNT_URL,
+        "accountCreationRedirectUrl": CREATE_ACCOUNT_URL,
       }, serviceAdapter);
 
       const entitlements = new Entitlement({
         service: PLATFORM_ID,
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {data: "this is the data"}
       });
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
       fetchStub.withArgs(HAS_ACCOUNT_URL).returns(Promise.resolve({
         json: () => Promise.resolve({ found: true }),
       }));
-
-      fetchStub.withArgs(CREATE_ACCOUNT_URL).returns(Promise.resolve({
-      }));
+      const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
 
       const deferredAccountCreationResponse = (
         new DeferredAccountCreationResponse(
@@ -851,14 +852,48 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
         .resolves(deferredAccountCreationResponse);
 
       await platform.pingback(entitlements);
-      // expect(url).to.match(/fakeUrl\.com\/hasAccount/);
-      //   console.log(init);
-      //   expect(init).to.deep.equal({
-      //     method: 'POST',
-      //     credentials: 'include',
-      //     body: '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER"}',
-      //   });
-      expect(fetchStub).to.be.calledTwice;
+
+      expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
+        body: '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        credentials: "include",
+        method: "POST"
+      });
+      expect(navigateToStub).to.be.calledWith(win, CREATE_ACCOUNT_URL);
     })
+
+  it('should not redirect to new account creation page when user gives no consent', async () => {
+    const HAS_ACCOUNT_URL = "https://fakeUrl.com/hasAccount";
+      const CREATE_ACCOUNT_URL = "https://fakeUrl.com/createAccount";
+      platform = new GoogleSubscriptionsPlatform(ampdoc, {
+        "hasAssociatedAccountUrl": HAS_ACCOUNT_URL,
+        "accountCreationRedirectUrl": CREATE_ACCOUNT_URL,
+      }, serviceAdapter);
+
+      const entitlements = new Entitlement({
+        service: PLATFORM_ID,
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {data: "this is the data"}
+      });
+  
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(Promise.resolve({
+        json: () => Promise.resolve({ found: true }),
+      }));
+      const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+
+      env.sandbox
+        .stub(platform.runtime_, 'completeDeferredAccountCreation')
+        .rejects();
+
+      await platform.pingback(entitlements);
+
+      expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
+        body: '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        credentials: "include",
+        method: "POST"
+      });
+      expect(navigateToStub).to.not.be.called;
+    });
   });
 });

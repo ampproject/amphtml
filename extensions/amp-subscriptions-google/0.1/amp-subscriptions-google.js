@@ -73,7 +73,6 @@ export class GoogleSubscriptionsPlatformService {
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
-    console.log(ampdoc);
   }
 
   /**
@@ -123,6 +122,11 @@ export class GoogleSubscriptionsPlatform {
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
+
+    /** @const @private {function(string):void} */
+    this.navigateTo_ = (url) => {
+      Services.navigationForDoc(ampdoc).navigateTo(ampdoc.win, url);
+    }
 
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
@@ -475,8 +479,8 @@ export class GoogleSubscriptionsPlatform {
    */
   isPingbackEnabled() {
     // Only enable pingback if useful deferred account creation.
-    return (this.serviceConfig_["hasAssociatedAccountUrl"] &&
-            this.serviceConfig_["createOrUpdateAccountUrl"]);
+    return (this.serviceConfig_['hasAssociatedAccountUrl'] &&
+            this.serviceConfig_['accountCreationRedirectUrl']);
   }
 
   /** @override */
@@ -487,7 +491,7 @@ export class GoogleSubscriptionsPlatform {
   /** @return {!Promise<{found: boolean}>} */
   hasAssociatedUserAccount_(selectedEntitlement) {
     const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
-      this.serviceConfig_["hasAssociatedAccountUrl"] ,
+      this.serviceConfig_['hasAssociatedAccountUrl'] ,
       'hasAssociatedAccountUrl is null'
     ));
 
@@ -505,34 +509,6 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * @param {!DeferredAccountCreationResponse} deferredAccountResponse
-   * @return {!Promise<{}>}
-   * */
-  createOrUpdateAccount_(deferredAccountResponse) {
-    const createOrUpdateAccountUrl = /** @type {string} */ (devAssert(
-      this.serviceConfig_["createOrUpdateAccountUrl"] ,
-      'createOrUpdateAccountUrl is null'
-    ));
-
-    const promise = this.urlBuilder_.buildUrl(
-      createOrUpdateAccountUrl,
-      /* useAuthData */ true
-    );
-    console.log('DeferredAccountCreationResponse')
-    return promise.then(url => {
-      return this.xhr_.fetchJson(url, {
-        method: 'POST',
-        credentials: 'include',
-        body: this.serviceAdapter_.stringifyForPingback({
-          entitlements: deferredAccountResponse.entitlements,
-          userData: deferredAccountResponse.userData,
-          purchaseDataList: deferredAccountResponse.purchaseDataList,
-        }),
-      });
-    });
-  }
-
-  /**
    * @override
    * @param {?./entitlement.Entitlement} entitlements
    * @return {!Promise|undefined}*/
@@ -541,21 +517,15 @@ export class GoogleSubscriptionsPlatform {
       return;
     }
     return this.hasAssociatedUserAccount_(entitlements).then(async result => {
-      console.log(`result ${result.json()}`)
       const {found} = await result.json();
-      console.log(`found ${found}`)
       if (found) {
+        // This will ask the user for authorization
         this.runtime_.completeDeferredAccountCreation({
           entitlements
         }).then(response => {
-          console.log(`response ${response}`);
-          this.createOrUpdateAccount_(response).then(() => {
-            console.log(`response ${response.complete}`);
-            response.complete().then(() => {
-              console.log("completed")
-              // mark flow as completed
-            })
-          })
+          // The user authorized the creation of a linked account.
+          // Redirect the user to URL provided for this purpose.
+          this.navigateTo_(this.serviceConfig_['accountCreationRedirectUrl']);
         })
       }
     });
