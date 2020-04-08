@@ -27,7 +27,8 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
 
   it('By default, the delay in retrieving LoaderService should be the initDelay', async () => {
     createLoaderElement(ampdoc, el, 400, 400);
-    await clock.tickAsync(loaderLatency);
+    clock.tick(loaderLatency);
+    await clock.runAllAsync()
 
     expect(loaderService.initializeLoader).calledOnceWith(
       el,
@@ -41,7 +42,8 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
   it('If specified, startTime should contribute to the initDelay', async () => {
     // startTime: 0, now: 50, loaderLatency: 100 --> initDelay: 150.
     createLoaderElement(ampdoc, el, 400, 400, 0);
-    await clock.tickAsync(loaderLatency);
+    clock.tick(loaderLatency);
+    await clock.runAllAsync()
 
     expect(loaderService.initializeLoader).calledOnceWith(
       el,

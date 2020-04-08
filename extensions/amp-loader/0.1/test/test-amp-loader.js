@@ -14,18 +14,33 @@
  * limitations under the License.
  */
 import {LoaderService} from '../amp-loader';
+import {getStyle} from '../../../../src/style';
 
-describes.fakeWin('amp-loader', {amp: true}, function (env) {
-  const doc = env.win.document;
+describes.fakeWin('amp-loader', {amp: true}, (env) => {
   let loaderService;
   let el;
+  let loaderRoot;
+
   beforeEach(() => {
-    el = doc.createElement();
+    el = document.createElement('div');
+    // TODO: actually use custom-element?
+    el.getPlaceholder = () => {};
+    el.createLoaderLogo = () => ({color: ''});
+    loaderRoot = document.createElement('div');
     loaderService = new LoaderService();
   });
 
   describe('initializeLoader', () => {
-    it('sets loader-delay-offset', () => {});
-    it('loader-delay-offset can never be more than 600ms', () => {});
+    it('sets loader-delay-offset', () => {
+      loaderService.initializeLoader(el, loaderRoot, 150, 400, 400);
+      const offset = getStyle(el, '--loader-delay-offset');
+      expect(offset).equal('150ms')
+    });
+
+    it('loader-delay-offset maxes out at 600ms', () => {
+      loaderService.initializeLoader(el, loaderRoot, 650, 400, 400);
+      const offset = getStyle(el, '--loader-delay-offset');
+      expect(offset).equal('600ms') 
+    });
   });
 });
