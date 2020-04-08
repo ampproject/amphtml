@@ -239,30 +239,9 @@ export class ViewportBindingNatural_ {
     // Nothing to do here.
   }
 
-  rectToString(b) {
-    return `[w: ${b.width}. h: ${b.height}]`;
-  }
-
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
     const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
-
-    if (opt_premeasuredRect) {
-      const c = el./*OK*/ getBoundingClientRect();
-      if (
-        Math.abs(b.width - c.width) > 1 ||
-        Math.abs(b.height - c.height) > 1
-      ) {
-        console.assert(
-          false,
-          'Mismatched size:',
-          el,
-          this.rectToString(c),
-          this.rectToString(b)
-        );
-      }
-    }
-
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =
