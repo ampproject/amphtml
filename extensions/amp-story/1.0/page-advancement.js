@@ -19,7 +19,6 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  StoryContextStore,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -27,11 +26,11 @@ import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 
@@ -54,6 +53,10 @@ const TOP_REGION = 0.8;
  * @private
  */
 const PROTECTED_SCREEN_EDGE_PX = 48;
+
+const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
+  interactiveElementsSelectors()
+).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -245,9 +248,6 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   constructor(win, element) {
     super();
-
-    /** @private @const {!Window} */
-    this.win_ = win;
 
     /** @private @const {!Element} */
     this.element_ = element;
@@ -474,7 +474,6 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
-      event.preventDefault();
       return false;
     }
 
@@ -549,25 +548,9 @@ export class ManualAdvancement extends AdvancementConfig {
 
     return (
       inExpandedMode ||
-      (this.isInClickableContext_(target) &&
+      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
         this.canShowTooltip_(event, pageRect))
     );
-  }
-
-  /**
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  isInClickableContext_(target) {
-    const context = parseInt(
-      computedStyle(this.win_, target).getPropertyValue(
-        '--i-amphtml-story-context'
-      ),
-      10
-    );
-
-    return context === StoryContextStore.EMBEDDED_COMPONENT;
   }
 
   /**
