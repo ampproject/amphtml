@@ -152,7 +152,6 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   authorize() {
     // TODO(dbow): Handle timeout?
     return super.authorize().then((response) => {
-      const holdback = response['features'] && response['features']['h'];
       const isStory = this.ampdoc
         .getRootNode()
         .querySelector('amp-story[standalone]');
@@ -163,10 +162,9 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           const bar = new ScrollBar(
             this.ampdoc,
             this.accessSource_,
-            this.baseUrl_,
-            holdback
+            this.baseUrl_
           );
-          const sheet = new Sheet(this.ampdoc, holdback);
+          const sheet = new Sheet(this.ampdoc);
 
           const relay = new Relay(this.baseUrl_);
           relay.register(sheet.window, (message) => {
@@ -183,7 +181,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
 
           const config = this.accessSource_.getAdapterConfig();
           addAnalytics(this.ampdoc, config);
-          if (response['features'] && response['features']['readDepth']) {
+          if (response['features'] && response['features']['d']) {
             new ReadDepthTracker(
               this.ampdoc,
               this.accessSource_,
@@ -197,9 +195,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           response['blocker'] &&
           ScrollContentBlocker.shouldCheck(this.ampdoc)
         ) {
-          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check(
-            holdback
-          );
+          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
         }
       }
       return response;
@@ -235,10 +231,8 @@ class ScrollContentBlocker {
 
   /**
    * Check if the Scroll App blocks the resource request.
-   *
-   * @param {boolean} holdback
    */
-  check(holdback) {
+  check() {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
@@ -253,12 +247,7 @@ class ScrollContentBlocker {
           const baseUrl = connectHostname(
             this.accessSource_.getAdapterConfig()
           );
-          const bar = new ScrollBar(
-            this.ampdoc_,
-            this.accessSource_,
-            baseUrl,
-            holdback
-          );
+          const bar = new ScrollBar(this.ampdoc_, this.accessSource_, baseUrl);
           const relay = new Relay(baseUrl);
           relay.register(bar.window, (message) => {
             if (message['_scramp'] === 'st') {

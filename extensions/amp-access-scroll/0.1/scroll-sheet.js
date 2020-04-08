@@ -24,10 +24,9 @@ export class Sheet extends ScrollComponent {
    *  Creates an instance of Audio.
    *
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
-   * @param {boolean} holdback
    */
-  constructor(doc, holdback) {
-    super(doc, holdback);
+  constructor(doc) {
+    super(doc);
 
     /** @private {string} */
     this.DEFAULT_TITLE_ = 'Scroll Feature';
@@ -109,7 +108,6 @@ export class Sheet extends ScrollComponent {
       })
     ));
     this.root_ = this.frame_;
-    this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
     this.mount();
   }
 }
