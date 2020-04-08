@@ -34,13 +34,13 @@ describes.fakeWin('amp-loader', {amp: true}, (env) => {
     it('sets loader-delay-offset', () => {
       loaderService.initializeLoader(el, loaderRoot, 150, 400, 400);
       const offset = getStyle(el, '--loader-delay-offset');
-      expect(offset).equal('150ms')
+      expect(offset).equal('150ms');
     });
 
     it('loader-delay-offset maxes out at 600ms', () => {
       loaderService.initializeLoader(el, loaderRoot, 650, 400, 400);
       const offset = getStyle(el, '--loader-delay-offset');
-      expect(offset).equal('600ms') 
+      expect(offset).equal('600ms');
     });
   });
 });
