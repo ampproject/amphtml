@@ -169,8 +169,6 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      // TODO(alanorozco): Remove unscaledClientRect. It was required only to
-      // for an abandoned experiment (amp-story-page-scaling).
       const target = dev().assertElement(this.presetTarget_);
       const targetRect = unscaledClientRect(target);
       const pageRect = unscaledClientRect(this.page_);
