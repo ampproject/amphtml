@@ -219,6 +219,7 @@ export class Page {
     if (
       this.state_ === PageState.INSERTED ||
       this.state_ === PageState.FETCHING ||
+      this.state_ === PageState.LOADED ||
       this.state_ === PageState.FAILED
     ) {
       return Promise.resolve();

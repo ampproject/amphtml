@@ -34,6 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
+import {findIndex} from '../../../src/utils/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -325,9 +326,10 @@ export class NextPageService {
       );
 
     // Switch the title and url of the page to reflect the first visible page
-    const lastVisiblePage = this.pages_.find((page) => page.isVisible());
-    if (this.currentTitlePage_ !== lastVisiblePage) {
-      this.setTitlePage(lastVisiblePage);
+    const visiblePageIndex = findIndex(this.pages_, (page) => page.isVisible());
+    const visiblePage = this.pages_[visiblePageIndex] || null;
+    if (visiblePage && this.currentTitlePage_ !== visiblePage) {
+      this.setTitlePage(visiblePage);
     }
 
     // Check if we're close to the bottom, if so fetch more pages
@@ -433,6 +435,7 @@ export class NextPageService {
     const {title, url} = page;
     this.doc_.title = title;
     this.history_.replace({title, url});
+    this.currentTitlePage_ = page;
     triggerAnalyticsEvent(
       this.getHost_(),
       'amp-next-page-scroll',
