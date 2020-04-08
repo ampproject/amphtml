@@ -319,13 +319,19 @@ export class StandardActions {
   handleHide_(invocation) {
     const target = dev().assertElement(invocation.node);
 
-    this.mutator_.mutateElement(target, () => {
-      if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/ collapse();
-      } else {
-        toggle(target, false);
-      }
-    });
+    this.mutator_.mutateElement(
+      target,
+      () => {
+        if (target.classList.contains('i-amphtml-element')) {
+          target./*OK*/ collapse();
+        } else {
+          toggle(target, false);
+        }
+      },
+      // It is safe to skip measuring, because  `mutator-impl.collapseElement`
+      // will trigger a remasure of everything below the collapsed element.
+      /* skipRemeasure */ true
+    );
 
     return null;
   }
