@@ -45,7 +45,7 @@ import {Services} from '../../../src/services';
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-import {ampGeoPresets} from './amp-geo-presets';
+import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, user, userAssert} from '../../../src/log';
@@ -73,6 +73,7 @@ const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
 const GEO_ID = 'ampGeo';
 const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
+const GEO_HOTPATCH_STR_REGEX = /^(\w{2})?(\s(\w{2}-\w{2}))?\s*/;
 
 /**
  * Operating Mode
@@ -85,6 +86,7 @@ const mode = {
   GEO_API: 3, //       Query API when cache patching unavailable
 };
 
+// TODO(zhouyx@): Rename if we have generic subdivision group support
 /**
  * @typedef {{
  *   ISOCountry: string,
@@ -106,6 +108,8 @@ export class AmpGeo extends AMP.BaseElement {
     this.error_ = false;
     /** @private {string} */
     this.country_ = 'unknown';
+    /** @private {string} */
+    this.subdivision_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
@@ -175,19 +179,38 @@ export class AmpGeo extends AMP.BaseElement {
     // - Unknown country will not have the country code, but will match all
     //   whitespace.
     // - Unpatched will match, but will not have a country code nor whitespace.
-    const trimmedCountryMatch = /^(\w{2})?\s*/.exec(COUNTRY);
+
+    // 'xx        ': trimmedGeoMatch is
+    // ["xx        ", "xx", undefined, undefined]
+
+    // 'xx xx-xx  ': trimmedGeoMatch is
+    // ["xx xx-xx  ", "xx", " xx-xx", "xx-xx"];
+
+    // 'xx        ' : trimmedGeoMatch is
+    // ["xx", "xx", undefined, undefined]
+
+    // '{{AMP_ISO_COUNTRY_HOTPATCH}}': trimmedGeoMatch is
+    // ["", undefined, undefined, undefined]
+    const trimmedGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(COUNTRY);
 
     // default country is 'unknown' which is also the zero length case
-
     if (
       getMode(this.win).geoOverride &&
-      (isCanary(this.win) || getMode(this.win).localDev) &&
-      /^\w+$/.test(getMode(this.win).geoOverride)
+      (isCanary(this.win) || getMode(this.win).localDev)
     ) {
       // debug override case, only works in canary or localdev
       // match to \w characters only to prevent xss vector
-      this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = getMode(this.win).geoOverride.toLowerCase();
+      const overrideGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
+        getMode(this.win).geoOverride.toLowerCase()
+      );
+      if (overrideGeoMatch && overrideGeoMatch[1]) {
+        this.country_ = overrideGeoMatch[1];
+        if (overrideGeoMatch[3]) {
+          // Allow subdivision_ to be customized for testing, not checking us-ca
+          this.subdivision_ = overrideGeoMatch[3];
+        }
+        this.mode_ = mode.GEO_OVERRIDE;
+      }
     } else if (
       preRenderMatch &&
       !Services.urlForDoc(this.element).isProxyOrigin(this.win.location)
@@ -198,14 +221,18 @@ export class AmpGeo extends AMP.BaseElement {
       // to handle that.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
-    } else if (trimmedCountryMatch[1]) {
+    } else if (trimmedGeoMatch[1]) {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
-      this.country_ = trimmedCountryMatch[1];
-    } else if (trimmedCountryMatch[0] === '' && urls.geoApi) {
+      this.country_ = trimmedGeoMatch[1];
+      if (trimmedGeoMatch[3] && trimmedGeoMatch[3] == US_CA_CODE) {
+        // Has subdivision code support (us-ca only)
+        this.subdivision_ = US_CA_CODE;
+      }
+    } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
       // We were not patched, but an API is available
       this.mode_ = mode.GEO_API;
-    } else if (trimmedCountryMatch[0] === '' && !getMode(this.win).localDev) {
+    } else if (trimmedGeoMatch[0] === '' && !getMode(this.win).localDev) {
       // We were not patched, if we're not in dev this is an error
       // and we leave the country at the default 'unknown'
       this.error_ = true;
@@ -333,6 +360,7 @@ export class AmpGeo extends AMP.BaseElement {
     ]);
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
+      // TODO(zhouyx@): Change the name with generic ISO subdivision support
       this.assertWithErrorReturn_(
         isObject(ISOCountryGroups),
         `${errorPrefix} must be an object`
@@ -374,11 +402,18 @@ export class AmpGeo extends AMP.BaseElement {
           return countries.concat(ampGeoPresets[country]);
         }
         // Otherwise we add the country to the list
-        countries.push(country);
+        if (country == 'unknown' || /^[a-zA-Z]{2}$/.test(country)) {
+          countries.push(country);
+        } else {
+          user().error(TAG, ' country %s not valid, will be ignored', country);
+        }
         return countries;
       }, [])
       .map((c) => c.toLowerCase());
-    return expandedGroup.includes(this.country_);
+    return (
+      expandedGroup.includes(this.country_) ||
+      (expandedGroup.includes(US_CA_CODE) && this.subdivision_ == US_CA_CODE)
+    );
   }
 
   /**

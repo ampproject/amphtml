@@ -39,6 +39,7 @@ describes.realWin(
         eea: ['preset-eea'],
         myGroup: ['preset-eea', 'us'],
         anz: ['au', 'nz'],
+        uscaGroup: ['preset-us-ca'],
       },
     };
 
@@ -56,6 +57,16 @@ describes.realWin(
         nafta: ['CA', 'mx', 'us', 'unknown'],
         unknown: ['unknown'],
         anz: ['au', 'NZ'],
+      },
+    };
+
+    const configWithInvalidCountry = {
+      ISOCountryGroups: {
+        nafta: ['CA', 'mx', 'us', 'unknown'],
+        unknown: ['unknown'],
+        anz: ['au', 'NZ'],
+        uscaGroup: ['preset-us-ca'],
+        invalid: ['us-ca'],
       },
     };
 
@@ -197,6 +208,29 @@ describes.realWin(
       });
     });
 
+    it('should allow hash to override subdivision in test', () => {
+      win.__AMP_MODE.geoOverride = 'us us-ca';
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('us');
+        expectBodyHasClass(
+          [
+            'amp-iso-country-us',
+            'amp-geo-group-nafta',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+          ],
+          true
+        );
+        expectBodyHasClass(
+          ['amp-iso-country-unknown', 'amp-geo-no-group', 'amp-geo-group-eea'],
+          false
+        );
+      });
+    });
+
     it('should allow preset country groups', () => {
       win.__AMP_MODE.geoOverride = 'fr';
       addConfigElement('script');
@@ -209,6 +243,21 @@ describes.realWin(
           true
         );
         expectBodyHasClass([, 'amp-geo-no-group'], false);
+      });
+    });
+
+    it('should allow preset-us-ca, but not us-ca', () => {
+      win.__AMP_MODE.geoOverride = 'us us-ca';
+      addConfigElement(
+        'script',
+        'application/json',
+        JSON.stringify(configWithInvalidCountry)
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then(() => {
+        expectBodyHasClass(['amp-geo-group-uscaGroup'], true);
+        expectBodyHasClass(['amp-geo-group-invalid'], false);
       });
     });
 
@@ -363,6 +412,7 @@ describes.realWin(
           'eea',
           'myGroup',
           'anz',
+          'uscaGroup',
         ]);
         expect(geo.isInCountryGroup).to.be.a('function');
       });
