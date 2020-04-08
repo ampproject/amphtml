@@ -56,15 +56,8 @@ export class VisibilityObserverEntry {
     this.topSentinelPosition_ = null;
     /** @private {?RelativePositions} */
     this.bottomSentinelPosition_ = null;
-    /** @private @const {function(!ViewportRelativePos)} */
-    this.callback_ = callback;
-  }
-
-  /**
-   * @return {function(!ViewportRelativePos)}
-   */
-  get callback() {
-    return this.callback_;
+    /** @const {function(!ViewportRelativePos)} */
+    this.callback = callback;
   }
 
   /**
@@ -326,6 +319,8 @@ export default class VisibilityObserver {
     const {viewportHeight_: vh, lastScrollTop_: scroll} = this;
     // Document height is the same as the distance from the top
     // to the <amp-next-page> element
+    // TODO(wassgha): Synchronous access to position updates will
+    // be deprecated, move to async getLayoutBox()
     const {top: height} = entry.nextPageEl.getLayoutBox();
     if (scroll < height - vh) {
       return ViewportRelativePos.CONTAINS_VIEWPORT;

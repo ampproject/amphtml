@@ -21,7 +21,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
-  insertAfterOrAtStart,
+  insertAtStart,
   isAmpElement,
   removeElement,
   tryFocus,
@@ -502,10 +502,7 @@ export class ConsentUI {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
-      insertAfterOrAtStart(
-        this.parent_,
-        dev().assertElement(this.placeholder_)
-      );
+      insertAtStart(this.parent_, dev().assertElement(this.placeholder_));
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
@@ -515,7 +512,7 @@ export class ConsentUI {
     ).then((clientInfo) => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_));
+      insertAtStart(this.parent_, dev().assertElement(this.ui_));
     });
 
     return Promise.all([

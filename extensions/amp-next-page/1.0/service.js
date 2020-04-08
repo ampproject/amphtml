@@ -26,7 +26,7 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
-  insertAfterOrAtStart,
+  insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
@@ -200,7 +200,7 @@ export class NextPageService {
     this.hostPage_ = this.createHostPage();
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
-    insertAfterOrAtStart(this.host_, this.recBox_, null /** after */);
+    insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -572,7 +572,7 @@ export class NextPageService {
 
       // Insert the separator
       const separatorInstance = this.separator_.cloneNode(true);
-      insertAfterOrAtStart(container, separatorInstance);
+      insertAtStart(container, separatorInstance);
       const separatorPromise = this.maybeRenderSeparatorTemplate_(
         separatorInstance,
         page
