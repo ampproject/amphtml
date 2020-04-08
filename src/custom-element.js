@@ -265,9 +265,8 @@ function createBaseCustomElementClass(win) {
       /** @private @const */
       this.signals_ = new Signals();
 
-      const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
-      this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+      this.perfOn_ = false;
 
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
@@ -473,6 +472,9 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return (this.buildingPromise_ = new Promise((resolve, reject) => {
+        const perf = Services.performanceForOrNull(win);
+        this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
         const policyId = this.getConsentPolicy_();
         if (!policyId) {
           resolve(this.implementation_.buildCallback());
