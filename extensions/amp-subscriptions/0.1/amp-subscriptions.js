@@ -698,7 +698,7 @@ export class SubscriptionService {
 
   /**
    * Adds entitlement on free pages.
-   * @param {!PlatformStore} platformStore
+   * @param {PlatformStore} platformStore
    * @private
    */
   maybeAddFreeEntitlement_(platformStore) {
