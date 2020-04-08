@@ -474,6 +474,7 @@ export class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
+      event.preventDefault();
       return false;
     }
 
