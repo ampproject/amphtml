@@ -16,14 +16,15 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const loadConfig = require('./load-config');
+const measureDocuments = require('./measure-documents');
 const runTests = require('./run-tests');
+const writeMetrics = require('./write-metrics');
 const {
   buildMinifiedRuntime,
   buildUnminifiedRuntime,
   installPackages,
 } = require('../../common/utils');
 const {CONTROL, EXPERIMENT, HOST, PORT} = require('./helpers');
-const {measureDocuments, writeMetrics} = require('./measure-documents');
 const {printReport} = require('./print-report');
 const {startServer, stopServer} = require('../serve');
 

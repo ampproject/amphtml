@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-const fs = require('fs');
 const log = require('fancy-log');
-const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -114,27 +112,6 @@ const readMetrics = (page) =>
   });
 
 /**
- * Writes measurements to ./results.json
- *
- * @param {Array<string>} urls
- * @param {Object} results
- */
-function writeMetrics(urls, results) {
-  try {
-    fs.unlinkSync(RESULTS_PATH);
-  } catch {} // file does not exist (first run)
-
-  const writtenResults = {};
-  urls.forEach((url) => {
-    writtenResults[url] = {
-      [CONTROL]: results[CONTROL][url],
-      [EXPERIMENT]: results[EXPERIMENT][url],
-    };
-  });
-  fs.writeFileSync(RESULTS_PATH, JSON.stringify(writtenResults));
-}
-
-/**
  * Opens Chrome, loads the URL from local file cache, and collects
  * metrics for the specified URL.
  *
@@ -214,4 +191,4 @@ async function measureDocuments(urls, version, {headless, runs}) {
   return results;
 }
 
-module.exports = {measureDocuments, writeMetrics};
+module.exports = measureDocuments;
