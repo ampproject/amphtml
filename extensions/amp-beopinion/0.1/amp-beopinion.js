@@ -77,11 +77,11 @@ class AmpBeOpinion extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         // We only get the message if and when there is a tweet to display,
         // so hide the placeholder
         this.togglePlaceholder(false);
-        this./*OK*/ changeHeight(data['height']);
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -117,6 +117,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBeOpinion);
 });

@@ -16,7 +16,7 @@
 
 import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
 
-describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
+describes.fakeWin('DomWriterStreamer', {amp: true}, (env) => {
   describe
     .configure()
     .skipFirefox()
@@ -31,8 +31,8 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
         writer = new DomWriterStreamer(win);
         onBodySpy = env.sandbox.spy();
         onBodyChunkSpy = env.sandbox.spy();
-        onBodyPromise = new Promise(resolve => {
-          writer.onBody(parsedDoc => {
+        onBodyPromise = new Promise((resolve) => {
+          writer.onBody((parsedDoc) => {
             resolve(parsedDoc.body);
             onBodySpy();
             return win.document.body;
@@ -45,13 +45,13 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
           }
           onBodyChunkSpy();
         });
-        onEndPromise = new Promise(resolve => {
+        onEndPromise = new Promise((resolve) => {
           writer.onEnd(resolve);
         });
       });
 
       function waitForNextBodyChunk() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           onBodyChunkPromiseResolver = resolve;
         });
       }
@@ -68,7 +68,7 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
       it('should resolve body as soon as available', () => {
         writer.write('<body class="b">');
         expect(onBodySpy).to.not.be.called;
-        return onBodyPromise.then(body => {
+        return onBodyPromise.then((body) => {
           expect(body.getAttribute('class')).to.equal('b');
           expect(onBodySpy).to.be.calledOnce;
         });
@@ -149,7 +149,7 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
     });
 });
 
-describes.fakeWin('DomWriterBulk', {amp: true}, env => {
+describes.fakeWin('DomWriterBulk', {amp: true}, (env) => {
   let win;
   let writer;
   let onBodySpy, onBodyChunkSpy;
@@ -160,8 +160,8 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
     writer = new DomWriterBulk(win);
     onBodySpy = env.sandbox.spy();
     onBodyChunkSpy = env.sandbox.spy();
-    onBodyPromise = new Promise(resolve => {
-      writer.onBody(parsedDoc => {
+    onBodyPromise = new Promise((resolve) => {
+      writer.onBody((parsedDoc) => {
         resolve(parsedDoc.body);
         onBodySpy(parsedDoc);
         return win.document.body;
@@ -174,7 +174,7 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
       }
       onBodyChunkSpy();
     });
-    onEndPromise = new Promise(resolve => {
+    onEndPromise = new Promise((resolve) => {
       writer.onEnd(resolve);
     });
   });

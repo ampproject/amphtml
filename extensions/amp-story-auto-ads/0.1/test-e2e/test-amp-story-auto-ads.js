@@ -36,7 +36,7 @@ describes.endtoend(
     // offset set by the viewer header.
     environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -79,7 +79,7 @@ describes.endtoend(
     // offset set by the viewer header.
     environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

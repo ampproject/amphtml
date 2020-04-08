@@ -427,7 +427,7 @@ message ExtensionSpec {
   optional ExtensionType extension_type = 8 [default = CUSTOM_ELEMENT];
 
   // For older tags, we did not originally require that the tag only be included
-  // once, so those tags are grandfathered in for multiple inclusion in the file
+  // once, so those tags are exempted from the multiple inclusion ban.
   optional bool deprecated_allow_duplicates = 6 [default = false];
 
   // TagSpec.requires_extension will be set to the new extension's name on one
@@ -442,15 +442,15 @@ message ExtensionSpec {
   //
   // The second requirement (extension requires usage) has a few exceptions:
   //   1) For older extensions, implemented before these tagspec rules, we
-  //      do not want to introduce a breaking change, so we grandfather these
-  //      extensions to not require usage. New extensions must use ERROR.
+  //      do not want to introduce a breaking change, so we exempt these
+  //      extensions from the usage requirement. New extensions must use ERROR.
   //   2) Some extensions, such as `amp-dynamic-css-classes`, do not have any
   //      associated tag in the document indicating usage. These extensions do
   //      not trigger warnings or errors.
   enum ExtensionUsageRequirement {
     ERROR = 1;
-    // Exception for grandfathered extensions. #1 above.
-    GRANDFATHERED = 2;
+    // Exception for exempted extensions. #1 above.
+    EXEMPTED = 2;
     // Exception for extensions with no usage-indicating tag. #2 above.
     NONE = 3;
   }
@@ -715,9 +715,10 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 111
+  // NEXT AVAILABLE TAG: 114
   enum Code {
     UNKNOWN_CODE = 0;
+    INVALID_DOCTYPE_HTML = 111;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
@@ -725,6 +726,8 @@ message ValidationError {
     WARNING_EXTENSION_UNUSED = 79;
     EXTENSION_UNUSED = 84;
     WARNING_EXTENSION_DEPRECATED_VERSION = 80;
+    NON_LTS_SCRIPT_AFTER_LTS = 112;
+    LTS_SCRIPT_AFTER_NON_LTS = 113;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;

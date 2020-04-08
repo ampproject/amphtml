@@ -79,11 +79,11 @@ export class AnalyticsRoot {
       // TODO: Using the visibility service and apply it for all tracking types
       const promise = HostServices.visibilityForDoc(this.ampdoc);
       this.usingHostAPIPromise_ = promise
-        .then(visibilityService => {
+        .then((visibilityService) => {
           this.hostVisibilityService_ = visibilityService;
           return true;
         })
-        .catch(error => {
+        .catch((error) => {
           dev().fine(
             TAG,
             'VisibilityServiceError - fallback=' + error.fallback
@@ -143,7 +143,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -239,7 +243,7 @@ export class AnalyticsRoot {
       return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(
           user().assertElement(
             this.getHostElement(),
@@ -283,17 +287,20 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod) {
-    return this.getElement(context, selector, selectionMethod).then(element => {
-      userAssert(
-        element.classList.contains('i-amphtml-element'),
-        'Element "%s" is required to be an AMP element',
-        selector
-      );
-      return element;
-    });
+  getAmpElement(context, selector, selectionMethod, opt_multiSelectorOn) {
+    return this.getElement(context, selector, selectionMethod).then(
+      (element) => {
+        userAssert(
+          element.classList.contains('i-amphtml-element'),
+          'Element "%s" is required to be an AMP element',
+          selector
+        );
+        return element;
+      }
+    );
   }
 
   /**
@@ -310,7 +317,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(listener, context, selector, selectionMethod = null) {
-    return event => {
+    return (event) => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
         // cannot be retargeted across the boundary of the embed.
@@ -400,7 +407,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;

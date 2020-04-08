@@ -24,7 +24,7 @@ describes.endtoend(
     browsers: ['chrome', 'firefox'],
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 
@@ -37,7 +37,8 @@ describes.endtoend(
       ).to.exist;
     });
 
-    it('should copy the link using the browser share menu', async () => {
+    // TODO(estherkim): re-enable this test.
+    it.skip('should copy the link using the browser share menu', async () => {
       // copy link
       const shareButton = await controller.findElement(
         'a.i-amphtml-story-share-control.i-amphtml-story-button'

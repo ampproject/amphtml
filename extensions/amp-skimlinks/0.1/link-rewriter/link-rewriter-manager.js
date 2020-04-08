@@ -164,7 +164,7 @@ export class LinkRewriterManager {
         clickType: event.type,
       };
 
-      suitableLinkRewriters.forEach(linkRewriter => {
+      suitableLinkRewriters.forEach((linkRewriter) => {
         const event = {
           type: EVENTS.CLICK,
           eventData,
@@ -207,7 +207,7 @@ export class LinkRewriterManager {
    * @private
    */
   onDomChanged_() {
-    this.linkRewriters_.forEach(linkRewriter => {
+    this.linkRewriters_.forEach((linkRewriter) => {
       linkRewriter.onDomUpdated();
     });
   }

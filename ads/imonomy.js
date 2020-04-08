@@ -40,7 +40,7 @@ export function imonomy(global, data) {
     const timer = setTimeout(() => {
       callDoubleclick(EVENT_TIMEOUT);
     }, data.timeout);
-    const callDoubleclick = function(code) {
+    const callDoubleclick = function (code) {
       if (calledDoubleclick) {
         return;
       }

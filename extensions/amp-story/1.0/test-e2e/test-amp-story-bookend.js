@@ -26,7 +26,7 @@ describes.endtoend(
     environments: ['single'],
     deviceName: 'iPhone X', // bookend appears only on mobile
   },
-  async env => {
+  async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 

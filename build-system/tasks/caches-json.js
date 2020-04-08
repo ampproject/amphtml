@@ -20,7 +20,7 @@ const gulp = require('gulp');
 const log = require('fancy-log');
 const through2 = require('through2');
 
-const expectedCaches = ['cloudflare', 'google'];
+const expectedCaches = ['google'];
 
 const cachesJsonPath = 'build-system/global-configs/caches.json';
 
@@ -31,7 +31,7 @@ const cachesJsonPath = 'build-system/global-configs/caches.json';
  */
 async function cachesJson() {
   return gulp.src([cachesJsonPath]).pipe(
-    through2.obj(function(file) {
+    through2.obj(function (file) {
       let obj;
       try {
         obj = JSON.parse(file.contents.toString());

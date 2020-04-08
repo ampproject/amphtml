@@ -147,6 +147,13 @@ export class Performance {
     );
 
     /**
+     * Whether the user agent supports the navigation timing API
+     *
+     * @private {boolean}
+     */
+    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
+
+    /**
      * The latest reported largest contentful paint time, where the loadTime
      * is specified.
      *
@@ -260,7 +267,7 @@ export class Performance {
    */
   maybeAddStoryExperimentId_() {
     const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
-    return isStoryDocument(ampdoc).then(isStory => {
+    return isStoryDocument(ampdoc).then((isStory) => {
       if (isStory) {
         this.addEnabledExperiment('story');
       }
@@ -290,7 +297,8 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-    const processEntry = entry => {
+    let recordedNavigation = false;
+    const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
         recordedFirstPaint = true;
@@ -319,6 +327,18 @@ export class Performance {
         if (entry.renderTime) {
           this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
+      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
+        [
+          'domComplete',
+          'domContentLoadedEventEnd',
+          'domContentLoadedEventStart',
+          'domInteractive',
+          'loadEventEnd',
+          'loadEventStart',
+          'requestStart',
+          'responseStart',
+        ].forEach((label) => this.tick(label, entry[label]));
+        recordedNavigation = true;
       }
     };
 
@@ -348,6 +368,11 @@ export class Performance {
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
+    if (this.supportsNavigation_) {
+      const navigationObserver = this.createPerformanceObserver_(processEntry);
+      navigationObserver.observe({type: 'navigation', buffered: true});
+    }
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -371,7 +396,7 @@ export class Performance {
    * @private
    */
   createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver(list => {
+    return new this.win.PerformanceObserver((list) => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
@@ -385,7 +410,7 @@ export class Performance {
     if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
       return;
     }
-    this.win.perfMetrics.onFirstInputDelay(delay => {
+    this.win.perfMetrics.onFirstInputDelay((delay) => {
       this.tickDelta('fid-polyfill', delay);
       this.flush();
     });
@@ -701,7 +726,7 @@ export class Performance {
       return;
     }
 
-    this.events_.forEach(tickEvent => {
+    this.events_.forEach((tickEvent) => {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;

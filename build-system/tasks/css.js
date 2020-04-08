@@ -75,7 +75,7 @@ const cssEntryPoints = [
  */
 function compileCss(watch) {
   if (watch) {
-    gulpWatch('css/**/*.css', function() {
+    gulpWatch('css/**/*.css', function () {
       compileCss();
     });
   }
@@ -99,7 +99,7 @@ function compileCss(watch) {
         }
       )
         .pipe(gulp.dest('build'))
-        .on('end', function() {
+        .on('end', function () {
           mkdirSync('build');
           mkdirSync('build/css');
           if (append) {
@@ -119,7 +119,7 @@ function compileCss(watch) {
    * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
-    return jsifyCssAsync(`css/${path}`).then(css =>
+    return jsifyCssAsync(`css/${path}`).then((css) =>
       writeCss(css, outJs, outCss, append)
     );
   }
@@ -131,7 +131,7 @@ function compileCss(watch) {
 
   let promise = Promise.resolve();
 
-  cssEntryPoints.forEach(entryPoint => {
+  cssEntryPoints.forEach((entryPoint) => {
     const {path, outJs, outCss, append} = entryPoint;
     promise = promise.then(() =>
       writeCssEntryPoint(path, outJs, outCss, append)

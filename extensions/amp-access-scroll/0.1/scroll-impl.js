@@ -15,11 +15,11 @@
  */
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {ActivateBar, ScrollUserBar} from './scroll-bar';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
+import {ScrollBar} from './scroll-bar';
 import {Services} from '../../../src/services';
 import {Sheet} from './scroll-sheet';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -33,7 +33,7 @@ const TAG = 'amp-access-scroll-elt';
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const accessConfig = baseUrl => {
+const accessConfig = (baseUrl) => {
   /** @const {!JsonObject} */
   const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
     'authorization':
@@ -64,7 +64,7 @@ const accessConfig = baseUrl => {
  * @param {string} baseUrl
  * @return {!JsonObject}
  */
-const analyticsConfig = baseUrl => {
+const analyticsConfig = (baseUrl) => {
   const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
       'scroll':
@@ -103,7 +103,7 @@ const analyticsConfig = baseUrl => {
  * @param {!JsonObject} config
  * @return {string}
  */
-const devEtld = config => {
+const devEtld = (config) => {
   return getMode().development && config['etld'] ? config['etld'] : '';
 };
 
@@ -113,7 +113,7 @@ const devEtld = config => {
  * @param {!JsonObject} config
  * @return {string}
  */
-const connectHostname = config => {
+const connectHostname = (config) => {
   return `https://connect${devEtld(config) || '.scroll.com'}`;
 };
 
@@ -151,8 +151,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   /** @override */
   authorize() {
     // TODO(dbow): Handle timeout?
-    return super.authorize().then(response => {
-      const holdback = response['features'] && response['features']['h'];
+    return super.authorize().then((response) => {
       const isStory = this.ampdoc
         .getRootNode()
         .querySelector('amp-story[standalone]');
@@ -160,21 +159,20 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       if (response && response['scroll']) {
         if (!isStory) {
           // Display Scrollbar and set up features
-          const bar = new ScrollUserBar(
+          const bar = new ScrollBar(
             this.ampdoc,
             this.accessSource_,
-            this.baseUrl_,
-            holdback
+            this.baseUrl_
           );
-          const sheet = new Sheet(this.ampdoc, holdback);
+          const sheet = new Sheet(this.ampdoc);
 
           const relay = new Relay(this.baseUrl_);
-          relay.register(sheet.window, message => {
+          relay.register(sheet.window, (message) => {
             if (message['_scramp'] === 'au' || message['_scramp'] === 'st') {
               sheet.update(message);
             }
           });
-          relay.register(bar.window, message => {
+          relay.register(bar.window, (message) => {
             if (message['_scramp'] === 'st') {
               sheet.update(message);
               bar.update(message);
@@ -183,7 +181,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
 
           const config = this.accessSource_.getAdapterConfig();
           addAnalytics(this.ampdoc, config);
-          if (response['features'] && response['features']['readDepth']) {
+          if (response['features'] && response['features']['d']) {
             new ReadDepthTracker(
               this.ampdoc,
               this.accessSource_,
@@ -197,9 +195,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           response['blocker'] &&
           ScrollContentBlocker.shouldCheck(this.ampdoc)
         ) {
-          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check(
-            holdback
-          );
+          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
         }
       }
       return response;
@@ -235,27 +231,29 @@ class ScrollContentBlocker {
 
   /**
    * Check if the Scroll App blocks the resource request.
-   *
-   * @param {boolean} holdback
    */
-  check(holdback) {
+  check() {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
         () => false,
-        e => this.blockedByScrollApp_(e.message)
+        (e) => this.blockedByScrollApp_(e.message)
       )
-      .then(blockedByScrollApp => {
+      .then((blockedByScrollApp) => {
         if (blockedByScrollApp === true) {
           // TODO(dbow): Ideally we would automatically redirect to the page
           // here, but for now we are adding a button so we redirect on user
           // action.
-          new ActivateBar(
-            this.ampdoc_,
-            this.accessSource_,
-            connectHostname(this.accessSource_.getAdapterConfig()),
-            holdback
+          const baseUrl = connectHostname(
+            this.accessSource_.getAdapterConfig()
           );
+          const bar = new ScrollBar(this.ampdoc_, this.accessSource_, baseUrl);
+          const relay = new Relay(baseUrl);
+          relay.register(bar.window, (message) => {
+            if (message['_scramp'] === 'st') {
+              bar.update(message);
+            }
+          });
         }
       });
   }

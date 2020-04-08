@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+  text: Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
 ---
 
 <!---
@@ -24,31 +24,6 @@ limitations under the License.
 -->
 
 # amp-position-observer
-
-Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/visual-effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
-        <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Overview
 
@@ -91,7 +66,7 @@ the page.
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-      {
+    {
       "duration": "3s",
       "fill": "both",
       "direction": "alternate",
@@ -99,8 +74,8 @@ the page.
         {
           "selector": "#clock-scene .clock-hand",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
           ]
         }
       ]
@@ -161,7 +136,7 @@ as clock becomes less than 50% visible.
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-      {
+    {
       "duration": "3s",
       "fill": "both",
       "direction": "alternate",
@@ -169,8 +144,8 @@ as clock becomes less than 50% visible.
         {
           "selector": "#clock-scene .clock-hand",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
           ]
         }
       ]

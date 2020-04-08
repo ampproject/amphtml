@@ -40,8 +40,8 @@ function fakeTouchEvent(type) {
   };
 }
 
-describes.fakeWin('TouchHandler', {}, env => {
-  describe('TouchHandler Unit Tests', function() {
+describes.fakeWin('TouchHandler', {}, (env) => {
+  describe('TouchHandler Unit Tests', function () {
     class WindowPortEmulator {
       constructor(win, origin) {
         /** @const {!Window} */
@@ -73,14 +73,18 @@ describes.fakeWin('TouchHandler', {}, env => {
       unlistenCount = 0;
       messages = [];
       win = env.win;
-      win.document.addEventListener = function(eventType, handler, options) {
+      win.document.addEventListener = function (eventType, handler, options) {
         listeners.push({
           type: eventType,
           handler,
           options,
         });
       };
-      win.document.removeEventListener = function(eventType, handler, options) {
+      win.document.removeEventListener = function (
+        eventType,
+        handler,
+        options
+      ) {
         expect(listeners[unlistenCount].type).to.equal(eventType);
         expect(listeners[unlistenCount].handler).to.equal(handler);
         expect(listeners[unlistenCount].options).to.equal(options);

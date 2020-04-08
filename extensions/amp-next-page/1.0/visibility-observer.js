@@ -96,12 +96,12 @@ export class VisibilityObserverEntry {
 
     this.observer_
       .getPositionObserver()
-      .observe(top, PositionObserverFidelity.LOW, position =>
+      .observe(top, PositionObserverFidelity.LOW, (position) =>
         this.topSentinelPositionChanged(position)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, PositionObserverFidelity.LOW, position =>
+      .observe(bottom, PositionObserverFidelity.LOW, (position) =>
         this.bottomSentinelPositionChanged(position)
       );
   }
@@ -236,7 +236,7 @@ export default class VisibilityObserver {
         const scrollDirection =
           delta > 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
 
-        this.entries_.forEach(entry => {
+        this.entries_.forEach((entry) => {
           // Entries that rely on scroll should be updated on every scroll
           // while entries that reliy on sentinels should only be updated
           // if the scroll direction changes

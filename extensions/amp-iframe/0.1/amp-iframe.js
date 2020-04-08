@@ -54,6 +54,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'referrerpolicy',
   'scrolling',
   'tabindex',
+  'title',
 ];
 
 /** @type {number}  */
@@ -125,6 +126,11 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasErroredEmbedSize_ = false;
   }
 
   /** @override */
@@ -258,10 +264,9 @@ export class AmpIframe extends AMP.BaseElement {
   firstAttachedCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc =
-      /** @type {string} */ (this.transformSrc_(
-        this.element.getAttribute('src')
-      ) ||
+    const iframeSrc = /** @type {string} */ (this.transformSrc_(
+      this.element.getAttribute('src')
+    ) ||
       this.transformSrcDoc_(
         this.element.getAttribute('srcdoc'),
         this.sandbox_
@@ -465,7 +470,7 @@ export class AmpIframe extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.updateSize_(data['height'], data['width']);
       },
       /*opt_is3P*/ undefined,
@@ -474,7 +479,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     // Listen for resize messages sent by Pym.js.
-    this.unlistenPym_ = listen(this.win, 'message', event => {
+    this.unlistenPym_ = listen(this.win, 'message', (event) => {
       return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
     });
 
@@ -618,6 +623,11 @@ export class AmpIframe extends AMP.BaseElement {
         );
       }
     }
+    if (this.iframe_ && mutations['title']) {
+      // only propagating title because propagating all causes e2e error:
+      // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
+      this.propagateAttributes(['title'], this.iframe_);
+    }
   }
 
   /**
@@ -665,11 +675,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      this.user().error(
-        TAG_,
-        'Ignoring embed-size request because this iframe is not resizable',
-        this.element
-      );
+      if (!this.hasErroredEmbedSize_) {
+        this.user().error(
+          TAG_,
+          'Ignoring embed-size request because this iframe is not resizable',
+          this.element
+        );
+        this.hasErroredEmbedSize_ = true;
+      }
       return;
     }
 
@@ -743,7 +756,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     // Register action (even if targetOrigin_ is not available so we can
     // provide a helpful error message).
-    this.registerAction('postMessage', invocation => {
+    this.registerAction('postMessage', (invocation) => {
       if (this.targetOrigin_) {
         this.iframe_.contentWindow./*OK*/ postMessage(
           invocation.args,
@@ -766,7 +779,7 @@ export class AmpIframe extends AMP.BaseElement {
     const maxUnexpectedMessages = 10;
     let unexpectedMessages = 0;
 
-    const listener = e => {
+    const listener = (e) => {
       if (e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
@@ -882,6 +895,6 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.extension(TAG_, '0.1', AMP => {
+AMP.extension(TAG_, '0.1', (AMP) => {
   AMP.registerElement(TAG_, AmpIframe);
 });

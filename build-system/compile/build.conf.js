@@ -16,10 +16,19 @@
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
-const localPlugin = name =>
+const localPlugin = (name) =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
-const defaultPlugins = isEsmBuild => [
+const jsxOpts = {
+  pragma: 'Preact.createElement',
+  pragmaFrag: 'Preact.Fragment',
+  useSpread: true,
+};
+
+const defaultPlugins = (isEsmBuild) => [
+  localPlugin('transform-fix-leading-comments'),
+  '@babel/plugin-transform-react-constant-elements',
+  ['@babel/plugin-transform-react-jsx', jsxOpts],
   localPlugin('transform-inline-configure-component'),
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
@@ -32,6 +41,16 @@ const defaultPlugins = isEsmBuild => [
   getReplacePlugin(isEsmBuild),
 ];
 
+const postCompilationPlugins = (isEsmBuild) =>
+  isEsmBuild
+    ? [
+        localPlugin('transform-minified-comments'),
+        localPlugin('transform-remove-directives'),
+        localPlugin('transform-function-declarations'),
+        localPlugin('transform-stringish-literals'),
+      ]
+    : [];
+
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
   './polyfills/domtokenlist': ['installDOMTokenList'],
@@ -41,6 +60,7 @@ const esmRemovedImports = {
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
   './polyfills/array-includes': ['installArrayIncludes'],
+  '../third_party/css-escape/css-escape': ['cssEscape'],
 };
 
 // Removable imports that are not needed for valid transformed documents.
@@ -85,7 +105,7 @@ function getReplacePlugin(isEsmBuild) {
   }
 
   // default each experiment flag constant to false
-  Object.keys(experimentsConfig).forEach(experiment => {
+  Object.keys(experimentsConfig).forEach((experiment) => {
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
@@ -100,9 +120,10 @@ function getReplacePlugin(isEsmBuild) {
   });
 
   // default each backup experiment constant to the customized value
-  for (const [experimentDefine, value] of Object.entries(
+  const experimentsConstantBackupEntries = Object.entries(
     experimentsConstantBackup
-  )) {
+  );
+  for (const [experimentDefine, value] of experimentsConstantBackupEntries) {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
@@ -129,8 +150,18 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
-  const applied = [...defaultPlugins(isEsmBuild || false)];
+function plugins({
+  isEsmBuild,
+  isForTesting,
+  isSinglePass,
+  isChecktypes,
+  isPostCompile,
+}) {
+  if (isPostCompile) {
+    return postCompilationPlugins(isEsmBuild);
+  }
+
+  const applied = [...defaultPlugins(isEsmBuild)];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -142,15 +173,18 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
-    applied.push([
-      'filter-imports',
-      {
-        imports: {
-          ...esmRemovedImports,
-          ...validTransformedRemovableImports,
+    applied.push(
+      [
+        'filter-imports',
+        {
+          imports: {
+            ...esmRemovedImports,
+            ...validTransformedRemovableImports,
+          },
         },
-      },
-    ]);
+      ],
+      localPlugin('transform-function-declarations')
+    );
   }
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));
@@ -161,10 +195,11 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
   }
   if (!(isForTesting || isChecktypes)) {
     applied.push(
-      localPlugin('amp-mode-transformer'),
+      [localPlugin('amp-mode-transformer'), {isEsmBuild}],
       localPlugin('is_dev-constant-transformer')
     );
   }
+
   return applied;
 }
 

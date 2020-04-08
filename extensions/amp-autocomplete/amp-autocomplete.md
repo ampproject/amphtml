@@ -2,6 +2,7 @@
 $category: dynamic-content
 formats:
   - websites
+  - email
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
@@ -22,30 +23,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-autocomplete`
+# amp-autocomplete
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An autocomplete-enabled input field suggests completed results corresponding to the user input as they type into the input field.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-     <td>Launched</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-autocomplete/">amp-autocomplete</a> sample.</td>
-  </tr>
-</table>
+[filter formats="email"]
+
+Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
+
+[/filter] <!-- formats="email" -->
 
 ## Behavior
 

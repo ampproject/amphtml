@@ -59,7 +59,7 @@ export class NavigationState {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       if (isActive) {
         this.fire_(StateChangeType.BOOKEND_ENTER);
         this.fire_(StateChangeType.END);
@@ -95,7 +95,7 @@ export class NavigationState {
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
 
     if (pageIndex >= totalPages - 1) {
-      this.hasBookend_().then(hasBookend => {
+      this.hasBookend_().then((hasBookend) => {
         if (!hasBookend) {
           this.fire_(StateChangeType.END);
         }
