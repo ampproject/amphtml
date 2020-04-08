@@ -444,6 +444,8 @@ class AnimationRunner {
 
   /** @private */
   notifyFinish_() {
+    // TODO(alanorozco): This should work with <amp-story-animation> by
+    // exposing it as a sequencing id.
     if (this.presetTarget_ && this.presetTarget_.id) {
       this.sequence_.notifyFinish(this.presetTarget_.id);
     }
