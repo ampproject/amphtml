@@ -98,13 +98,12 @@ module.exports = function (babel) {
     }
 
     if (type) {
-      path.replaceWith(t.parenthesizedExpression(arg));
-      // If it starts with a capital, make the type non-nullable.
-      if (/^[A-Z]/.test(type)) {
-        type = '!' + type;
-      }
+      path.replaceWith(arg);
+
+      // If it starts with a capital, make the commented type non-nullable.
+      const comment = `* @type {${/^[A-Z]/.test(type) ? '!' : ''}${type}}`;
       // Add a cast annotation to fix type.
-      path.addComment('leading', `* @type {${type}} `);
+      path.addComment('leading', comment);
     } else if (!assertion) {
       path.replaceWith(t.parenthesizedExpression(arg));
     }
