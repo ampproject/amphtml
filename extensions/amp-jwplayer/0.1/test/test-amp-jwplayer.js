@@ -282,7 +282,6 @@ describes.realWin(
           mockMessage('fullscreen', { fullscreen: false });
           expect(exitSpy.called).to.be.true;
           expect(enterSpy.callCount).to.equal(1);
-          // impl.isFullscreen = oldIsFS;
         });
 
         it('updates duration from meta', () => {
