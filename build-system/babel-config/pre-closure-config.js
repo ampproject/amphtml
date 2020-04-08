@@ -39,6 +39,7 @@ function getPreClosureConfig() {
         './polyfills/object-values': ['installObjectValues'],
         './polyfills/promise': ['installPromise'],
         './polyfills/array-includes': ['installArrayIncludes'],
+        './ie-media-bug': ['ieMediaCheckAndFix'],
         '../third_party/css-escape/css-escape': ['cssEscape'],
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
