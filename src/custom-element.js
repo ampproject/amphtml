@@ -32,6 +32,10 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
+import {
+  getImplementationClass,
+  upgradeWhenRegistered,
+} from './service/custom-element-registry';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
@@ -40,7 +44,7 @@ import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from './utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -216,18 +220,10 @@ function createBaseCustomElementClass(win) {
        */
       this.layoutScheduleTime = undefined;
 
-      // Closure compiler appears to mark HTMLElement as @struct which
-      // disables bracket access. Force this with a type coercion.
-      const nonStructThis = /** @type {!Object} */ (this);
+      const Ctor = getMode().test
+        ? getImplementationClass(win, this)
+        : ElementStub;
 
-      // `opt_implementationClass` is only used for tests.
-      let Ctor =
-        win.__AMP_EXTENDED_ELEMENTS &&
-        win.__AMP_EXTENDED_ELEMENTS[this.localName];
-      if (getMode().test && nonStructThis['implementationClassForTesting']) {
-        Ctor = nonStructThis['implementationClassForTesting'];
-      }
-      devAssert(Ctor);
       /** @private {!./base-element.BaseElement} */
       this.implementation_ = new Ctor(this);
 
@@ -270,6 +266,10 @@ function createBaseCustomElementClass(win) {
 
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
+
+      // Closure compiler appears to mark HTMLElement as @struct which
+      // disables bracket access. Force this with a type coercion.
+      const nonStructThis = /** @type {!Object} */ (this);
 
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
@@ -343,7 +343,17 @@ function createBaseCustomElementClass(win) {
         // Already upgraded or in progress or failed.
         return;
       }
-      this.implementation_ = new newImplClass(this);
+
+      // If the implmementation fails to construct, we'll leave it as a
+      // ElementStub. The runtime will ignore the element from now on.
+      try {
+        this.implementation_ = new newImplClass(this);
+      } catch (e) {
+        this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
+        const TAG = this.tagName;
+        dev().error(TAG, 'Failed to construct BaseElement', e);
+        return;
+      }
       if (this.everAttached) {
         // Usually, we do an implementation upgrade when the element is
         // attached to the DOM. But, if it hadn't yet upgraded from
@@ -768,11 +778,8 @@ function createBaseCustomElementClass(win) {
       }
       this.isConnected_ = true;
 
-      if (!this.everAttached) {
-        this.classList.add('i-amphtml-element');
-        this.classList.add('i-amphtml-notbuilt');
-        this.classList.add('amp-notbuilt');
-      }
+      const wasEverAttached = this.everAttached;
+      this.everAttached = true;
 
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
@@ -780,17 +787,6 @@ function createBaseCustomElementClass(win) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
-        // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
-        if (
-          isStub(this.implementation_) &&
-          !ampdoc.declaresExtension(extensionId)
-        ) {
-          Services.extensionsFor(win).installExtensionForDoc(
-            ampdoc,
-            extensionId
-          );
-        }
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
@@ -798,7 +794,7 @@ function createBaseCustomElementClass(win) {
       }
       this.getResources().add(this);
 
-      if (this.everAttached) {
+      if (wasEverAttached) {
         const reconstruct = this.reconstructWhenReparented();
         if (reconstruct) {
           this.reset_();
@@ -810,22 +806,43 @@ function createBaseCustomElementClass(win) {
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
-        this.everAttached = true;
-
         try {
           this.layout_ = applyStaticLayout(this);
         } catch (e) {
           reportError(e, this);
         }
-        if (!isStub(this.implementation_)) {
-          this.tryUpgrade_();
-        }
-        if (!this.isUpgraded()) {
-          this.classList.add('amp-unresolved');
-          this.classList.add('i-amphtml-unresolved');
-          // amp:attached is dispatched from the ElementStub class when it
-          // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+
+        this.classList.add('i-amphtml-element');
+        this.classList.add('i-amphtml-notbuilt');
+        this.classList.add('amp-notbuilt');
+
+        if (isStub(this.implementation_)) {
+          const Ctor = getImplementationClass(win, this);
+
+          // If the registered BaseElement implementation is still the
+          // ElementStub, that means the extension script hasn't been
+          // downloaded yet to register the real BaseElement implementation.
+          // We'll need to wait until it is before it can be "upgraded".
+          if (Ctor === ElementStub) {
+            upgradeWhenRegistered(this);
+
+            // Load the pre-stubbed extension if needed.
+            const extensionId = this.localName;
+            if (!this.ampdoc_.declaresExtension(extensionId)) {
+              Services.extensionsFor(win).installExtensionForDoc(
+                this.ampdoc_,
+                extensionId
+              );
+            }
+
+            this.classList.add('amp-unresolved');
+            this.classList.add('i-amphtml-unresolved');
+            // amp:attached is dispatched from the ElementStub class when it
+            // replayed the firstAttachedCallback call.
+            this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+          } else {
+            this.upgrade(Ctor);
+          }
         }
         // Classically, sizes/media queries are applied just before
         // Resource.measure. With IntersectionObserver, observe() is the

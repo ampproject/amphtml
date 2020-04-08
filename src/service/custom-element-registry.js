@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {ElementStub, stubbedElements} from '../element-stub';
+import {ElementStub} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
+import {devAssert, userAssert} from '../log';
 import {extensionScriptsInNode} from '../element-service';
+import {getMode} from '../mode';
 import {reportError} from '../error';
-import {userAssert} from '../log';
+
+/** @type {!Array<!Element>} */
+const stubbedElements = [];
 
 /**
  * @param {!Window} win
@@ -29,6 +33,33 @@ function getExtendedElements(win) {
     win.__AMP_EXTENDED_ELEMENTS = {};
   }
   return win.__AMP_EXTENDED_ELEMENTS;
+}
+
+/**
+ * Returns the BaseElement implementation that the element should upgrade to.
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {function(new:../base-element.BaseElement, !Element)}
+ */
+export function getImplementationClass(win, el) {
+  // Closure compiler appears to mark HTMLElement as @struct which
+  // disables bracket access. Force this with a type coercion.
+  const nonStructEl = /** @type {!Object} */ (el);
+
+  let Ctor = getExtendedElements(win)[el.localName];
+  if (getMode().test && nonStructEl['implementationClassForTesting']) {
+    Ctor = nonStructEl['implementationClassForTesting'];
+  }
+  return devAssert(Ctor);
+}
+
+/**
+ * Schedules the element to have its BaseElement implementation upgraded when
+ * it becomes registered.
+ * @param {!Element} el
+ */
+export function upgradeWhenRegistered(el) {
+  stubbedElements.push(el);
 }
 
 /**
@@ -54,27 +85,27 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     name,
     name
   );
+
   knownElements[name] = toClass;
+  let pointer = 0;
+
+  // The only elements in stubbedElements are the ones that were parsed or
+  // document.createElement-and-connected after registering the CE name (eg,
+  // amp-img registered as ElementStub), but before the actual BaseElement
+  // implementation was registered. We need to go through and "upgrade" the BE
+  // implmementation on these elements.
   for (let i = 0; i < stubbedElements.length; i++) {
-    const stub = stubbedElements[i];
-    // There are 3 possible states here:
-    // 1. We never made the stub because the extended impl. loaded first.
-    //    In that case the element won't be in the array.
-    // 2. We made a stub but the browser didn't attach it yet. In
-    //    that case we don't need to upgrade but simply switch to the new
-    //    implementation.
-    // 3. A stub was attached. We upgrade which means we replay the
-    //    implementation.
-    const {element} = stub;
+    const element = stubbedElements[i];
     if (
       element.tagName.toLowerCase() == name &&
       element.ownerDocument.defaultView == win
     ) {
       tryUpgradeElement_(element, toClass);
-      // Remove element from array.
-      stubbedElements.splice(i--, 1);
+    } else {
+      stubbedElements[pointer++] = element;
     }
   }
+  stubbedElements.length = pointer;
 }
 
 /**
