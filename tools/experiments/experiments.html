@@ -81,6 +81,21 @@
       min-width: 60px;
     }
 
+    details {
+      border: solid 1px gray;
+      margin-top: 5px;
+      padding: 10px;
+    }
+
+    details summary {
+      color: gray;
+      cursor: pointer;
+    }
+
+    details[open] summary {
+      color: inherit;
+    }
+
     #subdomain {
       color: gray;
       font-family: 'Courier New', Courier, monospace;
@@ -110,6 +125,21 @@
 
     tr[data-on='default'] .default {
       display: block;
+    }
+
+    #rtv {
+      border: solid 1px gray;
+      width: calc(100% - 150px);
+      padding: 10px;
+    }
+
+    #rtv-submit {
+      background: #aaa;
+      margin: 5px;
+    }
+
+    #rtv-submit[disabled] {
+      color: #777;
     }
 
     #redirect > input {
@@ -218,6 +248,20 @@
 
   <section class="content">
     <table id="channels-table" border=1></table>
+    <details id="rtv-details">
+      <summary>Advanced</summary>
+      <p>
+        You can manually opt in to a previously released RTV using this form.
+      </p>
+      <p>
+        <em>Warning:</em> This is an advanced setting. It is intended for use while debugging AMP runtime code, and is
+        not meant to be used to publish AMP documents. To opt out of this setting, clear the RTV in the input field.
+      </p>
+      <div>
+        <input id="rtv" placeholder="E.g., 011912312359590" maxlength="15" type="text">
+        <button id="rtv-submit" disabled>opt-in</button>
+      </div>
+    </detail>
   </section>
 
   <!-- Only displayed on top-level cdn.ampproject.org. -->

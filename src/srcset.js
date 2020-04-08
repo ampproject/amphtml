@@ -232,7 +232,7 @@ export class Srcset {
    * @return {!Array<string>}
    */
   getUrls() {
-    return this.sources_.map(s => s.url);
+    return this.sources_.map((s) => s.url);
   }
 
   /**

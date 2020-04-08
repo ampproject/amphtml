@@ -19,7 +19,7 @@ import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, (env) => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
   let defaultConfig;
@@ -28,14 +28,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsentConfigEl;
   let storyConsentEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     defaultConfig = {
       title: 'Foo title.',
@@ -51,7 +53,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       .returns(styles);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+    registerServiceBuilder(win, 'localization-v01', function () {
+      return localizationService;
+    });
 
     // Test DOM structure:
     // <amp-consent>

@@ -156,7 +156,7 @@ export function getTextColorForRGB(rgb) {
   const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  const getLinearRGBValue = x => {
+  const getLinearRGBValue = (x) => {
     // 8bit to sRGB.
     x /= 255;
 
@@ -238,13 +238,13 @@ export function getSourceOriginForElement(element, url) {
 
 /**
  * Resolves an image url and optimizes it if served from the cache.
- * @param {!Document} doc
+ * @param {!Window} win
  * @param {string} url
  * @return {string}
  */
-export function resolveImgSrc(doc, url) {
-  let urlSrc = resolveRelativeUrl(url, doc.location);
-  if (isProxyOrigin(doc.location.href)) {
+export function resolveImgSrc(win, url) {
+  let urlSrc = resolveRelativeUrl(url, win.location);
+  if (isProxyOrigin(win.location.href)) {
     // TODO(Enriqe): add extra params for resized image, for example:
     // (/ii/w${width}/s)
     urlSrc = urlSrc.replace('/c/s/', '/i/s/');
@@ -256,7 +256,6 @@ export function resolveImgSrc(doc, url) {
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  PAGE_ID: 'ampStoryPageId',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
@@ -341,7 +340,7 @@ export function setTextBackgroundColor(element) {
     TEXT_BACKGROUND_COLOR_SELECTOR
   );
 
-  Array.prototype.forEach.call(elementsToUpgradeStyles, el => {
+  Array.prototype.forEach.call(elementsToUpgradeStyles, (el) => {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });

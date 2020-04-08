@@ -22,13 +22,16 @@ import {endsWith} from '../../src/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {toggle} from '../../src/style';
 import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, () => {
+  let parentApi;
   let documentApi;
   let ampdoc;
+  let viewer;
   let vsyncApi;
   let vsyncTasks;
   let docBody, docElem;
@@ -42,6 +45,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let timer;
 
   beforeEach(() => {
+    parentApi = {};
     documentApi = {};
     allRules = {};
 
@@ -139,13 +143,13 @@ describes.sandboxed('FixedLayer', {}, () => {
           ],
         },
       ],
-      querySelectorAll: selector => {
+      querySelectorAll: (selector) => {
         if (!allRules[selector]) {
           return null;
         }
         return allRules[selector].elements;
       },
-      contains: elem => {
+      contains: (elem) => {
         return !!elem.parentElement;
       },
       defaultView: {
@@ -153,18 +157,19 @@ describes.sandboxed('FixedLayer', {}, () => {
         clearTimeout: window.clearTimeout,
         Promise: window.Promise,
         MutationObserver: FakeMutationObserver,
-        getComputedStyle: elem => {
+        getComputedStyle: (elem) => {
           return elem.computedStyle;
         },
         navigator: window.navigator,
         location: window.location,
         cookie: '',
       },
-      createElement: name => {
+      createElement: (name) => {
         return createElement(name);
       },
       documentElement: docElem,
       body: docBody,
+      parent: parentApi,
     });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
@@ -172,15 +177,18 @@ describes.sandboxed('FixedLayer', {}, () => {
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
+    installViewerServiceForDoc(ampdoc);
     timer = Services.timerFor(documentApi.defaultView);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => true;
 
     vsyncTasks = [];
     vsyncApi = {
-      runPromise: task => {
+      runPromise: (task) => {
         vsyncTasks.push(task);
         return Promise.resolve();
       },
-      mutate: mutator => {
+      mutate: (mutator) => {
         vsyncTasks.push({mutate: mutator});
       },
     };
@@ -189,7 +197,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   class FakeAttributes {
     constructor() {
       const attrs = [];
-      attrs.setNamedItem = function({name, value}) {
+      attrs.setNamedItem = function ({name, value}) {
         for (let i = 0; i < this.length; i++) {
           if (this[i].name === name) {
             this[i].value = value;
@@ -319,7 +327,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         transition: '',
       },
       matches: () => true,
-      compareDocumentPosition: other => {
+      compareDocumentPosition: (other) => {
         if (other.id > id) {
           return Node.DOCUMENT_POSITION_FOLLOWING;
         }
@@ -372,11 +380,11 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
       },
       attributes: new FakeAttributes(),
-      appendChild: child => {
+      appendChild: (child) => {
         child.parentElement = elem;
         children.push(child);
       },
-      removeChild: child => {
+      removeChild: (child) => {
         const index = children.indexOf(child);
         if (index != -1) {
           children.splice(index, 1);
@@ -1197,7 +1205,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          window.sandbox.stub(timer, 'delay').callsFake(callback => {
+          window.sandbox.stub(timer, 'delay').callsFake((callback) => {
             callback();
           });
           return mutationObserver
@@ -1255,6 +1263,10 @@ describes.sandboxed('FixedLayer', {}, () => {
     const transfer = true;
 
     beforeEach(() => {
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
       fixedLayer = new FixedLayer(
         ampdoc,
         vsyncApi,
@@ -1270,6 +1282,9 @@ describes.sandboxed('FixedLayer', {}, () => {
       const ampdoc = new AmpDocSingle(win);
       installPlatformService(win);
       installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
 
       const fixedLayer = new FixedLayer(
         ampdoc,
@@ -1601,7 +1616,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        window.sandbox.stub(timer, 'delay').callsFake(callback => {
+        window.sandbox.stub(timer, 'delay').callsFake((callback) => {
           callback();
         });
         return mutationObserver
@@ -1691,102 +1706,140 @@ describes.sandboxed('FixedLayer', {}, () => {
   });
 });
 
-describes.realWin('FixedLayer', {}, env => {
-  let win, doc;
+describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
+  let win;
   let ampdoc;
-  let fixedLayer;
-  let transferLayer;
-  let root;
-  let shadowRoot;
-  let container;
+  let viewer;
+  let vsyncApi;
 
-  const vsyncTasks = [];
-  const vsyncApi = {
-    runPromise: task => {
-      vsyncTasks.push(task);
-      return Promise.resolve();
-    },
-    mutate: mutator => {
-      vsyncTasks.push({mutate: mutator});
-    },
-  };
+  beforeEach(() => {
+    win = new FakeWindow();
+    window.__AMP_MODE = {
+      localDev: false,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    };
 
-  // Can only test when Shadow DOM is available.
-  describe
-    .configure()
-    .if(() => Element.prototype.attachShadow)
-    .run('shadow transfer', function() {
-      beforeEach(function() {
-        win = env.win;
-        doc = win.document;
+    const vsyncTasks = [];
+    vsyncApi = {
+      runPromise: (task) => {
+        vsyncTasks.push(task);
+        return Promise.resolve();
+      },
+      mutate: (mutator) => {
+        vsyncTasks.push({mutate: mutator});
+      },
+    };
+  });
 
-        installPlatformService(win);
-        installTimerService(win);
-        ampdoc = new AmpDocSingle(win);
-        shadowRoot = win.document.body.attachShadow({mode: 'open'});
-        fixedLayer = new FixedLayer(
-          ampdoc,
-          vsyncApi,
-          /* borderTop */ 0,
-          /* paddingTop */ 11,
-          /* transfer */ true
-        );
-        fixedLayer.setup();
-        transferLayer = fixedLayer.getTransferLayer_();
-        root = transferLayer.getRoot();
-        container = doc.createElement('div');
-        doc.body.appendChild(container);
-      });
+  it('should not perform setup when served canonically', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => false;
 
-      it('should create layer correctly', () => {
-        expect(root.parentNode).to.equal(shadowRoot);
-        expect(root.id).to.equal('i-amphtml-fixed-layer');
-        expect(root.style.position).to.equal('absolute');
-        expect(root.style.top).to.equal('0px');
-        expect(root.style.left).to.equal('0px');
-        expect(root.style.width).to.equal('0px');
-        expect(root.style.height).to.equal('0px');
-        expect(root.style.overflow).to.equal('hidden');
-        expect(root.style.visibility).to.equal('');
-        expect(root.children).to.have.length(1);
-        expect(root.children[0].tagName).to.equal('SLOT');
-        expect(root.children[0].name).to.equal('i-amphtml-fixed');
-      });
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.false;
+  });
 
-      it('should transfer element', () => {
-        const element = doc.createElement('div');
-        container.appendChild(element);
-        const fe = {element, id: 'F0'};
-        transferLayer.transferTo(fe);
+  it('should perform setup when served within a viewer', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => true;
 
-        // Element stays where it was.
-        expect(element.parentElement).to.equal(container);
-        expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
-        expect(root.children).to.have.length(1);
-
-        // Ensure that repeat slotting doesn't change anything.
-        transferLayer.transferTo(fe);
-        expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
-        expect(root.children).to.have.length(1);
-      });
-
-      it('should return element', () => {
-        const element = doc.createElement('div');
-        container.appendChild(element);
-        const fe = {element, id: 'F0'};
-        transferLayer.transferTo(fe);
-        expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
-        expect(root.children).to.have.length(1);
-
-        // The slot distribution is canceled, but the slot itself is kept.
-        transferLayer.returnFrom(fe);
-        expect(element.getAttribute('slot')).to.be.null;
-        expect(root.children).to.have.length(1);
-
-        // Ensure that repeat slotting doesn't change anything.
-        transferLayer.transferTo(fe);
-        expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
-        expect(root.children).to.have.length(1);
-      });
-    });
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.true;
+  });
 });
+
+describes.sandboxed(
+  'FixedLayer Setup Execution Bailouts with Local Development',
+  {},
+  () => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: (task) => {
+          vsyncTasks.push(task);
+          return Promise.resolve();
+        },
+        mutate: (mutator) => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should perform setup when served canonically', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => false;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
+
+    it('should perform setup when served within a viewer', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
+  }
+);

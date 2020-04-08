@@ -62,11 +62,10 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-geo-override',
-    name: 'AMP consent modified to support CCPA',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
+    id: 'amp-consent-restrict-fullscreen',
+    name: 'AMP consent restrict fullscreen API before user interaction',
+    spec: 'https://github.com/ampproject/amphtml/issues/26432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
   },
   {
     id: 'amp-sidebar-v2',
@@ -107,6 +106,11 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'amp-list-init-from-state',
+    name: 'Allows amp-list to initialize off of amp-state',
+    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',
@@ -198,12 +202,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-next-page-v2',
-    name: 'Document-level (true) infinite scroll experience',
-    spec: 'https://github.com/ampproject/amphtml/issues/25500',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -232,11 +230,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'X',
   },
   {
-    id: 'amp-consent-v2',
-    name: 'Enables CMP support to amp-consent component',
-    spec: 'https://github.com/ampproject/amphtml/issues/17742',
-  },
-  {
     id: 'video-dock',
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
@@ -255,14 +248,6 @@ export const EXPERIMENTS = [
       'within friendly iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
-  },
-  {
-    id: 'fie-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
     id: 'amp-user-location',
@@ -301,10 +286,10 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
   },
   {
-    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
-    name: 'Use amp-ad responsive to make amp auto ads responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
+    id: 'intersect-resources',
+    name: 'Use IntersectionObserver for resource scheduling.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25428',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
   },
   {
     id: 'layoutbox-invalidate-on-scroll',
@@ -313,5 +298,17 @@ export const EXPERIMENTS = [
       'after that scroller scrolls.',
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
+  },
+  {
+    id: 'amp-stream-gallery',
+    name: 'Enables component',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
+  },
+  {
+    id: 'visibility-trigger-improvements',
+    name: 'AMP Analytics Visibility Trigger Improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/26823',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
 ];

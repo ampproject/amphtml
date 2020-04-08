@@ -18,7 +18,7 @@ import {KeyCodes, Keys} from '../../../../src/utils/key-codes';
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
 
-describes.realWin('KeyboardHandler', {}, env => {
+describes.realWin('KeyboardHandler', {}, (env) => {
   let messages;
 
   class WindowPortEmulator {
@@ -52,7 +52,7 @@ describes.realWin('KeyboardHandler', {}, env => {
     );
   });
 
-  ['keydown', 'keypress', 'keydown'].forEach(eventType => {
+  ['keydown', 'keypress', 'keydown'].forEach((eventType) => {
     describe(`for ${eventType} events`, () => {
       describe('when event targeted on window', () => {
         it('forwards ESC events', () => {
@@ -354,7 +354,7 @@ describes.realWin('KeyboardHandler', {}, env => {
         });
       });
 
-      ['TEXTAREA', 'BUTTON', 'SELECT', 'OPTION'].forEach(nodeName => {
+      ['TEXTAREA', 'BUTTON', 'SELECT', 'OPTION'].forEach((nodeName) => {
         describe(`when event targeted on ${nodeName}`, () => {
           let node;
 

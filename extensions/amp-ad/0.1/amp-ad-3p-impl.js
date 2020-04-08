@@ -47,7 +47,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -245,14 +244,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach(p => {
+      this.config.prefetch.forEach((p) => {
         preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
       preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach(p => {
+      this.config.preconnect.forEach((p) => {
         preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
@@ -288,12 +287,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run(
         {
-          measure: state => {
+          measure: (state) => {
             state.direction = computedStyle(this.win, this.element)[
               'direction'
             ];
           },
-          mutate: state => {
+          mutate: (state) => {
             if (state.direction == 'rtl') {
               setStyle(this.element, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -355,11 +354,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
-    const consentStringPromise =
-      consentPolicyId && isConsentV2Experiment
-        ? getConsentPolicyInfo(this.element, consentPolicyId)
-        : Promise.resolve(null);
+    const consentStringPromise = consentPolicyId
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
@@ -369,7 +366,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then(consents => {
+    ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
       // ampcontext.js and this file are compiled in different compilation unit
@@ -384,9 +381,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'initialConsentState': consents[1],
         'consentSharedData': consents[2],
       });
-      if (isConsentV2Experiment) {
-        opt_context['initialConsentValue'] = consents[3];
-      }
+      opt_context['initialConsentValue'] = consents[3];
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them

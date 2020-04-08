@@ -37,8 +37,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
    curl -o- -L https://yarnpkg.com/install.sh | bash
    ```
 
-   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local  
-   development. This will automatically use the current stable version of `yarn`.
+   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
 6. If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
@@ -112,6 +111,8 @@ git checkout -b <branch name> master
 1. Edit files in your favorite editor
 2. Make sure your changes satisfy AMP's [code quality and style rules](getting-started-e2e.md#code-quality-and-style)
 3. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
+   - If it is a build-time dependency, use the `--dev` flag
+   - If it is a runtime dependency, add it to `build-system/compile/sources.js`
 4. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 5. Add each file you change: `git add <file>`
 6. Create a commit: `git commit -m "<your commit message>"`
@@ -155,6 +156,6 @@ git checkout -b <branch name> master
 
 - If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
 - If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. See the [release schedule](release-schedule.md) for more specific details.
-- The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it. `Pre-release` is the build on the Dev Channel, `Latest Release` is the build in production.
-- Opt in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
+- The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it. `Pre-release` is the build on the Experimental Channel, `Latest Release` is the build in production.
+- Opt in to using the Experimental Channel in a browser by enabling `experimental-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
 - Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`.

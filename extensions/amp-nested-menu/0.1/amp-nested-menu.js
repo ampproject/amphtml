@@ -95,11 +95,15 @@ export class AmpNestedMenu extends AMP.BaseElement {
     const submenuBtns = this.element.querySelectorAll(
       '[amp-nested-submenu-open],[amp-nested-submenu-close]'
     );
-    submenuBtns.forEach(submenuBtn => {
+    submenuBtns.forEach((submenuBtn) => {
       if (!submenuBtn.hasAttribute('tabindex')) {
         submenuBtn.setAttribute('tabindex', 0);
       }
       submenuBtn.setAttribute('role', 'button');
+      // Adds aria-expanded to the submenu open button if present
+      if (submenuBtn.hasAttribute('amp-nested-submenu-open')) {
+        submenuBtn.setAttribute('aria-expanded', 'false');
+      }
       userAssert(
         this.action_.hasAction(submenuBtn, 'tap') == false,
         'submenu open/close buttons should not have tap actions registered.'
@@ -145,7 +149,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   shouldHandleClick_(target, submenuBtn) {
-    const hasAnchor = !!closest(target, e => e.tagName == 'A', submenuBtn);
+    const hasAnchor = !!closest(target, (e) => e.tagName == 'A', submenuBtn);
     const hasTapAction = this.action_.hasAction(target, 'tap', submenuBtn);
     return !hasAnchor && !hasTapAction;
   }
@@ -180,13 +184,19 @@ export class AmpNestedMenu extends AMP.BaseElement {
       submenu.setAttribute('open', '');
       this.currentSubmenu_ = submenu;
       // move focus to close element after submenu fully opens.
+      // TODO(wassgha): Use Animation.animate instead to get a promise back
       Services.timerFor(this.win).delay(() => {
+        const submenuParent = dev().assertElement(submenu.parentElement);
+        const submenuOpen = dev().assertElement(
+          scopedQuerySelector(submenuParent, '>[amp-nested-submenu-open]')
+        );
+        submenuOpen.setAttribute('aria-expanded', 'true');
         // Find the first close button that is not in one of the child menus.
         const submenuCloseCandidates = toArray(
           submenu.querySelectorAll('[amp-nested-submenu-close]')
         );
         const submenuClose = submenuCloseCandidates.filter(
-          candidate => this.getParentMenu_(candidate) == submenu
+          (candidate) => this.getParentMenu_(candidate) == submenu
         )[0];
         userAssert(
           submenuClose,
@@ -229,11 +239,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
       submenu.removeAttribute('open');
       this.currentSubmenu_ = parentMenu;
       // move focus back to open element after submenu fully closes.
+      // TODO(wassgha): Use Animation.animate instead to get a promise back
       Services.timerFor(this.win).delay(() => {
         const submenuParent = dev().assertElement(submenu.parentElement);
         const submenuOpen = dev().assertElement(
           scopedQuerySelector(submenuParent, '>[amp-nested-submenu-open]')
         );
+        submenuOpen.setAttribute('aria-expanded', 'false');
         tryFocus(submenuOpen);
       }, ANIMATION_TIMEOUT);
     }
@@ -305,7 +317,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   handleMenuItemNavigation_(e) {
     const target = dev().assertElement(e.target);
     const parentMenu = this.getParentMenu_(target);
-    const item = closest(target, e => e.tagName == 'LI', parentMenu);
+    const item = closest(target, (e) => e.tagName == 'LI', parentMenu);
     // active element is not in a li that is inside the current submenu.
     if (!item) {
       return;
@@ -351,6 +363,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpNestedMenu, CSS);
 });

@@ -54,9 +54,9 @@ import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {
+  addAttributesToElement,
   childElement,
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -75,7 +75,8 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
-import {toggle} from '../../../src/style';
+import {px, toggle} from '../../../src/style';
+import {renderPageDescription} from './semantic-render';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -129,11 +130,17 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
 
+/** @private @const {string} */
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
+
+/** @private @const {string} */
+const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
+
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-const buildPlayMessageElement = element =>
+const buildPlayMessageElement = (element) =>
   htmlFor(element)`
       <button role="button"
           class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
@@ -145,7 +152,7 @@ const buildPlayMessageElement = element =>
  * @param {!Element} element
  * @return {!Element}
  */
-const buildErrorMessageElement = element =>
+const buildErrorMessageElement = (element) =>
   htmlFor(element)`
       <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
         <span class="i-amphtml-story-page-error-label"></span>
@@ -156,7 +163,7 @@ const buildErrorMessageElement = element =>
  * @param {!Element} element
  * @return {!Element}
  */
-const buildOpenAttachmentElement = element =>
+const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
       <div class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
@@ -223,15 +230,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!AdvancementConfig} */
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    /** @private {?AdvancementConfig} */
+    this.advancement_ = null;
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
-      isActive => this.toggleLoadingSpinner_(!!isActive),
+      (isActive) => this.toggleLoadingSpinner_(!!isActive),
       100
     );
+
+    /** @private {boolean}  */
+    this.isFirstPage_ = false;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -261,6 +271,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
 
+    /** @private {?Promise} */
+    this.registerAllMediaPromise_ = null;
+
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = deferred.promise;
 
@@ -270,14 +283,17 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private {boolean}  */
-    this.prerenderAllowed_ = false;
-
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @private {?Element} */
+    this.cssVariablesStyleEl_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -295,9 +311,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
-
-    /** @private {?string} A textual description of the content of the page. */
-    this.description_ = null;
   }
 
   /**
@@ -320,10 +333,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   firstAttachedCallback() {
     // Only prerender the first story page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type'
-    );
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
   }
 
   /** @override */
@@ -332,20 +342,41 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
+    this.maybeSetPreviewDuration_();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
       this.next(/* opt_isAutomaticAdvance */ true)
     );
-    this.advancement_.addProgressListener(progress =>
+    this.advancement_.addProgressListener((progress) =>
       this.emitProgress_(progress)
     );
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => this.onUIStateUpdate_(uiState),
+      (uiState) => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
     this.setPageDescription_();
+  }
+
+  /** @private */
+  maybeSetPreviewDuration_() {
+    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
+      const videos = this.getAllVideos_();
+
+      const autoAdvanceAttr =
+        videos.length > 0
+          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+
+      addAttributesToElement(
+        this.element,
+        dict({
+          'auto-advance-after': autoAdvanceAttr,
+        })
+      );
+    }
   }
 
   /**
@@ -365,10 +396,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     storyEl.getImpl().then(
-      storyImpl => {
+      (storyImpl) => {
         this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
       },
-      reason => this.mediaPoolRejectFn_(reason)
+      (reason) => this.mediaPoolRejectFn_(reason)
     );
   }
 
@@ -378,7 +409,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
+    Array.prototype.forEach.call(mediaSet, (mediaItem) => {
       mediaItem.setAttribute('preload', 'auto');
     });
   }
@@ -467,10 +498,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   resume_() {
-    this.registerAllMedia_();
+    const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      this.advancement_.start();
+      registerAllPromise.then(() => {
+        this.advancement_.start();
+      });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
@@ -498,6 +531,71 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
+  }
+
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
+  /** @override */
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
+    // Only measures from the first story page, that always gets built because
+    // of the prerendering optimizations in place.
+    if (
+      !this.isFirstPage_ ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
+      return;
+    }
+
+    this.layoutBox_ = layoutBox;
+
+    return this.getVsync().runPromise(
+      {
+        measure: (state) => {
+          const uiState = this.storeService_.get(StateProperty.UI_STATE);
+          // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
+          // ensures we are getting the raw size, ignoring the scale.
+          const {width, height} =
+            uiState === UIType.DESKTOP_PANELS
+              ? {
+                  height: this.element./*OK*/ clientHeight,
+                  width: this.element./*OK*/ clientWidth,
+                }
+              : layoutBox;
+          state.height = height;
+          state.width = width;
+          state.vh = height / 100;
+          state.vw = width / 100;
+          state.fiftyVw = Math.round(width / 2);
+          state.vmin = Math.min(state.vh, state.vw);
+          state.vmax = Math.max(state.vh, state.vw);
+        },
+        mutate: (state) => {
+          const {height, width} = state;
+          if (state.vh === 0 && state.vw === 0) {
+            return;
+          }
+          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+          if (!this.cssVariablesStyleEl_) {
+            const doc = this.win.document;
+            this.cssVariablesStyleEl_ = doc.createElement('style');
+            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+            doc.head.appendChild(this.cssVariablesStyleEl_);
+          }
+          this.cssVariablesStyleEl_.textContent =
+            `:root {` +
+            `--story-page-vh: ${px(state.vh)};` +
+            `--story-page-vw: ${px(state.vw)};` +
+            `--story-page-vmin: ${px(state.vmin)};` +
+            `--story-page-vmax: ${px(state.vmax)};` +
+            `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};` +
+            `}`;
+        },
+      },
+      {}
+    );
   }
 
   /**
@@ -531,13 +629,13 @@ export class AmpStoryPage extends AMP.BaseElement {
   waitForMediaLayout_() {
     const mediaSet = this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA);
 
-    const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
-      return new Promise(resolve => {
+    const mediaPromises = Array.prototype.map.call(mediaSet, (mediaEl) => {
+      return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-img':
           case 'amp-anim':
             whenUpgradedToCustomElement(mediaEl)
-              .then(el => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -591,7 +689,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      componentEls.forEach(el => {
+      componentEls.forEach((el) => {
         el.classList.add('i-amphtml-embedded-component');
       });
     });
@@ -606,7 +704,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     scopedQuerySelectorAll(
       this.element,
       INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS
-    ).forEach(el => {
+    ).forEach((el) => {
       const debouncePrepareForAnimation = debounceEmbedResize(
         this.win,
         this.element,
@@ -631,7 +729,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   buildAffiliateLinks_() {
     scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR).forEach(
-      el => {
+      (el) => {
         const link = new AmpStoryAffiliateLink(this.win, el);
         link.build();
       }
@@ -654,7 +752,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isFirstPage_;
   }
 
   /**
@@ -693,7 +791,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
     const mediaSet = [];
 
-    iterateCursor(scopedQuerySelectorAll(this.element, selector), el =>
+    iterateCursor(scopedQuerySelectorAll(this.element, selector), (el) =>
       mediaSet.push(el)
     );
 
@@ -703,13 +801,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           fie.win.document.body,
           Selectors.ALL_IFRAMED_MEDIA
         ),
-        el => mediaSet.push(el)
+        (el) => mediaSet.push(el)
       );
     }
 
     return includeHiddenMedia
       ? mediaSet
-      : mediaSet.filter(mediaEl => this.isMediaDisplayed_(mediaEl));
+      : mediaSet.filter((mediaEl) => this.isMediaDisplayed_(mediaEl));
   }
 
   /**
@@ -746,8 +844,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   whenAllMediaElements_(callbackFn) {
     const mediaSet = this.getAllMedia_();
-    return this.mediaPoolPromise_.then(mediaPool => {
-      const promises = Array.prototype.map.call(mediaSet, mediaEl => {
+    return this.mediaPoolPromise_.then((mediaPool) => {
+      const promises = Array.prototype.map.call(mediaSet, (mediaEl) => {
         return callbackFn(mediaPool, mediaEl);
       });
 
@@ -824,7 +922,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         () => {
           return mediaPool
             .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
-            .catch(unusedError => {
+            .catch((unusedError) => {
               // Auto playing the media failed, which could be caused by a data
               // saver, or a battery saving mode. Display a message so we can
               // get a user gesture to bless the media elements, and play them.
@@ -833,7 +931,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
                 // If autoplay got rejected, display a "play" button. If
                 // autoplay was supported, dispay an error message.
-                this.isAutoplaySupported_().then(isAutoplaySupported => {
+                this.isAutoplaySupported_().then((isAutoplaySupported) => {
                   if (isAutoplaySupported) {
                     this.toggleErrorMessage_(true);
                     return;
@@ -967,14 +1065,17 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Registers all media on this page
+   * Registers all media on this page.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   registerAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.registerMedia_(mediaPool, mediaEl);
-    });
+    this.registerAllMediaPromise_ =
+      this.registerAllMediaPromise_ ||
+      this.whenAllMediaElements_((mediaPool, mediaEl) => {
+        this.registerMedia_(mediaPool, mediaEl);
+      });
+    return this.registerAllMediaPromise_;
   }
 
   /**
@@ -1218,12 +1319,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.element.querySelectorAll('[on*=goToPage]')
     );
 
-    const actionAttrs = actionElements.map(action => action.getAttribute('on'));
+    const actionAttrs = actionElements.map((action) =>
+      action.getAttribute('on')
+    );
 
     return actionAttrs.reduce((res, actions) => {
       // Handling for multiple actions on one event or multiple events.
       const actionList = actions.split(/[;,]+/);
-      actionList.forEach(action => {
+      actionList.forEach((action) => {
         if (action.indexOf('goToPage') >= 0) {
           // The pageId is in between the equals sign & closing parenthesis.
           res.push(action.slice(action.search('=(.*)') + 1, -1));
@@ -1311,7 +1414,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
     return Array.prototype.some.call(
       ampVideoEls,
-      video => !video.hasAttribute('noaudio')
+      (video) => !video.hasAttribute('noaudio')
     );
   }
 
@@ -1323,7 +1426,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    getLogEntries(this.element).then(logEntries => {
+    getLogEntries(this.element).then((logEntries) => {
       dispatch(
         this.win,
         this.element,
@@ -1385,7 +1488,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.debounceToggleLoadingSpinner_(true);
     }
 
-    Array.prototype.forEach.call(videoEls, videoEl => {
+    Array.prototype.forEach.call(videoEls, (videoEl) => {
       this.unlisteners_.push(
         listen(videoEl, 'playing', () =>
           this.debounceToggleLoadingSpinner_(false)
@@ -1402,9 +1505,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       Selectors.ALL_AMP_VIDEO,
       true /* includeHiddenMedia */
     );
-    Array.prototype.forEach.call(ampVideoEls, ampVideoEl => {
+    Array.prototype.forEach.call(ampVideoEls, (ampVideoEl) => {
       this.unlisteners_.push(
-        listen(ampVideoEl, VideoEvents.VISIBILITY, event =>
+        listen(ampVideoEl, VideoEvents.VISIBILITY, (event) =>
           this.onVideoVisibilityUpdate_(event)
         )
       );
@@ -1416,7 +1519,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   stopListeningToVideoEvents_() {
     this.debounceToggleLoadingSpinner_(false);
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_ = [];
   }
 
@@ -1435,15 +1538,15 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const ampVideoEl = dev().assertElement(event.target);
     const videoEl = dev().assertElement(
-      childElement(ampVideoEl, el => el.tagName === 'VIDEO')
+      childElement(ampVideoEl, (el) => el.tagName === 'VIDEO')
     );
     const visible = getData(event)['visible'];
 
-    this.mediaPoolPromise_.then(mediaPool => {
+    this.mediaPoolPromise_.then((mediaPool) => {
       if (visible) {
         this.registerMedia_(mediaPool, videoEl)
           .then(() => this.preloadMedia_(mediaPool, videoEl))
-          .then(poolVideoEl => {
+          .then((poolVideoEl) => {
             this.playMedia_(mediaPool, poolVideoEl);
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
@@ -1503,7 +1606,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.togglePlayMessage_(false);
       this.startMeasuringVideoPerformance_();
       this.mediaPoolPromise_
-        .then(mediaPool => mediaPool.blessAll())
+        .then((mediaPool) => mediaPool.blessAll())
         .then(() => this.playAllMedia_());
     });
 
@@ -1596,14 +1699,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-label'
       );
 
-      const openAttachmentLabel =
-        attachmentEl.getAttribute('data-cta-text') ||
+      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+      const openLabel =
+        (openLabelAttr && openLabelAttr.trim()) ||
         Services.localizationService(this.win).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
       this.mutateElement(() => {
-        textEl.textContent = openAttachmentLabel;
+        textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }
@@ -1622,7 +1726,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    attachmentEl.getImpl().then(attachment => attachment.open(shouldAnimate));
+    attachmentEl.getImpl().then((attachment) => attachment.open(shouldAnimate));
   }
 
   /**
@@ -1643,51 +1747,28 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Sets the description of the page.
+   * Sets the description of the page, from its title and its videos
+   * alt/title attributes.
    * @private
    */
   setPageDescription_() {
-    this.description_ = this.element.getAttribute('title');
-
     if (this.isBotUserAgent_) {
-      this.renderPageDescription_();
-    } else {
+      renderPageDescription(
+        this,
+        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true)
+      );
+    }
+
+    if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {
       // Strip the title attribute from the page on non-bot user agents, to
       // prevent the browser tooltip.
       if (!this.element.getAttribute('aria-label')) {
-        this.element.setAttribute('aria-label', this.description_);
+        this.element.setAttribute(
+          'aria-label',
+          this.element.getAttribute('title')
+        );
       }
       this.element.removeAttribute('title');
-    }
-  }
-
-  /**
-   * Renders the page description in the page.
-   * @private
-   */
-  renderPageDescription_() {
-    if (!this.description_) {
-      return;
-    }
-
-    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
-    const descriptionEl = createElementWithAttributes(
-      this.win.document,
-      'h2',
-      dict({
-        'class': 'i-amphtml-story-page-description',
-        'id': descriptionElId,
-      })
-    );
-    descriptionEl./* OK */ textContent = this.description_;
-
-    this.element.parentElement.insertBefore(
-      descriptionEl,
-      this.element.nextElementSibling
-    );
-
-    if (!this.element.getAttribute('aria-labelledby')) {
-      this.element.setAttribute('aria-labelledby', descriptionElId);
     }
   }
 

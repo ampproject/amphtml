@@ -112,7 +112,11 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     position === 'below' ? apesterElement.nextSibling : apesterElement;
   apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
 
-  apesterElement.getResources().attemptChangeSize(ampBladeAd, size.height);
+  Services.mutatorForDoc(apesterElement).requestChangeSize(
+    ampBladeAd,
+    size.height,
+    /* newWidth */ undefined
+  );
 }
 
 /**

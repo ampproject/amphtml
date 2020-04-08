@@ -56,19 +56,21 @@ export class VisibilityObserverEntry {
    */
   observe(element, parent, callback) {
     const top = element.ownerDocument.createElement('div');
+    top.classList.add('i-amphtml-next-page-document-top-sentinel');
     const bottom = element.ownerDocument.createElement('div');
+    bottom.classList.add('i-amphtml-next-page-document-bottom-sentinel');
 
     parent.insertBefore(top, element);
     parent.insertBefore(bottom, element.nextSibling);
 
     this.observer_
       .getPositionObserver()
-      .observe(top, PositionObserverFidelity.LOW, position =>
+      .observe(top, PositionObserverFidelity.LOW, (position) =>
         this.topSentinelPositionChanged(position, callback)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, PositionObserverFidelity.LOW, position =>
+      .observe(bottom, PositionObserverFidelity.LOW, (position) =>
         this.bottomSentinelPositionChanged(position, callback)
       );
   }
@@ -141,7 +143,6 @@ export class VisibilityObserverEntry {
       // through being scrolling into/out of the viewport in which case
       // we don't need to update the visibility
       this.relativePos_ = ViewportRelativePos.LEAVING_VIEWPORT;
-      return;
     }
 
     callback(this.relativePos_);

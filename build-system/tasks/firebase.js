@@ -18,10 +18,10 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
+const {applyAmpConfig} = require('./helpers');
 const {build} = require('./build');
 const {clean} = require('./clean');
 const {dist} = require('./dist');
-const {enableLocalTesting} = require('./helpers');
 
 async function walk(dest) {
   const filelist = [];
@@ -43,8 +43,8 @@ async function copyAndReplaceUrls(src, dest) {
   // Recursively gets all the files within the directory and its children.
   const files = await walk(dest);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replaceUrls(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replaceUrls(file));
   await Promise.all(promises);
 }
 
@@ -80,8 +80,11 @@ async function firebase() {
 
   if (argv.fortesting) {
     await Promise.all([
-      enableLocalTesting('firebase/dist.3p/current/integration.js'),
-      enableLocalTesting('firebase/dist/amp.js'),
+      applyAmpConfig(
+        'firebase/dist.3p/current/integration.js',
+        /* localDev */ true
+      ),
+      applyAmpConfig('firebase/dist/amp.js', /* localDev */ true),
     ]);
   }
 

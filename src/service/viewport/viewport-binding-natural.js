@@ -56,12 +56,6 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    /**
-     * See `handleScrollEvent_` for details.
-     * @private @const {boolean}
-     */
-    this.resetScrollX_ = this.platform_.isIos() && this.win.parent !== this.win;
-
     /** @const {function()} */
     this.boundScrollEventListener_ = this.handleScrollEvent_.bind(this);
 
@@ -74,16 +68,6 @@ export class ViewportBindingNatural_ {
 
   /** @private */
   handleScrollEvent_() {
-    if (
-      this.resetScrollX_ &&
-      this.getScrollingElement()./*OK*/ scrollLeft > 0
-    ) {
-      // In the iframed iOS Safari case the `touch-action` and
-      // `overscroll-behavior` are not observed which leads to the overscroll
-      // bugs on the horizontal axis. The solution is to reset the horizontal
-      // scrolling in this case. See b/140131460 for more details.
-      this.getScrollingElement()./*OK*/ scrollLeft = 0;
-    }
     this.scrollObservable_.fire();
   }
 
@@ -256,8 +240,8 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
+    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

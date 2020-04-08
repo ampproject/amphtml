@@ -172,7 +172,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export const sandboxed = describeEnv(unusedSpec => []);
+export const sandboxed = describeEnv((unusedSpec) => []);
 
 /**
  * A test with a fake window.
@@ -186,7 +186,7 @@ export const sandboxed = describeEnv(unusedSpec => []);
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const fakeWin = describeEnv(spec => [
+export const fakeWin = describeEnv((spec) => [
   new FakeWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -204,7 +204,7 @@ export const fakeWin = describeEnv(spec => [
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const realWin = describeEnv(spec => [
+export const realWin = describeEnv((spec) => [
   new RealWinFixture(spec),
   new AmpFixture(spec),
 ]);
@@ -225,7 +225,9 @@ export const realWin = describeEnv(spec => [
  *   iframe: !HTMLIFrameElement,
  * })} fn
  */
-export const integration = describeEnv(spec => [new IntegrationFixture(spec)]);
+export const integration = describeEnv((spec) => [
+  new IntegrationFixture(spec),
+]);
 
 /**
  * A repeating test.
@@ -233,17 +235,17 @@ export const integration = describeEnv(spec => [new IntegrationFixture(spec)]);
  * @param {!Object<string, *>} variants
  * @param {function(string, *)} fn
  */
-export const repeated = (function() {
+export const repeated = (function () {
   /**
    * @param {string} name
    * @param {!Object<string, *>} variants
    * @param {function(string, *)} fn
    * @param {function(string, function())} describeFunc
    */
-  const templateFunc = function(name, variants, fn, describeFunc) {
-    return describeFunc(name, function() {
+  const templateFunc = function (name, variants, fn, describeFunc) {
+    return describeFunc(name, function () {
       for (const name in variants) {
-        describe(name ? ` ${name} ` : SUB, function() {
+        describe(name ? ` ${name} ` : SUB, function () {
           fn.call(this, name, variants[name]);
         });
       }
@@ -255,7 +257,7 @@ export const repeated = (function() {
    * @param {!Object<string, *>} variants
    * @param {function(string, *)} fn
    */
-  const mainFunc = function(name, variants, fn) {
+  const mainFunc = function (name, variants, fn) {
     return templateFunc(name, variants, fn, describe);
   };
 
@@ -264,7 +266,7 @@ export const repeated = (function() {
    * @param {!Object<string, *>} variants
    * @param {function(string, *)} fn
    */
-  mainFunc.only = function(name, variants, fn) {
+  mainFunc.only = function (name, variants, fn) {
     return templateFunc(name, variants, fn, describe./*OK*/ only);
   };
 
@@ -300,14 +302,14 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
    */
-  const templateFunc = function(name, spec, fn, describeFunc) {
+  const templateFunc = function (name, spec, fn, describeFunc) {
     const fixtures = [new SandboxFixture(spec)];
-    factory(spec).forEach(fixture => {
+    factory(spec).forEach((fixture) => {
       if (fixture && fixture.isOn()) {
         fixtures.push(fixture);
       }
     });
-    return describeFunc(name, function() {
+    return describeFunc(name, function () {
       const env = Object.create(null);
 
       beforeEach(() => {
@@ -332,7 +334,7 @@ function describeEnv(factory) {
         fixtures
           .slice(0)
           .reverse()
-          .forEach(fixture => {
+          .forEach((fixture) => {
             teardown = teardown.then(() => fixture.teardown(env));
           });
 
@@ -351,7 +353,7 @@ function describeEnv(factory) {
       if (spec.ifIe) {
         d = d.ifIe();
       }
-      d.run(SUB, function() {
+      d.run(SUB, function () {
         if (spec.timeout) {
           this.timeout(spec.timeout);
         }
@@ -365,7 +367,7 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    */
-  const mainFunc = function(name, spec, fn) {
+  const mainFunc = function (name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
   };
 
@@ -374,11 +376,11 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    */
-  mainFunc.only = function(name, spec, fn) {
+  mainFunc.only = function (name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
   };
 
-  mainFunc.skip = function(name, variants, fn) {
+  mainFunc.skip = function (name, variants, fn) {
     return templateFunc(name, variants, fn, describe.skip);
   };
 
@@ -453,7 +455,7 @@ class SandboxFixture {
   }
 
   restoreDefineProperty_() {
-    this.defineProperties_.forEach(item => {
+    this.defineProperties_.forEach((item) => {
       try {
         if (item.descriptor === undefined) {
           delete item.obj[item.propertyKey];
@@ -533,7 +535,7 @@ class IntegrationFixture {
         src,
         style,
       });
-      env.iframe.onload = function() {
+      env.iframe.onload = function () {
         env.win = env.iframe.contentWindow;
         resolve();
       };
@@ -614,7 +616,7 @@ class RealWinFixture {
         '<!doctype html><html><head>' +
         '<style>.i-amphtml-element {display: block;}</style>' +
         '<body style="margin:0"><div id=parent></div>';
-      iframe.onload = function() {
+      iframe.onload = function () {
         const win = iframe.contentWindow;
         env.win = win;
 
@@ -648,10 +650,7 @@ class RealWinFixture {
         } else {
           // The anonymous class parameter allows us to detect native classes
           // vs transpiled classes.
-          installCustomElements(
-            win,
-            NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
-          );
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
@@ -726,7 +725,7 @@ class AmpFixture {
     env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
-    env.flushVsync = function() {
+    env.flushVsync = function () {
       win.__AMP_SERVICES.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
@@ -737,6 +736,8 @@ class AmpFixture {
       installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
+      // Ensure cached meta name/content pairs are cleared before each test
+      ampdoc.meta_ = null;
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
@@ -745,7 +746,7 @@ class AmpFixture {
     maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
-      spec.extensions.forEach(extensionIdWithVersion => {
+      spec.extensions.forEach((extensionIdWithVersion) => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
         extensionIds.push(extensionId);
@@ -777,7 +778,7 @@ class AmpFixture {
      * @param {string} extensionId
      * @param {string=} opt_version
      */
-    env.installExtension = function(extensionId, opt_version) {
+    env.installExtension = function (extensionId, opt_version) {
       const version = opt_version || '0.1';
       const installer = extensionsBuffer[`${extensionId}:${version}`];
       if (!installer) {
@@ -795,7 +796,7 @@ class AmpFixture {
     /**
      * Creates a custom element without registration.
      * @param {string=} opt_name
-     * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+     * @param {typeof ./base-element.BaseElement} opt_implementationClass
      * @return {!AmpElement}
      */
     env.createAmpElement = createAmpElement.bind(null, win);
@@ -827,13 +828,13 @@ class AmpFixture {
           html,
           extensionIds,
         },
-        embedWin => {
+        (embedWin) => {
           interceptEventListeners(embedWin);
           interceptEventListeners(embedWin.document);
           interceptEventListeners(embedWin.document.documentElement);
           interceptEventListeners(embedWin.document.body);
         }
-      ).then(embed => {
+      ).then((embed) => {
         env.embed = embed;
         env.parentWin = env.win;
         env.win = embed.win;
@@ -877,7 +878,7 @@ class AmpFixture {
       }
     }
     if (this.spec.amp.extensions) {
-      this.spec.amp.extensions.forEach(extensionId => {
+      this.spec.amp.extensions.forEach((extensionId) => {
         if (extensionId.indexOf(':') != -1) {
           extensionId = extensionId.substring(0, extensionId.indexOf(':'));
         }
@@ -926,14 +927,14 @@ function installAmpAdStylesPromise(win) {
  * Creates a custom element without registration.
  * @param {!Window} win
  * @param {string=} opt_name
- * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+ * @param {typeof ./base-element.BaseElement} opt_implementationClass
  * @return {!AmpElement}
  */
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementForTesting(win, name).prototype;
-  const ctor = function() {
+  const proto = createAmpElementForTesting(win).prototype;
+  const ctor = function () {
     const el = win.document.createElement(name);
     el.__proto__ = proto;
     return el;

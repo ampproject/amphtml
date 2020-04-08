@@ -31,7 +31,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let liveStoryManager;
     let ampStory;
@@ -50,8 +50,7 @@ describes.realWin(
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
           const storyPage = new AmpStoryPage(page);
-          page.getImpl = () => Promise.resolve(storyPage);
-          env.sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
+          env.sandbox.stub(storyPage, 'mutateElement').callsFake((fn) => fn());
           container.appendChild(page);
           return page;
         });
@@ -63,9 +62,11 @@ describes.realWin(
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       env.sandbox.stub(win.history, 'replaceState');
 
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
@@ -85,6 +86,7 @@ describes.realWin(
 
     it('should build a dynamic live-list', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 
@@ -96,6 +98,7 @@ describes.realWin(
 
     it('live-list id should equal story id + dymanic-list combo', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 
@@ -109,6 +112,7 @@ describes.realWin(
 
     it('should throw if no story id is set', () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       ampStory.element.removeAttribute('id');
 
@@ -123,6 +127,7 @@ describes.realWin(
 
     it('should append new page from server to client in update', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       expect(ampStory.element.children.length).to.equal(2);
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
@@ -134,13 +139,13 @@ describes.realWin(
       const newPage = win.document.createElement('amp-story-page');
       // This would normally get added by AmpLiveList.
       newPage.classList.add('amp-live-list-item-new');
-      newPage.id = 'newPage';
+      newPage.id = 'new-page';
       ampStory.element.appendChild(newPage);
       liveStoryManager.update();
       expect(dispatchSpy).to.have.been.calledWith(Action.SET_PAGE_IDS, [
         'cover',
         'page-1',
-        'newPage',
+        'new-page',
       ]);
     });
   }

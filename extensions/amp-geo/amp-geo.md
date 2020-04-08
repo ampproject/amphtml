@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-geo
 
-Provides an approximate country-level geolocation interface.
-
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-geo/">amp-geo example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 The `amp-geo` component provides country-level geolocation. The `amp-geo` component also provides a simple mechanism to group countries, making it easier to apply attributes to several countries at once.
@@ -95,8 +76,8 @@ The `ISOCountryGroups` key allows selections by groups of country codes.
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -120,8 +101,8 @@ In the following example, we determine if the user is in a "soccer" country and 
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -164,8 +145,8 @@ Additional countries may be included with the preset list as in the `myList` exa
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "eea": [ "preset-eea" ],
-        "myList": [ "preset-eea", "ca", "au", "nz" ]
+        "eea": ["preset-eea"],
+        "myList": ["preset-eea", "ca", "au", "nz"]
       }
     }
   </script>
@@ -199,8 +180,8 @@ If the `AmpBind` key is present in the configuration, `amp-geo` inserts an `amp-
     {
       "AmpBind": true,
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -213,9 +194,9 @@ If the user were in Canada, the inserted `amp-state` would be as follows:
 <amp-state id="ampGeo">
   <script type="application/json">
     {
-    	"ISOCountry": "ca",
-       	 "soccer": true
-       }
+      "ISOCountry": "ca",
+      "soccer": true
+    }
   </script>
 </amp-state>
 ```
@@ -249,7 +230,7 @@ The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with 
 
 ### Debugging
 
-Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
+Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Experimental Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
 
 **Note:** Debugging in DevChannel may not work in Safari due to [ITP](https://webkit.org/blog/8311/intelligent-tracking-prevention-2-0/).
 

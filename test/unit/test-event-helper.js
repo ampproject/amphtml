@@ -27,6 +27,8 @@ import {Observable} from '../../src/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
+  resetPassiveSupportedForTesting,
+  supportsPassiveEventListener,
 } from '../../src/event-helper-listen';
 
 describe('EventHelper', () => {
@@ -87,7 +89,7 @@ describe('EventHelper', () => {
   it('listen', () => {
     const event = getEvent('load', element);
     let c = 0;
-    const handler = e => {
+    const handler = (e) => {
       c++;
       expect(e).to.equal(event);
     };
@@ -112,7 +114,7 @@ describe('EventHelper', () => {
   it('listenOnce', () => {
     const event = getEvent('load', element);
     let c = 0;
-    const handler = e => {
+    const handler = (e) => {
       c++;
       expect(e).to.equal(event);
     };
@@ -133,7 +135,7 @@ describe('EventHelper', () => {
   it('listenOnce - cancel', () => {
     const event = getEvent('load', element);
     let c = 0;
-    const handler = e => {
+    const handler = (e) => {
       c++;
       expect(e).to.equal(event);
     };
@@ -152,7 +154,7 @@ describe('EventHelper', () => {
 
   it('listenOncePromise - load event', () => {
     const event = getEvent('load', element);
-    const promise = listenOncePromise(element, 'load').then(result => {
+    const promise = listenOncePromise(element, 'load').then((result) => {
       expect(result).to.equal(event);
     });
     loadObservable.fire(event);
@@ -185,14 +187,14 @@ describe('EventHelper', () => {
 
   it('loadPromise - already complete', () => {
     element.complete = true;
-    return loadPromise(element).then(result => {
+    return loadPromise(element).then((result) => {
       expect(result).to.equal(element);
     });
   });
 
   it('loadPromise - already readyState == complete', () => {
     element.readyState = 'complete';
-    return loadPromise(element).then(result => {
+    return loadPromise(element).then((result) => {
       expect(result).to.equal(element);
     });
   });
@@ -201,7 +203,7 @@ describe('EventHelper', () => {
     element.tagName = 'VIDEO';
     element.currentSrc = 'foo.com/video.mp4';
     element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'foo.com/video.mp4';
-    return loadPromise(element).catch(result => {
+    return loadPromise(element).catch((result) => {
       expect(result).to.equal(element);
     });
   });
@@ -211,7 +213,7 @@ describe('EventHelper', () => {
     element.src = 'foo.com/video.mp4';
     element.currentSrc = 'foo.com/video.mp4';
     element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'bar.com/other-video.mp4';
-    const promise = loadPromise(element).then(result => {
+    const promise = loadPromise(element).then((result) => {
       expect(result).to.equal(element);
     });
     loadObservable.fire(getEvent('loadedmetadata', element));
@@ -219,7 +221,7 @@ describe('EventHelper', () => {
   });
 
   it('loadPromise - load event', () => {
-    const promise = loadPromise(element).then(result => {
+    const promise = loadPromise(element).then((result) => {
       expect(result).to.equal(element);
     });
     loadObservable.fire(getEvent('load', element));
@@ -228,14 +230,14 @@ describe('EventHelper', () => {
 
   it('loadPromise - error event', () => {
     const promise = loadPromise(element)
-      .then(result => {
+      .then((result) => {
         assert.fail('must never be here: ' + result);
       })
       .then(
         () => {
           throw new Error('Should not be reached.');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.include('Failed to load');
         }
       );
@@ -247,7 +249,7 @@ describe('EventHelper', () => {
     element.tagName = 'VIDEO';
     element.currentSrc = 'foo.com/video.mp4';
     const promise = loadPromise(element)
-      .then(result => {
+      .then((result) => {
         assert.fail('must never be here: ' + result);
       })
       .then(
@@ -297,7 +299,7 @@ describe('EventHelper', () => {
     const win = {};
     win.CustomEvent = {};
     win.document = {};
-    win.document.createEvent = function() {
+    win.document.createEvent = function () {
       return {
         initCustomEvent() {
           initCustomEventSpy();
@@ -363,3 +365,43 @@ describe('EventHelper', () => {
     expect(removeEventListenerStub.calledOnce).to.be.true;
   });
 });
+
+describes.sandboxed(
+  'addEventListener supports passive listener option',
+  {},
+  (env) => {
+    const win = {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+
+    function overrideEventListeners(passiveSupported) {
+      env.sandbox
+        .stub(win, 'addEventListener')
+        .callsFake((name, listener, option) => {
+          passiveSupported ? option.passive : false;
+        });
+      env.sandbox
+        .stub(win, 'removeEventListener')
+        .callsFake((name, listener, option) => {
+          passiveSupported ? option.passive : false;
+        });
+    }
+
+    beforeEach(() => {
+      resetPassiveSupportedForTesting();
+    });
+
+    it('should return true when supported', () => {
+      overrideEventListeners(true);
+      const passiveSupported = supportsPassiveEventListener(win);
+      expect(passiveSupported).to.be.true;
+    });
+
+    it('should return false when not supported', () => {
+      overrideEventListeners(false);
+      const passiveSupported = supportsPassiveEventListener(win);
+      expect(passiveSupported).to.be.false;
+    });
+  }
+);

@@ -75,7 +75,7 @@ export class BaseSlides extends BaseCarousel {
 
     this.registerAction(
       'toggleAutoplay',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args && args['toggleOn'] !== undefined) {
           this.toggleAutoplay_(args['toggleOn']);
@@ -106,7 +106,8 @@ export class BaseSlides extends BaseCarousel {
 
   /** @override */
   goCallback(dir, animate, opt_autoplay) {
-    this.moveSlide(dir, animate);
+    const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
+    this.moveSlide(dir, animate, trust);
     if (opt_autoplay) {
       this.autoplay_();
     } else {
@@ -118,9 +119,10 @@ export class BaseSlides extends BaseCarousel {
    * Proceeds to the next slide in the desired direction.
    * @param {number} unusedDir -1 or 1
    * @param {boolean} unusedAnimate
+   * @param {!ActionTrust} unusedTrust
    * @protected
    */
-  moveSlide(unusedDir, unusedAnimate) {
+  moveSlide(unusedDir, unusedAnimate, unusedTrust) {
     // Subclasses may override.
   }
 

@@ -36,12 +36,13 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -55,13 +56,18 @@ describes.realWin(
       };
       env.sandbox.stub(Services, 'templatesFor').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy.notCalled).to.be.true;
     });
 
     describe('manual', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 
@@ -82,7 +88,7 @@ describes.realWin(
 
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
         env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -147,9 +153,6 @@ describes.realWin(
 
     describe('loading states', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 
@@ -171,7 +174,7 @@ describes.realWin(
         env.sandbox
           .stub(list, 'prepareAndSendFetch_')
           .returns(Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -218,7 +221,6 @@ describes.realWin(
         expect(renderSpy).to.be.calledTwice;
         expect(renderSpy).to.be.calledWith([div3, div4], true);
 
-        list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
       });
 
@@ -231,7 +233,6 @@ describes.realWin(
         env.sandbox
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
-
         const div1 = doc.createElement('div');
         div1.textContent = '1';
         const div2 = doc.createElement('div');

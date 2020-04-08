@@ -25,7 +25,7 @@ import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
+describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
   let impl;
   let element;
 
@@ -248,7 +248,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       );
     });
 
-    Object.keys(RTC_ERROR_ENUM).forEach(errorName => {
+    Object.keys(RTC_ERROR_ENUM).forEach((errorName) => {
       it(`should send correct error value for ${errorName}`, () => {
         const rtcResponseArray = [
           {
@@ -412,19 +412,31 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         env.win.document,
         env.win
       );
+      const docViewport = Services.viewportForDoc(this.getAmpDoc());
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
-      Object.keys(macros).forEach(macro => {
+      expect(customMacros.ELEMENT_POS()).to.equal(
+        element.getBoundingClientRect().top + scrollY
+      );
+      expect(customMacros.SCROLL_TOP()).to.equal(docViewport.getScrollTop());
+      expect(customMacros.PAGE_HEIGHT()).to.equal(
+        docViewport.getScrollHeight()
+      );
+      expect(customMacros.BKG_STATE()).to.equal(
+        this.getAmpDoc().isVisible() ? 'visible' : 'hidden'
+      );
+      Object.keys(macros).forEach((macro) => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
       return Promise.all([
-        customMacros.ADCID().then(adcid => {
+        customMacros.ADCID().then((adcid) => {
           expect(adcid).to.not.be.null;
         }),
-        customMacros.REFERRER().then(referrer => {
+        customMacros.REFERRER().then((referrer) => {
           expect(referrer).to.equal(env.win.document.referrer);
         }),
       ]);
@@ -443,10 +455,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       let adcid;
-      return customMacros.ADCID().then(adcid1 => {
+      return customMacros.ADCID().then((adcid1) => {
         adcid = adcid1;
         expect(adcid).to.not.be.null;
-        return customMacros.ADCID().then(adcid2 => {
+        return customMacros.ADCID().then((adcid2) => {
           expect(adcid2).to.equal(adcid);
         });
       });
@@ -464,7 +476,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       );
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      return customMacros.ADCID(0).then(adcid => {
+      return customMacros.ADCID(0).then((adcid) => {
         expect(adcid).to.be.undefined;
       });
     });

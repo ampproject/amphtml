@@ -19,18 +19,14 @@ import {ConsentConfig, expandPolicyConfig} from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
-import {toggleExperiment} from '../../../../src/experiments';
 
-describes.realWin('ConsentConfig', {amp: 1}, env => {
-  let win;
+describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
   let element;
   let defaultConfig;
   beforeEach(() => {
-    win = env.win;
     doc = env.win.document;
     element = doc.createElement('div');
-    toggleExperiment(win, 'amp-consent-v2', true);
     defaultConfig = dict({
       'consentInstanceId': 'ABC',
       'checkConsentHref': 'https://response1',
@@ -237,16 +233,16 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
               'consentRequired': true,
             },
             'waldo': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': 'remote',
             },
             'geoGroupUnknown': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': true,
             },
             'invalid': {
               'consentInstanceId': 'error',
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
             },
           },
         };
@@ -309,7 +305,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': 'remote',
         });
       });
@@ -319,7 +315,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': 'abc',
           'geoOverride': {
             'geoGroupUnknown': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': true,
             },
           },
@@ -339,7 +335,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': true,
         });
       });
@@ -347,13 +343,13 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       it('should have remote consentRequired if checkConsentHref', async () => {
         geoConfig = {
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
         };
         appendConfigScriptElement(doc, element, geoConfig);
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': 'remote',
         });
       });
@@ -399,7 +395,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
           'consentRequired': false,
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
         });
       });
     });
@@ -501,7 +497,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         element,
         dict({
           'consentInstanceId': 'ABC',
-          'checkConsentHref': 'example.com/',
+          'checkConsentHref': 'example.test/',
           'policy': {
             'ABC': undefined,
           },
@@ -510,7 +506,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const consentConfig = new ConsentConfig(element);
       expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
         'consentInstanceId': 'ABC',
-        'checkConsentHref': 'example.com/',
+        'checkConsentHref': 'example.test/',
         'consentRequired': 'remote',
         'policy': {},
       });
@@ -527,7 +523,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create predefined _till_responded policy', function*() {
+    it('create predefined _till_responded policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_responded']).to.deep.equal({
         'waitFor': {
@@ -542,7 +538,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create predefined _till_accepted policy', function*() {
+    it('create predefined _till_accepted policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_accepted']).to.deep.equal({
         'waitFor': {
@@ -551,7 +547,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create default _auto_reject policy', function*() {
+    it('create default _auto_reject policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_auto_reject']).to.deep.equal({
         'waitFor': {
@@ -570,7 +566,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('override default policy', function*() {
+    it('override default policy', function* () {
       const policy = expandPolicyConfig(
         dict({
           'default': {

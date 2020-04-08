@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Provides the ability to collect and store a user's consent through a UI control.
+  text: Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 ---
 
 <!--
@@ -24,34 +24,6 @@ limitations under the License.
 -->
 
 # amp-consent
-
-Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/">Basic user consent flow</a></li>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
-    </td>
-  </tr>
-</table>
 
 ## Overview
 
@@ -288,6 +260,23 @@ AMP will check client cache and server in parallel to find the previous consent 
 #### xssiPrefix
 
 `xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
+#### uiConfig
+
+`uiConfig` provides extra UI and behaviors to `<amp-consent>`. `uiConfig` is an optional JSON object that can contain the key `overlay` which is a boolean. `overlay: true` will add a light black overlay behind the consent prompt to help users focus on the prompt. Additionally, this will stop user interaction with the contents beneath the consent prompt (such as scrolling). `overlay: false` is the default.
+
+#### captions
+
+`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the `consentPromptCaption` and `buttonActionCaption` strings. The default values for these fields are 'User Consent Prompt' and 'Focus Prompt' respectivly, but they can be overriden and customized for your use case (such as localization). When a consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+
+```json
+{
+  "captions": {
+    "consentPromptCaption": "This is an example user consent prompt",
+    "buttonActionCaption": "Click to interact with the prompt"
+  }
+}
+```
 
 ## Consent Management
 
@@ -642,8 +631,11 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Supported Consent Management Platforms
 
+- AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](/extensions/amp-consent/cmps/marfeel.md)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
+- Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
+- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+- Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 
 - Your Integrated platform here!

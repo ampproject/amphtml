@@ -22,11 +22,13 @@ To use RTC, you must meet the following requirements:
 - AppNexus
 - APS
 - Automatad
+- Browsi
 - Criteo
 - FLUX
 - IndexExchange
 - Lotame
 - Media.net
+- The Ozone Project
 - PubMatic OpenWrap
 - Purch
 - Rubicon

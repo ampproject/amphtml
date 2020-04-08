@@ -22,27 +22,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-story-page-attachment`
+# amp-story-page-attachment
 
 Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>
@@ -93,7 +76,9 @@ Values: "light" (default), "dark"
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
 
-<summary>List of allowed AMP components in a page attachment</summary>
+<details>
+  <summary>List of allowed AMP components in a page attachment</summary>
+</details>
 <ul>
   <li><code>&lt;amp-3d-gltf></code></li>
   <li><code>&lt;amp-3q-player></code></li>

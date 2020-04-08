@@ -20,8 +20,8 @@ import {requireExternal} from '../../../src/module';
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)} A date picker component with common functionality
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const reactDates = requireExternal('react-dates');
@@ -159,14 +159,14 @@ export function withDatePickerCommon(WrappedComponent) {
   DateComponent.prototype.constructor = DateComponent;
 
   /** @override */
-  DateComponent.prototype.componentDidMount = function() {
+  DateComponent.prototype.componentDidMount = function () {
     if (this.props['onMount']) {
       this.props['onMount']();
     }
   };
 
   /** @override */
-  DateComponent.prototype.componentWillReceiveProps = function(nextProps) {
+  DateComponent.prototype.componentWillReceiveProps = function (nextProps) {
     const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
     const blocked = nextProps['blocked'];
     const endDate = nextProps['endDate'];
@@ -200,7 +200,7 @@ export function withDatePickerCommon(WrappedComponent) {
   };
 
   /** @override */
-  DateComponent.prototype.render = function() {
+  DateComponent.prototype.render = function () {
     const props = /** @type {!JsonObject} */ (omit(
       this.props,
       Object.keys(defaultProps)

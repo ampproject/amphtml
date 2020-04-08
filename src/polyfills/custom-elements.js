@@ -23,7 +23,7 @@
 let DeferredDef;
 
 /**
- * @typedef {!Function}
+ * @typedef {!typeof HTMLElement}
  */
 let CustomElementConstructorDef;
 
@@ -63,7 +63,7 @@ const TRACK_SUBTREE = {
 /**
  * Asserts that the custom element name conforms to the spec.
  *
- * @param {!Function} SyntaxError
+ * @param {!typeof SyntaxError} SyntaxError
  * @param {string} name
  */
 function assertValidName(SyntaxError, name) {
@@ -194,7 +194,7 @@ class CustomElementRegistry {
     }
 
     let resolve;
-    const promise = new /*OK*/ Promise(res => (resolve = res));
+    const promise = new /*OK*/ Promise((res) => (resolve = res));
     pending[name] = {
       promise,
       resolve,
@@ -341,7 +341,7 @@ class Registry {
     };
 
     this.observe_(name);
-    this.roots_.forEach(tree => {
+    this.roots_.forEach((tree) => {
       this.upgrade(tree, name);
     });
   }
@@ -500,7 +500,7 @@ class Registry {
     this.query_ = name;
 
     // The first registered name starts the mutation observer.
-    const mo = new this.win_.MutationObserver(records => {
+    const mo = new this.win_.MutationObserver((records) => {
       if (records) {
         this.handleRecords_(records);
       }
@@ -510,7 +510,7 @@ class Registry {
     // I would love to not have to hold onto all of the roots, since it's a
     // memory leak. Unfortunately, there's no way to iterate a list and hold
     // onto its contents weakly.
-    this.roots_.forEach(tree => {
+    this.roots_.forEach((tree) => {
       mo.observe(tree, TRACK_SUBTREE);
     });
 
@@ -599,7 +599,7 @@ function installPatches(win, registry) {
   // Patch createElement to immediately upgrade the custom element.
   // This has the added benefit that it avoids the "already created but needs
   // constructor code run" chicken-and-egg problem.
-  docProto.createElement = function(name) {
+  docProto.createElement = function (name) {
     const def = registry.getByName(name);
     if (def) {
       return new def.ctor();
@@ -609,7 +609,7 @@ function installPatches(win, registry) {
 
   // Patch importNode to immediately upgrade custom elements.
   // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
-  docProto.importNode = function() {
+  docProto.importNode = function () {
     const imported = importNode.apply(this, arguments);
 
     // Only upgrade elements if the document that the nodes were imported into
@@ -626,35 +626,35 @@ function installPatches(win, registry) {
   };
 
   // Patch appendChild to upgrade custom elements before returning.
-  nodeProto.appendChild = function() {
+  nodeProto.appendChild = function () {
     const appended = appendChild.apply(this, arguments);
     registry.sync();
     return appended;
   };
 
   // Patch insertBefore to upgrade custom elements before returning.
-  nodeProto.insertBefore = function() {
+  nodeProto.insertBefore = function () {
     const inserted = insertBefore.apply(this, arguments);
     registry.sync();
     return inserted;
   };
 
   // Patch removeChild to upgrade custom elements before returning.
-  nodeProto.removeChild = function() {
+  nodeProto.removeChild = function () {
     const removed = removeChild.apply(this, arguments);
     registry.sync();
     return removed;
   };
 
   // Patch replaceChild to upgrade and detach custom elements before returning.
-  nodeProto.replaceChild = function() {
+  nodeProto.replaceChild = function () {
     const replaced = replaceChild.apply(this, arguments);
     registry.sync();
     return replaced;
   };
 
   // Patch cloneNode to immediately upgrade custom elements.
-  nodeProto.cloneNode = function() {
+  nodeProto.cloneNode = function () {
     const cloned = cloneNode.apply(this, arguments);
 
     // Only upgrade elements if the cloned node belonged to _this_ document.
@@ -685,7 +685,7 @@ function installPatches(win, registry) {
     );
   }
   const innerHTMLSetter = innerHTMLDesc.set;
-  innerHTMLDesc.set = function(html) {
+  innerHTMLDesc.set = function (html) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
@@ -726,13 +726,13 @@ function polyfill(win) {
      * @param {!{mode: string}} unused
      * @return {!ShadowRoot}
      */
-    elProto.attachShadow = function(unused) {
+    elProto.attachShadow = function (unused) {
       const shadow = attachShadow.apply(this, arguments);
       registry.observe(shadow);
       return shadow;
     };
     // Necessary for Shadow AMP
-    elProto.attachShadow.toString = function() {
+    elProto.attachShadow.toString = function () {
       return attachShadow.toString();
     };
   }
@@ -740,13 +740,13 @@ function polyfill(win) {
     /**
      * @return {!ShadowRoot}
      */
-    elProto.createShadowRoot = function() {
+    elProto.createShadowRoot = function () {
       const shadow = createShadowRoot.apply(this, arguments);
       registry.observe(shadow);
       return shadow;
     };
     // Necessary for Shadow AMP
-    elProto.createShadowRoot.toString = function() {
+    elProto.createShadowRoot.toString = function () {
       return createShadowRoot.toString();
     };
   }
@@ -840,8 +840,10 @@ function wrapHTMLElement(win) {
 /**
  * Setups up prototype inheritance
  *
- * @param {!Function} superClass
- * @param {!Function} subClass
+ * @param {!typeof SUPER} superClass
+ * @param {!typeof SUB} subClass
+ * @template SUPER
+ * @template SUB
  */
 function subClass(superClass, subClass) {
   // Object.getOwnPropertyDescriptor(superClass.prototype, 'constructor')
@@ -935,9 +937,9 @@ export function copyProperties(obj, prototype) {
  * done.
  *
  * @param {!Window} win
- * @param {!Function=} opt_ctor
+ * @param {!Function} ctor
  */
-export function install(win, opt_ctor) {
+export function install(win, ctor) {
   // Don't install in no-DOM environments e.g. worker.
   const shouldInstall = win.document;
   const hasCE = hasCustomElements(win);
@@ -948,7 +950,7 @@ export function install(win, opt_ctor) {
   let install = true;
   let installWrapper = false;
 
-  if (opt_ctor && hasCE) {
+  if (ctor && hasCE) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
@@ -956,15 +958,16 @@ export function install(win, opt_ctor) {
       const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = /** @type {!Function} */ (Object.create(
-        opt_ctor.prototype
-      ));
+      // I'm not sure why, but Closure will complain at the
+      // `Function.call.call()` below unless we cast to a Function instance
+      // here.
+      const instance = /** @type {!Function} */ (Object.create(ctor.prototype));
 
       // This will throw an error unless we're in a transpiled environemnt.
       // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
       // We use `Function.call.call` because Closure is too smart for regular
       // `Ctor.call`.
-      Function.call.call(opt_ctor, instance);
+      Function.call.call(ctor, instance);
 
       // If that didn't throw, we're transpiled.
       // Let's find out if we can wrap HTMLElement and avoid a full patch.

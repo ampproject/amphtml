@@ -1,0 +1,573 @@
+#
+# Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+# Defines how much css is allowed in the entire document. This is the sum of
+# `<style amp-custom>` and `style=` attribute inline CSS. If a CssLengthSpec
+# is not defined for a particular html_format, then no limit is enforced for
+# inline styles but a limit may be enforced on particular style tags. Those
+# would be defined in that tag's CdataSpec.
+css_length_spec: {
+  html_format: AMP
+  max_bytes: 75000
+  max_bytes_per_inline_style: 1000
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+}
+
+# This variant of <style amp-custom> is designed to help developers see how
+# close they are to the byte limit, even if the page is passing. By changing
+# the attribute to <style amp-custom-length-check>, this tagspec will be used
+# to match errors. It cannot pass however, as it has a cdata.max_bytes set to
+# -1. As a result, it will always fail and report the length found in the
+# tag's cdata. Deleting this tagspec will never break any valid AMP documents
+# as if it matches, the page will be invalid.
+tags: {  # <style amp-custom-length-check>, ALL FORMATS
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom-length-check"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom-length-check"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    # This will always cause the tagspec matching to fail.
+    max_bytes: -1
+  }
+}
+
+tags: {  # <style amp-custom>, [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom"
+  named_id: STYLE_AMP_CUSTOM
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: 75000
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
+        allow_empty: true
+      }
+      font_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
+
+tags: {  # `<style amp-custom>`, transformed [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (transformed)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: 75000
+    # For transformed AMP non-data URLs are not counted against the total byte
+    # limit for <style amp-custom>.
+    url_bytes_included: false
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
+        allow_empty: true
+      }
+      font_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
+
+tags: {  # <style amp-custom>, AMP4ADS
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (AMP4ADS)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: 20000  # Smaller than AMP, which is 75,000.
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: false
+          type: 'all'
+          type: 'print'
+          type: 'screen'
+          type: 'speech'
+          feature: 'width'
+          feature: 'height'
+          feature: 'aspect-ratio'
+          feature: 'orientation'
+          feature: 'resolution'
+        }
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
+        allow_empty: true
+      }
+      font_url_spec: {
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        allow_empty: true
+      }
+      validate_amp4ads: true
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
+}
+
+tags: {  # <style amp-custom>, AMP4EMAIL
+  html_format: AMP4EMAIL
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (AMP4EMAIL)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
+  cdata: {
+    max_bytes: 75000
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    css_spec: {
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        protocol: "https"
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
+
+tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate]"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+}
+
+tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-boilerplate] (transformed)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+}
+
+tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
+  html_format: AMP4ADS
+  tag_name: "STYLE"
+  spec_name: "head > style[amp4ads-boilerplate]"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp4ads-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace around the body statement, but
+    # not inside it. This is a compromise to keep things simple, but allow
+    # pretty printing tools some latitude.
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec?format=ads#boilerplate"
+}
+
+tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
+  html_format: AMP4EMAIL
+  tag_name: "STYLE"
+  spec_name: "head > style[amp4email-boilerplate]"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp4email-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/amp-email-format?format=email#required-markup"
+}
+
+tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate]"
+  mandatory: true
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata {
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+}
+
+tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "noscript > style[amp-boilerplate] (transformed)"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata {
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+}
+
+tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS, ACTIONS]
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
+  tag_name: "STYLE"
+  spec_name: "style[amp-keyframes]"
+  unique: true
+  mandatory_parent: "BODY"
+  mandatory_last_child: true
+  attrs: {
+     name: "amp-keyframes"
+     value: ""
+     mandatory: true
+     dispatch_key: NAME_DISPATCH
+  }
+  cdata: {
+    max_bytes: 500000
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#keyframes-stylesheet"
+    css_spec: {
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      validate_keyframes: true
+      declaration: "animation-timing-function"
+      declaration: "offset-distance"
+      declaration: "opacity"
+      declaration: "transform"
+      declaration: "visibility"
+    }
+  }
+}
+
+tags: {  # '<style amp-runtime>`, transformed AMP
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style[amp-runtime] (transformed)"
+  mandatory: true
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-runtime"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-version"
+    mandatory: true
+    value_regex: "^\\d{15}|latest$"
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}

@@ -144,13 +144,13 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
-  'amp-story-embed.js': {
+  'amp-story-player.js': {
     srcDir: './src/',
-    srcFilename: 'amp-story-embed.js',
+    srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      minifiedName: 'amp-story-embed-v0.js',
+      minifiedName: 'amp-story-player-v0.js',
       includePolyfills: false,
     },
   },
@@ -288,30 +288,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-ad-network-fake-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-triplelift-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-cloudflare-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-gmossp-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-mytarget-impl',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
@@ -754,7 +730,7 @@ exports.extensionBundles = [
   {
     name: 'amp-next-page',
     version: ['0.1', '1.0'],
-    latestVersion: '0.1',
+    latestVersion: '1.0',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
@@ -928,6 +904,20 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-story-education',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-selector',
     version: '0.1',
     latestVersion: '0.1',
@@ -1020,8 +1010,14 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-social-share',
+    version: '0.2',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-timeago',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -1220,8 +1216,8 @@ function verifyBundle_(condition, field, message, name, found) {
   }
 }
 
-exports.verifyExtensionBundles = function() {
-  exports.extensionBundles.forEach(bundle => {
+exports.verifyExtensionBundles = function () {
+  exports.extensionBundles.forEach((bundle) => {
     const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
       'name' in bundle,
@@ -1245,11 +1241,11 @@ exports.verifyExtensionBundles = function() {
       bundleString
     );
     const duplicates = exports.extensionBundles.filter(
-      duplicate => duplicate.name === bundle.name
+      (duplicate) => duplicate.name === bundle.name
     );
     verifyBundle_(
       duplicates.every(
-        duplicate => duplicate.latestVersion === bundle.latestVersion
+        (duplicate) => duplicate.latestVersion === bundle.latestVersion
       ),
       'latestVersion',
       'is not the same for all versions of',
@@ -1263,9 +1259,9 @@ exports.verifyExtensionBundles = function() {
       bundle.name,
       bundleString
     );
-    const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
+    const validTypes = Object.keys(TYPES).map((x) => TYPES[x]);
     verifyBundle_(
-      validTypes.some(validType => validType === bundle.type),
+      validTypes.some((validType) => validType === bundle.type),
       'type',
       `is not one of ${validTypes.join(',')} in`,
       bundle.name,

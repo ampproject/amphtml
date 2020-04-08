@@ -33,7 +33,7 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
     type: '_ping_',
     width: 300,
     height: 250,
-    src: 'https://testsrc',
+    src: 'https://src.test',
     'data-valid': 'true',
     'data-width': '6666',
   });
@@ -54,11 +54,11 @@ describes.realWin(
   {
     amp: {
       runtimeOn: false,
-      canonicalUrl: 'https://canonical.url',
+      canonicalUrl: 'https://canonical.test',
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let ad3p;
     let win;
     let registryBackup;
@@ -66,7 +66,7 @@ describes.realWin(
 
     beforeEach(() => {
       registryBackup = Object.create(null);
-      Object.keys(adConfig).forEach(k => {
+      Object.keys(adConfig).forEach((k) => {
         registryBackup[k] = adConfig[k];
         delete adConfig[k];
       });
@@ -82,7 +82,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      Object.keys(registryBackup).forEach(k => {
+      Object.keys(registryBackup).forEach((k) => {
         adConfig[k] = registryBackup[k];
       });
       registryBackup = null;
@@ -101,10 +101,12 @@ describes.realWin(
           expect(url).to.match(/frame(.max)?.html/);
           const data = JSON.parse(iframe.name).attributes;
           expect(data).to.have.property('type', '_ping_');
-          expect(data).to.have.property('src', 'https://testsrc');
+          expect(data).to.have.property('src', 'https://src.test');
           expect(data).to.have.property('width', 300);
           expect(data).to.have.property('height', 250);
-          expect(data._context.canonicalUrl).to.equal('https://canonical.url/');
+          expect(data._context.canonicalUrl).to.equal(
+            'https://canonical.test/'
+          );
         });
       });
 
@@ -227,7 +229,7 @@ describes.realWin(
       });
 
       it('should use custom path', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -245,7 +247,7 @@ describes.realWin(
       it('should use default path if custom disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
+        meta.setAttribute('content', 'https://src.test/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.onLayoutMeasure();
@@ -328,7 +330,7 @@ describes.realWin(
           expect(fetches).to.have.length(2);
           expect(
             Array.from(fetches)
-              .map(link => link.href)
+              .map((link) => link.href)
               .sort()
           ).to.jsonEqual([
             'http://ads.localhost:9876/dist.3p/current/frame.max.html',
@@ -340,13 +342,13 @@ describes.realWin(
           );
           expect(preconnects[preconnects.length - 1]).to.have.property(
             'href',
-            'https://testsrc/'
+            'https://src.test/'
           );
         });
       });
 
       it('should use remote html path for preload', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -356,7 +358,7 @@ describes.realWin(
         return whenFirstVisible.then(() => {
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link => link.href == `${remoteUrl}?$internalRuntimeVersion$`
+              (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
             )
           ).to.be.true;
         });
@@ -365,7 +367,7 @@ describes.realWin(
       it('should not use remote html path for preload if disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
+        meta.setAttribute('content', 'https://src.test/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.buildCallback();
@@ -375,7 +377,7 @@ describes.realWin(
         return whenFirstVisible.then(() => {
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link =>
+              (link) =>
                 link.href ==
                 'http://ads.localhost:9876/dist.3p/current/frame.max.html'
             )
@@ -403,7 +405,7 @@ describes.realWin(
         }
       );
 
-      it('should only allow rendering one ad per second', function*() {
+      it('should only allow rendering one ad per second', function* () {
         const clock = lolex.install({
           target: win,
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -425,7 +427,7 @@ describes.realWin(
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
       });
 
-      it('should only allow rendering one ad a time', function*() {
+      it('should only allow rendering one ad a time', function* () {
         const ad3p2 = createAmpAd(win);
         expect(ad3p.renderOutsideViewport()).to.equal(3);
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
@@ -676,7 +678,7 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'shadow',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
         expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
@@ -691,7 +693,7 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'single',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
         expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);

@@ -20,10 +20,6 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
-const tempy = require('tempy');
-
-const SRC_TEMP_DIR = tempy.directory();
-
 const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
@@ -34,6 +30,7 @@ const COMMON_GLOBS = [
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
+  'third_party/optimized-svg-icons/social-share-svgs.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -49,6 +46,9 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/toolbox-cache-url/package.json',
+  'node_modules/@ampproject/viewer-messaging/package.json',
+  'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
   'node_modules/preact/package.json',
@@ -139,8 +139,17 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
+/**
+ * NOTE: 3p code is generally excluded from the transform process.
+ * The globs here are force-transformed anyway.
+ */
+const THIRD_PARTY_TRANSFORM_GLOBS = [
+  // JSX syntax should undergo usual transforms
+  'third_party/optimized-svg-icons/social-share-svgs.js',
+];
+
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  SRC_TEMP_DIR,
+  THIRD_PARTY_TRANSFORM_GLOBS,
 };

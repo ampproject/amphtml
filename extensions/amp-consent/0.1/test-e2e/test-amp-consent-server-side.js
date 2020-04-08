@@ -26,18 +26,18 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us',
-    experiments: ['amp-consent-geo-override'],
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
       controller = env.controller;
     });
 
-    it('should respect server side decision and persist it', async () => {
+    //TODO (micajuineho): Unskip flaky test
+    it.skip('should respect server side decision and persist it', async () => {
       resetAllElements();
 
       const currentUrl = await controller.getCurrentUrl();
