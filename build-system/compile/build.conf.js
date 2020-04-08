@@ -61,6 +61,7 @@ const esmRemovedImports = {
   './polyfills/promise': ['installPromise'],
   './polyfills/array-includes': ['installArrayIncludes'],
   '../third_party/css-escape/css-escape': ['cssEscape'],
+  './ie-media-bug': ['ieMediaCheckAndFix'],
 };
 
 // Removable imports that are not needed for valid transformed documents.
