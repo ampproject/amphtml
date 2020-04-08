@@ -60,6 +60,7 @@ const esmRemovedImports = {
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
   './polyfills/array-includes': ['installArrayIncludes'],
+  './ie-media-bug': ['ieMediaCheckAndFix'],
   '../third_party/css-escape/css-escape': ['cssEscape'],
 };
 
