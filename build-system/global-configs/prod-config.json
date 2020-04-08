@@ -6,6 +6,7 @@
   "adsense-ad-size-optimization": 0.01,
   "amp-access-iframe": 1,
   "amp-action-macro": 1,
+  "amp-accordion-display-locking": 0.01,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-consent-restrict-fullscreen": 1,
