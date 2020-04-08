@@ -192,7 +192,7 @@ async function measureDocuments(urls, version, {headless, runs}) {
   // Make an array of tasks to be executed
   const tasks = urls.flatMap((url) =>
     Array.from({length: runs}).flatMap(() => [
-      measureDocument.bind(null, url, version, {headless}),
+      measureDocument.bind(null, url, {headless}),
     ])
   );
 

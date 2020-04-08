@@ -40,7 +40,7 @@ function buildMinifiedRuntime() {
  */
 function buildUnminifiedRuntime() {
   execOrDie('gulp clean');
-  execOrDie('gulp build --fortesting');
+  execOrDie(`gulp build --fortesting --config ${argv.config}`);
 }
 
 /**
