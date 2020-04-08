@@ -16,6 +16,8 @@
 
 import '../amp-jwplayer';
 import {htmlFor} from '../../../../src/static-template';
+import * as utils from '../../../../src/dom';
+import { VideoEvents } from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-jwplayer',
@@ -70,7 +72,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html'
+          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html?isAMP=true'
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -84,7 +86,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html'
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?isAMP=true'
         );
       });
 
@@ -98,7 +100,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag'
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag&isAMP=true'
         );
       });
 
@@ -113,7 +115,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true&isAMP=true'
         );
       });
     })
@@ -147,8 +149,8 @@ describes.realWin(
         expect(impl.preimplementsAutoFullscreen()).to.be.false;
       });
 
-      it('pre-implements MediaSession API', () => {
-        expect(impl.preimplementsMediaSessionAPI()).to.be.true;
+      it('does not pre-implement MediaSession API', () => {
+        expect(impl.preimplementsMediaSessionAPI()).to.be.false;
       });
 
       it('gets currentTime', () => {
@@ -188,7 +190,7 @@ describes.realWin(
       it('plays', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.play();
-        expect(spy).to.be.calledWith('play', { reason: 'amp-interaction' });
+        expect(spy).to.be.calledWith('play', { reason: undefined });
       });
   
       it('autoplays', () => {
@@ -222,16 +224,24 @@ describes.realWin(
       })
 
       it('can enter fullscreen', () => {
-        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        const spy = env.sandbox.spy(utils, 'fullscreenEnter');
+        const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
         impl.fullscreenEnter();
-        expect(spy).calledWith('setFullscreen', true);
+        if (impl.isSafariOrIos()) {
+          return expect(messageSpy).calledWith('setFullscreen', true);
+        }
+        expect(spy).calledWith(impl.iframe_);
       });
 
       it('can exit fullscreen', () => {
-        const spy = env.sandbox.spy(impl, 'sendCommand_');
-        impl.fullscreen_ = true;
+        const spy = env.sandbox.spy(utils, 'fullscreenExit');
+        const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
+
         impl.fullscreenExit();
-        expect(spy).calledWith('setFullscreen', false);
+        if (impl.isSafariOrIos()) {
+          return expect(messageSpy).calledWith('setFullscreen', true);
+        }
+        expect(spy).calledWith(impl.iframe_);
       });
 
       describe('message handling', () => {
@@ -256,11 +266,23 @@ describes.realWin(
           expect(spy).calledWith(detail);
         });
 
-        it('updates fullscreen state', () => {
-          mockMessage('fullscreen', { fullscreen: true })
-          expect(impl.fullscreen_).to.be.true;
-          mockMessage('fullscreen', { fullscreen: false })
-          expect(impl.fullscreen_).to.be.false;
+        it('updates fullscreen on message', () => {
+          const enterSpy = env.sandbox.spy(impl, 'fullscreenEnter');
+          const exitSpy = env.sandbox.spy(impl, 'fullscreenExit');
+
+          // Stub native fullscreen detection for headless testing
+          const isFullscreen =  env.sandbox.stub(impl, 'isFullscreen').returns(false);
+          
+          mockMessage('fullscreen', { fullscreen: true });
+          expect(exitSpy.called).to.be.false;
+          expect(enterSpy.called).to.be.true;
+          
+          isFullscreen.returns(true);
+
+          mockMessage('fullscreen', { fullscreen: false });
+          expect(exitSpy.called).to.be.true;
+          expect(enterSpy.callCount).to.equal(1);
+          // impl.isFullscreen = oldIsFS;
         });
 
         it('updates duration from meta', () => {
@@ -269,11 +291,13 @@ describes.realWin(
         });
 
         it('updates mute from state', () => {
-          const spy = env.sandbox.spy(impl, 'onToggleMute_');
+          const spy = env.sandbox.spy(impl.element, 'dispatchCustomEvent');
           mockMessage('mute', { mute: true });
-          expect(spy).calledWith(true);
+          expect(spy).calledWith(VideoEvents.MUTED);
+          expect(impl.muted_).equals(true);
           mockMessage('mute', { mute: false });
-          expect(spy).calledWith(false);
+          expect(spy).calledWith(VideoEvents.UNMUTED);
+          expect(impl.muted_).equals(false);
         });
 
         it('updates played ranges from state', () => {
@@ -438,7 +462,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html'
+          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html?isAMP=true'
         );
       });
     });
