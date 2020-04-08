@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {depCheckConfig} = require('./dep-check-config');
-const {postClosureConfig} = require('./post-closure-config');
-const {preClosureConfig} = require('./pre-closure-config');
-const {singlePassConfig} = require('./single-pass-config');
-const {testConfig} = require('./test-config');
-const {unminifiedConfig} = require('./unminified-config');
+'use strict';
 
-module.exports = {
-  depCheckConfig,
-  postClosureConfig,
-  preClosureConfig,
-  singlePassConfig,
-  testConfig,
-  unminifiedConfig,
-};
+const fs = require('fs');
+
+const babelConfigFiles = fs
+  .readdirSync(__dirname)
+  .filter((file) => file.includes('-config.js'));
+const babelConfigs = babelConfigFiles.map((file) => require(`./${file}`));
+module.exports = Object.assign({}, ...babelConfigs);
