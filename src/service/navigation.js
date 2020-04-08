@@ -568,7 +568,6 @@ export class Navigation {
       }
 
       if (this.navigateToUrlWithViewer(to, 'external nav')) {
-        console.log('from: ' + from + ', to: ' + to + ', target: ' + target);
         e.preventDefault();
       }
     }
