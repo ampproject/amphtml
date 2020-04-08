@@ -1,3 +1,18 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * @fileoverview
@@ -18,8 +33,6 @@ inob.observe($0);
  */
 export function install(win) {
   // DO NOT SUBMIT: remove, testing.
-  win.QqqqInOb = win.IntersectionObserver;
-  win.QqqqInObEntry = win.IntersectionObserverEntry;
   delete win.IntersectionObserver;
   delete win.IntersectionObserverEntry;
 
@@ -29,10 +42,28 @@ export function install(win) {
 }
 
 /**
+ * @param {!Window} childWin
+ */
+export function installForChildWin(childWin) {
+  const parent = childWin.parent;
+  if (!childWin.IntersectionObserver &&
+      parent &&
+      parent.IntersectionObserver) {
+    childWin.IntersectionObserver = parent.IntersectionObserver;
+    childWin.IntersectionObserverEntry = parent.IntersectionObserverEntry;
+  }
+}
+
+/**
  * @param {!Window} win
  */
 export function shouldLoadPolyfill(win) {
-  return (!win.IntersectionObserver || win.IntersectionObserver === IntersectionObserverStub);
+  return (
+    !win.IntersectionObserver ||
+    win.IntersectionObserver === IntersectionObserverStub ||
+    !win.IntersectionObserverEntry ||
+    !('isIntersecting' in win.IntersectionObserverEntry.prototype)
+  );
 }
 
 /**
@@ -48,10 +79,14 @@ export function upgradePolyfill(win, installer) {
     delete win.IntersectionObserverEntry;
     installer();
     const Impl = win.IntersectionObserver;
-    const microtask = Promise.resolve();
-    Stub.stubs_.forEach(stub => {
-      microtask.then(() => stub.upgrade_(Impl));
-    });
+    const stubs = Stub.stubs_;
+    Stub.stubs_ = [];
+    if (stubs.length > 0) {
+      const microtask = Promise.resolve();
+      stubs.forEach(stub => {
+        microtask.then(() => stub.upgrade_(Impl));
+      });
+    }
   }
 }
 

@@ -271,7 +271,6 @@ function adoptShared(global, callback) {
 
   // Some deferred polyfills.
   if (shouldLoadPolyfill(global)) {
-    console.log('Start InOb extension loading.');
     Services.extensionsFor(global).preloadExtension('amp-intersection-observer-polyfill');
   }
 
