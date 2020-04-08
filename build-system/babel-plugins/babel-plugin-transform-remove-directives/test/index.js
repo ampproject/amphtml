@@ -13,4 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const PROTOCOL_VERSION = '1.2';
+
+const runner = require('@babel/helper-plugin-test-runner').default;
+
+runner(__dirname);

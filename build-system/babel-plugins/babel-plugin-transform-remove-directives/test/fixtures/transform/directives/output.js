@@ -13,4 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const PROTOCOL_VERSION = '1.2';
+function without() {}
+
+'use strict';
+
+function named() {}
+
+try {
+  (function () {})();
+} catch (e) {}

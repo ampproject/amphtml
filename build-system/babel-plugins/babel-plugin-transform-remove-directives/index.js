@@ -13,4 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const PROTOCOL_VERSION = '1.2';
+
+module.exports = function () {
+  return {
+    name: 'remove-strict-directives',
+    visitor: {
+      Directive(path) {
+        const {node} = path;
+        if (node.value.value === 'use strict') {
+          path.remove();
+        }
+      },
+    },
+  };
+};
