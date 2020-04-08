@@ -22,14 +22,25 @@ import {toArray} from '../../src/types';
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
-  let url;
   let manager;
   const fireHandler = [];
+  const DEFAULT_CACHE_URL =
+    'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
+  const DEFAULT_ORIGIN_URL =
+    'https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
   let messagingMock;
 
-  function buildStoryPlayer(numStories = 1) {
+  function buildStoryPlayer(
+    numStories = 1,
+    url = DEFAULT_CACHE_URL,
+    cache = null
+  ) {
     playerEl = win.document.createElement('amp-story-player');
+
+    if (cache) {
+      playerEl.setAttribute('amp-cache', cache);
+    }
     for (let i = 0; i < numStories; i++) {
       const storyAnchor = win.document.createElement('a');
       url =
@@ -97,22 +108,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_CACHE_URL +
+        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+        '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
-  it('should correctly append params at the end of a story url with existing params', () => {
-    buildStoryPlayer();
-    url += '?testParam=true#myhash=hashValue';
-    playerEl.firstElementChild.setAttribute('href', url);
+  it('should correctly append params at the end of a story url with existing params', async () => {
+    const existingParams = '?testParam=true#myhash=hashValue';
+    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
 
     manager.loadPlayers();
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_CACHE_URL +
+        existingParams +
+        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+        '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -225,6 +238,36 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
       expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
       expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    });
+  });
+
+  describe('Cache URLs', () => {
+    it('should transform origin to cache url when specified by the publisher', async () => {
+      await buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'cdn.ampproject.org');
+
+      await Promise.resolve(); // Microtask tick.
+
+      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+
+      expect(storyIframe.getAttribute('src')).to.equals(
+        DEFAULT_CACHE_URL +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+          '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      );
+    });
+
+    it('should respect original url when there is no amp-cache value', async () => {
+      await buildStoryPlayer(1, DEFAULT_ORIGIN_URL);
+
+      await Promise.resolve(); // Microtask tick.
+
+      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+
+      expect(storyIframe.getAttribute('src')).to.equals(
+        DEFAULT_ORIGIN_URL +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
+          '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      );
     });
   });
 });

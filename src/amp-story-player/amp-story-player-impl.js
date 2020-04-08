@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
@@ -43,6 +44,9 @@ const IframePosition = {
   CURRENT: 0,
   NEXT: 1,
 };
+
+/** @const @type {!Array<string>} */
+const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 
 /**
  * @enum {number}
@@ -410,8 +414,33 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
-    const {href} = this.getEncodedLocation_(story.href, visibilityState);
+    const url = story.href;
+    const ampCache = this.getAttribute('amp-cache');
 
+    if (!ampCache) {
+      this.setIframeSrc_(iframe, url, visibilityState);
+      return;
+    }
+
+    if (!SUPPORTED_CACHES.includes(ampCache)) {
+      throw new Error(
+        `Unsupported cache, use one of following: ${SUPPORTED_CACHES}`
+      );
+    }
+
+    ampToolboxCacheUrl.createCacheUrl(ampCache, url).then((cacheUrl) => {
+      const viewerUrl = cacheUrl.replace('/c/s/', '/v/s/');
+      this.setIframeSrc_(iframe, viewerUrl, visibilityState);
+    });
+  }
+
+  /**
+   * @param {!Element} iframe
+   * @param {string} src
+   * @param {!VisibilityState} visibilityState
+   */
+  setIframeSrc_(iframe, src, visibilityState) {
+    const {href} = this.getEncodedLocation_(src, visibilityState);
     iframe.setAttribute('src', href);
   }
 
