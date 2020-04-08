@@ -16,7 +16,7 @@
 import {LoaderService} from '../amp-loader';
 import {getStyle} from '../../../../src/style';
 
-describes.fakeWin('amp-loader', {amp: true}, (env) => {
+describes.fakeWin('amp-loader', {}, () => {
   let loaderService;
   let el;
   let loaderRoot;
