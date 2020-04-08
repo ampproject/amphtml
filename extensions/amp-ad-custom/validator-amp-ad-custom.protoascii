@@ -33,6 +33,7 @@ tags: {  # <amp-ad-custom>
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: {
     name: "src"
+    mandatory: true
     value_url: {
       protocol: "https"
       allow_relative: false
