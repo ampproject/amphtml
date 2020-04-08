@@ -134,7 +134,7 @@ async function startNailgunServer(port, detached) {
  * @param {string} port
  */
 async function stopNailgunServer(port) {
-  if (argv.disable_nailgun) {
+  if (argv.disable_nailgun || argv.use_native) {
     return;
   }
 
