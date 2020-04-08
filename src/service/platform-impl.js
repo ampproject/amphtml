@@ -101,7 +101,7 @@ export class Platform {
    */
   isIe() {
     if (IS_ESM) {
-      return true;
+      return false;
     }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
