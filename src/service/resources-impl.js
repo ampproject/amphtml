@@ -422,6 +422,15 @@ export class ResourcesImpl {
     this.resources_.push(resource);
 
     if (this.intersectionObserver_) {
+      // Classically, sizes/media queries are applied just before measure.
+      // With IntersectionObserver, we have to make sure it happens before
+      // the observation so do it now. Won't cause layout thrash since
+      // Resource.add() is called in an implicit mutate context.
+      // TODO(willchou): Avoid unnecessary calls due to reparenting.
+      resource.applySizesAndMediaQuery();
+      dev().fine(TAG_, 'apply sizes/media query:', resource.debugid);
+
+      // The observer callback will schedule a pass to process this element.
       this.intersectionObserver_.observe(element);
     } else {
       this.remeasurePass_.schedule(1000);
@@ -540,11 +549,11 @@ export class ResourcesImpl {
     ) {
       return null;
     }
-    dev().fine(TAG_, 'build resource:', resource.debugid);
     const promise = resource.build();
     if (!promise) {
       return null;
     }
+    dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
     // With IntersectionObserver, no need to schedule passes after build.
     if (!schedulePass || this.intersectionObserver_) {
@@ -1164,13 +1173,24 @@ export class ResourcesImpl {
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (
+      if (this.intersectionObserver_) {
+        // With IntersectionObserver, we call applySizesAndMediaQuery() early
+        // in Resources.add(), so we only need to re-apply on relayout here.
+        // relayoutCount is also irrelevant and doesn't need an increment.
+        if (relayoutAll) {
+          r.applySizesAndMediaQuery();
+          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
+        }
+      } else if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
+        // TODO(willchou): We often call this needlessly e.g. all elements
+        // elements of the loading rect are NOT_LAID_OUT!
         r.applySizesAndMediaQuery();
+        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
