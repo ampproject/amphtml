@@ -75,6 +75,9 @@ export const urls = {
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
   errorReporting:
     env['errorReportingUrl'] || 'https://amp-error-reporting.appspot.com/r',
+  betaErrorReporting:
+    env['betaErrorReportingUrl'] ||
+    'https://us-central1-amp-error-reporting.cloudfunctions.net/r',
   localDev: env['localDev'] || false,
   /**
    * These domains are trusted with more sensitive viewer operations such as

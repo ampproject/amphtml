@@ -241,11 +241,15 @@ AmpConfigType.prototype.thirdPartyFrameRegex;
 /* @public {string} */
 AmpConfigType.prototype.errorReporting;
 /* @public {string} */
+AmpConfigType.prototype.betaErrorReporting;
+/* @public {string} */
 AmpConfigType.prototype.cdn;
 /* @public {string} */
 AmpConfigType.prototype.cdnUrl;
 /* @public {string} */
 AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.betaErrorReportingUrl;
 /* @public {string} */
 AmpConfigType.prototype.localDev;
 /* @public {string} */
