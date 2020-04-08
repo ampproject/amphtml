@@ -179,11 +179,6 @@ export class Page {
         .getBody()
         .classList.toggle(HIDDEN_DOC_CLASS, !this.isVisible());
     }
-
-    if (this.isVisible()) {
-      // Switch the title and url of the page to reflect this page
-      this.manager_.setTitlePage(this);
-    }
   }
 
   /**

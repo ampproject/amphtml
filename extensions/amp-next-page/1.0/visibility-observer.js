@@ -56,7 +56,7 @@ export class VisibilityObserverEntry {
     this.topSentinelPosition_ = null;
     /** @private {?RelativePositions} */
     this.bottomSentinelPosition_ = null;
-    /** @private {function(!ViewportRelativePos)} */
+    /** @private @const {function(!ViewportRelativePos)} */
     this.callback_ = callback;
   }
 
@@ -97,12 +97,12 @@ export class VisibilityObserverEntry {
     this.observer_
       .getPositionObserver()
       .observe(top, PositionObserverFidelity.LOW, (position) =>
-        this.topSentinelPositionChanged(position)
+        this.topSentinelPositionChanged_(position)
       );
     this.observer_
       .getPositionObserver()
       .observe(bottom, PositionObserverFidelity.LOW, (position) =>
-        this.bottomSentinelPositionChanged(position)
+        this.bottomSentinelPositionChanged_(position)
       );
   }
 
@@ -111,7 +111,7 @@ export class VisibilityObserverEntry {
    * top sentinel element
    * @param {?PositionInViewportEntryDef} position
    */
-  topSentinelPositionChanged(position) {
+  topSentinelPositionChanged_(position) {
     this.topSentinelPosition_ = position.relativePos;
     this.observer_.updateRelativePos(this);
   }
@@ -121,7 +121,7 @@ export class VisibilityObserverEntry {
    * bottom sentinel element
    * @param {?PositionInViewportEntryDef} position
    */
-  bottomSentinelPositionChanged(position) {
+  bottomSentinelPositionChanged_(position) {
     this.bottomSentinelPosition_ = position.relativePos;
     this.observer_.updateRelativePos(this);
   }

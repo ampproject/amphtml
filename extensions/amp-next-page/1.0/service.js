@@ -129,6 +129,9 @@ export class NextPageService {
     /** @private {?Page} */
     this.hostPage_ = null;
 
+    /** @private {?Page} */
+    this.currentTitlePage_ = null;
+
     /** @private {!Object<string, !Element>} */
     this.replaceableElements_ = {};
 
@@ -298,7 +301,7 @@ export class NextPageService {
         if (page.isVisible()) {
           page.setVisibility(VisibilityState.HIDDEN);
         }
-      } else {
+      } else if (page.relativePos !== ViewportRelativePos.LEAVING_VIEWPORT) {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
@@ -320,6 +323,12 @@ export class NextPageService {
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
+
+    // Switch the title and url of the page to reflect the first visible page
+    const lastVisiblePage = this.pages_.find((page) => page.isVisible());
+    if (this.currentTitlePage_ !== lastVisiblePage) {
+      this.setTitlePage(lastVisiblePage);
+    }
 
     // Check if we're close to the bottom, if so fetch more pages
     this.maybeFetchNext();
