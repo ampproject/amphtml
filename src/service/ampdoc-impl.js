@@ -308,6 +308,9 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
+    /** @private */
+    this.hasTrackingIframe_ = false;
+
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
 
@@ -748,6 +751,19 @@ export class AmpDoc {
    */
   onVisibilityChanged(handler) {
     return this.visibilityStateHandlers_.add(handler);
+  }
+
+  /**
+   * Allow one tracking iframe for each amp doc. Caller need to handle user
+   * error when registeration returns false
+   * @return {boolean}
+   */
+  registerTrackingIframe() {
+    if (this.hasTrackingIframe_) {
+      return false;
+    }
+    this.hasTrackingIframe_ = true;
+    return true;
   }
 }
 
