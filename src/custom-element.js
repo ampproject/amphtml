@@ -344,7 +344,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      // If the implmementation fails to construct, we'll leave it as a
+      // If the implementation fails to construct, we'll leave it as a
       // ElementStub. The runtime will ignore the element from now on.
       try {
         this.implementation_ = new newImplClass(this);
@@ -354,13 +354,8 @@ function createBaseCustomElementClass(win) {
         dev().error(TAG, 'Failed to construct BaseElement', e);
         return;
       }
-      if (this.everAttached) {
-        // Usually, we do an implementation upgrade when the element is
-        // attached to the DOM. But, if it hadn't yet upgraded from
-        // ElementStub, we couldn't. Now that it's upgraded from a stub, go
-        // ahead and do the full upgrade.
-        this.tryUpgrade_();
-      }
+
+      this.tryUpgrade_();
     }
 
     /**
@@ -785,8 +780,7 @@ function createBaseCustomElementClass(win) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
         const ampdocService = Services.ampdocServiceFor(win);
-        const ampdoc = ampdocService.getAmpDoc(this);
-        this.ampdoc_ = ampdoc;
+        this.ampdoc_ = ampdocService.getAmpDoc(this);
       }
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
