@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {devDependencies} = require('./dev-dependencies');
 const {replacePlugin} = require('./replace-plugin');
 
 /**
@@ -90,9 +91,11 @@ function getPreClosureConfig() {
     !(argv.fortesting || isCheckTypes)
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
+    argv.single_pass ? 'transform-es2015-modules-commonjs' : null,
   ].filter(Boolean);
   const preClosureConfig = {
     compact: false,
+    ignore: devDependencies,
     plugins: preClosurePlugins,
     retainLines: true,
   };

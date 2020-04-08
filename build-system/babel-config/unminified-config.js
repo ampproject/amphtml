@@ -46,7 +46,7 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     '@babel/plugin-transform-react-constant-elements',
-    ['@babel/plugin-transform-classes', {loose: false}],
+    '@babel/plugin-transform-classes',
     reactJsxPlugin,
   ];
   const unminifiedPresets = [presetEnv];
