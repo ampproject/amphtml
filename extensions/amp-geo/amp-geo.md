@@ -1,6 +1,7 @@
 ---
 $category@: dynamic-content
 formats:
+  - stories
   - websites
 teaser:
   text: Provides an approximate country-level geolocation interface.
@@ -170,6 +171,8 @@ This CSS hides the element that has the `foo` class until `amp-geo` has loaded a
 
 **Note**: Elements such as `amp-ad` and `amp-iframe` do not make external network requests when set to `display: none`.
 
+[filter formats="websites"]
+
 ### Integration with amp-bind
 
 If the `AmpBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information. Using the football example above, set the `AmpBind` flag to true to enable `amp-bind` integration.
@@ -200,6 +203,8 @@ If the user were in Canada, the inserted `amp-state` would be as follows:
   </script>
 </amp-state>
 ```
+
+[/filter]<!-- formats="websites" -->
 
 ### <a name="variable-substitution"></a>Variable substitution
 
