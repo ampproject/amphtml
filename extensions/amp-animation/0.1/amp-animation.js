@@ -26,7 +26,7 @@ import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
-import {parseAmpAnimationConfig} from './parse-animation-config';
+import {parseAnimationConfig} from './parse-animation-config';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -68,35 +68,29 @@ export class AmpAnimation extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    const {element} = this;
 
     // Trigger.
-    const trigger = element.getAttribute('trigger');
-
+    const trigger = this.element.getAttribute('trigger');
     if (trigger) {
-      userAssert(
+      this.triggerOnVisibility_ = userAssert(
         trigger == 'visibility',
         'Only allowed value for "trigger" is "visibility": %s',
-        element
+        this.element
       );
-
-      const isBodyChild =
-        element.parentNode == element.ownerDocument.body ||
-        element.parentNode == ampdoc.getBody();
-
-      if (isBodyChild) {
-        this.triggerOnVisibility_ = true;
-      } else {
-        // TODO(alanorozco): The only possible parent for
-        // amp-animation[trigger=visibility] other than <body> is
-        // <amp-story-page>. Stories coordinate animations, so we bail out in
-        // this case. For other container elements that may be supported in the
-        // future, this shouldn't short-circuit.
-        return;
-      }
     }
 
-    this.configJson_ = parseAmpAnimationConfig(element);
+    // TODO(dvoytenko): Remove once we support direct parent visibility.
+    if (trigger == 'visibility') {
+      userAssert(
+        this.element.parentNode == this.element.ownerDocument.body ||
+          this.element.parentNode == ampdoc.getBody(),
+        '%s is only allowed as a direct child of <body> element when trigger' +
+          ' is visibility. This restriction will be removed soon.',
+        TAG
+      );
+    }
+
+    this.configJson_ = parseAnimationConfig(element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`

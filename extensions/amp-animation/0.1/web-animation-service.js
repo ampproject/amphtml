@@ -33,15 +33,14 @@ export class WebAnimationService {
   }
 
   /**
-   * @param {!Document|!ShadowRoot|!Element} root
    * @return {!Builder}
    */
-  createBuilder(root) {
+  createBuilder() {
     installWebAnimationsIfNecessary(this.ampdoc_.win);
 
     return new Builder(
       this.ampdoc_.win,
-      root,
+      this.ampdoc_.getRootNode(),
       this.ampdoc_.getUrl(),
       this.vsync_,
       this.owners_

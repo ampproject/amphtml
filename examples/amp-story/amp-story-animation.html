@@ -12,11 +12,6 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script
       async
-      custom-element="amp-animation"
-      src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"
-    ></script>
-    <script
-      async
       custom-element="amp-story"
       src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
     ></script>
@@ -31,26 +26,28 @@
     <amp-story standalone>
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
-          <strong class="animate">rotate with amp-animation</strong>
+          <strong class="animate">rotate with amp-story-animation</strong>
           <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
           <div animate-in="fly-in-top" animate-in-after="first">
             fly-in with animate-in, after the previous element
           </div>
         </amp-story-grid-layer>
-        <amp-animation trigger="visibility" layout="nodisplay">
+        <amp-story-animation trigger="visibility" layout="nodisplay">
           <script type="application/json">
             {
-              "selector": ".animate",
+              "selector": "#cover .animate",
               "duration": "1s",
               "keyframes": {"transform": "rotate(360deg)"}
             }
           </script>
-        </amp-animation>
+        </amp-story-animation>
       </amp-story-page>
 
       <amp-story-page id="page1">
         <amp-story-grid-layer template="vertical">
-          <strong class="animate">bounce forward with amp-animation</strong>
+          <strong class="animate">
+            bounce forward with amp-story-animation
+          </strong>
           <div animate-in="fly-in-top" id="first">fly-in with animate-in</div>
           <div animate-in="fly-in-top" animate-in-after="first">
             fly-in with animate-in, after the previous element
@@ -58,10 +55,10 @@
         </amp-story-grid-layer>
         <!--
         -->
-        <amp-animation trigger="visibility" layout="nodisplay">
+        <amp-story-animation trigger="visibility" layout="nodisplay">
           <script type="application/json">
             {
-              "selector": ".animate",
+              "selector": "#page1 .animate",
               "duration": "0.5s",
               "keyframes": [
                 {"transform": "scale(1)"},
@@ -70,7 +67,7 @@
               ]
             }
           </script>
-        </amp-animation>
+        </amp-story-animation>
       </amp-story-page>
 
       <amp-story-bookend

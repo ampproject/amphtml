@@ -35,7 +35,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
-import {parseAmpAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
+import {parseAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -68,7 +68,7 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  */
 export function hasAnimations(element) {
   return (
-    !!childElementByTag(element, 'amp-animation') ||
+    !!childElementByTag(element, 'amp-story-animation') ||
     !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR)
   );
 }
@@ -594,9 +594,12 @@ export class AnimationManager {
       (el) => this.createAnimationDef(el, this.getPreset_(el))
     );
     // <amp-animation>
-    const ampAnimationElement = childElementByTag(this.root_, 'amp-animation');
-    if (ampAnimationElement) {
-      animationDefs.push(parseAmpAnimationConfig(ampAnimationElement));
+    const webAnimationSpecElement = childElementByTag(
+      this.root_,
+      'amp-story-animation'
+    );
+    if (webAnimationSpecElement) {
+      animationDefs.push(parseAnimationConfig(webAnimationSpecElement));
     }
     return animationDefs;
   }
@@ -660,9 +663,7 @@ export class AnimationManager {
     return Services.extensionsFor(this.ampdoc_.win)
       .installExtensionForDoc(this.ampdoc_, 'amp-animation')
       .then(() => Services.webAnimationServiceFor(this.root_))
-      .then((webAnimationService) =>
-        webAnimationService.createBuilder(this.root_)
-      );
+      .then((webAnimationService) => webAnimationService.createBuilder());
   }
 
   /**

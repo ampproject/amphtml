@@ -21,7 +21,7 @@ import {user, userAssert} from '../../../src/log';
  * @param {!Element} element
  * @return {?JsonObject}
  */
-export function parseAmpAnimationConfig(element) {
+export function parseAnimationConfig(element) {
   const {textContent} = userAssert(
     childElementByTag(element, 'script'),
     '"<script type=application/json>" must be present'
