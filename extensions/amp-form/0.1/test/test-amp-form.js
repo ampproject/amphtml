@@ -1271,6 +1271,86 @@ describes.repeated(
           });
         });
 
+        it('should call fetch with URLSearchParams when enctype is "application/x-www-form-urlencoded"', () => {
+          const form = getForm();
+          form.setAttribute('enctype', 'application/x-www-form-urlencoded');
+          return getAmpForm(form).then((ampForm) => {
+            env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: ampForm.form_,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+            expect(event.preventDefault).to.be.calledOnce;
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
+              expect(ampForm.xhr_.fetch).to.be.calledOnce;
+              expect(ampForm.xhr_.fetch).to.be.calledWith(
+                'https://example.com'
+              );
+
+              const xhrCall = ampForm.xhr_.fetch.getCall(0);
+              const config = xhrCall.args[1];
+              expect(config.body instanceof URLSearchParams).to.be.true;
+
+              const entriesInForm = fromIterator(
+                createFormDataWrapper(env.win, getForm()).entries()
+              );
+              expect(fromIterator(config.body.entries())).to.have.deep.members(
+                entriesInForm
+              );
+              expect(config.method).to.equal('POST');
+              expect(config.credentials).to.equal('include');
+
+              return submitEventPromise;
+            });
+          });
+        });
+
+        it('should call fetch with FormDataWrapper with any other enctype value', () => {
+          const form = getForm();
+          form.setAttribute('enctype', 'anything');
+          return getAmpForm(form).then((ampForm) => {
+            env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: ampForm.form_,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+            expect(event.preventDefault).to.be.calledOnce;
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
+              expect(ampForm.xhr_.fetch).to.be.calledOnce;
+              expect(ampForm.xhr_.fetch).to.be.calledWith(
+                'https://example.com'
+              );
+
+              const xhrCall = ampForm.xhr_.fetch.getCall(0);
+              const config = xhrCall.args[1];
+              expect(isFormDataWrapper(config.body)).to.be.true;
+
+              const entriesInForm = fromIterator(
+                createFormDataWrapper(env.win, getForm()).entries()
+              );
+              expect(fromIterator(config.body.entries())).to.have.deep.members(
+                entriesInForm
+              );
+              expect(config.method).to.equal('POST');
+              expect(config.credentials).to.equal('include');
+
+              return submitEventPromise;
+            });
+          });
+        });
+
         it('should respect the xssi-prefix option when parsing json', async () => {
           const form = createElement('form');
           form.setAttribute('method', 'GET');

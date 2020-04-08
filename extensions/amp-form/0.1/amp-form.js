@@ -182,6 +182,9 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
+    /** @const @private {?string} */
+    this.encType_ = this.getEncType_('enctype');
+
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
@@ -259,6 +262,20 @@ export class AmpForm {
   }
 
   /**
+   * Gets and validates an attribute for form request encoding type.
+   * @param {string} attribute
+   * @return {?string}
+   * @private
+   */
+  getEncType_(attribute) {
+    const encType = this.form_.getAttribute(attribute);
+    if (encType === 'application/x-www-form-urlencoded') {
+      return encType;
+    }
+    return 'multipart/form-data';
+  }
+
+  /**
    * @return {string|undefined} the value of the form's xssi-prefix attribute.
    */
   getXssiPrefix() {
@@ -291,7 +308,12 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = createFormDataWrapper(this.win_, this.form_);
+      if (this.encType_ === 'application/x-www-form-urlencoded') {
+        body = new URLSearchParams(this.getFormAsObject_());
+      } else {
+        // default case: encType_ is 'multipart/form-data'
+        body = createFormDataWrapper(this.win_, this.form_);
+      }
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach((name) => {
           body.delete(name);
