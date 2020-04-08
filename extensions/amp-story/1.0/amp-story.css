@@ -887,8 +887,6 @@ amp-story-quiz[theme="dark"] {
 
 amp-story-quiz[chip-corner="sharp"] {
   --reaction-chip-radius: 8px !important;
-  --reaction-answer-choice-border: transparent !important;
-  --reaction-answer-choice-background: transparent !important;
 }
 
 amp-story-quiz[chip-style="shadow"] {
