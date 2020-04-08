@@ -24,14 +24,10 @@ import {hasOwn} from '../../../src/utils/object';
 export class ScrollComponent {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
-   * @param {boolean} holdback
    */
-  constructor(doc, holdback) {
+  constructor(doc) {
     /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.doc_ = doc;
-
-    /** @protected */
-    this.holdback_ = holdback;
 
     /** @protected @property {?function(Window):undefined} */
     this.setWindow_ = null;
@@ -48,9 +44,6 @@ export class ScrollComponent {
       'left': null,
       'right': null,
     };
-
-    /** @protected */
-    this.HOLDBACK_CLASS = 'amp-access-scroll-holdback';
 
     /** @type {Promise<Window>} */
     this.window = new Promise((resolve) => {
