@@ -514,7 +514,7 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInScreenBottom_(target, pageRect) {
-    const targetRect = target.getBoundingClientRect();
+    const targetRect = target./*OK*/ getBoundingClientRect();
     return targetRect.top - pageRect.top >= pageRect.height * TOP_REGION;
   }
 
