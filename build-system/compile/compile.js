@@ -194,7 +194,6 @@ function compile(
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    const sourceMapBase = getSourceMapBase();
     const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -307,7 +306,6 @@ function compile(
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       // These arrays are filled in below.
       jscomp_error: [],
@@ -395,7 +393,7 @@ function compile(
         .on('error', (err) =>
           handleCompilerError(err, outputFilename, options, resolve)
         )
-        .pipe(rename(outputFilename))
+        .pipe(rename(`${outputDir}/${outputFilename}`))
         .pipe(
           gulpIf(
             !argv.pseudo_names && !options.skipUnknownDepsCheck,
@@ -403,15 +401,19 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(sourcemaps.write('.'))
         .pipe(
           gulpIf(
             shouldAppendSourcemappingURLText,
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(postClosureBabel(outputDir))
-        .pipe(gulp.dest(outputDir))
+        .pipe(postClosureBabel())
+        .pipe(
+          sourcemaps.write('.', {
+            sourceRoot: getSourceMapBase(),
+          })
+        )
+        .pipe(gulp.dest('.'))
         .on('end', resolve);
     }
   });

@@ -37,21 +37,6 @@ function loadSourceMap(file) {
 }
 
 /**
- * @param {string} map
- * @return {function(string)}
- */
-function returnMapFirst(map) {
-  let first = true;
-  return function (file) {
-    if (first) {
-      first = false;
-      return map;
-    }
-    return loadSourceMap(file);
-  };
-}
-
-/**
  * Minify passed string.
  *
  * @param {string} code
@@ -83,48 +68,39 @@ function terserMinify(code) {
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added
  * space with Terser. Used only in esm mode.
  *
- * @param {string} directory directory this file lives in
  * @return {!Promise}
  */
-exports.postClosureBabel = function (directory) {
+exports.postClosureBabel = function () {
   return through.obj(function (file, enc, next) {
     if (!argv.esm || path.extname(file.path) === '.map') {
       return next(null, file);
     }
+
+    const map = file.sourceMap;
 
     debug(
       CompilationLifecycles['closured-pre-babel'],
       file.path,
       file.contents
     );
-    const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
       caller: {name: 'post-closure'},
     });
+
     debug(
       CompilationLifecycles['closured-pre-terser'],
       file.path,
       file.contents
     );
-    let remapped = remapping(
-      babelMap,
-      returnMapFirst(map),
-      !argv.full_sourcemaps
-    );
-
     const {compressed, terserMap} = terserMinify(code);
-    file.contents = Buffer.from(compressed, 'utf-8');
+
     debug(CompilationLifecycles['complete'], file.path, compressed);
 
-    // TODO: Remapping should support a chain, instead of multiple invocations.
-    remapped = remapping(
-      terserMap,
-      returnMapFirst(remapped),
+    file.contents = Buffer.from(compressed, 'utf-8');
+    file.sourceMap = remapping(
+      [terserMap, babelMap, map],
+      () => null,
       !argv.full_sourcemaps
-    );
-    fs.writeFileSync(
-      path.resolve(directory, `${path.basename(file.path)}.map`),
-      remapped.toString()
     );
 
     return next(null, file);
