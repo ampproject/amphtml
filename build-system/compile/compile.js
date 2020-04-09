@@ -404,7 +404,7 @@ function compile(
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(postClosureBabel(outputDir, options.esmPassCompilation))
+        .pipe(postClosureBabel(outputDir))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }

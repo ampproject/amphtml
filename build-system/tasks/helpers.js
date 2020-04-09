@@ -18,7 +18,6 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
-const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -92,31 +91,6 @@ const MINIFIED_TARGETS = [
   'shadow-v0.js',
   'v0.js',
 ].map(maybeToEsmName);
-
-/**
- * Settings for the global Babelify transform while compiling unminified code
- */
-const BABELIFY_GLOBAL_TRANSFORM = {
-  global: true, // Transform node_modules
-  /**
-   * Ignore devDependencies, except for 'chai-as-promised' which contains ES6 code.
-   * ES6 code is fine for most test environments, but not for integration tests
-   * running on SauceLabs since some older browsers need ES5.
-   */
-  ignore: devDependencies().filter(
-    (dep) => dep.indexOf('chai-as-promised') === -1
-  ),
-};
-
-/**
- * Plugins used by Babelify while compiling unminified code
- */
-const BABELIFY_PLUGINS = {
-  plugins: [
-    conf.getReplacePlugin(argv.esm || false),
-    conf.getJsonConfigurationPlugin(),
-  ],
-};
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
@@ -388,17 +362,6 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
- * Returns array of relative paths to "devDependencies" defined in package.json.
- * @return {!Array<string>}
- */
-function devDependencies() {
-  const file = fs.readFileSync('package.json', 'utf8');
-  const packageJson = JSON.parse(file);
-  const devDependencies = Object.keys(packageJson['devDependencies']);
-  return devDependencies.map((p) => `./node_modules/${p}`);
-}
-
-/**
  * Transforms a given JavaScript file entry point with browserify, and watches
  * it for changes (if required).
  * @param {string} srcDir
@@ -421,12 +384,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     ...options.browserifyOptions,
   };
 
-  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
-
-  let bundler = browserify(browserifyOptions).transform(
-    babelify,
-    babelifyOptions
-  );
+  let bundler = browserify(browserifyOptions).transform(babelify, {
+    caller: {name: 'unminified'},
+    global: true,
+  });
 
   if (options.watch) {
     bundler = watchify(bundler);
@@ -705,14 +666,11 @@ function toPromise(readable) {
 
 module.exports = {
   applyAmpConfig,
-  BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
   compileAllJs,
   compileCoreRuntime,
   compileJs,
   compileTs,
-  devDependencies,
   doBuildJs,
   endBuildStep,
   hostname,
