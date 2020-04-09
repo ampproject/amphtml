@@ -77,11 +77,7 @@ Supporting AMP Access requires that the Publisher implement the components descr
 
 To assist access services and use cases, AMP Access introduces the concept of _Reader ID_.
 
-The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each Reader/Publisher pair - a Reader is identified differently to two different Publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications and has very high entropy. Publishers can use the Reader ID to identify the Reader and map it to their own identity systems.
-
-The Reader ID is constructed on the user device and intended to be long-lived. However, it follows the normal browser storage rules, including those for incognito windows. The intended lifecycle of a Reader ID is 1 year between uses or until the user clears their cookies. The Reader IDs are not currently shared between devices.
-
-The Reader ID is constructed similarly to the mechanism used to build ExternalCID described [here](https://docs.google.com/document/d/1f7z3X2GM_ASb3ZCI_7tngglxwS6WoWi1EB3aKzdf6vo/edit#heading=h.hb9q0wpwwhuf). An example Reader ID is `amp-OFsqR4pPKynymPyMmplPNMvxSTsNQob3TnK-oE3nwVT0clORaZ1rkeEz8xej-vV6`.
+Read more about it in [`amp-subscriptions`](../amp-subscriptions/amp-subscriptions.md).
 
 ### AMP Access and Cookies
 
@@ -206,50 +202,7 @@ It is possible to specify multiple access providers using an array instead of a 
 
 ### Access URL Variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
-
-<table>
-  <tr>
-    <th>Var</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>READER_ID</code></td>
-    <td>The AMP Reader ID.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>AUTHDATA(field)</code></td>
-    <td>The value of the field in the authorization response.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>RETURN_URL</code></td>
-    <td>The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>SOURCE_URL</code></td>
-    <td>The Source URL of this AMP document. If the document is served from a CDN, the AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>AMPDOC_URL</code></td>
-    <td>The URL of this AMP document.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>CANONICAL_URL</code></td>
-    <td>The canonical URL of this AMP document.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>DOCUMENT_REFERRER</code></td>
-    <td>The Referrer URL.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>VIEWER</code></td>
-    <td>The URL of the AMP Viewer.</td>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>RANDOM</code></td>
-    <td>A random number. Helpful to avoid browser caching.</td>
-  </tr>
-</table>
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The specific variables are described in more detail on the [`amp-subscriptions`](../amp-subscriptions/amp-subscriptions.md) page.
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 
@@ -261,7 +214,7 @@ https://pub.com/access?
   &_=RANDOM
 ```
 
-AUTHDATA variable is available to Pingback and Login URLs. It allows passing any field in the authorization
+`AUTHDATA` variable is available to Pingback and Login URLs. It allows passing any field in the authorization
 response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
 `AUTHDATA(other.isSubscriber)`. If using namespaces, namespaces can be prepended to the field e.g. `AUTHDATA(anamespace.afield)`.
 
