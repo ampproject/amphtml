@@ -643,7 +643,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const resource = new Resource(id, createElement(rect), resources);
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
-    // env.sandbox.stub(resource, 'isDisplayed').returns(true);
     return resource;
   }
 
@@ -711,6 +710,47 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     expect(resource1.hasBeenMeasured()).to.be.true;
     expect(mediaSpy).to.be.calledOnce;
+  });
+
+  describe('intersect-resources', () => {
+    beforeEach(() => {
+      // Enable "intersect-resources" experiment.
+      resources.intersectionObserver_ = {};
+      resource1.intersect_ = resource2.intersect_ = true;
+    });
+
+    it('should not applySizesAndMediaQuery after build', () => {
+      resources.relayoutAll_ = false;
+
+      // Unmeasured elements.
+      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
+      env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
+
+      // Measured elements that need relayout.
+      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
+      env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
+      env.sandbox
+        .stub(resource2, 'getState')
+        .returns(ResourceState.NOT_LAID_OUT);
+
+      resources.discoverWork_();
+
+      // Neither should have applySizesOrMediaQuery() called.
+      expect(resource1.applySizesAndMediaQuery).to.not.be.called;
+      expect(resource2.applySizesAndMediaQuery).to.not.be.called;
+    });
+
+    it('should applySizesAndMediaQuery on relayout', () => {
+      resources.relayoutAll_ = true;
+
+      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
+      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
+
+      resources.discoverWork_();
+
+      expect(resource1.applySizesAndMediaQuery).to.be.called;
+      expect(resource2.applySizesAndMediaQuery).to.be.called;
+    });
   });
 
   it('should render two screens when visible', () => {
