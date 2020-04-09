@@ -18,30 +18,30 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
-// const {isTravisBuild} = require('../common/travis');
+const {isTravisBuild} = require('../common/travis');
 
 const isCheckTypes = argv._.includes('check-types');
-// const filterImportsPlugin = [
-//   'filter-imports',
-//   {
-//     imports: {
-//       // Imports removed for all ESM builds.
-//       './polyfills/document-contains': ['installDocContains'],
-//       './polyfills/domtokenlist': ['installDOMTokenList'],
-//       './polyfills/fetch': ['installFetch'],
-//       './polyfills/math-sign': ['installMathSign'],
-//       './polyfills/object-assign': ['installObjectAssign'],
-//       './polyfills/object-values': ['installObjectValues'],
-//       './polyfills/promise': ['installPromise'],
-//       './polyfills/array-includes': ['installArrayIncludes'],
-//       './ie-media-bug': ['ieMediaCheckAndFix'],
-//       '../third_party/css-escape/css-escape': ['cssEscape'],
-//       // Imports that are not needed for valid transformed documents.
-//       '../build/ampshared.css': ['cssText', 'ampSharedCss'],
-//       '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-//     },
-//   },
-// ];
+const filterImportsPlugin = [
+  'filter-imports',
+  {
+    imports: {
+      // Imports removed for all ESM builds.
+      './polyfills/document-contains': ['installDocContains'],
+      './polyfills/domtokenlist': ['installDOMTokenList'],
+      './polyfills/fetch': ['installFetch'],
+      './polyfills/math-sign': ['installMathSign'],
+      './polyfills/object-assign': ['installObjectAssign'],
+      './polyfills/object-values': ['installObjectValues'],
+      './polyfills/promise': ['installPromise'],
+      './polyfills/array-includes': ['installArrayIncludes'],
+      './ie-media-bug': ['ieMediaCheckAndFix'],
+      '../third_party/css-escape/css-escape': ['cssEscape'],
+      // Imports that are not needed for valid transformed documents.
+      '../build/ampshared.css': ['cssText', 'ampSharedCss'],
+      '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+    },
+  },
+];
 const preClosurePlugins = [
   './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
   '@babel/plugin-transform-react-constant-elements',
@@ -53,8 +53,7 @@ const preClosurePlugins = [
       useSpread: true,
     },
   ],
-  // argv.esm ? null : ['@babel/plugin-transform-classes', {loose: false}],
-  ['@babel/plugin-transform-classes', {loose: false}],
+  argv.esm ? null : ['@babel/plugin-transform-classes', {loose: false}],
   './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [
@@ -71,16 +70,16 @@ const preClosurePlugins = [
   argv.single_pass
     ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
     : null,
-  // argv.esm ? filterImportsPlugin : null,
+  argv.esm ? filterImportsPlugin : null,
   isCheckTypes
     ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
     : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-  // argv.esm
-  //   ? [
-  //       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
-  //       {isEsmBuild: !!argv.esm},
-  //     ]
-  //   : null,
+  argv.esm
+    ? [
+        './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
+        {isEsmBuild: !!argv.esm},
+      ]
+    : null,
   !(argv.fortesting || isCheckTypes)
     ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
     : null,
@@ -92,24 +91,21 @@ const preClosurePlugins = [
  * @return {!Object}
  */
 function getPreClosurePresets() {
-  const targets = /*
-    argv.esm
+  const targets = argv.esm
     ? {'esmodules': true}
     : isTravisBuild()
     ? {'browsers': ['Last 2 versions', 'safari >= 9']}
-    :*/ {
-    'browsers': ['Last 2 versions'],
-  };
+    : {'browsers': ['Last 2 versions']};
 
   const options = {
     'modules': false,
     'targets': targets,
   };
-  // if (argv.esm) {
-  //   options['bugfixes'] = true;
-  // } else {
-  options['loose'] = true;
-  // }
+  if (argv.esm) {
+    options['bugfixes'] = true;
+  } else {
+    options['loose'] = true;
+  }
 
   return [['@babel/preset-env', options]];
 }
