@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-module.exports = function ({types: t}) {
-  return {
-    visitor: {
-      VariableDeclaration(path) {
-        if (path.node.kind !== 'const') {
-          return;
-        }
+const fs = require('fs');
 
-        path.replaceWith(t.variableDeclaration('let', path.node.declarations));
-      },
-    },
-  };
-};
+/**
+ * Populates a single object with the babel configs from all the *-config.js
+ * files in this directory.
+ *
+ * @return {!Object}
+ */
+function getAllBabelConfigs() {
+  const babelConfigFiles = fs
+    .readdirSync(__dirname)
+    .filter((file) => file.includes('-config.js'));
+  const babelConfigs = babelConfigFiles.map((file) => require(`./${file}`));
+  return Object.assign({}, ...babelConfigs);
+}
+
+module.exports = getAllBabelConfigs();

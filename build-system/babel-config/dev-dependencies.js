@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-module.exports = function ({types: t}) {
-  return {
-    visitor: {
-      VariableDeclaration(path) {
-        if (path.node.kind !== 'const') {
-          return;
-        }
+const packageJson = require('../../package.json');
 
-        path.replaceWith(t.variableDeclaration('let', path.node.declarations));
-      },
-    },
-  };
+/**
+ * Gets relative paths to all the devDependencies defined in package.json.
+ *
+ * @return {!Array<string>}
+ */
+function getDevDependencies() {
+  return Object.keys(packageJson.devDependencies).map(
+    (dependency) => `./node_modules/${dependency}`
+  );
+}
+
+module.exports = {
+  getDevDependencies,
 };
