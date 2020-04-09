@@ -20,29 +20,24 @@ const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
 const {isTravisBuild} = require('../common/travis');
 
-const isClosureCompiler =
-  argv._.includes('dist') ||
-  argv._.includes('check-types') ||
-  (argv._.length == 0 && argv.compiled);
-
 function getPreClosurePresets() {
+  const modules = argv.esm ? false : 'commonjs';
   const targets = argv.esm
     ? {'esmodules': true}
     : isTravisBuild()
     ? {'browsers': ['Last 2 versions', 'safari >= 9']}
     : {'browsers': ['Last 2 versions']};
 
-  return [
-    [
-      '@babel/preset-env',
-      {
-        'modules': argv.esm || isClosureCompiler ? false : 'commonjs',
-        'loose': true,
-        'targets': targets,
-        'bugfixes': true,
-      },
-    ],
-  ];
+  const options = {
+    'modules': modules,
+    'targets': targets,
+    'bugfixes': true,
+  };
+  if (argv.esm) {
+    options['loose'] = true;
+  }
+
+  return [['@babel/preset-env', options]];
 }
 
 /**
@@ -86,6 +81,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
+    argv.esm ? null : ['@babel/plugin-transform-classes', {loose: false}],
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
