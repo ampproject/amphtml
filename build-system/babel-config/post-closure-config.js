@@ -27,16 +27,38 @@ function getPostClosureConfig() {
     return {};
   }
 
+  const reactJsxPlugin = [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ];
   const postClosurePlugins = [
     './build-system/babel-plugins/babel-plugin-transform-minified-comments',
     './build-system/babel-plugins/babel-plugin-const-transformer',
     './build-system/babel-plugins/babel-plugin-transform-remove-directives',
     './build-system/babel-plugins/babel-plugin-transform-function-declarations',
     './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    '@babel/plugin-transform-react-constant-elements',
+    reactJsxPlugin,
   ];
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: {'esmodules': true},
+    },
+  ];
+  const postClosurePresets = [presetEnv];
   return {
+    compact: false,
     inputSourceMap: false,
     plugins: postClosurePlugins,
+    presets: postClosurePresets,
     retainLines: false,
     sourceMaps: true,
   };
