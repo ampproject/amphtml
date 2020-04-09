@@ -70,6 +70,7 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {serializeQueryString} from '../../../src/url.js';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -269,8 +270,17 @@ export class AmpForm {
    */
   getEncType_(attribute) {
     const encType = this.form_.getAttribute(attribute);
-    if (encType === 'application/x-www-form-urlencoded') {
+    if (
+      encType === 'application/x-www-form-urlencoded' ||
+      encType === 'multipart/form-data'
+    ) {
       return encType;
+    }
+    if (encType !== null) {
+      user().warn(
+        TAG,
+        `Unexpected enctype: ${encType}. Defaulting to 'multipart/form-data'.`
+      );
     }
     return 'multipart/form-data';
   }
@@ -292,6 +302,7 @@ export class AmpForm {
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
+    let headers = dict({'Accept': 'application/json'});
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
@@ -309,7 +320,11 @@ export class AmpForm {
     } else {
       xhrUrl = url;
       if (this.encType_ === 'application/x-www-form-urlencoded') {
-        body = new URLSearchParams(this.getFormAsObject_());
+        body = serializeQueryString(this.getFormAsObject_());
+        headers = dict({
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        });
       } else {
         // default case: encType_ is 'multipart/form-data'
         body = createFormDataWrapper(this.win_, this.form_);
@@ -332,7 +347,7 @@ export class AmpForm {
         'body': body,
         'method': method,
         'credentials': 'include',
-        'headers': dict({'Accept': 'application/json'}),
+        'headers': headers,
       }),
     };
 

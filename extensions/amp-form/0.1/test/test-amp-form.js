@@ -37,6 +37,7 @@ import {
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/utils/array';
+import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
@@ -1271,7 +1272,7 @@ describes.repeated(
           });
         });
 
-        it('should call fetch with URLSearchParams when enctype is "application/x-www-form-urlencoded"', () => {
+        it('should call fetch with a url encoded string when enctype is "application/x-www-form-urlencoded"', () => {
           const form = getForm();
           form.setAttribute('enctype', 'application/x-www-form-urlencoded');
           return getAmpForm(form).then((ampForm) => {
@@ -1295,14 +1296,17 @@ describes.repeated(
 
               const xhrCall = ampForm.xhr_.fetch.getCall(0);
               const config = xhrCall.args[1];
-              expect(config.body instanceof URLSearchParams).to.be.true;
+              expect(config.body).to.be.a('string');
+              expect(config.headers['Content-Type']).to.equal(
+                'application/x-www-form-urlencoded'
+              );
 
               const entriesInForm = fromIterator(
                 createFormDataWrapper(env.win, getForm()).entries()
               );
-              expect(fromIterator(config.body.entries())).to.have.deep.members(
-                entriesInForm
-              );
+              expect(
+                Object.entries(parseQueryString(config.body))
+              ).to.have.deep.members(entriesInForm);
               expect(config.method).to.equal('POST');
               expect(config.credentials).to.equal('include');
 
