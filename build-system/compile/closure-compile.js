@@ -104,6 +104,26 @@ function logError(message) {
 }
 
 /**
+ * Normalize the sourcemap file paths before pushing into Closure.
+ * Closure don't follow Gulp's normal sourcemap "root" pattern. Gulp considers
+ * all files to be relative to the CWD by default, meaning a file `src/foo.js`
+ * with a sourcemap alongside points to `src/foo.js`. Closure considers each
+ * file relative to the sourcemap. Since the sourcemap for `src/foo.js` "lives"
+ * in `src/`, it ends up resolving to `src/src/foo.js`.
+ *
+ * @param {!Stream} closureStream
+ * @return {!Stream}
+ */
+function makeSourcemapsRelative(closureStream) {
+  const relativeSourceMap = sourcemaps.mapSources((source, file) => {
+    const dir = path.dirname(file.sourceMap.file);
+    return path.relative(dir, source);
+  });
+
+  return pumpify.obj(relativeSourceMap, closureStream);
+}
+
+/**
  * @param {Array<string>} compilerOptions
  * @param {?string} nailgunPort
  * @return {stream.Writable}
@@ -147,19 +167,7 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
     }
   }
 
-  // Normalize the file path before pushing into Closure.
-  // Closure don't follow Gulp's normal sourcemap "root" pattern. Gulp
-  // considers all files to be relative to the CWD by default, meaning a file
-  // `src/foo.js` with a sourcemap alongside points to `src/foo.js`. Closure
-  // considers each file relative to the sourcemap. Since the sourcemap for
-  // `src/foo.js` "lives" in `src/`, it ends up resolving to `src/src/foo.js`.
-  const relativeSourceMap = sourcemaps.mapSources((source, file) => {
-    const dir = path.dirname(file.sourceMap.file);
-    return path.relative(dir, source);
-  });
-
-  return pumpify.obj(
-    relativeSourceMap,
+  return makeSourcemapsRelative(
     closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions)
   );
 }
