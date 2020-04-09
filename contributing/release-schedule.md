@@ -24,7 +24,7 @@ The **nightly** release channel is updated (as its name indicates) every weeknig
 
 The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues.
 
-The **nightly** release build is served to 0.05% of AMP traffic. It is possible to opt into the **nightly** channel, to test pull requests that were merged in the past few days. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
+It is possible to opt into the **nightly** channel, to test pull requests that were merged in the past few days. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
 ### Weekly
 
