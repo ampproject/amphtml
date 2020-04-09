@@ -39,6 +39,7 @@ const {
  * Mapping of babel transform callers to their corresponding babel configs.
  */
 const babelTransforms = new Map([
+  ['babel-jest', {}],
   ['dep-check', getDepCheckConfig()],
   ['post-closure', getPostClosureConfig()],
   ['pre-closure', getPreClosureConfig()],
