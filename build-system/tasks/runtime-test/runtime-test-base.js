@@ -224,6 +224,26 @@ class RuntimeTestConfig {
           : ['html', 'text', 'text-summary'],
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
+
+      const instanbulPlugin = [
+        'istanbul',
+        {
+          exclude: [
+            'ads/**/*.js',
+            'build-system/**/*.js',
+            'extensions/**/test/**/*.js',
+            'third_party/**/*.js',
+            'test/**/*.js',
+            'testing/**/*.js',
+          ],
+        },
+      ];
+      // don't overwrite existing plugins
+      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
+
+      this.browserify.transform = [
+        ['babelify', {...this.babelifyConfig, plugins}],
+      ];
     }
   }
 }

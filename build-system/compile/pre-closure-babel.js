@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
+const conf = require('./build.conf');
 const crypto = require('crypto');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
@@ -69,7 +71,17 @@ function sha256(contents) {
  * @return {!Promise}
  */
 function preClosureBabel() {
-  const babel = gulpBabel({caller: {name: 'pre-closure'}});
+  const babelPlugins = conf.plugins({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+    isChecktypes: argv._.includes('check-types'),
+  });
+  const babel = gulpBabel({
+    plugins: babelPlugins,
+    retainLines: true,
+    compact: false,
+  });
 
   return through.obj((file, enc, next) => {
     const {relative, path} = file;
