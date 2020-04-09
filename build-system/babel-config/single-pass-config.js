@@ -42,9 +42,11 @@ function getSinglePassPostConfig() {
  * @return {!Object}
  */
 function getSinglePassDepsConfig() {
-  const singlePassDepsConfig = getPreClosureConfig();
-  singlePassDepsConfig.plugins.push('transform-es2015-modules-commonjs');
-  return singlePassDepsConfig;
+  const clonedPreClosureConfig = JSON.parse(
+    JSON.stringify(getPreClosureConfig())
+  );
+  clonedPreClosureConfig.plugins.push('transform-es2015-modules-commonjs');
+  return clonedPreClosureConfig;
 }
 
 module.exports = {

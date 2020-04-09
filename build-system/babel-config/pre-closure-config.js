@@ -71,9 +71,9 @@ const preClosurePlugins = [
     ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
     : null,
   argv.esm ? filterImportsPlugin : null,
-  argv.esm
-    ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-    : null,
+  // argv.esm
+  //   ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
+  //   : null,
   isCheckTypes
     ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
     : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
@@ -101,17 +101,27 @@ function getPreClosurePresets() {
     ? {'browsers': ['Last 2 versions', 'safari >= 9']}
     : {'browsers': ['Last 2 versions']};
 
-  const options = {
-    'modules': false,
-    'targets': targets,
-  };
-  if (argv.esm) {
-    options['bugfixes'] = true;
-  } else {
-    options['loose'] = true;
-  }
+  // const options = {
+  //   'modules': false,
+  //   'targets': targets,
+  // };
+  // if (argv.esm) {
+  //   options['bugfixes'] = true;
+  // } else {
+  //   options['loose'] = true;
+  // }
 
-  return [['@babel/preset-env', options]];
+  return [
+    [
+      '@babel/preset-env',
+      {
+        'modules': false,
+        'targets': targets,
+        'bugfixes': true,
+        'loose': true,
+      },
+    ],
+  ];
 }
 
 /**

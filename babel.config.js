@@ -40,13 +40,13 @@ const {
  */
 const babelTransforms = new Map([
   ['babel-jest', {}],
-  ['dep-check', getDepCheckConfig()],
-  ['post-closure', getPostClosureConfig()],
-  ['pre-closure', getPreClosureConfig()],
-  ['single-pass-deps', getSinglePassDepsConfig()],
-  ['single-pass-post', getSinglePassPostConfig()],
-  ['test', getTestConfig()],
-  ['unminified', getUnminifiedConfig()],
+  ['dep-check', getDepCheckConfig],
+  ['post-closure', getPostClosureConfig],
+  ['pre-closure', getPreClosureConfig],
+  ['single-pass-deps', getSinglePassDepsConfig],
+  ['single-pass-post', getSinglePassPostConfig],
+  ['test', getTestConfig],
+  ['unminified', getUnminifiedConfig],
 ]);
 
 /**
@@ -58,7 +58,7 @@ const babelTransforms = new Map([
 module.exports = function (api) {
   const caller = api.caller((caller) => caller.name);
   if (babelTransforms.has(caller)) {
-    return babelTransforms.get(caller);
+    return babelTransforms.get(caller)();
   } else {
     const err = new Error('Unrecognized Babel caller (see babel.config.js).');
     err.showStack = false;
