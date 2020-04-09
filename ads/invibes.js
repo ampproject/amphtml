@@ -22,7 +22,7 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function invibes(global, data) {
   global.invibesAmp = {
-    allowedData: ['adCateg', 'pid'],
+    allowedData: ['adCateg', 'pid', 'customEndpoint'],
     mandatoryData: [],
     data,
   };
@@ -33,7 +33,7 @@ export function invibes(global, data) {
     global.invibesAmp.allowedData
   );
 
-  let url = 'https://k.r66net.com/GetAmpLink';
+  let url = data.customEndpoint || 'https://k.r66net.com/GetAmpLink';
   if (data.adCateg) {
     url = addQueryParam(url, 'adCateg', data.adCateg);
   }
