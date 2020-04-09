@@ -20,3 +20,6 @@
  * case.
  */
 
+import {dev, user, userAssert} from '../src/log';
+
+dev().assertString(this.embedType_)
