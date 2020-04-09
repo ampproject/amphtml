@@ -219,30 +219,20 @@ export class Crypto {
   /**
    * Returns a cryptographically random string with 128 bits of entropy if win.crypto is available.
    * If win.crypto, is not available, returns null.
-   * @param {boolean=} useFallback use Math.random when win.crypto isn't available.
+   * @param {number} length The length of the string to return 
    * @return {string|null}
    */
-  getSecureRandomString(useFallback = false) {
+  getSecureRandomString(length) {
     // Support IE 11
     const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
       .crypto || this.win_.msCrypto);
 
-    if (!useFallback && !cryptoLib) {
+    if (!cryptoLib) {
       return null;
     }
 
-    let /** !Array<number>|!Uint8Array */ randomValues;
-
-    if (cryptoLib) {
-      randomValues = new Uint8Array(16);
-      cryptoLib.getRandomValues(randomValues);
-    } else {
-      // If crypto isn't available, just use Math.random.
-      randomValues = new Array(16);
-      for (let i = 0; i < 16; ++i) {
-        randomValues[i] = Math.floor(Math.random() * 255);
-      }
-    }
+    let randomValues = new Uint8Array(length);
+    cryptoLib.getRandomValues(randomValues);
 
     let randomSubdomain = '';
     for (let i = 0; i < randomValues.length; i++) {

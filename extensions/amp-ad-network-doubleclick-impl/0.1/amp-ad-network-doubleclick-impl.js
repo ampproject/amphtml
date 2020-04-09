@@ -286,9 +286,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = /** @type {string} **/ Services.cryptoFor(
-      this.win
-    ).getSecureRandomString(true);
+    this.safeFrameSubdomain_ = this.getRandomString();
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
@@ -394,10 +392,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
         '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
-
-        // Random Subdomain
-        '10': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-        '11': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
       }[urlExperimentId];
       if (forcedExperimentId) {
         this.experimentIds.push(forcedExperimentId);
@@ -1046,11 +1040,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    if (
-      !this.experimentIds.includes(
-        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT
-      )
-    ) {
+    const randomSubdomainExperimentBranch = RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
+
+    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
 
@@ -1613,6 +1605,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   warnOnError(message, error) {
     dev().warn(TAG, message, error);
+  }
+
+  /**
+   * Generate a 32-byte random string.
+   * Uses the win.crypto when available.
+   * @return {string} The random string
+   * @protected
+   */
+  getRandomString() {
+
+    // 16 hex characters * 2 bytes per character = 32 bytes
+    const length = 16;
+    const randomString = Services.cryptoFor(this.win).getSecureRandomString(length);
+
+    if (randomString) {
+      return randomString;
+    }
+
+    // If crypto isn't available, just use Math.random.
+    let randomSubdomain = '';
+    for (let i = 0; i < length; i++) {
+      const randomValue = Math.floor(Math.random() * 255);
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
   }
 
   /** @override */
