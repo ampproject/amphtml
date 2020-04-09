@@ -37,8 +37,8 @@ const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
-const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
@@ -114,19 +114,6 @@ function compile(
     return (
       pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
     );
-  }
-
-  function getSourceMapBase() {
-    if (isProdBuild) {
-      return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;
-    } else if (argv.sourcemap_url) {
-      // Custom sourcemap URLs have placeholder {version} that should be
-      // replaced with the actual version. Also, ensure trailing slash exists.
-      return String(argv.sourcemap_url)
-        .replace(/\{version\}/g, internalRuntimeVersion)
-        .replace(/([^/])$/, '$1/');
-    }
-    return 'http://localhost:8000/';
   }
 
   const hideWarningsFor = [
@@ -408,11 +395,7 @@ function compile(
           )
         )
         .pipe(postClosureBabel())
-        .pipe(
-          sourcemaps.write('.', {
-            sourceRoot: getSourceMapBase(),
-          })
-        )
+        .pipe(writeSourcemaps())
         .pipe(gulp.dest('.'))
         .on('end', resolve);
     }

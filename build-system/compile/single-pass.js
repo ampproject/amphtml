@@ -49,11 +49,11 @@ const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map((x) => TYPES[x]);
 const wrappers = require('./compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
   typeof argv.single_pass_dest === 'string' ? argv.single_pass_dest : './dist/';
-const isProdBuild = !!argv.type;
 
 if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
@@ -703,13 +703,7 @@ function compile(flagsArray) {
       .on('error', (err) => handleSinglePassCompilerError(err))
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
-      .pipe(
-        sourcemaps.write('.', {
-          sourceRoot: isProdBuild
-            ? `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`
-            : 'http://localhost:8000/',
-        })
-      )
+      .pipe(writeSourcemaps())
       .pipe(
         gulpIf(
           /(\/amp-|\/_base)/,
