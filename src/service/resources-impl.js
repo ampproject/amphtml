@@ -1187,8 +1187,8 @@ export class ResourcesImpl {
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        // TODO(willchou): We often call this needlessly e.g. all elements
-        // elements of the loading rect are NOT_LAID_OUT!
+        // TODO(willchou): We sometimes call this needlessly/repeatedly.
+        // All elements outside of the loading rect are NOT_LAID_OUT!
         r.applySizesAndMediaQuery();
         dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
