@@ -28,7 +28,6 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isAmp4Email} from '../../../src/format';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
 
@@ -85,13 +84,12 @@ export class AmpSelector extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const doc = this.element.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      this.action_.addToWhitelist('AMP-SELECTOR', 'clear');
-      this.action_.addToWhitelist('AMP-SELECTOR', 'selectDown');
-      this.action_.addToWhitelist('AMP-SELECTOR', 'selectUp');
-      this.action_.addToWhitelist('AMP-SELECTOR', 'toggle');
-    }
+    /** If the element is in an email document, allow its `clear`,
+     * `selectDown`, `selectUp`, and `toggle` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'clear');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectDown');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectUp');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'toggle');
 
     this.isMultiple_ = this.element.hasAttribute('multiple');
 

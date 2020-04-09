@@ -273,10 +273,12 @@ export class ActionService {
      * @private {?Array<{tagOrTarget: string, method: string}>}
      */
     this.whitelist_ = null;
-    if (
+
+    /** @const {boolean} */
+    this.isEmail_ =
       this.ampdoc.isSingleDoc() &&
-      isAmp4Email(/** @type {!Document} */ (this.root_))
-    ) {
+      isAmp4Email(/** @type {!Document} */ (this.root_));
+    if (this.isEmail_) {
       this.setWhitelist(DEFAULT_EMAIL_ALLOWLIST);
     }
 
@@ -598,6 +600,18 @@ export class ActionService {
       this.whitelist_ = [];
     }
     this.whitelist_.push({tagOrTarget, method});
+  }
+
+  /**
+   * Adds an action to the whitelist only if the document is in the email format.
+   * @param {string} tagOrTarget The tag or target to whitelist, e.g.
+   *     'AMP-LIST', '*'.
+   * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
+   */
+  maybeAddToEmailWhitelist(tagOrTarget, method) {
+    if (this.isEmail_) {
+      this.addToWhitelist(tagOrTarget, method);
+    }
   }
 
   /**

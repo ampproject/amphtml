@@ -33,7 +33,6 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
-import {isAmp4Email} from '../../../src/format';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
@@ -150,12 +149,11 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(element);
-    const doc = this.element.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      this.action_.addToWhitelist('AMP-SIDEBAR', 'open');
-      this.action_.addToWhitelist('AMP-SIDEBAR', 'close');
-      this.action_.addToWhitelist('AMP-SIDEBAR', 'toggle');
-    }
+    /** If the element is in an email document,
+     * allow its `open`, `close`, and `toggle` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'open');
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'close');
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'toggle');
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT

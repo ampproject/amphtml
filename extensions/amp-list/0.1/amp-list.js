@@ -54,7 +54,6 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
@@ -196,11 +195,13 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    const doc = this.element.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      this.action_.addToWhitelist('AMP-LIST', 'changeToLayoutContainer');
-      this.action_.addToWhitelist('AMP-LIST', 'refresh');
-    }
+    /** If the element is in an email document,
+     * allow its `changeToLayoutContainer` and `refresh` actions. */
+    this.action_.maybeAddToEmailWhitelist(
+      'AMP-LIST',
+      'changeToLayoutContainer'
+    );
+    this.action_.maybeAddToEmailWhitelist('AMP-LIST', 'refresh');
 
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());

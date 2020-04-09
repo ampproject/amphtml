@@ -20,7 +20,6 @@ import {BaseCarousel} from './base-carousel';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {isAmp4Email} from '../../../src/format';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
@@ -90,13 +89,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
       },
       ActionTrust.LOW
     );
-    const doc = this.element.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      Services.actionServiceForDoc(this.element).addToWhitelist(
-        'AMP-CAROUSEL',
-        'goToSlide'
-      );
-    }
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    Services.actionServiceForDoc(this.element).maybeAddToEmailWhitelist(
+      'AMP-CAROUSEL',
+      'goToSlide'
+    );
   }
 
   /** @override */

@@ -38,7 +38,6 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isAmp4Email} from '../../../src/format';
 import {isInFie} from '../../../src/iframe-helper';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
@@ -180,11 +179,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.element.classList.add('i-amphtml-overlay');
     this.action_ = Services.actionServiceForDoc(this.element);
-    const doc = this.element.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      this.action_.addToWhitelist('AMP-LIGHTBOX', 'open');
-      this.action_.addToWhitelist('AMP-LIGHTBOX', 'close');
-    }
+    /** If the element is in an email document, allow its `open` and `close` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'open');
+    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'close');
     this.maybeSetTransparentBody_();
 
     this.registerDefaultAction((i) => this.open_(i.trust), 'open');

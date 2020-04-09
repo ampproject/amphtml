@@ -349,10 +349,9 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     once(() => {
-      if (this.isAmp4Email_) {
-        this.actions_.addToWhitelist('FORM', 'clear');
-        this.actions_.addToWhitelist('FORM', 'submit');
-      }
+      /** If the element is in an email document, allow its `clear` and `submit` actions. */
+      this.actions_.maybeAddToEmailWhitelist('FORM', 'clear');
+      this.actions_.maybeAddToEmailWhitelist('FORM', 'submit');
     });
 
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
