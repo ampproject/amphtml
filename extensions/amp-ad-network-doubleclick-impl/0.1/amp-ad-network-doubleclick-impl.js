@@ -142,8 +142,13 @@ const ZINDEX_EXP_BRANCHES = {
 /** @const {string} */
 const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
 
-/**@const @enum{string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
+
+/**
+ * Branches of the random subdomain for SafeFrame experiment.
+ * @const @enum{string}
+ * @visibleForTesting
+ */
+export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
   CONTROL: '21065817',
   EXPERIMENT: '21065818',
 };
@@ -286,7 +291,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = this.getRandomString();
+    this.safeFrameSubdomain_ = this.getRandomString_();
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
@@ -1047,7 +1052,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     return (
-      `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/` +
+      `https://${this.safeFrameSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
@@ -1611,9 +1616,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Generate a 32-byte random string.
    * Uses the win.crypto when available.
    * @return {string} The random string
-   * @protected
+   * @private
    */
-  getRandomString() {
+  getRandomString_() {
 
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
