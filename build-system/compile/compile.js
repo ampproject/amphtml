@@ -120,7 +120,7 @@ function compile(
     if (isProdBuild) {
       return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;
     } else if (argv.sourcemap_url) {
-      // Custom sourcemap URLs have placeholder $version$ that should be
+      // Custom sourcemap URLs have placeholder {version} that should be
       // replaced with the actual version. Also, ensure trailing slash exists.
       return String(argv.sourcemap_url)
         .replace(/\{version\}/g, internalRuntimeVersion)
