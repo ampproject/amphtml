@@ -16,6 +16,7 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
+const conf = require('./build.conf');
 const fs = require('fs-extra');
 const path = require('path');
 const remapping = require('@ampproject/remapping');
@@ -79,21 +80,26 @@ function terserMinify(code) {
 }
 
 /**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup added
- * space with Terser. Used only in esm mode.
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
  *
  * @param {string} directory directory this file lives in
+ * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-exports.postClosureBabel = function (directory) {
+exports.postClosureBabel = function (directory, isEsmBuild) {
+  const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
+
   return through.obj(function (file, enc, next) {
-    if (!argv.esm || path.extname(file.path) === '.map') {
+    if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
       return next(null, file);
     }
 
     const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
-      caller: {name: 'post-closure'},
+      plugins: babelPlugins,
+      retainLines: false,
+      sourceMaps: true,
+      inputSourceMap: false,
     });
     let remapped = remapping(
       babelMap,

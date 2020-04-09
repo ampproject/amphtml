@@ -70,7 +70,7 @@ async function e2e() {
     resolver = resolverIn;
   });
 
-  require('@babel/register')({caller: {name: 'test'}});
+  require('@babel/register');
   const {describes} = require('./helper');
   describes.configure({
     browsers: argv.browsers,
