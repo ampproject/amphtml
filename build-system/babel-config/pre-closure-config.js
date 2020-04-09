@@ -16,8 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {devDependencies} = require('./dev-dependencies');
-const {replacePlugin} = require('./replace-plugin');
+const {getDevDependencies} = require('./dev-dependencies');
+const {getReplacePlugin} = require('./replace-plugin');
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
@@ -55,7 +55,7 @@ function getPreClosureConfig() {
       useSpread: true,
     },
   ];
-
+  const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     '@babel/plugin-transform-react-constant-elements',
@@ -93,6 +93,7 @@ function getPreClosureConfig() {
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
+  const devDependencies = getDevDependencies();
   const preClosureConfig = {
     compact: false,
     ignore: devDependencies,
@@ -104,5 +105,4 @@ function getPreClosureConfig() {
 
 module.exports = {
   getPreClosureConfig,
-  preClosureConfig: getPreClosureConfig(),
 };

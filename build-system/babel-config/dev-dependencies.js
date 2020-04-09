@@ -29,5 +29,5 @@ function getDevDependencies() {
 }
 
 module.exports = {
-  devDependencies: getDevDependencies(),
+  getDevDependencies,
 };

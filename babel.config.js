@@ -26,26 +26,26 @@
 'use strict';
 
 const {
-  depCheckConfig,
-  postClosureConfig,
-  preClosureConfig,
-  singlePassDepsConfig,
-  singlePassPostConfig,
-  testConfig,
-  unminifiedConfig,
+  getDepCheckConfig,
+  getPostClosureConfig,
+  getPreClosureConfig,
+  getSinglePassDepsConfig,
+  getSinglePassPostConfig,
+  getTestConfig,
+  getUnminifiedConfig,
 } = require('./build-system/babel-config');
 
 /**
  * Mapping of babel transform callers to their corresponding babel configs.
  */
 const babelTransforms = new Map([
-  ['dep-check', depCheckConfig],
-  ['unminified', unminifiedConfig],
-  ['pre-closure', preClosureConfig],
-  ['post-closure', postClosureConfig],
-  ['single-pass-deps', singlePassDepsConfig],
-  ['single-pass-post', singlePassPostConfig],
-  ['test', testConfig],
+  ['dep-check', getDepCheckConfig()],
+  ['post-closure', getPostClosureConfig()],
+  ['pre-closure', getPreClosureConfig()],
+  ['single-pass-deps', getSinglePassDepsConfig()],
+  ['single-pass-post', getSinglePassPostConfig()],
+  ['test', getTestConfig()],
+  ['unminified', getUnminifiedConfig()],
 ]);
 
 /**

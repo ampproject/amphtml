@@ -16,15 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {devDependencies} = require('./dev-dependencies');
-const {replacePlugin} = require('./replace-plugin');
+const {getDevDependencies} = require('./dev-dependencies');
+const {getReplacePlugin} = require('./replace-plugin');
 
 /**
  * Ignore devDependencies except for 'chai-as-promised' which contains ES6 code.
  * ES6 code is fine for most test environments, but not for integration tests
  * running on SauceLabs since some older browsers need ES5.
  */
-const ignoredModules = devDependencies.filter((dep) =>
+const ignoredModules = getDevDependencies().filter((dep) =>
   dep.includes('chai-as-promised')
 );
 
@@ -64,6 +64,7 @@ function getTestConfig() {
       targets: {'browsers': ['Last 2 versions']},
     },
   ];
+  const replacePlugin = getReplacePlugin();
   const testPlugins = [
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
@@ -83,5 +84,5 @@ function getTestConfig() {
 }
 
 module.exports = {
-  testConfig: getTestConfig(),
+  getTestConfig,
 };

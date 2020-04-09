@@ -48,6 +48,6 @@ function getSinglePassDepsConfig() {
 }
 
 module.exports = {
-  singlePassDepsConfig: getSinglePassDepsConfig(),
-  singlePassPostConfig: getSinglePassPostConfig(),
+  getSinglePassDepsConfig,
+  getSinglePassPostConfig,
 };

@@ -15,8 +15,8 @@
  */
 'use strict';
 
-const {devDependencies} = require('./dev-dependencies');
-const {replacePlugin} = require('./replace-plugin');
+const {getDevDependencies} = require('./dev-dependencies');
+const {getReplacePlugin} = require('./replace-plugin');
 
 /**
  * Gets the config for babel transforms run during `gulp build`.
@@ -41,6 +41,7 @@ function getUnminifiedConfig() {
       targets: {'browsers': ['Last 2 versions']},
     },
   ];
+  const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
@@ -50,6 +51,7 @@ function getUnminifiedConfig() {
     reactJsxPlugin,
   ];
   const unminifiedPresets = [presetEnv];
+  const devDependencies = getDevDependencies();
   return {
     compact: false,
     ignore: devDependencies,
@@ -59,5 +61,5 @@ function getUnminifiedConfig() {
 }
 
 module.exports = {
-  unminifiedConfig: getUnminifiedConfig(),
+  getUnminifiedConfig,
 };

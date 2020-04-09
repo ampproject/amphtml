@@ -80,5 +80,5 @@ function getReplacePlugin() {
 }
 
 module.exports = {
-  replacePlugin: getReplacePlugin(),
+  getReplacePlugin,
 };

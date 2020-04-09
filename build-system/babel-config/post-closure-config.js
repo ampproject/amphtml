@@ -43,5 +43,5 @@ function getPostClosureConfig() {
 }
 
 module.exports = {
-  postClosureConfig: getPostClosureConfig(),
+  getPostClosureConfig,
 };
