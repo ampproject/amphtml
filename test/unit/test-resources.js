@@ -366,7 +366,12 @@ describe('Resources', () => {
         getTaskId: () => 'resource#L',
         applySizesAndMediaQuery: () => {},
       };
-      resources.scheduleLayoutOrPreload(resource, true, 0, /* force */ true);
+      resources.scheduleLayoutOrPreload(
+        resource,
+        true,
+        0,
+        /* ignoreQuota */ true
+      );
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.true;
     }
@@ -931,7 +936,12 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   });
 
   it('should force schedule resource execution outside viewport', () => {
-    resources.scheduleLayoutOrPreload(resource1, true, 0, /* force */ true);
+    resources.scheduleLayoutOrPreload(
+      resource1,
+      true,
+      0,
+      /* ignoreQuota */ true
+    );
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1046,8 +1056,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.build).to.be.calledOnce;
     expect(buildResourceSpy).calledWithExactly(
       resource1,
-      /* schedulePass */ true,
-      /* force */ false
+      /* ignoreQuota */ false
     );
   });
 
@@ -1069,10 +1078,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(buildResourceSpy).calledWithExactly(
-      resource1,
-      /* schedulePass */ true
-    );
+    expect(buildResourceSpy).calledWithExactly(resource1);
   });
 
   it('should NOT build non-prerenderable resources in prerender', () => {
@@ -1159,14 +1165,12 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     // discoverWork_ phase 1 build.
     expect(buildResourceSpy).calledWithExactly(
       resource1,
-      /* schedulePass */ true,
-      /* force */ false
+      /* ignoreQuota */ false
     );
     // discoverWork_ phase 4 layout grants build.
     expect(buildResourceSpy).calledWithExactly(
       resource1,
-      /* schedulePass */ true,
-      /* force */ true
+      /* ignoreQuota */ true
     );
   });
 
