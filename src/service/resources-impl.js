@@ -1159,7 +1159,7 @@ export class ResourcesImpl {
       }
       if (this.intersectionObserver_) {
         // With IntersectionObserver, we call applySizesAndMediaQuery() early
-        // in Resources.add(), so we only need to re-apply on relayout here.
+        // in connectedCallback(), so we only need to re-apply on relayout.
         // relayoutCount is also irrelevant and doesn't need an increment.
         if (relayoutAll) {
           r.applySizesAndMediaQuery();
