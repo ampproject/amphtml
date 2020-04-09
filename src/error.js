@@ -67,7 +67,7 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Chance to post to the new error reporting endpoint.
  * @const {number}
  */
-const BETA_ERROR_REPORT_URL_FREQ = 0.2;
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
