@@ -221,11 +221,11 @@ class AnimationRunner {
     }
     const {target, delay, duration, easing} = animationDef;
     return this.resolvePresetKeyframes_(preset.keyframes).then((keyframes) => ({
-      target,
-      easing,
       keyframes,
-      delay: `${delay}ms`,
-      duration: `${duration}ms`,
+      target,
+      delay,
+      duration,
+      easing,
       fill: 'forwards',
     }));
   }
