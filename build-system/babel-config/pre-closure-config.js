@@ -94,10 +94,20 @@ function getPreClosureConfig() {
       : null,
   ].filter(Boolean);
   const devDependencies = getDevDependencies();
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: {esmodules: true},
+    },
+  ];
+  const preClosurePresets = argv.esm ? [presetEnv] : [];
   const preClosureConfig = {
     compact: false,
     ignore: devDependencies,
     plugins: preClosurePlugins,
+    presets: preClosurePresets,
     retainLines: true,
   };
   return preClosureConfig;
