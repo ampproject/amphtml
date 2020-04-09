@@ -231,12 +231,12 @@ export class MutatorImpl {
       },
       mutate: () => {
         mutator();
+
+        // `skipRemeasure` is set by callers when we know that `mutator`
+        // cannot cause a change in size/position e.g. toggleLoading().
         if (skipRemeasure) {
           return;
         }
-
-        // TODO(willchou): toggleLoading() mutate causes a lot of unnecessary
-        // remeasures. Add affordance to mutateElement() to disable remeasures.
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
