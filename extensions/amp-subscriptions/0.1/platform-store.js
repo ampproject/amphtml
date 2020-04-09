@@ -35,6 +35,9 @@ const TAG = 'amp-subscriptions';
  */
 let PlatformWeightDef;
 
+/**
+ * Manages platforms. Has a list of platforms it instantiates and manages.
+ */
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -126,7 +129,7 @@ export class PlatformStore {
   }
 
   /**
-   *Calls a callback for when a platform is resolved.
+   * Calls a callback for when a platform is resolved.
    * @param {string} serviceId
    * @param {!Function} callback
    */
