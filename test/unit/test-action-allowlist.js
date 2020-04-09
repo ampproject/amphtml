@@ -206,6 +206,11 @@ describes.realWin(
         {tagOrTarget: '*'},
         {method: 'show'},
       ]);
+      expect(action.whitelist_).to.deep.equal([
+        {tagOrTarget: 'AMP', method: 'pushState'},
+        {tagOrTarget: 'AMP', method: 'setState'},
+        {tagOrTarget: '*', method: 'show'},
+      ]);
       const i = new ActionInvocation(
         target,
         'setState',

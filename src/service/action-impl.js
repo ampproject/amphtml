@@ -586,7 +586,9 @@ export class ActionService {
    * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
    */
   setWhitelist(whitelist) {
-    this.whitelist_ = whitelist;
+    this.whitelist_ = whitelist.filter(
+      (value) => hasOwn(value, 'tagOrTarget') && hasOwn(value, 'method')
+    );
   }
 
   /**
