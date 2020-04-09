@@ -456,8 +456,8 @@ dist.flags = {
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
-  sourcemap_url: '  Points sourcemap URLs to a custom destination',
-  type: '  Points sourcemap URLs to the correct AMP Project GitHub tag',
+  sourcemap_url: '  Sets a custom sourcemap URL with placeholder $version$',
+  type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
   version_override: '  Override the version written to AMP_CONFIG',
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
