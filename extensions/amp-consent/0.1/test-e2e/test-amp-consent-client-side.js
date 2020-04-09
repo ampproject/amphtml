@@ -36,9 +36,10 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.skip('should work with client side decision', async () => {
+    it('should work with client side decision', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
+      //console.log('currentUrl is  ', currentUrl);
 
       // Verify no local storage decision
       await findElements(controller);
@@ -96,6 +97,10 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
+      const p = new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      });
+      await p;
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;
