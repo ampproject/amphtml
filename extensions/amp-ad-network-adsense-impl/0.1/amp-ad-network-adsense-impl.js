@@ -89,8 +89,8 @@ const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
 
 /**@const @enum{string} */
 const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  RANDOM_SUBDOMAIN_SAFEFRAME_CONTROL: '21065852',
-  RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT: '21065853',
+  CONTROL: '21065852',
+  EXPERIMENT: '21065853',
 };
 
 /** @final */
@@ -153,6 +153,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {boolean}
      */
     this.shouldSandbox_ = false;
+
+    /** @private {string} The random subdomain to load SafeFrame from */
+    this.safeFrameSubdomain_ = Services.cryptoFor(
+      this.win
+    ).getSecureRandomString(true);
   }
 
   /** @override */
@@ -233,8 +238,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
         ifTrafficEligible: () => true,
         branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
@@ -262,14 +267,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   getSafeframePath() {
     if (
-      !this.experimentIds.includes(
-        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT
-      )
-    ) {
+      !this.experimentIds.includes(RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT)) {
       return super.getSafeframePath();
     }
 
-    return `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
+    return `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/` + 
+           `${this.safeframeVersion}/html/container.html`;
   }
 
   /** @override */

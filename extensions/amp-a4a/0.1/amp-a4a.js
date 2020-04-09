@@ -1841,8 +1841,37 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {string} full url to safeframe implementation.
    */
   getSafeframePath() {
-    return 'https://tpc.googlesyndication.com/safeframe/' + 
-           `${this.safeframeVersion}/html/container.html`;
+    return (
+      'https://tpc.googlesyndication.com/safeframe/' +
+      `${this.safeframeVersion}/html/container.html`
+    );
+  }
+
+  /**
+   * Generate a 32-byte random string.
+   * Uses the win.crypto when available.
+   * @return {string} The random string
+   * @protected
+   */
+  getRandomString() {
+    const randomString = Services.cryptoFor(this.win).getSecureRandomString();
+
+    if (randomString) {
+      return randomString;
+    }
+
+    // If crypto isn't available, just use Math.random.
+    let randomSubdomain = '';
+    for (let i = 0; i < 16; i++) {
+      const randomValue = Math.floor(Math.random() * 255);
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
   }
 
   /**

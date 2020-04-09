@@ -144,8 +144,8 @@ const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
 
 /**@const @enum{string} */
 const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  RANDOM_SUBDOMAIN_SAFEFRAME_CONTROL: '21065817',
-  RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT: '21065818',
+  CONTROL: '21065817',
+  EXPERIMENT: '21065818',
 };
 
 /**
@@ -288,7 +288,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {string} The random subdomain to load SafeFrame from */
     this.safeFrameSubdomain_ = Services.cryptoFor(
       this.win
-    ).getSecureRandomString();
+    ).getSecureRandomString(true);
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
@@ -396,8 +396,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
 
         // Random Subdomain
-        '10': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_CONTROL,
-        '11': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT,
+        '10': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+        '11': RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
       }[urlExperimentId];
       if (forcedExperimentId) {
         this.experimentIds.push(forcedExperimentId);
@@ -423,8 +423,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
         ifTrafficEligible: () => true,
         branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
@@ -1048,13 +1048,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getSafeframePath() {
     if (
       !this.experimentIds.includes(
-        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_EXPERIMENT
+        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT
       )
     ) {
       return super.getSafeframePath();
     }
 
-    return `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
+    return (
+      `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/` +
+      `${this.safeframeVersion}/html/container.html`
+    );
   }
 
   /** @visibleForTesting */
