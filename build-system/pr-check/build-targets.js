@@ -61,7 +61,9 @@ const targetMatchers = {
       file == 'build-system/compile/internal-version.js' ||
       file == 'build-system/compile/log-messages.js' ||
       file == 'build-system/tasks/babel-plugin-tests.js' ||
-      file.startsWith('build-system/babel-plugins/')
+      file == 'babel.config.js' ||
+      file.startsWith('build-system/babel-plugins/') ||
+      file.startsWith('build-system/babel-config/')
     );
   },
   'CACHES_JSON': (file) => {
@@ -160,6 +162,9 @@ const targetMatchers = {
     if (file.startsWith('validator/')) {
       return true;
     }
+    if (file === 'build-system/tasks/validator.js') {
+      return true;
+    }
     // validator files for each extension
     if (!file.startsWith('extensions/')) {
       return false;
@@ -178,11 +183,23 @@ const targetMatchers = {
         name.endsWith('.protoascii'))
     );
   },
+  'VALIDATOR_JAVA': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return (
+      file.startsWith('validator/java/') ||
+      file === 'build-system/tasks/validator.js'
+    );
+  },
   'VALIDATOR_WEBUI': (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
-    return file.startsWith('validator/webui/');
+    return (
+      file.startsWith('validator/webui/') ||
+      file === 'build-system/tasks/validator.js'
+    );
   },
   'VISUAL_DIFF': (file) => {
     if (isOwnersFile(file)) {

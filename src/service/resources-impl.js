@@ -459,14 +459,12 @@ export class ResourcesImpl {
    * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
-   * @param {boolean=} scheduleWhenBuilt
    * @param {boolean=} ignoreQuota
    * @private
    */
   buildOrScheduleBuildForResource_(
     resource,
     checkForDupes = false,
-    scheduleWhenBuilt = true,
     ignoreQuota = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
@@ -481,12 +479,12 @@ export class ResourcesImpl {
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, ignoreQuota);
+        this.buildResourceUnsafe_(resource, ignoreQuota);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
-          this.buildReadyResources_(scheduleWhenBuilt);
+          this.buildReadyResources_();
         }
       }
     }
@@ -494,10 +492,9 @@ export class ResourcesImpl {
 
   /**
    * Builds resources that are ready to be built.
-   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildReadyResources_(scheduleWhenBuilt = true) {
+  buildReadyResources_() {
     // Avoid cases where elements add more elements inside of them
     // and cause an infinite loop of building - see #3354 for details.
     if (this.isCurrentlyBuildingPendingResources_) {
@@ -505,17 +502,16 @@ export class ResourcesImpl {
     }
     try {
       this.isCurrentlyBuildingPendingResources_ = true;
-      this.buildReadyResourcesUnsafe_(scheduleWhenBuilt);
+      this.buildReadyResourcesUnsafe_();
     } finally {
       this.isCurrentlyBuildingPendingResources_ = false;
     }
   }
 
   /**
-   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
+  buildReadyResourcesUnsafe_() {
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -528,19 +524,18 @@ export class ResourcesImpl {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+        this.buildResourceUnsafe_(resource);
       }
     }
   }
 
   /**
    * @param {!Resource} resource
-   * @param {boolean} schedulePass
    * @param {boolean=} ignoreQuota
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass, ignoreQuota = false) {
+  buildResourceUnsafe_(resource, ignoreQuota = false) {
     if (
       !this.isUnderBuildQuota_() &&
       !ignoreQuota &&
@@ -555,10 +550,6 @@ export class ResourcesImpl {
     }
     dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
-    // With IntersectionObserver, no need to schedule passes after build.
-    if (!schedulePass || this.intersectionObserver_) {
-      return promise;
-    }
     return promise.then(
       () => this.schedulePass(),
       (error) => {
@@ -594,6 +585,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
     if (this.intersectionObserver_) {
+      // TODO(willchou): Fix observe/unobserve churn due to reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -1335,7 +1327,6 @@ export class ResourcesImpl {
           this.buildOrScheduleBuildForResource_(
             r,
             /* checkForDupes */ true,
-            /* scheduleWhenBuilt */ undefined,
             /* ignoreQuota */ true
           );
         }

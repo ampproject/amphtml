@@ -67,7 +67,7 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Chance to post to the new error reporting endpoint.
  * @const {number}
  */
-const NEW_ERROR_REPORT_URL_FREQ = 0.2;
+const BETA_ERROR_REPORT_URL_FREQ = 0.2;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -356,6 +356,24 @@ function onError(message, filename, line, col, error) {
 }
 
 /**
+ * Determines the error reporting endpoint which should be used.
+ *
+ * @param {!JsonObject} errData Data from `getErrorReportData`.
+ * @return {string} error reporting endpoint URL.
+ */
+function chooseReportingUrl_(errData) {
+  const useBeta =
+    // Legacy reporting drops non-.js stacktraces.
+    errData['esm'] === '1' ||
+    // Legacy reporting throttles non-canary binary types by a factor of 20.
+    errData['bt'] === 'nightly' ||
+    // Randomly divert remaining error reporting traffic.
+    Math.random() < BETA_ERROR_REPORT_URL_FREQ;
+
+  return useBeta ? urls.betaErrorReporting : urls.errorReporting;
+}
+
+/**
  * Passes the given error data to either server or viewer.
  * @param {!Window} win
  * @param {!JsonObject} data Data from `getErrorReportData`.
@@ -368,14 +386,7 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      // Override the errorReportingUrl to test the new error reporting endpoint.
-      const newErrorReportingUrl =
-        'https://us-central1-amp-error-reporting.cloudfunctions.net/r';
-      const url =
-        IS_ESM || Math.random() < NEW_ERROR_REPORT_URL_FREQ
-          ? newErrorReportingUrl
-          : urls.errorReporting;
-      xhr.open('POST', url, true);
+      xhr.open('POST', chooseReportingUrl_(data), true);
       xhr.send(JSON.stringify(data));
     }
   });

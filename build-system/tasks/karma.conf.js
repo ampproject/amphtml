@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -36,14 +35,6 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 30 * 60,
 };
 
-const BABELIFY_CONFIG = {
-  ...BABELIFY_GLOBAL_TRANSFORM,
-  ...BABELIFY_PLUGINS,
-  sourceMapsAbsolute: true,
-};
-
-const preprocessors = ['browserify'];
-
 /**
  * @param {!Object} config
  */
@@ -59,10 +50,10 @@ module.exports = {
 
   preprocessors: {
     './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': preprocessors,
-    './ads/**/test/test-*.js': preprocessors,
-    './extensions/**/test/**/*.js': preprocessors,
-    './testing/**/*.js': preprocessors,
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -70,14 +61,12 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
-  babelifyConfig: BABELIFY_CONFIG,
-
   browserify: {
     watch: true,
     debug: true,
     fast: true,
     basedir: __dirname + '/../../',
-    transform: [['babelify', BABELIFY_CONFIG]],
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
