@@ -84,6 +84,15 @@ export function resetSharedState() {
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
 
+/** @const {string} */
+const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
+
+/**@const @enum{string} */
+const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
+  RANDOM_SUBDOMAIN_SAFEFRAME_CONTROL: '21065852',
+  RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT: '21065853',
+};
+
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
@@ -221,6 +230,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
       },
+      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+        ifTrafficEligible: () => true,
+        branches: [
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT,
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -241,6 +257,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return `ca-${adClientId}`;
     }
     return adClientId;
+  }
+
+  /** @override */
+  getSafeframePath() {
+    if (
+      !this.experimentIds.includes(
+        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.RANDOM_SUBDOMAIN_SAFEFRAME_EXPERIMENT
+      )
+    ) {
+      return super.getSafeframePath();
+    }
+
+    return `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
   }
 
   /** @override */

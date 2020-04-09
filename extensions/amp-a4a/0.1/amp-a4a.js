@@ -59,7 +59,6 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -335,11 +334,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?JsonObject}
      */
     this.a4aAnalyticsConfig_ = null;
-
-    /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(
-      this.win
-    ).getSecureRandomString();
 
     /**
      * The amp-analytics element that for this impl's analytics config. It will
@@ -1847,14 +1841,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {string} full url to safeframe implementation.
    */
   getSafeframePath() {
-    const subdomain = isExperimentOn(
-      this.win,
-      'random-subdomains-for-safeframe'
-    )
-      ? this.safeFrameSubdomain_ + '.safeframe'
-      : 'tpc';
-
-    return `https://${subdomain}.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
+    return `https://tpc.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
   }
 
   /**
