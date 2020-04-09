@@ -1301,7 +1301,6 @@ export class ResourcesImpl {
         if (
           !r.isBuilt() &&
           !r.hasOwner() &&
-          r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
         ) {
