@@ -36,7 +36,7 @@ describes.realWin(
       extensions: ['amp-video-iframe'],
     },
   },
-  env => {
+  (env) => {
     const defaultFixture = 'video-iframe.html';
 
     let win;
@@ -60,11 +60,12 @@ describes.realWin(
 
     function getIframeSrc(fixture = null) {
       const {port} = location;
-      return `http://iframe.localhost:${port}/test/fixtures/served/${fixture ||
-        defaultFixture}`;
+      return `http://iframe.localhost:${port}/test/fixtures/served/${
+        fixture || defaultFixture
+      }`;
     }
 
-    const layoutConfigAttrs = size =>
+    const layoutConfigAttrs = (size) =>
       !size
         ? {layout: 'fill'}
         : {
@@ -177,7 +178,7 @@ describes.realWin(
           [1, 1],
         ];
 
-        trackingSizes.forEach(size => {
+        trackingSizes.forEach((size) => {
           const {implementation_} = createVideoIframe({}, size);
           allowConsoleError(() => {
             expect(() => implementation_.buildCallback()).to.throw();
@@ -230,7 +231,7 @@ describes.realWin(
 
         const invalidEvents = 'tacos al pastor'.split(' ');
 
-        invalidEvents.forEach(event => {
+        invalidEvents.forEach((event) => {
           videoIframe.implementation_.onMessage_({data: {event}});
           expect(dispatch.withArgs(event)).to.not.have.been.called;
         });
@@ -415,7 +416,7 @@ describes.realWin(
       'fullscreenExit',
     ];
 
-    implementedVideoInterfaceMethods.forEach(method => {
+    implementedVideoInterfaceMethods.forEach((method) => {
       describe(`#${method}`, () => {
         const lowercaseMethod = method.toLowerCase();
 

@@ -69,7 +69,7 @@ export let ReactionResponseType;
  * @param {!Element} element
  * @return {!Element}
  */
-const buildQuizTemplate = element => {
+const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-quiz-container">
@@ -85,7 +85,7 @@ const buildQuizTemplate = element => {
  * @param {!Element} option
  * @return {!Element}
  */
-const buildOptionTemplate = option => {
+const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
     <span class="i-amphtml-story-quiz-option">
@@ -165,7 +165,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   getClientId_() {
     if (!this.clientIdPromise_) {
-      this.clientIdPromise_ = this.clientIdService_.then(data => {
+      this.clientIdPromise_ = this.clientIdService_.then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
           /* consent */ Promise.resolve()
@@ -208,7 +208,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   adjustGridLayer_() {
-    const gridLayer = closest(dev().assertElement(this.element), el => {
+    const gridLayer = closest(dev().assertElement(this.element), (el) => {
       return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
 
@@ -259,7 +259,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     // Localize the answer choice options
-    this.answerChoiceOptions_ = this.answerChoiceOptions_.map(choice => {
+    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
       return this.localizationService_.getLocalizedString(
         LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
       );
@@ -319,14 +319,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Add a listener for changes in the RTL state
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
     );
 
     // Add a click listener to the element to trigger the class change
-    this.quizEl_.addEventListener('click', e => this.handleTap_(e));
+    this.quizEl_.addEventListener('click', (e) => this.handleTap_(e));
   }
 
   /**
@@ -342,7 +342,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     const optionEl = closest(
       dev().assertElement(e.target),
-      element => {
+      (element) => {
         return element.classList.contains('i-amphtml-story-quiz-option');
       },
       this.quizEl_
@@ -407,7 +407,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     const percentages = this.preprocessPercentages_(this.responseData_);
 
-    this.responseData_['responses'].forEach(response => {
+    this.responseData_['responses'].forEach((response) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       options[response['reactionValue']].querySelector(
         '.i-amphtml-story-quiz-percentage-text'
@@ -452,7 +452,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Special case: divide remainders by three if they break 100,
     // 3 is the maximum above 100 the remainders can add.
     if (total > 100) {
-      percentages = percentages.map(percentage =>
+      percentages = percentages.map((percentage) =>
         (percentage - (2 * (percentage - Math.floor(percentage))) / 3).toFixed(
           2
         )
@@ -466,7 +466,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     if (total === 100) {
-      return percentages.map(percentage => Math.round(percentage));
+      return percentages.map((percentage) => Math.round(percentage));
     }
 
     // Truncate all and round up those with the highest remainders,
@@ -491,16 +491,16 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       const highestRemainderObj = preserveOriginal[0];
 
       const ties = preserveOriginal.filter(
-        percentageObj => percentageObj.value === highestRemainderObj.value
+        (percentageObj) => percentageObj.value === highestRemainderObj.value
       );
       preserveOriginal = preserveOriginal.filter(
-        percentageObj => percentageObj.value !== highestRemainderObj.value
+        (percentageObj) => percentageObj.value !== highestRemainderObj.value
       );
 
       const toRoundUp =
         ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
 
-      ties.forEach(percentageObj => {
+      ties.forEach((percentageObj) => {
         finalPercentages[percentageObj.originalIndex] =
           Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
       });
@@ -509,7 +509,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       remainder -= toRoundUp ? ties.length : 0;
     }
 
-    preserveOriginal.forEach(percentageObj => {
+    preserveOriginal.forEach((percentageObj) => {
       finalPercentages[percentageObj.originalIndex] = Math.floor(
         percentageObj.value
       );
@@ -537,7 +537,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
       if (this.responseData_) {
         this.responseData_['totalResponseCount']++;
-        this.responseData_['responses'].forEach(response => {
+        this.responseData_['responses'].forEach((response) => {
           if (Number(response['reactionValue']) === optionEl.optionIndex_) {
             response['totalCount']++;
           }
@@ -567,10 +567,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         'method': 'GET',
       })
     )
-      .then(response => {
+      .then((response) => {
         this.handleSuccessfulDataRetrieval_(response);
       })
-      .catch(error => {
+      .catch((error) => {
         dev().error(TAG, error);
       });
   }
@@ -587,7 +587,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         'method': 'POST',
       }),
       reactionValue
-    ).catch(error => {
+    ).catch((error) => {
       dev().error(TAG, error);
     });
   }
@@ -607,7 +607,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     if (this.reactionId_ === null) {
-      const quizPageId = closest(dev().assertElement(this.element), el => {
+      const quizPageId = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
 
@@ -628,7 +628,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       url = addParamsToUrl(url, requestVars);
     }
 
-    return this.getClientId_().then(clientId => {
+    return this.getClientId_().then((clientId) => {
       requestVars['clientId'] = clientId;
       return this.requestService_.executeRequest(url, requestOptions);
     });
@@ -677,7 +677,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateQuizOnDataRetrieval_() {
     let selectedOptionKey;
-    this.responseData_['responses'].forEach(response => {
+    this.responseData_['responses'].forEach((response) => {
       if (response.selectedByUser) {
         selectedOptionKey = response.reactionValue;
       }

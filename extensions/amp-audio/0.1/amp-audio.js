@@ -135,7 +135,7 @@ export class AmpAudio extends AMP.BaseElement {
     );
 
     this.applyFillContent(audio);
-    this.getRealChildNodes().forEach(child => {
+    this.getRealChildNodes().forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
@@ -300,6 +300,6 @@ export class AmpAudio extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAudio);
 });

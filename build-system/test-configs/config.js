@@ -121,6 +121,7 @@ const presubmitGlobs = [
   '!validator/nodejs/node_modules/**/*.*',
   '!validator/webui/dist/**/*.*',
   '!validator/webui/node_modules/**/*.*',
+  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/e2e/node_modules/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',

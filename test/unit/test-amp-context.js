@@ -37,7 +37,7 @@ describe('3p ampcontext.js', () => {
 
       // setTimeout is needed for nextTick.
       // makes nextTick behavior synchronous for test assertions.
-      setTimeout: cb => cb(),
+      setTimeout: (cb) => cb(),
 
       // we don't care about window events for these tests since that behavior
       // is deprecated.

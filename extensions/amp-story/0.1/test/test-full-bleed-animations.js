@@ -34,7 +34,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let storyElem;
     let ampStory;
@@ -104,10 +104,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a full-bleed animation inside a grid-
             // layer with a `fill` template of the first page.
             addAnimationToImage(pages[1].element, 'pan-down', 'fill');
@@ -135,10 +135,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a full-bleed animation inside a grid-
             // layer with a template other than fill.
             addAnimationToImage(pages[1].element, 'fade-in', 'vertical');
@@ -165,10 +165,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a non-full-bleed animation.
             addAnimationToImage(pages[1].element, 'fade-in', 'fill');
 

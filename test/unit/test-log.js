@@ -53,9 +53,9 @@ describe('Logging', () => {
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      __AMP_REPORT_ERROR: error => error,
+      __AMP_REPORT_ERROR: (error) => error,
     };
-    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
+    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
@@ -163,7 +163,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -179,7 +179,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -194,7 +194,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -209,7 +209,7 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
       let reportedError;
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
 
@@ -290,7 +290,7 @@ describe('Logging', () => {
     });
 
     it('should fail', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -322,7 +322,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct dev', () => {
-      expect(function() {
+      expect(function () {
         devAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -336,7 +336,7 @@ describe('Logging', () => {
     });
 
     it('should fail direct user', () => {
-      expect(function() {
+      expect(function () {
         userAssert(false, 'xyz');
       }).to.throw(/xyz/);
       try {
@@ -350,16 +350,16 @@ describe('Logging', () => {
     });
 
     it('should substitute', () => {
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', 'XYZ');
       }).to.throw(/should fail XYZ/);
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s %s', 'XYZ', 'YYY');
       }).to.throw(/should fail XYZ YYY/);
       const div = document.createElement('div');
       div.id = 'abc';
       div.textContent = 'foo';
-      expect(function() {
+      expect(function () {
         log.assert(false, 'should fail %s', div);
       }).to.throw(/should fail div#abc/);
 
@@ -583,9 +583,9 @@ describe('Logging', () => {
     let log;
     let reportedError;
 
-    beforeEach(function() {
+    beforeEach(function () {
       log = new Log(win, RETURNS_OFF);
-      setReportError(function(e) {
+      setReportError(function (e) {
         reportedError = e;
       });
     });
@@ -816,7 +816,7 @@ describe('Logging', () => {
     let log;
 
     // Promise.resolve would be nicer, but it won't resolve sync'ly.
-    const syncResolve = v => ({then: cb => cb(v)});
+    const syncResolve = (v) => ({then: (cb) => cb(v)});
 
     function mockExternalMessages(messageTemplates) {
       win.fetch = () =>

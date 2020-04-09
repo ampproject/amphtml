@@ -50,6 +50,18 @@ export const EmbedMode = {
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
   NO_SHARING: 2,
+
+  /**
+   * This mode is intended for a preview of the story.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Auto-advances pages by a given duration.
+   * - Hides bookend
+   * - Hides all system layer buttons
+   * - Disables swipe-based user education
+   * - Disallows ads
+   */
+  PREVIEW: 3,
 };
 
 /**

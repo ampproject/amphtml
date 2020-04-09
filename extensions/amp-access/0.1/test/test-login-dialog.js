@@ -24,7 +24,7 @@ const RETURN_URL_ESC = encodeURIComponent(
     encodeURIComponent('http://localhost:8000/test-login-dialog')
 );
 
-describes.sandboxed('ViewerLoginDialog', {}, env => {
+describes.sandboxed('ViewerLoginDialog', {}, (env) => {
   let ampdoc;
   let viewer;
   let windowApi;
@@ -59,7 +59,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
     windowApi.document.defaultView = windowApi;
     installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
-    env.sandbox.stub(ampdoc, 'getParam').callsFake(param => {
+    env.sandbox.stub(ampdoc, 'getParam').callsFake((param) => {
       if (param == 'dialog') {
         return '1';
       }
@@ -71,7 +71,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
     const stub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
-    return openLoginDialog(ampdoc, 'http://acme.com/login').then(res => {
+    return openLoginDialog(ampdoc, 'http://acme.com/login').then((res) => {
       expect(res).to.equal('#success=yes');
       expect(stub).to.be.calledOnce;
       expect(stub.firstCall.args[0]).to.equal('openDialog');
@@ -86,7 +86,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     const urlPromise = Promise.resolve('http://acme.com/login');
-    return openLoginDialog(ampdoc, urlPromise).then(res => {
+    return openLoginDialog(ampdoc, urlPromise).then((res) => {
       expect(res).to.equal('#success=yes');
       expect(stub).to.be.calledOnce;
       expect(stub.firstCall.args[0]).to.equal('openDialog');
@@ -105,7 +105,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
       () => {
         throw new Error('must not be here');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal('expected');
       }
     );
@@ -119,7 +119,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
       () => {
         throw new Error('must not be here');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal('expected');
       }
     );
@@ -150,7 +150,7 @@ describes.sandboxed('ViewerLoginDialog', {}, env => {
   });
 });
 
-describes.sandboxed('WebLoginDialog', {}, env => {
+describes.sandboxed('WebLoginDialog', {}, (env) => {
   let clock;
   let viewer;
   let windowApi;
@@ -192,7 +192,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
       },
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       setInterval: (callback, t) => window.setInterval(callback, t),
-      clearInterval: intervalId => window.clearInterval(intervalId),
+      clearInterval: (intervalId) => window.clearInterval(intervalId),
     };
     windowApi = windowObj;
     windowApi.document.defaultView = windowApi;
@@ -205,7 +205,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
     dialog = {
       closed: false,
       location: {
-        replace: url => {
+        replace: (url) => {
           dialogUrl = url;
         },
       },
@@ -247,16 +247,13 @@ describes.sandboxed('WebLoginDialog', {}, env => {
 
   it('should yield error if window.open fails', () => {
     // Open is called twice due to retry on _top.
-    windowMock
-      .expects('open')
-      .twice()
-      .throws('OPEN ERROR');
+    windowMock.expects('open').twice().throws('OPEN ERROR');
     return openLoginDialog(ampdoc, 'http://acme.com/login')
       .then(
         () => 'SUCCESS',
-        error => 'ERROR ' + error
+        (error) => 'ERROR ' + error
       )
-      .then(result => {
+      .then((result) => {
         expect(result).to.match(/OPEN ERROR/);
         expect(windowApi.messageListener).to.not.exist;
       });
@@ -264,16 +261,13 @@ describes.sandboxed('WebLoginDialog', {}, env => {
 
   it('should yield error if window.open returns null', () => {
     // Open is called twice due to retry on _top.
-    windowMock
-      .expects('open')
-      .twice()
-      .returns(null);
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(ampdoc, 'http://acme.com/login')
       .then(
         () => 'SUCCESS',
-        error => 'ERROR ' + error
+        (error) => 'ERROR ' + error
       )
-      .then(result => {
+      .then((result) => {
         expect(result).to.match(/failed to open dialog/);
         expect(windowApi.messageListener).to.not.exist;
       });
@@ -281,33 +275,27 @@ describes.sandboxed('WebLoginDialog', {}, env => {
 
   it('should yield error if window.open returns null with promise', () => {
     // Open is called twice due to retry on _top.
-    windowMock
-      .expects('open')
-      .twice()
-      .returns(null);
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(ampdoc, Promise.resolve('http://acme.com/login'))
       .then(
         () => 'SUCCESS',
-        error => 'ERROR ' + error
+        (error) => 'ERROR ' + error
       )
-      .then(result => {
+      .then((result) => {
         expect(result).to.match(/failed to open dialog/);
         expect(windowApi.messageListener).to.not.exist;
       });
   });
 
   it('should respond when window.open succeeds', () => {
-    windowMock
-      .expects('open')
-      .once()
-      .returns(dialog);
+    windowMock.expects('open').once().returns(dialog);
     const promise = openLoginDialog(ampdoc, 'http://acme.com/login');
     return Promise.resolve()
       .then(() => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
         expect(windowApi.messageListener).to.not.exist;
       });
@@ -327,7 +315,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
     dialogMock
       .expects('postMessage')
       .withExactArgs(
-        env.sandbox.match(arg => {
+        env.sandbox.match((arg) => {
           return arg.sentinel == 'amp' && arg.type == 'result-ack';
         }),
         'http://localhost:8000'
@@ -339,7 +327,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
       });
   });
@@ -361,7 +349,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
       });
   });
@@ -386,7 +374,7 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
       });
   });
@@ -414,16 +402,13 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
       });
   });
 
   it('should respond with empty string when dialog is closed', () => {
-    windowMock
-      .expects('open')
-      .returns(dialog)
-      .once();
+    windowMock.expects('open').returns(dialog).once();
     dialog.closed = true;
     const promise = openLoginDialog(ampdoc, 'http://acme.com/login?a=1');
     return Promise.resolve()
@@ -433,22 +418,18 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         return promise;
       })
       .then(
-        res => res,
-        error => 'ERROR ' + error
+        (res) => res,
+        (error) => 'ERROR ' + error
       )
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('');
       });
   });
 
   it('should succeed with URL promise', () => {
-    windowMock
-      .expects('open')
-      .withArgs('')
-      .returns(dialog)
-      .once();
+    windowMock.expects('open').withArgs('').returns(dialog).once();
     let urlResolver;
-    const urlPromise = new Promise(resolve => {
+    const urlPromise = new Promise((resolve) => {
       urlResolver = resolve;
     });
     const dialogObj = new WebLoginDialog(windowApi, viewer, urlPromise);
@@ -466,18 +447,14 @@ describes.sandboxed('WebLoginDialog', {}, env => {
         succeed();
         return promise;
       })
-      .then(result => {
+      .then((result) => {
         expect(result).to.equal('#success=true');
         expect(windowApi.messageListener).to.not.exist;
       });
   });
 
   it('should fail when URL promise is rejected', () => {
-    windowMock
-      .expects('open')
-      .withArgs('')
-      .returns(dialog)
-      .once();
+    windowMock.expects('open').withArgs('').returns(dialog).once();
     const promise = openLoginDialog(ampdoc, Promise.reject());
     return Promise.resolve()
       .then(() => {
@@ -485,9 +462,9 @@ describes.sandboxed('WebLoginDialog', {}, env => {
       })
       .then(
         () => 'SUCCESS',
-        error => 'ERROR ' + error
+        (error) => 'ERROR ' + error
       )
-      .then(result => {
+      .then((result) => {
         expect(result).to.match(/failed to resolve url/);
         expect(windowApi.messageListener).to.not.exist;
       });

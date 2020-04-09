@@ -66,9 +66,8 @@ export class TemplateRenderer extends Renderer {
       size,
       element,
       creativeMetadata
-    ).then(iframe => {
-      const templateData =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
+    ).then((iframe) => {
+      const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();

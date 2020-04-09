@@ -51,7 +51,7 @@ export function getOrCreateAdCid(
 ) {
   const timeout =
     isNaN(opt_timeout) || opt_timeout == null ? 1000 : opt_timeout;
-  const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
+  const cidPromise = Services.cidForDoc(ampDoc).then((cidService) => {
     if (!cidService) {
       return;
     }
@@ -64,7 +64,7 @@ export function getOrCreateAdCid(
         },
         Promise.resolve(undefined)
       )
-      .catch(error => {
+      .catch((error) => {
         // Not getting a CID is not fatal.
         dev().error('AD-CID', error);
         return undefined;
@@ -74,7 +74,7 @@ export function getOrCreateAdCid(
   // 1 second, assume it will never arrive.
   return Services.timerFor(ampDoc.win)
     .timeoutPromise(timeout, cidPromise, 'cid timeout')
-    .catch(error => {
+    .catch((error) => {
       // Timeout is not fatal.
       dev().warn('AD-CID', error);
       return undefined;
