@@ -595,7 +595,7 @@ export class AnimationManager {
       scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
       (el) => this.createAnimationDef(el, this.getPreset_(el))
     );
-    // <amp-animation>
+    // <amp-story-animation>
     const webAnimationSpecElement = childElementByTag(
       this.root_,
       'amp-story-animation'
