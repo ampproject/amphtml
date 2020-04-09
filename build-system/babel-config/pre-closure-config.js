@@ -18,6 +18,32 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
+const {isTravisBuild} = require('../common/travis');
+
+const isClosureCompiler =
+  argv._.includes('dist') ||
+  argv._.includes('check-types') ||
+  (argv._.length == 0 && argv.compiled);
+
+function getPreClosurePresets() {
+  const targets = argv.esm
+    ? {'esmodules': true}
+    : isTravisBuild()
+    ? {'browsers': ['Last 2 versions', 'safari >= 9']}
+    : {'browsers': ['Last 2 versions']};
+
+  return [
+    [
+      '@babel/preset-env',
+      {
+        'modules': argv.esm || isClosureCompiler ? false : 'commonjs',
+        'loose': true,
+        'targets': targets,
+        'bugfixes': true,
+      },
+    ],
+  ];
+}
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
@@ -97,9 +123,11 @@ function getPreClosureConfig() {
   const preClosureConfig = {
     compact: false,
     ignore: devDependencies,
+    presets: getPreClosurePresets(),
     plugins: preClosurePlugins,
     retainLines: true,
   };
+
   return preClosureConfig;
 }
 

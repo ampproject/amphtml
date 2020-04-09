@@ -50,6 +50,7 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
+const {message} = require('../compile/debug-compilaton-lifecyle');
 const {VERSION} = require('../compile/internal-version');
 
 const {green, cyan} = colors;
@@ -100,6 +101,7 @@ async function runPreDistSteps(watch) {
   await copyParsers();
   await bootstrapThirdPartyFrames(watch, /* minify */ true);
   await startNailgunServer(distNailgunPort, /* detached */ false);
+  message();
 }
 
 /**
@@ -462,4 +464,5 @@ dist.flags = {
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
 };
