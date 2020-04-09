@@ -21,7 +21,7 @@ const log = require('fancy-log');
 const path = require('path');
 const tempy = require('tempy');
 
-const logFile = tempy.writeSync('Debug Lifecycles\n', {name: 'log'});
+const logFile = path.resolve(process.cwd(), 'dist', 'debug-compilation.log');
 
 const pad = (value, length) =>
   (value.length > length ? value.slice(value.length - length) : value).padEnd(
