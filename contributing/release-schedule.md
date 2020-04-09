@@ -22,7 +22,7 @@ To determine if a PR has been included in any of the following release channels,
 
 The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that build.
 
-The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues
+The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues.
 
 The **nightly** release build is served to 0.05% of AMP traffic. It is possible to opt into the **nightly** channel, to test pull requests that were merged in the past few days. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
@@ -36,7 +36,7 @@ The **stable** release channel is built with the _production_ configuration and 
 
 #### Beta and Experimental channels
 
-The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for releases-freeze weeks), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or erformance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
+The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for releases-freeze weeks), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or performance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
 
 It is possible to opt into these channels. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
