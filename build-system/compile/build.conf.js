@@ -45,7 +45,14 @@ const postCompilationPlugins = (isEsmBuild) =>
   isEsmBuild
     ? [
         localPlugin('transform-minified-comments'),
+<<<<<<< HEAD
         localPlugin('const-transformer'),
+=======
+<<<<<<< HEAD
+=======
+        localPlugin('const-transformer'),
+>>>>>>> parent of f801a93c2... 🏗♻️ Consolidate all `babel` configs into `babel.config.js` (#27576)
+>>>>>>> Revert "🏗♻️ Consolidate all `babel` configs into `babel.config.js` (#27576)"
         localPlugin('transform-remove-directives'),
         localPlugin('transform-function-declarations'),
         localPlugin('transform-stringish-literals'),
@@ -61,7 +68,14 @@ const esmRemovedImports = {
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
   './polyfills/array-includes': ['installArrayIncludes'],
+<<<<<<< HEAD
   './ie-media-bug': ['ieMediaCheckAndFix'],
+=======
+<<<<<<< HEAD
+=======
+  './ie-media-bug': ['ieMediaCheckAndFix'],
+>>>>>>> parent of f801a93c2... 🏗♻️ Consolidate all `babel` configs into `babel.config.js` (#27576)
+>>>>>>> Revert "🏗♻️ Consolidate all `babel` configs into `babel.config.js` (#27576)"
   '../third_party/css-escape/css-escape': ['cssEscape'],
 };
 
