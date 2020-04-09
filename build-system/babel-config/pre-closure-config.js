@@ -71,9 +71,6 @@ const preClosurePlugins = [
     ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
     : null,
   argv.esm ? filterImportsPlugin : null,
-  // argv.esm
-  //   ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-  //   : null,
   isCheckTypes
     ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
     : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
