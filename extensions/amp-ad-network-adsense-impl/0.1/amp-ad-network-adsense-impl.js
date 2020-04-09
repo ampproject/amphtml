@@ -155,7 +155,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.shouldSandbox_ = false;
 
     /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(
+    this.safeFrameSubdomain_ = /** @type {string} **/ Services.cryptoFor(
       this.win
     ).getSecureRandomString(true);
   }
@@ -267,12 +267,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   getSafeframePath() {
     if (
-      !this.experimentIds.includes(RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT)) {
+      !this.experimentIds.includes(
+        RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT
+      )
+    ) {
       return super.getSafeframePath();
     }
 
-    return `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/` + 
-           `${this.safeframeVersion}/html/container.html`;
+    return (
+      `https://${this.safeFrameSubdomain_}.googlesyndication.com/safeframe/` +
+      `${this.safeframeVersion}/html/container.html`
+    );
   }
 
   /** @override */

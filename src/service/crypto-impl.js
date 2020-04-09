@@ -219,14 +219,13 @@ export class Crypto {
   /**
    * Returns a cryptographically random string with 128 bits of entropy if win.crypto is available.
    * If win.crypto, is not available, returns null.
-   * Enable useFallback to use Math.random when win.crypto isn't available. 
+   * @param {boolean=} useFallback use Math.random when win.crypto isn't available.
    * @return {string|null}
    */
   getSecureRandomString(useFallback = false) {
     // Support IE 11
-    const cryptoLib =
-      /** @type {!webCrypto.Crypto|undefined} */ (this.win_.crypto ||
-      this.win_.msCrypto);
+    const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
+      .crypto || this.win_.msCrypto);
 
     if (!useFallback && !cryptoLib) {
       return null;

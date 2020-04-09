@@ -286,7 +286,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = Services.cryptoFor(
+    this.safeFrameSubdomain_ = /** @type {string} **/ Services.cryptoFor(
       this.win
     ).getSecureRandomString(true);
 
