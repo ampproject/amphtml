@@ -15,12 +15,15 @@
  */
 'use strict';
 
+const {getPreClosureConfig} = require('./pre-closure-config');
+
 /**
- * Gets the config for babel transforms run during `gulp dist --single_pass`.
+ * Gets the config for babel transforms run by the post compile step during
+ * `gulp dist --single_pass`.
  *
  * @return {!Object}
  */
-function getSinglePassConfig() {
+function getSinglePassPostConfig() {
   const singlePassPlugins = [
     './build-system/babel-plugins/babel-plugin-transform-prune-namespace',
   ];
@@ -32,6 +35,19 @@ function getSinglePassConfig() {
   };
 }
 
+/**
+ * Gets the config for babel transforms run while building the dependency tree
+ * during `gulp dist --single_pass`.
+ *
+ * @return {!Object}
+ */
+function getSinglePassDepsConfig() {
+  const singlePassDepsConfig = getPreClosureConfig();
+  singlePassDepsConfig.plugins.push('transform-es2015-modules-commonjs');
+  return singlePassDepsConfig;
+}
+
 module.exports = {
-  singlePassConfig: getSinglePassConfig(),
+  singlePassDepsConfig: getSinglePassDepsConfig(),
+  singlePassPostConfig: getSinglePassPostConfig(),
 };

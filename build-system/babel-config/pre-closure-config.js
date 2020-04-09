@@ -92,7 +92,6 @@ function getPreClosureConfig() {
     !(argv.fortesting || isCheckTypes)
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
-    argv.single_pass ? 'transform-es2015-modules-commonjs' : null,
   ].filter(Boolean);
   const preClosureConfig = {
     compact: false,
@@ -104,5 +103,6 @@ function getPreClosureConfig() {
 }
 
 module.exports = {
+  getPreClosureConfig,
   preClosureConfig: getPreClosureConfig(),
 };
