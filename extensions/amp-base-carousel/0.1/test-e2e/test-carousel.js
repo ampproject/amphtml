@@ -113,7 +113,7 @@ describes.endtoend(
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
     });
 
-    it.skip('should have the correct scroll position when resizing', async function () {
+    it('should have the correct scroll position when resizing', async function () {
       this.timeout(testTimeout);
       // Note: 513 seems to be the smallest settable width.
       await controller.setWindowRect({
