@@ -1841,7 +1841,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {string} full url to safeframe implementation.
    */
   getSafeframePath() {
-    return `https://tpc.googlesyndication.com/safeframe/${this.safeframeVersion}/html/container.html`;
+    return 'https://tpc.googlesyndication.com/safeframe/' + 
+           `${this.safeframeVersion}/html/container.html`;
   }
 
   /**
