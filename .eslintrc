@@ -262,9 +262,6 @@
         "module": false,
         "process": false,
         "require": false
-      },
-      "rules": {
-        "local/no-module-exports": 0
       }
     },
     {
