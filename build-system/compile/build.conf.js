@@ -45,6 +45,7 @@ const postCompilationPlugins = (isEsmBuild) =>
   isEsmBuild
     ? [
         localPlugin('transform-minified-comments'),
+        localPlugin('const-transformer'),
         localPlugin('transform-remove-directives'),
         localPlugin('transform-function-declarations'),
         localPlugin('transform-stringish-literals'),
@@ -60,6 +61,7 @@ const esmRemovedImports = {
   './polyfills/object-values': ['installObjectValues'],
   './polyfills/promise': ['installPromise'],
   './polyfills/array-includes': ['installArrayIncludes'],
+  './ie-media-bug': ['ieMediaCheckAndFix'],
   '../third_party/css-escape/css-escape': ['cssEscape'],
 };
 
