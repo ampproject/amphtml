@@ -43,6 +43,9 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
+/** @private @const {number} */
+const TOP_REGION = 0.8;
+
 /**
  * Protected edges of the screen in pixels. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
@@ -468,9 +471,24 @@ export class ManualAdvancement extends AdvancementConfig {
   canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    // We have a `pointer-events: none` set to all children of <a> tags inside
+    // of amp-story-grid-layer, which acts as a click shield, making sure we
+    // handle the click before navigation (see amp-story.css). It also ensures
+    // we always get the <a> to be the target, even if it has children (e.g.
+    // <span>).
     const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
+      event.preventDefault();
+      return false;
+    }
+
+    if (
+      target.getAttribute('has-tooltip') === 'auto' &&
+      this.isInScreenBottom_(target, pageRect)
+    ) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
       return false;
     }
 
@@ -491,6 +509,18 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+  }
+
+  /**
+   * Checks if element is inside of the bottom region of the screen.
+   * @param {!Element} target
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenBottom_(target, pageRect) {
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    return targetRect.top - pageRect.top >= pageRect.height * TOP_REGION;
   }
 
   /**
