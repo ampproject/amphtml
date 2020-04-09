@@ -1482,7 +1482,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     }
   );
 
-  it('should observe and apply sizes/media query (intersect-resources)', () => {
+  it('should observe element after adding it', () => {
     // Enables the 'intersect-resources' experiment.
     const observer = (resources.intersectionObserver_ = {
       observe: env.sandbox.spy(),
@@ -1490,14 +1490,11 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     // Avoid creating a new Resource, which is tricky to spy on.
     env.sandbox.stub(child1, 'reconstructWhenReparented').returns(false);
     env.sandbox.stub(resource1, 'getState').returns(ResourceState.NOT_LAID_OUT);
-
     env.sandbox.spy(resource1, 'requestMeasure');
-    env.sandbox.spy(resource1, 'applySizesAndMediaQuery');
 
     resources.add(child1);
 
     expect(resource1.requestMeasure).to.not.be.called;
-    expect(resource1.applySizesAndMediaQuery).to.be.calledOnce;
     expect(observer.observe).to.be.calledOnceWith(child1);
   });
 

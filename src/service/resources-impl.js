@@ -422,14 +422,6 @@ export class ResourcesImpl {
     this.resources_.push(resource);
 
     if (this.intersectionObserver_) {
-      // Classically, sizes/media queries are applied just before measure.
-      // With IntersectionObserver, we have to make sure it happens before
-      // the observation so do it now. Won't cause layout thrash since
-      // Resource.add() is called in an implicit mutate context.
-      // TODO(willchou): Avoid unnecessary calls due to reparenting.
-      resource.applySizesAndMediaQuery();
-      dev().fine(TAG_, 'apply sizes/media query:', resource.debugid);
-
       // The observer callback will schedule a pass to process this element.
       this.intersectionObserver_.observe(element);
     } else {
