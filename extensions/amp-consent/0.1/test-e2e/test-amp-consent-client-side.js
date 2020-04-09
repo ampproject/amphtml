@@ -97,10 +97,10 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
-      const p = new Promise((resolve) => {
-        setTimeout(resolve, 1000);
-      });
-      await p;
+      // const p = new Promise((resolve) => {
+      //   setTimeout(resolve, 1000);
+      // });
+      // await p;
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;
