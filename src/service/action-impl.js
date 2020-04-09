@@ -878,10 +878,10 @@ function isActionWhitelisted(invocation, whitelist) {
   const lcTagOrTarget = tagOrTarget.toLowerCase();
   return whitelist.some((w) => {
     if (
-      w.tagOrTarget.toLowerCase() === lcTagOrTarget ||
-      w.tagOrTarget === '*'
+      w.tagOrTarget &&
+      (w.tagOrTarget.toLowerCase() === lcTagOrTarget || w.tagOrTarget === '*')
     ) {
-      if (w.method.toLowerCase() === lcMethod) {
+      if (w.method && w.method.toLowerCase() === lcMethod) {
         return true;
       }
     }

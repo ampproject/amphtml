@@ -29,7 +29,6 @@ import {
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
-import {createElementWithAttributes} from '../../src/dom';
 import {htmlFor} from '../../src/static-template';
 import {setParentWindow} from '../../src/service';
 import {whenCalled} from '../../testing/test-helper.js';
@@ -1668,19 +1667,16 @@ describes.realWin(
       getDefaultActionAlias = env.sandbox.stub();
       target = createExecElement('foo', spy, getDefaultActionAlias);
     });
-    describe('with non-empty whitelist', () => {
+    describe('with null action allowlist', () => {
       beforeEach(() => {
-        const meta = createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-action-whitelist',
-          content:
-            'AMP.pushState, AMP.setState, *.show, ' +
-            'amp-element.defaultAction',
-        });
-        env.win.document.head.appendChild(meta);
         action = new ActionService(env.ampdoc, env.win.document);
       });
 
-      it('should allow whitelisted actions', () => {
+      afterEach(() => {
+        action = null;
+      });
+
+      it('should allow all actions by default', () => {
         const i = new ActionInvocation(
           target,
           'setState',
@@ -1696,7 +1692,7 @@ describes.realWin(
         expect(spy).to.be.calledWithExactly(i);
       });
 
-      it('should allow whitelisted actions case insensitive', () => {
+      it('should allow all actions case insensitive', () => {
         const i = new ActionInvocation(
           target,
           'setState',
@@ -1711,8 +1707,20 @@ describes.realWin(
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
+    });
 
-      it('should whitelist default actions if alias is registered default', () => {
+    describe('with non-null action allowlist', () => {
+      beforeEach(() => {
+        action = new ActionService(env.ampdoc, env.win.document);
+        action.setWhitelist([
+          {tagOrTarget: 'AMP', method: 'pushState'},
+          {tagOrTarget: 'AMP', method: 'setState'},
+          {tagOrTarget: '*', method: 'show'},
+          {tagOrTarget: 'amp-element', method: 'defaultAction'},
+        ]);
+      });
+
+      it('should allow default actions if alias is registered default', () => {
         // Given that 'defaultAction' is a registered default action.
         getDefaultActionAlias.returns('defaultAction');
         // Expect the 'activate' call to invoke it.
@@ -1788,92 +1796,27 @@ describes.realWin(
       });
     });
 
-    describe('email documents', () => {
-      beforeEach(() => {
-        env.win.document.documentElement.setAttribute('amp4email', '');
-      });
-
-      it('should supply default actions whitelist for email documents without meta', () => {
-        action = new ActionService(env.ampdoc, env.win.document);
-        const i = new ActionInvocation(
-          target,
-          'toggleClass', // hardcoded default
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        expect(action.invoke_(i)).to.be.null;
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should override empty actions whitelist with defaults for email documents', () => {
-        const meta = createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-action-whitelist',
-          content: '',
-        });
-        env.win.document.head.appendChild(meta);
-        action = new ActionService(env.ampdoc, env.win.document);
-        action = new ActionService(env.ampdoc, env.win.document);
-        const i = new ActionInvocation(
-          target,
-          'toggleClass', // hardcoded default
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        expect(action.invoke_(i)).to.be.null;
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should override non-empty actions whitelist with defaults for email documents', () => {
-        const meta = createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-action-whitelist',
-          content:
-            'AMP.pushState, AMP.setState, AMP.print, ' +
-            'amp-element.defaultAction',
-        });
-        env.win.document.head.appendChild(meta);
-        action = new ActionService(env.ampdoc, env.win.document);
-        const i = new ActionInvocation(
-          target,
-          'print',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        env.sandbox.stub(action, 'error_');
-        expect(action.invoke_(i)).to.be.null;
-        expect(action.error_).to.be.calledWith(
-          '"AMP.print" is not whitelisted ' +
-            '[{"tagOrTarget":"AMP","method":"setState"},' +
-            '{"tagOrTarget":"*","method":"focus"},' +
-            '{"tagOrTarget":"*","method":"hide"},' +
-            '{"tagOrTarget":"*","method":"show"},' +
-            '{"tagOrTarget":"*","method":"toggleClass"},' +
-            '{"tagOrTarget":"*","method":"toggleVisibility"}].'
-        );
-      });
+    it('should supply default actions allowlist for email documents', () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      action = new ActionService(env.ampdoc, env.win.document);
+      const i = new ActionInvocation(
+        target,
+        'toggleClass', // hardcoded default
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        'AMP'
+      );
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
     });
 
-    it('should not allow any action with empty string whitelist', () => {
-      const meta = createElementWithAttributes(env.win.document, 'meta', {
-        name: 'amp-action-whitelist',
-        content: '',
-      });
-      env.win.document.head.appendChild(meta);
+    it('should not allow any action with empty whitelist', () => {
       action = new ActionService(env.ampdoc, env.win.document);
+      action.setWhitelist([]);
       const i = new ActionInvocation(
         target,
         'print',
@@ -1893,13 +1836,15 @@ describes.realWin(
     });
 
     it('should ignore unparseable whitelist entries', () => {
-      const meta = createElementWithAttributes(env.win.document, 'meta', {
-        name: 'amp-action-whitelist',
-        content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
-      });
-      env.win.document.head.appendChild(meta);
+      action = new ActionService(env.ampdoc, env.win.document);
       allowConsoleError(() => {
-        action = new ActionService(env.ampdoc, env.win.document);
+        action.setWhitelist([
+          {tagOrTarget: 'AMP', method: 'pushState'},
+          {invalidEntry: 'invalid'},
+          {},
+          {tagOrTarget: 'AMP', method: 'setState'},
+          {tagOrTarget: '*', method: 'show'},
+        ]);
       });
       const i = new ActionInvocation(
         target,
