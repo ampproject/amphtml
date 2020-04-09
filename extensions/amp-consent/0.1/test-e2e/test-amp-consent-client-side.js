@@ -97,7 +97,7 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
-      const p = new Promise(resolve => {
+      const p = new Promise((resolve) => {
         setTimeout(resolve, 1000);
       });
       await p;
