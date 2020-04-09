@@ -1308,7 +1308,6 @@ describes.repeated(
                 Object.entries(parseQueryString(config.body))
               ).to.have.deep.members(entriesInForm);
               expect(config.method).to.equal('POST');
-              expect(config.credentials).to.equal('include');
 
               return submitEventPromise;
             });
@@ -1348,7 +1347,6 @@ describes.repeated(
                 entriesInForm
               );
               expect(config.method).to.equal('POST');
-              expect(config.credentials).to.equal('include');
 
               return submitEventPromise;
             });

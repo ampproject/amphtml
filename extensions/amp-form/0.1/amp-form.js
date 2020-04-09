@@ -275,8 +275,7 @@ export class AmpForm {
       encType === 'multipart/form-data'
     ) {
       return encType;
-    }
-    if (encType !== null) {
+    } else if (encType !== null) {
       user().warn(
         TAG,
         `Unexpected enctype: ${encType}. Defaulting to 'multipart/form-data'.`
@@ -327,6 +326,7 @@ export class AmpForm {
         });
       } else {
         // default case: encType_ is 'multipart/form-data'
+        devAssert(this.encType_ === 'multipart/form-data');
         body = createFormDataWrapper(this.win_, this.form_);
       }
       if (opt_fieldBlacklist) {
