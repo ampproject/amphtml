@@ -32,11 +32,11 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
-  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Deferred} from '../../../../src/utils/promise';
@@ -1456,7 +1456,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
   });
 
-
   describe('#RandomSubdomainSafeFrame', () => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
@@ -1468,25 +1467,24 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
-
     it('should use random subdomain when experiment is enabled', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
-      const expectedPath = "^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com" + 
-          "\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$"
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
-
 
     it('should use constant subdomain when experiment is disabled', () => {
-      const expectedPath = "^https://tpc.googlesyndication.com" + 
-          "\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$"
+      const expectedPath =
+        '^https://tpc.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
-
-  })
+  });
 });
 
 describes.realWin(

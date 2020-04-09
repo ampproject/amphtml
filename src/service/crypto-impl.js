@@ -219,7 +219,7 @@ export class Crypto {
   /**
    * Returns a cryptographically random string with 128 bits of entropy if win.crypto is available.
    * If win.crypto, is not available, returns null.
-   * @param {number} length The length of the string to return 
+   * @param {number} length The length of the string to return
    * @return {string|null}
    */
   getSecureRandomString(length) {
@@ -231,7 +231,7 @@ export class Crypto {
       return null;
     }
 
-    let randomValues = new Uint8Array(length);
+    const randomValues = new Uint8Array(length);
     cryptoLib.getRandomValues(randomValues);
 
     let randomSubdomain = '';

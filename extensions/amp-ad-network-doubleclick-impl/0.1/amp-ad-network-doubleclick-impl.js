@@ -142,7 +142,6 @@ const ZINDEX_EXP_BRANCHES = {
 /** @const {string} */
 const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
 
-
 /**
  * Branches of the random subdomain for SafeFrame experiment.
  * @const @enum{string}
@@ -1045,8 +1044,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch = RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-
+    const randomSubdomainExperimentBranch =
+      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
@@ -1619,11 +1618,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   getRandomString_() {
-
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
-    const randomString = Services.cryptoFor(this.win).getSecureRandomString(length);
-
+    const randomString = Services.cryptoFor(this.win).getSecureRandomString(
+      length
+    );
     if (randomString) {
       return randomString;
     }
