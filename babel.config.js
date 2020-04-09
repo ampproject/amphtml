@@ -25,99 +25,42 @@
 
 'use strict';
 
-const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/common/travis');
-const argv = minimist(process.argv.slice(2));
+const {
+  getDepCheckConfig,
+  getPostClosureConfig,
+  getPreClosureConfig,
+  getSinglePassDepsConfig,
+  getSinglePassPostConfig,
+  getTestConfig,
+  getUnminifiedConfig,
+} = require('./build-system/babel-config');
 
-const isClosureCompiler =
-  argv._.includes('dist') ||
-  argv._.includes('check-types') ||
-  (argv._.length == 0 && argv.compiled);
-const {esm} = argv;
+/**
+ * Mapping of babel transform callers to their corresponding babel configs.
+ */
+const babelTransforms = new Map([
+  ['dep-check', getDepCheckConfig()],
+  ['post-closure', getPostClosureConfig()],
+  ['pre-closure', getPreClosureConfig()],
+  ['single-pass-deps', getSinglePassDepsConfig()],
+  ['single-pass-post', getSinglePassPostConfig()],
+  ['test', getTestConfig()],
+  ['unminified', getUnminifiedConfig()],
+]);
 
-const targets = (esm) => {
-  if (esm) {
-    return {'esmodules': true};
-  }
-
-  if (isTravisBuild()) {
-    return {'browsers': ['Last 2 versions', 'safari >= 9']};
-  }
-
-  return {'browsers': ['Last 2 versions']};
-};
-
-const plugins = (esm) => {
-  const leadingComments =
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments';
-  const reactConstantElements =
-    '@babel/plugin-transform-react-constant-elements';
-  const transformJSX = [
-    '@babel/plugin-transform-react-jsx',
-    {
-      pragma: 'Preact.createElement',
-      pragmaFrag: 'Preact.Fragment',
-      useSpread: true,
-    },
-  ];
-  const transformClasses = [
-    '@babel/plugin-transform-classes',
-    {
-      loose: false,
-    },
-  ];
-
-  if (esm) {
-    return [leadingComments, reactConstantElements, transformJSX];
-  }
-
-  return [
-    leadingComments,
-    reactConstantElements,
-    transformClasses,
-    transformJSX,
-  ];
-};
-
-const presets = (esm) => {
-  if (esm) {
-    return [
-      [
-        '@babel/preset-env',
-        {
-          'modules': false,
-          'targets': targets(esm),
-          'bugfixes': true,
-        },
-      ],
-    ];
-  }
-
-  return [
-    [
-      '@babel/preset-env',
-      {
-        'modules': isClosureCompiler ? false : 'commonjs',
-        'loose': true,
-        'targets': targets(esm),
-      },
-    ],
-  ];
-};
-
-// eslint-disable-next-line local/no-module-exports
+/**
+ * Main entry point. Returns babel config corresponding to the caller.
+ *
+ * @param {!Object} api
+ * @return {!Object}
+ */
 module.exports = function (api) {
-  api.cache(true);
-  // Closure Compiler builds do not use any of the default settings below until its
-  // an esm build. (Both Multipass and Singlepass)
-  if (isClosureCompiler && !esm) {
-    return {};
+  const caller = api.caller((caller) => caller.name);
+  if (babelTransforms.has(caller)) {
+    return babelTransforms.get(caller);
+  } else {
+    const err = new Error('Unrecognized Babel caller (see babel.config.js).');
+    err.showStack = false;
+    throw err;
   }
-
-  return {
-    'plugins': plugins(esm),
-    'presets': presets(esm),
-    'compact': false,
-    'sourceType': 'module',
-  };
 };
