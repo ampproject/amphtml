@@ -36,7 +36,7 @@ The **stable** release channel is built with the _production_ configuration and 
 
 #### Beta and Experimental channels
 
-The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for releases-freeze weeks), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or performance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
+The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for weeks where there is a [release freeze](#release-freezes)), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or performance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
 
 It is possible to opt into these channels. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
 
@@ -56,7 +56,7 @@ The _Experimental Channel_ **may be less stable** and it may contain features no
 
 The **lts** release channel provides a previous **stable** build for one-month intervals. On the second Monday of each month, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the release freeze.
+In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the [release freeze](#release-freezes).
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
