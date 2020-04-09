@@ -37,6 +37,7 @@ import {
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
+  serializeQueryString,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -70,7 +71,6 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
-import {serializeQueryString} from '../../../src/url.js';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
