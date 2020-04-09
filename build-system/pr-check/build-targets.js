@@ -61,7 +61,9 @@ const targetMatchers = {
       file == 'build-system/compile/internal-version.js' ||
       file == 'build-system/compile/log-messages.js' ||
       file == 'build-system/tasks/babel-plugin-tests.js' ||
-      file.startsWith('build-system/babel-plugins/')
+      file == 'babel.config.js' ||
+      file.startsWith('build-system/babel-plugins/') ||
+      file.startsWith('build-system/babel-config/')
     );
   },
   'CACHES_JSON': (file) => {
