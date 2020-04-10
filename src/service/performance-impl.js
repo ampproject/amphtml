@@ -244,7 +244,7 @@ export class Performance {
         this.tickDelta('msr', this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tickDelta('timeOrigin', this.timeOrigin_);
+        this.tick('timeOrigin', undefined, this.timeOrigin_);
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -590,19 +590,21 @@ export class Performance {
    *     when adding a new metric.
    * @param {number=} opt_delta The delta. Call tickDelta instead of setting
    *     this directly.
+   * @param {number=} opt_value The value to use. Overrides default calculation.
    */
-  tick(label, opt_delta) {
+  tick(label, opt_delta, opt_value) {
     const data = dict({'label': label});
     let delta;
 
-    // Absolute value case (not delta).
-    if (opt_delta == undefined) {
-      // Marking only makes sense for non-deltas.
+    if (opt_delta != undefined) {
+      data['delta'] = delta = Math.max(opt_delta, 0);
+    } else if (opt_value != undefined) {
+      data['value'] = opt_value;
+    } else {
+      // Marking only makes sense for non-overridden values (and no deltas).
       this.mark(label);
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
-    } else {
-      data['delta'] = delta = Math.max(opt_delta, 0);
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
