@@ -23,6 +23,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let manager;
+
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
     'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
@@ -31,7 +32,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let fakeMessaging;
   let messagingMock;
 
-  function buildStoryPlayer(
+  async function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
     cache = null
@@ -54,6 +55,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')
       .resolves(fakeMessaging);
+
+    for (let i = 0; i < numStories; i++) {
+      await Promise.resolve(); // Microtask tick.
+    }
   }
 
   function swipeLeft() {
@@ -95,16 +100,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.verify();
   });
 
-  it('should build an iframe for each story', () => {
-    buildStoryPlayer();
-    manager.loadPlayers();
+  it('should build an iframe for each story', async () => {
+    await buildStoryPlayer();
 
     expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
-  it('should correctly append params at the end of the story url', () => {
-    buildStoryPlayer();
-    manager.loadPlayers();
+  it('should correctly append params at the end of the story url', async () => {
+    await buildStoryPlayer();
+
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
@@ -116,7 +120,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should correctly append params at the end of a story url with existing params', async () => {
     const existingParams = '?testParam=true#myhash=hashValue';
-    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
+    await buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
 
     manager.loadPlayers();
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
@@ -129,9 +133,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should set first story as visible', () => {
-    buildStoryPlayer(3);
-    manager.loadPlayers();
+  it('should set first story as visible', async () => {
+    await buildStoryPlayer(3);
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -139,9 +142,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', () => {
-    buildStoryPlayer(3);
-    manager.loadPlayers();
+  it('should prerender next stories', async () => {
+    await buildStoryPlayer(3);
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
@@ -153,10 +155,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     'should remove iframe from a story with distance > 1 from current story ' +
       'and give it to a new story that is distance <= 1 when navigating',
     async () => {
-      buildStoryPlayer(4);
+      await buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
-
-      await manager.loadPlayers();
 
       swipeLeft();
       expect(stories[0][IFRAME_IDX]).to.eql(0);
@@ -174,8 +174,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     async () => {
       buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
-
-      await manager.loadPlayers();
 
       swipeLeft();
       swipeLeft();
@@ -215,7 +213,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
-    await manager.loadPlayers();
 
     swipeLeft();
 
@@ -228,7 +225,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
-    await manager.loadPlayers();
 
     swipeLeft();
     swipeLeft();
@@ -268,6 +264,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
           '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost' +
           '%3A9876&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
+    });
+
+    // TODO(Enriqe): get this to work.
+    it.skip('should throw error when invalid url is provided', async () => {
+      expect(() =>
+        buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org')
+      ).to.throw();
     });
   });
 });
