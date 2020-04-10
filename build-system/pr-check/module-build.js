@@ -31,7 +31,7 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
 
-const FILENAME = 'module-build-tests.js';
+const FILENAME = 'module-build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
@@ -55,7 +55,7 @@ function main() {
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Build Tests'),
+        colors.cyan('Module Build'),
         'because this commit does not affect the runtime, flag configs,',
         'or integration tests.'
       );

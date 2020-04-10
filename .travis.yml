@@ -55,6 +55,10 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
+      name: 'Module Build'
+      script:
+        - unbuffer node build-system/pr-check/module-build.js
+    - stage: build
       name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
@@ -70,10 +74,6 @@ jobs:
       name: 'Single Pass Tests'
       script:
         - unbuffer node build-system/pr-check/single-pass-tests.js
-    - stage: test
-      name: 'Module Build Tests'
-      script:
-        - unbuffer node build-system/pr-check/module-build-tests.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
