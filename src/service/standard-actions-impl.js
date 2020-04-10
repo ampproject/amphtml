@@ -322,7 +322,7 @@ export class StandardActions {
     if (target.classList.contains('i-amphtml-element')) {
       this.mutator_.mutateElement(
         target,
-        () => target.collapse(),
+        () => target./*OK*/collapse(),
         // It is safe to skip measuring, because `mutator-impl.collapseElement`
         // will set the size of the element as well as trigger a remasure of
         // everything below the collapsed element.
