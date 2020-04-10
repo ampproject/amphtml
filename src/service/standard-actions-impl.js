@@ -324,7 +324,7 @@ export class StandardActions {
         target,
         () => target./*OK*/collapse(),
         // It is safe to skip measuring, because `mutator-impl.collapseElement`
-        // will set the size of the element as well as trigger a remasure of
+        // will set the size of the element as well as trigger a remeasure of
         // everything below the collapsed element.
         /* skipRemeasure */ true
       );
