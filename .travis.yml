@@ -55,6 +55,10 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
+      name: 'Module Build'
+      script:
+        - unbuffer node build-system/pr-check/module-build.js
+    - stage: build
       name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
