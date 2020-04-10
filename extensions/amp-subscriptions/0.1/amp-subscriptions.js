@@ -64,7 +64,10 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private {?Promise} */
+    /**
+     * Resolves when page and platform configs are processed.
+     * @private {?Promise}
+     */
     this.initialized_ = null;
 
     /** @private @const {!Renderer} */
@@ -123,14 +126,14 @@ export class SubscriptionService {
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {!Object<string, ?Promise<string>>} */
-    this.readerIdPromiseMap_ = {};
+    this.serviceIdToReaderIdPromiseMap_ = {};
 
     /** @private {!CryptoHandler} */
     this.cryptoHandler_ = new CryptoHandler(ampdoc);
   }
 
   /**
-   * Starts the amp-subscription Service
+   * Starts the `amp-subscriptions` extension.
    * @return {SubscriptionService}
    */
   start() {
@@ -140,16 +143,9 @@ export class SubscriptionService {
 
       userAssert(this.pageConfig_, 'Page config is null');
 
-      if (this.isPageUnlocked_()) {
-        // If the page is not locked then we treat it as granted and show any
-        // subscriptions content sections.
-        this.processGrantState_(true);
-        return;
-      }
-
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
-        this.startAuthorizationFlow_(false);
+        this.startAuthorizationFlow_(false /** doPlatformSelection */);
         return;
       }
 
@@ -198,19 +194,7 @@ export class SubscriptionService {
   /** @override from AccessVars */
   getAuthdataField(field) {
     return this.initialize_()
-      .then(() => {
-        if (this.isPageUnlocked_()) {
-          return new Entitlement({
-            source: '',
-            raw: '',
-            granted: true,
-            grantReason: GrantReason.UNLOCKED,
-            dataObject: {},
-          });
-        }
-
-        return this.platformStore_.getEntitlementPromiseFor('local');
-      })
+      .then(() => this.platformStore_.getEntitlementPromiseFor('local'))
       .then((entitlement) => getValueForExpr(entitlement.json(), field));
   }
 
@@ -223,7 +207,11 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {string} serviceId
+   * Returns encrypted document key if it exists.
+   * This key is needed for requesting a different key
+   * that decrypts locked content on the page.
+   * @param {string} serviceId Who you want to decrypt the key.
+   *                           For example: 'google.com'
    * @return {?string}
    */
   getEncryptedDocumentKey(serviceId) {
@@ -247,19 +235,19 @@ export class SubscriptionService {
    * @return {!Promise<string>}
    */
   getReaderId(serviceId) {
-    let readerId = this.readerIdPromiseMap_[serviceId];
-    if (!readerId) {
+    let readerIdPromise = this.serviceIdToReaderIdPromiseMap_[serviceId];
+    if (!readerIdPromise) {
       const consent = Promise.resolve();
       // Scope is kept "amp-access" by default to avoid unnecessary CID
       // rotation.
       const scope =
         'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
-      readerId = this.cid_.then((cid) =>
+      readerIdPromise = this.cid_.then((cid) =>
         cid.get({scope, createCookieIfNotPresent: true}, consent)
       );
-      this.readerIdPromiseMap_[serviceId] = readerId;
+      this.serviceIdToReaderIdPromiseMap_[serviceId] = readerIdPromise;
     }
-    return readerId;
+    return readerIdPromise;
   }
 
   /**
@@ -276,6 +264,7 @@ export class SubscriptionService {
    *
    * @param {string} serviceId
    * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
+   * @return {!Promise}
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
@@ -324,26 +313,31 @@ export class SubscriptionService {
   /**
    * Reset all platforms and re-fetch entitlements after an
    * external event (for example a login)
+   * @return {!Promise}
    */
   resetPlatforms() {
-    this.platformStore_ = this.platformStore_.resetPlatformStore();
-    this.renderer_.toggleLoading(true);
+    return this.initialize_().then(() => {
+      this.platformStore_ = this.platformStore_.resetPlatformStore();
+      this.maybeAddFreeEntitlement_(this.platformStore_);
 
-    this.platformStore_
-      .getAvailablePlatforms()
-      .forEach((subscriptionPlatform) => {
-        this.fetchEntitlements_(subscriptionPlatform);
-      });
-    this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-      ''
-    );
-    // deprecated event fired for backward compatibility
-    this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
-      ''
-    );
-    this.startAuthorizationFlow_();
+      this.renderer_.toggleLoading(true);
+
+      this.platformStore_
+        .getAvailablePlatforms()
+        .forEach((subscriptionPlatform) => {
+          this.fetchEntitlements_(subscriptionPlatform);
+        });
+      this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+        ''
+      );
+      // deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+        ''
+      );
+      this.startAuthorizationFlow_();
+    });
   }
 
   /**
@@ -396,6 +390,7 @@ export class SubscriptionService {
   }
 
   /**
+   * Returns promise that resolves when page and platform configs are processed.
    * @return {!Promise}
    * @private
    */
@@ -454,20 +449,21 @@ export class SubscriptionService {
    * @private
    */
   processGrantState_(grantState) {
+    // Hide loading animation.
     this.renderer_.toggleLoading(false);
-    /*
-     * If the viewer is providing a paywall we don't want the publisher
-     * paywall to render in the case of no grant so we leave the page
-     * in the original "unknown" state.
-     */
-    if (grantState || !this.doesViewerProvidePaywall_) {
-      this.renderer_.setGrantState(grantState);
-    }
+
+    // Track view.
     this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
-    if (grantState === false) {
-      // TODO(@prateekbh): Show UI that no eligible entitlement found
+
+    // If the viewer is providing a paywall we don't want the publisher
+    // paywall to render in the case of no grant so we leave the page
+    // in the original "unknown" state.
+    if (this.doesViewerProvidePaywall_ && !grantState) {
       return;
     }
+
+    // Update UI.
+    this.renderer_.setGrantState(grantState);
   }
 
   /**
@@ -519,6 +515,11 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
+    // Don't fetch entitlements on free pages.
+    if (this.isPageFree_()) {
+      return Promise.resolve();
+    }
+
     let timeout = ENTITLEMENTS_REQUEST_TIMEOUT;
     if (getMode().development || getMode().localDev) {
       timeout = ENTITLEMENTS_REQUEST_TIMEOUT * 2;
@@ -565,6 +566,7 @@ export class SubscriptionService {
       this.platformConfig_['score'],
       fallbackEntitlement
     );
+    this.maybeAddFreeEntitlement_(this.platformStore_);
   }
 
   /**
@@ -695,17 +697,34 @@ export class SubscriptionService {
   }
 
   /**
-   * Returns true if page is unlocked.
+   * Adds entitlement on free pages.
+   * @param {PlatformStore} platformStore
+   * @private
+   */
+  maybeAddFreeEntitlement_(platformStore) {
+    if (!this.isPageFree_()) {
+      return;
+    }
+
+    platformStore.resolveEntitlement(
+      'local',
+      new Entitlement({
+        source: '',
+        raw: '',
+        granted: true,
+        grantReason: GrantReason.UNLOCKED,
+        dataObject: {},
+      })
+    );
+  }
+
+  /**
+   * Returns true if page is free.
    * @return {boolean}
    * @private
    */
-  isPageUnlocked_() {
-    return (
-      !this.pageConfig_.isLocked() ||
-      // If a service marks `alwaysGrant` as true, it will unlock the page
-      // unless the viewer provides auth.
-      (this.platformConfig_['alwaysGrant'] && !this.doesViewerProvideAuth_)
-    );
+  isPageFree_() {
+    return !this.pageConfig_.isLocked() || this.platformConfig_['alwaysGrant'];
   }
 }
 
@@ -728,8 +747,8 @@ export function getPageConfigClassForTesting() {
   return PageConfig;
 }
 
-// Register the extension services.
-AMP.extension(TAG, '0.1', function (AMP) {
+// Register the `amp-subscriptions` extension.
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('subscriptions', function (ampdoc) {
     return new SubscriptionService(ampdoc).start();
   });

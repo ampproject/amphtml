@@ -24,12 +24,15 @@ branches:
     - /^amp-release-.*$/
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
       - expect-dev
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
+      - pkg-config
   chrome: stable
   hosts:
     - ads.localhost
@@ -51,6 +54,10 @@ jobs:
       name: 'Build'
       script:
         - unbuffer node build-system/pr-check/build.js
+    - stage: build
+      name: 'Module Build'
+      script:
+        - unbuffer node build-system/pr-check/module-build.js
     - stage: build
       name: 'Checks'
       script:
@@ -117,4 +124,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - validator/java/bazel-installer
   yarn: true
