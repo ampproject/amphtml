@@ -53,8 +53,7 @@ function main() {
         .log(
           `${FILELOGPREFIX} Skipping`,
           colors.cyan('Module Build'),
-          'because this commit does not affect the runtime, flag configs,',
-          'or integration tests.'
+          'because this commit does not affect the runtime or flag configs.'
         );
     }
   }
