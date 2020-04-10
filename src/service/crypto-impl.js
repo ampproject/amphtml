@@ -217,12 +217,12 @@ export class Crypto {
   }
 
   /**
-   * Returns a cryptographically random string with 128 bits of entropy if win.crypto is available.
+   * Returns a Uint8Array of the given length full of cryptographically random values if win.crypto is available.
    * If win.crypto, is not available, returns null.
    * @param {number} length The length of the string to return
-   * @return {string|null}
+   * @return {Uint8Array|null}
    */
-  getSecureRandomString(length) {
+  getSecureRandomBytes(length) {
     // Support IE 11
     const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
       .crypto || this.win_.msCrypto);
@@ -234,16 +234,7 @@ export class Crypto {
     const randomValues = new Uint8Array(length);
     cryptoLib.getRandomValues(randomValues);
 
-    let randomSubdomain = '';
-    for (let i = 0; i < randomValues.length; i++) {
-      // Ensure each byte is represented with two hexadecimal characters.
-      if (randomValues[i] <= 15) {
-        randomSubdomain += '0';
-      }
-      randomSubdomain += randomValues[i].toString(16);
-    }
-
-    return randomSubdomain;
+    return randomValues;
   }
 }
 

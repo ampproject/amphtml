@@ -289,8 +289,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @private {string} The random subdomain to load SafeFrame from */
-    this.safeFrameSubdomain_ = this.getRandomString_();
+    /** @private {string|null} The random subdomain to load SafeFrame from */
+    this.safeFrameRandomSubdomain_  = null;
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
@@ -1049,9 +1049,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
+    if (!this.safeFrameRandomSubdomain_) {
+      this.safeFrameRandomSubdomain_ = this.getRandomString_();
+    }
 
     return (
-      `https://${this.safeFrameSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
@@ -1620,17 +1623,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getRandomString_() {
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
-    const randomString = Services.cryptoFor(this.win).getSecureRandomString(
-      length
-    );
-    if (randomString) {
-      return randomString;
+    let randomValues = Services.cryptoFor(this.win).getSecureRandomBytes(length);
+
+    if (!randomValues) {
+      randomValues = new Array(length);
+      for (let i = 0; i < length; ++i) {
+        randomValues[i] = Math.floor(Math.random() * 255);
+      }
     }
 
     // If crypto isn't available, just use Math.random.
     let randomSubdomain = '';
     for (let i = 0; i < length; i++) {
-      const randomValue = Math.floor(Math.random() * 255);
+      const randomValue = randomValues[i];
       // Ensure each byte is represented with two hexadecimal characters.
       if (randomValue <= 15) {
         randomSubdomain += '0';

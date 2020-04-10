@@ -1477,6 +1477,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
+    it('should use random subdomain when experiment is enabled and crypto not available', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      let cryptoLib = Services.cryptoFor(impl.win);
+      env.sandbox.stub(cryptoLib, 'getSecureRandomBytes').returns(null);
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
     it('should use constant subdomain when experiment is disabled', () => {
       const expectedPath =
         '^https://tpc.googlesyndication.com' +
