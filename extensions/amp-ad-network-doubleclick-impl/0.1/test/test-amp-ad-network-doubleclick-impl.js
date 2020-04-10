@@ -1477,10 +1477,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
-    it('should use random subdomain when experiment is enabled and crypto not available', () => {
+    it('uses random subdomain if experiment is on without win.crypto', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
-      let cryptoLib = Services.cryptoFor(impl.win);
+      const cryptoLib = Services.cryptoFor(impl.win);
       env.sandbox.stub(cryptoLib, 'getSecureRandomBytes').returns(null);
 
       const expectedPath =

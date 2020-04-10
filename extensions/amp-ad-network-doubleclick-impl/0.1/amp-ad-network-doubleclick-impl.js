@@ -290,7 +290,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     /** @private {string|null} The random subdomain to load SafeFrame from */
-    this.safeFrameRandomSubdomain_  = null;
+    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
@@ -1623,7 +1623,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getRandomString_() {
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
-    let randomValues = Services.cryptoFor(this.win).getSecureRandomBytes(length);
+    let randomValues = Services.cryptoFor(this.win).getSecureRandomBytes(
+      length
+    );
 
     if (!randomValues) {
       randomValues = new Array(length);

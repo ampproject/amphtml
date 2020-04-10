@@ -226,14 +226,12 @@ export class Crypto {
     // Support IE 11
     const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
       .crypto || this.win_.msCrypto);
-
     if (!cryptoLib) {
       return null;
     }
 
     const randomValues = new Uint8Array(length);
     cryptoLib.getRandomValues(randomValues);
-
     return randomValues;
   }
 }
