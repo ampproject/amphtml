@@ -932,12 +932,13 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     });
 
     it('should check premeasured rect before layout', () => {
+      sandbox.stub(resource1, 'hasBeenMeasured').returns(true);
       sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
       sandbox.stub(resource1, 'isDisplayed').returns(true);
       resource1.isDisplayed
         .withArgs(/* usePremeasuredRect */ true)
         .returns(false);
-      sandbox.stub(resource1, 'layoutCanceled');
+      sandbox.spy(resource1, 'layoutCanceled');
 
       resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
       resources.work_();
@@ -947,7 +948,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
         /* usePremeasuredRect */ true
       );
       expect(resource1.layoutCanceled).to.be.calledOnce;
-      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+      expect(resource1.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
     });
   });
 
