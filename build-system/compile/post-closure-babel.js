@@ -21,6 +21,7 @@ const path = require('path');
 const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
+const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 
 /**
  * Given a filepath, return the sourcemap.
@@ -91,10 +92,20 @@ exports.postClosureBabel = function (directory) {
       return next(null, file);
     }
 
+    debug(
+      CompilationLifecycles['closured-pre-babel'],
+      file.path,
+      file.contents
+    );
     const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
       caller: {name: 'post-closure'},
     });
+    debug(
+      CompilationLifecycles['closured-pre-terser'],
+      file.path,
+      file.contents
+    );
     let remapped = remapping(
       babelMap,
       returnMapFirst(map),
@@ -103,6 +114,7 @@ exports.postClosureBabel = function (directory) {
 
     const {compressed, terserMap} = terserMinify(code);
     file.contents = Buffer.from(compressed, 'utf-8');
+    debug(CompilationLifecycles['complete'], file.path, compressed);
 
     // TODO: Remapping should support a chain, instead of multiple invocations.
     remapped = remapping(
