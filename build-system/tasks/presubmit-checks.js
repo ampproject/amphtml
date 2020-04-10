@@ -1087,7 +1087,6 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/0.2/timeago.js',
-      'build-system/compile/build.conf.js',
     ],
   },
   '\\.expandStringSync\\(': {
