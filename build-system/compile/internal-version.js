@@ -15,12 +15,22 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const minimist = require('minimist');
 const {gitCommitFormattedTime} = require('../common/git');
+
+// Allow leading zeros in --version_override, e.g. 0000000000001
+const argv = minimist(process.argv.slice(2), {
+  string: ['version_override'],
+});
 
 function getVersion() {
   if (argv.version_override) {
-    return String(argv.version_override);
+    const version = String(argv.version_override);
+    // #27579: What are allowed version strings...?
+    if (!/^\d{13}$/.test(version)) {
+      throw new Error('--version_override only accepts a 13-digit version');
+    }
+    return version;
   } else {
     // Generate a consistent version number by using the commit* time of the
     // latest commit on the active branch as the twelve digits. The last,
