@@ -325,11 +325,13 @@ export class StandardActions {
         if (target.classList.contains('i-amphtml-element')) {
           target./*OK*/ collapse();
         } else {
+          // TODO: is skipping remeasre in the toggle(target, false) case okay?
           toggle(target, false);
         }
       },
       // It is safe to skip measuring, because  `mutator-impl.collapseElement`
-      // will trigger a remasure of everything below the collapsed element.
+      // will set the size of the element as well as trigger a remasure of everything 
+      // below the collapsed element.
       /* skipRemeasure */ true
     );
 
