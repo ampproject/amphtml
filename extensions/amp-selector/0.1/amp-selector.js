@@ -84,7 +84,6 @@ export class AmpSelector extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-
     this.isMultiple_ = this.element.hasAttribute('multiple');
 
     if (!this.element.hasAttribute('role')) {
