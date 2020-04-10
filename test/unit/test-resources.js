@@ -655,7 +655,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   beforeEach(() => {
     sandbox = env.sandbox;
 
-    toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
     const viewer = Services.viewerForDoc(env.ampdoc);
     sandbox.stub(viewer, 'isRuntimeOn').returns(true);
     resources = new ResourcesImpl(env.ampdoc);
@@ -679,7 +678,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-force-prerender-visible-elements', false);
     viewportMock.verify();
   });
 
