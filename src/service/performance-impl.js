@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -593,6 +593,11 @@ export class Performance {
    * @param {number=} opt_value The value to use. Overrides default calculation.
    */
   tick(label, opt_delta, opt_value) {
+    devAssert(
+      opt_delta == undefined || opt_value == undefined,
+      'You may not set both opt_delta and opt_value.'
+    );
+
     const data = dict({'label': label});
     let delta;
 
