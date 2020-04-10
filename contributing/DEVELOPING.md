@@ -98,7 +98,7 @@ We also recommend scanning the [spec](../spec/). The non-element part should hel
 
 Developers and users of AMP can have their browser request AMP JS files from the pre-release channels (**beta**, **experimental**, and **nightly**) for all requests, using an opt-in mechanism.
 
-To opt your browser into the a pre-release channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the experiment channel of your choice (see [Beta and Experimental channels](release-schedule.md#beta-and-experimental-channels) and [Nightly](release-schedule.md##nightly) in the [release process](release-schedule.md) document for description of these channels). Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
+To opt your browser into the a pre-release channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the experiment channel of your choice (see [Beta/Experimental](release-schedule.md#beta-and-experimental-channels) and [Nightly](release-schedule.md##nightly) channels in the [release process](release-schedule.md) document for description of these channels). Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
 
 **Notes:**
 
