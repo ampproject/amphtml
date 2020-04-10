@@ -1229,19 +1229,18 @@ describes.realWin(
     let win;
     let resources;
     let viewerSendMessageStub, viewportContentHeightChangedStub;
+    let sandbox;
 
     beforeEach(() => {
       win = env.win;
+      sandbox = env.sandbox;
       resources = win.__AMP_SERVICES.resources.obj;
-      viewerSendMessageStub = env.sandbox.stub(
-        resources.viewer_,
-        'sendMessage'
-      );
-      viewportContentHeightChangedStub = env.sandbox.stub(
+      viewerSendMessageStub = sandbox.stub(resources.viewer_, 'sendMessage');
+      viewportContentHeightChangedStub = sandbox.stub(
         resources.viewport_,
         'contentHeightChanged'
       );
-      env.sandbox.stub(resources.vsync_, 'run').callsFake((task) => {
+      sandbox.stub(resources.vsync_, 'run').callsFake((task) => {
         task.measure({});
       });
     });
@@ -1254,7 +1253,7 @@ describes.realWin(
     });
 
     it('should send contentHeight to viewer if height was changed', () => {
-      env.sandbox.stub(resources.viewport_, 'getContentHeight').returns(200);
+      sandbox.stub(resources.viewport_, 'getContentHeight').returns(200);
       resources.maybeChangeHeight_ = true;
 
       resources.doPass();
@@ -1281,7 +1280,7 @@ describes.realWin(
     });
 
     it('should send contentHeight to viewer if viewport resizes', () => {
-      env.sandbox.stub(resources.viewport_, 'getContentHeight').returns(200);
+      sandbox.stub(resources.viewport_, 'getContentHeight').returns(200);
       resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
       resources.doPass();
 
@@ -1338,7 +1337,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         return signals;
       },
     };
-    element.build = env.sandbox.stub().returns(Promise.resolve());
+    element.build = sandbox.stub().returns(Promise.resolve());
     return element;
   }
 
@@ -1352,7 +1351,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
 
   function stubBuild(resource) {
     const origBuild = resource.build;
-    env.sandbox.stub(resource, 'build').callsFake(() => {
+    sandbox.stub(resource, 'build').callsFake(() => {
       resource.buildPromise = origBuild.call(resource);
       return resource.buildPromise;
     });
