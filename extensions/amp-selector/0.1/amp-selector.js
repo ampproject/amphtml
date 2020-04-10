@@ -84,12 +84,6 @@ export class AmpSelector extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
-    /** If the element is in an email document, allow its `clear`,
-     * `selectDown`, `selectUp`, and `toggle` actions. */
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'clear');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectDown');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectUp');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'toggle');
 
     this.isMultiple_ = this.element.hasAttribute('multiple');
 
@@ -164,6 +158,13 @@ export class AmpSelector extends AMP.BaseElement {
       },
       ActionTrust.LOW
     );
+
+    /** If the element is in an email document, allow its `clear`,
+     * `selectDown`, `selectUp`, and `toggle` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'clear');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectDown');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectUp');
+    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'toggle');
 
     // Triggers on DOM children updates
     this.element.addEventListener(

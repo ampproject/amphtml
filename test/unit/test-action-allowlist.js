@@ -14,17 +14,33 @@
  * limitations under the License.
  */
 
+import '../../extensions/amp-carousel/0.1/amp-carousel';
+import '../../extensions/amp-image-lightbox/0.1/amp-image-lightbox';
+import '../../extensions/amp-lightbox/0.1/amp-lightbox';
+import '../../extensions/amp-list/0.1/amp-list';
+import '../../extensions/amp-selector/0.1/amp-selector';
+import '../../extensions/amp-sidebar/0.1/amp-sidebar';
 import {ActionInvocation, ActionService} from '../../src/service/action-impl';
 import {ActionTrust} from '../../src/action-constants';
+import {AmpForm} from '../../extensions/amp-form/0.1/amp-form';
+import {Services} from '../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../src/dom';
+import {whenCalled} from '../../testing/test-helper.js';
 
 function createExecElement(id, enqueAction, defaultActionAlias) {
   const execElement = document.createElement('amp-element');
   execElement.setAttribute('id', id);
-  execElement.enqueAction = enqueAction;
-  execElement.getDefaultActionAlias = defaultActionAlias;
-  return execElement;
+  return setExecElement(execElement, enqueAction, defaultActionAlias);
 }
 
+function setExecElement(element, enqueAction, defaultActionAlias) {
+  element.enqueAction = enqueAction;
+  element.getDefaultActionAlias = defaultActionAlias;
+  return element;
+}
 
 function getActionInvocation(element, action, opt_tagOrTarget) {
   return new ActionInvocation(
@@ -44,9 +60,16 @@ describes.realWin(
   'Action allowlist on components',
   {
     amp: {
-      ampdoc: 'single',
       runtimeOn: true,
-      extensions: ['amp-carousel'],
+      extensions: [
+        'amp-carousel',
+        'amp-form',
+        'amp-image-lightbox',
+        'amp-lightbox',
+        'amp-list',
+        'amp-selector',
+        'amp-sidebar',
+      ],
     },
   },
   (env) => {
@@ -54,6 +77,7 @@ describes.realWin(
     let target;
     let spy;
     let getDefaultActionAlias;
+
     beforeEach(() => {
       spy = env.sandbox.spy();
       getDefaultActionAlias = env.sandbox.stub();
@@ -168,37 +192,254 @@ describes.realWin(
       });
 
       it('should supply default actions allowlist', () => {
-        action = new ActionService(env.ampdoc, env.win.document);
-        const i = new ActionInvocation(
-          target,
-          'toggleClass', // hardcoded default
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
+        const i = getActionInvocation(target, 'toggleClass', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
-      it('should add actions to the allowlist for amp-carousel', () => {
-        action = new ActionService(env.ampdoc, env.win.document);
-        const i = new ActionInvocation(
-          target,
-          'toggleClass', // hardcoded default
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
+      it('should not allow non-default actions', () => {
+        const i = getActionInvocation(target, 'print', 'AMP');
+        env.sandbox.stub(action, 'error_');
+        expect(action.invoke_(i)).to.be.null;
+        expect(action.error_).to.be.calledWith(
+          '"AMP.print" is not whitelisted ' +
+            '[{"tagOrTarget":"AMP","method":"setState"},' +
+            '{"tagOrTarget":"*","method":"focus"},' +
+            '{"tagOrTarget":"*","method":"hide"},' +
+            '{"tagOrTarget":"*","method":"show"},' +
+            '{"tagOrTarget":"*","method":"toggleClass"},' +
+            '{"tagOrTarget":"*","method":"toggleVisibility"}].'
         );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
+      });
+
+      describe('default component actions', () => {
+        beforeEach(() => {
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+        });
+
+        afterEach(() => {
+          Services.actionServiceForDoc.restore();
+        });
+
+        it('should add actions to the allowlist for amp-carousel[type=slides]', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-carousel',
+            {
+              'type': 'slides',
+              'width': '400',
+              'height': '300',
+            }
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          let i = getActionInvocation(element, 'goToSlide');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'toggleAutoplay');
+          env.sandbox.stub(action, 'error_');
+          expect(action.invoke_(i)).to.be.null;
+          expect(action.error_).to.be.calledWith(
+            '"AMP-CAROUSEL.toggleAutoplay" is not whitelisted ' +
+              '[{"tagOrTarget":"AMP","method":"setState"},' +
+              '{"tagOrTarget":"*","method":"focus"},' +
+              '{"tagOrTarget":"*","method":"hide"},' +
+              '{"tagOrTarget":"*","method":"show"},' +
+              '{"tagOrTarget":"*","method":"toggleClass"},' +
+              '{"tagOrTarget":"*","method":"toggleVisibility"},' +
+              '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"}].'
+          );
+        });
+
+        it('should add actions to the allowlist for amp-carousel[type=carousel]', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-carousel',
+            {
+              'type': 'carousel',
+              'width': '400',
+              'height': '300',
+            }
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          let i = getActionInvocation(element, 'goToSlide');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'toggleAutoplay');
+          env.sandbox.stub(action, 'error_');
+          expect(action.invoke_(i)).to.be.null;
+          expect(action.error_).to.be.calledWith(
+            '"AMP-CAROUSEL.toggleAutoplay" is not whitelisted ' +
+              '[{"tagOrTarget":"AMP","method":"setState"},' +
+              '{"tagOrTarget":"*","method":"focus"},' +
+              '{"tagOrTarget":"*","method":"hide"},' +
+              '{"tagOrTarget":"*","method":"show"},' +
+              '{"tagOrTarget":"*","method":"toggleClass"},' +
+              '{"tagOrTarget":"*","method":"toggleVisibility"},' +
+              '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"}].'
+          );
+        });
+
+        it('should add actions to the allowlist for amp-form', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'form',
+            {'method': 'POST'}
+          );
+          const nameElement = createElementWithAttributes(
+            env.win.document,
+            'input',
+            {'name': 'name', 'value': 'John Miller'}
+          );
+          element.appendChild(nameElement);
+          const submitBtn = createElementWithAttributes(
+            env.win.document,
+            'input',
+            {'type': 'submit'}
+          );
+
+          element.appendChild(submitBtn);
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          const form = new AmpForm(element, 'test-id');
+          const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
+          let i = getActionInvocation(element, 'clear');
+          action.invoke_(i);
+          expect(clearSpy).to.be.called;
+
+          env.sandbox.stub(form, 'submit_');
+          const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
+          i = getActionInvocation(element, 'submit');
+          action.invoke_(i);
+          await whenCalled(submitSpy);
+          expect(submitSpy).to.be.calledWithExactly(i);
+        });
+
+        it('should add actions to the allowlist for amp-image-lightbox', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-image-lightbox',
+            {'layout': 'nodisplay'}
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          element.implementation_.buildLightbox_();
+          const i = getActionInvocation(element, 'open');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
+
+        it('should add actions to the allowlist for amp-lightbox', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-lightbox',
+            {'layout': 'nodisplay'}
+          );
+          const img = createElementWithAttributes(env.win.document, 'amp-img', {
+            'src': '/examples/img/sample.jpg',
+            'width': '640',
+            'height': '480',
+          });
+          element.appendChild(img);
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          let i = getActionInvocation(element, 'open');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'close');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
+
+        it('should add actions to the allowlist for amp-list', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-list',
+            {
+              'width': '300',
+              'height': '100',
+              'src': 'https://data.com/list.json',
+            }
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(
+            element,
+            spy,
+            env.sandbox.stub().returns({'items': []})
+          );
+          await whenUpgradedToCustomElement(element);
+          env.sandbox.stub(element.implementation_, 'fetchList_');
+
+          let i = getActionInvocation(element, 'changeToLayoutContainer');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'refresh');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
+
+        it('should add actions to the allowlist for amp-selector', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-selector',
+            {'layout': 'container'}
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          let i = getActionInvocation(element, 'clear');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'selectDown');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'selectUp');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'toggle');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
+
+        it('should add actions to the allowlist for amp-sidebar', async () => {
+          const element = createElementWithAttributes(
+            env.win.document,
+            'amp-sidebar',
+            {'layout': 'nodisplay'}
+          );
+          env.win.document.body.appendChild(element);
+          setExecElement(element, spy, env.sandbox.stub());
+          await whenUpgradedToCustomElement(element);
+
+          let i = getActionInvocation(element, 'open');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'close');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+
+          i = getActionInvocation(element, 'toggle');
+          action.invoke_(i);
+          expect(spy).to.be.calledWithExactly(i);
+        });
       });
     });
   }

@@ -70,7 +70,6 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
-import {once} from '../../../src/utils/function';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -220,6 +219,9 @@ export class AmpForm {
     /** @const @private {!./form-verifiers.FormVerifier} */
     this.verifier_ = getFormVerifier(this.form_, () => this.handleXhrVerify_());
 
+    /** If the element is in an email document, allow its `clear` and `submit` actions. */
+    this.actions_.maybeAddToEmailWhitelist('FORM', 'clear');
+    this.actions_.maybeAddToEmailWhitelist('FORM', 'submit');
     this.actions_.installActionHandler(
       this.form_,
       this.actionHandler_.bind(this)
@@ -348,12 +350,6 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    once(() => {
-      /** If the element is in an email document, allow its `clear` and `submit` actions. */
-      this.actions_.maybeAddToEmailWhitelist('FORM', 'clear');
-      this.actions_.maybeAddToEmailWhitelist('FORM', 'submit');
-    });
-
     if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }

@@ -149,11 +149,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(element);
-    /** If the element is in an email document,
-     * allow its `open`, `close`, and `toggle` actions. */
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'open');
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'close');
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'toggle');
+
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT
@@ -231,6 +227,11 @@ export class AmpSidebar extends AMP.BaseElement {
         this.open_(trust, caller);
       }
     });
+    /** If the element is in an email document,
+     * allow its `open`, `close`, and `toggle` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'open');
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'close');
+    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'toggle');
 
     element.addEventListener(
       'click',

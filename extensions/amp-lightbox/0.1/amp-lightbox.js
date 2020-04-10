@@ -179,13 +179,13 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.element.classList.add('i-amphtml-overlay');
     this.action_ = Services.actionServiceForDoc(this.element);
-    /** If the element is in an email document, allow its `open` and `close` actions. */
-    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'open');
-    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'close');
     this.maybeSetTransparentBody_();
 
     this.registerDefaultAction((i) => this.open_(i.trust), 'open');
     this.registerAction('close', (i) => this.close(i.trust));
+    /** If the element is in an email document, allow its `open` and `close` actions. */
+    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'open');
+    this.action_.maybeAddToEmailWhitelist('AMP-LIGHTBOX', 'close');
   }
 
   /**
