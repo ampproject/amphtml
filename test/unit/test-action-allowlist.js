@@ -25,6 +25,21 @@ function createExecElement(id, enqueAction, defaultActionAlias) {
   return execElement;
 }
 
+
+function getActionInvocation(element, action, opt_tagOrTarget) {
+  return new ActionInvocation(
+    element,
+    action,
+    /* args */ null,
+    'source',
+    'caller',
+    'event',
+    ActionTrust.HIGH,
+    'tap',
+    opt_tagOrTarget || element.tagName
+  );
+}
+
 describes.realWin(
   'Action allowlist on components',
   {
@@ -55,33 +70,13 @@ describes.realWin(
       });
 
       it('should allow all actions by default', () => {
-        const i = new ActionInvocation(
-          target,
-          'setState',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
+        const i = getActionInvocation(target, 'setState', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
       it('should allow all actions case insensitive', () => {
-        const i = new ActionInvocation(
-          target,
-          'setState',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'TAP',
-          'amp'
-        );
+        const i = getActionInvocation(target, 'setState', 'amp');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
@@ -102,49 +97,19 @@ describes.realWin(
         // Given that 'defaultAction' is a registered default action.
         getDefaultActionAlias.returns('defaultAction');
         // Expect the 'activate' call to invoke it.
-        const i = new ActionInvocation(
-          target,
-          'activate',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          null
-        );
+        const i = getActionInvocation(target, 'activate', null);
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
       it('should allow whitelisted actions with wildcard target', () => {
-        const i = new ActionInvocation(
-          target,
-          'show',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'DIV'
-        );
+        const i = getActionInvocation(target, 'show', 'DIV');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
 
       it('should not allow non-whitelisted actions', () => {
-        const i = new ActionInvocation(
-          target,
-          'print',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
+        const i = getActionInvocation(target, 'print', 'AMP');
         env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
         expect(action.error_).to.be.calledWith(
@@ -157,17 +122,7 @@ describes.realWin(
       });
 
       it('should allow adding actions to the whitelist', () => {
-        const i = new ActionInvocation(
-          target,
-          'print',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
+        const i = getActionInvocation(target, 'print', 'AMP');
         action.addToWhitelist('AMP', 'print');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
@@ -177,17 +132,7 @@ describes.realWin(
     it('should not allow any action with empty whitelist', () => {
       action = new ActionService(env.ampdoc, env.win.document);
       action.setWhitelist([]);
-      const i = new ActionInvocation(
-        target,
-        'print',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        'AMP'
-      );
+      const i = getActionInvocation(target, 'print', 'AMP');
       env.sandbox.stub(action, 'error_');
       expect(action.invoke_(i)).to.be.null;
       expect(action.error_).to.be.calledWith(
@@ -211,17 +156,7 @@ describes.realWin(
         {tagOrTarget: 'AMP', method: 'setState'},
         {tagOrTarget: '*', method: 'show'},
       ]);
-      const i = new ActionInvocation(
-        target,
-        'setState',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        'AMP'
-      );
+      const i = getActionInvocation(target, 'setState', 'AMP');
       action.invoke_(i);
       expect(spy).to.be.calledWithExactly(i);
     });
