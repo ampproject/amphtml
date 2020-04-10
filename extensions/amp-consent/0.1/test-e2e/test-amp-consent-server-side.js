@@ -36,7 +36,6 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    //TODO (micajuineho): Unskip flaky test
     it('should respect server side decision and persist it', async () => {
       resetAllElements();
 
@@ -79,7 +78,11 @@ describes.endtoend(
         'postPromptUi': false,
       });
 
-      // Check the analytics request consentState
+      // Check the analytics request consentState. Wait for 1 second for the
+      // request to arrive to avoid flaky test.
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;
