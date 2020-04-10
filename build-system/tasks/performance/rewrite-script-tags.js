@@ -18,11 +18,13 @@ const fs = require('fs');
 const {
   CDN_URL,
   CONTROL,
+  DEFAULT_EXTENSIONS,
   EXPERIMENT,
   LOCAL_PATH_REGEXP,
-  AMP_JS_PATH,
+  V0_PATH,
   copyToCache,
   downloadToDisk,
+  getLocalPathFromExtension,
   urlToCachePath,
 } = require('./helpers');
 const {JSDOM} = require('jsdom');
@@ -40,12 +42,13 @@ async function useLocalScripts(url) {
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
     const matchArray = script.src.match(LOCAL_PATH_REGEXP);
+    // These cases handle real world websites and locally hosted websites
     if (script.src.startsWith(CDN_URL)) {
       const split = script.src.split(CDN_URL)[1];
       script.src = await copyToCache(split);
     } else if (matchArray) {
-      script.src = await copyToCache(matchArray[1] + matchArray[2]);
-    } else if (script.src === AMP_JS_PATH) {
+      script.src = await copyToCache(matchArray[1]);
+    } else if (script.src === V0_PATH) {
       script.src = await copyToCache('v0.js');
     }
   }
@@ -66,13 +69,12 @@ async function useRemoteScripts(url) {
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
     const matchArray = script.src.match(LOCAL_PATH_REGEXP);
+    // These cases handle real world websites and locally hosted websites
     if (script.src.startsWith(CDN_URL)) {
       script.src = await downloadToDisk(script.src);
     } else if (matchArray) {
-      script.src = await downloadToDisk(
-        CDN_URL + matchArray[1] + matchArray[2]
-      );
-    } else if (script.src === AMP_JS_PATH) {
+      script.src = await downloadToDisk(CDN_URL + matchArray[1]);
+    } else if (script.src === V0_PATH) {
       script.src = await downloadToDisk(CDN_URL + 'v0.js');
     }
   }
@@ -81,12 +83,27 @@ async function useRemoteScripts(url) {
 }
 
 /**
+ * Download local and master version of default extension that
+ * are not explicility stated by script tags in the HTML.
+ */
+async function downloadDefaultExtensions() {
+  return Promise.all(
+    DEFAULT_EXTENSIONS.flatMap((extension) => {
+      const localPath = getLocalPathFromExtension(extension);
+      const cdnUrl = CDN_URL + localPath;
+      return [downloadToDisk(cdnUrl), copyToCache(localPath)];
+    })
+  );
+}
+
+/**
  * Rewrite script tags for each document downloaded from the urls
  *
  * @param {!Array<string>} urls
  * @return {Promise}
  */
-function rewriteScriptTags(urls) {
+async function rewriteScriptTags(urls) {
+  await downloadDefaultExtensions();
   return Promise.all(
     urls.flatMap((url) => [useLocalScripts(url), useRemoteScripts(url)])
   );

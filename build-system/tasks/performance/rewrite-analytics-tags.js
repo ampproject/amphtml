@@ -15,18 +15,54 @@
  */
 
 const fs = require('fs');
-const {CONTROL, EXPERIMENT, urlToCachePath} = require('./helpers');
+const {
+  CONTROL,
+  EXPERIMENT,
+  getLocalVendorConfig,
+  urlToCachePath,
+} = require('./helpers');
 const {JSDOM} = require('jsdom');
 
 /**
- * Add extraUrlParam in analytics inline config,
- * if amp-analytics is on the page.
+ * Return local vendor config.
+ *
+ * @param {string} vendor
+ * @return {Object}
+ */
+async function getVendorConfig(vendor) {
+  return JSON.parse(await getLocalVendorConfig(vendor));
+}
+
+/**
+ * Fetch the vendor config and merge it with inline config.
+ * Work around for fetching real vendor config that gets blocked
+ * by AMP-analytics. Order of merging matters. Uses local config
+ * for both CONTROL and EXPERIMENT.
+ *
+ * @param {Element} tag
+ * @param {Object} script
+ * @return {Object}
+ */
+async function maybeMergeAndRemoveVendorConfig(tag, script) {
+  if (tag.hasAttribute('type')) {
+    const vendor = tag.getAttribute('type');
+    tag.removeAttribute('type');
+    const vendorConfig = await getVendorConfig(vendor);
+    // TODO (micajuineho) replace with analytics/config.js merge objects
+    return Object.assign(vendorConfig, script);
+  }
+  return script;
+}
+
+/**
+ * Adds extraUrlParam in analytics inline config and
+ * fetches and merges local vendor config.
  *
  * @param {string} url
  * @param {string} version
  * @param {?object} extraUrlParams
  */
-async function addExtraUrlParams(url, version, extraUrlParams) {
+async function alterAnalyticsTags(url, version, extraUrlParams) {
   const cachePath = urlToCachePath(url, version);
   const document = fs.readFileSync(cachePath);
   const dom = new JSDOM(document);
@@ -44,6 +80,7 @@ async function addExtraUrlParams(url, version, extraUrlParams) {
     script = Object.assign(script, {
       extraUrlParams,
     });
+    script = await maybeMergeAndRemoveVendorConfig(tag, script);
     const newScriptTag = dom.window.document.createElement('script');
     newScriptTag.textContent = JSON.stringify(script);
     newScriptTag.setAttribute('type', 'application/json');
@@ -65,8 +102,8 @@ function rewriteAnalyticsConfig(handlers) {
   );
   return Promise.all(
     urls.flatMap((url) => [
-      addExtraUrlParams(url, CONTROL, extraUrlParam),
-      addExtraUrlParams(url, EXPERIMENT, extraUrlParam),
+      alterAnalyticsTags(url, CONTROL, extraUrlParam),
+      alterAnalyticsTags(url, EXPERIMENT, extraUrlParam),
     ])
   );
 }

@@ -4,30 +4,15 @@
   "handlers": [
     {
       "handlerName": "defaultHandler",
-      "urls": [
-        {
-          "url": "localhost:8000/defaultTest.html",
-          "location": "/test/manual/performancePages/defaultTest.html"
-        }
-      ]
+      "urls": []
     },
     {
       "handlerName": "analyticsHandler",
-      "urls": [
-        {
-          "url": "localhost:8000/analyticsTestPage1.html",
-          "location": "/test/manual/amp-analytics/analyticsTestPage1.html"
-        },
-        {
-          "url": "localhost:8000/analyticsTestPage2.html",
-          "location": "/test/manual/amp-analytics/analyticsTestPage2.html"
-        }
-      ],
+      "urls": [],
       "timeout": 2000,
       "extraUrlParam": {
         "analytics": "amp-analytics-performance-param"
-      },
-      "analyticsParam": "analytics=amp-analytics-performance-param"
+      }
     },
     {
       "handlerName": "adsHander",

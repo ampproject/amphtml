@@ -16,15 +16,16 @@
 
 const fs = require('fs');
 const log = require('fancy-log');
-const path = require('path');
 const {
-  ANALYTICS_VENDORS_PATH,
-  CDN_ANALYTICS_REGEXP,
+  CDN_URL,
   CONTROL,
+  DEFAULT_EXTENSIONS,
   EXPERIMENT,
   RESULTS_PATH,
   urlToCachePath,
-  getFile,
+  getFileFromAbsolutePath,
+  getLocalPathFromExtension,
+  localFileToCachePath,
 } = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
@@ -75,7 +76,9 @@ const setupMeasurement = (page) =>
   });
 
 /**
- * Records first outgoing analytics request
+ * Matches intercepted request with special analytics parameter
+ * and records first outgoing analytics request, using callback.
+ * Abort all requests, to not ping real servers.
  *
  * @param {Request} interceptedRequest
  * @param {string} analyticsParam
@@ -97,40 +100,53 @@ async function handleAnalyticsRequests(
 }
 
 /**
- * Handles rewrites vendor config requests. Should always be
- * included.
+ * Intecepts requests for default extensions made by runtime,
+ * and returns cached version (master and local).
  * @param {Request} interceptedRequest
+ * @param {string} version
  * @return {!Promise<boolean>}
  */
-const analyticsVendorRewriteHandler = async (interceptedRequest) => {
+const defaultExtensionsHandler = async (interceptedRequest, version) => {
   const interceptedUrl = interceptedRequest.url();
-  const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
-  if (matchArray) {
-    const filename = matchArray[1];
-    const pathToJson = path.join(ANALYTICS_VENDORS_PATH, filename);
-    const jsonString = await getFile(pathToJson);
-    interceptedRequest.respond({
-      status: 200,
-      contentType: 'application/json; charset=utf-8',
-      body: jsonString,
-    });
-    return true;
+  for (let i = 0; i < DEFAULT_EXTENSIONS.length; i++) {
+    const extension = DEFAULT_EXTENSIONS[i];
+    if (interceptedUrl.endsWith(extension)) {
+      const localPath = getLocalPathFromExtension(extension);
+      const jsonString = await getFileFromAbsolutePath(
+        version === CONTROL
+          ? urlToCachePath(CDN_URL + localPath)
+          : localFileToCachePath(localPath)
+      );
+      interceptedRequest.respond({
+        status: 200,
+        contentType: 'script; charset=utf-8',
+        body: jsonString,
+      });
+      return true;
+    }
   }
   return false;
 };
 
 /**
- * Add specified timeout by handler
+ * Create a promise that will resolve after a setTimeout,
+ * unless it has been resolved before then.
  * @param {?Object} handlerOptions
- * @return {!Promise}
+ * @return {!Object}
  */
-function delayBasedOnHandlerOptions(handlerOptions) {
-  return new Promise((resolve) => {
+function setupDelayBasedOnHandlerOptions(handlerOptions) {
+  let resolve;
+  const timeoutPromise = new Promise((r) => {
+    resolve = r;
     setTimeout(
       resolve,
       handlerOptions && handlerOptions.timeout ? handlerOptions.timeout : 0
     );
   });
+  return {
+    timeoutPromise,
+    resolve,
+  };
 }
 
 /**
@@ -182,57 +198,78 @@ const readMetrics = (page) =>
   });
 
 /**
- * Set up defaults handlers
+ * Set up defaults handlers for docs that will be requested
+ * that are not explicted stated as script tags and not
+ * handled by the 'additionalHandlers'.
+ *
  * @param {!Array<function>} handlersList
+ * @param {string} version
  */
-function setUpDefaultHandlers(handlersList) {
-  // Always rewrite vendor json requests to pull locally.
-  // That way we are not including the time difference between
-  // fetching a local file vs network request to CDN.
-  handlersList.push(analyticsVendorRewriteHandler);
+function setupDefaultHandlers(handlersList, version) {
+  // Handle requests made by runtime for default extensions
+  handlersList.push((interceptedRequest) =>
+    defaultExtensionsHandler(interceptedRequest, version)
+  );
 }
 
 /**
- * Set up appropriate handlers
+ * Set up appropriate handlers based upon handlerOptions
+ *
  * @param {!Array<function>} handlersList
  * @param {?Object} handlerOptions
+ * @param {!Puppeteer.page} page
+ * @param {!function} resolve
  */
-function setUpAddionalHandlers(handlersList, handlerOptions) {
-  // Setting up timing and adding specified handler
-  if (handlerOptions.handlerName === 'analyticsHandler') {
-    Object.assign(handlerOptions, {'startTime': Date.now()});
-    handlersList.push((interceptedRequest) =>
-      handleAnalyticsRequests(
-        interceptedRequest,
-        handlerOptions.analyticsParam,
-        (endTime) => {
-          if (!handlerOptions.endTime) {
-            Object.assign(handlerOptions, {
-              endTime,
-              'timeout': 0,
-            });
+async function setupAdditionalHandlers(
+  handlersList,
+  handlerOptions,
+  page,
+  resolve
+) {
+  switch (handlerOptions.handlerName) {
+    case 'analyticsHandler':
+      // Set up timing
+      Object.assign(handlerOptions, {'startTime': Date.now()});
+      handlersList.push((interceptedRequest) =>
+        handleAnalyticsRequests(
+          interceptedRequest,
+          Object.keys(handlerOptions.extraUrlParam)
+            .map((key) => `${key}=${handlerOptions.extraUrlParam[key]}`)
+            .toString(),
+          (endTime) => {
+            if (!handlerOptions.endTime) {
+              Object.assign(handlerOptions, {
+                endTime,
+                'timeout': 0,
+              });
+              // Resolve and short circuit setTimeout
+              resolve();
+            }
           }
-        }
-      )
-    );
+        )
+      );
+      break;
+    case 'defaultHandler':
+      await setupMeasurement(page);
+      break;
   }
 }
 
 /**
  * Send each intercepted request to all handlers in list.
- * Takes care of continueing the request if the handler
- * doesn't alter/use the request.
+ * Takes care of continuing the request, if none of the
+ * handlers respond/abort the request.
+ *
  * @param {!Array<function>} handlersList
  * @param {Puppeteer.page} page
  */
 function startRequestListener(handlersList, page) {
   page.on('request', async (interceptedRequest) => {
-    const requestHandled = await handlersList.reduce(
-      // Don't short circuit
-      async (prev, handleRequest) =>
-        (await handleRequest(interceptedRequest)) || prev,
-      false
-    );
+    let requestHandled = false;
+    for (let i = 0; i < handlersList.length; i++) {
+      const curr = await handlersList[i](interceptedRequest);
+      requestHandled = requestHandled || curr;
+    }
     if (!requestHandled) {
       interceptedRequest.continue();
     }
@@ -240,23 +277,29 @@ function startRequestListener(handlersList, page) {
 }
 
 /**
- * Return metrics calcaultion based on handler
+ * Return metrics based on handler
+ *
  * @param {?Object} handlerOptions
- * @param {Object} metrics
+ * @param {Puppeteer.page} page
+ * @return {!Promise<!Object>}
  */
-function addHandlerMetric(handlerOptions, metrics) {
-  if (handlerOptions.handlerName === 'analyticsHandler') {
-    addAnalyticsMetric(handlerOptions, metrics);
+async function addHandlerMetric(handlerOptions, page) {
+  switch (handlerOptions.handlerName) {
+    case 'analyticsHandler':
+      return getAnalyticsMetric(handlerOptions);
+    case 'defaultHandler':
+      return await readMetrics(page);
   }
 }
 
 /**
  * If reqest didn't fire, don't include any value for
  * analyticsRequest.
+ *
  * @param {?Object} analyticsHandlerOptions
- * @param {Object} metrics
+ * @return {!Object}
  */
-function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
+function getAnalyticsMetric(analyticsHandlerOptions) {
   const {endTime, startTime} = analyticsHandlerOptions;
   const analyticsMetric = {};
   // If there is no end time, that means that request didn't fire.
@@ -266,8 +309,9 @@ function addAnalyticsMetric(analyticsHandlerOptions, metrics) {
   } else {
     analyticsMetric['analyticsRequest'] = endTime - startTime;
   }
-  analyticsMetric['requestsFailed'] = requestsFailed;
-  Object.assign(metrics, analyticsMetric);
+  // `percentRequestsFailed` because we take the mean rather than sum
+  analyticsMetric['percentRequestsFailed'] = requestsFailed;
+  return analyticsMetric;
 }
 
 /**
@@ -315,27 +359,31 @@ async function measureDocument(url, version, config) {
   const page = await browser.newPage();
   const handlerOptionsForUrl = {...config.urlToHandlers[url]};
   const handlersList = [];
+  const {timeoutPromise, resolve} = setupDelayBasedOnHandlerOptions(
+    handlerOptionsForUrl
+  );
   await page.setCacheEnabled(false);
   await page.setRequestInterception(true);
-  await setupMeasurement(page);
-  setUpDefaultHandlers(handlersList);
-  setUpAddionalHandlers(handlersList, handlerOptionsForUrl);
+  setupDefaultHandlers(handlersList, version);
+  await setupAdditionalHandlers(
+    handlersList,
+    handlerOptionsForUrl,
+    page,
+    resolve
+  );
   startRequestListener(handlersList, page);
-
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
       waitUntil: 'networkidle0',
     });
-  } catch (e) {
+  } catch {
     // site did not load
     await browser.close();
-    console.log(e);
     return;
   }
 
-  const metrics = await readMetrics(page);
-  await delayBasedOnHandlerOptions(handlerOptionsForUrl);
-  addHandlerMetric(handlerOptionsForUrl, metrics);
+  await timeoutPromise;
+  const metrics = await addHandlerMetric(handlerOptionsForUrl, page);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
