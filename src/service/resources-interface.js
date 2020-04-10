@@ -181,7 +181,6 @@ export class ResourcesInterface {
   /**
    * https://github.com/ampproject/amphtml/issues/25428
    * @return {boolean}
-   * @package
    */
   isIntersectionExperimentOn() {}
 }
