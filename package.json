@@ -91,7 +91,7 @@
     "fs-extra": "9.0.0",
     "fuse.js": "5.1.0",
     "globby": "11.0.0",
-    "google-closure-compiler": "20200224.0.0",
+    "google-closure-compiler": "20200406.0.0",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "gulp-ava": "3.0.0",
