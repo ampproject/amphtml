@@ -53,6 +53,15 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 
 /** @private @const {string} */
+const PAUSED_ATTRIBUTE = 'paused';
+
+/** @private @const {string} */
+const PAUSE_CLASS = 'i-amphtml-story-pause-control';
+
+/** @private @const {string} */
+const PLAY_CLASS = 'i-amphtml-story-play-control';
+
+/** @private @const {string} */
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
@@ -177,6 +186,28 @@ const TEMPLATE = {
               }),
               localizedLabelId:
                 LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-paused-display',
+          }),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': PAUSE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': PLAY_CLASS + ' i-amphtml-story-button',
+              }),
             },
           ],
         },
@@ -356,6 +387,10 @@ export class SystemLayer {
         this.onAudioIconClick_(true);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onAudioIconClick_(false);
+      } else if (matches(target, `.${PAUSE_CLASS}, .${PAUSE_CLASS} *`)) {
+        this.onPausedClick_(true);
+      } else if (matches(target, `.${PLAY_CLASS}, .${PLAY_CLASS} *`)) {
+        this.onPausedClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
@@ -393,6 +428,14 @@ export class SystemLayer {
       StateProperty.MUTED_STATE,
       (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAUSED_STATE,
+      (isPaused) => {
+        this.onPausedStateUpdate_(isPaused);
       },
       true /** callToInitialize */
     );
@@ -568,6 +611,19 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to paused state updates.
+   * @param {boolean} isPaused
+   * @private
+   */
+  onPausedStateUpdate_(isPaused) {
+    this.vsync_.mutate(() => {
+      isPaused
+        ? this.getShadowRoot().setAttribute(PAUSED_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(PAUSED_ATTRIBUTE);
+    });
+  }
+
+  /**
    * Hides message after elapsed time.
    * @param {string} message
    * @private
@@ -676,6 +732,15 @@ export class SystemLayer {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
       this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
     });
+  }
+
+  /**
+   * Handles click events on the paused and play buttons.
+   * @param paused Specifies if the story is being paused or not.
+   * @private
+   */
+  onPausedClick_(paused) {
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
   }
 
   /**
