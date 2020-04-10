@@ -677,7 +677,7 @@ export class Resource {
    *     available, use it. Otherwise, use the cached layout box.
    * @return {boolean}
    */
-  isDisplayed(usePremeasuredRect) {
+  isDisplayed(usePremeasuredRect = false) {
     devAssert(!usePremeasuredRect || !this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
