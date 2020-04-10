@@ -93,7 +93,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   // document.createElement-and-connected after registering the CE name (eg,
   // amp-img registered as ElementStub), but before the actual BaseElement
   // implementation was registered. We need to go through and "upgrade" the BE
-  // implmementation on these elements.
+  // implementation on these elements.
   for (let i = 0; i < stubbedElements.length; i++) {
     const element = stubbedElements[i];
     if (

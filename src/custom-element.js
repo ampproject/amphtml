@@ -773,9 +773,6 @@ function createBaseCustomElementClass(win) {
       }
       this.isConnected_ = true;
 
-      const wasEverAttached = this.everAttached;
-      this.everAttached = true;
-
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
@@ -786,6 +783,9 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
+
+      const wasEverAttached = this.everAttached;
+      this.everAttached = true;
       this.getResources().add(this);
 
       if (wasEverAttached) {
