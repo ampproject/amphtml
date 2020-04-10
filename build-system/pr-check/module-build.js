@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script builds the AMP runtime in ESM(module) mode.
- * This is run during the CI stage = test; job = module mode tests.
+ * This is run during the CI stage = build; job = module build.
  */
 
 const colors = require('ansi-colors');
@@ -45,20 +45,17 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
+    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --esm');
     } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
+      console /*OK*/
+        .log(
+          `${FILELOGPREFIX} Skipping`,
+          colors.cyan('Module Build'),
+          'because this commit does not affect the runtime, flag configs,',
+          'or integration tests.'
+        );
     }
   }
 
