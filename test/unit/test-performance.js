@@ -252,7 +252,7 @@ describes.realWin('performance', {amp: true}, (env) => {
             expect(timeOriginCall).to.be.calledOnce;
             expect(timeOriginCall).calledWithMatch('tick', {
               label: 'timeOrigin',
-              delta: env.sandbox.match.number,
+              value: 100,
             });
 
             expect(flushSpy).to.have.callCount(5);
