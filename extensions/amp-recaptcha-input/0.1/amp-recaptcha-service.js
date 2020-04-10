@@ -21,6 +21,7 @@
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {createCurlsSubdomain} from '@ampproject/toolbox-cache-url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -32,7 +33,6 @@ import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import ampUrl from '@ampproject/toolbox-cache-url';
 
 /**
  * @fileoverview
@@ -289,21 +289,19 @@ export class AmpRecaptchaService {
       }
 
       // TODO: win location href curls domain MAY need to be the same
-      return ampUrl
-        .createCurlsSubdomain(winLocation.href)
-        .then((curlsSubdomain) => {
-          return (
-            '//' +
-            curlsSubdomain +
-            '.recaptcha.' +
-            winLocation.host +
-            '/dist.3p/' +
-            (getMode().minified
-              ? `${internalRuntimeVersion()}/recaptcha`
-              : 'current/recaptcha.max') +
-            '.html'
-          );
-        });
+      return createCurlsSubdomain(winLocation.href).then((curlsSubdomain) => {
+        return (
+          '//' +
+          curlsSubdomain +
+          '.recaptcha.' +
+          winLocation.host +
+          '/dist.3p/' +
+          (getMode().minified
+            ? `${internalRuntimeVersion()}/recaptcha`
+            : 'current/recaptcha.max') +
+          '.html'
+        );
+      });
     }
 
     // Need to have the curls subdomain match the original document url.
@@ -318,9 +316,7 @@ export class AmpRecaptchaService {
         return this.win_.location.hostname.split('.')[0];
       });
     } else {
-      curlsSubdomainPromise = ampUrl.createCurlsSubdomain(
-        this.win_.location.href
-      );
+      curlsSubdomainPromise = createCurlsSubdomain(this.win_.location.href);
     }
 
     return curlsSubdomainPromise.then((curlsSubdomain) => {
