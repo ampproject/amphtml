@@ -289,7 +289,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @private {string|null} The random subdomain to load SafeFrame from */
+    /** 
+     * The random subdomain to load SafeFrame from, if SafeFrame is 
+     * being loaded from a random subdomain and if the subdomain
+     * has been generated.
+     * @private {string|null}  
+     */
     this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {?CONSENT_POLICY_STATE} */
