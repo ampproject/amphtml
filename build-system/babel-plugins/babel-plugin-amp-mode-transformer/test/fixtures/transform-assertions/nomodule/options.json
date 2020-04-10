@@ -1,6 +1,4 @@
 {
-  "plugins": [
-    ["../../../..", {"isEsmBuild": false}]
-  ],
+  "plugins": [["../../../..", {"isEsmBuild": false}]],
   "sourceType": "module"
 }
