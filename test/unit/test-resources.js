@@ -916,6 +916,44 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
   });
 
+  describe('intersect-resources', () => {
+    beforeEach(() => {
+      // Enables the "intersect-resources" experiment.
+      resources.intersectionObserver_ = {};
+    });
+
+    it('should not remeasure before layout', () => {
+      sandbox.stub(resource1, 'hasBeenPremeasured').returns(false);
+      sandbox.stub(resource1, 'measure');
+
+      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
+      resources.work_();
+
+      expect(resources.exec_.getSize()).to.equal(1);
+      expect(resource1.measure).to.not.be.called;
+      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    });
+
+    it('should check premeasured rect before layout', () => {
+      sandbox.stub(resource1, 'hasBeenPremeasured').returns(true);
+      sandbox.stub(resource1, 'isDisplayed').returns(true);
+      resource1.isDisplayed
+        .withArgs(/* usePremeasuredRect */ true)
+        .returns(false);
+      sandbox.stub(resource1, 'layoutCanceled');
+
+      resources.scheduleLayoutOrPreload(resource1, /* layout */ true);
+      resources.work_();
+
+      expect(resources.exec_.getSize()).to.equal(0);
+      expect(resource1.isDisplayed).to.be.calledWith(
+        /* usePremeasuredRect */ true
+      );
+      expect(resource1.layoutCanceled).to.be.calledOnce;
+      expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    });
+  });
+
   it('should not schedule resource execution outside viewport', () => {
     resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
