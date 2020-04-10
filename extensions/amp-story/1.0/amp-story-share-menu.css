@@ -26,7 +26,7 @@
   z-index: 100003 !important; /** Above pagination-buttons. */
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-share-menu-visible {
