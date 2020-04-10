@@ -23,7 +23,6 @@ import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
