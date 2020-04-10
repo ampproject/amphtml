@@ -32,7 +32,7 @@
 .i-amphtml-story-share-menu-visible {
   transform: translate3d(0, 0, 0) !important;
   transition-delay: 0s !important;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 
 /** Black opacity overlay. */
