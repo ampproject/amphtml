@@ -217,7 +217,8 @@ export class Crypto {
   }
 
   /**
-   * Returns a Uint8Array of the given length full of cryptographically random values if win.crypto is available.
+   * Returns a Uint8Array of the given length full of cryptographically
+   * random values if win.crypto is available.
    * If win.crypto, is not available, returns null.
    * @param {number} length The length of the string to return
    * @return {Uint8Array|null}
