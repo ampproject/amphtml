@@ -825,6 +825,13 @@ function createBaseCustomElementClass(win) {
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
+        // Classically, sizes/media queries are applied just before
+        // Resource.measure. With IntersectionObserver, observe() is the
+        // equivalent which happens above in Resources.add(). Applying here
+        // also avoids unnecessary reinvocation during reparenting.
+        if (this.getResources().isIntersectionExperimentOn()) {
+          this.applySizesAndMediaQuery();
+        }
       }
     }
 
