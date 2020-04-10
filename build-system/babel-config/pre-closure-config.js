@@ -73,9 +73,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,
-    argv.single_pass
-      ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
-      : null,
+    './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm ? filterImportsPlugin : null,
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
@@ -89,7 +87,7 @@ function getPreClosureConfig() {
           {isEsmBuild: !!argv.esm},
         ]
       : null,
-    !(argv.fortesting || isCheckTypes)
+    !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
