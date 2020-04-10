@@ -116,6 +116,19 @@ function compile(
     );
   }
 
+  function getSourceMapBase() {
+    if (isProdBuild) {
+      return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;
+    } else if (argv.sourcemap_url) {
+      // Custom sourcemap URLs have placeholder {version} that should be
+      // replaced with the actual version. Also, ensure trailing slash exists.
+      return String(argv.sourcemap_url)
+        .replace(/\{version\}/g, internalRuntimeVersion)
+        .replace(/([^/])$/, '$1/');
+    }
+    return 'http://localhost:8000/';
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -181,14 +194,7 @@ function compile(
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    let sourceMapBase = 'http://localhost:8000/';
-    if (isProdBuild) {
-      // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase =
-        'https://raw.githubusercontent.com/ampproject/amphtml/' +
-        internalRuntimeVersion +
-        '/';
-    }
+    const sourceMapBase = getSourceMapBase();
     const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
