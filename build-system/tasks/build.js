@@ -59,6 +59,18 @@ async function watch() {
 }
 
 /**
+ * Perform the prerequisite steps before starting the unminified build.
+ * Used by `gulp` and `gulp build`.
+ *
+ * @param {boolean} watch
+ */
+async function runPreBuildSteps(watch) {
+  await compileCss(watch);
+  await compileJison();
+  await bootstrapThirdPartyFrames(watch);
+}
+
+/**
  * Unminified build. Entry point for `gulp build`.
  */
 async function build() {
@@ -68,9 +80,7 @@ async function build() {
   printNobuildHelp();
   printConfigHelp('gulp build');
   parseExtensionFlags();
-  await compileCss(argv.watch);
-  await compileJison();
-  await bootstrapThirdPartyFrames(argv.watch);
+  await runPreBuildSteps(argv.watch);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(argv.watch, /* minify */ false);
   } else {
@@ -84,6 +94,7 @@ async function build() {
 
 module.exports = {
   build,
+  runPreBuildSteps,
   watch,
 };
 

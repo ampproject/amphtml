@@ -40,6 +40,9 @@ const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
+const {
   distNailgunPort,
   startNailgunServer,
   stopNailgunServer,
@@ -86,6 +89,24 @@ function printDistHelp() {
 }
 
 /**
+ * Perform the prerequisite steps before starting the minified build.
+ * Used by `gulp` and `gulp dist`.
+ *
+ * @param {boolean} watch
+ */
+async function runPreDistSteps(watch) {
+  cleanupBuildDir();
+  await prebuild();
+  await compileCss(watch);
+  await compileJison();
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(watch, /* minify */ true);
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+  displayLifecycleDebugging();
+}
+
+/**
  * Dist Build
  * @return {!Promise}
  */
@@ -96,17 +117,9 @@ async function dist() {
   printNobuildHelp();
   printDistHelp();
 
-  cleanupBuildDir();
-  await prebuild();
-  await compileCss();
-  await compileJison();
-
-  await copyCss();
-  await copyParsers();
-  await bootstrapThirdPartyFrames(argv.watch, /* minify */ true);
+  await runPreDistSteps(argv.watch);
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
-  await startNailgunServer(distNailgunPort, /* detached */ false);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(argv.watch, /* minify */ true);
   } else {
@@ -419,8 +432,7 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
-  copyCss,
-  copyParsers,
+  runPreDistSteps,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
@@ -448,10 +460,12 @@ dist.flags = {
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  sourcemap_url: '  Sets a custom sourcemap URL with placeholder {version}',
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
   version_override: '  Override the version written to AMP_CONFIG',
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
 };

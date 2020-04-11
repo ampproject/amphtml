@@ -1183,7 +1183,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   validateConsent_(consentEl) {
     if (!childElementByTag(consentEl, 'amp-story-consent')) {
-      dev().error(TAG, 'amp-consent must have an amp-story-consent child');
+      user().error(TAG, 'amp-consent must have an amp-story-consent child');
     }
 
     const allowedTags = ['SCRIPT', 'AMP-STORY-CONSENT'];
@@ -1195,7 +1195,7 @@ export class AmpStory extends AMP.BaseElement {
     if (toRemoveChildren.length === 0) {
       return;
     }
-    dev().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
+    user().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
@@ -2066,17 +2066,21 @@ export class AmpStory extends AMP.BaseElement {
             'publisher provided fallback.'
         );
       } else {
-        this.layoutStory_().then(() =>
+        this.layoutStory_().then(() => {
+          this.storeService_.dispatch(
+            Action.TOGGLE_PAUSED,
+            this.pausedStateToRestore_
+          );
           this.mutateElement(() => {
             this.unsupportedBrowserLayer_.removeLayer();
-            this.element.classList.remove('i-amphtml-story-fallback');
-          })
-        );
+          });
+        });
       }
     } else {
-      this.mutateElement(() => {
-        this.element.classList.add('i-amphtml-story-fallback');
-      });
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
       // Displays the publisher provided fallback or fallbacks to the default
       // unsupported browser layer.
       if (fallbackEl) {

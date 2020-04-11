@@ -15,14 +15,13 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const conf = require('./build.conf');
 const crypto = require('crypto');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
 const log = require('fancy-log');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {EventEmitter} = require('events');
 const {red, cyan} = require('ansi-colors');
 
@@ -71,17 +70,7 @@ function sha256(contents) {
  * @return {!Promise}
  */
 function preClosureBabel() {
-  const babelPlugins = conf.plugins({
-    isForTesting: !!argv.fortesting,
-    isEsmBuild: !!argv.esm,
-    isSinglePass: !!argv.single_pass,
-    isChecktypes: argv._.includes('check-types'),
-  });
-  const babel = gulpBabel({
-    plugins: babelPlugins,
-    retainLines: true,
-    compact: false,
-  });
+  const babel = gulpBabel({caller: {name: 'pre-closure'}});
 
   return through.obj((file, enc, next) => {
     const {relative, path} = file;
@@ -96,6 +85,7 @@ function preClosureBabel() {
     }
 
     let data, err;
+    debug(CompilationLifecycles['pre-babel'], file.path, file.contents);
     function onData(d) {
       babel.off('error', onError);
       data = d;
@@ -111,6 +101,11 @@ function preClosureBabel() {
         return next(err);
       }
 
+      debug(
+        CompilationLifecycles['pre-closure'],
+        file.path,
+        data.contents.toString('utf8')
+      );
       cache[path] = {
         file: data,
         hash,

@@ -342,7 +342,13 @@ export class VariableService {
           if (isArray(value)) {
             return Promise.all(
               value.map((item) =>
-                urlReplacements.expandStringAsync(item, bindings, opt_whitelist)
+                typeof item == 'string'
+                  ? urlReplacements.expandStringAsync(
+                      item,
+                      bindings,
+                      opt_whitelist
+                    )
+                  : item
               )
             );
           }
