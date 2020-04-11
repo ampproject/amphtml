@@ -38,20 +38,12 @@ function isOwnersFile(file) {
 }
 
 /**
- * Checks if the given file is a validator protoascii file.
+ * Checks if the given file is of the form validator-.*\.(html|out|protoascii)
  *
  * @param {string} file
  * @return {boolean}
  */
-function isValidatorProtoasciiFile(file) {
-  if (!file.startsWith('extensions/')) {
-    return false; // All protoascii files live in extensions/
-  }
-  const pathArray = path.dirname(file).split(path.sep);
-  if (pathArray.length < 2) {
-    return false; // Protoascii files live at least 2 levels in
-  }
-  // Protoascii files are of the form validator-.*\.(html|out|protoascii)
+function isValidatorFile(file) {
   const name = path.basename(file);
   return (
     name.startsWith('validator-') &&
@@ -188,7 +180,7 @@ const targetMatchers = {
     return (
       file.startsWith('validator/') ||
       file === 'build-system/tasks/validator.js' ||
-      isValidatorProtoasciiFile(file)
+      isValidatorFile(file)
     );
   },
   'VALIDATOR_JAVA': (file) => {
@@ -198,7 +190,7 @@ const targetMatchers = {
     return (
       file.startsWith('validator/java/') ||
       file === 'build-system/tasks/validator.js' ||
-      isValidatorProtoasciiFile(file)
+      isValidatorFile(file)
     );
   },
   'VALIDATOR_WEBUI': (file) => {
