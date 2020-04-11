@@ -28,12 +28,37 @@ const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 
 /**
- * Checks if the given file is an OWNERS file
+ * Checks if the given file is an OWNERS file.
+ *
  * @param {string} file
  * @return {boolean}
  */
 function isOwnersFile(file) {
   return file.endsWith('OWNERS');
+}
+
+/**
+ * Checks if the given file is a validator protoascii file.
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isValidatorProtoasciiFile(file) {
+  if (!file.startsWith('extensions/')) {
+    return false; // All protoascii files live in extensions/
+  }
+  const pathArray = path.dirname(file).split(path.sep);
+  if (pathArray.length < 2) {
+    return false; // Protoascii files live at least 2 levels in
+  }
+  // Protoascii files are of the form validator-.*\.(html|out|protoascii)
+  const name = path.basename(file);
+  return (
+    name.startsWith('validator-') &&
+    (name.endsWith('.out') ||
+      name.endsWith('.html') ||
+      name.endsWith('.protoascii'))
+  );
 }
 
 /**
@@ -153,34 +178,17 @@ const targetMatchers = {
     );
   },
   'VALIDATOR': (file) => {
-    if (isOwnersFile(file)) {
+    if (
+      isOwnersFile(file) ||
+      file.startsWith('validator/webui/') ||
+      file.startsWith('validator/java/')
+    ) {
       return false;
     }
-    if (file.startsWith('validator/webui/')) {
-      return false;
-    }
-    if (file.startsWith('validator/')) {
-      return true;
-    }
-    if (file === 'build-system/tasks/validator.js') {
-      return true;
-    }
-    // validator files for each extension
-    if (!file.startsWith('extensions/')) {
-      return false;
-    }
-    const pathArray = path.dirname(file).split(path.sep);
-    if (pathArray.length < 2) {
-      // At least 2 with ['extensions', '{$name}']
-      return false;
-    }
-    // Validator files take the form of validator-.*\.(html|out|protoascii)
-    const name = path.basename(file);
     return (
-      name.startsWith('validator-') &&
-      (name.endsWith('.out') ||
-        name.endsWith('.html') ||
-        name.endsWith('.protoascii'))
+      file.startsWith('validator/') ||
+      file === 'build-system/tasks/validator.js' ||
+      isValidatorProtoasciiFile(file)
     );
   },
   'VALIDATOR_JAVA': (file) => {
@@ -189,7 +197,8 @@ const targetMatchers = {
     }
     return (
       file.startsWith('validator/java/') ||
-      file === 'build-system/tasks/validator.js'
+      file === 'build-system/tasks/validator.js' ||
+      isValidatorProtoasciiFile(file)
     );
   },
   'VALIDATOR_WEBUI': (file) => {
