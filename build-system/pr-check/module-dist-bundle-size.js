@@ -17,8 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the AMP runtime in ESM(module) mode.
- * This is run during the CI stage = build; job = module build.
+ * This script builds the esm minified AMP runtime and runs the bundle size check.
+ * This is run during the CI stage = build; job = module dist, bundle size.
  */
 
 const colors = require('ansi-colors');
@@ -26,35 +26,45 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
+  uploadEsmDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
+const {runYarnChecks} = require('./yarn-checks');
 
-const FILENAME = 'module-build.js';
+const FILENAME = 'module-dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --esm');
+    timedExecOrDie('gulp dist --esm --fortesting');
+    // TODO(#27703): Run bundle size check (--on_push_build)
+    uploadEsmDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --esm');
+      timedExecOrDie('gulp dist --esm --fortesting');
+      // TODO(#27703): Run bundle size check (--on_pr_build)
+      uploadEsmDistOutput(FILENAME);
     } else {
-      console /*OK*/
-        .log(
-          `${FILELOGPREFIX} Skipping`,
-          colors.cyan('Module Build'),
-          'because this commit does not affect the runtime or flag configs.'
-        );
+      console.log(
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Module Dist, Bundle Size'),
+        'because this commit does not affect the runtime or flag configs.'
+      );
     }
   }
 

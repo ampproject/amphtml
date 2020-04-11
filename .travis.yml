@@ -55,10 +55,6 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
-      name: 'Module Build'
-      script:
-        - unbuffer node build-system/pr-check/module-build.js
-    - stage: build
       name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
@@ -70,6 +66,10 @@ jobs:
       name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: build
+      name: 'Module Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
       name: 'Single Pass Tests'
       script:

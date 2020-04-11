@@ -17,9 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the AMP runtime for production and runs the bundle size
- * check.
- * This is run during the CI stage = build; job = dist.
+ * This script builds the minified AMP runtime and runs the bundle size check.
+ * This is run during the CI stage = build; job = dist, bundle size.
  */
 
 const colors = require('ansi-colors');
