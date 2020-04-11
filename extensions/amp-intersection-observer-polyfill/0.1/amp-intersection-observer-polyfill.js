@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 import {upgradePolyfill} from '../../../src/polyfills/intersection-observer';
 // DO NOT SUBMIT: until we upgrade to the polyfill 0.8.0.
 // See https://github.com/w3c/IntersectionObserver/pull/419.

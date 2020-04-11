@@ -851,7 +851,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(childWin, class {});
-  installIntersectionObserver(childWin);
+  installIntersectionObserver(parentWin, childWin);
 }
 
 /**

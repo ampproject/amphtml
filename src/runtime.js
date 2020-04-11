@@ -42,10 +42,10 @@ import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/intersection-observer';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
-import {shouldLoadPolyfill} from './polyfills/intersection-observer';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -270,8 +270,10 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  if (shouldLoadPolyfill(global)) {
-    Services.extensionsFor(global).preloadExtension('amp-intersection-observer-polyfill');
+  if (shouldLoadInObPolyfill(global)) {
+    Services.extensionsFor(global).preloadExtension(
+      'amp-intersection-observer-polyfill'
+    );
   }
 
   return iniPromise;

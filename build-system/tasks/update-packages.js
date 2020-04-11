@@ -92,10 +92,7 @@ function patchIntersectionObserver() {
 
   // Wrap the contents inside the install function.
   file =
-    'export function installIntersectionObserver() {\n' +
-    file +
-    '\n' +
-    '}\n';
+    'export function installIntersectionObserver() {\n' + file + '\n' + '}\n';
   writeIfUpdated(patchedName, file);
 }
 

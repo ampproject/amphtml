@@ -19,7 +19,6 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
  */
 
-
 /* DO NOT SUBMIT: example:
 var inob = new IntersectionObserver(function(records) {
   console.log('inob: ', records);
@@ -27,6 +26,7 @@ var inob = new IntersectionObserver(function(records) {
 inob.observe($0);
 */
 
+const UPGRADERS = '_upgraders';
 
 /**
  * @param {!Window} win
@@ -42,15 +42,16 @@ export function install(win) {
 }
 
 /**
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-export function installForChildWin(childWin) {
-  const parent = childWin.parent;
-  if (!childWin.IntersectionObserver &&
-      parent &&
-      parent.IntersectionObserver) {
-    childWin.IntersectionObserver = parent.IntersectionObserver;
-    childWin.IntersectionObserverEntry = parent.IntersectionObserverEntry;
+export function installForChildWin(parentWin, childWin) {
+  if (!childWin.IntersectionObserver && parentWin.IntersectionObserver) {
+    childWin.IntersectionObserver = parentWin.IntersectionObserver;
+    childWin.IntersectionObserverEntry = parentWin.IntersectionObserverEntry;
+    if (parentWin.IntersectionObserver === IntersectionObserverStub) {
+      // QQQQ: push into stubs to upgrade when it shows up.
+    }
   }
 }
 
@@ -62,6 +63,8 @@ export function shouldLoadPolyfill(win) {
     !win.IntersectionObserver ||
     win.IntersectionObserver === IntersectionObserverStub ||
     !win.IntersectionObserverEntry ||
+    // Some browsers implement `intersectionRatio`, but not `isIntersecting`.
+    // Polyfill smooths this out.
     !('isIntersecting' in win.IntersectionObserverEntry.prototype)
   );
 }
@@ -74,19 +77,23 @@ export function upgradePolyfill(win, installer) {
   // Can't use the IntersectionObserverStub here directly since it's a separate
   // instance deployed in v0.js vs the polyfill extension.
   const Stub = /** @type {typeof IntersectionObserverStub} */ (win.IntersectionObserver);
-  if (!Stub || Stub.stubs_) {
+  if (Stub && UPGRADERS in Stub) {
     delete win.IntersectionObserver;
     delete win.IntersectionObserverEntry;
     installer();
     const Impl = win.IntersectionObserver;
-    const stubs = Stub.stubs_;
-    Stub.stubs_ = [];
-    if (stubs.length > 0) {
+    const upgraders = Stub[UPGRADERS].slice(0);
+    Stub[UPGRADERS].length = 0;
+    if (upgraders.length > 0) {
       const microtask = Promise.resolve();
-      stubs.forEach(stub => {
-        microtask.then(() => stub.upgrade_(Impl));
+      upgraders.forEach((upgrader) => {
+        microtask.then(() => upgrader(Impl));
       });
     }
+  } else {
+    // Even if this is not the stub, we still may need to polyfill
+    // `isIntersecting`. See `shouldLoadPolyfill` for more info.
+    installer();
   }
 }
 
@@ -96,7 +103,6 @@ export function upgradePolyfill(win, installer) {
  * This stub is necessary because the polyfill itself is significantly bigger.
  */
 class IntersectionObserverStub {
-
   /**
    * @param {!IntersectionObserverCallback} callback
    * @param {!IntersectionObserverInit=} options
@@ -114,7 +120,7 @@ class IntersectionObserverStub {
 
     // Must fail on the document root to ensure that the polyfill is not
     // confused with the new spec that allows document as the root.
-    const root = this.options_.root;
+    const {root} = this.options_;
     if (root && root.nodeType !== /* ELEMENT */ 1) {
       throw new Error('root document is not supported');
     }
@@ -126,7 +132,7 @@ class IntersectionObserverStub {
     this.inst_ = null;
 
     // Wait for the upgrade.
-    IntersectionObserverStub.stubs_.push(this);
+    IntersectionObserverStub[UPGRADERS].push(this.upgrade_.bind(this));
   }
 
   /**
@@ -214,19 +220,19 @@ class IntersectionObserverStub {
   }
 
   /**
-   * @param {function(new:IntersectionObserver, !IntersectionObserverCallback, !IntersectionObserverInit=)} constr
+   * @param {typeof IntersectionObserver} constr
    * @private
    */
   upgrade_(constr) {
     const inst = new constr(this.callback_, this.options_);
     this.inst_ = inst;
-    this.elements_.forEach(e => inst.observe(e));
+    this.elements_.forEach((e) => inst.observe(e));
     this.elements_ = null;
   }
 }
 
 /**
- * @type {!Array<!IntersectionObserverStub>}
- * @private
+ * @type {!Array<function(typeof IntersectionObserver)>}
+ * @const
  */
-IntersectionObserverStub.stubs_ = [];
+IntersectionObserverStub[UPGRADERS] = [];
