@@ -200,25 +200,3 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
 }
-
-/** Remote attachment opening animation */
-
-.i-amphtml-story-page-attachment-expand {
-  position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: #FFF !important;
-  z-index: 100000 !important; /** System layer + 1 */
-  animation: i-amphtml-open-3p-attachment 120ms cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
-}
-
-@keyframes i-amphtml-open-3p-attachment {
- 0% {
-  transform: scaleX(0);
-  opacity: 0.3;
- }
- 100% {
-  transform: scaleX(1);
-  opacity: 1;
- }
-}

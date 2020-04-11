@@ -87,15 +87,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildRemote_();
     }
 
-    this.win.addEventListener('pageshow', (event) => {
-      // On browser back, Safari does not reload the page but resumes its cached
-      // version. This event's parameter lets us know when this happens so we
-      // can cleanup the remote opening animation.
-      if (event.persisted) {
-        this.closeInternal_(false /** shouldAnimate */);
-      }
-    });
-
     toggle(this.element, true);
   }
 
@@ -205,6 +196,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       },
       true /** useCapture */
     );
+
+    // Closes the remote attachment drawer when users navigate back.
+    if (this.type_ === AttachmentType.REMOTE) {
+      const ampdoc = this.getAmpDoc();
+      ampdoc.onVisibilityChanged(() => {
+        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+    }
   }
 
   /**
@@ -245,30 +246,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Triggers a remote attachment opening animation, and redirects to the
-   * specified URL.
+   * Redirects to the specified URL.
    * @private
    */
   openRemote_() {
-    const animationEl = this.win.document.createElement('div');
-    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
-
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      this.win.setTimeout(() => {
-        const navigationService = Services.navigationForDoc(this.getAmpDoc());
-        navigationService.navigateTo(
-          this.win,
-          this.element.getAttribute('href')
-        );
-      }, 50);
-    });
+    const navigationService = Services.navigationForDoc(this.getAmpDoc());
+    navigationService.openWindow(
+      this.win,
+      this.element.getAttribute('href'),
+      '_blank',
+      true /** false */
+    );
   }
 
   /**
@@ -303,16 +291,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.closeInternal_(shouldAnimate);
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
-
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-    const animationEl = storyEl.querySelector(
-      '.i-amphtml-story-page-attachment-expand'
-    );
-    if (animationEl) {
-      this.mutateElement(() => {
-        removeElement(dev().assertElement(animationEl));
-      });
-    }
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
