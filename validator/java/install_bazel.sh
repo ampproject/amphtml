@@ -64,8 +64,8 @@ echo "$LOG_PREFIX Verifying sha256 integrity of $(CYAN "$BAZEL_BIN_PATH")..."
 
 echo "$LOG_PREFIX Installing $(CYAN "bazel") from $(CYAN "$BAZEL_BIN_PATH")..."
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  sudo dpkg -i $BAZEL_BIN_PATH  >/dev/null
+  sudo dpkg -i $BAZEL_BIN_PATH  >/dev/null 2>&1
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   chmod +x $BAZEL_BIN_PATH
-  sudo ./$BAZEL_BIN_PATH --user >/dev/null
+  sudo ./$BAZEL_BIN_PATH --user >/dev/null 2>&1
 fi
