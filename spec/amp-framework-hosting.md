@@ -148,7 +148,7 @@ In each case, the value of the `content` attribute should be an absolute, HTTPS 
 
 ## Serve the AMP framework
 
-Depending on your hosting capabilities, there are several routes you can take to serve the AMP framework.
+Depending on your hosting capabilities and goals, there are several options to consider when serving the AMP framework.
 
 ### URLs
 
@@ -176,13 +176,13 @@ The AMP Project has a [weekly release channel](https://amp.dev/documentation/gui
 
 ### Metadata
 
-The AMP Project hosts a metadata endpoint at [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata) that returns information on current releases. When hosting your own AMP framework, this endpoint is optional, but may be useful to host yourself if you use [AMP Toolbox](https://github.com/ampproject/amp-toolbox):
+The AMP Project hosts a metadata endpoint at [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata) that returns information on current releases. Hosting this endpoint yourself is optional, but may be useful if you use [AMP Toolbox](https://github.com/ampproject/amp-toolbox):
 
 - [@ampproject/toolbox-runtime-version](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-version) uses the data to determine the latest AMP framework version available.
 - [@ampproject/toolbox-optimizer](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) uses the data to identify the boilerplate CSS that should be included in optimized AMP pages.
 - [@ampproject/toolbox-runtime-fetch](https://github.com/ampproject/amp-toolbox/tree/master/packages/runtime-fetch) uses the data to identify an rtv-specific path from which the framework should be downloaded.
 
-Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata). Only a couple of the JSON properties are required from your own metadata endpoint, most are optional.
+Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata), most JSON properties are optional:
 
 ```
 {
@@ -243,11 +243,11 @@ A sample response for a user in Germany looks like:
 
 There are trade-offs in accuracy and performance when you set the client cache time for this API. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. For reference, `https://cdn.ampproject.org/v0/amp-geo-0.1.js` has a client cache time of 30 minutes.
 
-### AMP Toolbox
+## AMP Toolbox
 
 [AMP Toolbox](https://github.com/ampproject/amp-toolbox) has several tools that can help you get the most out of your hosted AMP framework. Notably, [@ampproject/toolbox-optimizer](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) supports transformation options to use your own host with versioned or versionless URLs in AMP pages. If you're aiming to get the best performance possible out of your AMP pages, this is a great tool to accomplish the task.
 
-### HTTP response Headers
+## HTTP response Headers
 
 In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
