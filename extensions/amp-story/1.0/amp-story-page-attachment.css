@@ -39,7 +39,7 @@
   line-height: 48px !important;
 }
 
-.i-amphtml-story-page-attachment-remote-domain {
+.i-amphtml-story-page-attachment-remote-title {
   max-width: calc(100% - 30px /* 24px icon + 6px margin */) !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;

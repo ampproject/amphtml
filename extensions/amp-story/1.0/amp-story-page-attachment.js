@@ -149,19 +149,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Use an anchor element to make this a real link in vertical rendering.
     const link = htmlFor(this.element)`
     <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-      <span class="i-amphtml-story-page-attachment-remote-domain"></span>
+      <span class="i-amphtml-story-page-attachment-remote-title"></span>
       <span class="i-amphtml-story-page-attachment-remote-icon"></span>
     </a>`;
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    const urlService = Services.urlForDoc(this.element);
-    const domain = urlService.getSourceOrigin(
-      this.element.getAttribute('href')
-    );
     this.contentEl_.querySelector(
-      '.i-amphtml-story-page-attachment-remote-domain'
-    ).textContent = domain;
+      '.i-amphtml-story-page-attachment-remote-title'
+    ).textContent =
+      this.element.getAttribute('data-title') ||
+      Services.urlForDoc(this.element).getSourceOrigin(
+        this.element.getAttribute('href')
+      );
   }
 
   /**
