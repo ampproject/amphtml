@@ -157,6 +157,7 @@ When the AMP runtime is initialized, all components are verified to belong to th
 #### Versioned URLs
 
 The simplest option for hosting the AMP framework is to host it from an rtv-specific path. For example, consider AMP framework host `https://example.com/amp`. Production version `200229061636` corresponds to runtime version `01200229061636` and should be hosted from `https://example.com/amp/rtv/01200229061636`. In this case, AMP meta and script URLs would look like the following:
+
 ```
 <meta name="runtime-host" content="https://example.com/amp"> <!-- not rtv-specific -->
 <script async src="https://example.com/amp/rtv/01200229061636/v0.js"></script>
@@ -168,6 +169,7 @@ If hosting a single AMP framework version is your end goal, then you can update 
 #### Versionless URLs
 
 The AMP Project has a [weekly release channel](https://amp.dev/documentation/guides-and-tutorials/learn/spec/release-schedule/#weekly), sometimes referred to as the "evergreen" release channel. AMP pages utilize this channel by including versionless URLs to AMP scripts and styles. This is relatively easy to accomplish when hosting the AMP framework yourself. The key is to ensure that the AMP framework hosted from versionless URLs is _also_ available from rtv-specific URLs. This suggests an update strategy: first make a new AMP framework version available from rtv-specific URLs and _then_ update the AMP framework available from versionless URLs. For example, if production AMP framework version `200229061636` is available from `https://example.com/amp`, then it must also be available from `https://example.com/amp/rtv/01200229061636`. In this case, AMP meta and script URLs would look like the following:
+
 ```
 <meta name="runtime-host" content="https://example.com/amp">
 <script async src="https://example.com/amp/v0.js"></script>
