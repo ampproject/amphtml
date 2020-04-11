@@ -71,5 +71,5 @@ java_test(
     ],
     use_testrunner=False,
     main_class='org.testng.TestNG',
-    args=['-testjar','libamphtml_validator_test_lib.jar','-verbose','2'],
+    args=['-testjar','libamphtml_validator_test_lib.jar','-verbose','1'],
 )
