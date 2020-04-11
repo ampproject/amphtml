@@ -16,20 +16,23 @@
 #
 # This script installs Bazel, either by downloading it or by installing from the
 # Travis cache if available.
+
+set -e # Exit on error
+
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 
 LOG_PREFIX=$(YELLOW "install_bazel.sh")
-BAZEL_VERSION="2.2.0"
-BAZEL_BIN_SHA="b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3"
+BAZEL_VERSION="3.0.0"
 INSTALLER_DIR="bazel-installer"
 
-# TODO(rsima): Add support for installs on Darwin.
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-  PLATFORM="linux"
-  BAZEL_INSTALLER="bazel_$BAZEL_VERSION-$PLATFORM-x86_64.deb"
+  BAZEL_INSTALLER="bazel_$BAZEL_VERSION-linux-x86_64.deb"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  BAZEL_INSTALLER="bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh"
 else
   echo "$LOG_PREFIX Installing Bazel on $(CYAN "$OSTYPE") is not yet supported; aborting"
   exit 1
@@ -37,6 +40,10 @@ fi
 
 BAZEL_BIN_URL="https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/$BAZEL_INSTALLER"
 BAZEL_BIN_PATH="$INSTALLER_DIR/$BAZEL_INSTALLER"
+
+BAZEL_BIN_SHA_URL="$BAZEL_BIN_URL.sha256"
+BAZEL_BIN_SHA_PATH="$BAZEL_BIN_PATH.sha256"
+BAZEL_INSTALLER_SHA="$BAZEL_INSTALLER.sha256"
 
 if type bazel &>/dev/null ; then
   echo "$LOG_PREFIX Bazel binary detected at $(CYAN "$BAZEL_BIN_PATH"); skipping installation"
@@ -48,9 +55,17 @@ if [[ -f $BAZEL_BIN_PATH ]]; then
 else
   echo "$LOG_PREFIX Downloading $(CYAN "$BAZEL_BIN_URL")..."
   mkdir -p $INSTALLER_DIR
-  wget -q -O $BAZEL_BIN_PATH $BAZEL_BIN_URL
-  echo "SHA256 ($BAZEL_BIN_PATH) = $BAZEL_BIN_SHA" | sha256sum -c -
+  curl -s --create-dirs -o "$BAZEL_BIN_PATH" -L "$BAZEL_BIN_URL"
+  curl -s --create-dirs -o "$BAZEL_BIN_SHA_PATH" -L "$BAZEL_BIN_SHA_URL"
 fi
 
+echo "$LOG_PREFIX Verifying sha256 integrity of $(CYAN "$BAZEL_BIN_PATH")..."
+(cd "$INSTALLER_DIR" && shasum -c "$BAZEL_INSTALLER_SHA" >/dev/null)
+
 echo "$LOG_PREFIX Installing $(CYAN "bazel") from $(CYAN "$BAZEL_BIN_PATH")..."
-sudo dpkg -i $BAZEL_BIN_PATH
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  sudo dpkg -i $BAZEL_BIN_PATH  >/dev/null 2>&1
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  chmod +x $BAZEL_BIN_PATH
+  sudo ./$BAZEL_BIN_PATH --user >/dev/null 2>&1
+fi
