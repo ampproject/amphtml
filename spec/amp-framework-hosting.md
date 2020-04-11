@@ -243,11 +243,7 @@ A sample response for a user in Germany looks like:
 
 There are trade-offs in accuracy and performance when you set the client cache time for this API. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. For reference, `https://cdn.ampproject.org/v0/amp-geo-0.1.js` has a client cache time of 30 minutes.
 
-## AMP Toolbox
-
-[AMP Toolbox](https://github.com/ampproject/amp-toolbox) has several tools that can help you get the most out of your hosted AMP framework. Notably, [@ampproject/toolbox-optimizer](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) supports transformation options to use your own host with versioned or versionless URLs in AMP pages. If you're aiming to get the best performance possible out of your AMP pages, this is a great tool to accomplish the task.
-
-## HTTP response Headers
+### HTTP response Headers
 
 In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
