@@ -140,7 +140,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildRemote_() {
     this.setDragCap_(48 /* pixels */);
-    this.setOpenThreshold_(150 /* pixels */);
 
     this.headerEl_.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
@@ -217,11 +216,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.open(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
-
-    // Don't create a new history entry for remote attachment as user is
-    // navigating away.
     if (this.type_ !== AttachmentType.REMOTE) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+
+      // Don't create a new history entry for remote attachment as user is
+      // navigating away.
+
       const currentHistoryState = /** @type {!Object} */ (getState(
         this.win.history
       ));
@@ -255,6 +255,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
+    const navigationService = Services.navigationForDoc(this.getAmpDoc());
+    navigationService.openWindow(
+      this.win,
+      this.element.getAttribute('href'),
+      '_blank',
+      // We want an opener. Not because we want it, but be cause this allows
+      // detection of a blocked popup, which then leads to a navigation away
+      // from the page 😿
+      true
+    );
+
     this.mutateElement(() => {
       storyEl.appendChild(animationEl);
     }).then(() => {
@@ -262,12 +273,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // amp-story-page-attachment.css). The navigation itself will take some
       // time, depending on the target and network conditions.
       this.win.setTimeout(() => {
-        const navigationService = Services.navigationForDoc(this.getAmpDoc());
-        navigationService.navigateTo(
-          this.win,
-          this.element.getAttribute('href')
-        );
-      }, 50);
+        removeElement(animationEl);
+        this.closeInternal_();
+      }, 300);
     });
   }
 

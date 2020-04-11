@@ -111,9 +111,6 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.touchEventUnlisteners_ = [];
-
-    /** @private {number} Threshold in pixels above which the drawer opens itself. */
-    this.openThreshold_ = Infinity;
   }
 
   /** @override */
@@ -389,15 +386,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    if (
-      this.state_ === DrawerState.DRAGGING_TO_OPEN &&
-      swipingUp &&
-      -deltaY > this.openThreshold_
-    ) {
-      this.open();
-      return;
-    }
-
     this.drag_(deltaY);
   }
 
@@ -417,15 +405,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       },
       /* opt_stopAt */ this.element
     );
-  }
-
-  /**
-   * Sets a swipe threshold in pixels above which the drawer opens itself.
-   * @param {number} openThreshold
-   * @protected
-   */
-  setOpenThreshold_(openThreshold) {
-    this.openThreshold_ = openThreshold;
   }
 
   /**
