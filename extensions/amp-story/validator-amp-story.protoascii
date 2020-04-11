@@ -771,6 +771,13 @@ tags: {  # <amp-story-page-attachment>
     value: "dark"
     value: "light"
   }
+  attrs: {
+    name: "href"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
 }
 descendant_tag_list {
   # Whitelisting as many components as possible, unless they could result in a
