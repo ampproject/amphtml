@@ -392,7 +392,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(runner);
     });
 
-    it(`creates internal runners when applying first frame`, async () => {
+    it('creates internal runners when applying first frame', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -431,7 +431,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       expect(async () => await animationManager.applyFirstFrame()).to.throw;
     });
 
-    it(`passes keyframeOptions to runner`, async () => {
+    it('passes keyframeOptions to runner', async () => {
       const page = html`<div></div>`;
 
       const targetsWithOptions = [
@@ -480,7 +480,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    it(`applies first frame`, async () => {
+    it('applies first frame', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
