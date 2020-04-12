@@ -17,6 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
+  KeyframesFilterFnDef,
   KeyframesOrFilterFnDef,
   StoryAnimationDef,
   StoryAnimationDimsDef,
@@ -27,8 +28,8 @@ import {WebAnimationPlayState} from '../../amp-animation/0.1/web-animation-types
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
+import {presets, setStyleForPreset} from './animation-presets';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
@@ -71,17 +72,23 @@ const PlaybackActivity = {
 };
 
 /** Wraps WebAnimationRunner for story page elements. */
-class AnimationRunner {
+export class AnimationRunner {
   /**
    * @param {!Element} page
    * @param {!StoryAnimationDef} animationDef
-   * @param {!Promise<
-   *    !../../amp-animation/0.1/web-animations.Builder
-   * >} webAnimationBuilderPromise
+   * @param {!Promise<!../../amp-animation/0.1/web-animations.Builder>} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!AnimationSequence} sequence
+   * @param {!Object<string, *>=} keyframeOptions
    */
-  constructor(page, animationDef, webAnimationBuilderPromise, vsync, sequence) {
+  constructor(
+    page,
+    animationDef,
+    webAnimationBuilderPromise,
+    vsync,
+    sequence,
+    keyframeOptions = {}
+  ) {
     /** @private @const */
     this.page_ = page;
 
@@ -101,7 +108,10 @@ class AnimationRunner {
     this.presetDef_ = animationDef.preset;
 
     /** @private @const */
-    this.keyframes_ = this.filterKeyframes_(animationDef.preset.keyframes);
+    this.keyframes_ = this.evaluateKeyframes_(
+      animationDef.preset.keyframes,
+      keyframeOptions
+    );
 
     /** @private @const */
     this.delay_ = animationDef.delay || this.presetDef_.delay || 0;
@@ -153,6 +163,33 @@ class AnimationRunner {
   }
 
   /**
+   * @param {!Element} page
+   * @param {!StoryAnimationDef} animationDef
+   * @param {!Promise<!../../amp-animation/0.1/web-animations.Builder>} webAnimationBuilderPromise
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   * @param {!AnimationSequence} sequence
+   * @param {!Object<string, *>=} keyframeOptions
+   * @return {!AnimationRunner}
+   */
+  static create(
+    page,
+    animationDef,
+    webAnimationBuilderPromise,
+    vsync,
+    sequence,
+    keyframeOptions = {}
+  ) {
+    return new AnimationRunner(
+      page,
+      animationDef,
+      webAnimationBuilderPromise,
+      vsync,
+      sequence,
+      keyframeOptions
+    );
+  }
+
+  /**
    * @return {!Promise<!StoryAnimationDimsDef>}
    * @visibleForTesting
    */
@@ -174,14 +211,18 @@ class AnimationRunner {
 
   /**
    * @param {!KeyframesOrFilterFnDef} keyframesArrayOrFn
+   * @param {!Object<string, *>} keyframeOptions
    * @return {!Promise<!KeyframesDef>}
    * @private
    */
-  filterKeyframes_(keyframesArrayOrFn) {
-    if (Array.isArray(keyframesArrayOrFn)) {
-      return Promise.resolve(keyframesArrayOrFn);
+  evaluateKeyframes_(keyframesArrayOrFn, keyframeOptions) {
+    if (typeof keyframesArrayOrFn === 'function') {
+      return this.getDims().then((dimensions) => {
+        const fn = /** @type {!KeyframesFilterFnDef} */ (keyframesArrayOrFn);
+        return fn(dimensions, keyframeOptions);
+      });
     }
-    return this.getDims().then(keyframesArrayOrFn);
+    return Promise.resolve(keyframesArrayOrFn);
   }
 
   /**
@@ -193,8 +234,8 @@ class AnimationRunner {
     return this.keyframes_.then((keyframes) => ({
       keyframes,
       target: this.target_,
-      delay: `${this.delay_}ms`,
-      duration: `${this.duration_}ms`,
+      delay: this.delay_,
+      duration: this.duration_,
       easing: this.easing_,
       fill: 'forwards',
     }));
@@ -231,15 +272,11 @@ class AnimationRunner {
    * @private
    */
   getStartWaitPromise_() {
-    let promise = Promise.resolve();
-
-    if (this.animationDef_.startAfterId) {
-      const startAfterId = /** @type {string} */ (this.animationDef_
-        .startAfterId);
-      promise = promise.then(() => this.sequence_.waitFor(startAfterId));
+    const {startAfterId} = this.animationDef_;
+    if (startAfterId) {
+      return this.sequence_.waitFor(startAfterId);
     }
-
-    return promise;
+    return Promise.resolve();
   }
 
   /**
@@ -430,7 +467,7 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
-    /** @private {?Array<!Promise<!AnimationRunner>>} */
+    /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
     /** @private */
@@ -495,16 +532,15 @@ export class AnimationManager {
 
   /**
    * Determines if there is an entrance animation running.
-   *
-   * @return {*} TODO(#23582): Specify return type
+   * @return {boolean}
    */
   hasAnimationStarted() {
     return this.getRunners_().some((runner) => runner.hasStarted());
   }
 
   /**
+   * @return {!Array<!AnimationRunner>}
    * @private
-   * @return {*} TODO(#23582): Specify return type
    */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
@@ -530,14 +566,16 @@ export class AnimationManager {
    */
   createRunner_(el) {
     const preset = this.getPreset_(el);
+    const keyframeOptions = this.getKeyframeOptions_(el);
     const animationDef = this.createAnimationDef(el, preset);
 
-    return new AnimationRunner(
+    return AnimationRunner.create(
       this.root_,
       animationDef,
       devAssert(this.builderPromise_),
       this.vsync_,
-      this.sequence_
+      this.sequence_,
+      keyframeOptions
     );
   }
 
@@ -603,6 +641,22 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+
+    return /** @type {StoryAnimationPresetDef} */ (userAssert(
+      presets[name],
+      'Invalid %s preset "%s" for element %s',
+      ANIMATE_IN_ATTRIBUTE_NAME,
+      name,
+      el
+    ));
+  }
+
+  /**
+   * @param {!Element} el
+   * @return {!Object<string, *>}
+   * @private
+   */
+  getKeyframeOptions_(el) {
     const options = {};
     setStyleForPreset(el, name);
 
@@ -660,18 +714,12 @@ export class AnimationManager {
       );
     }
 
-    return /** @type {StoryAnimationPresetDef} */ (userAssert(
-      getPresetDef(name, options),
-      'Invalid %s preset "%s" for element %s',
-      ANIMATE_IN_ATTRIBUTE_NAME,
-      name,
-      el
-    ));
+    return options;
   }
 }
 
 /** Bus for animation sequencing. */
-class AnimationSequence {
+export class AnimationSequence {
   /**
    * @public
    */
