@@ -23,37 +23,34 @@ import {
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
+import {
+  PRESET_OPTION_ATTRIBUTES,
+  presets,
+  setStyleForPreset,
+} from './animation-presets';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {map, omit} from '../../../src/utils/object';
-import {presets, setStyleForPreset} from './animation-presets';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
-/** const {string} */
+/** @const {string} */
 export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
-/** const {string} */
+/** @const {string} */
 const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
-/** const {string} */
+/** @const {string} */
 const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
-/** const {string} */
+/** @const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
-/** const {string} */
+/** @const {string} */
 const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
-/** const {string} */
+/** @const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-/** const {string} */
-const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
-/** const {string} */
-const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
-/** const {string} */
-const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
-/** const {string} */
-const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
-/** const {string} */
+
+/** @const {string} */
 const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
 
 /**
@@ -569,6 +566,9 @@ export class AnimationManager {
     const keyframeOptions = this.getKeyframeOptions_(el);
     const animationDef = this.createAnimationDef(el, preset);
 
+    // TODO(alanorozco): This should be part of a mutate cycle.
+    setStyleForPreset(el, name);
+
     return AnimationRunner.create(
       this.root_,
       animationDef,
@@ -658,61 +658,23 @@ export class AnimationManager {
    */
   getKeyframeOptions_(el) {
     const options = {};
-    setStyleForPreset(el, name);
 
-    if (el.hasAttribute(SCALE_START_ATTRIBUTE_NAME)) {
-      options.scaleStart = parseFloat(
-        el.getAttribute(SCALE_START_ATTRIBUTE_NAME)
-      );
-
-      userAssert(
-        options.scaleStart > 0,
-        '"%s" attribute must be a ' +
-          'positive number. Found negative or zero in element %s',
-        SCALE_START_ATTRIBUTE_NAME,
-        el
-      );
-    }
-
-    if (el.hasAttribute(SCALE_END_ATTRIBUTE_NAME)) {
-      options.scaleEnd = parseFloat(el.getAttribute(SCALE_END_ATTRIBUTE_NAME));
+    PRESET_OPTION_ATTRIBUTES.forEach((name) => {
+      if (!el.hasAttribute(name)) {
+        return;
+      }
+      const value = parseFloat(el.getAttribute(name));
 
       userAssert(
-        options.scaleEnd > 0,
+        value > 0,
         '"%s" attribute must be a ' +
           'positive number. Found negative or zero in element %s',
-        SCALE_END_ATTRIBUTE_NAME,
+        name,
         el
       );
-    }
 
-    if (el.hasAttribute(TRANSLATE_X_ATTRIBUTE_NAME)) {
-      options.translateX = parseFloat(
-        el.getAttribute(TRANSLATE_X_ATTRIBUTE_NAME)
-      );
-
-      userAssert(
-        options.translateX > 0,
-        '"%s" attribute must be a ' +
-          'positive number. Found negative or zero in element %s',
-        TRANSLATE_X_ATTRIBUTE_NAME,
-        el
-      );
-    }
-
-    if (el.hasAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)) {
-      options.translateY = parseFloat(
-        el.getAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)
-      );
-
-      userAssert(
-        options.translateY > 0,
-        '"%s" attribute must be a ' +
-          'positive number. Found negative or zero in element %s',
-        TRANSLATE_Y_ATTRIBUTE_NAME,
-        el
-      );
-    }
+      options[name] = value;
+    });
 
     return options;
   }

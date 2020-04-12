@@ -35,6 +35,23 @@ const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
 const SCALE_LOW_DEFAULT = 1;
 
+/** @const {string} */
+const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
+/** @const {string} */
+const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
+/** @const {string} */
+const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
+/** @const {string} */
+const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+
+/** @const {!Array<string} */
+export const PRESET_OPTION_ATTRIBUTES = [
+  SCALE_START_ATTRIBUTE_NAME,
+  SCALE_END_ATTRIBUTE_NAME,
+  TRANSLATE_X_ATTRIBUTE_NAME,
+  TRANSLATE_Y_ATTRIBUTE_NAME,
+];
+
 /**
  * A list of animations that are full bleed.
  * @private @const {!Array<string>}
@@ -243,7 +260,7 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions, options) {
-      const {translateX} = options;
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -264,7 +281,7 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions, options) {
-      const {translateX} = options;
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
 
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
@@ -286,7 +303,7 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions, options) {
-      const {translateY} = options;
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -307,7 +324,7 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions, options) {
-      const {translateY} = options;
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -328,7 +345,8 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(unusedDimensions, options) {
-      const {scaleStart, scaleEnd} = options;
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
 
       if (scaleStart) {
         userAssert(
@@ -348,7 +366,8 @@ export const presets = {
     duration: 1000,
     easing: 'linear',
     keyframes(unusedDimensions, options) {
-      const {scaleStart, scaleEnd} = options;
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
 
       if (scaleStart) {
         userAssert(

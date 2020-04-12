@@ -437,25 +437,25 @@ describes.realWin('amp-story animations', {}, (env) => {
       const targetsWithOptions = [
         {
           target: html`<div animate-in="pan-left" translate-x="100"></div>`,
-          expectedOptions: {translateX: 100},
+          expectedOptions: {'translate-x': 100},
         },
         {
           target: html`<div animate-in="pan-up" translate-y="200"></div>`,
-          expectedOptions: {translateY: 200},
+          expectedOptions: {'translate-y': 200},
         },
         {
           target: html`<div animate-in="zoom-out" scale-start="0.9"></div>`,
-          expectedOptions: {scaleStart: 0.9},
+          expectedOptions: {'scale-start': 0.9},
         },
         {
           target: html`<div animate-in="zoom-out" scale-end="0.2"></div>`,
-          expectedOptions: {scaleEnd: 0.2},
+          expectedOptions: {'scale-end': 0.2},
         },
         {
           target: html`
             <div animate-in="zoom-in" scale-end="0.1" scale-start="0.5"></div>
           `,
-          expectedOptions: {scaleEnd: 0.1, scaleStart: 0.5},
+          expectedOptions: {'scale-end': 0.1, 'scale-start': 0.5},
         },
       ];
 
