@@ -26,11 +26,11 @@ import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-ty
 import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {presets} from '../animation-presets';
+import {scopedQuerySelectorAll} from '../../../../src/dom';
+import {toArray} from '../../../../src/types';
 
-function htmlRefsFlat(element) {
-  const refs = htmlRefs(element);
-  return Object.keys(refs).map((k) => refs[k]);
-}
+const querySelectorAllAnimateIn = (element) =>
+  toArray(scopedQuerySelectorAll(element, '[animate-in]'));
 
 describes.realWin('amp-story animations', {}, (env) => {
   let html;
@@ -395,16 +395,16 @@ describes.realWin('amp-story animations', {}, (env) => {
     it(`creates internal runners when applying first frame`, async () => {
       const page = html`
         <div>
-          <div animate-in="fly-in-left" ref="0"></div>
-          <div animate-in="fade-in" ref="1"></div>
-          <div animate-in="drop" ref="2"></div>
+          <div animate-in="fly-in-left"></div>
+          <div animate-in="fade-in"></div>
+          <div animate-in="drop"></div>
         </div>
       `;
 
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrame();
 
-      htmlRefsFlat(page).forEach((target) => {
+      querySelectorAllAnimateIn(page).forEach((target) => {
         const preset = presets[target.getAttribute('animate-in')];
         expect(
           createAnimationRunner.withArgs(
@@ -483,15 +483,15 @@ describes.realWin('amp-story animations', {}, (env) => {
     it(`applies first frame`, async () => {
       const page = html`
         <div>
-          <div animate-in="fly-in-left" ref="0"></div>
-          <div animate-in="fade-in" ref="1"></div>
-          <div animate-in="drop" ref="2"></div>
+          <div animate-in="fly-in-left"></div>
+          <div animate-in="fade-in"></div>
+          <div animate-in="drop"></div>
         </div>
       `;
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrame();
       expect(runner.applyFirstFrame).to.have.callCount(
-        htmlRefsFlat(page).length
+        querySelectorAllAnimateIn(page).length
       );
     });
 
@@ -584,9 +584,9 @@ describes.realWin('amp-story animations', {}, (env) => {
       it(`calls ${runnerMethod}() on all runners calling ${managerMethod}()`, async () => {
         const page = html`
           <div>
-            <div animate-in="fly-in-left" ref="0"></div>
-            <div animate-in="fade-in" ref="1"></div>
-            <div animate-in="drop" ref="2"></div>
+            <div animate-in="fly-in-left"></div>
+            <div animate-in="fade-in"></div>
+            <div animate-in="drop"></div>
           </div>
         `;
 
@@ -595,7 +595,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         await animationManager.applyFirstFrame();
         animationManager[managerMethod]();
         expect(runner[runnerMethod]).to.have.callCount(
-          htmlRefsFlat(page).length
+          querySelectorAllAnimateIn(page).length
         );
       });
     });
