@@ -44,7 +44,7 @@ const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
 
-/** @const {!Array<string} */
+/** @const {!Array<string>} */
 export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_START_ATTRIBUTE_NAME,
   SCALE_END_ATTRIBUTE_NAME,
