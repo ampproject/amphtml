@@ -293,7 +293,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * The random subdomain to load SafeFrame from, if SafeFrame is
      * being loaded from a random subdomain and if the subdomain
      * has been generated.
-     * @private {string|null}
+     * @private {?string}
      */
     this.safeFrameRandomSubdomain_ = null;
 
@@ -1054,9 +1054,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
-    if (!this.safeFrameRandomSubdomain_) {
-      this.safeFrameRandomSubdomain_ = this.getRandomString_();
-    }
+    this.safeFrameRandomSubdomain_ =
+      this.safeFrameRandomSubdomain_ || this.getRandomString_();
 
     return (
       `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
@@ -1628,21 +1627,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getRandomString_() {
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
-    let randomValues = Services.cryptoFor(this.win).getSecureRandomBytes(
+    const randomValues = Services.cryptoFor(this.win).getSecureRandomBytes(
       length
     );
 
-    if (!randomValues) {
-      randomValues = new Array(length);
-      for (let i = 0; i < length; ++i) {
-        randomValues[i] = Math.floor(Math.random() * 255);
-      }
-    }
-
-    // If crypto isn't available, just use Math.random.
     let randomSubdomain = '';
     for (let i = 0; i < length; i++) {
-      const randomValue = randomValues[i];
+      // If crypto isn't available, just use Math.random.
+      const randomValue = randomValues
+        ? randomValues[i]
+        : Math.floor(Math.random() * 255);
       // Ensure each byte is represented with two hexadecimal characters.
       if (randomValue <= 15) {
         randomSubdomain += '0';
