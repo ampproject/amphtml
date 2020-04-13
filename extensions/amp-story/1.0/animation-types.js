@@ -17,7 +17,10 @@
 /** @typedef {!Array<!Object<string, *>>} */
 export let KeyframesDef;
 
-/** @typedef {(function(StoryAnimationDimsDef):!KeyframesDef)|!KeyframesDef} */
+/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!KeyframesDef} */
+export let KeyframesFilterFnDef;
+
+/** @typedef {!KeyframesDef|!KeyframesFilterFnDef} */
 export let KeyframesOrFilterFnDef;
 
 /**
