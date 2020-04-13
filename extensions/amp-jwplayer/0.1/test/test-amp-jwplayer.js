@@ -15,9 +15,9 @@
  */
 
 import '../amp-jwplayer';
-import {htmlFor} from '../../../../src/static-template';
 import * as utils from '../../../../src/dom';
-import { VideoEvents } from '../../../../src/video-interface';
+import {VideoEvents} from '../../../../src/video-interface';
+import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
   'amp-jwplayer',
@@ -42,14 +42,10 @@ describes.realWin(
       const html = htmlFor(env.win.document);
 
       env.sandbox
-      .stub(env.ampdoc.getHeadNode(), 'querySelector')
-      .withArgs('meta[property="og:title"]')
-      .returns(
-        html`
-          <meta property="og:title" content="title_tag" />
-        `
-      );
-      
+        .stub(env.ampdoc.getHeadNode(), 'querySelector')
+        .withArgs('meta[property="og:title"]')
+        .returns(html` <meta property="og:title" content="title_tag" /> `);
+
       jwp.setAttribute('width', '320');
       jwp.setAttribute('height', '180');
       jwp.setAttribute('layout', 'responsive');
@@ -118,29 +114,29 @@ describes.realWin(
           'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true&isAMP=true'
         );
       });
-    })
+    });
 
     describe('methods', async () => {
       let impl;
       function mockMessage(event, detail) {
         impl.onMessage_({
-          data: { event,  detail },
+          data: {event, detail},
           origin: 'https://ssl.p.jwpcdn.com',
           source: impl.element.querySelector('iframe').contentWindow,
         });
       }
-      beforeEach( async () => {
-        let jwp = await getjwplayer({
+      beforeEach(async () => {
+        const jwp = await getjwplayer({
           'data-media-id': 'BZ6tc0gy',
-          'data-player-id': 'uoIbMPm3'
+          'data-player-id': 'uoIbMPm3',
         });
         impl = jwp.implementation_;
-      })
+      });
 
       it('supports platform', () => {
         expect(impl.supportsPlatform()).to.be.true;
       });
-  
+
       it('is interactive', () => {
         expect(impl.isInteractive()).to.be.true;
       });
@@ -158,53 +154,52 @@ describes.realWin(
         impl.currentTime_ = 10;
         expect(impl.getCurrentTime()).to.equal(10);
       });
-  
+
       it('gets duration from playlist item', () => {
-        impl.playlistItem = { 
-          duration: 50
-        }
-  
-        expect(impl.getDuration()).to.equal(impl.playlistItem.duration);
+        impl.playlistItem_ = {
+          duration: 50,
+        };
+
+        expect(impl.getDuration()).to.equal(impl.playlistItem_.duration);
       });
-  
+
       it('gets duration when externally set', () => {
-        impl.duration_ = 50
-        impl.playlistItem = { 
-          duration: 0
-        }
+        impl.duration_ = 50;
+        impl.playlistItem_ = {
+          duration: 0,
+        };
 
         expect(impl.getDuration()).to.equal(impl.duration_);
       });
-  
+
       it('gets played ranges', () => {
         expect(impl.playedRanges_).to.deep.equal(impl.getPlayedRanges());
       });
-  
-  
+
       it('seeks', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.seekTo(10);
         expect(spy).to.be.calledWith('seek', 10);
       });
-  
+
       it('plays', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.play();
-        expect(spy).to.be.calledWith('play', { reason: undefined });
+        expect(spy).to.be.calledWith('play', {reason: undefined});
       });
-  
+
       it('autoplays', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.play(true);
-        expect(spy).to.be.calledWith('play', { reason: 'auto' });
+        expect(spy).to.be.calledWith('play', {reason: 'auto'});
       });
-  
+
       it('should pause if the video is playing', () => {
         env.sandbox.spy(impl, 'pause');
         impl.pauseCallback();
         expect(impl.pause.called).to.be.true;
       });
-  
+
       it('can pause', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.play(true);
@@ -215,19 +210,19 @@ describes.realWin(
         env.sandbox.spy(impl, 'sendCommand_');
         impl.mute();
         expect(impl.sendCommand_).calledWith('setMute', true);
-      })
+      });
 
       it('can unmute', () => {
         env.sandbox.spy(impl, 'sendCommand_');
         impl.unmute();
         expect(impl.sendCommand_).calledWith('setMute', false);
-      })
+      });
 
       it('can enter fullscreen', () => {
         const spy = env.sandbox.spy(utils, 'fullscreenEnter');
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
         impl.fullscreenEnter();
-        if (impl.isSafariOrIos()) {
+        if (impl.isSafariOrIos_()) {
           return expect(messageSpy).calledWith('setFullscreen', true);
         }
         expect(spy).calledWith(impl.iframe_);
@@ -238,7 +233,7 @@ describes.realWin(
         const messageSpy = env.sandbox.spy(impl, 'sendCommand_');
 
         impl.fullscreenExit();
-        if (impl.isSafariOrIos()) {
+        if (impl.isSafariOrIos_()) {
           return expect(messageSpy).calledWith('setFullscreen', true);
         }
         expect(spy).calledWith(impl.iframe_);
@@ -251,17 +246,17 @@ describes.realWin(
           expect(spy).returned(undefined);
         });
 
-        it('returns early if data isn\'t JSON or object', () => {
+        it("returns early if data isn't JSON or object", () => {
           const spy = env.sandbox.spy(impl, 'onMessage_');
-          impl.onMessage_({ data: 'Hello World'})
+          impl.onMessage_({data: 'Hello World'});
           expect(spy).returned(undefined);
         });
 
         it('calls onReady if valid ready message recieved', () => {
           const spy = env.sandbox.spy(impl, 'onReadyOnce_');
           const mockItem = {};
-          const detail = { muted: false, playlistItem: mockItem };
-          
+          const detail = {muted: false, playlistItem: mockItem};
+
           mockMessage('ready', detail);
           expect(spy).calledWith(detail);
         });
@@ -271,68 +266,70 @@ describes.realWin(
           const exitSpy = env.sandbox.spy(impl, 'fullscreenExit');
 
           // Stub native fullscreen detection for headless testing
-          const isFullscreen =  env.sandbox.stub(impl, 'isFullscreen').returns(false);
-          
-          mockMessage('fullscreen', { fullscreen: true });
+          const isFullscreen = env.sandbox
+            .stub(impl, 'isFullscreen')
+            .returns(false);
+
+          mockMessage('fullscreen', {fullscreen: true});
           expect(exitSpy.called).to.be.false;
           expect(enterSpy.called).to.be.true;
-          
+
           isFullscreen.returns(true);
 
-          mockMessage('fullscreen', { fullscreen: false });
+          mockMessage('fullscreen', {fullscreen: false});
           expect(exitSpy.called).to.be.true;
           expect(enterSpy.callCount).to.equal(1);
         });
 
         it('updates duration from meta', () => {
-          mockMessage('meta', { metadataType: 'media', duration: 50 });
+          mockMessage('meta', {metadataType: 'media', duration: 50});
           expect(impl.duration_).to.equal(50);
         });
 
         it('updates mute from state', () => {
           const spy = env.sandbox.spy(impl.element, 'dispatchCustomEvent');
-          mockMessage('mute', { mute: true });
+          mockMessage('mute', {mute: true});
           expect(spy).calledWith(VideoEvents.MUTED);
           expect(impl.muted_).equals(true);
-          mockMessage('mute', { mute: false });
+          mockMessage('mute', {mute: false});
           expect(spy).calledWith(VideoEvents.UNMUTED);
           expect(impl.muted_).equals(false);
         });
 
         it('updates played ranges from state', () => {
-          const mockPlayedRanges = { ranges: [[0, 3.187593]] };
-          mockMessage('playedRanges', mockPlayedRanges)
+          const mockPlayedRanges = {ranges: [[0, 3.187593]]};
+          mockMessage('playedRanges', mockPlayedRanges);
           expect(impl.playedRanges_).to.equal(mockPlayedRanges.ranges);
         });
 
         it('updates playlist item from state', () => {
           const playlistItem = {
-            "title": "test title",
-            "mediaid": "BZ6tc0gy",
-            "image": "http://foo.bar",
-            "duration": 52,
-            "description": "",
-            "file": "http://foo.bar",
-            "meta": {
-              "title": "test title",
-              "artist": "localhost",
-              "album": "",
-              "artwork": [
+            'title': 'test title',
+            'mediaid': 'BZ6tc0gy',
+            'image': 'http://foo.bar',
+            'duration': 52,
+            'description': '',
+            'file': 'http://foo.bar',
+            'meta': {
+              'title': 'test title',
+              'artist': 'localhost',
+              'album': '',
+              'artwork': [
                 {
-                  "sizes": "",
-                  "src": "http://foo.bar",
-                  "type": ""
-                }
-              ]
-            }
-          }
-          mockMessage('playlistItem', playlistItem)
-          expect(impl.playlistItem).to.deep.equal(playlistItem);
+                  'sizes': '',
+                  'src': 'http://foo.bar',
+                  'type': '',
+                },
+              ],
+            },
+          };
+          mockMessage('playlistItem', playlistItem);
+          expect(impl.playlistItem_).to.deep.equal(playlistItem);
         });
 
         it('updates current time from state', () => {
-          const mockTime = { currentTime: 30 };
-          mockMessage('time', mockTime)
+          const mockTime = {currentTime: 30};
+          mockMessage('time', mockTime);
           expect(impl.currentTime_).to.equal(mockTime.currentTime);
         });
 
@@ -344,7 +341,7 @@ describes.realWin(
           expect(spy).calledWith('setControls', false);
           impl.showControls();
           expect(spy).calledWith('setControls', true);
-        })
+        });
       });
     });
 
@@ -391,7 +388,7 @@ describes.realWin(
       const jwp = doc.createElement('amp-jwplayer');
       const attributes = {
         'data-media-id': 'BZ6tc0gy',
-        'data-player-id': 'uoIbMPm3'
+        'data-player-id': 'uoIbMPm3',
       };
 
       for (const key in attributes) {
@@ -400,14 +397,10 @@ describes.realWin(
       const html = htmlFor(env.win.document);
 
       env.sandbox
-      .stub(env.ampdoc.getHeadNode(), 'querySelector')
-      .withArgs('meta[property="og:title"]')
-      .returns(
-        html`
-          <meta property="og:title" content="title_tag" />
-        `
-      );
-      
+        .stub(env.ampdoc.getHeadNode(), 'querySelector')
+        .withArgs('meta[property="og:title"]')
+        .returns(html` <meta property="og:title" content="title_tag" /> `);
+
       jwp.setAttribute('width', '320');
       jwp.setAttribute('height', '180');
       jwp.setAttribute('layout', 'responsive');
@@ -422,7 +415,6 @@ describes.realWin(
       expect(imp['contentBackfill_']).to.equal('');
       await jwp.layoutCallback();
 
-      
       const placeholder = jwp.querySelector('[placeholder]');
       const unlistenSpy = env.sandbox.spy(imp, 'unlistenFrame_');
       imp.unlayoutCallback();
@@ -431,7 +423,7 @@ describes.realWin(
       expect(imp.iframe_).to.be.null;
       expect(placeholder).to.not.have.display('');
     });
-    
+
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {
         return getjwplayer({
@@ -456,7 +448,7 @@ describes.realWin(
       return getjwplayer({
         'data-playlist-id': 'zzz',
         'data-player-id': 'sDZEo0ea',
-      }).then(jw => {
+      }).then((jw) => {
         const iframe = jw.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
