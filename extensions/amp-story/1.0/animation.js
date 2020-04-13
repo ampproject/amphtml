@@ -173,7 +173,7 @@ export class AnimationRunner {
 
   /**
    * @param {!Element} page
-   * @param {!StoryAnimationDef} animationDef
+   * @param {!WebAnimationDef|!StoryAnimationDef} animationDef
    * @param {!Promise<!../../amp-animation/0.1/web-animations.Builder>} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!AnimationSequence} sequence
@@ -239,7 +239,7 @@ export class AnimationRunner {
   resolvePresetKeyframes_(keyframesOrCreateFn, keyframeOptions) {
     if (typeof keyframesOrCreateFn === 'function') {
       return this.getDims().then((dimensions) => {
-        const fn = /** @type {!KeyframesFilterFnDef} */ (keyframesOrCreateFn);
+        const fn = /** @type {!WebKeyframesCreateFnDef} */ (keyframesOrCreateFn);
         return fn(dimensions, keyframeOptions);
       });
     }
@@ -610,14 +610,19 @@ export class AnimationManager {
           scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
           (el) =>
             this.createRunner_(
-              this.createAnimationDef(el, this.getPreset_(el)),
+              this.createAnimationDefFromPreset_(el, this.getPreset_(el)),
               this.getKeyframeOptions_(el)
             )
         )
         .concat(
           Array.prototype.map.call(
             this.root_.querySelectorAll('amp-story-animation'),
-            (el) => this.createRunner_(parseAnimationConfig(el))
+            (el) =>
+              this.createRunner_(
+                // Casting since we're getting a JsonObject. This will be
+                // validated during preparation phase.
+                /** @type {!WebAnimationDef} */ (parseAnimationConfig(el))
+              )
           )
         );
     }
@@ -644,8 +649,9 @@ export class AnimationManager {
    * @param {!Element} el
    * @param {!StoryAnimationPresetDef} preset
    * @return {!StoryAnimationDef}
+   * @private
    */
-  createAnimationDef(el, preset) {
+  createAnimationDefFromPreset_(el, preset) {
     const animationDef = {
       preset,
       target: el,
