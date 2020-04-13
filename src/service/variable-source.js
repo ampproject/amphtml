@@ -342,7 +342,7 @@ export class VariableSource {
 
     // Disallow all URL macros for AMP4Email format documents.
     if (this.ampdoc.isSingleDoc()) {
-      const doc = /** @type {Document} */ (this.ampdoc.getRootNode());
+      const doc = /** @type {!Document} */ (this.ampdoc.getRootNode());
       if (isAmp4Email(doc)) {
         /**
          * The whitelist of variables allowed for variable substitution.
