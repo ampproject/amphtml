@@ -637,20 +637,17 @@ export class AnimationManager {
    * @private
    */
   getAnimationDefs_() {
-    // From preset
-    const animationDefs = Array.prototype.map.call(
-      scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
-      (el) => this.createAnimationDef(el, this.getPreset_(el))
-    );
-    // <amp-story-animation>
-    const webAnimationSpecElement = childElementByTag(
-      this.root_,
-      'amp-story-animation'
-    );
-    if (webAnimationSpecElement) {
-      animationDefs.push(parseAnimationConfig(webAnimationSpecElement));
-    }
-    return animationDefs;
+    return Array.prototype.map
+      .call(
+        scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
+        (el) => this.createAnimationDef(el, this.getPreset_(el))
+      )
+      .concat(
+        Array.prototype.map.call(
+          this.root_.querySelectorAll('amp-story-animation'),
+          parseAnimationConfig
+        )
+      );
   }
 
   /**

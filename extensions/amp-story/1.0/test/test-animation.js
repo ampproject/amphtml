@@ -403,7 +403,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(runner);
     });
 
-    it('creates internal runners when applying first frame', async () => {
+    it('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -428,6 +428,51 @@ describes.realWin('amp-story animations', {}, (env) => {
           )
         ).to.have.been.calledOnce;
       });
+    });
+
+    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
+      const spec1 = {keyframes: [{opacity: 1}]};
+      const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
+
+      const page = html`
+        <div>
+          <amp-story-animation>
+            <script type="application/json" ref="spec1holder"></script>
+          </amp-story-animation>
+          <amp-story-animation>
+            <script type="application/json" ref="spec2holder"></script>
+          </amp-story-animation>
+        </div>
+      `;
+
+      const {spec1holder, spec2holder} = htmlRefs(page);
+      spec1holder.textContent = JSON.stringify(spec1);
+      spec2holder.textContent = JSON.stringify(spec2);
+
+      const animationManager = new AnimationManager(page, ampdoc);
+      await animationManager.applyFirstFrame();
+
+      expect(
+        createAnimationRunner.withArgs(
+          page,
+          env.sandbox.match(spec1),
+          webAnimationBuilderPromise,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
+
+      expect(
+        createAnimationRunner.withArgs(
+          page,
+          env.sandbox.match(spec2),
+          webAnimationBuilderPromise,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
     });
 
     it('fails when using unknown presets', () => {
