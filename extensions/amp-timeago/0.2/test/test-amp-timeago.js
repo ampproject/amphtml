@@ -37,8 +37,15 @@ describes.realWin(
         return shadow.querySelector('time');
       });
       const time = shadow.querySelector('time');
-      await waitForChildPromise(time, (time) => {
+      if (time.textContent) {
         return time.textContent;
+      }
+      await new Promise((resolve) => {
+        const mo = new MutationObserver(() => {
+          mo.disconnect();
+          resolve();
+        });
+        mo.observe(time, {characterData: true, subtree: true});
       });
       return time.textContent;
     };

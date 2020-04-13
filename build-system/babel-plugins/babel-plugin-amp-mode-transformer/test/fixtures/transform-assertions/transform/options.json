@@ -1,4 +1,4 @@
 {
-  "plugins": ["../../../../../babel-plugin-amp-mode-transformer"],
+  "plugins": ["../../../.."],
   "sourceType": "module"
 }
