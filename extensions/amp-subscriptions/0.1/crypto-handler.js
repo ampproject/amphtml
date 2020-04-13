@@ -69,6 +69,9 @@ export class CryptoHandler {
   }
 
   /**
+   * Returns encrypted document key if it exists.
+   * This key is needed for requesting a different key
+   * that decrypts locked content on the page.
    * @param {string} serviceId Who you want to decrypt the key.
    *                           For example: 'google.com'
    * @return {?string}

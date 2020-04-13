@@ -16,12 +16,12 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
-const conf = require('./build.conf');
 const fs = require('fs-extra');
 const path = require('path');
 const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
+const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 
 /**
  * Given a filepath, return the sourcemap.
@@ -80,27 +80,32 @@ function terserMinify(code) {
 }
 
 /**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup added
+ * space with Terser. Used only in esm mode.
  *
  * @param {string} directory directory this file lives in
- * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-exports.postClosureBabel = function (directory, isEsmBuild) {
-  const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
-
+exports.postClosureBabel = function (directory) {
   return through.obj(function (file, enc, next) {
-    if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
+    if (!argv.esm || path.extname(file.path) === '.map') {
       return next(null, file);
     }
 
+    debug(
+      CompilationLifecycles['closured-pre-babel'],
+      file.path,
+      file.contents
+    );
     const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
-      plugins: babelPlugins,
-      retainLines: false,
-      sourceMaps: true,
-      inputSourceMap: false,
+      caller: {name: 'post-closure'},
     });
+    debug(
+      CompilationLifecycles['closured-pre-terser'],
+      file.path,
+      file.contents
+    );
     let remapped = remapping(
       babelMap,
       returnMapFirst(map),
@@ -109,6 +114,7 @@ exports.postClosureBabel = function (directory, isEsmBuild) {
 
     const {compressed, terserMap} = terserMinify(code);
     file.contents = Buffer.from(compressed, 'utf-8');
+    debug(CompilationLifecycles['complete'], file.path, compressed);
 
     // TODO: Remapping should support a chain, instead of multiple invocations.
     remapped = remapping(

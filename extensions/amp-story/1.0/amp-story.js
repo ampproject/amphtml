@@ -1183,7 +1183,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   validateConsent_(consentEl) {
     if (!childElementByTag(consentEl, 'amp-story-consent')) {
-      dev().error(TAG, 'amp-consent must have an amp-story-consent child');
+      user().error(TAG, 'amp-consent must have an amp-story-consent child');
     }
 
     const allowedTags = ['SCRIPT', 'AMP-STORY-CONSENT'];
@@ -1195,7 +1195,7 @@ export class AmpStory extends AMP.BaseElement {
     if (toRemoveChildren.length === 0) {
       return;
     }
-    dev().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
+    user().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
@@ -1855,7 +1855,15 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           for (let i = 0; i < pageAttachments.length; i++) {
-            this.element.appendChild(pageAttachments[i]);
+            this.element.insertBefore(
+              pageAttachments[i],
+              // Attachments that are just links are rendered in-line with their
+              // story page.
+              pageAttachments[i].getAttribute('href')
+                ? pageAttachments[i].parentElement.nextElementSibling
+                : // Other attachments are rendered at the end.
+                  null
+            );
           }
         });
 
