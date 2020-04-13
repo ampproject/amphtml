@@ -678,7 +678,7 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
-    devAssert(!usePremeasuredRect || !this.intersect_);
+    devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
