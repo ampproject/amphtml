@@ -209,8 +209,6 @@ describes.realWin('amp-story animations', {}, (env) => {
       const delay = 456;
 
       const animationDef = {
-        duration: 0,
-        delay: 0,
         target,
         easing,
         duration,
