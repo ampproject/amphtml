@@ -566,9 +566,6 @@ export class AnimationManager {
     const keyframeOptions = this.getKeyframeOptions_(el);
     const animationDef = this.createAnimationDef(el, preset);
 
-    // TODO(alanorozco): This should be part of a mutate cycle.
-    setStyleForPreset(el, name);
-
     return AnimationRunner.create(
       this.root_,
       animationDef,
@@ -641,6 +638,9 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+
+    // TODO(alanorozco): This should be part of a mutate cycle.
+    setStyleForPreset(el, name);
 
     return /** @type {StoryAnimationPresetDef} */ (userAssert(
       presets[name],
