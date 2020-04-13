@@ -65,7 +65,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
 
   function expectElementToHaveBeenShown(element, sync = false) {
     if (sync) {
-      expect(mutateElementStub).to.not.have.been.called;
+      expect(mutateElementStub).calledWithMatch(
+        element,
+        env.sandbox.match.func
+      );
     } else {
       expectElementMutatedAsync(element);
     }
