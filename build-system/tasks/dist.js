@@ -37,9 +37,6 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {
-  createModuleCompatibleES5Bundle,
-} = require('./create-module-compatible-es5-bundle');
-const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {
@@ -131,14 +128,6 @@ async function dist() {
   }
   if (!argv.watch) {
     await stopNailgunServer(distNailgunPort);
-  }
-
-  if (argv.esm) {
-    await createModuleCompatibleES5Bundle('v0.mjs');
-    if (!argv.core_runtime_only) {
-      await createModuleCompatibleES5Bundle('amp4ads-v0.mjs');
-      await createModuleCompatibleES5Bundle('shadow-v0.mjs');
-    }
   }
 
   if (!argv.core_runtime_only) {
