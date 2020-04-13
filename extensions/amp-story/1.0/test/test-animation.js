@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   AnimationManager,
   AnimationRunner,
@@ -39,7 +40,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
   beforeEach(() => {
     html = htmlFor(env.win.document);
-    ampdoc = {win: env.win};
+    ampdoc = new AmpDocSingle(env.win);
   });
 
   describe('AnimationRunner', () => {
