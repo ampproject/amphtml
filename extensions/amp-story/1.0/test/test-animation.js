@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {match} from 'sinon'; // eslint-disable-line local/no-import
-
 import {
   AnimationManager,
   AnimationRunner,
@@ -94,8 +92,8 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       expect(
         animationDef.preset.keyframes.withArgs(
-          match.any,
-          match(keyframeOptions)
+          env.sandbox.match.any,
+          env.sandbox.match(keyframeOptions)
         )
       ).to.have.been.calledOnce;
     });
@@ -140,7 +138,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       expect(
         animationDef.preset.keyframes.withArgs(
-          match({
+          env.sandbox.match({
             pageWidth: pageDimensions.width,
             pageHeight: pageDimensions.height,
             targetWidth: targetDimensions.width,
@@ -148,7 +146,7 @@ describes.realWin('amp-story animations', {}, (env) => {
             targetX: targetDimensions.x - pageDimensions.x,
             targetY: targetDimensions.y - pageDimensions.y,
           }),
-          match.any
+          env.sandbox.match.any
         )
       ).to.have.been.calledOnce;
     });
@@ -225,7 +223,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       expect(
         webAnimationBuilder.createRunner.withArgs(
-          match({
+          env.sandbox.match({
             target,
             easing,
             duration,
@@ -409,11 +407,11 @@ describes.realWin('amp-story animations', {}, (env) => {
         expect(
           createAnimationRunner.withArgs(
             page,
-            match({target, preset}),
+            env.sandbox.match({target, preset}),
             webAnimationBuilderPromise,
-            match.any,
-            match.any,
-            match.any
+            env.sandbox.match.any,
+            env.sandbox.match.any,
+            env.sandbox.match.any
           )
         ).to.have.been.calledOnce;
       });
@@ -470,11 +468,11 @@ describes.realWin('amp-story animations', {}, (env) => {
         expect(
           createAnimationRunner.withArgs(
             page,
-            match({target}),
-            match.any,
-            match.any,
-            match.any,
-            match(expectedOptions)
+            env.sandbox.match({target}),
+            env.sandbox.match.any,
+            env.sandbox.match.any,
+            env.sandbox.match.any,
+            env.sandbox.match(expectedOptions)
           )
         ).to.have.been.calledOnce;
       });
@@ -537,34 +535,40 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       expect(
         createAnimationRunner.withArgs(
-          match.any,
-          match({target: animatedFirst, startAfterId: undefined}),
-          match.any,
-          match.any,
-          match.any,
-          match.any
+          env.sandbox.match.any,
+          env.sandbox.match({target: animatedFirst, startAfterId: undefined}),
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
         )
       ).to.have.been.calledOnce;
 
       expect(
         createAnimationRunner.withArgs(
-          match.any,
-          match({target: animatedSecond, startAfterId: 'animated-first'}),
-          match.any,
-          match.any,
-          match.any,
-          match.any
+          env.sandbox.match.any,
+          env.sandbox.match({
+            target: animatedSecond,
+            startAfterId: 'animated-first',
+          }),
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
         )
       ).to.have.been.calledOnce;
 
       expect(
         createAnimationRunner.withArgs(
-          match.any,
-          match({target: animatedThird, startAfterId: 'animated-second'}),
-          match.any,
-          match.any,
-          match.any,
-          match.any
+          env.sandbox.match.any,
+          env.sandbox.match({
+            target: animatedThird,
+            startAfterId: 'animated-second',
+          }),
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
         )
       ).to.have.been.calledOnce;
     });
