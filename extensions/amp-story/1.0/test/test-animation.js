@@ -241,6 +241,40 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
+    it('passes static definition (like <amp-story-animation>) to WebAnimationRunner', async () => {
+      const page = html`<div></div>`;
+
+      const webAnimationRunner = {
+        getPlayState: () => WebAnimationPlayState.IDLE,
+        onPlayStateChanged: () => {},
+      };
+
+      webAnimationBuilder.createRunner = env.sandbox.spy(
+        () => webAnimationRunner
+      );
+
+      const animationDef = {
+        selector: '.foo',
+        easing: 'test-easing',
+        duration: 123,
+        delay: 346,
+        keyframes: [{}],
+      };
+
+      new AnimationRunner(
+        page,
+        animationDef,
+        webAnimationBuilderPromise,
+        vsync,
+        sequence
+      );
+
+      await nextTick();
+
+      expect(webAnimationBuilder.createRunner.withArgs(animationDef)).to.have
+        .been.calledOnce;
+    });
+
     it('starts', async () => {
       const page = html`<div></div>`;
       const target = html`<div></div>`;

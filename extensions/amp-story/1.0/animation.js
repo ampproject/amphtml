@@ -595,28 +595,41 @@ export class AnimationManager {
   }
 
   /**
+   * Gets or creates AnimationRunners.
+   * These are either from an <amp-story-animation> config (WebAnimationDefs),
+   * or resolved from presets via animate-in attributes (StoryAnimationDefs).
+   * If a root element contains both kinds of definitions, they'll run
+   * concurrently.
    * @return {!Array<!AnimationRunner>}
    * @private
    */
   getOrCreateRunners_() {
     if (!this.runners_) {
-      this.runners_ = this.getAnimationDefs_().map((animationDef) =>
-        this.createRunner_(animationDef)
-      );
+      this.runners_ = Array.prototype.map
+        .call(
+          scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
+          (el) =>
+            this.createRunner_(
+              this.createAnimationDef(el, this.getPreset_(el)),
+              this.getKeyframeOptions_(el)
+            )
+        )
+        .concat(
+          Array.prototype.map.call(
+            this.root_.querySelectorAll('amp-story-animation'),
+            (el) => this.createRunner_(parseAnimationConfig(el))
+          )
+        );
     }
     return devAssert(this.runners_);
   }
 
   /**
    * @param {!WebAnimationDef|!StoryAnimationDef} animationDef
+   * @param {!Object<string, *>=} keyframeOptions
    * @return {!AnimationRunner}
    */
-  createRunner_(animationDef) {
-    const {target} = animationDef;
-    const keyframeOptions = target
-      ? this.getKeyframeOptions_(target)
-      : undefined;
-
+  createRunner_(animationDef, keyframeOptions) {
     return AnimationRunner.create(
       this.root_,
       animationDef,
@@ -625,29 +638,6 @@ export class AnimationManager {
       this.sequence_,
       keyframeOptions
     );
-  }
-
-  /**
-   * Gets animation definitions.
-   * These are either from an <amp-animation> config (WebAnimationDefs), or
-   * resolved from presets via animate-in attributes (StoryAnimationDefs).
-   * If a root element contains both kinds of definitions, they'll run
-   * concurrently.
-   * @return {!Array<!WebAnimationDef|!StoryAnimationDef>}
-   * @private
-   */
-  getAnimationDefs_() {
-    return Array.prototype.map
-      .call(
-        scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
-        (el) => this.createAnimationDef(el, this.getPreset_(el))
-      )
-      .concat(
-        Array.prototype.map.call(
-          this.root_.querySelectorAll('amp-story-animation'),
-          parseAnimationConfig
-        )
-      );
   }
 
   /**
