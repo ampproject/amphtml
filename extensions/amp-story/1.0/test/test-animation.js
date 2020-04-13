@@ -74,6 +74,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       const keyframeOptions = {foo: 'bar'};
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: env.sandbox.spy(() => [{}]),
@@ -121,6 +123,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(targetDimensions);
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: env.sandbox.spy(() => [{}]),
@@ -163,6 +167,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         const target = html`<div></div>`;
 
         const animationDef = {
+          duration: 0,
+          delay: 0,
           target,
           preset: {
             keyframes: keyframeDefTypes[keyframeDefType],
@@ -203,6 +209,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       const delay = 456;
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         easing,
         duration,
@@ -248,6 +256,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       webAnimationBuilder.createRunner = () => webAnimationRunner;
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: [{}],
@@ -286,6 +296,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       sequence.waitFor = env.sandbox.spy(() => promise);
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         startAfterId,
         preset: {
@@ -334,6 +346,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       sequence.notifyFinish = env.sandbox.spy();
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: [{}],

@@ -112,7 +112,10 @@ export class AnimationRunner {
     this.startAfterId_ = animationDef.startAfterId;
 
     /** @private @const {!Promise<!WebAnimationDef>} */
-    this.webAnimationDefPromise_ = this.getWebAnimationDef_(animationDef);
+    this.webAnimationDefPromise_ = this.getWebAnimationDef_(
+      animationDef,
+      keyframeOptions
+    );
 
     /**
      * @private @const {!Promise<
@@ -246,9 +249,10 @@ export class AnimationRunner {
   /**
    * Normalizes an animation definition into a WebAnimationDef to consume.
    * @param {!StoryAnimationDef|!WebAnimationDef} animationDef
+   * @param {!Object<string, *>} keyframeOptions
    * @return {!Promise<!WebAnimationDef>}
    */
-  getWebAnimationDef_(animationDef) {
+  getWebAnimationDef_(animationDef, keyframeOptions) {
     const {preset} = animationDef;
     if (!preset) {
       // This is an amp-animation config, so it's already formed how the
@@ -256,14 +260,16 @@ export class AnimationRunner {
       return Promise.resolve(/** @type {!WebAnimationDef} */ (animationDef));
     }
     const {target, delay, duration, easing} = animationDef;
-    return this.resolvePresetKeyframes_(preset.keyframes).then((keyframes) => ({
-      keyframes,
-      target,
-      delay,
-      duration,
-      easing,
-      fill: 'forwards',
-    }));
+    return this.resolvePresetKeyframes_(preset.keyframes, keyframeOptions).then(
+      (keyframes) => ({
+        keyframes,
+        target,
+        delay,
+        duration,
+        easing,
+        fill: 'forwards',
+      })
+    );
   }
 
   /**
@@ -729,8 +735,7 @@ export class AnimationManager {
   }
 
   /**
-   * @param el
-   * @param {!Element} target
+   * @param {!Element} el
    * @return {!Object<string, *>}
    * @private
    */
