@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpStoryPlayer} from './amp-story-player-impl';
 import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
@@ -32,8 +33,9 @@ export class AmpStoryPlayerManager {
   /**
    * Calls layoutCallback on the player when it is close to the viewport.
    * @param {!AmpStoryPlayer} playerImpl
+   * @private
    */
-  layoutWhenVisible(playerImpl) {
+  layoutPlayer_(playerImpl) {
     if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
       this.layoutFallback_(playerImpl);
       return;
@@ -86,6 +88,21 @@ export class AmpStoryPlayerManager {
       .top;
     if (this.win_./*OK*/ innerHeight * 2 > playerTop) {
       playerImpl.layoutCallback();
+    }
+  }
+
+  /**
+   * Builds and layouts the players when appropiate.
+   * @public
+   */
+  loadPlayers() {
+    const doc = this.win_.document;
+    const players = doc.getElementsByTagName('amp-story-player');
+    for (let i = 0; i < players.length; i++) {
+      const playerEl = players[i];
+      const player = new AmpStoryPlayer(this.win_, playerEl);
+      player.buildCallback();
+      this.layoutPlayer_(player);
     }
   }
 }
