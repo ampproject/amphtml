@@ -921,10 +921,11 @@ export class BaseElement {
    *
    * @param {function()} mutator
    * @param {Element=} opt_element
+   * @param {boolean} skipRemeasure
    * @return {!Promise}
    */
-  mutateElement(mutator, opt_element) {
-    return this.measureMutateElement(null, mutator, opt_element);
+  mutateElement(mutator, opt_element, skipRemeasure) {
+    return this.measureMutateElement(null, mutator, opt_element, skipRemeasure);
   }
 
   /**
