@@ -26,7 +26,7 @@ import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
-import {getPresetDef} from '../animation-presets';
+import {presets} from '../animation-presets';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
@@ -242,8 +242,11 @@ describes.realWin(
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = getPresetDef('pan-up', {});
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(dimensions);
+      const calculatedKeyframes = presets['pan-up'];
+      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+        dimensions,
+        /* options */ {}
+      );
 
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
