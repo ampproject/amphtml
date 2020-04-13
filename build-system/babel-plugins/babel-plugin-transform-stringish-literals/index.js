@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-const MERGEABLE_TYPES = ['StringLiteral', 'NumericLiteral', 'TemplateLiteral'];
+const ESCAPE_REGEX = /\${|\\|`/g;
 
 module.exports = function ({types: t}) {
   const cloneNodes = (nodes) => nodes.map((node) => t.cloneNode(node));
-  const escapeStringForTemplateLiteral = (value) =>
-    String(value).replace(/\x60/g, '\\`');
-  const canMergeBinaryExpression = (binaryExpression) =>
-    MERGEABLE_TYPES.includes(binaryExpression.left.type) &&
-    MERGEABLE_TYPES.includes(binaryExpression.right.type) &&
-    binaryExpression.operator === '+';
+  const escapeValue = (value) => String(value).replace(ESCAPE_REGEX, '\\$&');
 
   function whichCloneQuasi(clonedQuasis, index) {
     for (let i = index; i >= 0; i--) {
@@ -34,79 +29,78 @@ module.exports = function ({types: t}) {
     }
   }
 
+  function joinTemplateLiterals(leftPath, rightPath) {
+    const {node: leftNode} = leftPath;
+    const {node: rightNode} = rightPath;
+
+    // First merge the first member of the right quasi into the last quasi on the left.
+    const fromQuasi = rightNode.quasis[0];
+    const toQuasi = leftNode.quasis[leftNode.quasis.length - 1];
+    toQuasi.value.raw += fromQuasi.value.raw;
+    toQuasi.value.cooked += fromQuasi.value.cooked;
+
+    // Merge the right remaining quasis and expressions to ensure merged left is valid.
+    leftNode.quasis.push(...rightNode.quasis.slice(1));
+    leftNode.expressions.push(...rightNode.expressions);
+
+    // Now the left contains the values of the right, so remove the right.
+    rightPath.remove();
+  }
+
+  function joinMaybeTemplateLiteral(path) {
+    const left = path.get('left');
+    const right = path.get('right');
+    if (left.isTemplateLiteral()) {
+      if (right.isTemplateLiteral()) {
+        // When both sides are template literals, bypass `babel.evaluate` since it cannot handle this condition.
+        joinTemplateLiterals(left, right);
+        return;
+      }
+
+      const e = right.evaluate();
+      if (e.confident) {
+        const quasi = left.node.quasis[left.node.quasis.length - 1];
+        quasi.value.raw += escapeValue(e.value);
+        quasi.value.cooked += e.value;
+        right.remove();
+      }
+    } else if (right.isTemplateLiteral()) {
+      const e = left.evaluate();
+      if (e.confident) {
+        const quasi = right.node.quasis[0];
+        quasi.value.raw = escapeValue(e.value) + quasi.value.raw;
+        quasi.value.cooked = e.value + quasi.value.cooked;
+        left.remove();
+      }
+    }
+  }
+
   return {
     name: 'flatten-stringish-literals',
     visitor: {
       BinaryExpression: {
         exit(path) {
-          if (!canMergeBinaryExpression(path.node)) {
+          if (path.node.operator !== '+') {
             return;
           }
 
-          const {left, right} = path.node;
-          if (t.isTemplateLiteral(right)) {
-            const rightQuasis = cloneNodes(right.quasis);
-
-            if (t.isTemplateLiteral(left)) {
-              const leftQuasis = cloneNodes(left.quasis);
-              const finalLeftQuasi = leftQuasis[leftQuasis.length - 1];
-              leftQuasis[leftQuasis.length - 1].value = {
-                raw: finalLeftQuasi.value.raw + rightQuasis[0].value.raw,
-                cooked: finalLeftQuasi.value.cooked + rightQuasis[0].value.raw,
-              };
-              rightQuasis[0] = null;
-
-              path.replaceWith(
-                t.templateLiteral(
-                  [...leftQuasis, ...rightQuasis.filter(Boolean)],
-                  [
-                    ...cloneNodes(left.expressions),
-                    ...cloneNodes(right.expressions),
-                  ]
-                )
-              );
-              return;
-            }
-
-            // Left is a literal, containing a value to merge into the right.
-            const leftValue = escapeStringForTemplateLiteral(left.value);
-            rightQuasis[0].value = {
-              raw: leftValue + rightQuasis[0].value.raw,
-              cooked: leftValue + rightQuasis[0].value.cooked,
-            };
-            path.replaceWith(
-              t.templateLiteral(rightQuasis, cloneNodes(right.expressions))
-            );
-          }
-
-          // Right is a literal containing a value to merge into the left.
-          if (t.isTemplateLiteral(left)) {
-            const rightValue = escapeStringForTemplateLiteral(right.value);
-            const leftQuasis = cloneNodes(left.quasis);
-            const finalLeftQuasi = leftQuasis[leftQuasis.length - 1];
-            leftQuasis[leftQuasis.length - 1].value = {
-              raw: finalLeftQuasi.value.raw + rightValue,
-              cooked: finalLeftQuasi.value.cooked + rightValue,
-            };
-
-            path.replaceWith(
-              t.templateLiteral(leftQuasis, cloneNodes(left.expressions))
-            );
+          const e = path.evaluate();
+          if (e.confident) {
+            path.replaceWith(t.valueToNode(e.value));
+            path.skip();
             return;
           }
 
-          // Merge two string literals
-          if (t.isStringLiteral(left) && t.isStringLiteral(right)) {
-            const newLiteral = t.cloneNode(left);
-            newLiteral.value = left.value + String(right.value);
-            path.replaceWith(newLiteral);
-          }
+          joinMaybeTemplateLiteral(path);
         },
       },
+
       TemplateLiteral(path) {
+        // Convert any items inside a template literal that are static literals.
+        // `foo{'123'}bar` => `foo123bar`
         const {expressions, quasis} = path.node;
-        const newQuasis = cloneNodes(quasis);
-        const newExpressions = cloneNodes(expressions);
+        let newQuasis = cloneNodes(quasis);
+        let newExpressions = cloneNodes(expressions);
         let conversions = 0;
 
         for (let index = expressions.length; index >= 0; index--) {
@@ -123,7 +117,7 @@ module.exports = function ({types: t}) {
             const {value: previousValue} = newQuasis[modifyIndex];
 
             newQuasis[modifyIndex] = t.templateElement({
-              raw: previousValue.raw + value + changedValue.raw,
+              raw: previousValue.raw + escapeValue(value) + changedValue.raw,
               cooked: previousValue.cooked + value + changedValue.cooked,
             });
             newQuasis[index + 1] = null;
@@ -132,16 +126,20 @@ module.exports = function ({types: t}) {
           }
         }
 
-        if (conversions === 0) {
+        newQuasis = newQuasis.filter(Boolean);
+        if (newQuasis.length === 1) {
+          // When the remaining number of quasis is one.
+          // Replace the TemplateLiteral with a StringLiteral.
+          // `foo` => 'foo'
+          path.replaceWith(t.stringLiteral(newQuasis[0].value.cooked));
           return;
         }
 
-        path.replaceWith(
-          t.templateLiteral(
-            newQuasis.filter(Boolean),
-            newExpressions.filter(Boolean)
-          )
-        );
+        if (conversions > 0) {
+          // Otherwise, any conversions of members requires replacing the existing TemplateLiteral
+          newExpressions = newExpressions.filter(Boolean);
+          path.replaceWith(t.templateLiteral(newQuasis, newExpressions));
+        }
       },
     },
   };

@@ -18,7 +18,6 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -306,30 +305,21 @@ exports.getGraph = function (entryModules, config) {
   });
 
   config.babel = config.babel || {};
-  const babelPlugins = conf
-    .plugins({
-      isEsmBuild: !!argv.esm,
-      isSinglePass: true,
-      isForTesting: !!argv.fortesting,
-    })
-    .concat(['transform-es2015-modules-commonjs']);
-
-  // Use browserify with babel to learn about deps.
-  const b = browserify(entryModules, {
+  const browserifyOptions = {
     basedir: '.',
     browserField: 'module',
     debug: true,
     deps: true,
     detectGlobals: false,
     fast: true,
-  })
+  };
+
+  // Use browserify with babel to learn about deps.
+  const b = browserify(entryModules, browserifyOptions)
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
-    .transform(babelify, {
-      compact: false,
-      cwd: process.cwd(),
-      plugins: babelPlugins,
-    });
+    .transform(babelify, {caller: {name: 'single-pass-deps'}, global: true});
+
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
@@ -733,10 +723,7 @@ function eliminateIntermediateBundles() {
         };
       }
       const {code, map: babelMap} = babel.transformFileSync(path, {
-        plugins: conf.eliminateIntermediateBundles(),
-        compact: false,
-        sourceMaps: true,
-        inputSourceMap: false,
+        caller: {name: 'single-pass-post'},
       });
       let remapped = remapping(
         babelMap,

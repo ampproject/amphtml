@@ -40,6 +40,9 @@ const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
+const {
   distNailgunPort,
   startNailgunServer,
   stopNailgunServer,
@@ -100,6 +103,7 @@ async function runPreDistSteps(watch) {
   await copyParsers();
   await bootstrapThirdPartyFrames(watch, /* minify */ true);
   await startNailgunServer(distNailgunPort, /* detached */ false);
+  displayLifecycleDebugging();
 }
 
 /**
@@ -456,10 +460,12 @@ dist.flags = {
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  sourcemap_url: '  Sets a custom sourcemap URL with placeholder {version}',
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
   version_override: '  Override the version written to AMP_CONFIG',
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
 };

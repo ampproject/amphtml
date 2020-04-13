@@ -22,7 +22,7 @@ import {
 
 export {WebAnimationDef, WebAnimationPlayState, WebKeyframesDef};
 
-/** @typedef {function(StoryAnimationDimsDef):!WebKeyframesDef} */
+/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
 export let WebKeyframesCreateFnDef;
 
 /**
