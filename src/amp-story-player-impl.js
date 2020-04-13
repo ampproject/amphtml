@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {VisibilityState} from './visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   parseUrlWithA,
   removeFragment,
 } from './url';
-import {applySandbox} from './3p-frame';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {AmpStoryPlayerManager} from './amp-story-player-manager';
+import {IframePool} from './amp-story-player-iframe-pool';
+import {VisibilityState} from './visibility-state';
+import {applySandbox} from './3p-frame';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from './style';
 import {toArray} from './types';
@@ -67,21 +66,29 @@ export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryPlayer extends HTMLElement {
+export class AmpStoryPlayer {
   /**
-   * Player is appended in the document.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @constructor
    */
-  connectedCallback() {
-    console./*OK*/ assert(this.childElementCount > 0, 'Missing configuration.');
+  constructor(win, element) {
+    console./*OK*/ assert(
+      element.childElementCount > 0,
+      'Missing configuration.'
+    );
 
     /** @private {!Window} */
-    this.win_ = self;
+    this.win_ = win;
 
     /** @private {!Array<!Element>} */
     this.iframes_ = [];
 
+    /** @private {!Element} */
+    this.element_ = element;
+
     /** @private {!Document} */
-    this.doc_ = this.win_.document;
+    this.doc_ = win.document;
 
     /** @private {!Element} */
     this.cachedA_ = this.doc_.createElement('a');
@@ -114,10 +121,6 @@ export class AmpStoryPlayer extends HTMLElement {
       lastX: 0,
       isSwipeX: null,
     };
-
-    this.buildCallback_();
-    const manager = new AmpStoryPlayerManager(self);
-    manager.layoutWhenVisible(this);
   }
 
   /**
@@ -125,12 +128,12 @@ export class AmpStoryPlayer extends HTMLElement {
    * @return {!Element}
    */
   getElement() {
-    return this;
+    return this.element_;
   }
 
-  /** @private */
-  buildCallback_() {
-    this.stories_ = toArray(this.querySelectorAll('a'));
+  /** @public */
+  buildCallback() {
+    this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
@@ -155,7 +158,7 @@ export class AmpStoryPlayer extends HTMLElement {
     this.rootEl_ = this.doc_.createElement('main');
 
     // Create shadow root
-    const shadowRoot = this.attachShadow({mode: 'open'});
+    const shadowRoot = this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
@@ -247,12 +250,12 @@ export class AmpStoryPlayer extends HTMLElement {
     iframeEl.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
-      this.classList.add(LoadStateClass.LOADED);
+      this.element_.classList.add(LoadStateClass.LOADED);
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
-      this.classList.add(LoadStateClass.ERROR);
+      this.element_.classList.add(LoadStateClass.ERROR);
     };
   }
 
