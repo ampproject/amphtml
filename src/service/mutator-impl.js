@@ -205,7 +205,7 @@ export class MutatorImpl {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
-   * @param {boolean} skipRemeasure
+   * @param {boolean=} skipRemeasure
    * @return {!Promise}
    */
   measureMutateElementResources_(

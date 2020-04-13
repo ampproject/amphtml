@@ -921,7 +921,7 @@ export class BaseElement {
    *
    * @param {function()} mutator
    * @param {Element=} opt_element
-   * @param {boolean} skipRemeasure
+   * @param {boolean=} skipRemeasure
    * @return {!Promise}
    */
   mutateElement(mutator, opt_element, skipRemeasure) {

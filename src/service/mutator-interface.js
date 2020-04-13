@@ -116,7 +116,7 @@ export class MutatorInterface {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
-   * @param {boolean} skipRemeasure
+   * @param {boolean=} skipRemeasure
    * @return {!Promise}
    */
   measureMutateElement(element, measurer, mutator, skipRemeasure) {}
