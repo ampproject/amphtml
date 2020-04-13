@@ -51,6 +51,13 @@ PASS
 |          </amp-youtube>
 |        </amp-story-page-attachment>
 |      </amp-story-page>
+|      <amp-story-page id="fill-template-title">
+|        <amp-story-grid-layer template="vertical">
+|          <h1>fill</h1>
+|        </amp-story-grid-layer>
+|        <amp-story-page-attachment layout="nodisplay" href="https://www.google.com">
+|        </amp-story-page-attachment>
+|      </amp-story-page>
 |    </amp-story>
 |  </body>
 |  </html>
