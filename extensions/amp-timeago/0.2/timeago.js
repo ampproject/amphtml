@@ -29,7 +29,7 @@ export function Timeago(props) {
     'cutoff': cutoff,
     'cutoffText': cutoffText,
   } = props;
-  const [timestamp, setTimestamp] = useState(null);
+  const [timestamp, setTimestamp] = useState('');
   const ref = useRef(null);
 
   useEffect(() => {
