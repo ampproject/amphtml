@@ -21,28 +21,28 @@ import {
 } from '../../../amp-subscriptions/0.1/analytics';
 import {
   ConfiguredRuntime,
+  DeferredAccountCreationResponse,
   Entitlements,
+  PurchaseData,
   SubscribeResponse,
   Entitlement as SwgEntitlement,
-  DeferredAccountCreationResponse,
   UserData,
-  PurchaseData
 } from '../../../../third_party/subscriptions-project/swg';
 import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import { GoogleSubscriptionsPlatform } from '../amp-subscriptions-google';
-import { PageConfig } from '../../../../third_party/subscriptions-project/config';
-import { ServiceAdapter } from '../../../amp-subscriptions/0.1/service-adapter';
-import { Services } from '../../../../src/services';
-import { SubscriptionsScoreFactor } from '../../../amp-subscriptions/0.1/score-factors';
-import { toggleExperiment } from '../../../../src/experiments';
+import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
+import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
+import {Services} from '../../../../src/services';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
-describes.realWin('amp-subscriptions-google', { amp: true }, env => {
+describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
   let pageConfig;
   let platform;
@@ -184,7 +184,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
           prerenderSafe: true,
         });
         return Promise.resolve({
-          json: () => Promise.resolve({ entitlements: entitlementResponse }),
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
         });
       });
 
@@ -237,7 +237,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   it('should ack matching entitlements', async () => {
     env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
       Promise.resolve({
-        json: () => Promise.resolve({ entitlements: entitlementResponse }),
+        json: () => Promise.resolve({entitlements: entitlementResponse}),
       })
     );
 
@@ -272,7 +272,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   });
 
   it('should show offers on activate when not granted', () => {
-    platform.activate(new Entitlement({ service: PLATFORM_ID, granted: false }));
+    platform.activate(new Entitlement({service: PLATFORM_ID, granted: false}));
     expect(methods.showOffers).to.be.calledOnce.calledWithExactly({
       list: 'amp',
     });
@@ -294,7 +294,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   });
 
   it('should override show offers with the grant for subscriber', () => {
-    const entitlement = new Entitlement({ service: PLATFORM_ID, granted: false });
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
     const grantEntitlement = new Entitlement({
       service: 'local',
       granted: true,
@@ -306,7 +306,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   });
 
   it('should override show offers with the grant non-subscriber', () => {
-    const entitlement = new Entitlement({ service: PLATFORM_ID, granted: false });
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
     const grantEntitlement = new Entitlement({
       service: 'local',
       granted: true,
@@ -318,14 +318,14 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   });
 
   it('should start linking flow when requested', async () => {
-    serviceAdapter.getReaderId.restore()
+    serviceAdapter.getReaderId.restore();
     serviceAdapterMock
       .expects('getReaderId')
       .withExactArgs('local')
       .returns(Promise.resolve('ari1'))
       .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
-    callback(callbacks.loginRequest)({ linkRequested: true });
+    callback(callbacks.loginRequest)({linkRequested: true});
     await 'Event loop tick';
     expect(methods.linkAccount).to.be.calledOnce.calledWithExactly({
       ampReaderId: 'ari1',
@@ -338,7 +338,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .withExactArgs(Action.LOGIN)
       .returns(Promise.resolve(false))
       .once();
-    callback(callbacks.loginRequest)({ linkRequested: false });
+    callback(callbacks.loginRequest)({linkRequested: false});
     expect(methods.linkAccount).to.not.be.called;
   });
 
@@ -349,7 +349,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .withExactArgs(Action.LOGIN)
       .returns(Promise.resolve(false))
       .once();
-    callback(callbacks.loginRequest)({ linkRequested: true });
+    callback(callbacks.loginRequest)({linkRequested: true});
     expect(methods.linkAccount).to.not.be.called;
   });
 
@@ -373,7 +373,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .withExactArgs(PLATFORM_ID, Action.LINK, ActionStatus.REJECTED)
       .once();
     serviceAdapterMock.expects('resetPlatforms').once();
-    callback(callbacks.flowCanceled)({ flow: 'linkAccount' });
+    callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
   describe('should log subscribe start', () => {
@@ -388,7 +388,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
           product: productId,
         })
         .once();
-      callback(callbacks.flowStarted)({ flow: Action.SUBSCRIBE, data });
+      callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE, data});
     });
     it('should work without a productId', () => {
       productId = 'unknown productId';
@@ -407,7 +407,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .expects('actionEvent')
       .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.REJECTED)
       .once();
-    callback(callbacks.flowCanceled)({ flow: Action.SUBSCRIBE });
+    callback(callbacks.flowCanceled)({flow: Action.SUBSCRIBE});
   });
 
   describe('should reauthorize on complete subscribe', () => {
@@ -488,7 +488,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .withExactArgs(Action.LOGIN)
       .returns(loginResult)
       .once();
-    callback(callbacks.loginRequest)({ linkRequested: false });
+    callback(callbacks.loginRequest)({linkRequested: false});
 
     await loginResult;
     expect(methods.reset).to.be.calledOnce.calledWithExactly();
@@ -501,7 +501,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       .withExactArgs(Action.LOGIN)
       .returns(loginResult)
       .once();
-    callback(callbacks.loginRequest)({ linkRequested: false });
+    callback(callbacks.loginRequest)({linkRequested: false});
 
     await loginResult;
     expect(methods.reset).to.not.be.called;
@@ -580,7 +580,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton');
     expect(elem.textContent).to.be.equal('');
-    expect(attachStub).to.be.calledWith(elem, { lang: 'en', theme: 'light' });
+    expect(attachStub).to.be.calledWith(elem, {lang: 'en', theme: 'light'});
   });
 
   it('should use light smartbutton theme', () => {
@@ -590,7 +590,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-light');
     expect(elem.textContent).to.be.equal('');
-    expect(attachStub).to.be.calledWith(elem, { theme: 'light', lang: 'en' });
+    expect(attachStub).to.be.calledWith(elem, {theme: 'light', lang: 'en'});
   });
 
   it('should use dark smartbutton theme', () => {
@@ -600,7 +600,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-dark');
     expect(elem.textContent).to.be.equal('');
-    expect(attachStub).to.be.calledWith(elem, { theme: 'dark', lang: 'en' });
+    expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
   });
 
   it('should use message text color', () => {
@@ -632,17 +632,17 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
     platform.executeAction(Action.SUBSCRIBE);
-    expect(executeStub).to.be.calledWith({ list: 'amp', isClosable: true });
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
     platform.executeAction(Action.CONTRIBUTE);
-    expect(executeStub).to.be.calledWith({ list: 'amp', isClosable: true });
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
   it('should link accounts if login action is delegated', async () => {
-    serviceAdapter.getReaderId.restore()
+    serviceAdapter.getReaderId.restore();
     serviceAdapterMock
       .expects('getReaderId')
       .withExactArgs('local')
@@ -658,7 +658,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     it('should convert granted entitlements to internal shape', async () => {
       env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ entitlements: entitlementResponse }),
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
         })
       );
 
@@ -702,14 +702,14 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       return {
         isReadyToPay,
         entitlements: {},
-        getEntitlementForThis: () => { },
+        getEntitlementForThis: () => {},
       };
     }
 
     it('should treat missing isReadyToPay as false', async () => {
       env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ entitlements: entitlementResponse }),
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
         })
       );
 
@@ -770,7 +770,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     it('should call getEncryptedDocumentKey with google.com', async () => {
       env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ entitlements: {} }),
+          json: () => Promise.resolve({entitlements: {}}),
         })
       );
 
@@ -781,7 +781,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     it('should not add encryptedDocumentKey parameter to url', async () => {
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ entitlements: {} }),
+          json: () => Promise.resolve({entitlements: {}}),
         })
       );
 
@@ -794,7 +794,7 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     it('should add encryptedDocumentKey parameter to url', async () => {
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ entitlements: {} }),
+          json: () => Promise.resolve({entitlements: {}}),
         })
       );
 
@@ -819,34 +819,39 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
     });
 
     it('should redirect to new account creation page when associated account present', async () => {
-      const HAS_ACCOUNT_URL = "https://fakeUrl.com/hasAccount";
-      const CREATE_ACCOUNT_URL = "https://fakeUrl.com/createAccount";
-      platform = new GoogleSubscriptionsPlatform(ampdoc, {
-        "hasAssociatedAccountUrl": HAS_ACCOUNT_URL,
-        "accountCreationRedirectUrl": CREATE_ACCOUNT_URL,
-      }, serviceAdapter);
+      const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+      const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+      platform = new GoogleSubscriptionsPlatform(
+        ampdoc,
+        {
+          'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+          'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+        },
+        serviceAdapter
+      );
 
       const entitlements = new Entitlement({
         service: PLATFORM_ID,
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
-        dataObject: {data: "this is the data"}
+        dataObject: {data: 'this is the data'},
       });
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
-      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(Promise.resolve({
-        json: () => Promise.resolve({ found: true }),
-      }));
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+        Promise.resolve({
+          json: () => Promise.resolve({found: true}),
+        })
+      );
       const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
 
-      const deferredAccountCreationResponse = (
-        new DeferredAccountCreationResponse(
-          entitlements,
-          new UserData('ID_TOK', {
-            'email': 'test@example.org'
-          }),
-          [new PurchaseData()],
-          () => Promise.resolve()
-        ));
+      const deferredAccountCreationResponse = new DeferredAccountCreationResponse(
+        entitlements,
+        new UserData('ID_TOK', {
+          'email': 'test@example.org',
+        }),
+        [new PurchaseData()],
+        () => Promise.resolve()
+      );
       env.sandbox
         .stub(platform.runtime_, 'completeDeferredAccountCreation')
         .resolves(deferredAccountCreationResponse);
@@ -854,32 +859,39 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       await platform.pingback(entitlements);
 
       expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
-        body: '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
-        credentials: "include",
-        method: "POST"
+        body:
+          '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        credentials: 'include',
+        method: 'POST',
       });
       expect(navigateToStub).to.be.calledWith(win, CREATE_ACCOUNT_URL);
-    })
+    });
 
-  it('should not redirect to new account creation page when user gives no consent', async () => {
-    const HAS_ACCOUNT_URL = "https://fakeUrl.com/hasAccount";
-      const CREATE_ACCOUNT_URL = "https://fakeUrl.com/createAccount";
-      platform = new GoogleSubscriptionsPlatform(ampdoc, {
-        "hasAssociatedAccountUrl": HAS_ACCOUNT_URL,
-        "accountCreationRedirectUrl": CREATE_ACCOUNT_URL,
-      }, serviceAdapter);
+    it('should not redirect to new account creation page when user gives no consent', async () => {
+      const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+      const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+      platform = new GoogleSubscriptionsPlatform(
+        ampdoc,
+        {
+          'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+          'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+        },
+        serviceAdapter
+      );
 
       const entitlements = new Entitlement({
         service: PLATFORM_ID,
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
-        dataObject: {data: "this is the data"}
+        dataObject: {data: 'this is the data'},
       });
-  
+
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
-      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(Promise.resolve({
-        json: () => Promise.resolve({ found: true }),
-      }));
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+        Promise.resolve({
+          json: () => Promise.resolve({found: true}),
+        })
+      );
       const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
 
       env.sandbox
@@ -889,9 +901,10 @@ describes.realWin('amp-subscriptions-google', { amp: true }, env => {
       await platform.pingback(entitlements);
 
       expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
-        body: '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
-        credentials: "include",
-        method: "POST"
+        body:
+          '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        credentials: 'include',
+        method: 'POST',
       });
       expect(navigateToStub).to.not.be.called;
     });

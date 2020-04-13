@@ -37,12 +37,12 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
+import {devAssert, userAssert} from '../../../src/log';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
-import {devAssert, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -124,9 +124,9 @@ export class GoogleSubscriptionsPlatform {
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {function(string):void} */
-    this.navigateTo_ = (url) => {
+    this.navigateTo_ = url => {
       Services.navigationForDoc(ampdoc).navigateTo(ampdoc.win, url);
-    }
+    };
 
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
@@ -479,8 +479,10 @@ export class GoogleSubscriptionsPlatform {
    */
   isPingbackEnabled() {
     // Only enable pingback if useful deferred account creation.
-    return (this.serviceConfig_['hasAssociatedAccountUrl'] &&
-            this.serviceConfig_['accountCreationRedirectUrl']);
+    return (
+      this.serviceConfig_['hasAssociatedAccountUrl'] &&
+      this.serviceConfig_['accountCreationRedirectUrl']
+    );
   }
 
   /** @override */
@@ -491,7 +493,7 @@ export class GoogleSubscriptionsPlatform {
   /** @return {!Promise<{found: boolean}>} */
   hasAssociatedUserAccount_(selectedEntitlement) {
     const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
-      this.serviceConfig_['hasAssociatedAccountUrl'] ,
+      this.serviceConfig_['hasAssociatedAccountUrl'],
       'hasAssociatedAccountUrl is null'
     ));
 
@@ -520,13 +522,15 @@ export class GoogleSubscriptionsPlatform {
       const {found} = await result.json();
       if (found) {
         // This will ask the user for authorization
-        this.runtime_.completeDeferredAccountCreation({
-          entitlements
-        }).then(response => {
-          // The user authorized the creation of a linked account.
-          // Redirect the user to URL provided for this purpose.
-          this.navigateTo_(this.serviceConfig_['accountCreationRedirectUrl']);
-        })
+        this.runtime_
+          .completeDeferredAccountCreation({
+            entitlements,
+          })
+          .then(unusedResponse => {
+            // The user authorized the creation of a linked account.
+            // Redirect the user to URL provided for this purpose.
+            this.navigateTo_(this.serviceConfig_['accountCreationRedirectUrl']);
+          });
       }
     });
   }
