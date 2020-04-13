@@ -128,10 +128,8 @@ describes.fakeWin(
       (env) => {
         let variableSource;
         beforeEach(() => {
-          env.sandbox.stub(env.ampdoc, 'getMeta').returns({
-            'amp-allowed-url-macros': 'ABC,ABCD,CANONICAL',
-          });
           variableSource = new VariableSource(env.ampdoc);
+          variableSource.variableWhitelist_ = ['ABC', 'ABCD', 'CANONICAL'];
         });
 
         it('Works with whitelisted variables', () => {
@@ -173,10 +171,8 @@ describes.fakeWin(
     );
 
     it('Should not work with empty variable whitelist', () => {
-      env.sandbox.stub(env.ampdoc, 'getMeta').returns({
-        'amp-allowed-url-macros': '',
-      });
       const variableSource = new VariableSource(env.ampdoc);
+      variableSource.variableWhitelist_ = [''];
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;

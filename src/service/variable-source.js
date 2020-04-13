@@ -331,8 +331,7 @@ export class VariableSource {
   }
 
   /**
-   * Searches for the "amp-allowed-url-macros" meta tag, parses and returns its contents.
-   * For email documents, the allowlist defaults to empty and supercedes the meta tag.
+   * For email documents, all URL macros are disallowed by default.
    * @return {?Array<string>} The allowlist of substitutable AMP variables
    * @private
    */
@@ -341,8 +340,7 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    // Allow no URL macros for AMP4Email format documents.
-    // This cannot be overwritten even if the meta tag is provided.
+    // Disallow all URL macros for AMP4Email format documents.
     if (this.ampdoc.isSingleDoc()) {
       const doc = /** @type {Document} */ (this.ampdoc.getRootNode());
       if (
@@ -351,24 +349,13 @@ export class VariableSource {
         doc.documentElement.hasAttribute &&
         isAmp4Email(doc)
       ) {
-        return [];
+        /**
+         * The whitelist of variables allowed for variable substitution.
+         * @private {?Array<string>}
+         */
+        this.variableWhitelist_ = [''];
+        return this.variableWhitelist_;
       }
     }
-
-    // A meta[name="amp-allowed-url-macros"] tag, if present,
-    // contains, in its content attribute, a whitelist of variable substitution.
-    const meta = this.ampdoc.getMetaByName('amp-allowed-url-macros');
-    if (meta === null) {
-      return null;
-    }
-
-    /**
-     * The whitelist of variables allowed for variable substitution.
-     * @private {?Array<string>}
-     */
-    this.variableWhitelist_ = meta
-      .split(',')
-      .map((variable) => variable.trim());
-    return this.variableWhitelist_;
   }
 }
