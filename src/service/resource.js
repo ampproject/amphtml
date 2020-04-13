@@ -673,13 +673,16 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
-   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
-   *    premeasured ClientRect instead of using the cached layout box.
+   * @param {boolean} usePremeasuredRect If true and a premeasured rect is
+   *     available, use it. Otherwise, use the cached layout box.
    * @return {boolean}
    */
-  isDisplayed(opt_premeasuredRect) {
+  isDisplayed(usePremeasuredRect = false) {
+    devAssert(!usePremeasuredRect || !this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    const box = opt_premeasuredRect || this.getLayoutBox();
+    const box = usePremeasuredRect
+      ? devAssert(this.premeasuredRect_)
+      : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (
       (isFluid || hasNonZeroSize) &&

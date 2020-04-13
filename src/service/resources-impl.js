@@ -1431,14 +1431,28 @@ export class ResourcesImpl {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        // With IntersectionObserver, the element's client rect measurement
-        // is recent so immediate remeasuring shouldn't be necessary.
-        if (!this.intersectionObserver_) {
-          task.resource.measure();
+        const {resource} = task;
+
+        let stillDisplayed = true;
+        if (this.intersectionObserver_) {
+          // With IntersectionObserver, peek at the premeasured rect to see
+          // if the resource is still displayed (has a non-zero size).
+          // The premeasured rect is most analogous to an immediate measure.
+          if (resource.hasBeenPremeasured()) {
+            stillDisplayed = resource.isDisplayed(
+              /* usePremeasuredRect */ true
+            );
+          }
+        } else {
+          // Remeasure can only update isDisplayed(), not in-viewport state.
+          resource.measure();
         }
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
-        if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
+        if (
+          stillDisplayed &&
+          this.isLayoutAllowed_(resource, task.forceOutsideViewport)
+        ) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1450,9 +1464,8 @@ export class ResourcesImpl {
             )
             .catch(/** @type {function (*)} */ (reportError));
         } else {
-          devAssert(!this.intersectionObserver_);
           dev().fine(TAG_, 'cancelled', task.id);
-          task.resource.layoutCanceled();
+          resource.layoutCanceled();
         }
       }
 
