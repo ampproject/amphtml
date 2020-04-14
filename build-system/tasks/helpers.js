@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const debounce = require('debounce');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -92,8 +93,15 @@ const MINIFIED_TARGETS = [
   'v0.js',
 ].map(maybeToEsmName);
 
-const hostname = argv.hostname || 'cdn.ampproject.org';
+/**
+ * Used while building the 3p frame
+ **/
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
+
+/**
+ * Used to debounce file edits during watch to prevent races.
+ */
+const watchDebounceDelay = 1000;
 
 /**
  * @param {!Object} jsBundles
@@ -131,9 +139,10 @@ async function bootstrapThirdPartyFrames(watch, minify) {
   });
   if (watch) {
     thirdPartyFrames.forEach((frameObject) => {
-      gulpWatch(frameObject.max, function () {
+      const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, minify);
-      });
+      };
+      gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
     });
   }
   await Promise.all(promises);
@@ -253,14 +262,15 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    gulpWatch(entryPoint, async function () {
+    const watchFunc = async () => {
       const compileComplete = await doCompileMinifiedJs(
         /* continueOnError */ true
       );
       if (options.onWatchBuild) {
         options.onWatchBuild(compileComplete);
       }
-    });
+    };
+    gulpWatch(entryPoint, debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -390,13 +400,14 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   });
 
   if (options.watch) {
-    bundler = watchify(bundler);
-    bundler.on('update', () => {
+    const watchFunc = () => {
       const bundleComplete = performBundle(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(bundleComplete);
       }
-    });
+    };
+    bundler = watchify(bundler);
+    bundler.on('update', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
@@ -673,10 +684,10 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
-  hostname,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  watchDebounceDelay,
 };

@@ -1143,6 +1143,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/check-links.js',
+      'build-system/tasks/dist.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',

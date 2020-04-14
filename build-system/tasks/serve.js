@@ -16,6 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
+const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
@@ -34,6 +35,7 @@ const {cyan, green, red} = require('ansi-colors');
 const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {watchDebounceDelay} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -196,9 +198,10 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, async () => {
+  const watchFunc = async () => {
     await restartServer();
-  });
+  };
+  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }

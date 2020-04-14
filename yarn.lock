@@ -5482,6 +5482,11 @@ dateformat@^1.0.7-1.2.3:
     get-stdin "^4.0.1"
     meow "^3.3.0"
 
+debounce@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.0.tgz#44a540abc0ea9943018dc0eaa95cce87f65cd131"
+  integrity sha512-mYtLl1xfZLi1m4RtQYlZgJUNQjl4ZxVnHzIR8nLLgi4q1YT8o/WM+MK/f8yfcc9s5Ir5zRaPZyZU6xs1Syoocg==
+
 debug-fabulous@1.X:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/debug-fabulous/-/debug-fabulous-1.1.0.tgz#af8a08632465224ef4174a9f06308c3c2a1ebc8e"
@@ -7987,6 +7992,13 @@ gulp-connect@5.7.0:
     serve-index "^1.9.1"
     serve-static "^1.13.2"
     tiny-lr "^1.1.1"
+
+gulp-debounce@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/gulp-debounce/-/gulp-debounce-1.0.2.tgz#0b943e812973e3003f980d88fc0d77e7996d9db9"
+  integrity sha1-C5Q+gSlz4wA/mA2I/A1355ltnbk=
+  dependencies:
+    through "^2.3.8"
 
 gulp-eslint-if-fixed@1.0.0:
   version "1.0.0"
