@@ -23,6 +23,7 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
   let ampdoc;
   let loaderService;
   let el;
+  const loaderDownloadTime = 100;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -33,18 +34,17 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
       .stub(Services, 'extensionsFor')
       .returns({installExtensionForDoc: () => Promise.resolve()});
 
-    const downloadTime = 100;
     env.sandbox.stub(Services, 'loaderServiceForDoc').returns(
       new Promise((res) => {
         loaderService = {initializeLoader: env.sandbox.spy()};
-        env.win.setTimeout(() => res(loaderService), downloadTime);
+        env.win.setTimeout(() => res(loaderService), loaderDownloadTime);
       })
     );
   });
 
   it('By default, sets initDelay to how long loaderService download takes', async () => {
     createLoaderElement(ampdoc, el, /* width */ 400, /* height */ 400);
-    clock.tick(loaderLatency);
+    clock.tick(loaderDownloadTime);
     await clock.runAllAsync();
 
     expect(loaderService.initializeLoader).calledOnceWith(
@@ -57,9 +57,9 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
   });
 
   it('If specified, startTime should contribute to the initDelay', async () => {
-    // startTime: 0, now: 50, loaderLatency: 100 --> initDelay: 150.
+    // startTime: 0, now: 50, loaderDownloadTime: 100 --> initDelay: 150.
     createLoaderElement(ampdoc, el, /* width */ 400, /* height */ 400, 0);
-    clock.tick(loaderLatency);
+    clock.tick(loaderDownloadTime);
     await clock.runAllAsync();
 
     expect(loaderService.initializeLoader).calledOnceWith(
