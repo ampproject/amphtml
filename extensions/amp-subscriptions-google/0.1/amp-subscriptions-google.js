@@ -490,7 +490,11 @@ export class GoogleSubscriptionsPlatform {
     return true;
   }
 
-  /** @return {!Promise<{found: boolean}>} */
+  /**
+   * @param {?./entitlement.Entitlement} selectedEntitlement
+   * @return {!Promise<{found: boolean}>} 
+   * @private 
+   * */
   hasAssociatedUserAccount_(selectedEntitlement) {
     const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
       this.serviceConfig_['hasAssociatedAccountUrl'],
