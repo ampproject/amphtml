@@ -1197,7 +1197,7 @@ export class ResourcesImpl {
         // as the element's new measurements even if the element isn't built.
         const requested = r.isMeasureRequested();
         if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid, premeasured);
+          dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
         const premeasured = r.hasBeenPremeasured();
         const needsMeasure = premeasured || requested || this.relayoutAll_;
