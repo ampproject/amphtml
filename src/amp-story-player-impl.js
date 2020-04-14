@@ -134,8 +134,7 @@ export class AmpStoryPlayer {
 
   /** @public */
   buildCallback() {
-    initLogConstructor();
-    this.stories_ = toArray(this.querySelectorAll('a'));
+    this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
