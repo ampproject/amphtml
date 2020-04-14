@@ -1422,8 +1422,9 @@ tags: {
     value_casei: "application/rss+xml"
   }
   attrs: {
-    name: "has-tooltip"
+    name: "show-tooltip"
     value: "auto"
+    value: "true"
   }
   attr_lists: "name-attr"
   # <amp-bind>
