@@ -484,7 +484,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     if (
-      target.getAttribute('has-tooltip') === 'auto' &&
+      target.getAttribute('show-tooltip') === 'auto' &&
       this.isInScreenBottom_(target, pageRect)
     ) {
       target.setAttribute('target', '_blank');
