@@ -290,6 +290,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
