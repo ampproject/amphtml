@@ -54,27 +54,25 @@ const JWPLAYER_EVENTS = {
 };
 
 const eventHandlers = {
-  fullscreen: (fullscreenInfo, ctx) => {
-    const {fullscreen} = fullscreenInfo;
-
+  fullscreen: ({ fullscreen }, ctx) => {
     if (fullscreen == ctx.isFullscreen()) {
       return;
     }
 
     fullscreen ? ctx.fullscreenEnter() : ctx.fullscreenExit();
   },
-  meta: (metadata, ctx) => {
-    if (metadata.metadataType === 'media') {
-      ctx.duration_ = metadata.duration;
+  meta: ({ metadataType, duration }, ctx) => {
+    if (metadataType === 'media') {
+      ctx.duration_ = duration;
     }
   },
-  mute: (muted, ctx) => {
+  mute: ({ mute }, ctx) => {
     const {element} = ctx;
-    ctx.muted_ = muted.mute;
-    element.dispatchCustomEvent(mutedOrUnmutedEvent(muted.mute));
+    ctx.muted_ = mute;
+    element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
   },
-  playedRanges: (playedRanges, ctx) => {
-    ctx.playedRanges_ = playedRanges.ranges;
+  playedRanges: ({ ranges }, ctx) => {
+    ctx.playedRanges_ = ranges;
   },
   playlistItem: (playlistItem, ctx) => {
     ctx.playlistItem_ = {...playlistItem};
@@ -130,15 +128,15 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.onMessage_ = this.onMessage_.bind(this);
 
     /** @private {JsonObject} */
-    this.playlistItem_ = {};
+    this.playlistItem_ = null;
 
     /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {./time.timeDef} */
+    /** @private {number} */
     this.duration_ = 0;
 
-    /** @private {./time.timeDef} */
+    /** @private {number} */
     this.currentTime_ = 0;
 
     /** @private {Array<Array>} */
@@ -162,7 +160,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getDuration() {
-    return this.duration_ || this.playlistItem_.duration || 0;
+    return this.duration_ || this.playlistItem_['duration'] || 0;
   }
 
   /** @override */
@@ -223,10 +221,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (
       'mediaSession' in navigator &&
       window.MediaMetadata &&
-      this.playlistItem_.meta
+      this.playlistItem_['meta']
     ) {
       try {
-        return new window.MediaMetadata(this.playlistItem_.meta);
+        return new window.MediaMetadata(this.playlistItem_['meta']);
       } catch (error) {
         // catch error that occurs when mediaSession fails to setup
       }
@@ -273,7 +271,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {./time.timeDef} timeSeconds
+   * @param {number} timeSeconds
    * @override
    */
   seekTo(timeSeconds) {
@@ -514,7 +512,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {?string=}
+   * @return {string|null}
    */
   getContextualVal_() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
