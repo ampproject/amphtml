@@ -75,7 +75,7 @@ export class TemplateRenderer extends Renderer {
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper
         .render(data, this.getDocument(iframe).body)
-        .then(renderedElement => {
+        .then((renderedElement) => {
           const {analytics} = templateData;
           if (analytics) {
             templateHelper.insertAnalytics(renderedElement, analytics);
