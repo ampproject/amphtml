@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
-=======
-import {AmpStoryPlayerManager} from './amp-story-player-manager';
 import {IframePool} from './amp-story-player-iframe-pool';
->>>>>>> a808afbee... fixes firefox bug
 import {Messaging} from '@ampproject/viewer-messaging';
+import {VisibilityState} from './visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   parseUrlWithA,
   removeFragment,
 } from './url';
+import {applySandbox} from './3p-frame';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-<<<<<<< HEAD
-import {IframePool} from './amp-story-player-iframe-pool';
-import {VisibilityState} from './visibility-state';
-import {applySandbox} from './3p-frame';
-=======
->>>>>>> a808afbee... fixes firefox bug
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {initLogConstructor} from './log';
 import {resetStyles, setStyle, setStyles} from './style';
@@ -140,8 +132,8 @@ export class AmpStoryPlayer {
     return this.element_;
   }
 
-  /** @private */
-  buildCallback_() {
+  /** @public */
+  buildCallback() {
     initLogConstructor();
     this.stories_ = toArray(this.querySelectorAll('a'));
 
