@@ -39,6 +39,7 @@ import {getData, getDetail, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
+import { getMode } from '../../../src/mode';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
@@ -496,12 +497,12 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @return {string}
    */
   getSingleLineEmbed_() {
-    const IS_DEV = true;
+    const isDev = getMode(this.win).localDev;
     const cid = encodeURIComponent(this.contentid_);
     const pid = encodeURIComponent(this.playerid_);
     let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
-    if (IS_DEV) {
+    if (isDev) {
       const testPage = new URLSearchParams(document.location.search).get(
         'test_page'
       );
