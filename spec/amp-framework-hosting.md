@@ -2,34 +2,43 @@
 
 You can host the AMP framework and components from your own server or CDN. This feature has a number of applications. For example, you can...
 
-- test and demonstrate changes to the framework or components.
 - set a release cadence that matches your development cycle.
 - deliver the AMP framework in regions where `cdn.ampproject.org` may not be available.
 - serve AMP pages and the framework from the same host, potentially improving content delivery times.
+- test and demonstrate changes to the framework or components.
 
-The AMP Project is looking into options for [validation](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/) of AMP pages that use an AMP framework hosted outside of `cdn.ampproject.org`. As of April 2020, these AMP pages do not pass validation.
+The AMP Project is looking into options for [validation](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/) of AMP pages that use an AMP framework hosted outside of `cdn.ampproject.org` ([#27546](https://github.com/ampproject/amphtml/issues/27546)). As of April 2020, these AMP pages do not pass validation.
 
 ## Versioning
 
 This document makes frequent use of the terms "version" and "runtime version (rtv)". These two versions are slightly different. When the AMP framework is built, it is assigned a 13-digit _version_. When the AMP framework is served, a config number prefixes the version, resulting in a 15-digit _runtime version_. The build system and runtime enforce these version formats.
 
-The AMP Project has adopted the following conventions:
+Note: The _version_ (sometimes referred to as the "AMP version number") and _runtime version_ are often confused with each other. When it matters, be explicit about the version to which you're referring by indicating 13- or 15-digits.
 
-- Version: the commit time of the last commit in the active branch
+When the AMP framework is built (either by you or by the AMP Project), a 13-digit date-based version is automatically assigned. You can find this version in `version.txt` at the root of the AMP framework distribution. Then, the easiest route to hosting the AMP framework is to prefix this version with `01` to create a 15-digit runtime version, where `01` indicates a stable release.
+
+A more complete picture of the conventions adopted by the AMP Project for the version and runtime version is below. This is more than you need to get started with hosting the AMP framework, but serves as a good reference in case you want to expand your hosting capabilities.
+
+- Version ([16631](https://github.com/ampproject/amphtml/pull/16631)): the commit time of the last commit in the active branch
 
   ```
   TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S
   ```
 
-  with a trailing single-digit build code (almost always `0`). This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
+  with a trailing single-digit build code (defaults to `0`, but can be arbitrarily changed). This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
 
 - Runtime version (rtv): the version prefixed by a 2-digit config code:
 
-  - Canary: `00`
-  - Production: `01`
-  - Experiment: `02`, `03`, `04`, etc.
+  - Experimental: `00`
+  - Stable: `01`
+  - Control: `02`
+  - Beta: `03`
+  - Nightly: `04`
+  - Nightly-Control: `05`
+  - AMP Experiments: `10`, `11`, `12`
+  - INABOX Control and Experiments: `20`, `21`, `22`, `23`, `24`, `25`
 
-  The runtime version is found in URLs and is reported in the console of browser inspectors when an AMP page loads. For example, runtime version `012004041903580` is production version `2004041903580` .
+The runtime version is found in URLs and is reported in the console of browser inspectors when an AMP page loads. For example, runtime version `012004041903580` is stable version `2004041903580`.
 
 ## Acquire the AMP framework
 
@@ -66,7 +75,7 @@ The built framework can be found in directory `dist`. The version assigned to th
 
 If you have advanced hosting capabilities or would like to manually assign a version, `gulp dist` accepts these flags (among others):
 
-- `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
+- `--config`: Indicate the release type, stable (`prod`) or experimental (`canary`). Defaults to `prod`.
 - `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
 - `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `http://localhost:8000/`.
 
@@ -81,6 +90,8 @@ If you have advanced hosting capabilities or would like to manually assign a ver
 
 The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly release is always served from the root of `cdn.ampproject.org`. All [non-deprecated releases](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations) can be found in versioned URLs: `cdn.ampproject.org/rtv/<rtv>`, where `<rtv>` is the runtime version.
 
+Note: The AMP Project is looking into options for packaging releases ([#27726](https://github.com/ampproject/amphtml/issues/27726)).
+
 #### Copy files
 
 A listing of files in each release can be found in `files.txt` at the root of the framework distribution. For example, the files included in the current weekly release are listed in [cdn.ampproject.org/files.txt](https://cdn.ampproject.org/files.txt). Use your favorite HTTP client to download all of the files in `files.txt`, retaining path structures.
@@ -89,7 +100,7 @@ A listing of files in each release can be found in `files.txt` at the root of th
 
 When you request `amp-geo-0.1.js` from `cdn.ampproject.org` using an HTTP client, the CDN detects the country where the request originated and patches `amp-geo-0.1.js` on-the-fly. This patch needs to be reversed to ensure users are not all assigned the same country when amp-geo loads.
 
-When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 alpha-2 country code (two ascii letter characters) followed by 26 spaces to maintain the string length. Reversal of this patch can be accomplished by a RegEx replacement: search for `/[a-zA-Z]{2} {26}/` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
+When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 country code or an ISO 3166-2 subdivision code, followed by enough spaces to maintain the length of the string being replaced. Reversal of this patch can be accomplished by a RegEx replacement: search for `/[a-zA-Z]{2}(?:-[a-zA-Z]{2} {23}| {26})/` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
 
 In addition to `amp-geo-0.1.js`, you may find module JS (`.mjs`) and unversioned (`amp-geo-latest.js`) variants of the same file. The same RegEx replacement should be performed in these files as well.
 
@@ -156,19 +167,19 @@ When the AMP runtime is initialized, all components are verified to belong to th
 
 #### Versioned URLs
 
-The simplest option for hosting the AMP framework is to host it from an rtv-specific path. For example, consider AMP framework host `https://example.com/amp`. Production version `200229061636` corresponds to runtime version `01200229061636` and should be hosted from `https://example.com/amp/rtv/01200229061636`. In this case, AMP meta and script URLs would look like the following:
+The simplest option for hosting the AMP framework is to host it from an rtv-specific path. For example, consider AMP framework host `https://example.com/amp`. Stable version `2002290616360` corresponds to runtime version `012002290616360` and should be hosted from `https://example.com/amp/rtv/012002290616360`. In this case, AMP meta and script URLs would look like the following:
 
 ```
 <meta name="runtime-host" content="https://example.com/amp"> <!-- not rtv-specific -->
-<script async src="https://example.com/amp/rtv/01200229061636/v0.js"></script>
-<script async custom-element="amp-geo" src="https://example.com/amp/rtv/01200229061636/v0/amp-geo-0.1.js"></script>
+<script async src="https://example.com/amp/rtv/012002290616360/v0.js"></script>
+<script async custom-element="amp-geo" src="https://example.com/amp/rtv/012002290616360/v0/amp-geo-0.1.js"></script>
 ```
 
 If hosting a single AMP framework version is your end goal, then you can update your AMP pages to download the runtime and components from your host and skip to section [amp-geo hotpatching](#amp-geo-hotpatching). If you expect to update the AMP framework regularly, then updating rtv-specific URLs in AMP pages could be cumbersome. See the next section, [Versionless URLs](#versionless-urls), for a solution.
 
 #### Versionless URLs
 
-The AMP Project has a [weekly release channel](https://amp.dev/documentation/guides-and-tutorials/learn/spec/release-schedule/#weekly), sometimes referred to as the "evergreen" release channel. AMP pages utilize this channel by including versionless URLs to AMP scripts and styles. This is relatively easy to accomplish when hosting the AMP framework yourself. The key is to ensure that the AMP framework hosted from versionless URLs is _also_ available from rtv-specific URLs. This suggests an update strategy: first make a new AMP framework version available from rtv-specific URLs and _then_ update the AMP framework available from versionless URLs. For example, if production AMP framework version `200229061636` is available from `https://example.com/amp`, then it must also be available from `https://example.com/amp/rtv/01200229061636`. In this case, AMP meta and script URLs would look like the following:
+The AMP Project has a [weekly release channel](https://amp.dev/documentation/guides-and-tutorials/learn/spec/release-schedule/#weekly), sometimes referred to as the "evergreen" release channel. AMP pages utilize this channel by including versionless URLs to AMP scripts and styles. This is relatively easy to accomplish when hosting the AMP framework yourself. The key is to ensure that the AMP framework hosted from versionless URLs is _also_ available from rtv-specific URLs. This suggests an update strategy: first make a new AMP framework version available from rtv-specific URLs and _then_ update the AMP framework available from versionless URLs. For example, if stable AMP framework version `2002290616360` is available from `https://example.com/amp`, then it must also be available from `https://example.com/amp/rtv/012002290616360`. In this case, AMP meta and script URLs would look like the following:
 
 ```
 <meta name="runtime-host" content="https://example.com/amp">
@@ -199,10 +210,10 @@ Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn
 
 The properties are defined as follows:
 
-- `ampRuntimeVersion` (required) is the current production runtime version of the AMP framework.
-- `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current production runtime version.
-- `canaryPercentage` (optional) indicates the fraction of users who receive the current canary runtime version of the AMP framework instead of the current production runtime version.
-- `diversions` (optional) lists active non-production runtime versions (canary and experiments).
+- `ampRuntimeVersion` (required) is the current stable runtime version of the AMP framework.
+- `ampCssUrl` (optional) is a URL to the boilerplate CSS for the current stable runtime version.
+- `canaryPercentage` (optional) indicates the fraction of users who receive the experimental runtime version of the AMP framework instead of the current stable runtime version.
+- `diversions` (optional) lists active non-stable runtime versions.
 - `ltsRuntimeVersion` (optional) is the current [long-term stable](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md) runtime version.
 - `ltsCssUrl` (optional) is a URL to the boilerplate CSS for the current long-term stable runtime version.
 
