@@ -37,8 +37,10 @@ describe
       const overflowRect = overflow.getBoundingClientRect();
 
       expect(overflowRect.height).to.be.greaterThan(0);
-      expect(iframeRect.width).to.equal(
-        iframeRect.height + overflowRect.height
+      // The amp-iframe has a 1:1 aspect ratio, and its height should be
+      // incremented by the overflow's height.
+      expect(iframeRect.height).to.equal(
+        iframeRect.width + overflowRect.height
       );
     });
   });
