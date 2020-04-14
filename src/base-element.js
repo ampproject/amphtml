@@ -952,6 +952,21 @@ export class BaseElement {
   }
 
   /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
+  }
+
+  /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
    * @param {!AmpElement} unusedElement Child element that was collapsed.
