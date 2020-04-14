@@ -125,7 +125,6 @@ export class GoogleSubscriptionsPlatform {
 
     /** @const @private {function(string):void} */
     this.navigateTo_ = url => {
-      console.log('navogatee te');
       Services.navigationForDoc(ampdoc).navigateTo(ampdoc.win, url);
     };
 
@@ -523,23 +522,32 @@ export class GoogleSubscriptionsPlatform {
     if (!this.isPingbackEnabled() || !entitlements) {
       return;
     }
-    return this.hasAssociatedUserAccount_(entitlements).then(result => {
-      result.json().then(jsonResult => {
-        console.log(jsonResult.found);
-        if (jsonResult.found) {
+    return new Promise((resolve, unusedReject) => {
+      this.hasAssociatedUserAccount_(entitlements).then(result => {
+        result.json().then(jsonResult => {
+          if (jsonResult.found) {
+            resolve();
+            return;
+          }
           // This will ask the user for authorization
           this.runtime_
             .completeDeferredAccountCreation({
               entitlements,
             })
-            .then(unusedResponse => {
-              // The user authorized the creation of a linked account.
-              // Redirect the user to URL provided for this purpose.
-              this.navigateTo_(
-                this.serviceConfig_['accountCreationRedirectUrl']
-              );
-            });
-        }
+            .then(
+              unusedResponse => {
+                // The user authorized the creation of a linked account.
+                // Redirect the user to URL provided for this purpose.
+                resolve();
+                this.navigateTo_(
+                  this.serviceConfig_['accountCreationRedirectUrl']
+                );
+              },
+              unusedError => {
+                resolve();
+              }
+            );
+        });
       });
     });
   }

@@ -818,7 +818,41 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       expect(platform.pingback(entitlements)).to.be.undefined;
     });
 
-    it('should redirect to new account creation page when associated account present', async () => {
+    it('should not call deferred account creation when user is already found', async () => {
+      const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+      const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+      platform = new GoogleSubscriptionsPlatform(
+        ampdoc,
+        {
+          'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+          'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+        },
+        serviceAdapter
+      );
+
+      const entitlements = new Entitlement({
+        service: PLATFORM_ID,
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {data: 'this is the data'},
+      });
+
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+        Promise.resolve({
+          json: () => Promise.resolve({found: true}),
+        })
+      );
+
+      const deferredCreationStub = env.sandbox.stub(
+        platform.runtime_,
+        'completeDeferredAccountCreation'
+      );
+      await platform.pingback(entitlements);
+      expect(deferredCreationStub).to.not.be.called;
+    });
+
+    it('should redirect to new account creation page when associated account absent', async () => {
       const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
       const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
       platform = new GoogleSubscriptionsPlatform(
@@ -839,10 +873,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
       fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
         Promise.resolve({
-          json: () => Promise.resolve({found: true}),
+          json: () => Promise.resolve({found: false}),
         })
       );
       const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+      navigateToStub.callsFake(() => {
+        /* make fake to avoid redirect */
+      });
 
       const deferredAccountCreationResponse = new DeferredAccountCreationResponse(
         entitlements,
@@ -891,10 +928,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
       fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
         Promise.resolve({
-          json: () => Promise.resolve({found: true}),
+          json: () => Promise.resolve({found: false}),
         })
       );
       const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+      navigateToStub.callsFake(() => {
+        /* make fake to avoid redirect */
+      });
 
       env.sandbox
         .stub(platform.runtime_, 'completeDeferredAccountCreation')
