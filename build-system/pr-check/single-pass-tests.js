@@ -27,6 +27,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDieWithDnsMonitor: timedExecOrDieWithDnsMonitorBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -35,14 +36,16 @@ const FILENAME = 'single-pass-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDieWithDnsMonitor = (cmd, unusedFileName) =>
+  timedExecOrDieWithDnsMonitorBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting --single_pass');
-    timedExecOrDie(
+    await timedExecOrDieWithDnsMonitor(
       'gulp integration --nobuild --compiled --single_pass --headless'
     );
   } else {
@@ -55,7 +58,7 @@ function main() {
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --single_pass');
-      timedExecOrDie(
+      await timedExecOrDieWithDnsMonitor(
         'gulp integration --nobuild --compiled --single_pass --headless'
       );
     } else {

@@ -28,6 +28,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDieWithDnsMonitor: timedExecOrDieWithDnsMonitorBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -36,15 +37,21 @@ const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDieWithDnsMonitor = (cmd, unusedFileName) =>
+  timedExecOrDieWithDnsMonitorBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --headless --coverage');
-    timedExecOrDie('gulp unit --nobuild --headless --coverage');
+    await timedExecOrDieWithDnsMonitor(
+      'gulp integration --nobuild --headless --coverage'
+    );
+    await timedExecOrDieWithDnsMonitor(
+      'gulp unit --nobuild --headless --coverage'
+    );
     timedExecOrDie('gulp codecov-upload');
   } else {
     printChangeSummary(FILENAME);
@@ -69,7 +76,9 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
+      await timedExecOrDieWithDnsMonitor(
+        'gulp unit --nobuild --headless --local_changes'
+      );
     }
 
     if (
@@ -77,11 +86,15 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp integration --nobuild --headless --coverage');
+      await timedExecOrDieWithDnsMonitor(
+        'gulp integration --nobuild --headless --coverage'
+      );
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --coverage');
+      await timedExecOrDieWithDnsMonitor(
+        'gulp unit --nobuild --headless --coverage'
+      );
     }
 
     if (buildTargets.has('RUNTIME')) {

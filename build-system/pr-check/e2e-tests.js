@@ -28,6 +28,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDieWithDnsMonitor: timedExecOrDieWithDnsMonitorBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
@@ -36,6 +37,8 @@ const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDieWithDnsMonitor = (cmd, unusedFileName) =>
+  timedExecOrDieWithDnsMonitorBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -43,7 +46,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless');
+    await timedExecOrDieWithDnsMonitor('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -54,7 +57,7 @@ async function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless');
+      await timedExecOrDieWithDnsMonitor('gulp e2e --nobuild --headless');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
