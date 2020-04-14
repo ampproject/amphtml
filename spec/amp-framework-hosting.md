@@ -19,7 +19,7 @@ When the AMP framework is built (either by you or by the AMP Project), a 13-digi
 
 A more complete picture of the conventions adopted by the AMP Project for the version and runtime version is below. This is more than you need to get started with hosting the AMP framework, but serves as a good reference in case you want to expand your hosting capabilities.
 
-- Version ([16631](https://github.com/ampproject/amphtml/pull/16631)): the commit time of the last commit in the active branch
+- Version ([#16631](https://github.com/ampproject/amphtml/pull/16631)): the commit time of the last commit in the active branch
 
   ```
   TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S
@@ -75,7 +75,7 @@ The built framework can be found in directory `dist`. The version assigned to th
 
 If you have advanced hosting capabilities or would like to manually assign a version, `gulp dist` accepts these flags (among others):
 
-- `--config`: Indicate the release type, stable (`prod`) or experimental (`canary`). Defaults to `prod`.
+- `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
 - `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
 - `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `http://localhost:8000/`.
 
