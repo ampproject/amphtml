@@ -59,6 +59,12 @@ function terserMinify(code) {
 exports.postClosureBabel = function () {
   return through.obj(function (file, enc, next) {
     if (!argv.esm || path.extname(file.path) === '.map') {
+      debug(
+        CompilationLifecycles['complete'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
       return next(null, file);
     }
 
@@ -67,7 +73,8 @@ exports.postClosureBabel = function () {
     debug(
       CompilationLifecycles['closured-pre-babel'],
       file.path,
-      file.contents
+      file.contents,
+      file.sourceMap
     );
     const {code, map: babelMap} = babel.transformSync(file.contents, {
       caller: {name: 'post-closure'},
@@ -76,17 +83,23 @@ exports.postClosureBabel = function () {
     debug(
       CompilationLifecycles['closured-pre-terser'],
       file.path,
-      file.contents
+      file.contents,
+      file.sourceMap
     );
     const {compressed, terserMap} = terserMinify(code);
-
-    debug(CompilationLifecycles['complete'], file.path, compressed);
 
     file.contents = Buffer.from(compressed, 'utf-8');
     file.sourceMap = remapping(
       [terserMap, babelMap, map],
       () => null,
       !argv.full_sourcemaps
+    );
+
+    debug(
+      CompilationLifecycles['complete'],
+      file.path,
+      file.contents,
+      file.sourceMap
     );
 
     return next(null, file);
