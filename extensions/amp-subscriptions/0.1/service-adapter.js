@@ -135,11 +135,8 @@ export class ServiceAdapter {
    */
   stringifyForPingback(obj) {
     // If there's json for pingback use that if not use json if not go deeper
-    if (!obj) {
-      return JSON.stringify(obj)
-    }
     if (obj.jsonForPingback) {
-      return this.stringifyForPingback(obj.jsonForPingback());
+      return JSON.stringify(obj.jsonForPingback());
     } else if (obj.json) {
       return JSON.stringify(obj.json());
     }
@@ -155,8 +152,9 @@ export class ServiceAdapter {
       obj.forEach(element => {
         objArray.push(this.stringifyForPingback(element));
       });
-      return JSON.stringify(objArray);
+      return '[' + objArray.join(',') + ']';
     }
+    return JSON.stringify(obj);
   }
 }
 
