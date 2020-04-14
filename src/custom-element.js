@@ -1623,7 +1623,8 @@ function createBaseCustomElementClass(win) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
 
-      const laidOut = this.layoutCount_ > 0 || CommonSignals.RENDER_START;
+      const laidOut =
+        this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START);
       if (
         this.loadingDisabled_ ||
         (laidOut && !this.implementation_.isLoadingReused()) ||
