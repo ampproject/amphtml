@@ -130,7 +130,6 @@ exports.jsBundles = {
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-      compilationLevel: 'WHITESPACE_ONLY',
       skipUnknownDepsCheck: true,
     },
   },

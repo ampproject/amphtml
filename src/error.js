@@ -67,7 +67,7 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Chance to post to the new error reporting endpoint.
  * @const {number}
  */
-const BETA_ERROR_REPORT_URL_FREQ = 0.2;
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -357,20 +357,12 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
- *
- * @param {!JsonObject} errData Data from `getErrorReportData`.
  * @return {string} error reporting endpoint URL.
  */
-function chooseReportingUrl_(errData) {
-  const useBeta =
-    // Legacy reporting drops non-.js stacktraces.
-    errData['esm'] === '1' ||
-    // Legacy reporting throttles non-canary binary types by a factor of 20.
-    errData['bt'] === 'nightly' ||
-    // Randomly divert remaining error reporting traffic.
-    Math.random() < BETA_ERROR_REPORT_URL_FREQ;
-
-  return useBeta ? urls.betaErrorReporting : urls.errorReporting;
+function chooseReportingUrl_() {
+  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+    ? urls.betaErrorReporting
+    : urls.errorReporting;
 }
 
 /**
@@ -386,7 +378,7 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', chooseReportingUrl_(data), true);
+      xhr.open('POST', chooseReportingUrl_(), true);
       xhr.send(JSON.stringify(data));
     }
   });

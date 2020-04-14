@@ -80,9 +80,9 @@ function getPreClosureConfig() {
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
       : null,
-    isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
-      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    !isCheckTypes
+      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
+      : null,
     argv.esm
       ? [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
@@ -94,10 +94,20 @@ function getPreClosureConfig() {
       : null,
   ].filter(Boolean);
   const devDependencies = getDevDependencies();
+  const presetEnv = [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      targets: {esmodules: true},
+    },
+  ];
+  const preClosurePresets = argv.esm ? [presetEnv] : [];
   const preClosureConfig = {
     compact: false,
     ignore: devDependencies,
     plugins: preClosurePlugins,
+    presets: preClosurePresets,
     retainLines: true,
   };
   return preClosureConfig;
