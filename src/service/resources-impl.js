@@ -1195,12 +1195,9 @@ export class ResourcesImpl {
         }
         // Difference: if we have a "premeasured" client rect, consume it
         // as the element's new measurements even if the element isn't built.
-        const requested = r.isMeasureRequested();
-        if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid, premeasured);
-        }
         const premeasured = r.hasBeenPremeasured();
-        const needsMeasure = premeasured || requested || this.relayoutAll_;
+        const needsMeasure =
+          premeasured || this.relayoutAll_ || r.isMeasureRequested();
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
