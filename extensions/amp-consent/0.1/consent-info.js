@@ -23,6 +23,7 @@ import {isEnumValue, isObject} from '../../../src/types';
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
+ * GDPR: Set when the gdprApplies value of TCF v2 is sent from vendors.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
@@ -83,7 +84,9 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
-    value[STORAGE_KEY.GDPR],
+    value[STORAGE_KEY.GDPR] !== undefined
+      ? value[STORAGE_KEY.GDPR] === 1
+      : undefined,
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -145,8 +148,9 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.STRING] = consentInfo['consentString'];
   }
 
-  if (consentInfo['gdprApplies']) {
-    obj[STORAGE_KEY.GDPR] = consentInfo['gdprApplies'];
+  // g:(0|1|undefined)
+  if (consentInfo['gdprApplies'] !== undefined) {
+    obj[STORAGE_KEY.GDPR] = consentInfo['gdprApplies'] ? 1 : 0;
   }
 
   if (consentInfo['isDirty'] === true) {

@@ -505,7 +505,9 @@ export class AmpConsent extends AMP.BaseElement {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
           response['consentString'] || undefined,
-          response['gdprApplies'] || !!response['consentRequired']
+          response['gdprApplies'] !== undefined
+            ? response['gdprApplies']
+            : !!response['consentRequired']
         );
       }
     });

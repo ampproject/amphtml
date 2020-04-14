@@ -476,7 +476,7 @@ export class ConsentInstance {
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }
-      if (consentInfo['gdprApplies']) {
+      if (consentInfo['gdprApplies'] !== undefined) {
         request['gdprApplies'] = consentInfo['gdprApplies'];
       }
       const init = {
