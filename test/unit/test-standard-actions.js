@@ -67,7 +67,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     if (sync) {
       expect(mutateElementStub).calledWithMatch(
         element,
-        env.sandbox.match.func
+        env.sandbox.match((fn) => fn.toString() === (() => {}).toString())
       );
     } else {
       expectElementMutatedAsync(element);
@@ -258,7 +258,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
 
           standardActions.handleShow_(trustedInvocation({node}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(node, /* sync */ true);
           expect(node.focus).to.have.been.calledOnce;
         });
 
@@ -270,7 +270,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
           wrapper.firstElementChild.appendChild(node);
           standardActions.handleShow_(trustedInvocation({node: wrapper}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(wrapper, /* sync */ true);
           expect(node.focus).to.have.been.calledOnce;
         });
 
