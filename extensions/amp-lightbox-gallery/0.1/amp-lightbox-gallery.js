@@ -273,15 +273,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Return a cleaned clone of the given element for building
    * carousel slides with.
    * @param {!Element} element
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Element}
    * @private
    */
   cloneLightboxableElement_(element) {
+    const fallback = element.getFallback();
+    const shouldCloneFallback =
+      element.classList.contains('amp-notsupported') && !!fallback;
+    if (shouldCloneFallback) {
+      element = fallback;
+    }
     const deepClone = !element.classList.contains('i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
     clonedNode.removeAttribute('i-amphtml-layout');
+    clonedNode.removeAttribute('fallback');
     return clonedNode;
   }
   /**
