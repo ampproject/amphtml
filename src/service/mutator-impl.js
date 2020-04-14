@@ -174,13 +174,8 @@ export class MutatorImpl {
   }
 
   /** @override */
-  measureMutateElement(element, measurer, mutator, skipRemeasure) {
-    return this.measureMutateElementResources_(
-      element,
-      measurer,
-      mutator,
-      skipRemeasure
-    );
+  measureMutateElement(element, measurer, mutator) {
+    return this.measureMutateElementResources_(element, measurer, mutator);
   }
 
   /**

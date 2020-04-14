@@ -959,9 +959,8 @@ export class BaseElement {
    * @return {!Promise}
    */
   mutateElementSkipRemeasure(mutator) {
-    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
       this.element,
-      null,
       mutator,
       /* skipRemeasure */ true
     );
