@@ -552,7 +552,7 @@ export class AmpList extends AMP.BaseElement {
     ) {
       const reset = () => {
         this.togglePlaceholder(true);
-        this.toggleLoading(true, /* opt_force */ true);
+        this.toggleLoading(true);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
