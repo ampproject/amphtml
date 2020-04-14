@@ -726,7 +726,11 @@ describes.realWin(
     describe('get amp elements', () => {
       beforeEach(() => {
         child.classList.add('i-amphtml-element');
-        toggleExperiment(win, 'visibility-trigger-improvements', true);
+        toggleExperiment(
+          parentRoot.ampdoc.win,
+          'visibility-trigger-improvements',
+          true
+        );
       });
 
       afterEach(() => {
@@ -737,22 +741,26 @@ describes.realWin(
       it('should find all elements by selector', async () => {
         const child2 = win.document.createElement('child');
         const child3 = win.document.createElement('child');
-        child.id = 'hi';
-        child2.id = 'bye';
+        // Parent child attached to parent doc should not be captured
+        const parentChild = env.parentWin.document.createElement('child');
         body.appendChild(child2);
         body.appendChild(child3);
+        env.parentWin.document.body.appendChild(parentChild);
         child.classList.add('myClass');
         child2.classList.add('myClass');
         child3.classList.add('notMyClass');
+        parentChild.classList.add('myClass');
         child2.classList.add('i-amphtml-element');
         child3.classList.add('i-amphtml-element');
-        const e = await root.getAmpElements(body, ['.myClass'], null);
-
-        expect(e).to.deep.equals([child, child2]);
+        parentChild.classList.add('i-amphtml-element');
+        expect(
+          await root.getAmpElements(body, ['.myClass'], null)
+        ).to.deep.equals([child, child2]);
         // Check that non-experiment version works
-        // toggleExperiment(win, 'visibility-trigger-improvements', false);
-        // e = await root.getAmpElements(body, '.notMyClass', null);
-        // expect(e).to.deep.equals([child3]);
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
+        expect(
+          await root.getAmpElements(body, '.notMyClass', null)
+        ).to.deep.equals([child3]);
       });
 
       it('should handle missing selector for AMP search', async () => {

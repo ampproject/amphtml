@@ -354,11 +354,13 @@ export class AnalyticsRoot {
         'Cannot have selectionMethod %s defined with an array selector.',
         selectionMethod
       );
-      return this.getElementsByQuerySelectorAll_(selectors);
+      return this.getElementsByQuerySelectorAll_(
+        /** @type {!Array<string>} */ (selectors)
+      );
     }
     return this.getAmpElement(
       context,
-      selectors,
+      /** @type {string} */ (selectors),
       selectionMethod
     ).then((element) => [element]);
   }
