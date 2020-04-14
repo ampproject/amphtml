@@ -712,25 +712,36 @@ export class AmpAnalytics extends AMP.BaseElement {
   isSampledIn_(trigger) {
     /** @const {!JsonObject} */
     const spec = trigger['sampleSpec'];
-    const resolve = Promise.resolve(true);
     const TAG = this.getName_();
     if (!spec) {
-      return resolve;
+      return Promise.resolve(true);
     }
     const sampleOn = spec['sampleOn'];
     if (!sampleOn) {
       this.user().error(TAG, 'Invalid sampleOn value.');
-      return resolve;
+      return Promise.resolve(true);
     }
-    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+    const threshold = parseFloat(spec['threshold']);
     if (threshold >= 0 && threshold <= 100) {
-      const expansionOptions = this.expansionOptions_(dict({}), trigger);
-      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-        .then((key) => this.cryptoService_.uniform(key))
-        .then((digest) => digest * 100 < threshold);
+      const sampleDeferred = new Deferred();
+      const sampleInTask = () => {
+        if (threshold >= 0 && threshold <= 100) {
+          const expansionOptions = this.expansionOptions_(dict({}), trigger);
+          this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
+            .then((key) => this.cryptoService_.uniform(key))
+            .then((digest) => digest * 100 < threshold)
+            .then(() => sampleDeferred.resolve(true));
+        }
+      };
+      if (isExperimentOn(this.win, 'analytics-chunks')) {
+        chunk(this.element, sampleInTask, ChunkPriority.LOW);
+      } else {
+        sampleInTask();
+      }
+      return sampleDeferred.promise;
     }
     user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
-    return resolve;
+    return Promise.resolve(true);
   }
 
   /**

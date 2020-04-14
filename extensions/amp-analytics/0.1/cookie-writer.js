@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
@@ -22,6 +24,7 @@ import {isObject} from '../../../src/types';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
+import { isExperimentOn } from '../../../src/experiments';
 
 const TAG = 'amp-analytics/cookie-writer';
 
@@ -50,8 +53,8 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
-    /** @private {?Promise} */
-    this.writePromise_ = null;
+    /** @private {?Deferred} */
+    this.writeDeferred_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
@@ -64,11 +67,18 @@ export class CookieWriter {
    * @return {!Promise}
    */
   write() {
-    if (!this.writePromise_) {
-      this.writePromise_ = this.init_();
+    if (!this.writeDeferred_) {
+      this.writeDeferred_ = new Deferred();
+      const task = () => {
+        this.init_().then(() => this.writeDeferred_.resolve());
+      };
+      if (isExperimentOn(this.win_, 'analytics-chunks')) {
+        chunk(this.element_, task, ChunkPriority.LOW);
+      } else {
+        task();
+      }
     }
-
-    return this.writePromise_;
+    return this.writeDeferred_.promise;
   }
 
   /**
