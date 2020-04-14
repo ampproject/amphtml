@@ -366,9 +366,11 @@ describes.realWin(
           'data-ad-client': AD_CLIENT_ID,
           'height': '500',
           'width': '1024',
-        }); 
+        });
         const viewport = Services.viewportForDoc(element);
-        env.sandbox.stub(viewport, 'getSize').returns({width: 1024, height: 500});
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
         storageContent[`aas-${AD_CLIENT_ID}`] = true;
 
         const result = await ResponsiveState.maybeUpgradeToResponsive(

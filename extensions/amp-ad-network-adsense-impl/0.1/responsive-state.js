@@ -413,6 +413,7 @@ export class ResponsiveState {
 
   /**
    * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
    * @return {boolean}
    * @private
    */
