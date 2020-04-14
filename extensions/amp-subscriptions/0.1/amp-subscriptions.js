@@ -550,29 +550,48 @@ export class SubscriptionService {
   }
 
   /**
-   * Performs pingback on local platform.
+   * Performs pingback on qll platform.
    * @return {?Promise}
    * @private
    */
   performPingback_() {
     if (this.viewTrackerPromise_) {
-      const localPlatform = this.platformStore_.getLocalPlatform();
+      const availablePlatforms = this.platformStore_.getAvailablePlatforms();
       return this.viewTrackerPromise_
         .then(() => {
-          if (localPlatform.pingbackReturnsAllEntitlements()) {
-            return this.platformStore_.getAllPlatformsEntitlements();
-          }
-          return this.platformStore_
-            .getGrantEntitlement()
-            .then(
-              grantStateEntitlement =>
-                grantStateEntitlement || Entitlement.empty('local')
-            );
+          return Promise.all(
+            availablePlatforms.map(platform => {
+              if (platform.pingbackReturnsAllEntitlements()) {
+                return this.platformStore_.getAllPlatformsEntitlements();
+              }
+              return this.platformStore_.getGrantEntitlement();
+            })
+          );
         })
         .then(resolveEntitlements => {
-          if (localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(resolveEntitlements);
-          }
+          availablePlatforms.forEach((platform, index) => {
+            if (platform.isPingbackEnabled()) {
+              const platformEntitlements = resolveEntitlements[index];
+              // If the platform requested all the entitlements, then send an array of its entitlements.
+              // If the platform requested the granted entitlement, then send the granted entitlement only
+              // to the platform it belongs to.
+              // In all other cases, send an empty entitlement to the platform.
+              let entitlementsToSend = Entitlement.empty(
+                platform.getServiceId()
+              );
+              if (platform.pingbackReturnsAllEntitlements()) {
+                entitlementsToSend = platformEntitlements.filter(
+                  entitlement => entitlement.source == platform.getServiceId()
+                );
+              } else if (
+                platformEntitlements &&
+                platformEntitlements.source == platform.getServiceId()
+              ) {
+                entitlementsToSend = platformEntitlements;
+              }
+              platform.pingback(entitlementsToSend);
+            }
+          });
         });
     }
     return null;

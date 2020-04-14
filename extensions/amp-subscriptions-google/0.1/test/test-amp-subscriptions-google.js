@@ -859,8 +859,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       await platform.pingback(entitlements);
 
       expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
-        body:
-          '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        body: {
+          entitlements:
+            '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        },
         credentials: 'include',
         method: 'POST',
       });
@@ -901,8 +903,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       await platform.pingback(entitlements);
 
       expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
-        body:
-          '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        body: {
+          entitlements:
+            '{"raw":"","service":"subscribe.google.com","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}',
+        },
         credentials: 'include',
         method: 'POST',
       });

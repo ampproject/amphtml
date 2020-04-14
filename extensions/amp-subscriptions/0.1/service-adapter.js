@@ -15,7 +15,6 @@
  */
 
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {devAssert} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 
 export class ServiceAdapter {
@@ -129,14 +128,18 @@ export class ServiceAdapter {
 
   /**
    * Format data for pingback
-   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} entitlements
+   *
+   * @param {any} obj
+   *
    * @return {string}
-   * @private
    */
   stringifyForPingback(obj) {
-    // If there's json for pingback use tat if not use json if not go deeper
+    // If there's json for pingback use that if not use json if not go deeper
+    if (!obj) {
+      return JSON.stringify(obj)
+    }
     if (obj.jsonForPingback) {
-      return JSON.stringify(obj.jsonForPingback());
+      return this.stringifyForPingback(obj.jsonForPingback());
     } else if (obj.json) {
       return JSON.stringify(obj.json());
     }
@@ -150,8 +153,7 @@ export class ServiceAdapter {
     if (isArray(obj)) {
       const objArray = [];
       obj.forEach(element => {
-        objArray.push(
-          this.stringifyForPingback(element));
+        objArray.push(this.stringifyForPingback(element));
       });
       return JSON.stringify(objArray);
     }

@@ -125,6 +125,7 @@ export class GoogleSubscriptionsPlatform {
 
     /** @const @private {function(string):void} */
     this.navigateTo_ = url => {
+      console.log('navogatee te');
       Services.navigationForDoc(ampdoc).navigateTo(ampdoc.win, url);
     };
 
@@ -505,7 +506,11 @@ export class GoogleSubscriptionsPlatform {
       return this.xhr_.fetchJson(url, {
         method: 'POST',
         credentials: 'include',
-        body: this.serviceAdapter_.stringifyForPingback(selectedEntitlement),
+        body: {
+          entitlements: this.serviceAdapter_.stringifyForPingback(
+            selectedEntitlement
+          ),
+        },
       });
     });
   }
@@ -515,23 +520,27 @@ export class GoogleSubscriptionsPlatform {
    * @param {?./entitlement.Entitlement} entitlements
    * @return {!Promise|undefined}*/
   pingback(entitlements) {
-    if (!this.isPingbackEnabled()) {
+    if (!this.isPingbackEnabled() || !entitlements) {
       return;
     }
-    return this.hasAssociatedUserAccount_(entitlements).then(async result => {
-      const {found} = await result.json();
-      if (found) {
-        // This will ask the user for authorization
-        this.runtime_
-          .completeDeferredAccountCreation({
-            entitlements,
-          })
-          .then(unusedResponse => {
-            // The user authorized the creation of a linked account.
-            // Redirect the user to URL provided for this purpose.
-            this.navigateTo_(this.serviceConfig_['accountCreationRedirectUrl']);
-          });
-      }
+    return this.hasAssociatedUserAccount_(entitlements).then(result => {
+      result.json().then(jsonResult => {
+        console.log(jsonResult.found);
+        if (jsonResult.found) {
+          // This will ask the user for authorization
+          this.runtime_
+            .completeDeferredAccountCreation({
+              entitlements,
+            })
+            .then(unusedResponse => {
+              // The user authorized the creation of a linked account.
+              // Redirect the user to URL provided for this purpose.
+              this.navigateTo_(
+                this.serviceConfig_['accountCreationRedirectUrl']
+              );
+            });
+        }
+      });
     });
   }
 
