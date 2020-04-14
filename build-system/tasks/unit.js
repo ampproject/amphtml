@@ -26,7 +26,6 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -50,10 +49,6 @@ async function unit() {
   }
 
   maybePrintArgvMessages();
-
-  if (argv.local_changes && !getUnitTestsToRun()) {
-    return;
-  }
 
   const config = new RuntimeTestConfig('unit');
   const runner = new Runner(config);

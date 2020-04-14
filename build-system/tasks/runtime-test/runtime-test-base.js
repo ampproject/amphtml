@@ -17,6 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
+const getUnitTestsToRun = require('./helpers-unit');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../test-configs/config');
@@ -34,7 +35,6 @@ const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
-const {unitTestsToRun} = require('./helpers-unit');
 
 /**
  * Updates the browsers based off of the test type
@@ -135,7 +135,7 @@ function getFiles(testType) {
         return files.concat(testConfig.unitTestOnSaucePaths);
       }
       if (argv.local_changes) {
-        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
+        return files.concat(getUnitTestsToRun(testConfig.unitTestPaths));
       }
       return files.concat(testConfig.unitTestPaths);
 

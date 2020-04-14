@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const findImports = require('find-imports-forked');
+const dependencyTree = require('dependency-tree');
 const fs = require('fs');
 const globby = require('globby');
 const log = require('fancy-log');
@@ -30,7 +30,6 @@ const {reportTestSkipped} = require('../report-test-status');
 
 const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
 const LARGE_REFACTOR_THRESHOLD = 50;
-const ROOT_DIR = path.resolve(__dirname, '../../../');
 
 /**
  * Returns true if the PR is a large refactor.
@@ -79,28 +78,21 @@ function extractCssJsFileMap() {
 }
 
 /**
- * Returns the list of files imported by a JS file
+ * Checks whether a JS file imports any files included in possibleImports
  *
  * @param {string} jsFile
- * @return {!Array<string>}
+ * @param {Array<string>} possibleImports
+ * @return {boolean}
  */
-function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
+function areAnyDependencies(jsFile, possibleImports) {
+  const dependencies = dependencyTree.toList({
+    filename: jsFile,
+    directory: '/',
+    filter: (path) => path.indexOf('node_modules') === -1,
   });
-  const files = [];
-  const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function (file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(ROOT_DIR, fullPath);
-      files.push(relativePath);
-    }
+  return dependencies.some((dependency) => {
+    return possibleImports.includes(dependency);
   });
-  return files;
 }
 
 /**
@@ -119,7 +111,8 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
     });
     jsFilesInDir.forEach((jsFile) => {
       const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
+      const cssFilePath = path.resolve(cssJsFileMap[cssFile]);
+      if (areAnyDependencies(jsFile, [cssFilePath])) {
         jsFiles.push(jsFilePath);
       }
     });
@@ -127,7 +120,7 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun() {
+function getUnitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -139,7 +132,7 @@ function getUnitTestsToRun() {
     return;
   }
 
-  const tests = unitTestsToRun();
+  const tests = unitTestsToRun(unitTestPaths);
   if (tests.length == 0) {
     log(
       green('INFO:'),
@@ -164,7 +157,7 @@ function getUnitTestsToRun() {
  * @param {!Array<string>} unitTestPaths
  * @return {!Array<string>}
  */
-function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
+function unitTestsToRun(unitTestPaths) {
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
   const testsToRun = [];
@@ -177,12 +170,11 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   }
 
   function shouldRunTest(testFile, srcFiles) {
-    const filesImported = getImports(testFile);
-    return (
-      filesImported.filter(function (file) {
-        return srcFiles.includes(file);
-      }).length > 0
-    );
+    const absolutePaths = srcFiles.map((file) => {
+      return path.resolve(file);
+    });
+
+    return areAnyDependencies(testFile, absolutePaths);
   }
 
   // Retrieves the set of unit tests that should be run
@@ -219,8 +211,4 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   return testsToRun;
 }
 
-module.exports = {
-  isLargeRefactor,
-  getUnitTestsToRun,
-  unitTestsToRun,
-};
+module.exports = getUnitTestsToRun;
