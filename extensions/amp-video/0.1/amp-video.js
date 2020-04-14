@@ -15,6 +15,10 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {
+  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
+  listen,
+} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -35,10 +39,6 @@ import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  listen,
-  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
-} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
