@@ -7993,6 +7993,13 @@ gulp-connect@5.7.0:
     serve-static "^1.13.2"
     tiny-lr "^1.1.1"
 
+gulp-debounce@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/gulp-debounce/-/gulp-debounce-1.0.2.tgz#0b943e812973e3003f980d88fc0d77e7996d9db9"
+  integrity sha1-C5Q+gSlz4wA/mA2I/A1355ltnbk=
+  dependencies:
+    through "^2.3.8"
+
 gulp-eslint-if-fixed@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gulp-eslint-if-fixed/-/gulp-eslint-if-fixed-1.0.0.tgz#ebad1f2a92e2c6ed793b01daaf0081dcaaca0e26"
