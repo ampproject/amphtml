@@ -36,6 +36,7 @@ describe
       const overflow = doc.querySelector('[overflow]');
       const overflowRect = overflow.getBoundingClientRect();
 
+      expect(overflowRect.height).to.be.greaterThan(0);
       expect(iframeRect.width).to.equal(
         iframeRect.height + overflowRect.height
       );
