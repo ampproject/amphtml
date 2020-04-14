@@ -954,7 +954,6 @@ export class BaseElement {
   /**
    * Runs the specified mutation on the element. Will not cause remeasurements.
    * Only use this function when the mutations will not affect any resource sizes.
-   * layouts are performed for the affected elements.
    *
    * @param {function()} mutator
    * @return {!Promise}
