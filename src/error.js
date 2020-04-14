@@ -64,6 +64,12 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 /**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
+
+/**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
@@ -92,7 +98,7 @@ function pushLimit(array, element, limit) {
  * @param {function()} work the function to execute after backoff
  * @return {number} the setTimeout id
  */
-let reportingBackoff = function(work) {
+let reportingBackoff = function (work) {
   // Set reportingBackoff as the lazy-created function. JS Vooodoooo.
   reportingBackoff = exponentialBackoff(1.5);
   return reportingBackoff(work);
@@ -165,7 +171,7 @@ export function reportError(error, opt_associatedElement) {
     }
     // Report if error is not an expected type.
     if (!isValidError && getMode().localDev && !getMode().test) {
-      setTimeout(function() {
+      setTimeout(function () {
         const rethrow = new Error(
           '_reported_ Error reported incorrectly: ' + error
         );
@@ -218,7 +224,7 @@ export function reportError(error, opt_associatedElement) {
       error
     );
   } catch (errorReportingError) {
-    setTimeout(function() {
+    setTimeout(function () {
       throw errorReportingError;
     });
   }
@@ -281,7 +287,7 @@ export function isBlockedByConsent(errorOrMessage) {
  */
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (onError);
-  win.addEventListener('unhandledrejection', event => {
+  win.addEventListener('unhandledrejection', (event) => {
     if (
       event.reason &&
       (event.reason.message === CANCELLED ||
@@ -337,7 +343,8 @@ function onError(message, filename, line, col, error) {
       try {
         return reportErrorToServerOrViewer(
           this,
-          /** @type {!JsonObject} */ (data)
+          /** @type {!JsonObject} */
+          (data)
         ).catch(() => {
           // catch async errors to avoid recursive errors.
         });
@@ -346,6 +353,16 @@ function onError(message, filename, line, col, error) {
       }
     });
   }
+}
+
+/**
+ * Determines the error reporting endpoint which should be used.
+ * @return {string} error reporting endpoint URL.
+ */
+function chooseReportingUrl_() {
+  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+    ? urls.betaErrorReporting
+    : urls.errorReporting;
 }
 
 /**
@@ -358,10 +375,10 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
-  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+  return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      xhr.open('POST', chooseReportingUrl_(), true);
       xhr.send(JSON.stringify(data));
     }
   });
@@ -396,7 +413,7 @@ export function maybeReportErrorToViewer(win, data) {
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-  return viewer.isTrustedViewer().then(viewerTrusted => {
+  return viewer.isTrustedViewer().then((viewerTrusted) => {
     if (!viewerTrusted) {
       return false;
     }
@@ -656,7 +673,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
 export function detectJsEngineFromStack() {
   /** @constructor */
   function Fn() {}
-  Fn.prototype.t = function() {
+  Fn.prototype.t = function () {
     throw new Error('message');
   };
   const object = new Fn();
@@ -717,8 +734,6 @@ export function reportErrorToAnalytics(error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = Services.ampdocServiceFor(win)
-    .getSingleDoc()
-    .getRootNode();
+  const root = Services.ampdocServiceFor(win).getSingleDoc().getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

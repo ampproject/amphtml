@@ -31,7 +31,7 @@ const {endBuildStep} = require('../tasks/helpers');
  * @param {string} srcFilename
  * @return {!Promise}
  */
-exports.transpileTs = function(srcDir, srcFilename) {
+exports.transpileTs = function (srcDir, srcFilename) {
   const startTime = Date.now();
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
@@ -78,7 +78,7 @@ exports.transpileTs = function(srcDir, srcFilename) {
         fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
       }
     )
-    .then(emitResult => {
+    .then((emitResult) => {
       const diagnostics = ts
         .getPreEmitDiagnostics(program)
         .concat(emitResult.diagnostics);

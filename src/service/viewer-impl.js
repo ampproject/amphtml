@@ -25,6 +25,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
+import {endsWith, startsWith} from '../string';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -38,7 +39,6 @@ import {isIframed} from '../dom';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {startsWith} from '../string';
 import {urls} from '../config';
 
 const TAG_ = 'Viewer';
@@ -190,11 +190,11 @@ export class ViewerImpl {
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
-    this.referrerUrl_ = new Promise(resolve => {
+    this.referrerUrl_ = new Promise((resolve) => {
       if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             resolve(ampdoc.getParam('referrer'));
           } else {
@@ -220,13 +220,13 @@ export class ViewerImpl {
     this.resolvedViewerUrl_ = removeFragment(this.win.location.href || '');
 
     /** @const @private {!Promise<string>} */
-    this.viewerUrl_ = new Promise(resolve => {
+    this.viewerUrl_ = new Promise((resolve) => {
       /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = devAssert(viewerUrlOverride);
           } else {
@@ -316,11 +316,11 @@ export class ViewerImpl {
     const timeoutMessage = 'initMessagingChannel timeout';
     return Services.timerFor(this.win)
       .timeoutPromise(20000, messagingPromise, timeoutMessage)
-      .catch(reason => {
+      .catch((reason) => {
         let error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
-        if (error && error.message === timeoutMessage) {
+        if (error && endsWith(error.message, timeoutMessage)) {
           error = dev().createExpectedError(error);
         }
         reportError(error);
@@ -410,7 +410,7 @@ export class ViewerImpl {
    * @private
    */
   hasRoughlySameOrigin_(first, second) {
-    const trimOrigin = origin => {
+    const trimOrigin = (origin) => {
       if (origin.split('.').length > 2) {
         return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
       }
@@ -594,7 +594,7 @@ export class ViewerImpl {
       this.isTrustedViewer_ =
         isTrustedAncestorOrigins !== undefined
           ? Promise.resolve(isTrustedAncestorOrigins)
-          : this.messagingReadyPromise_.then(origin => {
+          : this.messagingReadyPromise_.then((origin) => {
               return origin ? this.isTrustedViewerOrigin_(origin) : false;
             });
     }
@@ -668,7 +668,7 @@ export class ViewerImpl {
       // Non-https origins are never trusted.
       return false;
     }
-    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some((th) => th.test(url.hostname));
   }
 
   /** @override */
@@ -738,7 +738,7 @@ export class ViewerImpl {
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
-      queue.forEach(message => {
+      queue.forEach((message) => {
         const responsePromise = this.messageDeliverer_(
           message.eventType,
           message.data,
@@ -800,7 +800,10 @@ export class ViewerImpl {
       });
     }
 
-    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
+    const found = findIndex(
+      this.messageQueue_,
+      (m) => m.eventType == eventType
+    );
 
     let message;
     if (found != -1) {

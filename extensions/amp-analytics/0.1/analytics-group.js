@@ -40,7 +40,7 @@ export class AnalyticsGroup {
 
   /** @override */
   dispose() {
-    this.listeners_.forEach(listener => {
+    this.listeners_.forEach((listener) => {
       listener();
     });
   }

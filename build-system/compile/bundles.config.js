@@ -130,7 +130,6 @@ exports.jsBundles = {
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-      compilationLevel: 'WHITESPACE_ONLY',
       skipUnknownDepsCheck: true,
     },
   },
@@ -1216,8 +1215,8 @@ function verifyBundle_(condition, field, message, name, found) {
   }
 }
 
-exports.verifyExtensionBundles = function() {
-  exports.extensionBundles.forEach(bundle => {
+exports.verifyExtensionBundles = function () {
+  exports.extensionBundles.forEach((bundle) => {
     const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
       'name' in bundle,
@@ -1241,11 +1240,11 @@ exports.verifyExtensionBundles = function() {
       bundleString
     );
     const duplicates = exports.extensionBundles.filter(
-      duplicate => duplicate.name === bundle.name
+      (duplicate) => duplicate.name === bundle.name
     );
     verifyBundle_(
       duplicates.every(
-        duplicate => duplicate.latestVersion === bundle.latestVersion
+        (duplicate) => duplicate.latestVersion === bundle.latestVersion
       ),
       'latestVersion',
       'is not the same for all versions of',
@@ -1259,9 +1258,9 @@ exports.verifyExtensionBundles = function() {
       bundle.name,
       bundleString
     );
-    const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
+    const validTypes = Object.keys(TYPES).map((x) => TYPES[x]);
     verifyBundle_(
-      validTypes.some(validType => validType === bundle.type),
+      validTypes.some((validType) => validType === bundle.type),
       'type',
       `is not one of ${validTypes.join(',')} in`,
       bundle.name,

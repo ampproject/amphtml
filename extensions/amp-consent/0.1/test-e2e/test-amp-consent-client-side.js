@@ -29,14 +29,14 @@ describes.endtoend(
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
       controller = env.controller;
     });
 
-    it('should work with client side decision', async () => {
+    it.skip('should work with client side decision', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
 

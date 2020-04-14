@@ -56,6 +56,7 @@ const forbiddenTerms = {
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -68,8 +69,9 @@ const forbiddenTerms = {
   '(^i-amp-|\\Wi-amp-)': {
     message: 'Switch to new internal ID form',
     whitelist: [
-      'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/create-golden-css/css/main.css',
+      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
     ],
@@ -112,6 +114,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/module-dist-bundle-size.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
@@ -656,6 +659,7 @@ const forbiddenTerms = {
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
+      'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
@@ -1084,7 +1088,6 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/0.2/timeago.js',
-      'build-system/compile/build.conf.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1134,24 +1137,26 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
-      'build-system/server/app-video-testbench.js',
-      'build-system/server/variable-substitution.js',
-      'build-system/server/app.js',
       'build-system/server/app-utils.js',
+      'build-system/server/app-video-testbench.js',
+      'build-system/server/app.js',
       'build-system/server/shadow-viewer.js',
+      'build-system/server/variable-substitution.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
+      'src/amp-story-player-impl.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
-      'validator/engine/validator.js',
       'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
     ],
@@ -1224,7 +1229,7 @@ function isInBuildSystemFixtureFolder(filePath) {
  */
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function (match) {
     // Preserve the newlines
     const newlines = [];
     for (let i = 0; i < match.length; i++) {
@@ -1254,7 +1259,7 @@ function matchTerms(file, terms) {
   const contents = stripComments(file.contents.toString());
   const {relative} = file;
   return Object.keys(terms)
-    .map(function(term) {
+    .map(function (term) {
       let fix;
       const {whitelist, checkInTestFolder} = terms[term];
       // NOTE: we could do a glob test instead of exact check in the future
@@ -1317,7 +1322,7 @@ function matchTerms(file, terms) {
 
       return hasTerm;
     })
-    .some(function(hasAnyTerm) {
+    .some(function (hasAnyTerm) {
       return hasAnyTerm;
     });
 }
@@ -1372,7 +1377,7 @@ function hasAnyTerms(file) {
 function isMissingTerms(file) {
   const contents = file.contents.toString();
   return Object.keys(requiredTerms)
-    .map(function(term) {
+    .map(function (term) {
       const filter = requiredTerms[term];
       if (!filter.test(file.path)) {
         return false;
@@ -1390,7 +1395,7 @@ function isMissingTerms(file) {
       }
       return false;
     })
-    .some(function(hasMissingTerm) {
+    .some(function (hasMissingTerm) {
       return hasMissingTerm;
     });
 }
@@ -1406,13 +1411,13 @@ function presubmit() {
   return gulp
     .src(srcGlobs)
     .pipe(
-      through2.obj(function(file, enc, cb) {
+      through2.obj(function (file, enc, cb) {
         forbiddenFound = hasAnyTerms(file) || forbiddenFound;
         missingRequirements = isMissingTerms(file) || missingRequirements;
         cb();
       })
     )
-    .on('end', function() {
+    .on('end', function () {
       if (forbiddenFound) {
         log(
           colors.blue(

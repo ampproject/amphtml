@@ -34,23 +34,25 @@ const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
-const {preClosureBabel} = require('./pre-closure-babel');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
-const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
+  ? 4
+  : parseInt(argv.closure_concurrency, 10) || 1;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function(
+exports.closureCompile = async function (
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -59,7 +61,7 @@ exports.closureCompile = async function(
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     function start() {
       inProgress++;
       compile(
@@ -69,12 +71,12 @@ exports.closureCompile = async function(
         options,
         timeInfo
       ).then(
-        function() {
+        function () {
           inProgress--;
           next();
           resolve();
         },
-        reason => reject(reason)
+        (reason) => reject(reason)
       );
     }
     function next() {
@@ -168,7 +170,7 @@ function compile(
     );
   }
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!(entryModuleFilenames instanceof Array)) {
       entryModuleFilenames = [entryModuleFilenames];
     }
@@ -179,19 +181,11 @@ function compile(
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    let sourceMapBase = 'http://localhost:8000/';
-    if (isProdBuild) {
-      // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase =
-        'https://raw.githubusercontent.com/ampproject/amphtml/' +
-        internalRuntimeVersion +
-        '/';
-    }
     const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
-    entryModuleFilenames.forEach(function(filename) {
+    entryModuleFilenames.forEach(function (filename) {
       if (!filename.includes('extensions/')) {
         return;
       }
@@ -214,7 +208,7 @@ function compile(
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
       const polyfills = fs.readdirSync('src/polyfills');
-      const polyfillsShadowList = polyfills.filter(p => {
+      const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
         return p !== 'custom-elements.js';
       });
@@ -225,7 +219,7 @@ function compile(
         'src/polyfills/custom-elements.js',
         'build/fake-polyfills/**/*.js'
       );
-      polyfillsShadowList.forEach(polyfillFile => {
+      polyfillsShadowList.forEach((polyfillFile) => {
         srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync(
           'build/fake-polyfills/src/polyfills/' + polyfillFile,
@@ -253,7 +247,7 @@ function compile(
       // Don't include externs.
       '!**/*.extern.js'
     );
-    unneededFiles.forEach(function(fake) {
+    unneededFiles.forEach(function (fake) {
       if (!fs.existsSync(fake)) {
         fs.writeFileSync(
           fake,
@@ -299,7 +293,6 @@ function compile(
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       // These arrays are filled in below.
       jscomp_error: [],
@@ -349,10 +342,10 @@ function compile(
     }
 
     const compilerOptionsArray = [];
-    Object.keys(compilerOptions).forEach(function(option) {
+    Object.keys(compilerOptions).forEach(function (option) {
       const value = compilerOptions[option];
       if (value instanceof Array) {
-        value.forEach(function(item) {
+        value.forEach(function (item) {
           compilerOptionsArray.push('--' + option + '=' + item);
         });
       } else {
@@ -369,11 +362,9 @@ function compile(
         .src(srcs, {base: '.'})
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
+        .on('error', (err) => handlePreClosureError(err, outputFilename))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
-        .on('error', err => {
-          handleTypeCheckError();
-          reject(err);
-        })
+        .on('error', (err) => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
     } else {
@@ -382,12 +373,14 @@ function compile(
         .src(srcs, {base: '.'})
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
+        .on('error', (err) =>
+          handlePreClosureError(err, outputFilename, options, resolve)
+        )
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
-        .on('error', err => {
-          handleCompilerError(outputFilename);
-          reject(err);
-        })
-        .pipe(rename(outputFilename))
+        .on('error', (err) =>
+          handleCompilerError(err, outputFilename, options, resolve)
+        )
+        .pipe(rename(`${outputDir}/${outputFilename}`))
         .pipe(
           gulpIf(
             !argv.pseudo_names && !options.skipUnknownDepsCheck,
@@ -395,15 +388,15 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(sourcemaps.write('.'))
         .pipe(
           gulpIf(
             shouldAppendSourcemappingURLText,
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(postClosureBabel(outputDir, options.esmPassCompilation))
-        .pipe(gulp.dest(outputDir))
+        .pipe(postClosureBabel())
+        .pipe(writeSourcemaps())
+        .pipe(gulp.dest('.'))
         .on('end', resolve);
     }
   });

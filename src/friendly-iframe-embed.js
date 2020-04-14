@@ -145,7 +145,7 @@ export function installFriendlyIframeEmbed(
 
   // Pre-load extensions.
   if (spec.extensionIds) {
-    spec.extensionIds.forEach(extensionId =>
+    spec.extensionIds.forEach((extensionId) =>
       extensions.preloadExtension(extensionId)
     );
   }
@@ -160,7 +160,7 @@ export function installFriendlyIframeEmbed(
   const registerViolationListener = () => {
     iframe.contentWindow.addEventListener(
       'securitypolicyviolation',
-      violationEvent => {
+      (violationEvent) => {
         dev().warn('FIE', 'security policy violation', violationEvent);
       }
     );
@@ -194,7 +194,7 @@ export function installFriendlyIframeEmbed(
   if (isIframeReady(iframe)) {
     readyPromise = Promise.resolve();
   } else {
-    readyPromise = new Promise(resolve => {
+    readyPromise = new Promise((resolve) => {
       /** @const {number} */
       const interval = win.setInterval(() => {
         if (isIframeReady(iframe)) {
@@ -206,7 +206,7 @@ export function installFriendlyIframeEmbed(
       // For safety, make sure we definitely stop polling when child doc is
       // loaded.
       loadedPromise
-        .catch(error => {
+        .catch((error) => {
           rethrowAsync(error);
         })
         .then(() => {
@@ -304,7 +304,7 @@ function mergeHtml(spec) {
 
   // Load fonts.
   if (spec.fonts) {
-    spec.fonts.forEach(font => {
+    spec.fonts.forEach((font) => {
       result.push(
         `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`
       );
@@ -580,8 +580,8 @@ export class FriendlyIframeEmbed {
     const resources = this.getResources_();
     const toRemove = resources
       .get()
-      .filter(resource => resource.hostWin == this.win);
-    toRemove.forEach(resource => {
+      .filter((resource) => resource.hostWin == this.win);
+    toRemove.forEach((resource) => {
       resources.remove(resource.element);
       resource.disconnect();
     });
@@ -726,7 +726,7 @@ export class FriendlyIframeEmbed {
     stubLegacyElements(childWin);
 
     return Promise.all(
-      extensionIds.map(extensionId => {
+      extensionIds.map((extensionId) => {
         // This will extend automatic upgrade of custom elements from top
         // window to the child window.
         if (!LEGACY_ELEMENTS.includes(extensionId)) {
@@ -783,7 +783,7 @@ export class FriendlyIframeEmbed {
     stubLegacyElements(childWin);
 
     const promises = [];
-    extensionIds.forEach(extensionId => {
+    extensionIds.forEach((extensionId) => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
@@ -793,9 +793,9 @@ export class FriendlyIframeEmbed {
       // Install CSS.
       const promise = extensions
         .preloadExtension(extensionId)
-        .then(extension => {
+        .then((extension) => {
           // Adopt embeddable extension services.
-          extension.services.forEach(service => {
+          extension.services.forEach((service) => {
             installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
           });
 
@@ -803,7 +803,7 @@ export class FriendlyIframeEmbed {
           let elementPromises = null;
           for (const elementName in extension.elements) {
             const elementDef = extension.elements[elementName];
-            const elementPromise = new Promise(resolve => {
+            const elementPromise = new Promise((resolve) => {
               if (elementDef.css) {
                 installStylesLegacy(
                   childWin.document,
@@ -890,7 +890,7 @@ export function installStandardServicesInEmbed(childWin) {
     Services.navigationForDoc(frameElement),
   ];
   const ampdoc = getAmpdoc(frameElement);
-  standardServices.forEach(service => {
+  standardServices.forEach((service) => {
     // Static functions must be invoked on the class, not the instance.
     service.constructor.installInEmbedWindow(childWin, ampdoc);
   });

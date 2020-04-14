@@ -251,7 +251,7 @@ export class RefreshManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -324,7 +324,7 @@ export class RefreshManager {
    *    refresh timer elapses successfully.
    */
   startRefreshTimer_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
         this.unobserve();

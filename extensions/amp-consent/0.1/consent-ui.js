@@ -21,7 +21,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
-  insertAfterOrAtStart,
+  insertAtStart,
   isAmpElement,
   removeElement,
   tryFocus,
@@ -473,10 +473,10 @@ export class ConsentUI {
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
-    return consentStatePromise.then(consentStateManager => {
+    return consentStatePromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
-        .then(consentInfo => {
+        .then((consentInfo) => {
           return dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
@@ -502,21 +502,17 @@ export class ConsentUI {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
-      insertAfterOrAtStart(
-        this.parent_,
-        dev().assertElement(this.placeholder_),
-        null
-      );
+      insertAtStart(this.parent_, dev().assertElement(this.placeholder_));
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.getClientInfoPromise_(
       isActionPromptTrigger
-    ).then(clientInfo => {
+    ).then((clientInfo) => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+      insertAtStart(this.parent_, dev().assertElement(this.ui_));
     });
 
     return Promise.all([

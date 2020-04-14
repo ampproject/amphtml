@@ -55,7 +55,7 @@ describe('TaskQueue', () => {
     queue.enqueue({id: 'B', v: 2});
     queue.enqueue({id: 'C', v: 1});
 
-    const task = queue.peek(task => 10 - task.v);
+    const task = queue.peek((task) => 10 - task.v);
     expect(task.id).to.equal('B');
   });
 });

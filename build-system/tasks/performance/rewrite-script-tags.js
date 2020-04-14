@@ -73,7 +73,7 @@ async function useRemoteScripts(url) {
  */
 function rewriteScriptTags(urls) {
   return Promise.all(
-    urls.flatMap(url => [useLocalScripts(url), useRemoteScripts(url)])
+    urls.flatMap((url) => [useLocalScripts(url), useRemoteScripts(url)])
   );
 }
 

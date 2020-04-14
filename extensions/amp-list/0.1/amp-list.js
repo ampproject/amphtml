@@ -243,7 +243,7 @@ export class AmpList extends AMP.BaseElement {
     setDOM['KEY'] = DIFF_KEY;
     setDOM['IGNORE'] = DIFF_IGNORE;
 
-    Services.bindForDocOrNull(this.element).then(bind => {
+    Services.bindForDocOrNull(this.element).then((bind) => {
       this.bind_ = bind;
     });
   }
@@ -379,7 +379,7 @@ export class AmpList extends AMP.BaseElement {
    */
   getAmpStateJson_(src) {
     return Services.bindForDocOrNull(this.element)
-      .then(bind => {
+      .then((bind) => {
         userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
@@ -387,7 +387,7 @@ export class AmpList extends AMP.BaseElement {
         );
 
         const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath).catch(err => {
+        return bind.getStateAsync(ampStatePath).catch((err) => {
           const stateKey = ampStatePath.split('.')[0];
           user().error(
             TAG,
@@ -396,7 +396,7 @@ export class AmpList extends AMP.BaseElement {
           throw err;
         });
       })
-      .then(json => {
+      .then((json) => {
         userAssert(
           typeof json !== 'undefined',
           `[amp-list] No data was found at provided uri: ${src}`
@@ -414,7 +414,7 @@ export class AmpList extends AMP.BaseElement {
      * @param {!Array|!Object} data
      * @return {!Promise}
      */
-    const renderLocalData = data => {
+    const renderLocalData = (data) => {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
       userAssert(
@@ -470,7 +470,7 @@ export class AmpList extends AMP.BaseElement {
    */
   createContainer_() {
     const container = this.win.document.createElement('div');
-    container.setAttribute('role', 'list');
+    this.setRoleAttribute_(container, 'list');
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
@@ -489,9 +489,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   addElementsToContainer_(elements, container) {
-    elements.forEach(element => {
+    elements.forEach((element) => {
       if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
+        this.setRoleAttribute_(element, 'listitem');
       }
       if (
         !element.hasAttribute('tabindex') &&
@@ -501,6 +501,21 @@ export class AmpList extends AMP.BaseElement {
       }
       container.appendChild(element);
     });
+  }
+
+  /**
+   * Adds the 'role' attribute to the element.
+   * For amp-lists with 'single-item' enabled, we should not specify the
+   * role of 'list' on the container or listitem on the children as it
+   * causes screen readers to read an extra nested list with one item
+   * @param {!Node} element
+   * @param {string} value
+   * @private
+   */
+  setRoleAttribute_(element, value) {
+    if (!this.element.hasAttribute('single-item')) {
+      element.setAttribute('role', value);
+    }
   }
 
   /**
@@ -633,7 +648,7 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.isAmpStateSrc_(elementSrc)
         ? this.getAmpStateJson_(elementSrc)
         : this.prepareAndSendFetch_(opt_refresh);
-      fetch = fetch.then(data => {
+      fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
           return;
@@ -652,7 +667,7 @@ export class AmpList extends AMP.BaseElement {
       });
     }
 
-    return fetch.catch(error => {
+    return fetch.catch((error) => {
       this.triggerFetchErrorEvent_(error);
       this.showFallback_();
       throw error;
@@ -667,7 +682,7 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-    return this.prepareAndSendFetch_().then(data => {
+    return this.prepareAndSendFetch_().then((data) => {
       const items = this.computeListItems_(data);
       this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
       return this.scheduleRender_(
@@ -712,7 +727,7 @@ export class AmpList extends AMP.BaseElement {
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return requestForBatchFetch(this.element, this.getPolicy_(), refresh)
-      .then(r => {
+      .then((r) => {
         request = r;
 
         request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
@@ -738,7 +753,7 @@ export class AmpList extends AMP.BaseElement {
         );
       })
       .then(
-        response => {
+        (response) => {
           userAssert(
             response,
             'Error proxying amp-list templates, received no response.'
@@ -762,11 +777,11 @@ export class AmpList extends AMP.BaseElement {
           request.fetchOpt.responseType = 'application/json';
           return response;
         },
-        error => {
+        (error) => {
           throw user().createError('Error proxying amp-list templates', error);
         }
       )
-      .then(data => {
+      .then((data) => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
           return;
@@ -801,8 +816,8 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.renderedItems_ && opt_append) {
-      this.renderItems_.payload =
-        /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload || {});
+      this.renderItems_.payload = /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload ||
+        {});
     }
 
     return promise;
@@ -815,6 +830,8 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
+
+    user().fine(TAG, 'Rendering list', this.element, 'with data', current.data);
 
     devAssert(current && current.data, 'Nothing to render.');
     const scheduleNextPass = () => {
@@ -837,8 +854,8 @@ export class AmpList extends AMP.BaseElement {
     const isSSR = this.ssrTemplateHelper_.isEnabled();
     let renderPromise = this.ssrTemplateHelper_
       .applySsrOrCsrTemplate(this.element, current.data)
-      .then(result => this.updateBindings_(result, current.append))
-      .then(elements => this.render_(elements, current.append));
+      .then((result) => this.updateBindings_(result, current.append))
+      .then((elements) => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
       renderPromise = renderPromise.then(() =>
@@ -884,7 +901,7 @@ export class AmpList extends AMP.BaseElement {
     if (elem && this.templates_.hasTemplate(elem)) {
       return this.templates_
         .findAndRenderTemplate(elem, data)
-        .then(newContents => {
+        .then((newContents) => {
           return this.mutateElement(() => {
             removeChildren(dev().assertElement(elem));
             elem.appendChild(newContents);
@@ -916,7 +933,7 @@ export class AmpList extends AMP.BaseElement {
 
     // Early out if elements contain no bindings.
     const hasBindings = elements.some(
-      el =>
+      (el) =>
         el.hasAttribute('i-amphtml-binding') ||
         !!el.querySelector('[i-amphtml-binding]')
     );
@@ -935,7 +952,7 @@ export class AmpList extends AMP.BaseElement {
      * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
      * @return {!Promise<!Array<!Element>>}
      */
-    const updateWith = bind => {
+    const updateWith = (bind) => {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
@@ -957,7 +974,7 @@ export class AmpList extends AMP.BaseElement {
         return updateWith(this.bind_);
       } else {
         // On initial render, do a non-blocking scan and don't update.
-        Services.bindForDocOrNull(this.element).then(bind => {
+        Services.bindForDocOrNull(this.element).then((bind) => {
           if (bind) {
             bind.rescan(elements, [], {'fast': true, 'update': false});
           }
@@ -967,7 +984,7 @@ export class AmpList extends AMP.BaseElement {
     }
     // binding=always (default): Wait for amp-bind to download and always
     // do render-blocking update.
-    return Services.bindForDocOrNull(this.element).then(bind => {
+    return Services.bindForDocOrNull(this.element).then((bind) => {
       if (bind) {
         return updateWith(bind);
       } else {
@@ -1014,9 +1031,9 @@ export class AmpList extends AMP.BaseElement {
       return this.maybeResizeListToFitItems_();
     };
 
-    if (this.isLayoutContainer_) {
+    if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
-        renderAndResize().then(resized =>
+        renderAndResize().then((resized) =>
           resized ? this.unlockHeightInsideMutate_() : null
         )
       );
@@ -1070,7 +1087,7 @@ export class AmpList extends AMP.BaseElement {
     // But, we only need to do (1) here because bindings in initial content
     // are inert by design (as are bindings in placeholder content).
     const elements = container.querySelectorAll('.i-amphtml-element');
-    elements.forEach(element => {
+    elements.forEach((element) => {
       markElementForDiffing(element, () => String(key--));
     });
   }
@@ -1087,7 +1104,7 @@ export class AmpList extends AMP.BaseElement {
       return;
     }
     const shouldReplace = replacementAttrs.some(
-      attr => before.getAttribute(attr) !== after.getAttribute(attr)
+      (attr) => before.getAttribute(attr) !== after.getAttribute(attr)
     );
     // Use the new element if there's a mismatched attribute value.
     if (shouldReplace) {
@@ -1120,12 +1137,16 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Measure and lock height before performing given mutate fn.
-   * Applicable for layout=container.
+   * Applicable for layout=container without infinite scrolling.
    * @private
    * @param {!Function} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
+    devAssert(
+      !this.loadMoreEnabled_,
+      'amp-list[layout=container] does not support infinite scrolling with [load-more].'
+    );
     let currentHeight;
     return this.measureMutateElement(
       () => {
@@ -1365,7 +1386,7 @@ export class AmpList extends AMP.BaseElement {
         // Necessary since load-more elements are toggled in the above block
         this.attemptToFitLoadMore_(dev().assertElement(this.container_));
       })
-      .catch(error => {
+      .catch((error) => {
         this.triggerFetchErrorEvent_(error);
         this.handleLoadMoreFailed_();
       });
@@ -1426,7 +1447,7 @@ export class AmpList extends AMP.BaseElement {
 
     this.viewport_
       .getClientRectAsync(dev().assertElement(endoOfListMarker))
-      .then(positionRect => {
+      .then((positionRect) => {
         const viewportHeight = this.viewport_.getHeight();
         if (3 * viewportHeight > positionRect.bottom) {
           return this.loadMoreCallback_();
@@ -1440,7 +1461,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   prepareAndSendFetch_(opt_refresh = false) {
-    return getViewerAuthTokenIfAvailable(this.element).then(token =>
+    return getViewerAuthTokenIfAvailable(this.element).then((token) =>
       this.fetch_(opt_refresh, token)
     );
   }
@@ -1529,6 +1550,6 @@ export class AmpList extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpList, CSS);
 });

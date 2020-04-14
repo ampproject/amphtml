@@ -62,7 +62,7 @@ export class IframeMessagingClient {
   getData(requestType, payload, callback) {
     const responseType = requestType + CONSTANTS.responseTypeSuffix;
     const messageId = this.nextMessageId_++;
-    const unlisten = this.registerCallback(responseType, result => {
+    const unlisten = this.registerCallback(responseType, (result) => {
       if (result[CONSTANTS.messageIdFieldName] === messageId) {
         unlisten();
         callback(result[CONSTANTS.contentFieldName]);
@@ -100,7 +100,7 @@ export class IframeMessagingClient {
    * @return {*} TODO(#23582): Specify return type
    */
   requestOnce(requestType, responseType, callback) {
-    const unlisten = this.registerCallback(responseType, event => {
+    const unlisten = this.registerCallback(responseType, (event) => {
       unlisten();
       callback(event);
     });
@@ -191,7 +191,7 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', event => {
+    listen(this.win_, 'message', (event) => {
       // If we have set a host window, strictly check that it's from it.
       if (this.hostWindow_ && event.source != this.hostWindow_) {
         return;
