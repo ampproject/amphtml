@@ -921,11 +921,10 @@ export class BaseElement {
    *
    * @param {function()} mutator
    * @param {Element=} opt_element
-   * @param {boolean=} skipRemeasure
    * @return {!Promise}
    */
-  mutateElement(mutator, opt_element, skipRemeasure) {
-    return this.measureMutateElement(null, mutator, opt_element, skipRemeasure);
+  mutateElement(mutator, opt_element) {
+    return this.measureMutateElement(null, mutator, opt_element);
   }
 
   /**
@@ -949,6 +948,23 @@ export class BaseElement {
       opt_element || this.element,
       measurer,
       mutator
+    );
+  }
+
+  /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   * layouts are performed for the affected elements.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      this.element,
+      null,
+      mutator,
+      /* skipRemeasure */ true
     );
   }
 
