@@ -25,7 +25,6 @@ const {
   compileCoreRuntime,
   compileJs,
   endBuildStep,
-  hostname,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
@@ -55,12 +54,23 @@ const {VERSION} = require('../compile/internal-version');
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
+/**
+ * Files that must be built for amp-web-push
+ */
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
   'amp-web-push-permission-dialog',
 ];
 
+/**
+ * Versions that must be built for amp-web-push
+ */
 const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
+
+/**
+ * Used while building the experiments page.
+ */
+const hostname = argv.hostname || 'cdn.ampproject.org';
 
 /**
  * Prints a useful help message prior to the gulp dist task

@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+const debounce = require('debounce');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
+const {
+  endBuildStep,
+  mkdirSync,
+  toPromise,
+  watchDebounceDelay,
+} = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
-const {endBuildStep, mkdirSync, toPromise} = require('./helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -75,9 +81,10 @@ const cssEntryPoints = [
  */
 function compileCss(watch) {
   if (watch) {
-    gulpWatch('css/**/*.css', function () {
+    const watchFunc = () => {
       compileCss();
-    });
+    };
+    gulpWatch('css/**/*.css', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
