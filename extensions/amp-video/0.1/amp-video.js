@@ -35,7 +35,10 @@ import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {
+  listen,
+  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
+} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
@@ -322,23 +325,39 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
+    let pendingOriginPromise;
     if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      this.getAmpDoc()
+      pendingOriginPromise = this.getAmpDoc()
         .whenFirstVisible()
         .then(() => {
           this.propagateLayoutChildren_();
+          // We need to yield to the event queue before listing for loadPromise
+          // because this element may still be in error state from the pre-render
+          // load.
+          return Services.timerFor(this.win)
+            .promise(1)
+            .then(() => this.loadPromise(this.video_));
         });
     } else {
       this.propagateLayoutChildren_();
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    const promise = this.loadPromise(this.video_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const promise = this.loadPromise(this.video_).then(
+      () => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      },
+      (reason) => {
+        if (pendingOriginPromise) {
+          this.video_[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = undefined;
+          return pendingOriginPromise;
+        }
+        throw reason;
+      }
+    );
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
