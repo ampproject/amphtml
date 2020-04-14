@@ -50,7 +50,6 @@ export class AmpAdMetadataTransformer {
    * Please note: once runtime offsets are computed the document must not
    * change.
    *
-   * https://cs.corp.google.com/piper///depot/google3/search/amphtml/transformers/amp_ad_metadata_transformer.cc
    * @param {Document} doc
    * @return {string}
    */
