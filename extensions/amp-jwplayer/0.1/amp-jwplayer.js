@@ -458,8 +458,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /**
    * @param {string} method
-   * @param {T} optParams
-   * @template {number|boolean|string|undefined} T
+   * @param {number|boolean|string|undefined} optParams
    * @private
    */
   sendCommand_(method, optParams) {
