@@ -52,14 +52,6 @@ const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
-
-// Middleware is executed in order, so this must be at the top.
-// TODO(#24333): Migrate all server URL handlers to new-server/router and
-// deprecate this file.
-if (argv.new_server) {
-  app.use(require('./new-server/router'));
-}
-
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
@@ -80,8 +72,7 @@ app.use((req, res, next) => {
 
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
-    isRtvMode(serveMode)
+    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
   );
 }
 
@@ -243,7 +234,7 @@ app.use('/pwa', (req, res) => {
   }
   res.statusCode = 200;
   res.setHeader('Content-Type', contentType);
-  fs.promises.readFile(pc.cwd() + file).then((file) => {
+  fs.promises.readFile(pc.cwd() + file).then(file => {
     res.end(file);
   });
 });
@@ -304,7 +295,7 @@ app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   const fields = Object.create(null);
-  form.on('field', function (name, value) {
+  form.on('field', function(name, value) {
     if (!(name in fields)) {
       fields[name] = value;
       return;
@@ -320,7 +311,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, (unusedErr) => {
+  form.parse(req, unusedErr => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -414,7 +405,7 @@ app.use('/form/autocomplete/query', (req, res) => {
     res.json({items: autocompleteColors});
   } else {
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = autocompleteColors.filter((l) =>
+    const filtered = autocompleteColors.filter(l =>
       l.toLowerCase().includes(lowerCaseQuery)
     );
     res.json({items: filtered});
@@ -432,7 +423,7 @@ app.use('/form/mention/query', (req, res) => {
     return;
   }
   const lowerCaseQuery = query.toLowerCase().trim();
-  const filtered = autocompleteEmailData.filter((l) =>
+  const filtered = autocompleteEmailData.filter(l =>
     l.toLowerCase().startsWith(lowerCaseQuery)
   );
   res.json({items: filtered});
@@ -493,7 +484,7 @@ function proxyToAmpProxy(req, res, mode) {
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   console.log('Fetching URL: ' + url);
-  request(url, function (error, response, body) {
+  request(url, function(error, response, body) {
     body = body
       // Unversion URLs.
       .replace(
@@ -585,7 +576,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       pagination.textContent = '';
       const liveChildren = [].slice
         .call(items.children)
-        .filter((x) => !x.hasAttribute('data-tombstone'));
+        .filter(x => !x.hasAttribute('data-tombstone'));
 
       const pageCount = Math.ceil(liveChildren.length / perPage);
       const pageListItems = Array.apply(null, Array(pageCount))
@@ -867,7 +858,7 @@ app.get('/a4a_template/*', (req, res) => {
     `0.1/data/${match[2]}.template`;
   fs.promises
     .readFile(filePath)
-    .then((file) => {
+    .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
@@ -948,7 +939,7 @@ app.get(
     const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
-      .then((file) => {
+      .then(file => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
@@ -1029,7 +1020,7 @@ app.get(
         if (stream > 0) {
           res.writeHead(200, {'Content-Type': 'text/html'});
           let pos = 0;
-          const writeChunk = function () {
+          const writeChunk = function() {
             const chunk = file.substring(
               pos,
               Math.min(pos + stream, file.length)
@@ -1160,11 +1151,8 @@ app.use('/subscription/pingback', (req, res) => {
 });
 
 app.use('/remote-vendor-config/', (req, res) => {
-  // TODO: Remove later
   cors.assertCors(req, res, ['GET']);
-  const j = JSON.parse(
-    '{"requests":{"2":"https://sb.scorecardresearch.com/b?c1=2&c2=24196029&rn=${random}&c8=${title}&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}","12":"https://ping.chartbeat.net/ping?h=axios.com&u=${clientId(_cb)}&g=65020&g1=${chartbeatNormalizedAuthors}&p=${canonicalPath}&d=${canonicalHost}&c=120&x=${scrollTop}&y=${scrollHeight}&j=30&R=1&W=0&I=0&E=${totalEngagedTime}&r=${documentReferrer}&t=${pageViewId}${clientId(_cb)}&b=${pageLoadTime}&i=${title}&T=${timestamp}&tz=${timezone}&C=2&_","13":"https://www.facebook.com/tr?id=989104511193714&ev=PageView&noscript=1","14":"https://www.google-analytics.com/r/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=${random}&t=pageview&_r=1&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp","18":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}","19":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=view&el=${headline}&a=${pageViewId}&z=${random}&cm1=${index}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp","21":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cm1=${index}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp&cd5=${clickUrl}&cd7=${linkText}&cd8=${item}","22":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=footer&ea=view&el=&a=${pageViewId}&z=${random}","23":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cm1=${index}&cd3=${subCategory}&cd4=amp&cd5=${clickUrl}&cd7=${linkText}&cd8=${item}","24":"https://pixel.quantserve.com/pixel;r=${random};a=${pcode};labels=;fpan=;fpa=p-kDmzBJE8RjKKd;ns=0;ce=1;cm=;je=0;sr=${screenWidth}x${screenHeight}x${screenColorDepth};enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}","25":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=ad&ea=view&el=&a=${pageViewId}&z=${random}&cd3=${subCategory}&cd1=${index}","26":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=story&ea=view&el=${headline}&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp","27":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=timing&plt=${pageLoadTime}&dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&srt=${serverResponseTime}&pdt=${pageDownloadTime}&clt=${contentLoadTime}&dit=${domInteractiveTime}&a=${pageViewId}&z=${random}","28":"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=adtiming&plt=${pageLoadTime}&dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&srt=${serverResponseTime}&pdt=${pageDownloadTime}&clt=${contentLoadTime}&dit=${domInteractiveTime}&a=${pageViewId}&z=${random}"},"triggers":{"30":{"request":"2","vars":{"gtm.event":"gtm.pageview"},"on":"visible"},"31":{"request":"12","selector":"<a>","vars":{"gtm.event":"gtm.click"},"on":"click"},"33":{"request":"12","timerSpec":{"interval":15,"maxTimerLength":7200},"vars":{"gtm.event":"gtm.timer"},"on":"timer"},"35":{"request":"12","vars":{"gtm.event":"gtm.pageview"},"on":"visible"},"36":{"request":"13","vars":{"gtm.event":"gtm.pageview"},"on":"visible"},"37":{"request":"14","vars":{"gtm.event":"gtm.pageview"},"on":"visible"},"38":{"request":"18","selector":"a.gtm-atomic-unit-link","vars":{"gtm.event":"gtm.click"},"on":"click"},"39":{"request":"19","visibilitySpec":{"selector":"#gtm-atomic-unit","visiblePercentageMin":1,"visiblePercentageMax":100,"continuousTimeMin":1,"totalTimeMin":1},"vars":{"gtm.event":"gtm.visible"},"on":"visible"},"40":{"request":"21","selector":".gtm-content-click","vars":{"gtm.event":"gtm.click"},"on":"click"},"41":{"request":"22","visibilitySpec":{"selector":"#gtm-footer","visiblePercentageMin":1,"visiblePercentageMax":100,"continuousTimeMin":1,"totalTimeMin":1},"vars":{"gtm.event":"gtm.visible"},"on":"visible"},"42":{"request":"23","selector":".gtm-non-content-click","vars":{"gtm.event":"gtm.click"},"on":"click"},"43":{"request":"24","vars":{"gtm.event":"gtm.pageview"},"on":"visible"},"44":{"request":"25","visibilitySpec":{"selector":"#gtm-ad","visiblePercentageMin":1,"visiblePercentageMax":100,"continuousTimeMin":1,"totalTimeMin":1},"vars":{"gtm.event":"gtm.visible"},"on":"visible"},"45":{"request":"26","visibilitySpec":{"selector":"#gtm-story","visiblePercentageMin":1,"visiblePercentageMax":100,"continuousTimeMin":1,"totalTimeMin":1},"vars":{"gtm.event":"gtm.visible"},"on":"visible"},"46":{"request":"27","vars":{"gtm.event":"gtm.pageview"},"on":"visible","sampleSpec":{"sampleOn":"${clientId}","threshold":1}},"47":{"request":"28","vars":{"gtm.event":"gtm.pageview"},"on":"visible","enabled":"${queryParam(gclid)}"}},"vars":{"clientId":"CLIENT_ID(AMP_ECID_GOOGLE,,_ga)"},"transport":{"beacon":false,"xhrpost":false,"image":true},"cookies":{},"linkers":{},"optout":"_gaUserPrefs.ioo"}'
-  );
+  const j = JSON.parse("{\"requests\":{\"2\":\"https://sb.scorecardresearch.com/b?c1=2&c2=24196029&rn=${random}&c8=${title}&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}\",\"12\":\"https://ping.chartbeat.net/ping?h=axios.com&u=${clientId(_cb)}&g=65020&g1=${chartbeatNormalizedAuthors}&p=${canonicalPath}&d=${canonicalHost}&c=120&x=${scrollTop}&y=${scrollHeight}&j=30&R=1&W=0&I=0&E=${totalEngagedTime}&r=${documentReferrer}&t=${pageViewId}${clientId(_cb)}&b=${pageLoadTime}&i=${title}&T=${timestamp}&tz=${timezone}&C=2&_\",\"13\":\"https://www.facebook.com/tr?id=989104511193714&ev=PageView&noscript=1\",\"14\":\"https://www.google-analytics.com/r/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=${random}&t=pageview&_r=1&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp\",\"18\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}\",\"19\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=view&el=${headline}&a=${pageViewId}&z=${random}&cm1=${index}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp\",\"21\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cm1=${index}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp&cd5=${clickUrl}&cd7=${linkText}&cd8=${item}\",\"22\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=footer&ea=view&el=&a=${pageViewId}&z=${random}\",\"23\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=${eventCategory}&ea=click&el=${linkText}&a=${pageViewId}&z=${random}&cm1=${index}&cd3=${subCategory}&cd4=amp&cd5=${clickUrl}&cd7=${linkText}&cd8=${item}\",\"24\":\"https://pixel.quantserve.com/pixel;r=${random};a=${pcode};labels=;fpan=;fpa=p-kDmzBJE8RjKKd;ns=0;ce=1;cm=;je=0;sr=${screenWidth}x${screenHeight}x${screenColorDepth};enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}\",\"25\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=ad&ea=view&el=&a=${pageViewId}&z=${random}&cd3=${subCategory}&cd1=${index}\",\"26\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=event&ec=story&ea=view&el=${headline}&a=${pageViewId}&z=${random}&cd1=${contentId}&cd2=${headline}&cd3=${subCategory}&cd4=amp\",\"27\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=timing&plt=${pageLoadTime}&dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&srt=${serverResponseTime}&pdt=${pageDownloadTime}&clt=${contentLoadTime}&dit=${domInteractiveTime}&a=${pageViewId}&z=${random}\",\"28\":\"https://www.google-analytics.com/collect?v=1&_v=a1&gtm=2ag2j0GTM-WKW68KZ&ds=AMP&aip=true&_s=${requestCount}&dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&cid=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&tid=UA-87586659-18&dl=${sourceUrl}&dr=${externalReferrer}&sd=${screenColorDepth}&ul=${browserLanguage}&de=${documentCharset}&jid=&t=adtiming&plt=${pageLoadTime}&dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&srt=${serverResponseTime}&pdt=${pageDownloadTime}&clt=${contentLoadTime}&dit=${domInteractiveTime}&a=${pageViewId}&z=${random}\"},\"triggers\":{\"30\":{\"request\":\"2\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\"},\"31\":{\"request\":\"12\",\"selector\":\"<a>\",\"vars\":{\"gtm.event\":\"gtm.click\"},\"on\":\"click\"},\"33\":{\"request\":\"12\",\"timerSpec\":{\"interval\":15,\"maxTimerLength\":7200},\"vars\":{\"gtm.event\":\"gtm.timer\"},\"on\":\"timer\"},\"35\":{\"request\":\"12\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\"},\"36\":{\"request\":\"13\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\"},\"37\":{\"request\":\"14\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\"},\"38\":{\"request\":\"18\",\"selector\":\"a.gtm-atomic-unit-link\",\"vars\":{\"gtm.event\":\"gtm.click\"},\"on\":\"click\"},\"39\":{\"request\":\"19\",\"visibilitySpec\":{\"selector\":\"#gtm-atomic-unit\",\"visiblePercentageMin\":1,\"visiblePercentageMax\":100,\"continuousTimeMin\":1,\"totalTimeMin\":1},\"vars\":{\"gtm.event\":\"gtm.visible\"},\"on\":\"visible\"},\"40\":{\"request\":\"21\",\"selector\":\".gtm-content-click\",\"vars\":{\"gtm.event\":\"gtm.click\"},\"on\":\"click\"},\"41\":{\"request\":\"22\",\"visibilitySpec\":{\"selector\":\"#gtm-footer\",\"visiblePercentageMin\":1,\"visiblePercentageMax\":100,\"continuousTimeMin\":1,\"totalTimeMin\":1},\"vars\":{\"gtm.event\":\"gtm.visible\"},\"on\":\"visible\"},\"42\":{\"request\":\"23\",\"selector\":\".gtm-non-content-click\",\"vars\":{\"gtm.event\":\"gtm.click\"},\"on\":\"click\"},\"43\":{\"request\":\"24\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\"},\"44\":{\"request\":\"25\",\"visibilitySpec\":{\"selector\":\"#gtm-ad\",\"visiblePercentageMin\":1,\"visiblePercentageMax\":100,\"continuousTimeMin\":1,\"totalTimeMin\":1},\"vars\":{\"gtm.event\":\"gtm.visible\"},\"on\":\"visible\"},\"45\":{\"request\":\"26\",\"visibilitySpec\":{\"selector\":\"#gtm-story\",\"visiblePercentageMin\":1,\"visiblePercentageMax\":100,\"continuousTimeMin\":1,\"totalTimeMin\":1},\"vars\":{\"gtm.event\":\"gtm.visible\"},\"on\":\"visible\"},\"46\":{\"request\":\"27\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\",\"sampleSpec\":{\"sampleOn\":\"${clientId}\",\"threshold\":1}},\"47\":{\"request\":\"28\",\"vars\":{\"gtm.event\":\"gtm.pageview\"},\"on\":\"visible\",\"enabled\":\"${queryParam(gclid)}\"}},\"vars\":{\"clientId\":\"CLIENT_ID(AMP_ECID_GOOGLE,,_ga)\"},\"transport\":{\"beacon\":false,\"xhrpost\":false,\"image\":true},\"cookies\":{},\"linkers\":{},\"optout\":\"_gaUserPrefs.ioo\"}");
   res.json(j);
 });
 
@@ -1181,7 +1169,7 @@ app.get('/adzerk/*', (req, res) => {
     pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.promises
     .readFile(filePath)
-    .then((file) => {
+    .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
       res.setHeader('AMP-Ad-Response-Type', 'template');
@@ -1238,7 +1226,7 @@ app.get(
       // This will not be useful until extension-location.js change in prod
       // Require url from cdn
       const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function (error, response) {
+      request(filePath, function(error, response) {
         if (error) {
           res.status(404);
           res.end();
@@ -1275,7 +1263,7 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
+    .then(file => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1307,7 +1295,7 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.promises
         .readFile(pc.cwd() + path, 'utf8')
-        .then((file) => {
+        .then(file => {
           res.end(file);
         })
         .catch(next);
@@ -1325,7 +1313,7 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then((file) => {
+    .then(file => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1369,7 +1357,7 @@ app.get('/dist/diversions', (req, res) => {
  * Web worker binary.
  */
 app.get('/dist/ww(.max)?.js', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
+  fs.promises.readFile(pc.cwd() + req.path).then(file => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
@@ -1507,7 +1495,7 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
 
   fs.promises
     .readFile(localVendorConfigPath)
-    .then((file) => {
+    .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })
