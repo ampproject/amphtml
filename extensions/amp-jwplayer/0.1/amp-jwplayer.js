@@ -36,10 +36,10 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, getDetail, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
-import { getMode } from '../../../src/mode';
 
 const JWPLAYER_EVENTS = {
   'ready': VideoEvents.LOAD,
