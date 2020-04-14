@@ -39,8 +39,8 @@ describe
       expect(overflowRect.height).to.be.greaterThan(0);
       // The amp-iframe has a 1:1 aspect ratio, and its height should be
       // incremented by the overflow's height.
-      expect(iframeRect.height).to.equal(
-        iframeRect.width + overflowRect.height
-      );
+      expect(
+        Math.abs(iframeRect.width + overflowRect.height) - iframeRect.height
+      ).to.lessThan(2);
     });
   });
