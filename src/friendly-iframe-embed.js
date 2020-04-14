@@ -224,7 +224,7 @@ export function installFriendlyIframeEmbed(
   // we have to fallback to polling.
   let readyPromise;
   if (isIframeReady(iframe)) {
-    readyPromise = Promise.resolve();
+    readyPromise = getDelayPromise(win)();
   } else {
     readyPromise = new Promise((resolve) => {
       /** @const {number} */
@@ -248,7 +248,7 @@ export function installFriendlyIframeEmbed(
     });
   }
 
-  return readyPromise.then(getDelayPromise(win)).then(() => {
+  return readyPromise.then(() => {
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     const signals = spec.host && spec.host.signals();
     const ampdoc =
@@ -790,13 +790,14 @@ export class FriendlyIframeEmbed {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
 
+    const maybeDelay = getDelayPromise(parentWin);
     return Promise.resolve()
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         // Install necessary polyfills.
         installPolyfillsInChildWindow(parentWin, childWin);
       })
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         // Install runtime styles.
         installStylesLegacy(
@@ -807,25 +808,25 @@ export class FriendlyIframeEmbed {
           /* opt_ext */ 'amp-runtime'
         );
       })
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         // Run pre-install callback.
         if (opt_preinstallCallback) {
           opt_preinstallCallback(childWin);
         }
       })
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         // Install embeddable standard services.
         installStandardServicesInEmbed(childWin);
       })
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         // Install built-ins and legacy elements.
         copyBuiltinElementsToChildWindow(topWin, childWin);
         stubLegacyElements(childWin);
       })
-      .then(getDelayPromise(parentWin))
+      .then(maybeDelay)
       .then(() => {
         const promises = [];
         extensionIds.forEach((extensionId) => {
