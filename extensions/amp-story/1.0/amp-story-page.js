@@ -1354,6 +1354,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.switchTo_(pageId, NavigationDirection.PREVIOUS);
+
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**
@@ -1376,6 +1378,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.switchTo_(pageId, NavigationDirection.NEXT);
+
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**
@@ -1547,7 +1551,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.registerMedia_(mediaPool, videoEl)
           .then(() => this.preloadMedia_(mediaPool, videoEl))
           .then((poolVideoEl) => {
-            this.playMedia_(mediaPool, poolVideoEl);
+            if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+              this.playMedia_(mediaPool, poolVideoEl);
+            }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
             }

@@ -529,6 +529,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+    console.log('Pause callback for video');
     if (this.video_) {
       this.video_.pause();
     }
@@ -559,6 +560,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
+    console.log('Play video from amp-video');
     const ret = this.video_.play();
 
     if (ret && ret.catch) {

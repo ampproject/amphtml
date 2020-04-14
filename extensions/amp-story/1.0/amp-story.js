@@ -467,7 +467,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pause_() {
-    this.pausedStateToRestore_ = !!this.storeService_.get(
+    this.pausedStateToRestore_ = this.storeService_.get(
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -1770,7 +1770,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       if (isLandscape) {
-        this.pausedStateToRestore_ = !!this.storeService_.get(
+        this.pausedStateToRestore_ = this.storeService_.get(
           StateProperty.PAUSED_STATE
         );
         this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -1949,8 +1949,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
-    isPaused ? this.advancement_.stop() : this.advancement_.start();
-
     this.activePage_.setState(pageState);
   }
 
@@ -2085,7 +2083,7 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     } else {
-      this.pausedStateToRestore_ = !!this.storeService_.get(
+      this.pausedStateToRestore_ = this.storeService_.get(
         StateProperty.PAUSED_STATE
       );
       this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);

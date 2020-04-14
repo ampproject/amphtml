@@ -760,7 +760,6 @@ class VideoEntry {
     }
     this.supportsAutoplay_().then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
-
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
       } else {

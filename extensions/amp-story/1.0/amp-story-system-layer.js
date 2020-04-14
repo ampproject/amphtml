@@ -736,7 +736,7 @@ export class SystemLayer {
 
   /**
    * Handles click events on the paused and play buttons.
-   * @param paused Specifies if the story is being paused or not.
+   * @param {boolean} paused Specifies if the story is being paused or not.
    * @private
    */
   onPausedClick_(paused) {
