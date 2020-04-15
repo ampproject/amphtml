@@ -35,7 +35,7 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
-import {getData, getDetail, listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -484,13 +484,13 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     const data = objOrParseJson(messageData);
     const event = data['event'];
-    const value = getDetail(data);
+    const value = data['detail'];
 
     // Log any valid events
     dev().info('JWPLAYER', 'EVENT:', event || 'anon event', value || data);
 
     if (event === 'ready') {
-      this.onReadyOnce_(value);
+      value && this.onReadyOnce_(value);
       return;
     }
 
