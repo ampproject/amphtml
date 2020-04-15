@@ -54,34 +54,66 @@ const JWPLAYER_EVENTS = {
 };
 
 const eventHandlers = {
-  fullscreen: ({ fullscreen }, ctx) => {
+  /**
+   * @param {{fullscreen:boolean}} msg Message details being passed from the iframe.
+   * @param {Object} ctx
+   */
+  fullscreen: (msg, ctx) => {
+    const {fullscreen} = msg;
     if (fullscreen == ctx.isFullscreen()) {
       return;
     }
 
     fullscreen ? ctx.fullscreenEnter() : ctx.fullscreenExit();
   },
-  meta: ({ metadataType, duration }, ctx) => {
+  /**
+   * @param {{metadataType:string}} msg details being passed from the iframe.
+   * @param {Object} ctx
+   */
+  meta: (msg, ctx) => {
+    const {metadataType, duration} = msg;
     if (metadataType === 'media') {
       ctx.duration_ = duration;
     }
   },
-  mute: ({ mute }, ctx) => {
+  /**
+   * @param {{mute:boolean}} msg Message details being passed from the iframe.
+   * @param {Object} ctx
+   */
+  mute: (msg, ctx) => {
+    const {mute} = msg;
     const {element} = ctx;
     ctx.muted_ = mute;
     element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
   },
-  playedRanges: ({ ranges }, ctx) => {
+  /**
+   * @param {{ranges:Array<(Array<number>|null)>}} msg Message details being passed from the iframe.
+   * @param {Object} ctx
+   */
+  playedRanges: (msg, ctx) => {
+    const {ranges} = msg;
     ctx.playedRanges_ = ranges;
   },
+  /**
+   * @param {Object} playlistItem Playlist item coming from JW Player.
+   * @param {Object} ctx
+   */
   playlistItem: (playlistItem, ctx) => {
     ctx.playlistItem_ = {...playlistItem};
     ctx.sendCommand_('getPlayedRanges');
   },
+  /**
+   * @param {{currentTime:number}} time Message details being passed from the iframe.
+   * @param {Object} ctx
+   */
   time: (time, ctx) => {
     ctx.currentTime_ = time.currentTime;
     ctx.sendCommand_('getPlayedRanges');
   },
+  /**
+   * @param {{position:number}} adTime Message details being passed from the iframe.
+   * @param {Object} ctx
+   */
   adTime: (adTime, ctx) => {
     ctx.currentTime_ = adTime.position;
   },
@@ -119,7 +151,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
-    /** @private {function()} */
+    /** @private {?function(Element)} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {function(Object)} */
     this.onReadyOnce_ = once((readyEvent) => this.onReady_(readyEvent));
 
     this.muteOnAutoOnce_ = once(() => this.muteOnAuto_());
@@ -127,7 +162,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
 
-    /** @private {JsonObject} */
+    /** @private {Object} */
     this.playlistItem_ = null;
 
     /** @private {boolean} */
@@ -139,8 +174,14 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.currentTime_ = 0;
 
-    /** @private {Array<Array>} */
+    /** @private {Array<(Array<number>|null)>} */
     this.playedRanges_ = [];
+
+    /** @private {?function()} */
+    this.unlistenFrame_ = null;
+
+    /** @private {?function()} */
+    this.unlistenFullscreen_ = null;
   }
 
   /** @override */
@@ -163,9 +204,11 @@ class AmpJWPlayer extends AMP.BaseElement {
     return this.duration_ || this.playlistItem_['duration'] || 0;
   }
 
-  /** @override */
+  /**
+   * @override
+   */
   getPlayedRanges() {
-    return this.playedRanges_;
+    return this.playedRanges_ || [];
   }
 
   /** @private */
@@ -267,7 +310,11 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   isFullscreen() {
-    return isFullscreenElement(this.iframe_);
+    if (this.iframe_) {
+      return isFullscreenElement(this.iframe_);
+    }
+
+    return false;
   }
 
   /**
@@ -404,7 +451,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {object} data
+   * @param {Object} data
    * @private
    */
   onReady_(data) {
@@ -417,11 +464,15 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {MessageEvent} messageEvent
+   * @param {Event} messageEvent
    * @private
    */
   onMessage_(messageEvent) {
-    if (!this.iframe_ || messageEvent.source != this.iframe_.contentWindow) {
+    if (
+      !this.iframe_ ||
+      !messageEvent ||
+      messageEvent.source != this.iframe_.contentWindow
+    ) {
       return;
     }
 
@@ -456,7 +507,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /**
    * @param {string} method
-   * @param {number|boolean|string|undefined} optParams
+   * @param {number|boolean|string|Object|undefined} [optParams]
    * @private
    */
   sendCommand_(method, optParams) {
