@@ -321,10 +321,6 @@ class AmpVideo extends AMP.BaseElement {
 
     this.propagateCachedSources_();
 
-    const videoLoaded = () => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    };
-
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
@@ -342,23 +338,23 @@ class AmpVideo extends AMP.BaseElement {
           // load.
           return Services.timerFor(this.win)
             .promise(1)
-            .then(() => this.loadPromise(this.video_))
-            .then(videoLoaded);
+            .then(() => this.loadPromise(this.video_));
         });
     } else {
       this.propagateLayoutChildren_();
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    const promise = this.loadPromise(this.video_).then(
-      videoLoaded,
-      (reason) => {
+    const promise = this.loadPromise(this.video_)
+      .then(null, (reason) => {
         if (pendingOriginPromise) {
           return pendingOriginPromise;
         }
         throw reason;
-      }
-    );
+      })
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
