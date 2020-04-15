@@ -38,6 +38,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
+import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';
 import {parseAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
 import {timeStrToMillis, unscaledClientRect} from './utils';
@@ -621,7 +622,7 @@ export class AnimationManager {
               this.createRunner_(
                 // Casting since we're getting a JsonObject. This will be
                 // validated during preparation phase.
-                /** @type {!WebAnimationDef} */ (parseAnimationConfig(el))
+                /** @type {!WebAnimationDef} */ (getChildJsonConfig(el))
               )
           )
         );

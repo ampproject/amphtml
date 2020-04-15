@@ -21,12 +21,12 @@ import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
 import {clamp} from '../../../src/utils/math';
+import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
-import {parseAnimationConfig} from './parse-animation-config';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -90,7 +90,7 @@ export class AmpAnimation extends AMP.BaseElement {
       );
     }
 
-    this.configJson_ = parseAnimationConfig(this.element);
+    this.configJson_ = getChildJsonConfig(this.element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
