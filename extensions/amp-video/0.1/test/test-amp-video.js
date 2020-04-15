@@ -833,7 +833,7 @@ describes.realWin(
         });
       });
 
-      describe('should preconnect to the first cached source', () => {
+      describe('should preconnect to all sources', () => {
         let preconnect;
 
         beforeEach(() => {
@@ -883,10 +883,14 @@ describes.realWin(
             /* opt_noLayout */ true
           );
 
-          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledTwice;
           expect(preconnect.url.getCall(0)).to.have.been.calledWith(
             env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(1)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
           );
         });
 
@@ -913,7 +917,7 @@ describes.realWin(
             null,
             /* opt_noLayout */ true
           );
-          expect(preconnect.url).to.have.been.calledTwice;
+          expect(preconnect.url).to.have.been.calledThrice;
           expect(preconnect.url.getCall(0)).to.have.been.calledWith(
             env.sandbox.match.object, // AmpDoc
             'https://example.com/video.mp4'
@@ -921,6 +925,10 @@ describes.realWin(
           expect(preconnect.url.getCall(1)).to.have.been.calledWith(
             env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(2)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
           );
         });
       });
