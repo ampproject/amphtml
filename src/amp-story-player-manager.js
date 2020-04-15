@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryPlayer} from './amp-story-player-impl';
+import {initLogConstructor} from './log';
 import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
@@ -98,6 +99,7 @@ export class AmpStoryPlayerManager {
   loadPlayers() {
     const doc = this.win_.document;
     const players = doc.getElementsByTagName('amp-story-player');
+    initLogConstructor();
     for (let i = 0; i < players.length; i++) {
       const playerEl = players[i];
       const player = new AmpStoryPlayer(this.win_, playerEl);
