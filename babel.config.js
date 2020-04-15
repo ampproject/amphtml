@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Global configuration file for the babelify transform.
+ * @fileoverview Global configuration file for various babel transforms.
  *
  * Notes: From https://babeljs.io/docs/en/plugins#plugin-ordering:
  * 1. Plugins run before Presets.
@@ -25,6 +25,7 @@
 
 'use strict';
 
+const log = require('fancy-log');
 const {
   getDepCheckConfig,
   getPostClosureConfig,
@@ -34,6 +35,7 @@ const {
   getTestConfig,
   getUnminifiedConfig,
 } = require('./build-system/babel-config');
+const {cyan, yellow} = require('ansi-colors');
 
 /**
  * Mapping of babel transform callers to their corresponding babel configs.
@@ -50,18 +52,25 @@ const babelTransforms = new Map([
 ]);
 
 /**
- * Main entry point. Returns babel config corresponding to the caller.
+ * Main entry point. Returns babel config corresponding to the caller, or a
+ * blank config if the caller is unrecognized.
  *
  * @param {!Object} api
  * @return {!Object}
  */
 module.exports = function (api) {
-  const caller = api.caller((caller) => caller.name);
-  if (babelTransforms.has(caller)) {
-    return babelTransforms.get(caller);
+  const callerName = api.caller((callerObj) => {
+    return callerObj ? callerObj.name : '<unnamed>';
+  });
+  if (callerName && babelTransforms.has(callerName)) {
+    return babelTransforms.get(callerName);
   } else {
-    const err = new Error('Unrecognized Babel caller (see babel.config.js).');
-    err.showStack = false;
-    throw err;
+    log(
+      yellow('WARNING:'),
+      'Unrecognized Babel caller',
+      cyan(callerName),
+      '(see babel.config.js).'
+    );
+    return {};
   }
 };
