@@ -23,6 +23,7 @@ import {
 
 describe
   .configure()
+  .enableIe()
   .retryOnSaucelabs()
   .run('Rendering of amp-img', () => {
     const timeout = window.ampTestRuntimeConfig.mochaTimeout;
