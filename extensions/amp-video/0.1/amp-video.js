@@ -165,7 +165,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {?string}
+   * @return {!Array<string>}
    */
   getVideoSourcesForPreconnect_() {
     const videoSrc = this.element.getAttribute('src');
@@ -178,6 +178,7 @@ class AmpVideo extends AMP.BaseElement {
       if (src) {
         srcs.push(src);
       }
+      // We also want to preconnect to the origin src to make fallback faster.
       const origSrc = source.getAttribute('amp-orig-src');
       if (origSrc) {
         srcs.push(origSrc);
