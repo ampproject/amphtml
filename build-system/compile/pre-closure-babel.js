@@ -85,7 +85,12 @@ function preClosureBabel() {
     }
 
     let data, err;
-    debug(CompilationLifecycles['pre-babel'], file.path, file.contents);
+    debug(
+      CompilationLifecycles['pre-babel'],
+      file.path,
+      file.contents,
+      file.sourceMap
+    );
     function onData(d) {
       babel.off('error', onError);
       data = d;
@@ -104,7 +109,8 @@ function preClosureBabel() {
       debug(
         CompilationLifecycles['pre-closure'],
         file.path,
-        data.contents.toString('utf8')
+        data.contents,
+        data.sourceMap
       );
       cache[path] = {
         file: data,
