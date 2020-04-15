@@ -31,16 +31,11 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {
-  childElementByTag,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';
-import {parseAnimationConfig} from '../../amp-animation/0.1/parse-animation-config';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** @const {string} */
