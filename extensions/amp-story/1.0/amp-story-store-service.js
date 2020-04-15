@@ -149,6 +149,8 @@ export const StateProperty = {
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
+  // Any page has playable element.
+  STORY_HAS_PLAYABLE_STATE: 'storyHasPlayableState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
@@ -192,6 +194,7 @@ export const Action = {
   TOGGLE_SIDEBAR: 'toggleSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
+  TOGGLE_STORY_HAS_PLAYABLE: 'toggleStoryHasPlayable',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
@@ -308,6 +311,12 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
+      });
+    // Shows or hides the play/pause controls.
+    case Action.TOGGLE_STORY_HAS_PLAYABLE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_PLAYABLE_STATE]: !!data,
       });
     case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
       return /** @type {!State} */ ({

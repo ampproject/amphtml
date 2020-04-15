@@ -212,8 +212,8 @@
   display: block !important;
 }
 
-.i-amphtml-story-system-layer:not([paused]) .i-amphtml-story-pause-control,
-.i-amphtml-story-system-layer[paused] .i-amphtml-story-play-control {
+.i-amphtml-story-has-playable:not([paused]) .i-amphtml-story-pause-control,
+.i-amphtml-story-has-playable[paused] .i-amphtml-story-play-control {
   display: block !important;
 }
 

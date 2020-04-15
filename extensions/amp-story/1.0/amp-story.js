@@ -615,6 +615,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
+    this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
@@ -1770,7 +1771,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mutateElement(() => {
       if (isLandscape) {
-        this.pausedStateToRestore_ = this.storeService_.get(
+        this.pausedStateToRestore_ = !!this.storeService_.get(
           StateProperty.PAUSED_STATE
         );
         this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -2083,7 +2084,7 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     } else {
-      this.pausedStateToRestore_ = this.storeService_.get(
+      this.pausedStateToRestore_ = !!this.storeService_.get(
         StateProperty.PAUSED_STATE
       );
       this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -2577,6 +2578,21 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
+    );
+  }
+
+  /**
+   * Shows the play/pause icon if there is a playable element in the story
+   * @private
+   */
+  updatePausedIcon_() {
+    const containsPlayableElement = !!this.element.querySelector(
+      'amp-audio, amp-video, [background-audio], amp-story-page.auto-advance-after'
+    );
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_PLAYABLE,
+      containsPlayableElement
     );
   }
 

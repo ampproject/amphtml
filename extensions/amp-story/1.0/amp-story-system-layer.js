@@ -425,6 +425,14 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
+      StateProperty.STORY_HAS_PLAYABLE_STATE,
+      (hasPlayable) => {
+        this.onStoryHasPlayableStateUpdate_(hasPlayable);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
       (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
@@ -571,6 +579,20 @@ export class SystemLayer {
       this.getShadowRoot().classList.toggle(
         'i-amphtml-story-has-audio',
         hasAudio
+      );
+    });
+  }
+
+  /**
+   * Reacts to has playable state updates, determining if the story has an element that can be paused.
+   * @param {boolean} hasPlayable
+   * @private
+   */
+  onStoryHasPlayableStateUpdate_(hasPlayable) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-has-playable',
+        hasPlayable
       );
     });
   }
