@@ -65,10 +65,8 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  * TODO(alanorozco): maybe memoize?
  */
 export function hasAnimations(element) {
-  return (
-    !!childElementByTag(element, 'amp-story-animation') ||
-    !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR)
-  );
+  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},amp-story-animation`;
+  return !!scopedQuerySelector(element, selector);
 }
 
 /** @enum {number} */
