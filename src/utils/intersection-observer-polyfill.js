@@ -22,6 +22,7 @@ import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {dict} from './object';
+import {getMode} from '../mode';
 import {isArray, isFiniteNumber} from '../types';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
@@ -100,8 +101,15 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
  * @return {boolean}
  */
 export function nativeIntersectionObserverSupported(win) {
+  if (!('IntersectionObserver' in win)) {
+    return false;
+  }
+  // eslint-disable-next-line no-undef
+  if (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) {
+    // For the new stub polyfill it's enough to have a stub to be functional.
+    return true;
+  }
   return (
-    'IntersectionObserver' in win &&
     'IntersectionObserverEntry' in win &&
     'intersectionRatio' in win.IntersectionObserverEntry.prototype
   );
