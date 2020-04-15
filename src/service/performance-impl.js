@@ -88,19 +88,11 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    this.fcpDeferred_ = new Deferred();
-    this.fvrDeferred_ = new Deferred();
-    this.mbvDeferred_ = new Deferred();
-
-    // Platform service must be installed before performance serivce is
+    // Platform service must be installed before performance service is
     this.platform_ = Services.platformFor(this.win);
 
-    // TODO (micajuineho) change this once all platforms
-    // support PerformancePaintTiming
-    // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
-    if (!this.platform_.isChrome() && !this.platform_.isOpera()) {
-      this.fcpDeferred_.resolve(null);
-    }
+    /** @private {Object} */
+    this.metrics_ = {};
 
     /**
      * How many times a layout shift metric has been ticked.
@@ -121,6 +113,12 @@ export class Performance {
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
       [];
+
+    // If Paint Timing API is not supported, cannot determine first contentful paint
+    if (!supportedEntryTypes.includes('paint')) {
+      this.metrics_['fcp'] = Promise.resolve(null);
+    }
+
     /**
      * Whether the user agent supports the Layout Instability API that shipped
      * with Chromium 77.
@@ -128,6 +126,10 @@ export class Performance {
      * @private {boolean}
      */
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
+
+    if (!this.supportsLayoutShift_) {
+      this.metrics_['cls'] = Promise.resolve(null);
+    }
 
     /**
      * Whether the user agent supports the Event Timing API that shipped
@@ -137,6 +139,10 @@ export class Performance {
      */
     this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
+    if (!this.supportsEventTiming_) {
+      this.metrics_['fid'] = Promise.resolve(null);
+    }
+
     /**
      * Whether the user agent supports the Largest Contentful Paint metric.
      *
@@ -145,6 +151,10 @@ export class Performance {
     this.supportsLargestContentfulPaint_ = supportedEntryTypes.includes(
       'largest-contentful-paint'
     );
+
+    if (!this.supportsLargestContentfulPaint_) {
+      this.metrics_['lcpl'] = Promise.resolve(null);
+    }
 
     /**
      * Whether the user agent supports the navigation timing API
@@ -626,17 +636,10 @@ export class Performance {
       this.queueTick_(data);
     }
 
-    switch (label) {
-      case 'fcp':
-        this.fcpDeferred_.resolve(delta);
-        break;
-      case 'pc':
-        this.fvrDeferred_.resolve(delta);
-        break;
-      case 'mbv':
-        this.mbvDeferred_.resolve(delta);
-        break;
+    if (!this.metrics_[label]) {
+      this.metrics_[label] = new Deferred();
     }
+    this.metrics_[label].resolve(delta);
   }
 
   /**
@@ -772,24 +775,16 @@ export class Performance {
   }
 
   /**
+   * Retrieve a promise for tick label, resolved with metric. Used by amp-analytics
+   *
+   * @param {string} label
    * @return {!Promise<number>}
    */
-  getFirstContentfulPaint() {
-    return this.fcpDeferred_.promise;
-  }
-
-  /**
-   * @return {!Promise<number>}
-   */
-  getMakeBodyVisible() {
-    return this.mbvDeferred_.promise;
-  }
-
-  /**
-   * @return {!Promise<number>}
-   */
-  getFirstViewportReady() {
-    return this.fvrDeferred_.promise;
+  getMetric(label) {
+    if (!this.metrics_[label]) {
+      this.metrics_[label] = new Deferred();
+    }
+    return this.metrics_[label];
   }
 }
 

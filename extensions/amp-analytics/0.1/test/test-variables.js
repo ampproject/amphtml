@@ -470,7 +470,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
       env.sandbox.stub(Services, 'performanceFor').returns({
-        getFirstContentfulPaint() {
+        getMetric(unused) {
           return Promise.resolve(1);
         },
       });
@@ -479,7 +479,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace FIRST_VIEWPORT_READY', () => {
       env.sandbox.stub(Services, 'performanceFor').returns({
-        getFirstViewportReady() {
+        getMetric(unused) {
           return Promise.resolve(1);
         },
       });
@@ -488,11 +488,38 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace MAKE_BODY_VISIBLE', () => {
       env.sandbox.stub(Services, 'performanceFor').returns({
-        getMakeBodyVisible() {
+        getMetric(unused) {
           return Promise.resolve(1);
         },
       });
       return check('MAKE_BODY_VISIBLE', '1');
+    });
+
+    it('should replace LARGEST_CONTENTFUL_PAINT', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
+      return check('LARGEST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_INPUT_DELAY', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
+      return check('FIRST_INPUT_DELAY', '1');
+    });
+
+    it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
+      return check('CUMULATIVE_LAYOUT_SHIFT', '1');
     });
 
     describe('$MATCH', () => {

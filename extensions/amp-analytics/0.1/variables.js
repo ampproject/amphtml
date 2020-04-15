@@ -234,20 +234,26 @@ export class VariableService {
     this.register_('SCROLL_LEFT', () =>
       Services.viewportForDoc(this.ampdoc_).getScrollLeft()
     );
-    // Was set async before
-    this.register_('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(
-        this.ampdoc_.win
-      ).getFirstContentfulPaint();
-    });
 
-    this.register_('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
-    });
-
-    this.register_('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
-    });
+    // Call performance-impl.js to get promise returning value for metric
+    this.register_('FIRST_CONTENTFUL_PAINT', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('fcp')
+    );
+    this.register_('FIRST_VIEWPORT_READY', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('pc')
+    );
+    this.register_('MAKE_BODY_VISIBLE', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('mbv')
+    );
+    this.register_('LARGEST_CONTENTFUL_PAINT', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('lcp')
+    );
+    this.register_('FIRST_INPUT_DELAY', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('fid')
+    );
+    this.register_('CUMULATIVE_LAYOUT_SHIFT', () =>
+      Services.performanceFor(this.ampdoc_.win).getMetric('cls')
+    );
   }
 
   /**
