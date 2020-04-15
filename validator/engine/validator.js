@@ -6478,3 +6478,4 @@ goog.exportSymbol(
 goog.exportSymbol('amp.validator.categorizeError', categorizeError);
 goog.exportSymbol(
     'amp.validator.annotateWithErrorCategories', annotateWithErrorCategories);
+goog.exportSymbol('amp.validator.isSeverityWarning', isSeverityWarning);
