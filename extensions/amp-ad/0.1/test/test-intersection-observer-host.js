@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
+import {BaseElement} from '../../../../src/base-element';
 import {
-  IntersectionObserver,
+  IntersectionObserverHost,
   getIntersectionChangeEntry,
-} from '../../src/intersection-observer';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+} from '../intersection-observer-host';
+import {createAmpElementForTesting} from '../../../../src/custom-element';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describe('getIntersectionChangeEntry', () => {
   beforeEach(() => {
@@ -283,7 +283,7 @@ describe('getIntersectionChangeEntry', () => {
   });
 });
 
-describe('IntersectionObserver', () => {
+describe('IntersectionObserverHost', () => {
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
@@ -401,7 +401,7 @@ describe('IntersectionObserver', () => {
   });
 
   it('should not send intersection', () => {
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
@@ -412,7 +412,7 @@ describe('IntersectionObserver', () => {
 
   it('should send intersection', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
@@ -432,7 +432,7 @@ describe('IntersectionObserver', () => {
 
   it('should send more intersections', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
@@ -477,8 +477,8 @@ describe('IntersectionObserver', () => {
   });
 
   it('should init listeners when element is in viewport', () => {
-    const fireSpy = window.sandbox.spy(IntersectionObserver.prototype, 'fire');
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const fireSpy = window.sandbox.spy(IntersectionObserverHost.prototype, 'fire');
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     expect(fireSpy).to.be.calledOnce;
@@ -488,8 +488,8 @@ describe('IntersectionObserver', () => {
   });
 
   it('should unlisten listeners when element is out of viewport', () => {
-    const fireSpy = window.sandbox.spy(IntersectionObserver.prototype, 'fire');
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const fireSpy = window.sandbox.spy(IntersectionObserverHost.prototype, 'fire');
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
@@ -499,7 +499,7 @@ describe('IntersectionObserver', () => {
 
   it('should go into in-viewport state for initially visible element', () => {
     element.isInViewport = () => true;
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
@@ -510,7 +510,7 @@ describe('IntersectionObserver', () => {
 
   it('should not send intersection after destroy is called', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserver(element, testIframe);
+    const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     testIframe.contentWindow.postMessage = (message) => {

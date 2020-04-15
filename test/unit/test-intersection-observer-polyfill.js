@@ -17,12 +17,12 @@
 import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
   DEFAULT_THRESHOLD,
-  IntersectionObserverApi,
+  IntersectionObserverHostApi,
   IntersectionObserverPolyfill,
   getIntersectionChangeEntry,
   getThresholdSlot,
   intersectionRatio,
-} from '../../src/intersection-observer-polyfill';
+} from '../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -38,7 +38,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describes.sandboxed('IntersectionObserverApi', {}, (env) => {
+describes.sandboxed('IntersectionObserverHostApi', {}, (env) => {
   let onScrollSpy;
   let onChangeSpy;
   let testDoc;
@@ -118,7 +118,7 @@ describes.sandboxed('IntersectionObserverApi', {}, (env) => {
         return false;
       },
     };
-    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    ioApi = new IntersectionObserverHostApi(baseElement, testIframe);
     insert(testIframe);
     tickSpy = env.sandbox.spy(ioApi.intersectionObserver_, 'tick');
   });
@@ -142,7 +142,7 @@ describes.sandboxed('IntersectionObserverApi', {}, (env) => {
     baseElement.isInViewport = () => {
       return true;
     };
-    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    ioApi = new IntersectionObserverHostApi(baseElement, testIframe);
     insert(testIframe);
     const inViewportTickSpy = env.sandbox.spy(
       ioApi.intersectionObserver_,
