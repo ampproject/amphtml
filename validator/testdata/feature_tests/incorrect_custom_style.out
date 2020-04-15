@@ -54,7 +54,6 @@ feature_tests/incorrect_custom_style.html:37:24 CSS syntax error in tag 'style a
 feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
 |      foo { background-image: url('https://valid.com/1.jpg') }
 |      foo { background-image: url('http://valid.com/1.jpg') }
-|      foo { background-image: url('absolute://disallow.com/soon.jpg') }
 |      foo { background-image: url('://valid.jpg') }
 |      foo { background-image: url('valid.jpg') }
 |
@@ -62,12 +61,9 @@ feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style a
 |      @font-face { src: url(''); } /* allowed for now */
 |      @font-face { src: url('invalid://invalid.com/1.ttf') }
 >>                       ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:50:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
 |      @font-face { src: url('https://valid.com/1.ttf') }
 |      @font-face { src: url('http://valid.com/1.ttf') }
-|      @font-face { src: url('absolute://invalid.com/1.ttf') }
->>                       ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:53:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'absolute:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
 |      @font-face { src: url('://valid.ttf') }
 |      @font-face { src: url('valid.ttf') }
 |    </style>
@@ -75,5 +71,9 @@ feature_tests/incorrect_custom_style.html:53:22 CSS syntax error in tag 'style a
 |    <script src="https://cdn.ampproject.org/v0.js" async></script>
 |  </head>
 |  <body>
+|    <!-- Invalid due to !important -->
+|    <b style="color: red !important"></div>
+>>   ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:60:2 The attribute 'style' in tag 'b' is set to the invalid value 'color: red !important'.
 |  </body>
 |  </html>
