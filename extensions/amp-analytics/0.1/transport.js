@@ -103,6 +103,8 @@ export class Transport {
     }
 
     const getRequest = cacheFuncResult(generateRequest);
+    const beacon = this.options_['beacon'];
+    const xhrpost = this.options_['xhrpost'];
 
     if (this.options_['iframe']) {
       if (!this.iframeTransport_) {
@@ -114,13 +116,13 @@ export class Transport {
     }
 
     if (
-      this.options_['beacon'] &&
+      beacon &&
       Transport.sendRequestUsingBeacon(this.win_, getRequest(this.useBody_))
     ) {
       return;
     }
     if (
-      this.options_['xhrpost'] &&
+      xhrpost &&
       Transport.sendRequestUsingXhr(this.win_, getRequest(this.useBody_))
     ) {
       return;
@@ -131,7 +133,10 @@ export class Transport {
         typeof image == 'object' && image['suppressWarnings'];
       Transport.sendRequestUsingImage(
         this.win_,
-        getRequest(false),
+        // If xhrpost or beacon failed, don't append extraUrlParams to url
+        xhrpost || beacon
+          ? {'url': getRequest(this.useBody_).url}
+          : getRequest(false),
         suppressWarnings,
         /** @type {string|undefined} */ (this.referrerPolicy_)
       );
