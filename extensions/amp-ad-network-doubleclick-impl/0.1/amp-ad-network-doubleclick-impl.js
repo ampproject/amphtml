@@ -516,9 +516,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Constructs block-level url parameters with side effect of setting
    * size_, jsonTargeting, and adKey_ fields.
+   * @param {?string} consentString
    * @return {!Object<string,string|boolean|number>}
    */
-  getBlockParameters_() {
+  getBlockParameters_(consentString) {
     devAssert(this.initialSize_);
     devAssert(this.jsonTargeting);
     const tfcd = this.jsonTargeting && this.jsonTargeting[TFCD];
@@ -545,6 +546,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'iu': this.element.getAttribute('data-slot'),
       'co':
         this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
+      'gdpr_consent': consentString,
       'adk': this.adKey,
       'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
       'output': 'html',
@@ -607,12 +609,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState, opt_rtcResponsesPromise) {
+  getAdUrl(consentTuple, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
     if (
-      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      !consentTuple ||
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -624,6 +627,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
+    const consentState = consentTuple.consentState;
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
@@ -648,7 +652,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_BASE_URL,
         startTime,
         Object.assign(
-          this.getBlockParameters_(),
+          this.getBlockParameters_(consentTuple.consentString),
           this.buildIdentityParams(),
           this.getPageParameters(consentState),
           rtcParams

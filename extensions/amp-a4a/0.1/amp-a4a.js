@@ -695,7 +695,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentString = consentResponse[1];
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          consentState,
+          { consentState, consentString },
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
       })
@@ -1238,11 +1238,13 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {?CONSENT_POLICY_STATE} unusedConsentState
+   * @param {?object} unusedConsentTuple
+   * @param {?CONSENT_POLICY_STATE} unusedConsentTuple.consentState
+   * @param {?string} unusedConsentTuple.consentString
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
+  getAdUrl(unusedConsentTuple, opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 

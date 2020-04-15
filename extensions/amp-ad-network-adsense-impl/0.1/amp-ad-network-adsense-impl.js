@@ -244,14 +244,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState) {
+  getAdUrl(consentTuple) {
     if (
-      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      !consentTuple ||
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
       return Promise.resolve('');
     }
+    const consentState = consentTuple.consentState;
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -307,6 +309,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         consentState == CONSENT_POLICY_STATE.UNKNOWN
           ? 1
           : null,
+      'gdpr_consent': consentTuple.consentString,
       'adtest': adTestOn ? 'on' : null,
       'adk': adk,
       'output': 'html',
