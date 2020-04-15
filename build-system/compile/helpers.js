@@ -38,6 +38,7 @@ function getSourceMapBase() {
 function writeSourcemaps() {
   return sourcemaps.write('.', {
     sourceRoot: getSourceMapBase(),
+    includeContent: !!argv.full_sourcemaps,
   });
 }
 
