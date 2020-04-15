@@ -59,16 +59,16 @@ const babelTransforms = new Map([
  * @return {!Object}
  */
 module.exports = function (api) {
-  const caller = api.caller((caller) => {
-    return caller ? caller.name : '<unnamed>';
+  const callerName = api.caller((callerObj) => {
+    return callerObj ? callerObj.name : '<unnamed>';
   });
-  if (caller && babelTransforms.has(caller)) {
-    return babelTransforms.get(caller);
+  if (callerName && babelTransforms.has(callerName)) {
+    return babelTransforms.get(callerName);
   } else {
     log(
       yellow('WARNING:'),
       'Unrecognized Babel caller',
-      cyan(caller),
+      cyan(callerName),
       '(see babel.config.js).'
     );
     return {};
