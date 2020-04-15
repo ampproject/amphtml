@@ -837,6 +837,9 @@ function createBaseCustomElementClass(win) {
           } else {
             this.upgrade(Ctor);
           }
+        } else if (getMode().test) {
+          // Test mode can sync upgrade, because our tests expected this behavior.
+          this.tryUpgrade_();
         }
         // Classically, sizes/media queries are applied just before
         // Resource.measure. With IntersectionObserver, observe() is the
