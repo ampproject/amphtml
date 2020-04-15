@@ -21,7 +21,6 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByTag,
   childElementsByTag,
-  elementByTag,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
@@ -104,15 +103,13 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const videoSrc = this.getVideoSourceForPreconnect_();
-    if (videoSrc) {
-      this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
+    this.getVideoSourcesForPreconnect_().forEach((videoSrc) => {
       Services.preconnectFor(this.win).url(
         this.getAmpDoc(),
         videoSrc,
         opt_onLayout
       );
-    }
+    });
   }
 
   /**
@@ -168,21 +165,26 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {?string}
+   * @return {!Array<string>}
    */
-  getVideoSourceForPreconnect_() {
-    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
-      const source = this.getFirstCachedSource_();
-      return (source && source.getAttribute('src')) || null;
+  getVideoSourcesForPreconnect_() {
+    const videoSrc = this.element.getAttribute('src');
+    if (videoSrc) {
+      return [videoSrc];
     }
-    let videoSrc = this.element.getAttribute('src');
-    if (!videoSrc) {
-      const source = elementByTag(this.element, 'source');
-      if (source) {
-        videoSrc = source.getAttribute('src');
+    const srcs = [];
+    childElementsByTag(this.element, 'source').forEach((source) => {
+      const src = source.getAttribute('src');
+      if (src) {
+        srcs.push(src);
       }
-    }
-    return videoSrc;
+      // We also want to preconnect to the origin src to make fallback faster.
+      const origSrc = source.getAttribute('amp-orig-src');
+      if (origSrc) {
+        srcs.push(origSrc);
+      }
+    });
+    return srcs;
   }
 
   /** @override */
@@ -322,23 +324,37 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
+    let pendingOriginPromise;
     if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      this.getAmpDoc()
+      pendingOriginPromise = this.getAmpDoc()
         .whenFirstVisible()
         .then(() => {
           this.propagateLayoutChildren_();
+          // We need to yield to the event queue before listing for loadPromise
+          // because this element may still be in error state from the pre-render
+          // load.
+          return Services.timerFor(this.win)
+            .promise(1)
+            .then(() => this.loadPromise(this.video_));
         });
     } else {
       this.propagateLayoutChildren_();
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    const promise = this.loadPromise(this.video_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const promise = this.loadPromise(this.video_)
+      .then(null, (reason) => {
+        if (pendingOriginPromise) {
+          return pendingOriginPromise;
+        }
+        throw reason;
+      })
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
