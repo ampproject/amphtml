@@ -3888,6 +3888,10 @@ attr_lists: {
     disabled_by: "amp4email"
     name: "list"
   }
+  attrs: { 
+    disabled_by: "amp4email"
+    name: "enterkeyhint"
+  }
   attrs: { name: "max" }
   attrs: { name: "maxlength" }
   attrs: { name: "min" }
