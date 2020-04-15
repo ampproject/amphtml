@@ -5044,6 +5044,11 @@ commander@2.15.1:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
   integrity sha512-VlfT9F3V0v+jr4yxPc5gg9s62/fIVWsd2Bk2iD435um1NlGMYdVCq+MjcXnhYq2icNOizHr1kK+5TI6H0Hy0ag==
 
+commander@2.20.0:
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
+  integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
+
 commander@5.0.0, commander@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-5.0.0.tgz#dbf1909b49e5044f8fdaf0adc809f0c0722bdfd0"
@@ -7756,6 +7761,15 @@ from@^0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/from/-/from-0.1.7.tgz#83c60afc58b9c56997007ed1a768b3ab303a44fe"
   integrity sha1-g8YK/Fi5xWmXAH7Rp2izqzA6RP4=
+
+fs-extra@8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.0.1.tgz#90294081f978b1f182f347a440a209154344285b"
+  integrity sha512-W+XLrggcDzlle47X/XnS7FXrXu9sDo+Ze9zpndeBxdgv88FHLm1HtmkhEwavruS6koanBjp098rUpHs65EmG7A==
+  dependencies:
+    graceful-fs "^4.1.2"
+    jsonfile "^4.0.0"
+    universalify "^0.1.0"
 
 fs-extra@9.0.0:
   version "9.0.0"
@@ -15421,6 +15435,14 @@ source-map-support@^0.5.13, source-map-support@^0.5.5, source-map-support@^0.5.6
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
+
+source-map-unpacker@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/source-map-unpacker/-/source-map-unpacker-1.2.0.tgz#1679deec6874a8f404c3b2e188555f5f492e33a8"
+  integrity sha512-fmID4OAQinb7kx5T2crj8aWF6rVK8UyMyJ4P0BYsokrsBIEraiCDhQ6GwUxKs+vj13sizRZfScRJA3HT5ErZmQ==
+  dependencies:
+    commander "2.20.0"
+    fs-extra "8.0.1"
 
 source-map-url@^0.4.0:
   version "0.4.0"
