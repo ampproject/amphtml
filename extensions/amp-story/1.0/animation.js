@@ -207,12 +207,14 @@ export class AnimationRunner {
       const targetRect = unscaledClientRect(target);
       const pageRect = unscaledClientRect(this.page_);
 
-      // TODO(alanorozco): Expose equivalents to <amp-animation>
+      // TODO(alanorozco, https://go.amp.dev/issue/27758):
+      // Expose equivalents to <amp-animation>
       // - targetWidth/targetHeight are already available as width()/height()
       // - pageWidth/pageHeight should be exposed as vw/vh
       // - targetX/targetY should be exposed somehow (?)
       //
-      // TODO(alanorozco): After exposing these to <amp-animation> syntax, we
+      // TODO(alanorozco, https://go.amp.dev/issue/27758):
+      // After exposing these to <amp-animation> syntax, we
       // can get rid of this entire method (and this async chain!) if we ensure
       // that presets avoid visual jumps either via:
       // a) default styles and/or
@@ -291,8 +293,13 @@ export class AnimationRunner {
 
     return this.firstFrameProps_.then((firstFrameProps) => {
       if (!firstFrameProps) {
-        // These are only available when they can be evaluated. They can't
-        // when using <amp-animation> definitions.
+        // These are only available when they can be evaluated:
+        // - delay is not negative
+        // - first frame is defined in plain CSS, so it does not use special
+        //   <amp-animation> CSS syntax/extensions.
+        //
+        // We can't guarantee any of these properties when using
+        // <amp-story-animation> effects, but we can do it for our own presets.
         return;
       }
       return this.vsync_.mutatePromise(() => {
@@ -485,7 +492,7 @@ export class AnimationRunner {
   /** @private */
   notifyFinish_() {
     // TODO(alanorozco): This should work with <amp-story-animation> by
-    // exposing it as a sequencing id.
+    // exposing it as a sequencing id. See https://go.amp.dev/issue/27758
     if (this.presetTarget_ && this.presetTarget_.id) {
       this.sequence_.notifyFinish(this.presetTarget_.id);
     }
