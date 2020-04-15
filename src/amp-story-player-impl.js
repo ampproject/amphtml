@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {VisibilityState} from './visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   parseUrlWithA,
   removeFragment,
 } from './url';
+import {applySandbox} from './3p-frame';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {IframePool} from './amp-story-player-iframe-pool';
-import {VisibilityState} from './visibility-state';
-import {applySandbox} from './3p-frame';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from './style';
 import {toArray} from './types';

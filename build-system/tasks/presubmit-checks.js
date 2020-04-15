@@ -358,6 +358,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
+      'src/amp-story-player-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
