@@ -384,10 +384,44 @@ describes.realWin(
               '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring"}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
-            'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": "unknown", "gdprApplies": false}',
             'https://geo-override-check2/': '{"consentRequired": true}',
+            'https://gdpr-applies/':
+              '{"consentRequired": true, "gdprApplies": false}',
+            'https://gdpr-applies-2/': '{"consentRequired": true}',
           };
+        });
+
+        describe('gdprApplies value', () => {
+          it('uses given value', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': 'remote',
+              'checkConsentHref': 'https://gdpr-applies/',
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            const stateManagerGdprApplies = await ampConsent
+              .getConsentStateManagerForTesting()
+              .getConsentInstanceGdprApplies();
+            expect(stateManagerGdprApplies).to.be.false;
+          });
+
+          it('defaults to consentRequired remote value', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': 'remote',
+              'checkConsentHref': 'https://gdpr-applies-2/',
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            await expect(
+              ampConsent
+                .getConsentStateManagerForTesting()
+                .getConsentInstanceGdprApplies()
+            ).to.eventually.be.true;
+          });
         });
 
         it('should not update local storage when response is false', async () => {
@@ -412,7 +446,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 4,
             'consentString': undefined,
-            'gdprApplies': undefined,
             'isDirty': undefined,
           });
         });
@@ -437,7 +470,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 5,
             'consentString': undefined,
-            'gdprApplies': undefined,
             'isDirty': undefined,
           });
           expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
@@ -464,7 +496,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
-            'gdprApplies': true,
             'isDirty': undefined,
           });
         });
@@ -486,31 +517,9 @@ describes.realWin(
           );
 
           expect(stateValue).to.equal('unknown');
-          // gdprApplies defaults to 'consentRequired'
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 5,
             'consentString': undefined,
-            'gdprApplies': true,
-            'isDirty': undefined,
-          });
-        });
-
-        it('should use gdprApplies values if applicable', async () => {
-          const inlineConfig = {
-            'consentInstanceId': 'abc',
-            'consentRequired': 'remote',
-            'checkConsentHref': 'https://server-test-4/',
-          };
-          ampConsent = getAmpConsent(doc, inlineConfig);
-          await ampConsent.buildCallback();
-          await macroTask();
-          const stateManagerInfo = await ampConsent
-            .getConsentStateManagerForTesting()
-            .getConsentInstanceInfo();
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': 5,
-            'consentString': undefined,
-            'gdprApplies': false,
             'isDirty': undefined,
           });
         });
@@ -520,7 +529,7 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "gdprApplies": true}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -552,7 +561,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 1,
             'consentString': 'newstring',
-            'gdprApplies': true,
             'isDirty': undefined,
           });
         });
@@ -568,7 +576,6 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'mystring',
-              [STORAGE_KEY.GDPR]: 1,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -585,7 +592,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
-            'gdprApplies': true,
             'isDirty': undefined,
           });
         });
@@ -628,7 +634,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
-            'gdprApplies': undefined,
             'isDirty': true,
           });
         });
@@ -644,7 +649,6 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'mystring',
-              [STORAGE_KEY.GDPR]: 1,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -661,7 +665,6 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
-            'gdprApplies': true,
             'isDirty': true,
           });
         });

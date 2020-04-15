@@ -420,6 +420,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
+    this.setGdprApplies();
     this.syncRemoteConsentState_();
 
     this.getConsentRequiredPromise_()
@@ -483,6 +484,28 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Create and set gdprApplies promise form consent manager.
+   * Default value to `consentRequired`, if no `gdprApplies`
+   * value is provided.
+   *
+   */
+  setGdprApplies() {
+    const responsePromise = this.getConsentRemote_();
+    const gdprAppliesPromise = responsePromise.then((response) => {
+      if (
+        !response ||
+        response['gdprApplies'] === undefined ||
+        typeof response['gdprApplies'] !== 'boolean'
+      ) {
+        return this.getConsentRequiredPromise_();
+      }
+      return response['gdprApplies'];
+    });
+
+    this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
+  }
+
+  /**
    * Clear cache for server side decision and then sync.
    */
   syncRemoteConsentState_() {
@@ -504,10 +527,7 @@ export class AmpConsent extends AMP.BaseElement {
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString'] || undefined,
-          response['gdprApplies'] !== undefined
-            ? response['gdprApplies']
-            : !!response['consentRequired']
+          response['consentString'] || undefined
         );
       }
     });
@@ -515,23 +535,16 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Sync with local storage if consentRequired is true.
-   * Treat all three values as a grouping, only update cache
-   * if responseStateValue is not null
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
-   * @param {boolean=} responseGdprApplies
    */
-  updateCacheIfNotNull_(
-    responseStateValue,
-    responseConsentString,
-    responseGdprApplies
-  ) {
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        responseConsentString,
-        responseGdprApplies
+        responseConsentString
       );
     }
   }

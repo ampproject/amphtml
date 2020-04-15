@@ -76,9 +76,6 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
-
-    /** @private {?string} */
-    this.gdprApplies_ = null;
   }
 
   /**
@@ -182,14 +179,9 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const gdprApplies = info['gdprApplies'];
-    const {
-      consentString_: prevConsentStr,
-      gdprApplies_: prevGdprApplies,
-    } = this;
+    const {consentString_: prevConsentStr} = this;
 
     this.consentString_ = consentStr;
-    this.gdprApplies_ = gdprApplies;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -208,9 +200,8 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString and gdprApplies doesn't change with dismiss action
+      // consentString doesn't change with dismiss action
       this.consentString_ = prevConsentStr;
-      this.gdprApplies_ = prevGdprApplies;
     } else {
       this.consentState_ = state;
     }
@@ -279,6 +270,20 @@ export class ConsentPolicyManager {
   }
 
   /**
+   * Get gdprApplies value of a policy.
+   *
+   * @param {string} policyId
+   * @return {!Promise<Object>}
+   */
+  getGdprAppliesInfo(policyId) {
+    return this.whenPolicyResolved(policyId)
+      .then(() => this.ConsentStateManagerPromise_)
+      .then((manager) => {
+        return manager.getConsentInstanceGdprApplies();
+      });
+  }
+
+  /**
    * Get the consent string value of a policy. Return a promise that resolves
    * when the policy resolves.
    * @param {string} policyId
@@ -287,18 +292,6 @@ export class ConsentPolicyManager {
   getConsentStringInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
       return this.consentString_;
-    });
-  }
-
-  /**
-   * Get the gdprApplies value of a policy. Return a promise that resolves
-   * when the policy resolves.
-   * @param {string} policyId
-   * @return {!Promise<?boolean>}
-   */
-  getGdprAppliesInfo(policyId) {
-    return this.whenPolicyResolved(policyId).then(() => {
-      return this.gdprApplies_;
     });
   }
 

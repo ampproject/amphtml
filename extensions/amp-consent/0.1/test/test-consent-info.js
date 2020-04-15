@@ -31,7 +31,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.UNKNOWN,
           'consentString': undefined,
-          'gdprApplies': undefined,
           'isDirty': undefined,
         })
       );
@@ -42,7 +41,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.ACCEPTED,
           'consentString': undefined,
-          'gdprApplies': undefined,
           'isDirty': undefined,
         })
       );
@@ -50,7 +48,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': undefined,
-          'gdprApplies': undefined,
           'isDirty': undefined,
         })
       );
@@ -65,7 +62,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.ACCEPTED,
           'consentString': undefined,
-          'gdprApplies': undefined,
           'isDirty': undefined,
         })
       );
@@ -79,7 +75,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': 'test',
           'isDirty': undefined,
-          'gdprApplies': undefined,
         })
       );
       expect(
@@ -93,36 +88,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
           'consentState': CONSENT_ITEM_STATE.UNKNOWN,
           'consentString': 'test',
           'isDirty': true,
-          'gdprApplies': undefined,
-        })
-      );
-      expect(
-        getStoredConsentInfo({
-          's': -1,
-          'r': 'test',
-          'd': 1,
-        })
-      ).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-          'consentString': 'test',
-          'isDirty': true,
-          'gdprApplies': undefined,
-        })
-      );
-      expect(
-        getStoredConsentInfo({
-          's': -1,
-          'r': 'test',
-          'g': 1,
-          'd': 1,
-        })
-      ).to.deep.equal(
-        dict({
-          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-          'consentString': 'test',
-          'isDirty': true,
-          'gdprApplies': true,
         })
       );
     });
@@ -187,13 +152,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         's': 0,
         'r': 'test',
         'd': 1,
-      });
-      consentInfo['gdprApplies'] = true;
-      expect(composeStoreValue(consentInfo)).to.deep.equal({
-        's': 0,
-        'r': 'test',
-        'd': 1,
-        'g': 1,
       });
     });
   });

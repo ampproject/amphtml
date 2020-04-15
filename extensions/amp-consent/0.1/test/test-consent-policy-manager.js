@@ -65,6 +65,9 @@ describes.realWin(
               })
             );
           },
+          getConsentInstanceGdprApplies: () => {
+            return Promise.resolve(true);
+          },
         });
       });
     });
@@ -77,11 +80,7 @@ describes.realWin(
       let manager;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE.ACCEPTED,
-          'test',
-          true
-        );
+        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -90,7 +89,6 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
-        expect(manager.gdprApplies_).to.be.true;
       });
 
       describe('Register policy instance', () => {
@@ -588,15 +586,11 @@ describes.realWin(
           .callsFake(() => {
             return Promise.resolve();
           });
-        consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE.UNKNOWN,
-          undefined,
-          true
-        );
+        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('should return gdprApplies', async () => {
+      it('should return sharedData', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,

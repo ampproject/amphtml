@@ -94,19 +94,16 @@ export class ConsentStateManager {
    *
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {boolean=} gdprApplies
    */
-  updateConsentInstanceState(state, consentStr, gdprApplies) {
+  updateConsentInstanceState(state, consentStr) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, gdprApplies, false);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
-      this.consentChangeHandler_(
-        constructConsentInfo(state, consentStr, gdprApplies)
-      );
+      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
     }
   }
 
@@ -166,6 +163,17 @@ export class ConsentStateManager {
   }
 
   /**
+   * Sets a promise which resolves to a shareData object that is to be returned
+   * from the remote endpoint.
+   *
+   * @param {!Promise<boolean>} gdprAppliesPromise
+   */
+  setConsentInstanceGdprApplies(gdprAppliesPromise) {
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
+    this.instance_.gdprAppliesPromise = gdprAppliesPromise;
+  }
+
+  /**
    * Sets the dirty bit so current consent info won't be used for
    * decision making on next visit
    */
@@ -182,6 +190,16 @@ export class ConsentStateManager {
   getConsentInstanceSharedData() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.sharedDataPromise;
+  }
+
+  /**
+   * Returns a promise that resolves to a gdprApplies value
+   *
+   * @return {?Promise<?Object>}
+   */
+  getConsentInstanceGdprApplies() {
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
+    return this.instance_.gdprAppliesPromise;
   }
 
   /**
@@ -230,6 +248,9 @@ export class ConsentInstance {
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
 
+    /** @public {?Promise<boolean>} */
+    this.gdprAppliesPromise = null;
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
@@ -267,12 +288,7 @@ export class ConsentInstance {
         // No need to update with dirtyBit
         return;
       }
-      this.update(
-        info['consentState'],
-        info['consentString'],
-        info['gdprApplies'],
-        true
-      );
+      this.update(info['consentState'], info['consentString'], true);
     });
   }
 
@@ -280,10 +296,9 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {boolean=} gdprApplies
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, gdprApplies, opt_systemUpdate) {
+  update(state, consentString, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
@@ -291,13 +306,10 @@ export class ConsentInstance {
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
       const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-      const localGdprApplies =
-        this.localConsentInfo_ && this.localConsentInfo_['gdprApplies'];
       // If state is dismissed, use the old consent string.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr,
-        localGdprApplies
+        localConsentStr
       );
       return;
     }
@@ -309,7 +321,6 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
-        gdprApplies,
         true
       );
     } else {
@@ -317,15 +328,13 @@ export class ConsentInstance {
       // from localConsentInfo_
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        consentString,
-        gdprApplies
+        consentString
       );
     }
 
     const newConsentInfo = constructConsentInfo(
       calculatedState,
       consentString,
-      gdprApplies,
       this.hasDirtyBitNext_
     );
 
@@ -475,9 +484,6 @@ export class ConsentInstance {
       );
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
-      }
-      if (consentInfo['gdprApplies'] !== undefined) {
-        request['gdprApplies'] = consentInfo['gdprApplies'];
       }
       const init = {
         credentials: 'include',

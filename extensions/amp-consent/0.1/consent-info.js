@@ -23,14 +23,12 @@ import {isEnumValue, isObject} from '../../../src/types';
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
- * GDPR: Set when the gdprApplies value of TCF v2 is sent from vendors.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
 export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
-  GDPR: 'g',
   IS_DIRTY: 'd',
 };
 
@@ -52,7 +50,6 @@ export const CONSENT_ITEM_STATE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
- *  gdprApplies: (boolean|undefined)
  *  isDirty: (boolean|undefined),
  * }}
  */
@@ -67,7 +64,6 @@ export function getStoredConsentInfo(value) {
   if (value === undefined) {
     return constructConsentInfo(
       CONSENT_ITEM_STATE.UNKNOWN,
-      undefined,
       undefined,
       undefined
     );
@@ -84,9 +80,6 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
-    value[STORAGE_KEY.GDPR] !== undefined
-      ? value[STORAGE_KEY.GDPR] === 1
-      : undefined,
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -148,11 +141,6 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.STRING] = consentInfo['consentString'];
   }
 
-  // g:(0|1|undefined)
-  if (consentInfo['gdprApplies'] !== undefined) {
-    obj[STORAGE_KEY.GDPR] = consentInfo['gdprApplies'] ? 1 : 0;
-  }
-
   if (consentInfo['isDirty'] === true) {
     obj[STORAGE_KEY.IS_DIRTY] = 1;
   }
@@ -197,14 +185,13 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
       calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
       (infoA['consentString'] || '') === (infoB['consentString'] || '');
-    const gdprAppliesEqual = infoA['gdprApplies'] === infoB['gdprApplies'];
     let isDirtyEqual;
     if (opt_isDirty) {
       isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    return stateEqual && stringEqual && gdprAppliesEqual && isDirtyEqual;
+    return stateEqual && stringEqual && isDirtyEqual;
   }
   return false;
 }
@@ -216,27 +203,24 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
  */
 function getLegacyStoredConsentInfo(value) {
   const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined, undefined);
+  return constructConsentInfo(state, undefined, undefined);
 }
 
 /**
  * Construct the consentInfo object from values
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
- * @param {boolean=} opt_gdprApplies
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
-  opt_gdprApplies,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
-    'gdprApplies': opt_gdprApplies,
     'isDirty': opt_isDirty,
   };
 }

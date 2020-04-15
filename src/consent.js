@@ -81,7 +81,7 @@ export function getConsentPolicyInfo(element, policyId) {
 /**
  * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
- * @return {!Promise<boolean>}
+ * @return {!Promise<?boolean>}
  */
 export function getGdprAppliesInfo(element, policyId) {
   // Return the stored gdpr applies value.
