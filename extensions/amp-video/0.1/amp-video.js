@@ -15,17 +15,12 @@
  */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {
-  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
-  listen,
-} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByTag,
   childElementsByTag,
-  elementByTag,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
@@ -39,6 +34,7 @@ import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   propagateObjectFitStyles,
@@ -107,15 +103,13 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const videoSrc = this.getVideoSourceForPreconnect_();
-    if (videoSrc) {
-      this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
+    this.getVideoSourcesForPreconnect_().forEach((videoSrc) => {
       Services.preconnectFor(this.win).url(
         this.getAmpDoc(),
         videoSrc,
         opt_onLayout
       );
-    }
+    });
   }
 
   /**
@@ -173,19 +167,14 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    * @return {?string}
    */
-  getVideoSourceForPreconnect_() {
-    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
-      const source = this.getFirstCachedSource_();
-      return (source && source.getAttribute('src')) || null;
+  getVideoSourcesForPreconnect_() {
+    const videoSrc = this.element.getAttribute('src');
+    if (videoSrc) {
+      return [videoSrc];
     }
-    let videoSrc = this.element.getAttribute('src');
-    if (!videoSrc) {
-      const source = elementByTag(this.element, 'source');
-      if (source) {
-        videoSrc = source.getAttribute('src');
-      }
-    }
-    return videoSrc;
+    return toArray(childElementsByTag(this.element, 'source')).map((source) =>
+      source.getAttribute('src')
+    );
   }
 
   /** @override */
@@ -352,7 +341,6 @@ class AmpVideo extends AMP.BaseElement {
       },
       (reason) => {
         if (pendingOriginPromise) {
-          this.video_[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = undefined;
           return pendingOriginPromise;
         }
         throw reason;
