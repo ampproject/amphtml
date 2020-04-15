@@ -64,6 +64,12 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 /**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
+
+/**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
@@ -337,7 +343,8 @@ function onError(message, filename, line, col, error) {
       try {
         return reportErrorToServerOrViewer(
           this,
-          /** @type {!JsonObject} */ (data)
+          /** @type {!JsonObject} */
+          (data)
         ).catch(() => {
           // catch async errors to avoid recursive errors.
         });
@@ -346,6 +353,16 @@ function onError(message, filename, line, col, error) {
       }
     });
   }
+}
+
+/**
+ * Determines the error reporting endpoint which should be used.
+ * @return {string} error reporting endpoint URL.
+ */
+function chooseReportingUrl_() {
+  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+    ? urls.betaErrorReporting
+    : urls.errorReporting;
 }
 
 /**
@@ -361,7 +378,7 @@ export function reportErrorToServerOrViewer(win, data) {
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      xhr.open('POST', chooseReportingUrl_(), true);
       xhr.send(JSON.stringify(data));
     }
   });

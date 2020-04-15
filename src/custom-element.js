@@ -45,14 +45,6 @@ import {tryResolve} from '../src/utils/promise';
 const TAG = 'CustomElement';
 
 /**
- * The elements positioned ahead of this threshold may have their loading
- * indicator initialized faster. This is benefitial to avoid relayout during
- * render phase or scrolling.
- * @private @const {number}
- */
-const PREPARE_LOADING_THRESHOLD = 1000;
-
-/**
  * @enum {number}
  */
 const UpgradeState = {
@@ -459,6 +451,11 @@ function createBaseCustomElementClass(win) {
       return this.implementation_.getDefaultActionAlias();
     }
 
+    /** @return {boolean} */
+    isBuilding() {
+      return !!this.buildingPromise_;
+    }
+
     /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
@@ -583,21 +580,6 @@ function createBaseCustomElementClass(win) {
           }
         } catch (e) {
           reportError(e, this);
-        }
-      }
-
-      if (this.isLoadingEnabled_()) {
-        if (this.isInViewport_) {
-          // Already in viewport - start showing loading.
-          this.toggleLoading(true);
-        } else if (
-          layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0 &&
-          !this.loadingContainer_
-        ) {
-          // Few top elements will also be pre-initialized with a loading
-          // element.
-          this.mutateOrInvoke_(() => this.prepareLoading_());
         }
       }
     }
@@ -842,6 +824,13 @@ function createBaseCustomElementClass(win) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+        }
+        // Classically, sizes/media queries are applied just before
+        // Resource.measure. With IntersectionObserver, observe() is the
+        // equivalent which happens above in Resources.add(). Applying here
+        // also avoids unnecessary reinvocation during reparenting.
+        if (this.getResources().isIntersectionExperimentOn()) {
+          this.applySizesAndMediaQuery();
         }
       }
     }
@@ -1229,6 +1218,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
+          const loadingStartTime = win.Date.now();
           Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
@@ -1238,7 +1228,7 @@ function createBaseCustomElementClass(win) {
               this.ownerDocument &&
               this.ownerDocument.defaultView
             ) {
-              this.toggleLoading(true);
+              this.toggleLoading(true, {startTime: loadingStartTime});
             }
           }, 100);
         }
@@ -1664,8 +1654,9 @@ function createBaseCustomElementClass(win) {
      * actually be shown. This method must also be called in the mutate
      * context.
      * @private
+     * @param {number=} startTime
      */
-    prepareLoading_() {
+    prepareLoading_(startTime) {
       if (!this.isLoadingEnabled_()) {
         return;
       }
@@ -1680,7 +1671,8 @@ function createBaseCustomElementClass(win) {
           this.getAmpDoc(),
           this,
           this.layoutWidth_,
-          this.layoutHeight_
+          this.layoutHeight_,
+          startTime
         );
 
         container.appendChild(loadingElement);
@@ -1694,12 +1686,13 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=} opt_options
+     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined), startTime:(number|undefined)}=} opt_options
      * @public @final
      */
     toggleLoading(state, opt_options) {
       const cleanup = opt_options && opt_options.cleanup;
       const force = opt_options && opt_options.force;
+      const startTime = opt_options && opt_options.startTime;
       assertNotTemplate(this);
       if (
         state &&
@@ -1724,32 +1717,40 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      this.mutateOrInvoke_(() => {
-        let state = this.loadingState_;
-        // Repeat "loading enabled" check because it could have changed while
-        // waiting for vsync.
-        if (state && !force && !this.isLoadingEnabled_()) {
-          state = false;
-        }
-        if (state) {
-          this.prepareLoading_();
-        }
-        if (!this.loadingContainer_) {
-          return;
-        }
+      this.mutateOrInvoke_(
+        () => {
+          let state = this.loadingState_;
+          // Repeat "loading enabled" check because it could have changed while
+          // waiting for vsync.
+          if (state && !force && !this.isLoadingEnabled_()) {
+            state = false;
+          }
+          if (state) {
+            this.prepareLoading_(startTime);
+          }
+          if (!this.loadingContainer_) {
+            return;
+          }
 
-        this.loadingContainer_.classList.toggle('amp-hidden', !state);
-        this.loadingElement_.classList.toggle('amp-active', state);
+          this.loadingContainer_.classList.toggle('amp-hidden', !state);
+          this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && cleanup && !this.implementation_.isLoadingReused()) {
-          const loadingContainer = this.loadingContainer_;
-          this.loadingContainer_ = null;
-          this.loadingElement_ = null;
-          this.mutateOrInvoke_(() => {
-            dom.removeElement(loadingContainer);
-          });
-        }
-      });
+          if (!state && cleanup && !this.implementation_.isLoadingReused()) {
+            const loadingContainer = this.loadingContainer_;
+            this.loadingContainer_ = null;
+            this.loadingElement_ = null;
+            this.mutateOrInvoke_(
+              () => {
+                dom.removeElement(loadingContainer);
+              },
+              undefined,
+              true
+            );
+          }
+        },
+        undefined,
+        /* skipRemeasure */ true
+      );
     }
 
     /**
@@ -1810,7 +1811,7 @@ function createBaseCustomElementClass(win) {
           this.overflowElement_.onclick = () => {
             const mutator = Services.mutatorForDoc(this.getAmpDoc());
             mutator.forceChangeSize(this, requestedHeight, requestedWidth);
-            mutator./*OK*/ mutateElement(this, () => {
+            mutator.mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1829,12 +1830,14 @@ function createBaseCustomElementClass(win) {
      *
      * @param {function()} mutator
      * @param {?Element=} opt_element
+     * @param {boolean=} opt_skipRemeasure
      */
-    mutateOrInvoke_(mutator, opt_element) {
+    mutateOrInvoke_(mutator, opt_element, opt_skipRemeasure = false) {
       if (this.ampdoc_) {
         Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
           opt_element || this,
-          mutator
+          mutator,
+          opt_skipRemeasure
         );
       } else {
         mutator();

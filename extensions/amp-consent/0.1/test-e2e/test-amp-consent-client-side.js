@@ -36,7 +36,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should work with client side decision', async () => {
+    it.skip('should work with client side decision', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
 

@@ -16,6 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
+const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
@@ -24,21 +25,17 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
-  distNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
-const {cleanupBuildDir} = require('../compile/compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
+const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {watchDebounceDelay} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -118,11 +115,6 @@ async function startServer(
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
   logServeMode();
-
-  if (lazyBuild && argv.compiled) {
-    cleanupBuildDir();
-    await startNailgunServer(distNailgunPort, /* detached */ false);
-  }
 }
 
 /**
@@ -206,9 +198,10 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, async () => {
+  const watchFunc = async () => {
     await restartServer();
-  });
+  };
+  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }

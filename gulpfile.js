@@ -30,10 +30,19 @@ const {
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {
+  storybookAmp,
+  storybookPreact,
+} = require('./build-system/tasks/storybook');
+const {
+  validator,
+  validatorJava,
+  validatorWebui,
+} = require('./build-system/tasks/validator');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, defaultTask, watch} = require('./build-system/tasks/build');
+const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
@@ -45,6 +54,7 @@ const {compileJison} = require('./build-system/tasks/compile-jison');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
+const {defaultTask} = require('./build-system/tasks/default-task');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
@@ -66,7 +76,6 @@ const {size} = require('./build-system/tasks/size');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
-const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
@@ -87,7 +96,8 @@ function createTask(name, taskFunc) {
  * @param {function} taskFunc
  */
 function checkFlags(name, taskFunc) {
-  if (!argv._.includes(name)) {
+  const isDefaultTask = name == 'default' && argv._.length == 0;
+  if (!argv._.includes(name) && !isDefaultTask) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
@@ -157,10 +167,13 @@ createTask('process-github-issues', processGithubIssues);
 createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);
+createTask('storybook-amp', storybookAmp);
+createTask('storybook-preact', storybookPreact);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
 createTask('validator', validator);
+createTask('validator-java', validatorJava);
 createTask('validator-webui', validatorWebui);
 createTask('vendor-configs', vendorConfigs);
 createTask('visual-diff', visualDiff);

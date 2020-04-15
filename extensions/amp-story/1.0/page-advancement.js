@@ -43,6 +43,9 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
+/** @private @const {number} */
+const TOP_REGION = 0.8;
+
 /**
  * Protected edges of the screen in pixels. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
@@ -237,7 +240,7 @@ export class AdvancementConfig {
  * Always provides a progress of 1.0.  Advances when the user taps the
  * corresponding section, depending on language settings.
  */
-class ManualAdvancement extends AdvancementConfig {
+export class ManualAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {!Element} element The element that, when clicked, can cause
@@ -468,9 +471,24 @@ class ManualAdvancement extends AdvancementConfig {
   canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    // We have a `pointer-events: none` set to all children of <a> tags inside
+    // of amp-story-grid-layer, which acts as a click shield, making sure we
+    // handle the click before navigation (see amp-story.css). It also ensures
+    // we always get the <a> to be the target, even if it has children (e.g.
+    // <span>).
     const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
+      event.preventDefault();
+      return false;
+    }
+
+    if (
+      target.getAttribute('show-tooltip') === 'auto' &&
+      this.isInScreenBottom_(target, pageRect)
+    ) {
+      target.setAttribute('target', '_blank');
+      target.setAttribute('role', 'link');
       return false;
     }
 
@@ -491,6 +509,18 @@ class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+  }
+
+  /**
+   * Checks if element is inside of the bottom region of the screen.
+   * @param {!Element} target
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenBottom_(target, pageRect) {
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    return targetRect.top - pageRect.top >= pageRect.height * TOP_REGION;
   }
 
   /**
@@ -657,7 +687,7 @@ class ManualAdvancement extends AdvancementConfig {
  * Provides progress and advancement based on a fixed duration of time,
  * specified in either seconds or milliseconds.
  */
-class TimeBasedAdvancement extends AdvancementConfig {
+export class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win The Window object.
    * @param {number} delayMs The duration to wait before advancing.
@@ -799,7 +829,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * having been executed before the amp-story-page buildCallback, which is not
  * guaranteed.
  */
-class MediaBasedAdvancement extends AdvancementConfig {
+export class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
    * @param {!Array<!Element>} elements
@@ -909,7 +939,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return this.element_;
     } else if (
       this.element_.hasAttribute('background-audio') &&
-      (tagName === 'amp-story' || tagName === 'amp-story-page')
+      tagName === 'amp-story-page'
     ) {
       return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
@@ -1051,10 +1081,26 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const elements = element.querySelectorAll(
-        `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          #${escapeCssSelectorIdent(autoAdvanceStr)}`
+      // amp-video, amp-audio, as well as amp-story-page with a background audio
+      // are eligible for media based auto advance.
+      const elements = toArray(
+        element.querySelectorAll(
+          `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
+          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        )
       );
+      if (
+        matches(
+          element,
+          `amp-story-page[background-audio]#${escapeCssSelectorIdent(
+            autoAdvanceStr
+          )}`
+        )
+      ) {
+        elements.push(element);
+      }
       if (!elements.length) {
         if (autoAdvanceStr) {
           user().warn(
@@ -1066,7 +1112,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
         return null;
       }
 
-      return new MediaBasedAdvancement(win, toArray(elements));
+      return new MediaBasedAdvancement(win, elements);
     } catch (e) {
       return null;
     }

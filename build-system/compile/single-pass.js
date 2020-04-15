@@ -18,7 +18,6 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -50,6 +49,7 @@ const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map((x) => TYPES[x]);
 const wrappers = require('./compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -100,7 +100,6 @@ exports.getFlags = function (config) {
     use_types_for_optimization: true,
     rewrite_polyfills: false,
     source_map_include_content: !!argv.full_sourcemaps,
-    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
@@ -306,30 +305,21 @@ exports.getGraph = function (entryModules, config) {
   });
 
   config.babel = config.babel || {};
-  const babelPlugins = conf
-    .plugins({
-      isEsmBuild: !!argv.esm,
-      isSinglePass: true,
-      isForTesting: !!argv.fortesting,
-    })
-    .concat(['transform-es2015-modules-commonjs']);
-
-  // Use browserify with babel to learn about deps.
-  const b = browserify(entryModules, {
+  const browserifyOptions = {
     basedir: '.',
     browserField: 'module',
     debug: true,
     deps: true,
     detectGlobals: false,
     fast: true,
-  })
+  };
+
+  // Use browserify with babel to learn about deps.
+  const b = browserify(entryModules, browserifyOptions)
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
-    .transform(babelify, {
-      compact: false,
-      cwd: process.cwd(),
-      plugins: babelPlugins,
-    });
+    .transform(babelify, {caller: {name: 'single-pass-deps'}, global: true});
+
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
@@ -569,11 +559,17 @@ function wrapMainBinaries() {
     if (x === 'v0') {
       s.prepend(prefix);
       s.append(suffix);
-      const map = s.generateDecodedMap({
+      const originalMap = loadSourceMap(path);
+      const wrappedMap = s.generateDecodedMap({
         hires: true,
-        source: path,
+        source: `${x}.js`,
+        includeContent: !!argv.full_sourcemaps,
       });
-      const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
+      const remapped = remapping(
+        [wrappedMap, originalMap],
+        () => null,
+        !argv.full_sourcemaps
+      );
       fs.writeFileSync(path, s.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     } else {
@@ -583,8 +579,15 @@ function wrapMainBinaries() {
       bundle.addSource(mainFile);
       bundle.addSource(s);
       bundle.append(suffix);
-      const map = bundle.generateDecodedMap({hires: true});
-      const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
+      const map = bundle.generateDecodedMap({
+        hires: true,
+        includeContent: !!argv.full_sourcemaps,
+      });
+      const remapped = remapping(
+        map,
+        loadApprovedSourceMaps(map.sources),
+        !argv.full_sourcemaps
+      );
       fs.writeFileSync(path, bundle.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     }
@@ -650,8 +653,15 @@ function postPrepend(extension, prependContents) {
       bundle.addSource(prependContents[i]);
     }
     bundle.addSource(suffix);
-    const map = bundle.generateDecodedMap({hires: true});
-    const remapped = remapping(map, loadSourceMap, !argv.full_sourcemaps);
+    const map = bundle.generateDecodedMap({
+      hires: true,
+      includeContent: !!argv.full_sourcemaps,
+    });
+    const remapped = remapping(
+      map,
+      loadApprovedSourceMaps(map.sources),
+      !argv.full_sourcemaps
+    );
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
@@ -693,7 +703,7 @@ function compile(flagsArray) {
       .on('error', (err) => handleSinglePassCompilerError(err))
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
-      .pipe(sourcemaps.write('.'))
+      .pipe(writeSourcemaps())
       .pipe(
         gulpIf(
           /(\/amp-|\/_base)/,
@@ -722,27 +732,10 @@ function eliminateIntermediateBundles() {
     }
     targets.forEach((path) => {
       const map = loadSourceMap(path);
-      function returnMapFirst(map) {
-        let first = true;
-        return function (file) {
-          if (first) {
-            first = false;
-            return map;
-          }
-          return loadSourceMap(file);
-        };
-      }
+
       const {code, map: babelMap} = babel.transformFileSync(path, {
-        plugins: conf.eliminateIntermediateBundles(),
-        compact: false,
-        sourceMaps: true,
-        inputSourceMap: false,
+        caller: {name: 'single-pass-post'},
       });
-      let remapped = remapping(
-        babelMap,
-        returnMapFirst(map),
-        !argv.full_sourcemaps
-      );
 
       const {code: compressed, map: terserMap} = terser.minify(code, {
         mangle: false,
@@ -758,10 +751,9 @@ function eliminateIntermediateBundles() {
         sourceMap: true,
       });
 
-      // TODO: Remapping should support a chain, instead of having to call multiple times.
-      remapped = remapping(
-        terserMap,
-        returnMapFirst(remapped),
+      const remapped = remapping(
+        [terserMap, babelMap, map],
+        () => null,
         !argv.full_sourcemaps
       );
 
@@ -780,9 +772,19 @@ function readMagicString(file) {
   return new MagicString(contents, {filename: file});
 }
 
+function loadApprovedSourceMaps(files) {
+  return (file) => {
+    if (files.includes(file)) {
+      return loadSourceMap(file);
+    }
+    return null;
+  };
+}
+
 function loadSourceMap(file) {
-  if (file.startsWith('dist')) {
+  try {
     return readFile(`${file}.map`);
+  } catch (e) {
+    return null;
   }
-  return null;
 }

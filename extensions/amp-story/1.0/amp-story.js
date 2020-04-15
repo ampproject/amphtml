@@ -945,7 +945,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Renders the layout for the story
+   * Renders the layout for the story.
    * @return {!Promise} A promise that is resolved when the story layout is
    *       loaded
    * @private
@@ -1183,7 +1183,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   validateConsent_(consentEl) {
     if (!childElementByTag(consentEl, 'amp-story-consent')) {
-      dev().error(TAG, 'amp-consent must have an amp-story-consent child');
+      user().error(TAG, 'amp-consent must have an amp-story-consent child');
     }
 
     const allowedTags = ['SCRIPT', 'AMP-STORY-CONSENT'];
@@ -1195,7 +1195,7 @@ export class AmpStory extends AMP.BaseElement {
     if (toRemoveChildren.length === 0) {
       return;
     }
-    dev().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
+    user().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
@@ -1654,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * For some reason, Safari has an issue where sometimes when pages become
-   * visible, some descendants are not painted.  This is a hack where we detect
+   * visible, some descendants are not painted.  This is a hack, where we detect
    * that the browser is Safari and force it to repaint, to avoid this case.
    * See newmuis/amphtml-story#106 for details.
    * @private
@@ -1855,7 +1855,15 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           for (let i = 0; i < pageAttachments.length; i++) {
-            this.element.appendChild(pageAttachments[i]);
+            this.element.insertBefore(
+              pageAttachments[i],
+              // Attachments that are just links are rendered in-line with their
+              // story page.
+              pageAttachments[i].getAttribute('href')
+                ? pageAttachments[i].parentElement.nextElementSibling
+                : // Other attachments are rendered at the end.
+                  null
+            );
           }
         });
 
@@ -2066,17 +2074,21 @@ export class AmpStory extends AMP.BaseElement {
             'publisher provided fallback.'
         );
       } else {
-        this.layoutStory_().then(() =>
+        this.layoutStory_().then(() => {
+          this.storeService_.dispatch(
+            Action.TOGGLE_PAUSED,
+            this.pausedStateToRestore_
+          );
           this.mutateElement(() => {
             this.unsupportedBrowserLayer_.removeLayer();
-            this.element.classList.remove('i-amphtml-story-fallback');
-          })
-        );
+          });
+        });
       }
     } else {
-      this.mutateElement(() => {
-        this.element.classList.add('i-amphtml-story-fallback');
-      });
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
       // Displays the publisher provided fallback or fallbacks to the default
       // unsupported browser layer.
       if (fallbackEl) {

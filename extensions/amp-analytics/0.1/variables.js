@@ -338,6 +338,7 @@ export class VariableService {
         }
         value = Promise.all(/** @type {!Array<string>} */ (value));
       }
+
       return Promise.resolve(value).then((value) =>
         !options.noEncode
           ? encodeVars(/** @type {string|?Array<string>} */ (value))
