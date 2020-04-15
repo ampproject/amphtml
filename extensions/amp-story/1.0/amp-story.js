@@ -1654,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * For some reason, Safari has an issue where sometimes when pages become
-   * visible, some descendants are not painted.  This is a hack where we detect
+   * visible, some descendants are not painted.  This is a hack, where we detect
    * that the browser is Safari and force it to repaint, to avoid this case.
    * See newmuis/amphtml-story#106 for details.
    * @private
