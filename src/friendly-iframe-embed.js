@@ -224,7 +224,7 @@ export function installFriendlyIframeEmbed(
   // we have to fallback to polling.
   let readyPromise;
   if (isIframeReady(iframe)) {
-    readyPromise = getDelayPromise(win)();
+    readyPromise = getDelayPromise(win)(undefined);
   } else {
     readyPromise = new Promise((resolve) => {
       /** @const {number} */
