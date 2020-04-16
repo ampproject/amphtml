@@ -652,7 +652,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentState, consentString),
+          this.getPageParameters(consentState, /* instances= */undefined, consentString),
           rtcParams
         ),
         this.experimentIds
