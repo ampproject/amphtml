@@ -27,19 +27,18 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      return buildAmpAutocomplete().then(ampAutocomplete => {
+      return buildAmpAutocomplete().then((ampAutocomplete) => {
         impl = ampAutocomplete;
       });
     });
 
     function buildAmpAutocomplete(wantSsr) {
-      const form = doc.createElement('form');
       const element = createElementWithAttributes(doc, 'amp-autocomplete', {
         layout: 'container',
         filter: 'substring',
@@ -54,8 +53,7 @@ describes.realWin(
       script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
       element.appendChild(script);
 
-      form.appendChild(element);
-      doc.body.appendChild(form);
+      doc.body.appendChild(element);
 
       if (wantSsr) {
         element.removeAttribute('filter');
@@ -678,7 +676,7 @@ describes.realWin(
             impl.activeElement_ = impl.createElementFromItem_('abc');
             env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             env.sandbox
-              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .stub(impl.binding_, 'shouldPreventDefaultOnEnter')
               .returns(true);
             return impl.keyDownHandler_(event);
           })
@@ -724,7 +722,7 @@ describes.realWin(
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
       env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       return impl
         .layoutCallback()
         .then(() => {
@@ -777,6 +775,9 @@ describes.realWin(
     it('should call toggleResultsHandler_()', () => {
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      const form = doc.createElement('form');
+      form.appendChild(impl.element);
+      doc.body.appendChild(form);
       return impl
         .layoutCallback()
         .then(() => {
@@ -784,7 +785,7 @@ describes.realWin(
         })
         .then(() => {
           expect(toggleResultsSpy).to.have.been.calledOnce;
-          expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          expect(impl.getFormOrNull_().getAttribute('autocomplete')).to.equal(
             'off'
           );
           expect(resetSpy).not.to.have.been.called;
@@ -811,29 +812,33 @@ describes.realWin(
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledTwice;
-          expect(selectItemSpy).to.have.been.called;
+          expect(selectItemSpy).to.have.been.calledWith(null);
           expect(impl.inputElement_.value).to.equal('');
           mockEl = impl.createElementFromItem_('abc');
           return impl.selectHandler_({target: mockEl});
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledWith(mockEl);
-          expect(selectItemSpy).to.have.been.calledWith(mockEl);
+          expect(selectItemSpy).to.have.been.calledWith('abc');
           expect(impl.inputElement_.value).to.equal('abc');
         });
     });
 
-    it('should fire select event from selectItem_', () => {
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+    it('should fire events from selectItem_', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
-      const mockEl = doc.createElement('div');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        mockEl.setAttribute('data-value', 'test');
-        impl.selectItem_(mockEl);
+        impl.selectItem_('test');
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
-        expect(triggerSpy).to.have.been.calledOnce;
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
       });
     });
 
@@ -957,7 +962,7 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return impl.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch((e) => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -992,6 +997,19 @@ describes.realWin(
         expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
         expect(impl.generateSrc_('abc')).to.equal(
           'https://www.data.com/?q=abc'
+        );
+      });
+    });
+
+    it('should preserve existing query parameters when generating src values from "query" attribute', () => {
+      return impl.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/?param=1';
+        expect(impl.generateSrc_('')).to.equal(
+          'https://www.data.com/?param=1&q='
+        );
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?param=1&q=abc'
         );
       });
     });

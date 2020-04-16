@@ -19,10 +19,7 @@ import {
   RequestBank,
 } from '../../../../../testing/test-helper';
 
-const t = describe
-  .configure()
-  .skipSafari()
-  .skipEdge();
+const t = describe.configure().skipSafari().skipEdge();
 
 t.run('amp-story-affiliate link', () => {
   describes.integration(
@@ -57,10 +54,10 @@ t.run('amp-story-affiliate link', () => {
       </amp-analytics>`,
       extensions: ['amp-story', 'amp-analytics'],
     },
-    env => {
+    (env) => {
       let browser;
 
-      beforeEach(function() {
+      beforeEach(function () {
         browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });

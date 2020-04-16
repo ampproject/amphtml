@@ -24,7 +24,6 @@ import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../sr
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -187,12 +186,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return ResponsiveState.maybeUpgradeToResponsive(
       this.element,
       this.getAdClientId_()
-    ).then(state => {
+    ).then((state) => {
       if (state != null) {
         this.responsiveState_ = state;
       }
       if (this.responsiveState_ != null) {
-        return this.responsiveState_.attemptChangeSize();
+        return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
       // preceding logic (specifically responsive logic).
@@ -222,17 +221,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
       },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
+    Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
   }
@@ -357,11 +349,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)
       .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch(unusedErr => {
+      .catch((unusedErr) => {
         // On error/timeout, proceed.
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
-    return identityPromise.then(identity => {
+    return identityPromise.then((identity) => {
       return googleAdUrl(
         this,
         ADSENSE_BASE_URL,
@@ -558,7 +550,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.parentElement &&
       this.element.parentElement.tagName == 'AMP-STICKY-AD'
     ) {
-      const stickyMsgListener = event => {
+      const stickyMsgListener = (event) => {
         if (
           getData(event) == 'fill_sticky' &&
           event['source'] == this.iframe.contentWindow
@@ -575,6 +567,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
 });

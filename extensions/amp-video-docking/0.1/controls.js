@@ -83,17 +83,15 @@ function swap(a, b) {
  * @return {!Element}
  * @private
  */
-const renderDockedOverlay = html =>
-  html`
-    <div class="i-amphtml-video-docked-overlay" hidden></div>
-  `;
+const renderDockedOverlay = (html) =>
+  html` <div class="i-amphtml-video-docked-overlay" hidden></div> `;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const renderControls = html =>
+const renderControls = (html) =>
   html`
     <div class="amp-video-docked-controls" hidden>
       <div
@@ -170,11 +168,8 @@ export class Controls {
     /** @public @const {!Element} */
     this.overlay = renderDockedOverlay(html);
 
-    /** @private @const */
-    this.manager_ = once(() => Services.videoManagerForDoc(ampdoc));
-
     const refs = htmlRefs(this.container);
-    const assertRef = ref => dev().assertElement(refs[ref]);
+    const assertRef = (ref) => dev().assertElement(refs[ref]);
 
     /** @private @const {!Element} */
     this.dismissButton_ = assertRef('dismissButton');
@@ -255,7 +250,7 @@ export class Controls {
   setVideo(video, area) {
     this.area_ = area;
 
-    if (this.video_ != video) {
+    if (this.video_ !== video) {
       this.video_ = video;
       this.listen_(video);
     }
@@ -269,7 +264,7 @@ export class Controls {
   useControlSet_(setName) {
     const activeClassname = `amp-video-docked-control-set-${setName}`;
 
-    iterateCursor(this.controlSets_, controlSet => {
+    iterateCursor(this.controlSets_, (controlSet) => {
       toggle(controlSet, controlSet.classList.contains(activeClassname));
     });
   }
@@ -341,15 +336,6 @@ export class Controls {
     this.container.dispatchEvent(
       createCustomEvent(this.ampdoc_.win, event, /* detail */ undefined)
     );
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isPlaying_() {
-    devAssert(this.video_);
-    return this.manager_().getPlayingState(this.video_) != PlayingStates.PAUSED;
   }
 
   /** @private */
@@ -427,6 +413,13 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
+    const manager = Services.videoManagerForDoc(this.ampdoc_);
+    const video = devAssert(this.video_);
+
+    const isRollingAd = manager.isRollingAd(video);
+    const isMuted = manager.isMuted(video);
+    const isPlaying = manager.getPlayingState(video) !== PlayingStates.PAUSED;
+
     const {container, overlay} = this;
 
     toggle(container, true);
@@ -434,12 +427,12 @@ export class Controls {
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
 
-    const isPlaying = this.isPlaying_();
+    this.useControlSet_(
+      isRollingAd ? ControlSet.SCROLL_BACK : ControlSet.PLAYBACK
+    );
 
     toggle(this.playButton_, !isPlaying);
     toggle(this.pauseButton_, isPlaying);
-
-    const isMuted = this.manager_().isMuted(this.video_);
 
     toggle(this.muteButton_, !isMuted);
     toggle(this.unmuteButton_, isMuted);
@@ -480,7 +473,7 @@ export class Controls {
 
   /** @private */
   hideOnTapOutside_() {
-    listen(this.ampdoc_.getRootNode(), 'mousedown', e => {
+    listen(this.ampdoc_.getRootNode(), 'mousedown', (e) => {
       if (this.isControlsTarget_(dev().assertElement(e.target))) {
         return;
       }
@@ -532,7 +525,7 @@ export class Controls {
       this.show_();
     });
 
-    this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', e => {
+    this.mouseOutUnlistener_ = listen(this.overlay, 'mouseout', (e) => {
       devAssert(this.area_);
 
       const {x, y} = pointerCoords(/** @type {!MouseEvent} */ (e));

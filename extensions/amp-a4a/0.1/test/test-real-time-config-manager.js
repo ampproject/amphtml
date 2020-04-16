@@ -31,7 +31,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
-describes.realWin('real-time-config-manager', {amp: true}, env => {
+describes.realWin('real-time-config-manager', {amp: true}, (env) => {
   let element;
   let a4aElement;
   let fetchJsonStub;
@@ -108,18 +108,18 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   describe('#getCalloutParam_', () => {
     it('should convert url to callout param when parseable', () => {
-      const url = 'https://www.example.com/endpoint.php?unincluded';
+      const url = 'https://www.example.test/endpoint.php?unincluded';
       const ard = getCalloutParam_(url);
-      expect(ard).to.equal('www.example.com/endpoint.php');
+      expect(ard).to.equal('www.example.test/endpoint.php');
     });
 
     it('should convert & trunc url when parseable', () => {
       const url =
-        'https://www.example.com/thisIsTooMany' +
+        'https://www.example.test/thisIsTooMany' +
         'Characters1234567891011121314.php';
       const ard = getCalloutParam_(url);
       expect(ard).to.equal(
-        'www.example.com/thisIsTooManyCharacters12345678910'
+        'www.example.test/thisIsTooManyCharacters1234567891'
       );
     });
   });
@@ -148,10 +148,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       });
       const customMacros = args['customMacros'] || {};
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(customMacros);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
+      return rtcResponsePromiseArray.then((rtcResponseArray) => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
-        (expectedCalloutUrls || []).forEach(url => {
+        (expectedCalloutUrls || []).forEach((url) => {
           expect(fetchJsonStub).to.have.been.calledWith(url);
         });
         rtcResponseArray.forEach((rtcResponse, i) => {
@@ -614,7 +614,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
             return rtcResult.then(() => expect(fetchJsonStub).to.be.calledOnce);
           case CONSENT_POLICY_STATE.UNKNOWN:
           case CONSENT_POLICY_STATE.INSUFFICIENT:
-            return rtcResult.then(result => {
+            return rtcResult.then((result) => {
               expect(result).to.deep.equal([]);
               expect(fetchJsonStub).to.not.be.called;
             });
@@ -712,7 +712,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'urls': []},
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'},
-    ].forEach(rtcConfig => {
+    ].forEach((rtcConfig) => {
       it('should return false for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
         allowConsoleError(() => {
@@ -748,7 +748,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         },
       };
       inflateAndSendRtc_(url, macros);
-      return rtc.promiseArray_[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse.error).to.equal(
           RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT
         );
@@ -764,7 +764,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       // Simulate an unlayoutCallback call
       inflateAndSendRtc_(url, macros);
       a4aElement.promiseId_++;
-      return rtc.promiseArray_[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse).to.be.undefined;
       });
     });
@@ -976,7 +976,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       imageStub = env.sandbox.stub(env.win, 'Image').returns(imageMock);
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
-      errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
+      errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
       const whitelist = {ERROR_TYPE: true, HREF: true};
       const macros = {
         ERROR_TYPE: errorType,

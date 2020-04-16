@@ -14,16 +14,37 @@
  * limitations under the License.
  */
 
-import {MutatorInterface} from './mutator-interface';
-
 /** @const {string} */
 export const READY_SCAN_SIGNAL = 'ready-scan';
+
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   newMargins: !../layout-rect.LayoutMarginsChangeDef,
+ *   currentMargins: !../layout-rect.LayoutMarginsDef
+ * }}
+ */
+export let MarginChangeDef;
+
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   resource: !./resource.Resource,
+ *   newHeight: (number|undefined),
+ *   newWidth: (number|undefined),
+ *   marginChange: (!MarginChangeDef|undefined),
+ *   event: (?Event|undefined),
+ *   force: boolean,
+ *   callback: (function(boolean)|undefined),
+ * }}
+ */
+export let ChangeSizeRequestDef;
 
 /* eslint-disable no-unused-vars */
 /**
  * @interface
  */
-export class ResourcesInterface extends MutatorInterface {
+export class ResourcesInterface {
   /**
    * Returns a list of resources.
    * @return {!Array<!./resource.Resource>}
@@ -107,6 +128,20 @@ export class ResourcesInterface extends MutatorInterface {
   schedulePass(opt_delay, opt_relayoutAll) {}
 
   /**
+   * Enqueue, or update if already exists, a mutation task for a resource.
+   * @param {./resource.Resource} resource
+   * @param {ChangeSizeRequestDef} newRequest
+   * @package
+   */
+  updateOrEnqueueMutateTask(resource, newRequest) {}
+
+  /**
+   * Schedules the work pass at the latest with the specified delay.
+   * @package
+   */
+  schedulePassVsync() {}
+
+  /**
    * Registers a callback to be called when the next pass happens.
    * @param {function()} callback
    */
@@ -124,11 +159,29 @@ export class ResourcesInterface extends MutatorInterface {
   ampInitComplete() {}
 
   /**
+   * @param {number} relayoutTop
+   * @package
+   */
+  setRelayoutTop(relayoutTop) {}
+
+  /**
+   * Flag that the height could have been changed.
+   * @package
+   */
+  maybeHeightChanged() {}
+
+  /**
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
    * @param {number} newLayoutPriority
    */
   updateLayoutPriority(element, newLayoutPriority) {}
+
+  /**
+   * https://github.com/ampproject/amphtml/issues/25428
+   * @return {boolean}
+   */
+  isIntersectionExperimentOn() {}
 }
 /* eslint-enable no-unused-vars */

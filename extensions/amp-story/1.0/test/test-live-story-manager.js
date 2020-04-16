@@ -31,7 +31,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let liveStoryManager;
     let ampStory;
@@ -50,8 +50,7 @@ describes.realWin(
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
           const storyPage = new AmpStoryPage(page);
-          page.getImpl = () => Promise.resolve(storyPage);
-          env.sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
+          env.sandbox.stub(storyPage, 'mutateElement').callsFake((fn) => fn());
           container.appendChild(page);
           return page;
         });
@@ -63,9 +62,11 @@ describes.realWin(
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       env.sandbox.stub(win.history, 'replaceState');
 
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
@@ -138,13 +139,13 @@ describes.realWin(
       const newPage = win.document.createElement('amp-story-page');
       // This would normally get added by AmpLiveList.
       newPage.classList.add('amp-live-list-item-new');
-      newPage.id = 'newPage';
+      newPage.id = 'new-page';
       ampStory.element.appendChild(newPage);
       liveStoryManager.update();
       expect(dispatchSpy).to.have.been.calledWith(Action.SET_PAGE_IDS, [
         'cover',
         'page-1',
-        'newPage',
+        'new-page',
       ]);
     });
   }

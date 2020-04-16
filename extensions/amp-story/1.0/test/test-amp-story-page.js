@@ -15,15 +15,18 @@
  */
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpStoryPage, PageState} from '../amp-story-page';
+import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  createElementWithAttributes,
+  scopedQuerySelectorAll,
+} from '../../../../src/dom';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-page', {amp: true}, env => {
+describes.realWin('amp-story-page', {amp: true}, (env) => {
   let win;
   let element;
   let gridLayerEl;
@@ -43,14 +46,20 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     };
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function () {
+      return localizationService;
+    });
 
-    registerServiceBuilder(win, 'performance', () => ({
-      isPerformanceTrackingOn: () => isPerformanceTrackingOn,
-    }));
+    registerServiceBuilder(win, 'performance', function () {
+      return {
+        isPerformanceTrackingOn: () => isPerformanceTrackingOn,
+      };
+    });
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
@@ -63,7 +72,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    env.sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
+    env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
   });
 
   afterEach(() => {
@@ -101,11 +110,14 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start the advancement when state becomes active', async () => {
-    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
-
+    page.registerAllMediaPromise_ = Promise.resolve();
     page.buildCallback();
+    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
+
+    // Microtask tick
+    await Promise.resolve();
 
     expect(advancementStartStub).to.have.been.calledOnce;
   });
@@ -140,7 +152,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     expect(animateInStub).to.have.been.calledOnce;
   });
 
-  it('should perform media operations when state becomes active', done => {
+  it('should perform media operations when state becomes active', (done) => {
     env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
@@ -156,12 +168,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then(mediaPool => {
+      .then((mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
-        mediaPoolMock
-          .expects('register')
-          .withExactArgs(videoEl)
-          .once();
+        mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
         mediaPoolMock
           .expects('preload')
@@ -169,10 +178,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
           .returns(Promise.resolve())
           .once();
 
-        mediaPoolMock
-          .expects('play')
-          .withExactArgs(videoEl)
-          .once();
+        mediaPoolMock.expects('play').withExactArgs(videoEl).once();
 
         page.setState(PageState.PLAYING);
 
@@ -186,7 +192,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       });
   });
 
-  it('should perform media operations on fie video when active', done => {
+  it('should perform media operations on fie video when active', (done) => {
     const iframe = win.document.createElement('iframe');
     const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
       url: 'https://amp.dev',
@@ -194,7 +200,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
-    fiePromise.then(fie => {
+    fiePromise.then((fie) => {
       const fieDoc = fie.win.document;
       const videoEl = fieDoc.querySelector('video');
 
@@ -208,12 +214,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       page
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
-        .then(mediaPool => {
+        .then((mediaPool) => {
           mediaPoolMock = env.sandbox.mock(mediaPool);
-          mediaPoolMock
-            .expects('register')
-            .withExactArgs(videoEl)
-            .once();
+          mediaPoolMock.expects('register').withExactArgs(videoEl).once();
 
           mediaPoolMock
             .expects('preload')
@@ -221,10 +224,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             .returns(Promise.resolve())
             .once();
 
-          mediaPoolMock
-            .expects('play')
-            .withExactArgs(videoEl)
-            .once();
+          mediaPoolMock.expects('play').withExactArgs(videoEl).once();
 
           page.setState(PageState.PLAYING);
 
@@ -239,10 +239,37 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
   });
 
-  it('should stop the advancement when state becomes not active', async () => {
-    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
+  it('should build the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
 
+    element.setAttribute('background-audio', 'foo.mp3');
     page.buildCallback();
+    await page.layoutCallback();
+    expect(
+      scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0].tagName
+    ).to.equal('AUDIO');
+  });
+
+  it('should register the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
+    await page.layoutCallback();
+
+    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
+  it('should stop the advancement when state becomes not active', async () => {
+    page.buildCallback();
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
     page.setState(PageState.NOT_ACTIVE);
 
@@ -264,7 +291,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     expect(cancelAllStub).to.have.been.calledOnce;
   });
 
-  it('should pause/rewind media when state becomes not active', done => {
+  it('should pause/rewind media when state becomes not active', (done) => {
     env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
@@ -279,7 +306,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then(mediaPool => {
+      .then((mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
@@ -299,16 +326,15 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop the advancement when state becomes paused', async () => {
-    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
-
     page.buildCallback();
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
     page.setState(PageState.PAUSED);
 
     expect(advancementStopStub).to.have.been.calledOnce;
   });
 
-  it('should pause media when state becomes paused', done => {
+  it('should pause media when state becomes paused', (done) => {
     env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
@@ -322,7 +348,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     page
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
-      .then(mediaPool => {
+      .then((mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')

@@ -42,7 +42,7 @@ export function ix(global, data) {
       callDoubleclick(EVENT_TIMEOUT);
     }, data.ixTimeout);
 
-    const callDoubleclick = function(code) {
+    const callDoubleclick = function (code) {
       if (calledDoubleclick) {
         return;
       }

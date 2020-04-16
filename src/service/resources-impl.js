@@ -23,13 +23,12 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
+import {expandLayoutRect} from '../layout-rect';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
+import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
@@ -50,29 +49,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-
-/**
- * The internal structure of a ChangeHeightRequest.
- * @typedef {{
- *   newMargins: !../layout-rect.LayoutMarginsChangeDef,
- *   currentMargins: !../layout-rect.LayoutMarginsDef
- * }}
- */
-let MarginChangeDef;
-
-/**
- * The internal structure of a ChangeHeightRequest.
- * @typedef {{
- *   resource: !Resource,
- *   newHeight: (number|undefined),
- *   newWidth: (number|undefined),
- *   marginChange: (!MarginChangeDef|undefined),
- *   event: (?Event|undefined),
- *   force: boolean,
- *   callback: (function(boolean)|undefined),
- * }}
- */
-let ChangeSizeRequestDef;
 
 /**
  * @implements {ResourcesInterface}
@@ -159,6 +135,9 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
+      // With IntersectionObserver, "remeasuring" hack no longer needed.
+      devAssert(!this.intersectionObserver_);
+
       this.relayoutAll_ = true;
       this.schedulePass();
     });
@@ -173,7 +152,7 @@ export class ResourcesImpl {
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
-     * @private {!Array<!ChangeSizeRequestDef>}
+     * @private {!Array<!./resources-interface.ChangeSizeRequestDef>}
      */
     this.requestsChangeSize_ = [];
 
@@ -215,15 +194,51 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    // When viewport is resized, we have to re-measure all elements.
-    this.viewport_.onChanged(event => {
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
+    /**
+     * True if the callback for intersectionObserver_ has fired at least once.
+     * @private {boolean}
+     */
+    this.intersectionObserverCallbackFired_ = false;
+
+    if (isExperimentOn(this.win, 'intersect-resources')) {
+      const iframed = isIframed(this.win);
+
+      // Classic IntersectionObserver doesn't support viewport tracking and
+      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
+      // supports it via {root: document}, which throws on other browsers.
+      const root = /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
+        ? /** @type {*} */ (this.win.document)
+        : null);
+      try {
+        this.intersectionObserver_ = new IntersectionObserver(
+          (e) => this.intersects_(e),
+          {root, rootMargin: '200% 25%'}
+        );
+
+        // Wait for intersection callback instead of measuring all elements
+        // during the first pass.
+        this.relayoutAll_ = false;
+      } catch (e) {
+        dev().warn(TAG_, 'Falling back to classic Resources:', e);
+      }
+    }
+
+    // When user scrolling stops, run pass to check newly in-viewport elements.
+    // When viewport is resized, we have to re-measure everything.
+    this.viewport_.onChanged((event) => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
-      this.schedulePass();
+      // With IntersectionObserver, we only need to handle viewport resize.
+      if (this.relayoutAll_ || !this.intersectionObserver_) {
+        this.schedulePass();
+      }
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -238,14 +253,10 @@ export class ResourcesImpl {
       this.schedulePass();
     });
 
-    this.viewer_.onRuntimeState(state => {
+    this.viewer_.onRuntimeState((state) => {
       dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
-    });
-
-    this.activeHistory_.onFocus(element => {
-      this.checkPendingChangeSize_(element);
     });
 
     // Schedule initial passes. This must happen in a startup task
@@ -257,15 +268,57 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
+    if (
+      !this.intersectionObserver_ &&
+      isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')
+    ) {
       /** @private @const */
-      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 250);
+      this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
       listen(this.win.document, 'scroll', this.throttledScroll_, {
         capture: true,
         passive: true,
       });
     }
+  }
+
+  /** @override */
+  isIntersectionExperimentOn() {
+    return !!this.intersectionObserver_;
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   * @private
+   */
+  intersects_(entries) {
+    devAssert(this.intersectionObserver_);
+
+    // TODO(willchou): Remove assert once #27167 is fixed.
+    devAssert(this.prerenderSize_ == 1);
+
+    if (getMode().localDev) {
+      const inside = [];
+      const outside = [];
+      entries.forEach((e) => {
+        const r = Resource.forElement(e.target);
+        (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
+      });
+      dev().fine(TAG_, 'intersection', inside, outside);
+    }
+
+    this.intersectionObserverCallbackFired_ = true;
+
+    entries.forEach((entry) => {
+      const {boundingClientRect, target} = entry;
+
+      const r = Resource.forElement(target);
+      // Strangely, JSC is missing x/y from typedefs of boundingClientRect
+      // despite it being a DOMRectReadOnly (ClientRect) by spec.
+      r.premeasure(/** @type {!ClientRect} */ (boundingClientRect));
+    });
+
+    this.schedulePass();
   }
 
   /** @private */
@@ -275,36 +328,41 @@ export class ResourcesImpl {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
-      const fixPromise = ieMediaCheckAndFix(this.win);
-      const remeasure = () => this.remeasurePass_.schedule();
-      if (fixPromise) {
-        fixPromise.then(remeasure);
-      } else {
-        // No promise means that there's no problem.
-        remeasure();
-      }
+
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      // Safari 10 and under incorrectly estimates font spacing for
-      // `@font-face` fonts. This leads to wild measurement errors. The best
-      // course of action is to remeasure everything on window.onload or font
-      // timeout (3s), whichever is earlier. This has to be done on the global
-      // window because this is where the fonts are always added.
-      // Unfortunately, `document.fonts.ready` cannot be used here due to
-      // https://bugs.webkit.org/show_bug.cgi?id=174030.
-      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-      Promise.race([
-        loadPromise(this.win),
-        Services.timerFor(this.win).promise(3100),
-      ]).then(remeasure);
+      // With IntersectionObserver, no need for remeasuring hacks.
+      if (!this.intersectionObserver_) {
+        const fixPromise = ieMediaCheckAndFix(this.win);
+        const remeasure = () => this.remeasurePass_.schedule();
+        if (fixPromise) {
+          fixPromise.then(remeasure);
+        } else {
+          // No promise means that there's no problem.
+          remeasure();
+        }
 
-      // Remeasure the document when all fonts loaded.
-      if (
-        this.win.document.fonts &&
-        this.win.document.fonts.status != 'loaded'
-      ) {
-        this.win.document.fonts.ready.then(remeasure);
+        // Safari 10 and under incorrectly estimates font spacing for
+        // `@font-face` fonts. This leads to wild measurement errors. The best
+        // course of action is to remeasure everything on window.onload or font
+        // timeout (3s), whichever is earlier. This has to be done on the global
+        // window because this is where the fonts are always added.
+        // Unfortunately, `document.fonts.ready` cannot be used here due to
+        // https://bugs.webkit.org/show_bug.cgi?id=174030.
+        // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+        Promise.race([
+          loadPromise(this.win),
+          Services.timerFor(this.win).promise(3100),
+        ]).then(remeasure);
+
+        // Remeasure the document when all fonts loaded.
+        if (
+          this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded'
+        ) {
+          this.win.document.fonts.ready.then(remeasure);
+        }
       }
     });
   }
@@ -350,7 +408,11 @@ export class ResourcesImpl {
       resource.getState() != ResourceState.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
-      resource.requestMeasure();
+      // With IntersectionObserver, no need to request remeasure
+      // on reuse since initial intersection callback will trigger soon.
+      if (!this.intersectionObserver_) {
+        resource.requestMeasure();
+      }
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
@@ -358,7 +420,13 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
-    this.remeasurePass_.schedule(1000);
+
+    if (this.intersectionObserver_) {
+      // The observer callback will schedule a pass to process this element.
+      this.intersectionObserver_.observe(element);
+    } else {
+      this.remeasurePass_.schedule(1000);
+    }
   }
 
   /**
@@ -383,15 +451,13 @@ export class ResourcesImpl {
    * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
-   * @param {boolean=} scheduleWhenBuilt
-   * @param {boolean=} force
+   * @param {boolean=} ignoreQuota
    * @private
    */
   buildOrScheduleBuildForResource_(
     resource,
     checkForDupes = false,
-    scheduleWhenBuilt = true,
-    force = false
+    ignoreQuota = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
 
@@ -405,12 +471,12 @@ export class ResourcesImpl {
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, force);
+        this.buildResourceUnsafe_(resource, ignoreQuota);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
-          this.buildReadyResources_(scheduleWhenBuilt);
+          this.buildReadyResources_();
         }
       }
     }
@@ -418,10 +484,9 @@ export class ResourcesImpl {
 
   /**
    * Builds resources that are ready to be built.
-   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildReadyResources_(scheduleWhenBuilt = true) {
+  buildReadyResources_() {
     // Avoid cases where elements add more elements inside of them
     // and cause an infinite loop of building - see #3354 for details.
     if (this.isCurrentlyBuildingPendingResources_) {
@@ -429,17 +494,16 @@ export class ResourcesImpl {
     }
     try {
       this.isCurrentlyBuildingPendingResources_ = true;
-      this.buildReadyResourcesUnsafe_(scheduleWhenBuilt);
+      this.buildReadyResourcesUnsafe_();
     } finally {
       this.isCurrentlyBuildingPendingResources_ = false;
     }
   }
 
   /**
-   * @param {boolean=} scheduleWhenBuilt
    * @private
    */
-  buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
+  buildReadyResourcesUnsafe_() {
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -452,22 +516,22 @@ export class ResourcesImpl {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+        this.buildResourceUnsafe_(resource);
       }
     }
   }
 
   /**
    * @param {!Resource} resource
-   * @param {boolean} schedulePass
-   * @param {boolean=} force
+   * @param {boolean=} ignoreQuota
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass, force = false) {
+  buildResourceUnsafe_(resource, ignoreQuota = false) {
     if (
       !this.isUnderBuildQuota_() &&
-      !force &&
+      !ignoreQuota &&
+      // Special case: amp-experiment is allowed to bypass prerender build quota.
       !resource.isBuildRenderBlocking()
     ) {
       return null;
@@ -476,13 +540,11 @@ export class ResourcesImpl {
     if (!promise) {
       return null;
     }
+    dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
-    if (!schedulePass) {
-      return promise;
-    }
     return promise.then(
       () => this.schedulePass(),
-      error => {
+      (error) => {
         // Build failed: remove the resource. No other state changes are
         // needed.
         this.removeResource_(resource);
@@ -514,15 +576,21 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
+    if (this.intersectionObserver_) {
+      // TODO(willchou): Fix observe/unobserve churn due to reparenting.
+      this.intersectionObserver_.unobserve(resource.element);
+    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev().fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
 
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
+    // TODO(willchou): Delay this until after 1vp loads. This should improve
+    // LCP and be safe since we already do something similar in prerender mode.
     this.buildOrScheduleBuildForResource_(resource);
-    dev().fine(TAG_, 'element upgraded:', resource.debugid);
+    dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
 
   /** @override */
@@ -532,7 +600,7 @@ export class ResourcesImpl {
     resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
-    this.queue_.forEach(task => {
+    this.queue_.forEach((task) => {
       if (task.resource == resource) {
         task.priority = newLayoutPriority;
       }
@@ -542,206 +610,33 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.scheduleChangeSize_(
-      Resource.forElement(element),
-      newHeight,
-      newWidth,
-      opt_newMargins,
-      /* event */ undefined,
-      /* force */ true,
-      opt_callback
-    );
-  }
-
-  /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
-    return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(
-        Resource.forElement(element),
-        newHeight,
-        newWidth,
-        opt_newMargins,
-        opt_event,
-        /* force */ false,
-        success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        }
-      );
-    });
-  }
-
-  /** @override */
-  measureElement(measurer) {
-    return this.vsync_.measurePromise(measurer);
-  }
-
-  /** @override */
-  mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
-  }
-
-  /** @override */
-  measureMutateElement(element, measurer, mutator) {
-    return this.measureMutateElementResources_(element, measurer, mutator);
-  }
-
-  /**
-   * Handles element mutation (and measurement) APIs in the Resources system.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  measureMutateElementResources_(element, measurer, mutator) {
-    const calcRelayoutTop = () => {
-      const box = this.viewport_.getLayoutRect(element);
-      if (box.width != 0 && box.height != 0) {
-        return box.top;
-      }
-      return -1;
-    };
-    let relayoutTop = -1;
-    // TODO(jridgewell): support state
-    return this.vsync_.runPromise({
-      measure: () => {
-        if (measurer) {
-          measurer();
-        }
-        relayoutTop = calcRelayoutTop();
-      },
-      mutate: () => {
-        mutator();
-
-        if (element.classList.contains('i-amphtml-element')) {
-          const r = Resource.forElement(element);
-          r.requestMeasure();
-        }
-        const ampElements = element.getElementsByClassName('i-amphtml-element');
-        for (let i = 0; i < ampElements.length; i++) {
-          const r = Resource.forElement(ampElements[i]);
-          if (typeof r === 'undefined') {
-            dev().error(
-              TAG_,
-              'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
-              ampElements[i],
-              getMode().runtime
-            );
-          }
-          r.requestMeasure();
-        }
-        if (relayoutTop != -1) {
-          this.setRelayoutTop_(relayoutTop);
-        }
-        this.schedulePass(FOUR_FRAME_DELAY_);
-
-        // Need to measure again in case the element has become visible or
-        // shifted.
-        this.vsync_.measure(() => {
-          const updatedRelayoutTop = calcRelayoutTop();
-          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
-            this.setRelayoutTop_(updatedRelayoutTop);
-            this.schedulePass(FOUR_FRAME_DELAY_);
-          }
-          this.maybeChangeHeight_ = true;
-        });
-      },
-    });
-  }
-
-  /**
-   * Dirties the cached element measurements after a mutation occurs.
-   *
-   * TODO(jridgewell): This API needs to be audited. Common practice is
-   * to pass the amp-element in as the root even though we are only
-   * mutating children. If the amp-element is passed, we invalidate
-   * everything in the parent layer above it, where only invalidating the
-   * amp-element was necessary (only children were mutated, only
-   * amp-element's scroll box is affected).
-   *
-   * @param {!Element} element
-   */
-  dirtyElement(element) {
-    let relayoutAll = false;
-    const isAmpElement = element.classList.contains('i-amphtml-element');
-    if (isAmpElement) {
-      const r = Resource.forElement(element);
-      this.setRelayoutTop_(r.getLayoutBox().top);
-    } else {
-      relayoutAll = true;
-    }
-    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
-  }
-
-  /** @override */
-  attemptCollapse(element) {
-    return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(
-        Resource.forElement(element),
-        0,
-        0,
-        /* newMargin */ undefined,
-        /* event */ undefined,
-        /* force */ false,
-        success => {
-          if (success) {
-            const resource = Resource.forElement(element);
-            resource.completeCollapse();
-            resolve();
-          } else {
-            reject(dev().createExpectedError('collapse attempt denied'));
-          }
-        }
-      );
-    });
-  }
-
-  /** @override */
-  collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
-    const resource = Resource.forElement(element);
-    if (box.width != 0 && box.height != 0) {
-      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-        this.dirtyElement(element);
-      } else {
-        this.setRelayoutTop_(box.top);
-      }
-    }
-    resource.completeCollapse();
-    this.schedulePass(FOUR_FRAME_DELAY_);
-  }
-
-  /** @override */
-  expandElement(element) {
-    const resource = Resource.forElement(element);
-    resource.completeExpand();
-
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
-
-    this.schedulePass(FOUR_FRAME_DELAY_);
-  }
-
-  /** @override */
-  schedulePass(opt_delay, opt_relayoutAll) {
-    if (opt_relayoutAll) {
-      this.relayoutAll_ = true;
-    }
+  schedulePass(opt_delay) {
     return this.pass_.schedule(opt_delay);
   }
 
-  /**
-   * Schedules the work pass at the latest with the specified delay.
-   * @private
-   */
-  schedulePassVsync_() {
+  /** @override */
+  updateOrEnqueueMutateTask(resource, newRequest) {
+    let request = null;
+    for (let i = 0; i < this.requestsChangeSize_.length; i++) {
+      if (this.requestsChangeSize_[i].resource == resource) {
+        request = this.requestsChangeSize_[i];
+        break;
+      }
+    }
+    if (request) {
+      request.newHeight = newRequest.newHeight;
+      request.newWidth = newRequest.newWidth;
+      request.marginChange = newRequest.marginChange;
+      request.event = newRequest.event;
+      request.force = newRequest.force || request.force;
+      request.callback = newRequest.callback;
+    } else {
+      this.requestsChangeSize_.push(newRequest);
+    }
+  }
+
+  /** @override */
+  schedulePassVsync() {
     if (this.vsyncScheduled_) {
       return;
     }
@@ -752,7 +647,22 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
+    dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
+  }
+
+  /** @override */
+  setRelayoutTop(relayoutTop) {
+    if (this.relayoutTop_ == -1) {
+      this.relayoutTop_ = relayoutTop;
+    } else {
+      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
+    }
+  }
+
+  /** @override */
+  maybeHeightChanged() {
+    this.maybeChangeHeight_ = true;
   }
 
   /** @override */
@@ -780,6 +690,9 @@ export class ResourcesImpl {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
       const documentInfo = Services.documentInfoForDoc(this.ampdoc);
+
+      // TODO(choumx, #26687): Update viewers to read data.viewport instead of
+      // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
         dict({
@@ -787,7 +700,8 @@ export class ResourcesImpl {
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
-          'metaTags': documentInfo.metaTags,
+          'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
+          'viewport': documentInfo.viewport,
         }),
         /* cancelUnsent */ true
       );
@@ -820,16 +734,8 @@ export class ResourcesImpl {
     this.vsyncScheduled_ = false;
 
     this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
-    if (
-      this.documentReady_ &&
-      this.ampInitialized_ &&
-      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
-    ) {
-      // This signal mainly signifies that most of elements have been measured
-      // by now. This is mostly used to avoid measuring too many elements
-      // individually. May not be called in shadow mode.
-      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
-    }
+
+    this.signalIfReady_();
 
     if (this.maybeChangeHeight_) {
       this.maybeChangeHeight_ = false;
@@ -853,6 +759,30 @@ export class ResourcesImpl {
       fn();
     }
     this.passCallbacks_.length = 0;
+  }
+
+  /**
+   * If (1) the document is fully parsed, (2) the AMP runtime (services etc.)
+   * is initialized, and (3) we did a first pass on element measurements,
+   * then fire the "ready" signal.
+   * @private
+   */
+  signalIfReady_() {
+    if (
+      this.documentReady_ &&
+      this.ampInitialized_ &&
+      // With IntersectionObserver, elements are not measured until the first
+      // intersection callback.
+      (!this.intersectionObserver_ ||
+        this.intersectionObserverCallbackFired_) &&
+      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
+    ) {
+      // This signal mainly signifies that most of elements have been measured
+      // by now. This is mostly used to avoid measuring too many elements
+      // individually. May not be called in shadow mode.
+      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
+      dev().fine(TAG_, 'signal: ready-scan');
+    }
   }
 
   /**
@@ -908,7 +838,7 @@ export class ResourcesImpl {
         const {
           resource,
           event,
-        } = /** @type {!ChangeSizeRequestDef} */ (request);
+        } = /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
@@ -995,7 +925,7 @@ export class ResourcesImpl {
             // height decrease
             continue;
           }
-          // Can only resized when scrollinghas stopped,
+          // Can only resized when scrolling has stopped,
           // otherwise defer util next cycle.
           if (isScrollingStopped) {
             // These requests will be executed in the next animation cycle and
@@ -1024,7 +954,7 @@ export class ResourcesImpl {
           // schedule a size change.
           this.vsync_.run(
             {
-              measure: state => {
+              measure: (state) => {
                 state.resize = false;
                 const parent = resource.element.parentElement;
                 if (!parent) {
@@ -1045,9 +975,9 @@ export class ResourcesImpl {
                 }
                 state.resize = true;
               },
-              mutate: state => {
+              mutate: (state) => {
                 if (state.resize) {
-                  request.resource./*OK*/ changeSize(
+                  request.resource.changeSize(
                     request.newHeight,
                     request.newWidth,
                     newMargins
@@ -1078,7 +1008,7 @@ export class ResourcesImpl {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource./*OK*/ changeSize(
+          request.resource.changeSize(
             request.newHeight,
             request.newWidth,
             newMargins
@@ -1098,23 +1028,23 @@ export class ResourcesImpl {
       }
 
       if (minTop != -1) {
-        this.setRelayoutTop_(minTop);
+        this.setRelayoutTop(minTop);
       }
 
       // Execute scroll-adjusting resize requests, if any.
       if (scrollAdjSet.length > 0) {
         this.vsync_.run(
           {
-            measure: state => {
+            measure: (state) => {
               state./*OK*/ scrollHeight = this.viewport_./*OK*/ getScrollHeight();
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
-            mutate: state => {
+            mutate: (state) => {
               let minTop = -1;
-              scrollAdjSet.forEach(request => {
+              scrollAdjSet.forEach((request) => {
                 const box = request.resource.getLayoutBox();
                 minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-                request.resource./*OK*/ changeSize(
+                request.resource.changeSize(
                   request.newHeight,
                   request.newWidth,
                   request.marginChange
@@ -1126,7 +1056,7 @@ export class ResourcesImpl {
                 }
               });
               if (minTop != -1) {
-                this.setRelayoutTop_(minTop);
+                this.setRelayoutTop(minTop);
               }
               // Sync is necessary here to avoid UI jump in the next frame.
               const newScrollHeight = this.viewport_./*OK*/ getScrollHeight();
@@ -1164,41 +1094,33 @@ export class ResourcesImpl {
   }
 
   /**
-   * @param {number} relayoutTop
+   * Always returns true unless the resource was previously displayed but is
+   * not displayed now (i.e. the resource should be unloaded).
+   * @param {!Resource} r
+   * @param {boolean} usePremeasuredRect
+   * @return {boolean}
    * @private
    */
-  setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
-      this.relayoutTop_ = relayoutTop;
-    } else {
-      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
-    }
+  measureResource_(r, usePremeasuredRect = false) {
+    const wasDisplayed = r.isDisplayed();
+    r.measure(usePremeasuredRect);
+    return !(wasDisplayed && !r.isDisplayed());
   }
 
   /**
-   * Reschedules change size request when an overflown element is activated.
-   * @param {!Element} element
+   * Unloads given resources in an async mutate phase.
+   * @param {!Array<!Resource>} resources
    * @private
    */
-  checkPendingChangeSize_(element) {
-    const resourceElement = closest(
-      element,
-      el => !!Resource.forElementOptional(el)
-    );
-    if (!resourceElement) {
-      return;
-    }
-    const resource = Resource.forElement(resourceElement);
-    const pendingChangeSize = resource.getPendingChangeSize();
-    if (pendingChangeSize !== undefined) {
-      this.scheduleChangeSize_(
-        resource,
-        pendingChangeSize.height,
-        pendingChangeSize.width,
-        pendingChangeSize.margins,
-        /* event */ undefined,
-        /* force */ true
-      );
+  unloadResources_(resources) {
+    if (resources.length) {
+      this.vsync_.mutate(() => {
+        resources.forEach((r) => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
+        dev().fine(TAG_, 'unload:', resources);
+      });
     }
   }
 
@@ -1235,12 +1157,24 @@ export class ResourcesImpl {
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (
+      if (this.intersectionObserver_) {
+        // With IntersectionObserver, we call applySizesAndMediaQuery() early
+        // in connectedCallback(), so we only need to re-apply on relayout.
+        // relayoutCount is also irrelevant and doesn't need an increment.
+        if (relayoutAll) {
+          r.applySizesAndMediaQuery();
+          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
+        }
+      } else if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
+        // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
+        // TODO(willchou): We sometimes call this needlessly/repeatedly.
+        // All elements outside of the loading rect are NOT_LAID_OUT!
         r.applySizesAndMediaQuery();
+        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
@@ -1251,7 +1185,40 @@ export class ResourcesImpl {
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
     let toUnload;
-    if (
+    if (this.intersectionObserver_) {
+      // The IntersectionObserver variant for phase 2 is just a simplification
+      // that ignores `relayoutTop` and `elementsThatScrolled`.
+      for (let i = 0; i < this.resources_.length; i++) {
+        const r = this.resources_[i];
+        if (r.hasOwner()) {
+          continue;
+        }
+        // Difference: if we have a "premeasured" client rect, consume it
+        // as the element's new measurements even if the element isn't built.
+        const requested = r.isMeasureRequested();
+        if (requested) {
+          dev().fine(TAG_, 'force remeasure:', r.debugid);
+        }
+        const premeasured = r.hasBeenPremeasured();
+        const needsMeasure = premeasured || requested || this.relayoutAll_;
+        if (needsMeasure) {
+          const isDisplayed = this.measureResource_(
+            r,
+            /* usePremeasuredRect */ premeasured
+          );
+          if (!isDisplayed) {
+            devAssert(
+              r.getState() != ResourceState.NOT_BUILT,
+              'Should not unload unbuilt elements.'
+            );
+            if (!toUnload) {
+              toUnload = [];
+            }
+            toUnload.push(r);
+          }
+        }
+      }
+    } else if (
       relayoutCount > 0 ||
       remeasureCount > 0 ||
       relayoutAll ||
@@ -1285,9 +1252,8 @@ export class ResourcesImpl {
         }
 
         if (needsMeasure) {
-          const wasDisplayed = r.isDisplayed();
-          r.measure();
-          if (wasDisplayed && !r.isDisplayed()) {
+          const isDisplayed = this.measureResource_(r);
+          if (!isDisplayed) {
             if (!toUnload) {
               toUnload = [];
             }
@@ -1300,12 +1266,7 @@ export class ResourcesImpl {
 
     // Unload all in one cycle.
     if (toUnload) {
-      this.vsync_.mutate(() => {
-        toUnload.forEach(r => {
-          r.unload();
-          this.cleanupTasks_(r);
-        });
-      });
+      this.unloadResources_(toUnload);
     }
 
     const viewportRect = this.viewport_.getRect();
@@ -1350,7 +1311,7 @@ export class ResourcesImpl {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload method below.
-        // Force build for all resources visible, measured, and in the viewport.
+        // Build all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
           !r.hasOwner() &&
@@ -1361,8 +1322,7 @@ export class ResourcesImpl {
           this.buildOrScheduleBuildForResource_(
             r,
             /* checkForDupes */ true,
-            /* scheduleWhenBuilt */ undefined,
-            /* force */ true
+            /* ignoreQuota */ true
           );
         }
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
@@ -1375,6 +1335,11 @@ export class ResourcesImpl {
           this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       }
+    }
+
+    // With IntersectionObserver, skip phases 5+.
+    if (this.intersectionObserver_) {
+      return;
     }
 
     if (
@@ -1469,8 +1434,28 @@ export class ResourcesImpl {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.resource.measure();
-        if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
+        const {resource} = task;
+
+        let stillDisplayed = true;
+        if (this.intersectionObserver_) {
+          // With IntersectionObserver, peek at the premeasured rect to see
+          // if the resource is still displayed (has a non-zero size).
+          // The premeasured rect is most analogous to an immediate measure.
+          if (resource.hasBeenPremeasured()) {
+            stillDisplayed = resource.isDisplayed(
+              /* usePremeasuredRect */ true
+            );
+          }
+        } else {
+          // Remeasure can only update isDisplayed(), not in-viewport state.
+          resource.measure();
+        }
+        // Check if the element has exited the viewport or the page has changed
+        // visibility since the layout was scheduled.
+        if (
+          stillDisplayed &&
+          this.isLayoutAllowed_(resource, task.forceOutsideViewport)
+        ) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1483,7 +1468,7 @@ export class ResourcesImpl {
             .catch(/** @type {function (*)} */ (reportError));
         } else {
           dev().fine(TAG_, 'cancelled', task.id);
-          task.resource.layoutCanceled();
+          resource.layoutCanceled();
         }
       }
 
@@ -1491,8 +1476,13 @@ export class ResourcesImpl {
       timeout = -1;
     }
 
-    dev().fine(TAG_, 'queue size:', this.queue_.getSize());
-    dev().fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev().fine(
+      TAG_,
+      'queue size:',
+      this.queue_.getSize(),
+      'exec size:',
+      this.exec_.getSize()
+    );
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
@@ -1578,7 +1568,7 @@ export class ResourcesImpl {
     }
 
     let timeout = 0;
-    this.exec_.forEach(other => {
+    this.exec_.forEach((other) => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
       const penalty = Math.max(
@@ -1622,160 +1612,6 @@ export class ResourcesImpl {
       );
       return Promise.reject(opt_reason);
     }
-  }
-
-  /**
-   * Schedules change of the element's height.
-   * @param {!Resource} resource
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} newMargins
-   * @param {?Event|undefined} event
-   * @param {boolean} force
-   * @param {function(boolean)=} opt_callback A callback function
-   * @private
-   */
-  scheduleChangeSize_(
-    resource,
-    newHeight,
-    newWidth,
-    newMargins,
-    event,
-    force,
-    opt_callback
-  ) {
-    if (resource.hasBeenMeasured() && !newMargins) {
-      this.completeScheduleChangeSize_(
-        resource,
-        newHeight,
-        newWidth,
-        undefined,
-        event,
-        force,
-        opt_callback
-      );
-    } else {
-      // This is a rare case since most of times the element itself schedules
-      // resize requests. However, this case is possible when another element
-      // requests resize of a controlled element. This also happens when a
-      // margin size change is requested, since existing margins have to be
-      // measured in this instance.
-      this.vsync_.measure(() => {
-        if (!resource.hasBeenMeasured()) {
-          resource.measure();
-        }
-        const marginChange = newMargins
-          ? {
-              newMargins,
-              currentMargins: this.getLayoutMargins_(resource),
-            }
-          : undefined;
-        this.completeScheduleChangeSize_(
-          resource,
-          newHeight,
-          newWidth,
-          marginChange,
-          event,
-          force,
-          opt_callback
-        );
-      });
-    }
-  }
-
-  /**
-   * Returns the layout margins for the resource.
-   * @param {!Resource} resource
-   * @return {!../layout-rect.LayoutMarginsDef}
-   * @private
-   */
-  getLayoutMargins_(resource) {
-    const style = computedStyle(this.win, resource.element);
-    return {
-      top: parseInt(style.marginTop, 10) || 0,
-      right: parseInt(style.marginRight, 10) || 0,
-      bottom: parseInt(style.marginBottom, 10) || 0,
-      left: parseInt(style.marginLeft, 10) || 0,
-    };
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!MarginChangeDef|undefined} marginChange
-   * @param {?Event|undefined} event
-   * @param {boolean} force
-   * @param {function(boolean)=} opt_callback A callback function
-   * @private
-   */
-  completeScheduleChangeSize_(
-    resource,
-    newHeight,
-    newWidth,
-    marginChange,
-    event,
-    force,
-    opt_callback
-  ) {
-    resource.resetPendingChangeSize();
-    const layoutBox = resource.getPageLayoutBox();
-    if (
-      (newHeight === undefined || newHeight == layoutBox.height) &&
-      (newWidth === undefined || newWidth == layoutBox.width) &&
-      (marginChange === undefined ||
-        !areMarginsChanged(
-          marginChange.currentMargins,
-          marginChange.newMargins
-        ))
-    ) {
-      if (
-        newHeight === undefined &&
-        newWidth === undefined &&
-        marginChange === undefined
-      ) {
-        dev().error(
-          TAG_,
-          'attempting to change size with undefined dimensions',
-          resource.debugid
-        );
-      }
-      // Nothing to do.
-      if (opt_callback) {
-        opt_callback(/* success */ true);
-      }
-      return;
-    }
-
-    let request = null;
-    for (let i = 0; i < this.requestsChangeSize_.length; i++) {
-      if (this.requestsChangeSize_[i].resource == resource) {
-        request = this.requestsChangeSize_[i];
-        break;
-      }
-    }
-
-    if (request) {
-      request.newHeight = newHeight;
-      request.newWidth = newWidth;
-      request.marginChange = marginChange;
-      request.event = event;
-      request.force = force || request.force;
-      request.callback = opt_callback;
-    } else {
-      this.requestsChangeSize_.push(
-        /** {!ChangeSizeRequestDef} */ {
-          resource,
-          newHeight,
-          newWidth,
-          marginChange,
-          event,
-          force,
-          callback: opt_callback,
-        }
-      );
-    }
-    this.schedulePassVsync_();
   }
 
   /**
@@ -1826,12 +1662,16 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
-    devAssert(
-      resource.getState() != ResourceState.NOT_BUILT && resource.isDisplayed(),
-      'Not ready for layout: %s (%s)',
-      resource.debugid,
-      resource.getState()
-    );
+    const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
+    const isDisplayed = resource.isDisplayed();
+    if (!isBuilt || !isDisplayed) {
+      devAssert(
+        false,
+        'Not ready for layout: %s (%s)',
+        resource.debugid,
+        resource.getState()
+      );
+    }
     const forceOutsideViewport = opt_forceOutsideViewport || false;
     if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
@@ -1927,11 +1767,15 @@ export class ResourcesImpl {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
       if (viewportSize.height > 0 && viewportSize.width > 0) {
+        // 1. Handle all size-change requests. 1x mutate (+1 vsync measure/mutate for above-fold resizes).
         if (this.hasMutateWork_()) {
           this.mutateWork_();
         }
+        // 2. Build/measure/in-viewport/schedule layouts. 1x mutate & measure.
         this.discoverWork_();
+        // 3. Execute scheduled layouts and preloads. 1x mutate.
         let delay = this.work_();
+        // 4. Deferred size-change requests (waiting for scrolling to stop) will shorten delay until next pass.
         if (this.hasMutateWork_()) {
           // Overflow mutate work.
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
@@ -1950,17 +1794,17 @@ export class ResourcesImpl {
     };
     const noop = () => {};
     const pause = () => {
-      this.resources_.forEach(r => r.pause());
+      this.resources_.forEach((r) => r.pause());
     };
     const unload = () => {
-      this.resources_.forEach(r => {
+      this.resources_.forEach((r) => {
         r.unload();
         this.cleanupTasks_(r);
       });
       this.unselectText_();
     };
     const resume = () => {
-      this.resources_.forEach(r => r.resume());
+      this.resources_.forEach((r) => r.resume());
       doWork();
     };
 
@@ -2017,13 +1861,13 @@ export class ResourcesImpl {
       // for layout again later on.
       // TODO(mkhatib): Think about how this might affect preload tasks once the
       // prerender change is in.
-      this.queue_.purge(task => {
+      this.queue_.purge((task) => {
         return task.resource == resource;
       });
-      this.exec_.purge(task => {
+      this.exec_.purge((task) => {
         return task.resource == resource;
       });
-      remove(this.requestsChangeSize_, request => {
+      remove(this.requestsChangeSize_, (request) => {
         return request.resource === resource;
       });
     }

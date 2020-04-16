@@ -58,7 +58,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
   getEntitlements() {
     return this.urlBuilder_
       .buildUrl(this.authorizationUrl_, /* useAuthData */ false)
-      .then(fetchUrl => {
+      .then((fetchUrl) => {
         // WARNING: If this key is really long, you might run into issues by hitting
         // the maximum URL length in some browsers when sending the GET fetch URL.
         const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
@@ -70,8 +70,8 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
         }
         return this.xhr_
           .fetchJson(fetchUrl, {credentials: 'include'})
-          .then(res => res.json())
-          .then(resJson => {
+          .then((res) => res.json())
+          .then((resJson) => {
             return Entitlement.parseFromJson(resJson);
           });
       });
@@ -82,6 +82,26 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     return !!this.pingbackUrl_;
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Format data for pingback
+   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} entitlements
+   * @return {string}
+   * @private
+   */
+  stringifyPingbackData_(entitlements) {
+    if (isArray(entitlements)) {
+      const entitlementArray = [];
+      entitlements.forEach((ent) => {
+        entitlementArray.push(ent.jsonForPingback());
+      });
+      return JSON.stringify(entitlementArray);
+    }
+    return JSON.stringify(entitlements.jsonForPingback());
+  }
+
+>>>>>>> 39c4d675bd0ce59b61d15f22de2b81b9a03c5b3e
   /** @override */
   pingback(selectedEntitlement) {
     if (!this.isPingbackEnabled) {
@@ -96,7 +116,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       pingbackUrl,
       /* useAuthData */ true
     );
-    return promise.then(url => {
+    return promise.then((url) => {
       // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',

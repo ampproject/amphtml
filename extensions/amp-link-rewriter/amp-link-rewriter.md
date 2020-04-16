@@ -22,22 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-link-rewriter`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run link-rewriter inside your AMP page</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`>&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
+# amp-link-rewriter
 
 ## Overview
 
@@ -67,20 +52,17 @@ Code:
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-        "section": [
-            "#product-listing-1",
-            "#product-listing-2",
-        ],
-        "attribute": {
-            "href": "((?!(https:\/\/skip\.com)).)*",
-            "id": "comments",
-            "class": "sidebar",
-            "rel": "(?!(skip))*",
-        },
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+      "section": ["#product-listing-1", "#product-listing-2"],
+      "attribute": {
+        "href": "((?!(https:\/\/skip\.com)).)*",
+        "id": "comments",
+        "class": "sidebar",
+        "rel": "(?!(skip))*"
+      },
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>
@@ -106,20 +88,17 @@ The final code should look like:
     <amp-link-rewriter layout="nodisplay">
       <script type="application/json">
         {
-            "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-            "section": [
-                "#product-listing-1",
-                "#product-listing-2",
-            ],
-            "attribute": {
-                "href": "`((?!(https:\/\/skip\.com)).)*`",
-                "id": "comments",
-                "class": "sidebar",
-                "rel": "(?!(skip))*",
-            },
-            "vars": {
-                "customerId": "12345"
-            }
+          "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+          "section": ["#product-listing-1", "#product-listing-2"],
+          "attribute": {
+            "href": "`((?!(https:\/\/skip\.com)).)*`",
+            "id": "comments",
+            "class": "sidebar",
+            "rel": "(?!(skip))*"
+          },
+          "vars": {
+            "customerId": "12345"
+          }
         }
       </script>
     </amp-link-rewriter>
@@ -140,10 +119,10 @@ Example:
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>

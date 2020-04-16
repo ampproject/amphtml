@@ -17,14 +17,16 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {NavigationState, StateChangeType} from '../navigation-state';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
+describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, (env) => {
   let navigationState;
   let hasBookend = false;
   let storeService;
 
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
-    registerServiceBuilder(env.win, 'story-store', () => storeService);
+    registerServiceBuilder(env.win, 'story-store', function () {
+      return storeService;
+    });
     hasBookend = false;
     navigationState = new NavigationState(
       env.win,
@@ -42,14 +44,14 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
       .fill(undefined)
       .map(() => env.sandbox.spy());
 
-    observers.forEach(observer => navigationState.observe(observer));
+    observers.forEach((observer) => navigationState.observe(observer));
 
     navigationState.updateActivePage(0, 10, 'my-page-id-1');
 
-    observers.forEach(observer => {
+    observers.forEach((observer) => {
       expect(observer).to.have.been.calledWith(
         env.sandbox.match(
-          e =>
+          (e) =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 0 &&
             e.value.totalPages === 10 &&
@@ -61,10 +63,10 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     navigationState.updateActivePage(5, 15, 'foo');
 
-    observers.forEach(observer => {
+    observers.forEach((observer) => {
       expect(observer).to.have.been.calledWith(
         env.sandbox.match(
-          e =>
+          (e) =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 5 &&
             e.value.totalPages === 15 &&
@@ -76,10 +78,10 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     navigationState.updateActivePage(2, 5, 'one-two-three');
 
-    observers.forEach(observer => {
+    observers.forEach((observer) => {
       expect(observer).to.have.been.calledWith(
         env.sandbox.match(
-          e =>
+          (e) =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 2 &&
             e.value.totalPages === 5 &&
@@ -93,7 +95,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   it('should dispatch END on last page if story does NOT have bookend', () => {
     const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event));
+    navigationState.observe((event) => observer(event));
 
     hasBookend = false;
 
@@ -101,7 +103,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     expect(observer).to.have.been.calledWith(
       env.sandbox.match(
-        e =>
+        (e) =>
           e.type == StateChangeType.ACTIVE_PAGE &&
           e.value.pageIndex === 1 &&
           e.value.totalPages === 2
@@ -109,14 +111,14 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     );
 
     expect(observer).to.have.been.calledWith(
-      env.sandbox.match(e => e.type == StateChangeType.END)
+      env.sandbox.match((e) => e.type == StateChangeType.END)
     );
   });
 
   it('should NOT dispatch END on last page if story has bookend', () => {
     const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event));
+    navigationState.observe((event) => observer(event));
 
     hasBookend = true;
 
@@ -124,7 +126,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     expect(observer).to.have.been.calledWith(
       env.sandbox.match(
-        e =>
+        (e) =>
           e.type == StateChangeType.ACTIVE_PAGE &&
           e.value.pageIndex === 1 &&
           e.value.totalPages === 2
@@ -132,14 +134,14 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     );
 
     expect(observer).to.not.have.been.calledWith(
-      env.sandbox.match(e => e.type == StateChangeType.END)
+      env.sandbox.match((e) => e.type == StateChangeType.END)
     );
   });
 
   it('should dispatch BOOKEND_ENTER/END and BOOKEND_EXIT', () => {
     const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event.type));
+    navigationState.observe((event) => observer(event.type));
 
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
 

@@ -32,7 +32,7 @@
 
 amp-consent {
   /* Fixed to make position independent of page other elements. */
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 0;
   overflow: hidden !important;
@@ -83,6 +83,15 @@ amp-consent.amp-hidden {
   stroke-width: 1.5px;
   transform-origin: 50% 50%;
   animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
+}
+
+.i-amphtml-consent-alertdialog {
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  left: -10000px;
+  top: auto;
 }
 
 .i-amphtml-consent-ui-fill {

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../../src/services';
 import {handleCompanionAds} from '../monetization/index';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
-describes.realWin('amp-apester-media-monetization', {}, env => {
+describes.realWin('amp-apester-media-monetization', {}, (env) => {
   let win, doc;
   let baseElement;
-  let resources;
   let docInfo;
-  const queryAmpAdBladeSelector = myDoc =>
+  const queryAmpAdBladeSelector = (myDoc) =>
     myDoc.querySelector('amp-ad[type=blade]');
-  const queryAmpAdDisplaySelector = myDoc =>
+  const queryAmpAdDisplaySelector = (myDoc) =>
     myDoc.querySelector('amp-ad[type=doubleclick]');
 
   beforeEach(() => {
@@ -36,11 +36,10 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
 
     baseElement = doc.createElement('amp-apester-media');
 
-    resources = {
-      attemptChangeSize: () => env.sandbox.stub(),
+    const mutator = {
+      requestChangeSize: () => env.sandbox.stub(),
     };
-
-    baseElement.getResources = () => resources;
+    env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
 
     doc.body.appendChild(baseElement);
     docInfo = {
@@ -49,7 +48,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     };
     installDocService(win, /* isSingleDoc */ true);
     resetServiceForTesting(win, 'documentInfo');
-    return registerServiceBuilderForDoc(doc, 'documentInfo', () => {
+    return registerServiceBuilderForDoc(doc, 'documentInfo', function () {
       return {
         get: () => docInfo,
       };

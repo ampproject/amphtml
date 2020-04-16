@@ -65,9 +65,7 @@ export class AmpPixel extends BaseElement {
       return;
     }
     // Trigger, but only when visible.
-    this.getAmpDoc()
-      .whenFirstVisible()
-      .then(this.trigger_.bind(this));
+    this.getAmpDoc().whenFirstVisible().then(this.trigger_.bind(this));
   }
 
   /**
@@ -92,7 +90,10 @@ export class AmpPixel extends BaseElement {
         }
         return Services.urlReplacementsForDoc(this.element)
           .expandUrlAsync(this.assertSource_(src))
-          .then(src => {
+          .then((src) => {
+            if (!this.win) {
+              return;
+            }
             const pixel = createPixel(this.win, src, this.referrerPolicy_);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;

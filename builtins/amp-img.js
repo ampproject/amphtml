@@ -34,14 +34,14 @@ const TAG = 'amp-img';
  */
 const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
-  'title',
-  'referrerpolicy',
-  'aria-label',
   'aria-describedby',
+  'aria-label',
   'aria-labelledby',
-  'srcset',
-  'src',
+  'referrerpolicy',
   'sizes',
+  'src',
+  'srcset',
+  'title',
 ];
 
 export class AmpImg extends BaseElement {
@@ -75,7 +75,7 @@ export class AmpImg extends BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.img_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined
+        (value) => mutations[value] !== undefined
       );
       // Mutating src should override existing srcset, so remove the latter.
       if (

@@ -18,7 +18,6 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -29,10 +28,9 @@ const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
 const pkgUp = require('pkg-up');
+const remapping = require('@ampproject/remapping');
 const rename = require('gulp-rename');
-const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
-const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 const {
@@ -46,11 +44,12 @@ const {
   handleSinglePassCompilerError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
-const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {TopologicalSort} = require('topological-sort');
-const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
+const TYPES_VALUES = Object.keys(TYPES).map((x) => TYPES[x]);
 const wrappers = require('./compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -62,8 +61,6 @@ if (!singlePassDest.endsWith('/')) {
 
 const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
-// Used to store transforms and compile v0.js
-const transformDir = tempy.directory();
 const srcs = [];
 
 const mainBundle = 'src/amp.js';
@@ -71,7 +68,7 @@ const extensionsInfo = {};
 let extensions = extensionBundles
   .concat(altMainBundles)
   .filter(unsupportedExtensions)
-  .map(ext => {
+  .map((ext) => {
     const path = buildFullPathFromConfig(ext);
     if (Array.isArray(path)) {
       path.forEach((p, index) => {
@@ -93,7 +90,7 @@ extensions = [].concat.apply([], extensions);
 
 const jsFilesToWrap = [];
 
-exports.getFlags = function(config) {
+exports.getFlags = function (config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
   config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
@@ -103,7 +100,6 @@ exports.getFlags = function(config) {
     use_types_for_optimization: true,
     rewrite_polyfills: false,
     source_map_include_content: !!argv.full_sourcemaps,
-    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
@@ -136,10 +132,10 @@ exports.getFlags = function(config) {
   const flagsArray = [];
   Object.keys(flags)
     .sort()
-    .forEach(function(flag) {
+    .forEach(function (flag) {
       const val = flags[flag];
       if (val instanceof Array) {
-        val.forEach(function(item) {
+        val.forEach(function (item) {
           flagsArray.push('--' + flag, item);
         });
       } else {
@@ -151,12 +147,12 @@ exports.getFlags = function(config) {
       }
     });
 
-  return exports.getGraph(config.modules, config).then(function(g) {
+  return exports.getGraph(config.modules, config).then(function (g) {
     return flagsArray.concat(exports.getBundleFlags(g, flagsArray));
   });
 };
 
-exports.getBundleFlags = function(g) {
+exports.getBundleFlags = function (g) {
   const flagsArray = [];
 
   // Add all packages (directories with a package.json) to the srcs array.
@@ -164,10 +160,10 @@ exports.getBundleFlags = function(g) {
   // non-relative module names.
   Object.keys(g.packages)
     .sort()
-    .forEach(function(pkg) {
+    .forEach(function (pkg) {
       g.bundles[mainBundle].modules.push(pkg);
       fs.outputFileSync(
-        `${g.tmp}/${pkg}`,
+        pkg,
         JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
       );
     });
@@ -183,12 +179,12 @@ exports.getBundleFlags = function(g) {
   const indexOfIntermediate = bundleKeys.indexOf('_base_i');
   bundleKeys.splice(indexOfIntermediate, 1);
   bundleKeys.splice(1, 0, '_base_i');
-  bundleKeys.forEach(function(originalName) {
+  bundleKeys.forEach(function (originalName) {
     const isMain = originalName == mainBundle;
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
-    bundle.modules.forEach(function(js) {
-      srcs.push(`${g.tmp}/${js}`);
+    bundle.modules.forEach(function (js) {
+      srcs.push(js);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -268,14 +264,13 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
 
-exports.getGraph = function(entryModules, config) {
+exports.getGraph = function (entryModules, config) {
   let resolve;
   let reject;
-  const promise = new Promise(function(res, rej) {
+  const promise = new Promise(function (res, rej) {
     resolve = res;
     reject = rej;
   });
@@ -299,10 +294,9 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: transformDir,
   };
 
-  TYPES_VALUES.forEach(type => {
+  TYPES_VALUES.forEach((type) => {
     graph.bundles[type] = {
       isBase: true,
       name: type,
@@ -311,27 +305,27 @@ exports.getGraph = function(entryModules, config) {
   });
 
   config.babel = config.babel || {};
-
-  // Use browserify with babel to learn about deps.
-  const b = browserify(entryModules, {
+  const browserifyOptions = {
+    basedir: '.',
+    browserField: 'module',
     debug: true,
     deps: true,
     detectGlobals: false,
     fast: true,
-    browserField: 'module',
-  })
+  };
+
+  // Use browserify with babel to learn about deps.
+  const b = browserify(entryModules, browserifyOptions)
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
-    .transform(babelify, {
-      compact: false,
-      plugins: ['transform-es2015-modules-commonjs'],
-    });
+    .transform(babelify, {caller: {name: 'single-pass-deps'}, global: true});
+
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
   const depEntries = [];
   b.pipeline.get('deps').push(
-    through.obj(function(row, enc, next) {
+    through.obj(function (row, enc, next) {
       row.source = null; // Release memory
       depEntries.push(row);
       next();
@@ -339,21 +333,21 @@ exports.getGraph = function(entryModules, config) {
   );
 
   b.bundle()
-    .on('end', function() {
+    .on('end', function () {
       const edges = {};
       depEntries
-        .sort(function(a, b) {
+        .sort(function (a, b) {
           return a.id < b.id;
         })
-        .forEach(function(row) {
+        .forEach(function (row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative('.', row.id))
           );
           topo.addNode(id, id);
           const deps = Object.keys(row.deps)
             .sort()
-            .map(dep => {
-              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+            .map((dep) => {
+              dep = unifyPath(path.relative('.', row.deps[dep]));
               if (dep.startsWith('node_modules/')) {
                 const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
                 const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
@@ -366,22 +360,21 @@ exports.getGraph = function(entryModules, config) {
           if (row.entry) {
             graph.depOf[id] = {};
             graph.depOf[id][id] = true; // Self edge.
-            deps.forEach(function(dep) {
+            deps.forEach(function (dep) {
               graph.depOf[id][dep] = true;
             });
           }
         });
       Object.keys(edges)
         .sort()
-        .forEach(function(id) {
-          edges[id].forEach(function(dep) {
+        .forEach(function (id) {
+          edges[id].forEach(function (dep) {
             topo.addEdge(id, dep);
           });
         });
       graph.sorted = Array.from(topo.sort().keys()).reverse();
 
       setupBundles(graph);
-      transformPathsToTempDir(graph, config);
       resolve(graph);
       fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
     })
@@ -395,11 +388,11 @@ function setupBundles(graph) {
   // modules depends on them (transitively).
   Array.from(graph.sorted)
     .reverse()
-    .forEach(function(id) {
-      graph.deps[id].forEach(function(dep) {
+    .forEach(function (id) {
+      graph.deps[id].forEach(function (dep) {
         Object.keys(graph.depOf)
           .sort()
-          .forEach(function(entry) {
+          .forEach(function (entry) {
             if (graph.depOf[entry][id]) {
               graph.depOf[entry][dep] = true;
             }
@@ -408,7 +401,7 @@ function setupBundles(graph) {
     });
 
   // Create the bundles.
-  graph.sorted.forEach(function(id) {
+  graph.sorted.forEach(function (id) {
     let inBundleCount = 0;
     // The bundle a module should go into.
     let dest;
@@ -417,7 +410,7 @@ function setupBundles(graph) {
     // Count in how many bundles a modules wants to be.
     Object.keys(graph.depOf)
       .sort()
-      .forEach(function(entry) {
+      .forEach(function (entry) {
         if (graph.depOf[entry][id]) {
           inBundleCount++;
           dest = entry;
@@ -438,8 +431,8 @@ function setupBundles(graph) {
     // If a module is in more than 1 bundle, it must go into _base.
     if (bundleDestCandidates.length > 1) {
       const first = bundleDestCandidates[0];
-      const allTheSame = !bundleDestCandidates.some(c => c != first);
-      const needsBase = bundleDestCandidates.some(c => c == mainBundle);
+      const allTheSame = !bundleDestCandidates.some((c) => c != first);
+      const needsBase = bundleDestCandidates.some((c) => c == mainBundle);
       dest = mainBundle;
       // If all requested bundles are the same, then that is the right
       // place.
@@ -462,47 +455,10 @@ function setupBundles(graph) {
   });
 }
 
-/**
- * Takes all of the nodes in the dependency graph and transfers them
- * to a temporary directory where we can run babel transformations.
- *
- * @param {!Object} graph
- * @param {!Object} config
- */
-function transformPathsToTempDir(graph, config) {
-  log(
-    'Performing single-pass',
-    colors.cyan('babel'),
-    'transforms in',
-    colors.cyan(graph.tmp) + '...'
-  );
-  // `sorted` will always have the files that we need.
-  graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them.
-    if (f.startsWith('node_modules/')) {
-      fs.copySync(f, `${graph.tmp}/${f}`);
-    } else {
-      const {code, map} = babel.transformFileSync(f, {
-        plugins: conf.plugins({
-          isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
-          isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
-          isSinglePass: true,
-        }),
-        retainLines: true,
-        sourceMaps: true,
-      });
-      fs.outputFileSync(`${graph.tmp}/${f}`, code);
-      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
-    }
-    process.stdout.write('.');
-  });
-  console.log('\n');
-}
-
 // Returns the extension bundle config for the given filename or null.
 function getExtensionBundleConfig(filename) {
   const basename = path.basename(filename, '.js');
-  return extensionBundles.filter(x => x.name == basename)[0];
+  return extensionBundles.filter((x) => x.name == basename)[0];
 }
 
 const knownExtensions = {
@@ -513,7 +469,7 @@ const knownExtensions = {
   json: true,
 };
 
-exports.maybeAddDotJs = function(id) {
+exports.maybeAddDotJs = function (id) {
   const extensionMatch = id.match(/\.([a-zA-Z0-9]+)$/);
   const extension = extensionMatch ? extensionMatch[1].toLowerCase() : null;
   if (!knownExtensions[extension]) {
@@ -537,7 +493,7 @@ function buildFullPathFromConfig(ext) {
   }
 
   if (Array.isArray(ext.version)) {
-    return ext.version.map(ver => getPath(ver));
+    return ext.version.map((ver) => getPath(ver));
   }
 
   return getPath(ext.version);
@@ -555,12 +511,12 @@ function unsupportedExtensions(name) {
  * @return {boolean}
  */
 function isAltMainBundle(name) {
-  return altMainBundles.some(altMainBundle => {
+  return altMainBundles.some((altMainBundle) => {
     return altMainBundle.name === name;
   });
 }
 
-exports.singlePassCompile = async function(entryModule, options, timeInfo) {
+exports.singlePassCompile = async function (entryModule, options, timeInfo) {
   timeInfo.startTime = Date.now();
   return exports
     .getFlags({
@@ -578,7 +534,7 @@ exports.singlePassCompile = async function(entryModule, options, timeInfo) {
     .then(thirdPartyConcat)
     .then(cleanupWeakModuleFiles)
     .then(copyAliasedExtensions)
-    .catch(err => {
+    .catch((err) => {
       err.showStack = false; // Useless node_modules stack
       throw err;
     });
@@ -597,17 +553,23 @@ function wrapMainBinaries() {
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
   const mainFile = readMagicString('dist/v0.js');
-  jsFilesToWrap.forEach(x => {
+  jsFilesToWrap.forEach((x) => {
     const path = `dist/${x}.js`;
     const s = readMagicString(path);
     if (x === 'v0') {
       s.prepend(prefix);
       s.append(suffix);
-      const map = s.generateDecodedMap({
+      const originalMap = loadSourceMap(path);
+      const wrappedMap = s.generateDecodedMap({
         hires: true,
-        source: path,
+        source: `${x}.js`,
+        includeContent: !!argv.full_sourcemaps,
       });
-      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      const remapped = remapping(
+        [wrappedMap, originalMap],
+        () => null,
+        !argv.full_sourcemaps
+      );
       fs.writeFileSync(path, s.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     } else {
@@ -617,8 +579,15 @@ function wrapMainBinaries() {
       bundle.addSource(mainFile);
       bundle.addSource(s);
       bundle.append(suffix);
-      const map = bundle.generateDecodedMap({hires: true});
-      const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+      const map = bundle.generateDecodedMap({
+        hires: true,
+        includeContent: !!argv.full_sourcemaps,
+      });
+      const remapped = remapping(
+        map,
+        loadApprovedSourceMaps(map.sources),
+        !argv.full_sourcemaps
+      );
       fs.writeFileSync(path, bundle.toString(), 'utf8');
       fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
     }
@@ -630,7 +599,7 @@ function wrapMainBinaries() {
  * TODO This should operate on the gulp stream, not on disk files.
  */
 function intermediateBundleConcat() {
-  extensionBundles.forEach(extension => {
+  extensionBundles.forEach((extension) => {
     const prependContents = [
       'dist/v0/_base_i.js',
       `dist/v0/${extension.type}.js`,
@@ -651,7 +620,7 @@ function intermediateBundleConcat() {
  * TODO This should operate on the gulp stream, not on disk files.
  */
 function thirdPartyConcat() {
-  extensionBundles.forEach(extension => {
+  extensionBundles.forEach((extension) => {
     const postPrependPaths = extension.postPrepend;
     if (!Array.isArray(postPrependPaths)) {
       return;
@@ -673,7 +642,7 @@ function postPrepend(extension, prependContents) {
   } else {
     targets.push(createFullPath(extension.version));
   }
-  targets.forEach(path => {
+  targets.forEach((path) => {
     const bundle = new MagicString.Bundle();
     const s = readMagicString(path);
     const index = s.original.indexOf(SPLIT_MARKER);
@@ -684,8 +653,15 @@ function postPrepend(extension, prependContents) {
       bundle.addSource(prependContents[i]);
     }
     bundle.addSource(suffix);
-    const map = bundle.generateDecodedMap({hires: true});
-    const remapped = resorcery(map, loadSourceMap, !argv.full_sourcemaps);
+    const map = bundle.generateDecodedMap({
+      hires: true,
+      includeContent: !!argv.full_sourcemaps,
+    });
+    const remapped = remapping(
+      map,
+      loadApprovedSourceMaps(map.sources),
+      !argv.full_sourcemaps
+    );
     fs.writeFileSync(path, bundle.toString(), 'utf8');
     fs.writeFileSync(`${path}.map`, remapped.toString(), 'utf8');
   });
@@ -695,7 +671,7 @@ function postPrepend(extension, prependContents) {
  * Copies JS for aliased extensions. (CSS is already dropped in place.)
  */
 function copyAliasedExtensions() {
-  Object.keys(extensionAliasBundles).forEach(aliasedExtension => {
+  Object.keys(extensionAliasBundles).forEach((aliasedExtension) => {
     const {version, aliasedVersion} = extensionAliasBundles[aliasedExtension];
     const src = `${aliasedExtension}-${version}.js`;
     const dest = `${aliasedExtension}-${aliasedVersion}.js`;
@@ -717,23 +693,21 @@ function cleanupWeakModuleFiles() {
 function compile(flagsArray) {
   log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     gulp
-      .src(srcs, {base: transformDir})
-      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-      .pipe(sourcemaps.init({loadMaps: true}))
+      .src(srcs, {base: '.'})
+      .pipe(sourcemaps.init())
+      .pipe(preClosureBabel())
+      .on('error', (err) => handlePreClosureError(err))
       .pipe(gulpClosureCompile(flagsArray))
-      .on('error', err => {
-        handleSinglePassCompilerError();
-        reject(err);
-      })
+      .on('error', (err) => handleSinglePassCompilerError(err))
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
-      .pipe(sourcemaps.write('.'))
+      .pipe(writeSourcemaps())
       .pipe(
         gulpIf(
           /(\/amp-|\/_base)/,
-          rename(path => (path.dirname += '/v0'))
+          rename((path) => (path.dirname += '/v0'))
         )
       )
       .pipe(gulp.dest('.'))
@@ -745,7 +719,7 @@ function compile(flagsArray) {
  * TODO This should operate on the gulp stream, not on disk files.
  */
 function eliminateIntermediateBundles() {
-  extensionBundles.forEach(extension => {
+  extensionBundles.forEach((extension) => {
     function createFullPath(version) {
       return `dist/v0/${extension.name}-${version}.js`;
     }
@@ -756,29 +730,12 @@ function eliminateIntermediateBundles() {
     } else {
       targets.push(createFullPath(extension.version));
     }
-    targets.forEach(path => {
+    targets.forEach((path) => {
       const map = loadSourceMap(path);
-      function returnMapFirst(map) {
-        let first = true;
-        return function(file) {
-          if (first) {
-            first = false;
-            return map;
-          }
-          return loadSourceMap(file);
-        };
-      }
+
       const {code, map: babelMap} = babel.transformFileSync(path, {
-        plugins: conf.eliminateIntermediateBundles(),
-        retainLines: true,
-        sourceMaps: true,
-        inputSourceMap: false,
+        caller: {name: 'single-pass-post'},
       });
-      let remapped = resorcery(
-        babelMap,
-        returnMapFirst(map),
-        !argv.full_sourcemaps
-      );
 
       const {code: compressed, map: terserMap} = terser.minify(code, {
         mangle: false,
@@ -794,11 +751,9 @@ function eliminateIntermediateBundles() {
         sourceMap: true,
       });
 
-      // TODO: Resorcery should support a chain, instead of having to call
-      // multiple times.
-      remapped = resorcery(
-        terserMap,
-        returnMapFirst(remapped),
+      const remapped = remapping(
+        [terserMap, babelMap, map],
+        () => null,
         !argv.full_sourcemaps
       );
 
@@ -817,9 +772,19 @@ function readMagicString(file) {
   return new MagicString(contents, {filename: file});
 }
 
+function loadApprovedSourceMaps(files) {
+  return (file) => {
+    if (files.includes(file)) {
+      return loadSourceMap(file);
+    }
+    return null;
+  };
+}
+
 function loadSourceMap(file) {
-  if (file.startsWith('dist')) {
+  try {
     return readFile(`${file}.map`);
+  } catch (e) {
+    return null;
   }
-  return null;
 }

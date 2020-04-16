@@ -21,9 +21,10 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   elementByTag,
-  insertAfterOrAtStart,
+  insertAtStart,
   isAmpElement,
   removeElement,
+  tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
@@ -37,6 +38,21 @@ const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
+const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
+const FULLSCREEN_ERROR =
+  'Could not enter fullscreen. Fullscreen is only supported ' +
+  'when the iframe is visible and after user interaction.';
+const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
+const BUTTON_ACTION_CAPTION = 'Focus Prompt';
+
+export const actionState = {
+  error: 'error',
+  success: 'success',
+};
+
+export const ampConsentMessageType = {
+  response: 'amp-consent-response',
+};
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -48,6 +64,7 @@ export const consentUiClasses = {
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   enableBorder: 'i-amphtml-consent-ui-enable-border',
+  screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
 export class ConsentUI {
@@ -80,9 +97,20 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.overlayEnabled_ =
-      isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
-      config['uiConfig'] &&
-      config['uiConfig']['overlay'] === true;
+      config['uiConfig'] && config['uiConfig']['overlay'] === true;
+
+    /** @private {string} */
+    this.consentPromptCaption_ =
+      (config['captions'] && config['captions']['consentPromptCaption']) ||
+      CONSENT_PROMPT_CAPTION;
+
+    /** @private {string} */
+    this.buttonActionCaption_ =
+      (config['captions'] && config['captions']['buttonActionCaption']) ||
+      BUTTON_ACTION_CAPTION;
+
+    /** @private {boolean} */
+    this.srAlertShown_ = false;
 
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
@@ -95,6 +123,9 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.maskElement_ = null;
+
+    /** @private {?Element} */
+    this.srAlert_ = null;
 
     /** @private {?Element} */
     this.elementWithFocusBeforeShowing_ = null;
@@ -169,7 +200,7 @@ export class ConsentUI {
         );
       }
       this.ui_ = dev().assertElement(promptElement);
-    } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
+    } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
       this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
@@ -205,6 +236,10 @@ export class ConsentUI {
           }
 
           this.maybeShowOverlay_();
+
+          // Create and append SR alert for the when iframe
+          // initially loads.
+          this.maybeShowSrAlert_();
 
           this.showIframe_();
 
@@ -275,6 +310,8 @@ export class ConsentUI {
 
       // Hide the overlay
       this.maybeHideOverlay_();
+      // Remove the SR alert from DOM
+      this.maybeRemoveSrAlert_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
       // Reset any animation styles set by style attribute
@@ -436,10 +473,10 @@ export class ConsentUI {
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
-    return consentStatePromise.then(consentStateManager => {
+    return consentStatePromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
-        .then(consentInfo => {
+        .then((consentInfo) => {
           return dict({
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
@@ -465,21 +502,17 @@ export class ConsentUI {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
-      insertAfterOrAtStart(
-        this.parent_,
-        dev().assertElement(this.placeholder_),
-        null
-      );
+      insertAtStart(this.parent_, dev().assertElement(this.placeholder_));
     }
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.getClientInfoPromise_(
       isActionPromptTrigger
-    ).then(clientInfo => {
+    ).then((clientInfo) => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+      insertAtStart(this.parent_, dev().assertElement(this.ui_));
     });
 
     return Promise.all([
@@ -550,6 +583,59 @@ export class ConsentUI {
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * If this is the first time viewing the iframe, create
+   * an 'invisible' alert dialog with a title and a button.
+   * Clicking on the button will transfer focus to the iframe.
+   */
+  maybeShowSrAlert_() {
+    if (this.restrictFullscreenOn_) {
+      // If the SR alert has been shown, don't show it again
+      if (this.srAlertShown_) {
+        return;
+      }
+
+      const alertDialog = this.document_.createElement('div');
+      const button = this.document_.createElement('button');
+      const titleDiv = this.document_.createElement('div');
+
+      alertDialog.setAttribute('role', 'alertdialog');
+
+      titleDiv.textContent = this.consentPromptCaption_;
+      button.textContent = this.buttonActionCaption_;
+      button.onclick = () => {
+        tryFocus(dev().assertElement(this.ui_));
+      };
+
+      alertDialog.appendChild(titleDiv);
+      alertDialog.appendChild(button);
+
+      // Style to be visiblly hidden, but not hidden from the SR
+      const {classList} = alertDialog;
+      classList.add(consentUiClasses.screenReaderDialog);
+
+      this.baseInstance_.element.appendChild(alertDialog);
+      tryFocus(button);
+
+      // SR alert was shown when consent prompt loaded for
+      // the first time. Don't show it again
+      this.srAlertShown_ = true;
+
+      // Keep reference of the SR alert to remove later
+      this.srAlert_ = alertDialog;
+    }
+  }
+
+  /**
+   * Remove the SR alert from the DOM once it has been shown once
+   */
+  maybeRemoveSrAlert_() {
+    if (this.srAlert_) {
+      removeElement(this.srAlert_);
+      delete this.srAlert_;
+    }
   }
 
   /**
@@ -671,24 +757,79 @@ export class ConsentUI {
       return;
     }
 
-    if (data['action'] === 'ready') {
+    const requestAction = data['action'];
+    const requestType = data['type'];
+
+    if (requestAction === 'ready') {
       this.handleReady_(/** @type {!JsonObject} */ (data));
     }
 
-    if (data['action'] === 'enter-fullscreen') {
+    if (requestAction === 'enter-fullscreen') {
       // Do nothing if iframe not visible or it's not the active element.
       if (
         !this.isIframeVisible_ ||
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_)
       ) {
-        // TODO (@torch2424) Send response back if enter fullscreen was succesful
+        user().warn(TAG, FULLSCREEN_ERROR);
+        this.sendEnterFullscreenResponse_(requestType, requestAction, true);
         return;
       }
+      this.sendEnterFullscreenResponse_(requestType, requestAction);
 
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
       });
+    }
+  }
+
+  /**
+   * @param {string} requestType
+   * @param {string} requestAction
+   * @param {boolean} isError
+   * */
+  sendEnterFullscreenResponse_(requestType, requestAction, isError = false) {
+    this.sendIframeMessage_(
+      ampConsentMessageType.response,
+      requestType,
+      requestAction,
+      isError ? actionState.error : actionState.success,
+      isError ? FULLSCREEN_ERROR : FULLSCREEN_SUCCESS
+    );
+  }
+
+  /**
+   * Send message to iframe, regarding action response or other info.
+   * Silently die if iframe does not have content window.
+   *
+   * Example message:
+   * {
+   *  type: 'amp-consent-response'
+   *  requestType:'consent-ui'
+   *  requestAction: 'enter-fullscreen'
+   *  state: 'error/success'
+   *  info: 'msg'
+   * }
+   * @param {string} type
+   * @param {string} requestType
+   * @param {string} requestAction
+   * @param {string} state
+   * @param {string} info
+   */
+  sendIframeMessage_(type, requestType, requestAction, state, info) {
+    const iframeWindow = this.ui_.contentWindow;
+    if (iframeWindow) {
+      // No sensitive information sent, so safe to use '*'
+      iframeWindow./*OK*/ postMessage(
+        /** @type {!JsonObject} */ ({
+          type,
+          requestType,
+          requestAction,
+          state,
+          info,
+        }),
+        '*'
+      );
     }
   }
 }

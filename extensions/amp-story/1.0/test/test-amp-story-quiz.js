@@ -17,13 +17,14 @@
 import {AmpStoryQuiz} from '../amp-story-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
- * Populates the quiz with some number of prompts and some number of options
+ * Populates the quiz with some number of prompts and some number of options.
  *
  * @param {Window} win
  * @param {AmpStoryQuiz} quiz
@@ -47,7 +48,7 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
 };
 
 /**
- * Populates the quiz with a prompt and three options
+ * Populates the quiz with a prompt and three options.
  *
  * @param {Window} win
  * @param {AmpStoryQuiz} quiz
@@ -57,10 +58,9 @@ const populateStandardQuizContent = (win, quizElement) => {
 };
 
 /**
- * Returns mock reaction data
+ * Returns mock reaction data.
  *
  * @return {Object}
- * @private
  */
 const getMockReactionData = () => {
   return {
@@ -93,12 +93,35 @@ const getMockReactionData = () => {
   };
 };
 
+/**
+ * Generates a response given an array of counts.
+ *
+ * @param {Array<number>} responseCounts
+ */
+const generateResponseDataFor = (responseCounts) => {
+  const response = {
+    totalResponseCount: responseCounts.reduce((a, b) => a + b, 0),
+    hasUserResponded: false,
+    responses: [],
+  };
+
+  responseCounts.forEach((count, index) => {
+    response.responses.push({
+      reactionValue: index,
+      totalCount: count,
+      selectedByUser: false,
+    });
+  });
+
+  return response;
+};
+
 describes.realWin(
   'amp-story-quiz',
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let win;
     let ampStoryQuiz;
     let storyEl;
@@ -121,7 +144,14 @@ describes.realWin(
       requestService = getRequestService(win, ampStoryQuizEl);
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', () => storeService);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
+
+      const localizationService = new LocalizationService(win);
+      registerServiceBuilder(win, 'localization', function () {
+        return localizationService;
+      });
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
@@ -133,7 +163,7 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
 
-      env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake(fn => fn());
+      env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
 
     it('should take the html and reformat it', () => {
@@ -154,13 +184,13 @@ describes.realWin(
         'i-amphtml-story-quiz-option-container'
       );
 
-      // check prompt container structure
+      // Check prompt container structure.
       expect(quizContent[0].children.length).to.equal(1);
       expect(
         quizContent[0].querySelectorAll('.i-amphtml-story-quiz-prompt')
       ).to.have.length(1);
 
-      // check option container structure
+      // Check option container structure.
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
         quizContent[1].querySelectorAll('.i-amphtml-story-quiz-option')
@@ -256,7 +286,7 @@ describes.realWin(
     });
 
     it('should update the quiz when the user has already reacted', async () => {
-      // Fill the response to the requestService with mock reaction data
+      // Fill the response to the requestService with mock reaction data.
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getMockReactionData());
@@ -276,6 +306,64 @@ describes.realWin(
       expect(quizOptions[0]).to.have.class(
         'i-amphtml-story-quiz-option-selected'
       );
+    });
+
+    it('should handle the percentage pipeline', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockReactionData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOptions = quizElement.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      const percentageOption0 = quizOptions[0].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      );
+
+      expect(percentageOption0.textContent).to.equal('30%');
+
+      const percentageOption3 = quizOptions[3].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      );
+
+      expect(percentageOption3.textContent).to.equal('10%');
+    });
+
+    it('should preprocess percentages properly', () => {
+      const responseData1 = getMockReactionData()['data'];
+
+      const percentages1 = ampStoryQuiz.preprocessPercentages_(responseData1);
+
+      expect(percentages1).to.deep.equal([30, 30, 30, 10]);
+    });
+
+    it('should preprocess percentages preserving ties', () => {
+      const responseData2 = generateResponseDataFor([3, 3, 3]);
+      const percentages2 = ampStoryQuiz.preprocessPercentages_(responseData2);
+
+      expect(percentages2).to.deep.equal([33, 33, 33]);
+    });
+
+    it('should preprocess percentages preserving order', () => {
+      const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
+      const percentages3 = ampStoryQuiz.preprocessPercentages_(responseData3);
+
+      expect(percentages3).to.deep.equal([26, 26, 24, 24]);
+    });
+
+    it('should preprocess percentages handling rounding edge cases', () => {
+      const responseData4 = generateResponseDataFor([335, 335, 330]);
+      const percentages4 = ampStoryQuiz.preprocessPercentages_(responseData4);
+
+      expect(percentages4).to.deep.equal([33, 33, 33]);
     });
   }
 );

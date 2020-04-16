@@ -152,7 +152,7 @@ export class Extensions {
     try {
       this.currentExtensionId_ = extensionId;
       factory(arg, arg['_']);
-      if (getMode().localDev || getMode().test) {
+      if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);
@@ -297,7 +297,7 @@ export class Extensions {
    * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
-    return this.preloadExtension(elementName).then(extension => {
+    return this.preloadExtension(elementName).then((extension) => {
       const element = devAssert(
         extension.elements[elementName],
         'Element not found: %s',
@@ -319,7 +319,7 @@ export class Extensions {
   addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
-    this.addDocFactory(ampdoc => {
+    this.addDocFactory((ampdoc) => {
       this.installElement_(ampdoc, name, implementationClass, css);
     });
   }
@@ -376,7 +376,7 @@ export class Extensions {
         serviceClass: implementationClass,
       })
     );
-    this.addDocFactory(ampdoc => {
+    this.addDocFactory((ampdoc) => {
       registerServiceBuilderForDoc(
         ampdoc,
         name,
@@ -420,7 +420,7 @@ export class Extensions {
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
     const promises = [];
-    extensionIds.forEach(extensionId => {
+    extensionIds.forEach((extensionId) => {
       promises.push(this.installExtensionInDoc(ampdoc, extensionId));
     });
     return Promise.all(promises);
@@ -436,7 +436,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
       ampdoc.declareExtension(extensionId);
-      holder.docFactories.forEach(factory => {
+      holder.docFactories.forEach((factory) => {
         try {
           factory(ampdoc);
         } catch (e) {
@@ -483,7 +483,7 @@ export class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionId_ && !getMode().test) {
+    if (!this.currentExtensionId_ && !getMode(this.win).test) {
       dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
@@ -582,14 +582,14 @@ export class Extensions {
     // https://github.com/ampproject/amphtml/issues/7353
     scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
-    if (getMode().test && this.win.testLocation) {
+    if (getMode(this.win).test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(
       loc,
       extensionId,
       opt_extensionVersion,
-      getMode().localDev
+      getMode(this.win).localDev
     );
     scriptElement.src = scriptSrc;
     return scriptElement;
@@ -611,7 +611,7 @@ export class Extensions {
  * @param {!Window} win
  */
 export function stubLegacyElements(win) {
-  LEGACY_ELEMENTS.forEach(name => {
+  LEGACY_ELEMENTS.forEach((name) => {
     stubElementIfNotKnown(win, name);
   });
 }

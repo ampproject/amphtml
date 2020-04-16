@@ -48,7 +48,7 @@ export class AmpActionMacro extends AMP.BaseElement {
 
     const argVarNames = element.getAttribute('arguments');
     if (argVarNames) {
-      this.arguments_ = argVarNames.split(',').map(s => s.trim());
+      this.arguments_ = argVarNames.split(',').map((s) => s.trim());
     }
 
     this.registerAction('execute', this.execute_.bind(this));
@@ -123,6 +123,6 @@ export class AmpActionMacro extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpActionMacro);
 });

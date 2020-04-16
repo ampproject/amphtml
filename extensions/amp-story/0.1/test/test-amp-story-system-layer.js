@@ -20,7 +20,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story system layer', {amp: true}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   let win;
   let systemLayer;
   let progressBarStub;
@@ -29,10 +29,12 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store', () => ({
-      get: NOOP,
-      subscribe: NOOP,
-    }));
+    registerServiceBuilder(win, 'story-store', function () {
+      return {
+        get: NOOP,
+        subscribe: NOOP,
+      };
+    });
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
@@ -45,7 +47,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
     env.sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+      mutate: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win);
@@ -76,7 +78,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   });
 
   it('should set the active page index', () => {
-    [0, 1, 2, 3, 4].forEach(index => {
+    [0, 1, 2, 3, 4].forEach((index) => {
       systemLayer.setActivePageId(index);
       progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });

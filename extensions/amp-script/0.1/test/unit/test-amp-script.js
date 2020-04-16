@@ -23,9 +23,13 @@ import {
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../../src/service';
 import {user} from '../../../../../src/log';
 
-describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
+describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
   let script;
   let service;
@@ -59,7 +63,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   function stubFetch(url, headers, text, responseUrl) {
     xhr.fetchText.withArgs(url).resolves({
       headers: {
-        get: h => headers[h],
+        get: (h) => headers[h],
       },
       text: () => Promise.resolve(text),
       url: responseUrl || url,
@@ -76,7 +80,22 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
+    expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should work with "text/javascript" content-type for same-origin src', () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    expectAsyncConsoleError(/should require JS content-type/);
+    return script.layoutCallback().should.be.fulfilled;
   });
 
   it('should check sha384(author_js) for cross-origin src', async () => {
@@ -184,45 +203,31 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   });
 
   describe('development mode', () => {
+    beforeEach(() => {
+      registerServiceBuilderForDoc(
+        env.win.document,
+        'amp-script',
+        AmpScriptService
+      );
+    });
+    afterEach(() => {
+      resetServiceForTesting(env.win, 'amp-script');
+    });
+
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
     });
 
-    it('data-ampdevmode on just the element should not enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on just the root html element should not enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on both the element and root html element should enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
+    it('data-ampdevmode on just the element should enable dev mode', () => {
+      element.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
     });
 
-    it('data-ampdevmode on both the element and a parent element should enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      element.ownerDocument.body.setAttribute('data-ampdevmode', true);
+    it('data-ampdevmode on just the root html element should enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
@@ -230,46 +235,69 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   });
 });
 
-describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
-  let crypto;
-  let service;
+describes.repeated(
+  '',
+  {
+    'single ampdoc': {ampdoc: 'single'},
+    'shadow ampdoc': {ampdoc: 'shadow'},
+  },
+  (name, variant) => {
+    describes.fakeWin(
+      'AmpScriptService',
+      {
+        amp: {
+          runtimeOn: false,
+          ampdoc: variant.ampdoc,
+        },
+      },
+      (env) => {
+        let crypto;
+        let service;
 
-  beforeEach(() => {
-    crypto = {sha384Base64: env.sandbox.stub()};
-    env.sandbox.stub(Services, 'cryptoFor').returns(crypto);
-  });
+        beforeEach(() => {
+          crypto = {sha384Base64: env.sandbox.stub()};
+          env.sandbox.stub(Services, 'cryptoFor').returns(crypto);
+        });
 
-  function createMetaTag(name, content) {
-    const meta = document.createElement('meta');
-    meta.setAttribute('name', name);
-    meta.setAttribute('content', content);
-    env.ampdoc.getHeadNode().appendChild(meta);
+        function createMetaHash(name, content) {
+          if (variant.ampdoc === 'shadow') {
+            env.ampdoc.setMetaByName(name, content);
+          } else {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', content);
+            env.ampdoc.getHeadNode().appendChild(meta);
+          }
+        }
+
+        describe('checkSha384', () => {
+          it('should resolve if hash exists in meta tag', async () => {
+            createMetaHash('amp-script-src', 'sha384-my_fake_hash');
+
+            service = new AmpScriptService(env.ampdoc);
+
+            crypto.sha384Base64.resolves('my_fake_hash');
+
+            const promise = service.checkSha384('alert(1)', 'foo');
+            return promise.should.be.fulfilled;
+          });
+
+          it('should reject if hash does not exist in meta tag', () => {
+            expectAsyncConsoleError(/Script hash not found/);
+            createMetaHash('amp-script-src', 'sha384-another_fake_hash');
+
+            service = new AmpScriptService(env.ampdoc);
+
+            crypto.sha384Base64.resolves('my_fake_hash');
+
+            const promise = service.checkSha384('alert(1)', 'foo');
+            return promise.should.be.rejected;
+          });
+        });
+      }
+    );
   }
-
-  describe('checkSha384', () => {
-    it('should resolve if hash exists in meta tag', async () => {
-      createMetaTag('amp-script-src', 'sha384-my_fake_hash');
-
-      service = new AmpScriptService(env.ampdoc);
-
-      crypto.sha384Base64.resolves('my_fake_hash');
-
-      const promise = service.checkSha384('alert(1)', 'foo');
-      return promise.should.be.fulfilled;
-    });
-
-    it('should reject if hash does not exist in meta tag', () => {
-      createMetaTag('amp-script-src', 'sha384-another_fake_hash');
-
-      service = new AmpScriptService(env.ampdoc);
-
-      crypto.sha384Base64.resolves('my_fake_hash');
-
-      const promise = service.checkSha384('alert(1)', 'foo');
-      return promise.should.be.rejected;
-    });
-  });
-});
+);
 
 describe('SanitizerImpl', () => {
   let el;
@@ -531,6 +559,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('AMP.setState(not_json)', async () => {
+      expectAsyncConsoleError(/Invalid AMP.setState/);
       await s.setStorage(
         StorageLocation.AMP_STATE,
         /* key */ null,

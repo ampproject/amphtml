@@ -35,9 +35,10 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {devAssert, userAssert} from '../../../src/log';
+import {WindowInterface} from '../../../src/window-interface';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -131,9 +132,10 @@ export class GoogleSubscriptionsPlatform {
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
-        exp => startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+        (exp) =>
+          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
-      .map(exp => exp.substring(4));
+      .map((exp) => exp.substring(4));
 
     const swgConfig = {'experiments': ampExperimentsForSwg};
     let resolver = null;
@@ -143,7 +145,7 @@ export class GoogleSubscriptionsPlatform {
       serviceAdapter.getPageConfig(),
       {
         fetcher: new AmpFetcher(ampdoc.win),
-        configPromise: new Promise(resolve => (resolver = resolve)),
+        configPromise: new Promise((resolve) => (resolver = resolve)),
       },
       swgConfig
     );
@@ -162,7 +164,7 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.analytics().setUrl(ampdoc.getUrl());
     resolver();
 
-    this.runtime_.setOnLoginRequest(request => {
+    this.runtime_.setOnLoginRequest((request) => {
       this.onLoginRequest_(request && request.linkRequested);
     });
     this.runtime_.setOnLinkComplete(() => {
@@ -178,7 +180,7 @@ export class GoogleSubscriptionsPlatform {
         this.getServiceId()
       );
     });
-    this.runtime_.setOnFlowStarted(e => {
+    this.runtime_.setOnFlowStarted((e) => {
       // This information is used by Propensity.
       const params = /** @type {!JsonObject} */ ({});
       const data = /** @type {!JsonObject} */ (getData(e) || {});
@@ -208,7 +210,7 @@ export class GoogleSubscriptionsPlatform {
         );
       }
     });
-    this.runtime_.setOnFlowCanceled(e => {
+    this.runtime_.setOnFlowCanceled((e) => {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
@@ -237,8 +239,8 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
-    this.runtime_.setOnPaymentResponse(promise => {
-      promise.then(response => {
+    this.runtime_.setOnPaymentResponse((promise) => {
+      promise.then((response) => {
         this.onSubscribeResponse_(
           response,
           response.productType === 'CONTRIBUTION'
@@ -333,7 +335,7 @@ export class GoogleSubscriptionsPlatform {
    */
   loginWithAmpReaderId_() {
     // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
-    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+    this.serviceAdapter_.getReaderId('local').then((ampReaderId) => {
       this.runtime_.linkAccount({ampReaderId});
     });
   }
@@ -356,7 +358,7 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   maybeComplete_(promise) {
-    promise.then(result => {
+    promise.then((result) => {
       if (result) {
         this.runtime_.reset();
       }
@@ -412,7 +414,7 @@ export class GoogleSubscriptionsPlatform {
     );
     return this.runtime_
       .getEntitlements(encryptedDocumentKey)
-      .then(swgEntitlements => {
+      .then((swgEntitlements) => {
         // Get and store the isReadyToPay signal which is independent of
         // any entitlments existing.
         if (swgEntitlements.isReadyToPay) {
@@ -584,7 +586,7 @@ export class GoogleSubscriptionsPlatform {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
       // a minimal race condition here.
-      viewer.getViewerOrigin().then(origin => {
+      viewer.getViewerOrigin().then((origin) => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
             parseUrlDeprecated(origin).hostname
@@ -676,6 +678,9 @@ class AmpFetcher {
   constructor(win) {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
+
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /** @override */
@@ -685,27 +690,55 @@ class AmpFetcher {
         credentials: 'include',
         prerenderSafe: true,
       })
-      .then(response => response.json());
+      .then((response) => response.json());
   }
 
   /** @override */
   fetch(input, opt_init) {
     return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
   }
+
+  /**
+   * POST data to a URL endpoint, do not wait for a response.
+   * @param {string} url
+   * @param {string|!Object} data
+   */
+  sendBeacon(url, data) {
+    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+    const body =
+      'f.req=' +
+      JSON.stringify(/** @type {JsonObject} */ (data.toArray(false)));
+    const sendBeacon = WindowInterface.getSendBeacon(this.win_);
+
+    if (sendBeacon) {
+      const blob = new Blob([body], {type: contentType});
+      sendBeacon(url, blob);
+      return;
+    }
+
+    // Only newer browsers support beacon.  Fallback to standard XHR POST.
+    const init = {
+      method: 'POST',
+      headers: {'Content-Type': contentType},
+      credentials: 'include',
+      body,
+    };
+    this.fetch(url, init);
+  }
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(
     'subscriptions-google',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
      * @return {*} TODO(#23582): Specify return type
      */
-    ampdoc => {
+    function (ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
-      Services.subscriptionsServiceForDoc(element).then(service => {
+      Services.subscriptionsServiceForDoc(element).then((service) => {
         service.registerPlatform(
           PLATFORM_ID,
           (platformConfig, serviceAdapter) => {
@@ -729,6 +762,16 @@ AMP.extension(TAG, '0.1', function(AMP) {
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
+}
+
+/**
+ * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
+ * @package
+ * @visibleForTesting
+ * @return {*}
+ */
+export function getAmpFetcherClassForTesting() {
+  return AmpFetcher;
 }
 
 /**

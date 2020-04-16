@@ -23,6 +23,7 @@ import * as lolex from 'lolex';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {Deferred} from '../../../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
@@ -53,6 +54,28 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
     container.appendChild(element);
   }
   return element;
+}
+
+/**
+ * @param {!Object} env
+ * @param {?Element} container
+ * @param {string} id
+ * @param {!Promise} valuePromise
+ */
+function addAmpState(env, container, id, fetchingPromise) {
+  const ampState = env.win.document.createElement('amp-state');
+  ampState.setAttribute('id', id);
+  ampState.createdCallback = () => {};
+  ampState.getImpl = () =>
+    Promise.resolve({
+      getFetchingPromise() {
+        return fetchingPromise;
+      },
+      parseAndUpdate: () => {},
+      element: ampState,
+    });
+
+  container.appendChild(ampState);
 }
 
 /**
@@ -160,7 +183,7 @@ function onBindReadyAndRescan(env, bind, added, removed, options) {
  * @return {!Promise}
  */
 function waitForEvent(env, name) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
@@ -177,7 +200,7 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
 describe
   .configure()
   .ifChrome()
-  .run('Bind', function() {
+  .run('Bind', function () {
     // Give more than default 2000ms timeout for local testing.
     const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
     this.timeout(TIMEOUT);
@@ -191,7 +214,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let fieBind;
         let fieBody;
         let fieWindow;
@@ -286,7 +309,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let container;
 
@@ -333,7 +356,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let clock;
         let container;
@@ -626,7 +649,7 @@ describe
           });
         });
 
-        it('should update properties for empty strings', function*() {
+        it('should update properties for empty strings', function* () {
           const element = createElement(
             env,
             container,
@@ -947,10 +970,60 @@ describe
           });
           return promise.then(() => {
             return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
-              result => {
+              (result) => {
                 expect(result).to.equal('myval');
               }
             );
+          });
+        });
+
+        describe('getStateAsync', () => {
+          it('should reject if there is no associated "amp-state"', async () => {
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {mykey: 'myval'},
+            });
+
+            const state = bind.getStateAsync('mystate.mykey');
+            return expect(state).to.eventually.rejectedWith(/#mystate/);
+          });
+
+          it('should not wait if the still-loading state is irrelevant', async () => {
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {myKey: 'myval'},
+            });
+            addAmpState(env, container, 'mystate', Promise.resolve());
+            addAmpState(
+              // never resolves
+              env,
+              container,
+              'irrelevant',
+              new Promise((unused) => {})
+            );
+
+            const state = await bind.getStateAsync('mystate.myKey');
+            expect(state).to.equal('myval');
+          });
+
+          it('should wait for a relevant key', async () => {
+            const {promise, resolve} = new Deferred();
+            addAmpState(env, container, 'mystate', promise);
+
+            await onBindReady(env, bind);
+            const statePromise = bind.getStateAsync('mystate.mykey');
+
+            await bind.setState({mystate: {mykey: 'myval'}}).then(resolve);
+            expect(await statePromise).to.equal('myval');
+          });
+
+          it('should stop waiting for a key if its fetch rejects', async () => {
+            const {promise, reject} = new Deferred();
+            addAmpState(env, container, 'mystate', promise);
+
+            await onBindReady(env, bind);
+            const statePromise = bind.getStateAsync('mystate.mykey');
+            reject();
+
+            expect(await statePromise).to.equal(undefined);
           });
         });
 

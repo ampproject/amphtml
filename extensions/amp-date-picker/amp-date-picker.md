@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Provides a calendar widget to select dates.
+  text: Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.
 ---
 
 <!---
@@ -23,30 +23,6 @@ limitations under the License.
 -->
 
 # amp-date-picker
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td><ul>
-      <li>For static mode: <code>fixed</code>, <code>fixed-height</code>, <code>responsive</code>, <code>fill</code> or <code>flex-item</code></li>
-      <li>For overlay mode: <code>container</code></li>
-    </ul></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-picker/">amp-date-picker</a>.</td>
-  </tr>
-</table>
 
 ## Behavior
 
@@ -509,9 +485,7 @@ _Example: Markup using the `src` attribute_
   layout="fixed-height"
   height="360"
 >
-  <template type="amp-mustache" date-template id="my-template-id"
-    >⚡️</template
-  >
+  <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
   <template type="amp-mustache" date-template id="my-second-template-id"
     >🌮</template
   >
@@ -776,9 +750,7 @@ rendered after the calendar view renders for the first time.
 ```html
 <amp-date-picker layout="fixed-height" height="360">
   <!-- Render the "party" emoji on New Years Day 2018 -->
-  <template type="amp-mustache" date-template dates="2018-01-01"
-    >🎉</template
-  >
+  <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
   <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
   <template
     type="amp-mustache"
@@ -791,9 +763,7 @@ rendered after the calendar view renders for the first time.
     <amp-img layout="fixed-height" height="39" src="./example.jpg"></amp-img>
   </template>
   <!-- Renders dates in the two-digit day format -->
-  <template type="amp-mustache" date-template default
-    >{{DD}}</template
-  >
+  <template type="amp-mustache" date-template default>{{DD}}</template>
 </amp-date-picker>
 ```
 

@@ -29,6 +29,7 @@ import {
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
+  setIsMediaComponent,
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
@@ -91,6 +92,13 @@ export class VideoManager {
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
+
+    /**
+     * Keeps last found entry as a small optimization for multiple state calls
+     * during one task.
+     * @private {?VideoEntry}
+     */
+    this.lastFoundEntry_ = null;
 
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
@@ -192,7 +200,7 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
-    element.classList.add('i-amphtml-video-component');
+    setIsMediaComponent(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -222,7 +230,14 @@ export class VideoManager {
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
-    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    // fullscreen/fullscreenenter are a special case.
+    // - fullscreenenter is kept as a standard name for symmetry with internal
+    //   internal interfaces
+    // - fullscreen is an undocumented alias for backwards compatibility.
+    const fullscreenEnter = () => video.fullscreenEnter();
+    registerAction('fullscreenenter', fullscreenEnter);
+    registerAction('fullscreen', fullscreenEnter);
 
     /**
      * @param {string} action
@@ -253,7 +268,7 @@ export class VideoManager {
   maybeInstallVisibilityObserver_(entry) {
     const {element} = entry.video;
 
-    listen(element, VideoEvents.VISIBILITY, details => {
+    listen(element, VideoEvents.VISIBILITY, (details) => {
       const data = getData(details);
       if (data && data['visible'] == true) {
         entry.updateVisibility(/* opt_forceVisible */ true);
@@ -280,78 +295,29 @@ export class VideoManager {
   }
 
   /**
-   * Returns the entry in the video manager corresponding to the video
-   * provided
-   *
-   * @param {!../video-interface.VideoInterface} video
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {VideoEntry} entry
-   * @private
    */
-  getEntryForVideo_(video) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].video === video) {
-        return this.entries_[i];
-      }
+  getEntry_(videoOrElement) {
+    if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
+      return this.lastFoundEntry_;
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
-  }
 
-  /**
-   * Returns the entry in the video manager corresponding to the element
-   * provided
-   *
-   * @param {!AmpElement} element
-   * @return {VideoEntry} entry
-   * @private
-   */
-  getEntryForElement_(element) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (entry.video.element === element) {
+      if (isEntryFor(entry, videoOrElement)) {
+        this.lastFoundEntry_ = entry;
         return entry;
       }
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
-  }
 
-  /**
-   * Gets the current analytics details for the given video.
-   * Fails silently if the video is not registered.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!VideoAnalyticsDetailsDef|undefined>}
-   */
-  getAnalyticsDetails(videoElement) {
-    const entry = this.getEntryForElement_(videoElement);
-    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
-  }
-
-  /**
-   * Returns whether the video is paused or playing after the user interacted
-   * with it or playing through autoplay
-   *
-   * @param {!../video-interface.VideoInterface} video
-   * @return {!../video-interface.PlayingStateDef}
-   */
-  getPlayingState(video) {
-    return this.getEntryForVideo_(video).getPlayingState();
-  }
-
-  /**
-   * @param {!../video-interface.VideoInterface} video
-   * @return {boolean}
-   */
-  isMuted(video) {
-    return this.getEntryForVideo_(video).isMuted();
-  }
-
-  /**
-   * @param {!../video-interface.VideoInterface} video
-   * @return {boolean}
-   */
-  userInteracted(video) {
-    return this.getEntryForVideo_(video).userInteracted();
+    return devAssert(
+      null,
+      '%s not registered to VideoManager',
+      videoOrElement.element || videoOrElement
+    );
   }
 
   /** @param {!VideoEntry} entry */
@@ -366,7 +332,77 @@ export class VideoManager {
   getAutoFullscreenManagerForTesting_() {
     return this.getAutoFullscreenManager_();
   }
+
+  /**
+   * Gets the current analytics details property for the given video.
+   * Fails silently if the video is not registered.
+   * @param {string} id
+   * @param {string} property
+   * @return {!Promise<string>}
+   */
+  getVideoStateProperty(id, property) {
+    const root = this.ampdoc.getRootNode();
+    const videoElement = user().assertElement(
+      root.getElementById(/** @type {string} */ (id)),
+      `Could not find an element with id="${id}" for VIDEO_STATE`
+    );
+    const entry = this.getEntry_(videoElement);
+    return (entry
+      ? entry.getAnalyticsDetails()
+      : Promise.resolve()
+    ).then((details) => (details ? details[property] : ''));
+  }
+
+  // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
+  // instead and use directly. This is better for size and sanity. Users can
+  // also then keep the entry reference for their own use.
+  // (Can't expose yet due to package-level methods to be restructured, e.g
+  // videoLoaded(). See issue)
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   *
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {!../video-interface.PlayingStateDef}
+   */
+  getPlayingState(videoOrElement) {
+    return this.getEntry_(videoOrElement).getPlayingState();
+  }
+
+  /**
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {boolean}
+   */
+  isMuted(videoOrElement) {
+    return this.getEntry_(videoOrElement).isMuted();
+  }
+
+  /**
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {boolean}
+   */
+  userInteracted(videoOrElement) {
+    return this.getEntry_(videoOrElement).userInteracted();
+  }
+
+  /**
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {boolean}
+   */
+  isRollingAd(videoOrElement) {
+    return this.getEntry_(videoOrElement).isRollingAd();
+  }
 }
+
+/**
+ * @param {?VideoEntry=} entry
+ * @param {?../video-interface.VideoOrBaseElementDef|!Element=} videoOrElement
+ * @return {boolean}
+ */
+const isEntryFor = (entry, videoOrElement) =>
+  !!entry &&
+  (entry.video === videoOrElement || entry.video.element === videoOrElement);
 
 /**
  * VideoEntry represents an entry in the VideoManager's list.
@@ -394,6 +430,9 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.isPlaying_ = false;
+
+    /** @private {boolean} */
+    this.isRollingAd_ = false;
 
     /** @private {boolean} */
     this.isVisible_ = false;
@@ -466,17 +505,8 @@ class VideoEntry {
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
-    listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    listen(video.element, VideoEvents.AD_START, () =>
-      analyticsEvent(this, VideoAnalyticsEvents.AD_START)
-    );
-
-    listen(video.element, VideoEvents.AD_END, () =>
-      analyticsEvent(this, VideoAnalyticsEvents.AD_END)
-    );
-
-    listen(video.element, VideoEvents.CUSTOM_TICK, e => {
+    listen(video.element, VideoEvents.CUSTOM_TICK, (e) => {
       const data = getData(e);
       const eventType = data['eventType'];
       if (!eventType) {
@@ -486,6 +516,21 @@ class VideoEntry {
         return;
       }
       this.logCustomAnalytics_(eventType, data['vars']);
+    });
+
+    listen(video.element, VideoEvents.ENDED, () => {
+      this.isRollingAd_ = false;
+      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+    });
+
+    listen(video.element, VideoEvents.AD_START, () => {
+      this.isRollingAd_ = true;
+      analyticsEvent(this, VideoAnalyticsEvents.AD_START);
+    });
+
+    listen(video.element, VideoEvents.AD_END, () => {
+      this.isRollingAd_ = false;
+      analyticsEvent(this, VideoAnalyticsEvents.AD_END);
     });
 
     video
@@ -525,7 +570,7 @@ class VideoEntry {
   logCustomAnalytics_(eventType, vars) {
     const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
 
-    Object.keys(vars).forEach(key => {
+    Object.keys(vars).forEach((key) => {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
@@ -632,15 +677,6 @@ class VideoEntry {
       this.pauseCalledByAutoplay_ = false;
     }
   }
-
-  /**
-   * Callback for when the video has ended
-   * @private
-   */
-  videoEnded_() {
-    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-  }
-
   /**
    * Called when the video is loaded and can play.
    */
@@ -722,7 +758,7 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    this.supportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
@@ -747,7 +783,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.supportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then((supportsAutoplay) => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -782,15 +818,13 @@ class VideoEntry {
     const animation = renderIcon(win, element);
 
     /** @param {boolean} isPlaying */
-    const toggleAnimation = isPlaying => {
-      video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', isPlaying);
-      });
+    const toggleAnimation = (isPlaying) => {
+      video.mutateElementSkipRemeasure(() =>
+        animation.classList.toggle('amp-video-eq-play', isPlaying)
+      );
     };
 
-    video.mutateElement(() => {
-      element.appendChild(animation);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(animation));
 
     const unlisteners = [
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
@@ -808,7 +842,7 @@ class VideoEntry {
           video.showControls();
         }
         video.unmute();
-        unlisteners.forEach(unlistener => {
+        unlisteners.forEach((unlistener) => {
           unlistener();
         });
         const animation = element.querySelector('.amp-video-eq');
@@ -828,17 +862,13 @@ class VideoEntry {
     const mask = renderInteractionOverlay(element);
 
     /** @param {boolean} display */
-    const setMaskDisplay = display => {
-      video.mutateElement(() => {
-        toggle(mask, display);
-      });
+    const setMaskDisplay = (display) => {
+      video.mutateElementSkipRemeasure(() => toggle(mask, display));
     };
 
     video.hideControls();
 
-    video.mutateElement(() => {
-      element.appendChild(mask);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(mask));
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
@@ -851,7 +881,7 @@ class VideoEntry {
         video.hideControls();
       }),
       listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
-    ].forEach(unlistener => unlisteners.push(unlistener));
+    ].forEach((unlistener) => unlisteners.push(unlistener));
   }
 
   /**
@@ -932,6 +962,11 @@ class VideoEntry {
     return PlayingStates.PLAYING_MANUAL;
   }
 
+  /** @return {boolean} */
+  isRollingAd() {
+    return this.isRollingAd_;
+  }
+
   /**
    * Returns whether the video was interacted with or not
    * @return {boolean}
@@ -948,7 +983,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    return this.supportsAutoplay_().then(supportsAutoplay => {
+    return this.supportsAutoplay_().then((supportsAutoplay) => {
       const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
@@ -1023,7 +1058,7 @@ export class AutoFullscreenManager {
      * @param {!../video-interface.VideoOrBaseElementDef} video
      * @return {boolean}
      */
-    this.boundIncludeOnlyPlaying_ = video =>
+    this.boundIncludeOnlyPlaying_ = (video) =>
       this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
 
     /**
@@ -1039,7 +1074,7 @@ export class AutoFullscreenManager {
 
   /** @public */
   dispose() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
   }
 
@@ -1360,7 +1395,7 @@ function calculateActualPercentageFrequencyMs(durationSeconds) {
  * @param {?number=} duration
  * @return {boolean}
  */
-const isDurationFiniteNonZero = duration =>
+const isDurationFiniteNonZero = (duration) =>
   !!duration && !isNaN(duration) && duration > 1;
 
 /** @visibleForTesting */
@@ -1552,7 +1587,7 @@ export class AnalyticsPercentageTracker {
 function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
 
-  entry.getAnalyticsDetails().then(details => {
+  entry.getAnalyticsDetails().then((details) => {
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }

@@ -95,9 +95,11 @@
           <option>[Select a vendor]</option>
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
+          <option>appconsent</option>
           <option>didomi</option>
           <option>sirdata</option>
           <option>Marfeel</option>
+          <option>Ogury</option>
           <option>SourcePoint</option>
         </select>
         <input type="submit" value="Go">
@@ -106,7 +108,6 @@
     </div>
 
     <h1 id="top">AMP Consent CMP</h1>
-    <h3>Please open your devtools an enable the consent v2 experiment: `AMP.toggleExperiment('amp-consent-v2', true)`</h3>
     <h3>Image that is blocked by both consent</h3>
     <amp-img data-block-on-consent src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
 
@@ -137,6 +138,23 @@
         </div>
       </amp-consent>
       <!-- End _ping_ example -->
+
+      <!-- appconsent example -->
+      <amp-consent id='ABC' layout='nodisplay' type='appconsent'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "id": "1/10/v5eCA1JV4"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:ABC.prompt(consent=appconsent)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
 
       <!-- didomi example -->
       <amp-consent id='didomi' layout='nodisplay' type='didomi'>
@@ -186,7 +204,7 @@
         </div>
       </amp-consent>
       <!-- End sirdata example -->
-      
+
       <!-- Marfeel example -->
       <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
         <script type="application/json">
@@ -204,6 +222,28 @@
         </div>
       </amp-consent>
       <!-- End Marfeel example -->
+
+      <!-- Ogury example -->
+      <amp-consent id='ogury' layout='nodisplay' type='Ogury'>
+        <script type="application/json">
+          {
+            "postPromptUI": "custom-prompt-ui",
+            "clientConfig": {
+              "assetKey": "OGY-316B32F7E5B7"
+            },
+            "uiConfig": {
+              "overlay": true
+            }
+          }
+        </script>
+        <div id="custom-prompt-ui">
+          Post Prompt UI
+          <button on="tap:ogury.prompt(consent=Ogury)" role="button">
+            Privacy Settings
+          </button>
+        </div>
+      </amp-consent>
+      <!-- End Ogury example -->
 
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>

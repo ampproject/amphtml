@@ -190,7 +190,7 @@ export class AutocompleteBindingInline {
    * @param {boolean} activeElement
    * @return {boolean}
    */
-  shouldPreventFormSubmissionOnEnter(activeElement) {
+  shouldPreventDefaultOnEnter(activeElement) {
     return activeElement;
   }
 }
