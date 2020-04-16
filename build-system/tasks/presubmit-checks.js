@@ -372,7 +372,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
-      'src/amp-story-player-impl.js',
+      'src/amp-story-player/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -1152,7 +1152,7 @@ const forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
-      'src/amp-story-player-impl.js',
+      'src/amp-story-player/amp-story-player-impl.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
