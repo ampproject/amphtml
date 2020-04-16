@@ -51,7 +51,7 @@ describe
       });
     });
 
-    it.only('should resize and load more elements', () => {
+    it('should resize and load more elements', () => {
       // Note that there will be no load event for the inabox image.
       const p = fixture.awaitEvent(AmpEvents.LOAD_START, 11).then(function () {
         expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(
