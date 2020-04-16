@@ -25,7 +25,6 @@ export default makeDecorator({
   wrapper: (getStory, context) => {
     const contents = render(getStory(context));
     const styleElements = flush();
-    console.log('styleElements', styleElements);
     const styles = render(
       <style
         amp-custom=""
