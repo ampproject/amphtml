@@ -13966,7 +13966,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null
+      null  
     );
   }
 
@@ -14152,7 +14152,7 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments =
+    const supportedInstruments = 
         [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
@@ -16529,8 +16529,4 @@ class ConfiguredRuntime {
   }
 }
 
-<<<<<<< HEAD
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, SubscribeResponse$1 as SubscribeResponse, DeferredAccountCreationResponse, UserData, PurchaseData };
-=======
 export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };
->>>>>>> 39c4d675bd0ce59b61d15f22de2b81b9a03c5b3e
