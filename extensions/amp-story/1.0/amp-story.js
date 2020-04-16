@@ -1950,8 +1950,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
-    isPaused ? this.advancement_.stop() : this.advancement_.start();
-
     this.activePage_.setState(pageState);
   }
 
