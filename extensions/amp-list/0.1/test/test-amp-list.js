@@ -160,7 +160,7 @@ describes.repeated(
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
             listMock.expects('togglePlaceholder').withExactArgs(true).once();
-            listMock.expects('toggleLoading').withExactArgs(true, true).once();
+            listMock.expects('toggleLoading').withExactArgs(true).once();
           }
 
           // Stub the rendering of the template.
@@ -1048,10 +1048,7 @@ describes.repeated(
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
               listMock.expects('togglePlaceholder').withExactArgs(true).once();
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(true, true)
-                .once();
+              listMock.expects('toggleLoading').withExactArgs(true).once();
               // Expect hiding of placeholder/loading after render.
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleLoading').withExactArgs(false).once();
