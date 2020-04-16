@@ -103,6 +103,12 @@ export class ResponsiveState {
     if (element.hasAttribute('data-auto-format')) {
       return Promise.resolve(null);
     }
+
+    // If the user already has a wide viewport layout, we don't upgrade to responsive.
+    if (!ResponsiveState.isLayoutViewportNarrow_(element)) {
+      return Promise.resolve(null);
+    }
+
     return (
       Services.storageForDoc(element)
         .then((storage) =>
@@ -403,5 +409,17 @@ export class ResponsiveState {
       default:
         return 0;
     }
+  }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  static isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    return viewportSize.width < 488;
   }
 }
