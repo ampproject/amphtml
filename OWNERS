@@ -13,7 +13,7 @@
     },
     {
       pattern: '**/validator-*.{protoascii,html,out}',
-      owners: [{name: 'ampproject/wg-caching', notify: true}],
+      owners: [{name: 'ampproject/wg-caching', required: true}],
     },
     {
       pattern: '**/*.md',
