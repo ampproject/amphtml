@@ -231,6 +231,7 @@ i-amphtml-sizer {
   color: transparent !important;
 }
 
+/* Hide all children of non-container elements. */
 .i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
 [layout]:not([layout=container]):not(.i-amphtml-element) > *
 {
@@ -350,6 +351,10 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   position: relative;
   z-index: 2;
   visibility: hidden;
+  /* display:initial overrides display:none from the "hide all children of
+     non-container elements" rule. This avoids a minor content jump after
+     element build since overflows increase the height of their parents. */
+  display: initial;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
