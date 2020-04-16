@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
 import {addParamsToUrl} from '../../../../src/url';
 import {getSocialConfig} from '../amp-social-share-config';
-import {select, withKnobs} from '@storybook/addon-knobs';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -39,24 +39,25 @@ export const _default = () => {
     'line',
     'sms',
     'system',
+    'custom endpoint',
   ];
-  const type = select(
-    'Provider Type',
-    knobConfigurations,
-    knobConfigurations[0],
-    'type'
-  );
+  let type = select('Provider Type', knobConfigurations, knobConfigurations[0]);
+  let href = text('Custom Share Endpoint', 'Not Specified');
+
   const config = getSocialConfig(type);
+  if (type !== 'custom endpoint') {
+    href = addParamsToUrl(config.shareEndpoint, config.defaultParams);
+  } else {
+    type = 'system';
+  }
   return (
     <div>
       <p>
         Click the button below to share this page using the configured provider.
-        Update the provider using storybook knobs.
+        Update the provider using storybook knobs. Choose Provider Type: 'custom
+        endpoint' to specify your own share endpoint.
       </p>
-      <SocialShare
-        type={type}
-        href={addParamsToUrl(config.shareEndpoint, config.defaultParams)}
-      />
+      <SocialShare type={type} href={href} />
     </div>
   );
 };
