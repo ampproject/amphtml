@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.100 */
+/** Version: 0.1.22.101 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1336,6 +1336,78 @@ function deserialize(data) {
 function getLabel(messageType) {
   const message = /** @type {!Message} */ (new messageType());
   return message.label();
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
 }
 
 /**
@@ -5581,7 +5653,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.100',
+    '_client': 'SwG 0.1.22.101',
   });
 }
 
@@ -6695,7 +6767,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.100',
+        '_client': 'SwG 0.1.22.101',
         'supportsEventManager': true,
       },
       args || {}
@@ -6812,78 +6884,6 @@ class ActivityPorts$1 {
   getOriginalWebActivityPorts() {
     return this.activityPorts_;
   }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @enum {number}  */
-const FilterResult = {
-  /** The event is allowed to proceed to the listeners. */
-  PROCESS_EVENT: 0,
-  /** The event is canceled and the listeners are not informed about it. */
-  CANCEL_EVENT: 1,
-};
-
-/**
- * Defines a client event in SwG
- * Properties:
- * - eventType: Required. The AnalyticsEvent type that occurred.
- * - eventOriginator: Required.  The codebase that initiated the event.
- * - isFromUserAction: Optional.  True if the user took an action to generate
- *   the event.
- * - additionalParameters: Optional.  A JSON object to store generic data.
- *
- *  @typedef {{
- *    eventType: !AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
- *    isFromUserAction: ?boolean,
- *    additionalParameters: ?Object,
- * }}
- */
-let ClientEvent;
-
-/**
- * @interface
- */
-class ClientEventManagerApi {
-  /**
-   * Call this function to log an event. The registered listeners will be
-   * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
-   */
-  registerEventListener(listener) { }
-
-  /**
-   * Register a filterer for events if you need to potentially prevent the
-   * listeners from hearing about it.  A filterer should return
-   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
-   * event.
-   * @param {!function(!ClientEvent):FilterResult} filterer
-   */
-  registerEventFilterer(filterer) { }
-
-  /**
-   * Call this function to log an event.  It will immediately throw an error if
-   * the event is invalid.  It will then asynchronously call the filterers and
-   * stop the event if a filterer cancels it.  After that, it will call each
-   * listener asynchronously.
-   * @param {!ClientEvent} event
-   */
-  logEvent(event) { }
 }
 
 /**
@@ -7609,7 +7609,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.100');
+    context.setClientVersion('SwG 0.1.22.101');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -16529,4 +16529,4 @@ class ConfiguredRuntime {
   }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, SubscribeResponse$1 as SubscribeResponse };
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };

@@ -45,14 +45,6 @@ import {tryResolve} from '../src/utils/promise';
 const TAG = 'CustomElement';
 
 /**
- * The elements positioned ahead of this threshold may have their loading
- * indicator initialized faster. This is benefitial to avoid relayout during
- * render phase or scrolling.
- * @private @const {number}
- */
-const PREPARE_LOADING_THRESHOLD = 1000;
-
-/**
  * @enum {number}
  */
 const UpgradeState = {
@@ -590,21 +582,6 @@ function createBaseCustomElementClass(win) {
           reportError(e, this);
         }
       }
-
-      if (this.isLoadingEnabled_()) {
-        if (this.isInViewport_) {
-          // Already in viewport - start showing loading.
-          this.toggleLoading(true);
-        } else if (
-          layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0 &&
-          !this.loadingContainer_
-        ) {
-          // Few top elements will also be pre-initialized with a loading
-          // element.
-          this.mutateOrInvoke_(() => this.prepareLoading_());
-        }
-      }
     }
 
     /**
@@ -847,6 +824,13 @@ function createBaseCustomElementClass(win) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+        }
+        // Classically, sizes/media queries are applied just before
+        // Resource.measure. With IntersectionObserver, observe() is the
+        // equivalent which happens above in Resources.add(). Applying here
+        // also avoids unnecessary reinvocation during reparenting.
+        if (this.getResources().isIntersectionExperimentOn()) {
+          this.applySizesAndMediaQuery();
         }
       }
     }
@@ -1234,6 +1218,7 @@ function createBaseCustomElementClass(win) {
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
+          const loadingStartTime = win.Date.now();
           Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(() => {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
@@ -1243,7 +1228,7 @@ function createBaseCustomElementClass(win) {
               this.ownerDocument &&
               this.ownerDocument.defaultView
             ) {
-              this.toggleLoading(true);
+              this.toggleLoading(true, {startTime: loadingStartTime});
             }
           }, 100);
         }
@@ -1623,14 +1608,14 @@ function createBaseCustomElementClass(win) {
     isLoadingEnabled_() {
       // No loading indicator will be shown if either one of these conditions
       // true:
-      // 1. `noloading` attribute is specified;
-      // 2. The element has not been whitelisted;
-      // 3. The element is too small or has not yet been measured;
-      // 4. The element has already been laid out (include having loading
+      // 1. The document is A4A.
+      // 2. `noloading` attribute is specified;
+      // 3. The element has already been laid out, and does not support reshowing the indicator (include having loading
       //    error);
-      // 5. The element is a `placeholder` or a `fallback`;
-      // 6. The element's layout is not a size-defining layout.
-      // 7. The document is A4A.
+      // 4. The element is too small or has not yet been measured;
+      // 5. The element has not been whitelisted;
+      // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
+      // 7. The element's layout is not a size-defining layout.
       if (this.isInA4A()) {
         return false;
       }
@@ -1638,10 +1623,12 @@ function createBaseCustomElementClass(win) {
         this.loadingDisabled_ = this.hasAttribute('noloading');
       }
 
+      const laidOut =
+        this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START);
       if (
-        this.layoutCount_ > 0 ||
-        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
+        (laidOut && !this.implementation_.isLoadingReused()) ||
+        this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
@@ -1669,8 +1656,9 @@ function createBaseCustomElementClass(win) {
      * actually be shown. This method must also be called in the mutate
      * context.
      * @private
+     * @param {number=} startTime
      */
-    prepareLoading_() {
+    prepareLoading_(startTime) {
       if (!this.isLoadingEnabled_()) {
         return;
       }
@@ -1685,7 +1673,8 @@ function createBaseCustomElementClass(win) {
           this.getAmpDoc(),
           this,
           this.layoutWidth_,
-          this.layoutHeight_
+          this.layoutHeight_,
+          startTime
         );
 
         container.appendChild(loadingElement);
@@ -1699,21 +1688,14 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:(boolean|undefined), force:(boolean|undefined)}=} opt_options
+     * @param {{cleanup:(boolean|undefined), startTime:(number|undefined)}=} opt_options
      * @public @final
      */
     toggleLoading(state, opt_options) {
       const cleanup = opt_options && opt_options.cleanup;
-      const force = opt_options && opt_options.force;
+      const startTime = opt_options && opt_options.startTime;
       assertNotTemplate(this);
-      if (
-        state &&
-        !this.implementation_.isLoadingReused() &&
-        (this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START))
-      ) {
-        // Loading has already been canceled. Ignore.
-        return;
-      }
+
       if (state === this.loadingState_ && !opt_options) {
         // Loading state is the same.
         return;
@@ -1724,7 +1706,7 @@ function createBaseCustomElementClass(win) {
       }
 
       // Check if loading should be shown.
-      if (state && !force && !this.isLoadingEnabled_()) {
+      if (state && !this.isLoadingEnabled_()) {
         this.loadingState_ = false;
         return;
       }
@@ -1734,11 +1716,11 @@ function createBaseCustomElementClass(win) {
           let state = this.loadingState_;
           // Repeat "loading enabled" check because it could have changed while
           // waiting for vsync.
-          if (state && !force && !this.isLoadingEnabled_()) {
+          if (state && !this.isLoadingEnabled_()) {
             state = false;
           }
           if (state) {
-            this.prepareLoading_();
+            this.prepareLoading_(startTime);
           }
           if (!this.loadingContainer_) {
             return;

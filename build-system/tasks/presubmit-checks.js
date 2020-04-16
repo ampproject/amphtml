@@ -114,6 +114,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/module-dist-bundle-size.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
@@ -357,6 +358,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
+      'src/amp-story-player-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
@@ -1087,7 +1089,6 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
       'extensions/amp-timeago/0.2/timeago.js',
-      'build-system/compile/build.conf.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1143,6 +1144,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/shadow-viewer.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/check-links.js',
+      'build-system/tasks/dist.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
