@@ -26,21 +26,8 @@ const POLYFILLED = '__AMP_WA';
  * @param {!Window} win
  */
 function forceOnSafari(win) {
-  if (win.Animation && Services.platformFor(win).isSafari()) {
-    const {prototype} = win.Animation;
-    const animationUnimplemented = {};
-    for (const k in prototype) {
-      try {
-        if (typeof prototype[k] === 'function') {
-          animationUnimplemented[k] = () => {};
-        }
-      } catch (unusedError) {
-        // Non-method member access (like .id) will fail.
-        // We don't care.
-      }
-    }
-    win.document.documentElement.animate = () =>
-      /** @type {!Animation} */ (animationUnimplemented);
+  if (Services.platformFor(win).isSafari()) {
+    win.Element.prototype.animate = null;
   }
 }
 
