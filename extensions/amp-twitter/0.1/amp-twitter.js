@@ -201,7 +201,7 @@ class AmpTwitter extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.iframe_ && mutations['data-tweetid'] != null) {
       this.unlayoutCallback();
-      this.toggleLoading(true, /* opt_force */ true);
+      this.toggleLoading(true);
       this.layoutCallback();
     }
   }
