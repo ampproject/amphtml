@@ -100,7 +100,7 @@ A listing of files in each release can be found in `files.txt` at the root of th
 
 When you request `amp-geo-0.1.js` from `cdn.ampproject.org` using an HTTP client, the CDN detects the country where the request originated and patches `amp-geo-0.1.js` on-the-fly. This patch needs to be reversed to ensure users are not all assigned the same country when amp-geo loads.
 
-When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 country code or an ISO 3166-2 subdivision code, followed by enough spaces to maintain the length of the string being replaced. Reversal of this patch can be accomplished by a RegEx replacement: search for `/[a-zA-Z]{2}(?:-[a-zA-Z0-9]{2} {23}| {26})/` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
+When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 country code or an ISO 3166-2 country-subdivision code, followed by enough spaces to maintain the length of the string being replaced. Reversal of this patch can be accomplished by a RegEx replacement: search for `/[a-zA-Z]{2}(?:-[a-zA-Z0-9]{1,3} {22,24}| {26})/` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
 
 In addition to `amp-geo-0.1.js`, you may find module JS (`.mjs`) and unversioned (`amp-geo-latest.js`) variants of the same file. The same RegEx replacement should be performed in these files as well.
 
