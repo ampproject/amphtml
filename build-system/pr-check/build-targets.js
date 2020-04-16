@@ -189,8 +189,7 @@ const targetMatchers = {
     }
     return (
       file.startsWith('validator/java/') ||
-      file === 'build-system/tasks/validator.js' ||
-      isValidatorFile(file)
+      file === 'build-system/tasks/validator.js'
     );
   },
   'VALIDATOR_WEBUI': (file) => {
