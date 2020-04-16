@@ -375,6 +375,7 @@ export class StandardActions {
     // iOS only honors focus in sync operations.
     if (autofocusElOrNull && Services.platformFor(ownerWindow).isIos()) {
       this.handleShowSync_(target, autofocusElOrNull);
+      this.mutator_.mutateElement(target, () => {}); // force a remeasure
     } else {
       this.mutator_.mutateElement(target, () => {
         this.handleShowSync_(target, autofocusElOrNull);
