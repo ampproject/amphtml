@@ -82,8 +82,6 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     return !!this.pingbackUrl_;
   }
 
-<<<<<<< HEAD
-=======
   /**
    * Format data for pingback
    * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} entitlements
@@ -101,7 +99,6 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     return JSON.stringify(entitlements.jsonForPingback());
   }
 
->>>>>>> 39c4d675bd0ce59b61d15f22de2b81b9a03c5b3e
   /** @override */
   pingback(selectedEntitlement) {
     if (!this.isPingbackEnabled) {
