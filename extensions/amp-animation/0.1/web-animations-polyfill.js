@@ -26,8 +26,8 @@ const POLYFILLED = '__AMP_WA';
  * @param {!Window} win
  */
 function forceOnSafari(win) {
-  const {prototype} = win.Animation || {};
-  if (prototype && Services.platformFor(win).isSafari()) {
+  if (win.Animation && Services.platformFor(win).isSafari()) {
+    const {prototype} = win.Animation;
     const animationUnimplemented = {};
     for (const k in prototype) {
       try {
