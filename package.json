@@ -15,14 +15,9 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.2.0",
-<<<<<<< HEAD
-    "@ampproject/viewer-messaging": "1.1.0",
-    "@ampproject/worker-dom": "0.23.2",
-=======
     "@ampproject/toolbox-cache-url": "2.2.0",
     "@ampproject/viewer-messaging": "1.1.0",
     "@ampproject/worker-dom": "0.24.0",
->>>>>>> 39c4d675bd0ce59b61d15f22de2b81b9a03c5b3e
     "dompurify": "2.0.7",
     "moment": "2.24.0",
     "preact": "10.2.1",
