@@ -16,6 +16,7 @@
 
 /** @fileoverview */
 
+import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -43,7 +44,10 @@ if (self.document) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(self, class {});
-  installIntersectionObserver(self);
+  // eslint-disable-next-line no-undef
+  if (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) {
+    installIntersectionObserver(self);
+  }
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no

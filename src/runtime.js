@@ -270,7 +270,11 @@ function adoptShared(global, callback) {
   }
 
   // Some deferred polyfills.
-  if (shouldLoadInObPolyfill(global)) {
+  if (
+    // eslint-disable-next-line no-undef
+    (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) &&
+    shouldLoadInObPolyfill(global)
+  ) {
     Services.extensionsFor(global).preloadExtension(
       'amp-intersection-observer-polyfill'
     );
