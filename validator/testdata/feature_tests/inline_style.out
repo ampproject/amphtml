@@ -49,5 +49,7 @@ feature_tests/inline_style.html:38:2 The property 'lemur' in attribute 'style' i
 |    <amp-img layout=fill src=lemur.png style="display:block;" [style]="display:block;"></amp-img>
 >>   ^~~~~~~~~
 feature_tests/inline_style.html:40:2 The attribute '[style]' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img)
+|    <!-- Invalid: mailto protocol not allowed in URLs -->
+|    <b style="background-image: url('mailto:foo@bar.com')"></b>
 |  </body>
 |  </html>
