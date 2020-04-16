@@ -87,35 +87,15 @@ tags: {  # <style amp-custom>, [AMP, ACTIONS]
     max_bytes: 75000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
-      at_rule_spec: {
-        name: 'font-face'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: 'keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'media'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'page'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '$DEFAULT'  # matches if none of the above match
-        type: PARSE_AS_ERROR
-      }
+      at_rule_spec: { name: 'font-face' }
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: { name: 'media' }
+      at_rule_spec: { name: 'page' }
+      at_rule_spec: { name: 'supports' }
       image_url_spec: {
         protocol: "https"
         protocol: "http"
         protocol: "data"
-        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
@@ -168,35 +148,15 @@ tags: {  # `<style amp-custom>`, transformed [AMP, ACTIONS]
     url_bytes_included: false
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
-      at_rule_spec: {
-        name: 'font-face'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: 'keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'media'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'page'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '$DEFAULT'  # matches if none of the above match
-        type: PARSE_AS_ERROR
-      }
+      at_rule_spec: { name: 'font-face' }
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: { name: 'media' }
+      at_rule_spec: { name: 'page' }
+      at_rule_spec: { name: 'supports' }
       image_url_spec: {
         protocol: "https"
         protocol: "http"
         protocol: "data"
-        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
@@ -245,17 +205,10 @@ tags: {  # <style amp-custom>, AMP4ADS
     max_bytes: 20000  # Smaller than AMP, which is 75,000.
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
     css_spec: {
-      at_rule_spec: {
-        name: 'font-face'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: 'keyframes'
-        type: PARSE_AS_RULES
-      }
+      at_rule_spec: { name: 'font-face' }
+      at_rule_spec: { name: 'keyframes' }
       at_rule_spec: {
         name: 'media'
-        type: PARSE_AS_RULES
         media_query_spec: {
           issues_as_error: false
           type: 'all'
@@ -269,19 +222,11 @@ tags: {  # <style amp-custom>, AMP4ADS
           feature: 'resolution'
         }
       }
-      at_rule_spec: {
-        name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '$DEFAULT'  # matches if none of the above match
-        type: PARSE_AS_ERROR
-      }
+      at_rule_spec: { name: 'supports' }
       image_url_spec: {
         protocol: "https"
         protocol: "http"
         protocol: "data"
-        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
@@ -333,7 +278,6 @@ tags: {  # <style amp-custom>, AMP4EMAIL
     css_spec: {
       at_rule_spec: {
         name: 'media'
-        type: PARSE_AS_RULES
         media_query_spec: {
           issues_as_error: true
           type: 'all'
@@ -345,14 +289,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL
           feature: 'width'
         }
       }
-      at_rule_spec: {
-        name: 'page'
-        type: PARSE_AS_DECLARATIONS
-      }
-      at_rule_spec: {
-        name: '$DEFAULT'  # matches if none of the above match
-        type: PARSE_AS_ERROR
-      }
+      at_rule_spec: { name: 'page' }
       image_url_spec: {
         protocol: "https"
       }
@@ -524,22 +461,9 @@ tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS, ACTIONS]
     max_bytes: 500000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#keyframes-stylesheet"
     css_spec: {
-      at_rule_spec: {
-        name: 'keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'media'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '$DEFAULT'  # matches if none of the above match
-        type: PARSE_AS_ERROR
-      }
+      at_rule_spec: { name: 'keyframes' }
+      at_rule_spec: { name: 'media' }
+      at_rule_spec: { name: 'supports' }
       validate_keyframes: true
       declaration: "animation-timing-function"
       declaration: "offset-distance"
