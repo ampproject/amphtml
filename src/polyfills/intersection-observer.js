@@ -19,13 +19,6 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
  */
 
-/* DO NOT SUBMIT: example:
-var inob = new IntersectionObserver(function(records) {
-  console.log('inob: ', records);
-});
-inob.observe($0);
-*/
-
 const UPGRADERS = '_upgraders';
 
 /**
@@ -39,6 +32,35 @@ export function install(win) {
   if (!win.IntersectionObserver) {
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
   }
+
+  /* DO NOT SUBMIT: examples */
+  (() => {
+    const inob1 = new win.IntersectionObserver((records) => {
+      console.log('inob1: ', records);
+    });
+    inob1.observe(win.document.body);
+
+    const iframe = win.document.createElement('iframe');
+    iframe.srcdoc = '<!doctype html><html><head><body>';
+    iframe.onload = () => {
+      const childWin = iframe.contentWindow;
+      installForChildWin(win, childWin);
+      const inob2 = new childWin.IntersectionObserver((records) => {
+        console.log('inob2: ', records);
+      });
+      inob2.observe(childWin.document.body);
+
+      IntersectionObserverStub[UPGRADERS].push(() => {
+        setTimeout(() => {
+          const inob3 = new IntersectionObserverStub((records) => {
+            console.log('inob3: ', records);
+          });
+          inob3.observe(childWin.document.body);
+        }, 1000);
+      });
+    };
+    win.document.body.appendChild(iframe);
+  })();
 }
 
 /**
@@ -46,17 +68,28 @@ export function install(win) {
  * @param {!Window} childWin
  */
 export function installForChildWin(parentWin, childWin) {
+  // DO NOT SUBMIT: remove, testing.
+  delete childWin.IntersectionObserver;
+  delete childWin.IntersectionObserverEntry;
+
   if (!childWin.IntersectionObserver && parentWin.IntersectionObserver) {
     childWin.IntersectionObserver = parentWin.IntersectionObserver;
     childWin.IntersectionObserverEntry = parentWin.IntersectionObserverEntry;
     if (parentWin.IntersectionObserver === IntersectionObserverStub) {
-      // QQQQ: push into stubs to upgrade when it shows up.
+      // Wait until new polyfill is available and override with the upgraded
+      // classes.
+      IntersectionObserverStub[UPGRADERS].push(() => {
+        childWin.IntersectionObserver = parentWin.IntersectionObserver;
+        childWin.IntersectionObserverEntry =
+          parentWin.IntersectionObserverEntry;
+      });
     }
   }
 }
 
 /**
  * @param {!Window} win
+ * @return {boolean}
  */
 export function shouldLoadPolyfill(win) {
   return (
@@ -83,13 +116,18 @@ export function upgradePolyfill(win, installer) {
     installer();
     const Impl = win.IntersectionObserver;
     const upgraders = Stub[UPGRADERS].slice(0);
-    Stub[UPGRADERS].length = 0;
+    const microtask = Promise.resolve();
+    const upgrade = (upgrader) => {
+      microtask.then(() => upgrader(Impl));
+    };
     if (upgraders.length > 0) {
-      const microtask = Promise.resolve();
-      upgraders.forEach((upgrader) => {
-        microtask.then(() => upgrader(Impl));
-      });
+      upgraders.forEach(upgrade);
     }
+    Stub[
+      UPGRADERS
+    ] = /** @type {!Array<function(typeof IntersectionObserver)>} */ ({
+      'push': upgrade,
+    });
   } else {
     // Even if this is not the stub, we still may need to polyfill
     // `isIntersecting`. See `shouldLoadPolyfill` for more info.
@@ -224,6 +262,7 @@ class IntersectionObserverStub {
    * @private
    */
   upgrade_(constr) {
+    console.log('inob: upgraded');
     const inst = new constr(this.callback_, this.options_);
     this.inst_ = inst;
     this.elements_.forEach((e) => inst.observe(e));
@@ -233,6 +272,5 @@ class IntersectionObserverStub {
 
 /**
  * @type {!Array<function(typeof IntersectionObserver)>}
- * @const
  */
 IntersectionObserverStub[UPGRADERS] = [];

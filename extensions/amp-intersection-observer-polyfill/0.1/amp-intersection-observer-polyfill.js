@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
+import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
 import {registerServiceBuilder} from '../../../src/service';
 import {upgradePolyfill} from '../../../src/polyfills/intersection-observer';
-// DO NOT SUBMIT: until we upgrade to the polyfill 0.8.0.
-// See https://github.com/w3c/IntersectionObserver/pull/419.
-import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
 
 const TAG = 'amp-intersection-observer-polyfill';
 
 /**
  * @param {!Window} win
+ * @return {!Object}
  */
 function install(win) {
-  upgradePolyfill(win, installIntersectionObserver);
+  upgradePolyfill(win, () => {
+    installIntersectionObserver();
+    // TODO(dvoytenko): hookup 3p host updater for inabox.
+  });
   return {};
 }
 
