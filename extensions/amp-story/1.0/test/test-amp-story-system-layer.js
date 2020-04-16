@@ -141,4 +141,21 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     // Default "canonical"
     expect(shareButton.href).to.equal('http://localhost:9876/context.html');
   });
+
+  it('should show paused button if page has playable', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    expect(systemLayer.getShadowRoot()).to.have.class(
+      'i-amphtml-story-has-playable'
+    );
+  });
+
+  it('should show paused button if page has playable', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    expect(systemLayer.getShadowRoot()).to.have.attribute(
+      'i-amphtml-current-page-has-playable'
+    );
+  });
 });

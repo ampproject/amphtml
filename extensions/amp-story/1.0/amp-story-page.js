@@ -508,6 +508,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasPlayable_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
       this.startMeasuringVideoPerformance_();
@@ -1354,6 +1355,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.switchTo_(pageId, NavigationDirection.PREVIOUS);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**
@@ -1376,6 +1378,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.switchTo_(pageId, NavigationDirection.NEXT);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**
@@ -1415,6 +1418,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     return Array.prototype.some.call(
       ampVideoEls,
       (video) => !video.hasAttribute('noaudio')
+    );
+  }
+
+  /**
+   * Checks if the page has playable elements.
+   * @private
+   */
+  checkPageHasPlayable_() {
+    const pageHasPlayable =
+      this.element.hasAttribute('background-audio') ||
+      this.element.querySelector('amp-audio') ||
+      this.element.querySelector('amp-video') ||
+      this.element.hasAttribute('auto-advance-after');
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_PAGE_HAS_PLAYABLE,
+      pageHasPlayable
     );
   }
 
@@ -1547,7 +1567,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.registerMedia_(mediaPool, videoEl)
           .then(() => this.preloadMedia_(mediaPool, videoEl))
           .then((poolVideoEl) => {
-            this.playMedia_(mediaPool, poolVideoEl);
+            if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+              this.playMedia_(mediaPool, poolVideoEl);
+            }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
             }
