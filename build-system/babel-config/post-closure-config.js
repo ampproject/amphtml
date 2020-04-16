@@ -31,7 +31,6 @@ function getPostClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-minified-comments',
     './build-system/babel-plugins/babel-plugin-const-transformer',
     './build-system/babel-plugins/babel-plugin-transform-remove-directives',
-    './build-system/babel-plugins/babel-plugin-transform-function-declarations',
     './build-system/babel-plugins/babel-plugin-transform-stringish-literals',
   ];
   return {
