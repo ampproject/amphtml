@@ -55,11 +55,11 @@ const JWPLAYER_EVENTS = {
 
 const eventHandlers = {
   /**
-   * @param {{fullscreen:boolean}} msg Message details being passed from the iframe.
+   * @param {{fullscreen:boolean}} detail Message detail from JW Player event.
    * @param {Object} ctx
    */
-  fullscreen: (msg, ctx) => {
-    const {fullscreen} = msg;
+  fullscreen: (detail, ctx) => {
+    const {fullscreen} = detail;
     if (fullscreen == ctx.isFullscreen()) {
       return;
     }
@@ -67,35 +67,35 @@ const eventHandlers = {
     fullscreen ? ctx.fullscreenEnter() : ctx.fullscreenExit();
   },
   /**
-   * @param {{metadataType:string}} msg details being passed from the iframe.
+   * @param {{metadataType:string}} detail Message detail from JW Player event.
    * @param {Object} ctx
    */
-  meta: (msg, ctx) => {
-    const {metadataType, duration} = msg;
+  meta: (detail, ctx) => {
+    const {metadataType, duration} = detail;
     if (metadataType === 'media') {
       ctx.duration_ = duration;
     }
   },
   /**
-   * @param {{mute:boolean}} msg Message details being passed from the iframe.
+   * @param {{mute:boolean}} detail Message details from JW Player event.
    * @param {Object} ctx
    */
-  mute: (msg, ctx) => {
-    const {mute} = msg;
+  mute: (detail, ctx) => {
+    const {mute} = detail;
     const {element} = ctx;
     ctx.muted_ = mute;
     element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
   },
   /**
-   * @param {{ranges:Array<(Array<number>|null)>}} msg Message details being passed from the iframe.
+   * @param {{ranges:Array<(Array<number>|null)>}} detail Message details from JW Player event.
    * @param {Object} ctx
    */
-  playedRanges: (msg, ctx) => {
-    const {ranges} = msg;
+  playedRanges: (detail, ctx) => {
+    const {ranges} = detail;
     ctx.playedRanges_ = ranges;
   },
   /**
-   * @param {Object} playlistItem Playlist item coming from JW Player.
+   * @param {Object} playlistItem New current JW Player playlist item.
    * @param {Object} ctx
    */
   playlistItem: (playlistItem, ctx) => {
@@ -103,7 +103,7 @@ const eventHandlers = {
     ctx.sendCommand_('getPlayedRanges');
   },
   /**
-   * @param {{currentTime:number}} time Message details being passed from the iframe.
+   * @param {{currentTime:number}} time Message details being passed from JW Player.
    * @param {Object} ctx
    */
   time: (time, ctx) => {
@@ -111,7 +111,7 @@ const eventHandlers = {
     ctx.sendCommand_('getPlayedRanges');
   },
   /**
-   * @param {{position:number}} adTime Message details being passed from the iframe.
+   * @param {{position:number}} adTime Message details being passed from JW Player.
    * @param {Object} ctx
    */
   adTime: (adTime, ctx) => {
@@ -484,13 +484,13 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     const data = objOrParseJson(messageData);
     const event = data['event'];
-    const value = data['detail'];
+    const detail = data['detail'];
 
     // Log any valid events
-    dev().info('JWPLAYER', 'EVENT:', event || 'anon event', value || data);
+    dev().info('JWPLAYER', 'EVENT:', event || 'anon event', detail || data);
 
     if (event === 'ready') {
-      value && this.onReadyOnce_(value);
+      detail && this.onReadyOnce_(detail);
       return;
     }
 
@@ -500,8 +500,8 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
 
-    if (value && event && eventHandlers[event]) {
-      eventHandlers[event](value, this);
+    if (detail && event && eventHandlers[event]) {
+      eventHandlers[event](detail, this);
     }
   }
 
