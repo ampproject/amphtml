@@ -67,6 +67,10 @@ function getTestConfig() {
   const testPresets = [presetEnv];
   return {
     compact: false,
+    // We do not want to ignore our dependencies in test mode, since some may
+    // be using newer features that need to be transpiled down for our test
+    // browsers.
+    ignore: [],
     plugins: testPlugins,
     presets: testPresets,
   };
