@@ -16,17 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
-
-/**
- * Ignore devDependencies except for 'chai-as-promised' which contains ES6 code.
- * ES6 code is fine for most test environments, but not for integration tests
- * running on SauceLabs since some older browsers need ES5.
- */
-const ignoredModules = getDevDependencies().filter((dep) =>
-  dep.includes('chai-as-promised')
-);
 
 /**
  * Gets the config for babel transforms run during `gulp [unit|integration]`.
@@ -77,7 +67,6 @@ function getTestConfig() {
   const testPresets = [presetEnv];
   return {
     compact: false,
-    ignore: ignoredModules,
     plugins: testPlugins,
     presets: testPresets,
   };
