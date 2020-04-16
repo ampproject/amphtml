@@ -16,6 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const astCompare = require('ast-compare');
+const babelParser = require('@babel/parser');
 const fs = require('fs');
 const log = require('fancy-log');
 const {cyan, red} = require('ansi-colors');
@@ -112,13 +114,34 @@ function unpackRuntime() {
 }
 
 /**
+ * Gets the AST from the JS contents of a given file
+ *
+ * @param {string} file
+ * @return {!Object}
+ */
+function getAstFromFile(file) {
+  const contents = fs.readFileSync(file, 'utf8').toString();
+  return babelParser.parse(contents, {sourceType: 'module'});
+}
+
+/**
  * Compares the unpacked runtime with the original source.
  */
 function checkUnpackedRuntime() {
   log('Comparing', cyan(ampJs), 'with', cyan(unpackedAmpJs) + '...');
-  // TODO(rsimha): Filter expected changes (version string, IS_ESM, etc.),
-  // eliminate whitespace changes (maybe use prettier?), and then diff
   exec(diffCmd);
+  log('Comparing ASTs of', cyan(ampJs), 'and', cyan(unpackedAmpJs) + '...');
+  const ampJsAst = getAstFromFile(ampJs);
+  const unpackedAmpJsAst = getAstFromFile(unpackedAmpJs);
+  // TODO(rsimha): Figure out how to meaningfully compare ASTs.
+  log(ampJsAst);
+  log(unpackedAmpJsAst);
+  log(
+    astCompare(ampJsAst, unpackedAmpJsAst, {
+      hungryForWhitespace: true,
+      verboseWhenMismatches: true,
+    })
+  );
 }
 
 /**
