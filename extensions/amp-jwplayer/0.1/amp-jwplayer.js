@@ -503,6 +503,11 @@ class AmpJWPlayer extends AMP.BaseElement {
     const isDev = getMode(this.win).localDev;
     const cid = encodeURIComponent(this.contentid_);
     const pid = encodeURIComponent(this.playerid_);
+
+    if (cid === 'outstream') {
+      cid = 'oi7pAMI1';
+    }
+
     let baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
     if (isDev) {
