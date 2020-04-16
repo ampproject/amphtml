@@ -74,6 +74,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       const keyframeOptions = {foo: 'bar'};
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: env.sandbox.spy(() => [{}]),
@@ -121,6 +123,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(targetDimensions);
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: env.sandbox.spy(() => [{}]),
@@ -163,6 +167,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         const target = html`<div></div>`;
 
         const animationDef = {
+          duration: 0,
+          delay: 0,
           target,
           preset: {
             keyframes: keyframeDefTypes[keyframeDefType],
@@ -235,6 +241,40 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
+    it('passes static definition (like <amp-story-animation>) to WebAnimationRunner', async () => {
+      const page = html`<div></div>`;
+
+      const webAnimationRunner = {
+        getPlayState: () => WebAnimationPlayState.IDLE,
+        onPlayStateChanged: () => {},
+      };
+
+      webAnimationBuilder.createRunner = env.sandbox.spy(
+        () => webAnimationRunner
+      );
+
+      const animationDef = {
+        selector: '.foo',
+        easing: 'test-easing',
+        duration: 123,
+        delay: 346,
+        keyframes: [{}],
+      };
+
+      new AnimationRunner(
+        page,
+        animationDef,
+        webAnimationBuilderPromise,
+        vsync,
+        sequence
+      );
+
+      await nextTick();
+
+      expect(webAnimationBuilder.createRunner.withArgs(animationDef)).to.have
+        .been.calledOnce;
+    });
+
     it('starts', async () => {
       const page = html`<div></div>`;
       const target = html`<div></div>`;
@@ -248,6 +288,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       webAnimationBuilder.createRunner = () => webAnimationRunner;
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: [{}],
@@ -286,6 +328,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       sequence.waitFor = env.sandbox.spy(() => promise);
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         startAfterId,
         preset: {
@@ -334,6 +378,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       sequence.notifyFinish = env.sandbox.spy();
 
       const animationDef = {
+        duration: 0,
+        delay: 0,
         target,
         preset: {
           keyframes: [{}],
@@ -391,7 +437,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(runner);
     });
 
-    it('creates internal runners when applying first frame', async () => {
+    it('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -416,6 +462,51 @@ describes.realWin('amp-story animations', {}, (env) => {
           )
         ).to.have.been.calledOnce;
       });
+    });
+
+    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
+      const spec1 = {keyframes: [{opacity: 1}]};
+      const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
+
+      const page = html`
+        <div>
+          <amp-story-animation>
+            <script type="application/json" ref="spec1holder"></script>
+          </amp-story-animation>
+          <amp-story-animation>
+            <script type="application/json" ref="spec2holder"></script>
+          </amp-story-animation>
+        </div>
+      `;
+
+      const {spec1holder, spec2holder} = htmlRefs(page);
+      spec1holder.textContent = JSON.stringify(spec1);
+      spec2holder.textContent = JSON.stringify(spec2);
+
+      const animationManager = new AnimationManager(page, ampdoc);
+      await animationManager.applyFirstFrame();
+
+      expect(
+        createAnimationRunner.withArgs(
+          page,
+          env.sandbox.match(spec1),
+          webAnimationBuilderPromise,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
+
+      expect(
+        createAnimationRunner.withArgs(
+          page,
+          env.sandbox.match(spec2),
+          webAnimationBuilderPromise,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
     });
 
     it('fails when using unknown presets', () => {
