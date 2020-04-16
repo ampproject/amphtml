@@ -65,6 +65,10 @@ const PLAY_CLASS = 'i-amphtml-story-play-control';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
+const CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE =
+  'i-amphtml-current-page-has-playable';
+
+/** @private @const {string} */
 const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
 
 /** @private @const {string} */
@@ -481,6 +485,14 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_PLAYABLE_STATE,
+      (hasPlayable) => {
+        this.onPageHasPlayableStateUpdate_(hasPlayable);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.HAS_SIDEBAR_STATE,
       (hasSidebar) => {
         this.onHasSidebarStateUpdate_(hasSidebar);
@@ -620,6 +632,26 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the presence of playables on a page to determine if should disable
+   * or not the play/pause button.
+   *
+   * @param {boolean} pageHasPlayable
+   * @private
+   */
+  onPageHasPlayableStateUpdate_(pageHasPlayable) {
+    this.vsync_.mutate(() => {
+      pageHasPlayable
+        ? this.getShadowRoot().setAttribute(
+            CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE,
+            ''
+          )
+        : this.getShadowRoot().removeAttribute(
+            CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE
+          );
+    });
+  }
+
+  /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
    * @private
@@ -685,6 +717,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-mobile');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
@@ -692,6 +725,9 @@ export class SystemLayer {
           break;
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.MOBILE:
+          shadowRoot.classList.add('i-amphtml-story-mobile');
           break;
       }
     });
@@ -762,7 +798,9 @@ export class SystemLayer {
    * @private
    */
   onPausedClick_(paused) {
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
+    if (this.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)) {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
+    }
   }
 
   /**

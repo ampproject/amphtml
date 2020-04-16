@@ -508,6 +508,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasPlayable_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
       this.startMeasuringVideoPerformance_();
@@ -1407,6 +1408,23 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.hasVideoWithAudio_();
 
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+  }
+
+  /**
+   * Checks if the page has playable elements.
+   * @private
+   */
+  checkPageHasPlayable_() {
+    const pageHasPlayable =
+      this.element.hasAttribute('background-audio') ||
+      this.element.querySelector('amp-audio') ||
+      this.element.querySelector('amp-video') ||
+      this.element.hasAttribute('auto-advance-after');
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_PAGE_HAS_PLAYABLE,
+      pageHasPlayable
+    );
   }
 
   /**

@@ -140,6 +140,7 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_PLAYABLE_STATE: 'pagePlayableState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -188,6 +189,7 @@ export const Action = {
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_PLAYABLE: 'togglePageHasPlayable',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
@@ -333,6 +335,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_HAS_PLAYABLE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_PLAYABLE_STATE]: !!data,
       });
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ ({
@@ -538,6 +545,7 @@ export class AmpStoryStoreService {
       },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_PLAYABLE_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
