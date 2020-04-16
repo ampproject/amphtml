@@ -32,7 +32,9 @@ export default makeDecorator({
         dangerouslySetInnerHTML={{
           __html: styleElements
             .map((style) => style.props.dangerouslySetInnerHTML.__html)
-            .join(''),
+            .join('')
+            .replace(/\/\*# sourceMappingURL=.*\*\//g, '')
+            .replace(/\/\*@ sourceURL=.*?\*\//g, ''),
         }}
       />
     );
