@@ -66,7 +66,7 @@ describes.realWin(
             );
           },
           getConsentInstanceGdprApplies: () => {
-            return Promise.resolve(true);
+            return Promise.resolve(false);
           },
         });
       });
@@ -581,23 +581,18 @@ describes.realWin(
 
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        env.sandbox
-          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
-          .callsFake(() => {
-            return Promise.resolve();
-          });
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('should return sharedData', async () => {
+      it.only('should return gdprApplies data', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
           },
         });
         await macroTask();
-        await expect(manager.getGdprAppliesInfo()).to.eventually.be.true;
+        // Set above in getConsentInstanceGdprApplies mock
+        await expect(manager.getGdprAppliesInfo()).to.eventually.be.false;
       });
     });
   }

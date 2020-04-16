@@ -387,7 +387,6 @@ describes.realWin(
             'https://geo-override-check2/': '{"consentRequired": true}',
             'https://gdpr-applies/':
               '{"consentRequired": true, "gdprApplies": false}',
-            'https://gdpr-applies-2/': '{"consentRequired": true}',
           };
         });
 
@@ -411,7 +410,23 @@ describes.realWin(
             const inlineConfig = {
               'consentInstanceId': 'abc',
               'consentRequired': 'remote',
-              'checkConsentHref': 'https://gdpr-applies-2/',
+              'checkConsentHref': 'https://geo-override-check2/',
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            await expect(
+              ampConsent
+                .getConsentStateManagerForTesting()
+                .getConsentInstanceGdprApplies()
+            ).to.eventually.be.true;
+          });
+
+          it('defaults to consentRequired remote value', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': 'remote',
+              'checkConsentHref': 'https://geo-override-check2/',
             };
             ampConsent = getAmpConsent(doc, inlineConfig);
             await ampConsent.buildCallback();
