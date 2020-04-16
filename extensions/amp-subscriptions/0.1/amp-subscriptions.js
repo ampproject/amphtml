@@ -668,7 +668,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Performs pingback on qll platform.
+   * Performs pingback on all platform.
    * @return {?Promise}
    * @private
    */
@@ -677,7 +677,6 @@ export class SubscriptionService {
       const availablePlatforms = this.platformStore_.getAvailablePlatforms();
       return this.viewTrackerPromise_
         .then(() => {
-<<<<<<< HEAD
           return Promise.all(
             availablePlatforms.map(platform => {
               if (platform.pingbackReturnsAllEntitlements()) {
@@ -711,22 +710,6 @@ export class SubscriptionService {
               platform.pingback(entitlementsToSend);
             }
           });
-=======
-          if (localPlatform.pingbackReturnsAllEntitlements()) {
-            return this.platformStore_.getAllPlatformsEntitlements();
-          }
-          return this.platformStore_
-            .getGrantEntitlement()
-            .then(
-              (grantStateEntitlement) =>
-                grantStateEntitlement || Entitlement.empty('local')
-            );
-        })
-        .then((resolveEntitlements) => {
-          if (localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(resolveEntitlements);
-          }
->>>>>>> 39c4d675bd0ce59b61d15f22de2b81b9a03c5b3e
         });
     }
     return null;
