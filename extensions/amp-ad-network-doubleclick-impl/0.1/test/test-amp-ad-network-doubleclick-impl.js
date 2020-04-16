@@ -1546,17 +1546,13 @@ describes.realWin(
       function verifyCss(iframe, expectedSize) {
         expect(iframe).to.be.ok;
         const style = env.win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         expect(style.width).to.equal(expectedSize.width);
         expect(style.height).to.equal(expectedSize.height);
         // We don't know the exact values by which the frame will be
         // translated, as this can vary depending on whether we use the
         // height/width attributes, or the actual size of the frame. To make
         // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       afterEach(() => env.win.document.body.removeChild(impl.element));

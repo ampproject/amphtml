@@ -488,8 +488,6 @@ describes.realWin(
       function verifyCss(iframe) {
         expect(iframe).to.be.ok;
         const style = win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         // We expect these set, but the exact dimensions will be determined by the
         // IOb.
         expect(style.width).to.be.ok;
@@ -498,9 +496,7 @@ describes.realWin(
         // as this can vary depending on whether we use the height/width
         // attributes, or the actual size of the frame. To make this less of a
         // hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       it('centers iframe in slot when height && width', () => {
