@@ -15,11 +15,14 @@
  */
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpStoryPage, PageState} from '../amp-story-page';
+import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  createElementWithAttributes,
+  scopedQuerySelectorAll,
+} from '../../../../src/dom';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -234,6 +237,34 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
           });
         });
     });
+  });
+
+  it('should build the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    await page.layoutCallback();
+    expect(
+      scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0].tagName
+    ).to.equal('AUDIO');
+  });
+
+  it('should register the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
+    await page.layoutCallback();
+
+    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
   it('should stop the advancement when state becomes not active', async () => {

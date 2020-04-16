@@ -92,7 +92,7 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
  * contained in amp-story-page-attachment.
  * @enum {string}
  */
-const Selectors = {
+export const Selectors = {
   // which media to wait for on page layout.
   ALL_AMP_MEDIA:
     'amp-story-grid-layer amp-audio, ' +
@@ -521,7 +521,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    upgradeBackgroundAudio(this.element);
+    const audioEl = upgradeBackgroundAudio(this.element);
+    if (audioEl) {
+      this.mediaPoolPromise_.then((mediaPool) => {
+        this.registerMedia_(mediaPool, dev().assertElement(audioEl));
+      });
+    }
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
