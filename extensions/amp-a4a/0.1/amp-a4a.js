@@ -687,21 +687,22 @@ export class AmpA4A extends AMP.BaseElement {
         return Promise.resolve([null, null]);
       })
       // This block returns the ad URL, if one is available.
-      /** @return {!Promise<?string>} */
+      /** @return {!Promise<{?string, ?string}>} */
       .then((consentResponse) => {
         checkStillCurrent();
 
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
 
-        return /** @type {!Promise<?string>} */ (this.getAdUrl(
+        const adUrlPromise = /** @type {!Promise<?string>} */ (this.getAdUrl(
           { consentState, consentString },
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
+        return adUrlPromise.then((adUrl) => ({ adUrl, consentString }));
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
-      .then((adUrl) => {
+      .then(({ adUrl, consentString }) => {
         checkStillCurrent();
         this.adUrl_ = adUrl;
         // If we should skip the XHR, we will instead request and render
@@ -712,7 +713,7 @@ export class AmpA4A extends AMP.BaseElement {
             XORIGIN_MODE.IFRAME_GET;
           return Promise.reject(IFRAME_GET);
         }
-        return adUrl && this.sendXhrRequest(adUrl);
+        return adUrl && this.sendXhrRequest(adUrl, consentString);
       })
       // The following block returns either the response (as a
       // {bytes, headers} object), or null if no response is available /
@@ -1236,11 +1237,15 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @typedef {Object} ConsentTuple
+   * @property {?CONSENT_POLICY_STATE} consentState
+   * @property {?string} consentString
+   */
+
+  /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {?object} unusedConsentTuple
-   * @param {?CONSENT_POLICY_STATE} unusedConsentTuple.consentState
-   * @param {?string} unusedConsentTuple.consentString
+   * @param {!ConsentTuple} unusedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
@@ -1352,10 +1357,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
+   * @param {?string} consentString
    * @return {!Promise<?Response>}
    * @protected
    */
-  sendXhrRequest(adUrl) {
+  sendXhrRequest(adUrl, consentString) {
     this.maybeTriggerAnalyticsEvent_('adRequestStart');
     const xhrInit = {
       mode: 'cors',

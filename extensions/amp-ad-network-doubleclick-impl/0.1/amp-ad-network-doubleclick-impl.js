@@ -493,10 +493,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
+   * @param {?string} consentString
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState, instances) {
+  getPageParameters(consentState, instances, consentString) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
@@ -510,16 +511,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
+      'gdpr_consent': consentString,
     };
   }
 
   /**
    * Constructs block-level url parameters with side effect of setting
    * size_, jsonTargeting, and adKey_ fields.
-   * @param {?string} consentString
    * @return {!Object<string,string|boolean|number>}
    */
-  getBlockParameters_(consentString) {
+  getBlockParameters_() {
     devAssert(this.initialSize_);
     devAssert(this.jsonTargeting);
     const tfcd = this.jsonTargeting && this.jsonTargeting[TFCD];
@@ -546,7 +547,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'iu': this.element.getAttribute('data-slot'),
       'co':
         this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
-      'gdpr_consent': consentString,
       'adk': this.adKey,
       'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
       'output': 'html',
@@ -609,13 +609,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl({consentState, consentString}, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
     if (
-      !consentTuple ||
-      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -627,7 +626,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
-    const consentState = consentTuple.consentState;
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
@@ -652,9 +650,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_BASE_URL,
         startTime,
         Object.assign(
-          this.getBlockParameters_(consentTuple.consentString),
+          this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentState),
+          this.getPageParameters(consentState, consentString),
           rtcParams
         ),
         this.experimentIds
@@ -1323,15 +1321,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  sendXhrRequest(adUrl) {
+  sendXhrRequest(adUrl, consentString) {
     if (!this.useSra) {
-      return super.sendXhrRequest(adUrl);
+      return super.sendXhrRequest(adUrl, consentString);
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
     // responses returned such that sraDeferred being non-null indicates this
     // element was somehow not included so report.
-    this.initiateSraRequests().then(() => {
+    this.initiateSraRequests(consentString).then(() => {
       checkStillCurrent();
       if (!this.sraDeferred) {
         dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
@@ -1358,7 +1356,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.sraDeferred.promise.then((response) => {
       checkStillCurrent();
       this.sraDeferred = null;
-      return response || super.sendXhrRequest(adUrl);
+      return response || super.sendXhrRequest(adUrl, consentString);
     });
   }
 
@@ -1423,10 +1421,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
+   * @param {?string} consentString
    * @return {!Promise}
    * @visibleForTesting
    */
-  initiateSraRequests() {
+  initiateSraRequests(consentString) {
     // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
@@ -1482,7 +1481,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               let sraUrl;
               // Construct and send SRA request.
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
-              return constructSRARequest_(this, typeInstances)
+              return constructSRARequest_(this, typeInstances, consentString)
                 .then((sraUrlIn) => {
                   checkStillCurrent();
                   sraUrl = sraUrlIn;
@@ -1749,9 +1748,10 @@ export function getNetworkId(element) {
 /**
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @param {?string} consentString
  * @return {!Promise<string>} SRA request URL
  */
-function constructSRARequest_(a4a, instances) {
+function constructSRARequest_(a4a, instances, consentString) {
   // TODO(bradfrizzell): Need to add support for RTC.
   devAssert(instances && instances.length);
   const startTime = Date.now();
@@ -1766,7 +1766,8 @@ function constructSRARequest_(a4a, instances) {
         Object.assign(
           blockParameters,
           googPageLevelParameters,
-          instances[0].getPageParameters(instances[0].consentState, instances)
+          instances[0].getPageParameters(
+            instances[0].consentState, instances, consentString)
         ),
         startTime
       );
