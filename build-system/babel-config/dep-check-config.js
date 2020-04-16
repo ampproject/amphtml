@@ -15,8 +15,6 @@
  */
 'use strict';
 
-const {getDevDependencies} = require('./dev-dependencies');
-
 /**
  * Gets the config for babel transforms run during `gulp dep-check`.
  *
@@ -47,10 +45,8 @@ function getDepCheckConfig() {
     reactJsxPlugin,
   ];
   const depCheckPresets = [presetEnv];
-  const devDependencies = getDevDependencies();
   return {
     compact: false,
-    ignore: devDependencies,
     plugins: depCheckPlugins,
     presets: depCheckPresets,
   };
