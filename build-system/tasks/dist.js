@@ -467,4 +467,5 @@ dist.flags = {
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
   debug: '  Outputs the file contents during compilation lifecycles',
+  defineExperimentConstant: '  Build with experiment const set to true',
 };
