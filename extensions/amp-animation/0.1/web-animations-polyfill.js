@@ -27,7 +27,8 @@ const POLYFILLED = '__AMP_WA';
  */
 function forceOnSafari(win) {
   if (Services.platformFor(win).isSafari()) {
-    win.Element.prototype.animate = null;
+    // Using string access syntax to bypass typecheck.
+    win.Element.prototype['animate'] = null;
   }
 }
 
