@@ -723,9 +723,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       const sampleDeferred = new Deferred();
       const sampleInTask = () => {
         const expansionOptions = this.expansionOptions_(dict({}), trigger);
-        const samplePromise = this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
+        const samplePromise = this.expandTemplateWithUrlParams_(
+          sampleOn,
+          expansionOptions
+        )
           .then((key) => this.cryptoService_.uniform(key))
-          .then((digest) => digest * 100 < threshold)
+          .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
       if (isExperimentOn(this.win, 'analytics-chunks')) {
