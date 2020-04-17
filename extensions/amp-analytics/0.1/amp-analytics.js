@@ -228,11 +228,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.variableService_ = services[1];
         const loadConfigDeferred = new Deferred();
         const loadConfigTask = () => {
-          return new AnalyticsConfig(this.element)
-            .loadConfig()
-            .then((config) => {
-              loadConfigDeferred.resolve(config);
-            });
+          const configPromise = new AnalyticsConfig(this.element).loadConfig();
+          loadConfigDeferred.resolve(configPromise);
         };
         if (isExperimentOn(this.win, 'analytics-chunks')) {
           chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
@@ -725,13 +722,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (threshold >= 0 && threshold <= 100) {
       const sampleDeferred = new Deferred();
       const sampleInTask = () => {
-        if (threshold >= 0 && threshold <= 100) {
-          const expansionOptions = this.expansionOptions_(dict({}), trigger);
-          this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-            .then((key) => this.cryptoService_.uniform(key))
-            .then((digest) => digest * 100 < threshold)
-            .then(() => sampleDeferred.resolve(true));
-        }
+        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const samplePromise = this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
+          .then((key) => this.cryptoService_.uniform(key))
+          .then((digest) => digest * 100 < threshold)
+        sampleDeferred.resolve(samplePromise);
       };
       if (isExperimentOn(this.win, 'analytics-chunks')) {
         chunk(this.element, sampleInTask, ChunkPriority.LOW);

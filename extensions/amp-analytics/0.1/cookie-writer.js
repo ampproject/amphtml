@@ -70,7 +70,7 @@ export class CookieWriter {
     if (!this.writeDeferred_) {
       this.writeDeferred_ = new Deferred();
       const task = () => {
-        this.init_().then(() => this.writeDeferred_.resolve());
+        this.writeDeferred_.resolve(this.init_());
       };
       if (isExperimentOn(this.win_, 'analytics-chunks')) {
         chunk(this.element_, task, ChunkPriority.LOW);
