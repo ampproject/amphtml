@@ -74,7 +74,7 @@
     "eslint-plugin-chai-expect": "2.1.0",
     "eslint-plugin-eslint-plugin": "2.2.1",
     "eslint-plugin-google-camelcase": "0.0.2",
-    "eslint-plugin-jasmine": "4.1.0",
+    "eslint-plugin-jasmine": "4.1.1",
     "eslint-plugin-jsdoc": "23.0.0",
     "eslint-plugin-local": "1.0.0",
     "eslint-plugin-notice": "0.8.9",
