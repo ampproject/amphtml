@@ -26,9 +26,10 @@ up to date:
 - Add any updates that may be of interest to the community (such as delays) as
   comments on this issue, including after the release is promoted to Stable (and, in some cases, LTS).
 
+Note: remove the backticks (``) from the link. They are there to allow the template file for this issue to pass `gulp check-links`.
 -->
 
-This issue tracks release [<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)
+This issue tracks release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)`
 
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (opt-in) channels (<CL submit time>)
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (1% traffic) channels (<CL submit time>)
