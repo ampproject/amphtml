@@ -38,12 +38,12 @@ function getReplacePlugin() {
   }
 
   const replacements = [createReplacement('IS_ESM', argv.esm)];
-  const defineFlag = argv.defineExperimentConstant;
+  const defineFlag = argv.define_experiment_constant;
 
   // add define flags from arguments
   if (Array.isArray(defineFlag)) {
     if (defineFlag.length > 1) {
-      throw new Error('Only one defineExperimentConstant flag is allowed');
+      throw new Error('Only one define_experiment_constant flag is allowed');
     } else {
       replacements.push(createReplacement(defineFlag[0], true));
     }
