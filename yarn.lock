@@ -12923,25 +12923,25 @@ postcss@7.0.27, postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.27:
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
-posthtml-parser@^0.4.1:
+posthtml-parser@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/posthtml-parser/-/posthtml-parser-0.4.2.tgz#a132bbdf0cd4bc199d34f322f5c1599385d7c6c1"
   integrity sha512-BUIorsYJTvS9UhXxPTzupIztOMVNPa/HtAm9KHni9z6qEfiJ1bpOBL5DfUOL9XAc3XkLIEzBzpph+Zbm4AdRAg==
   dependencies:
     htmlparser2 "^3.9.2"
 
-posthtml-render@^1.1.5:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/posthtml-render/-/posthtml-render-1.2.0.tgz#3df0c800a8bbb95af583a94748520469477addf4"
-  integrity sha512-dQB+hoAKDtnI94RZm/wxBUH9My8OJcXd0uhWmGh2c7tVtQ85A+OS3yCN3LNbFtPz3bViwBJXAeoi+CBGMXM0DA==
+posthtml-render@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/posthtml-render/-/posthtml-render-1.2.2.tgz#f554a19ed40d40e2bfc160826b0a91d4a23656cd"
+  integrity sha512-MbIXTWwAfJ9qET6Zl29UNwJcDJEEz9Zkr5oDhiujitJa7YBJwEpbkX2cmuklCDxubTMoRWpid3q8DrSyGnUUzQ==
 
-posthtml@0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/posthtml/-/posthtml-0.12.0.tgz#6e2a2fcd774eaed1a419a95c5cc3a92b676a40a6"
-  integrity sha512-aNUEP/SfKUXAt+ghG51LC5MmafChBZeslVe/SSdfKIgLGUVRE68mrMF4V8XbH07ZifM91tCSuxY3eHIFLlecQw==
+posthtml@0.12.2:
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/posthtml/-/posthtml-0.12.2.tgz#81d1ca9892a54941639bfd0f546957eaa1d3497a"
+  integrity sha512-vDMikGrmr2Ce4ralyBwfoTymA9Ycv2QSeaV+U9CdF/kHstsGSBVsTZ3Jt/BdACFuqCNyaICMdJI/rvGEreL7pA==
   dependencies:
-    posthtml-parser "^0.4.1"
-    posthtml-render "^1.1.5"
+    posthtml-parser "^0.4.2"
+    posthtml-render "^1.2.2"
 
 preact-render-to-string@^4.1.0:
   version "4.1.0"
