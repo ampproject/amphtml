@@ -219,6 +219,12 @@ export class AmpList extends AMP.BaseElement {
     );
 
     this.loadMoreEnabled_ = this.element.hasAttribute('load-more');
+    userAssert(
+      !(this.loadMoreEnabled_ && this.enableManagedResizing_),
+      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+      TAG,
+      this.element
+    );
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -569,8 +575,8 @@ export class AmpList extends AMP.BaseElement {
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
       const reset = () => {
-      this.togglePlaceholder(true);
-      this.toggleLoading(true);
+        this.togglePlaceholder(true);
+        this.toggleLoading(true);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -1296,6 +1302,15 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
+    if (this.enableManagedResizing_) {
+      user().warn(
+        '%s [is-layout-container] and changeToLayoutContainer are ineffective ' +
+          'when an amp-list initially sets layout=container',
+        TAG,
+        this.element
+      );
+      return Promise.resolve();
+    }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
