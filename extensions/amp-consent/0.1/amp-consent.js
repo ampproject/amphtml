@@ -239,6 +239,7 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.registerAction('prompt', () => {
+      console.log('register action prompt');
       this.scheduleDisplay_(true);
     });
 
