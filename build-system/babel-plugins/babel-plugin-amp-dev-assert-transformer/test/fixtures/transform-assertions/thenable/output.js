@@ -26,6 +26,8 @@ class ThenableSuccessFailure {
   refresh() {
     return this.promise_(() => {
       console.log('success');
+    }, () => {
+      console.log('failure');
     });
   }
 

@@ -108,10 +108,10 @@ module.exports = function ({types: t}) {
       if (isThenable(memberExpression)) {
         // MemberExpression is thenable, so removing the `devAssert` means thenabling the first argument of `devAssert`.
         const newCallee = innerCallExpression.get('arguments.0');
-        const newArguments = callExpression.get('arguments.0');
+        const newArguments = callExpression.get('arguments');
         const newCallExpression = t.callExpression(
           t.cloneDeep(newCallee.node),
-          [t.cloneDeep(newArguments.node)]
+          [...newArguments.map((arg) => t.cloneDeep(arg.node))]
         );
 
         callExpression.replaceWith(newCallExpression);
