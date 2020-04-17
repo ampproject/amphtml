@@ -88,4 +88,6 @@ defaultTask.flags = {
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   host: '  Host to serve the project on. localhost by default.',
   port: '  Port to serve the project on. 8000 by default.',
+  define_experiment_constant:
+    '  Builds runtime with the EXPERIMENT constant set to true',
 };
