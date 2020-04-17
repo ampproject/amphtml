@@ -87,6 +87,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -108,7 +109,6 @@ import {
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode, getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -1628,7 +1628,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // 16 hex characters * 2 bytes per character = 32 bytes
     const length = 16;
 
-    const randomValues = getCryptoRandomBytesArray(this.win, length)
+    const randomValues = getCryptoRandomBytesArray(this.win, length);
 
     let randomSubdomain = '';
     for (let i = 0; i < length; i++) {

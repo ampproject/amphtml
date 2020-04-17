@@ -101,8 +101,8 @@ export function bytesToUInt32(bytes) {
  */
 export function getCryptoRandomBytesArray(win, length) {
   // Support IE 11
-  const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (win
-    .crypto || win.msCrypto);
+  const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (win.crypto ||
+    win.msCrypto);
   if (!cryptoLib || !cryptoLib.getRandomValues) {
     return null;
   }
