@@ -175,21 +175,9 @@ describes.realWin('crypto-impl', {}, (env) => {
     });
   });
 
-  it('should not generate a secure random string when API is not available', () => {
-    const crypto = new Crypto({});
-    expect(crypto.getSecureRandomBytes(16)).to.be.null;
-  });
-
   // Run tests below only on browsers that we're confident about the existence
   // of native Crypto API.
   if (isModernChrome()) {
-    it('should generate secure random bytes when API is available', () => {
-      const crypto = new Crypto(win);
-      const length = 16;
-      const randomBytes = crypto.getSecureRandomBytes(length);
-      expect(randomBytes.length).to.equal(length);
-    });
-
     it(
       'should not load closure lib when native API is available ' +
         '(string input)',

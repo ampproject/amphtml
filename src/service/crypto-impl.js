@@ -215,26 +215,6 @@ export class Crypto {
       data
     ));
   }
-
-  /**
-   * Returns a Uint8Array of the given length full of cryptographically
-   * random values if win.crypto is available.
-   * If win.crypto, is not available, returns null.
-   * @param {number} length The length of the string to return
-   * @return {Uint8Array|null}
-   */
-  getSecureRandomBytes(length) {
-    // Support IE 11
-    const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (this.win_
-      .crypto || this.win_.msCrypto);
-    if (!cryptoLib) {
-      return null;
-    }
-
-    const randomValues = new Uint8Array(length);
-    cryptoLib.getRandomValues(randomValues);
-    return randomValues;
-  }
 }
 
 /**
