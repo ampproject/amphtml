@@ -580,17 +580,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     const linkerTaskDeferred = new Deferred();
     const linkerTask = () => {
-      try {
-        this.linkerManager_ = new LinkerManager(
-          this.getAmpDoc(),
-          this.config_,
-          type,
-          this.element
-        );
-        this.linkerManager_.init();
-      } catch (e) {
-        user.error(TAG, 'error initiating analytics linker, %s', e);
-      }
+      this.linkerManager_ = new LinkerManager(
+        this.getAmpDoc(),
+        this.config_,
+        type,
+        this.element
+      );
+      this.linkerManager_.init();
       linkerTaskDeferred.resolve();
     };
     if (isExperimentOn(this.win, 'analytics-chunks')) {
