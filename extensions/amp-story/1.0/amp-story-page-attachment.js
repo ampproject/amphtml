@@ -107,7 +107,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildInline_() {
     this.headerEl_.appendChild(
       htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button"
+          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
               role="button">
           </span>`
     );
