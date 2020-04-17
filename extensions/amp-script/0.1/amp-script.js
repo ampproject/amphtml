@@ -419,24 +419,22 @@ export class AmpScript extends AMP.BaseElement {
       // Emit an error message for each mutation type, including count.
       Object.keys(errors).forEach((type) => {
         const count = errors[type];
-        user().error(this.mutationTypeToErrorMessage_(type, count));
+        user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
       });
+
+      if (disallowedTypes.length > 0) {
+        this.workerDom_.terminate();
+
+        this.element.classList.remove('i-amphtml-hydrated');
+        this.element.classList.add('i-amphtml-broken');
+
+        user().error(
+          TAG,
+          '%s was terminated due to illegal mutation.',
+          this.debugId_
+        );
+      }
     });
-
-    // TODO(amphtml): flush(false) already filters all user-visible mutations,
-    // so we could just remove this code block for gentler failure mode.
-    if (!allowMutation && phase == Phase.MUTATING) {
-      this.workerDom_.terminate();
-
-      this.element.classList.remove('i-amphtml-hydrated');
-      this.element.classList.add('i-amphtml-broken');
-
-      user().error(
-        TAG,
-        '%s was terminated due to illegal mutation.',
-        this.debugId_
-      );
-    }
   }
 
   /**
@@ -453,16 +451,21 @@ export class AmpScript extends AMP.BaseElement {
       case '0':
       case '3':
         target = 'DOM element attributes or styles';
+        break;
       // Character data
       case '1':
         target = 'textContent or the like';
+        break;
       // Child list
       case '2':
         target = 'DOM element children, innerHTML, or the like';
+        break;
       // Other
       default:
         target = 'the DOM';
+        break;
     }
+
     return (
       `Blocked ${count} attempts to modify ${target}.` +
       ' For variable-sized <amp-script> containers, a user action has to happen first.'

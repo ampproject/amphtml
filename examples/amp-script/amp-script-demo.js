@@ -39,6 +39,10 @@ if (hello) {
     document.body.appendChild(el);
   });
 }
+setTimeout(() => {
+  const el = document.createElement('h1');
+  el.textContent = 'gotcvhya!';
+}, 3000);
 
 // Long task.
 const long = document.getElementById('long');
@@ -47,12 +51,12 @@ if (long) {
     incrementMutationCount();
 
     fetch('http://localhost:8000/examples/amp-script/hello-world-data.json')
-        .then(response => response.json())
-        .then(json => {
-          const el = document.createElement('h1');
-          el.textContent = 'Hello ' + json.year + ' World!';
-          document.body.appendChild(el);
-        });
+      .then((response) => response.json())
+      .then((json) => {
+        const el = document.createElement('h1');
+        el.textContent = 'Hello ' + json.year + ' World!';
+        document.body.appendChild(el);
+      });
   });
 }
 
@@ -65,7 +69,7 @@ if (ampImg) {
     const el = document.createElement('amp-img');
     el.setAttribute('width', '300');
     el.setAttribute('height', '200');
-    el.setAttribute('src', '/examples/img/hero@1x.jpg')
+    el.setAttribute('src', '/examples/img/hero@1x.jpg');
     document.body.appendChild(el);
   });
 }
