@@ -21,7 +21,7 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
-import {devAssert, dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
