@@ -16,40 +16,11 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
-const conf = require('./build.conf');
-const fs = require('fs-extra');
 const path = require('path');
 const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
-
-/**
- * Given a filepath, return the sourcemap.
- *
- * @param {string} file
- * @return {string|null}
- */
-function loadSourceMap(file) {
-  if (file.startsWith('dist')) {
-    return fs.readFile(`${file}.map`);
-  }
-  return null;
-}
-
-/**
- * @param {string} map
- * @return {function(string)}
- */
-function returnMapFirst(map) {
-  let first = true;
-  return function (file) {
-    if (first) {
-      first = false;
-      return map;
-    }
-    return loadSourceMap(file);
-  };
-}
+const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 
 /**
  * Minify passed string.
@@ -80,45 +51,55 @@ function terserMinify(code) {
 }
 
 /**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup added
+ * space with Terser. Used only in esm mode.
  *
- * @param {string} directory directory this file lives in
- * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-exports.postClosureBabel = function (directory, isEsmBuild) {
-  const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
-
+exports.postClosureBabel = function () {
   return through.obj(function (file, enc, next) {
-    if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
+    if (!argv.esm || path.extname(file.path) === '.map') {
+      debug(
+        CompilationLifecycles['complete'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
       return next(null, file);
     }
 
-    const map = loadSourceMap(file.path);
+    const map = file.sourceMap;
+
+    debug(
+      CompilationLifecycles['closured-pre-babel'],
+      file.path,
+      file.contents,
+      file.sourceMap
+    );
     const {code, map: babelMap} = babel.transformSync(file.contents, {
-      plugins: babelPlugins,
-      retainLines: false,
-      sourceMaps: true,
-      inputSourceMap: false,
+      caller: {name: 'post-closure'},
     });
-    let remapped = remapping(
-      babelMap,
-      returnMapFirst(map),
-      !argv.full_sourcemaps
-    );
 
+    debug(
+      CompilationLifecycles['closured-pre-terser'],
+      file.path,
+      file.contents,
+      file.sourceMap
+    );
     const {compressed, terserMap} = terserMinify(code);
-    file.contents = Buffer.from(compressed, 'utf-8');
 
-    // TODO: Remapping should support a chain, instead of multiple invocations.
-    remapped = remapping(
-      terserMap,
-      returnMapFirst(remapped),
+    file.contents = Buffer.from(compressed, 'utf-8');
+    file.sourceMap = remapping(
+      [terserMap, babelMap, map],
+      () => null,
       !argv.full_sourcemaps
     );
-    fs.writeFileSync(
-      path.resolve(directory, `${path.basename(file.path)}.map`),
-      remapped.toString()
+
+    debug(
+      CompilationLifecycles['complete'],
+      file.path,
+      file.contents,
+      file.sourceMap
     );
 
     return next(null, file);

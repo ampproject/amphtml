@@ -35,8 +35,7 @@ const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);

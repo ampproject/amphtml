@@ -18,7 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
-const conf = require('../compile/build.conf');
+const debounce = require('debounce');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -94,32 +94,14 @@ const MINIFIED_TARGETS = [
 ].map(maybeToEsmName);
 
 /**
- * Settings for the global Babelify transform while compiling unminified code
- */
-const BABELIFY_GLOBAL_TRANSFORM = {
-  global: true, // Transform node_modules
-  /**
-   * Ignore devDependencies, except for 'chai-as-promised' which contains ES6 code.
-   * ES6 code is fine for most test environments, but not for integration tests
-   * running on SauceLabs since some older browsers need ES5.
-   */
-  ignore: devDependencies().filter(
-    (dep) => dep.indexOf('chai-as-promised') === -1
-  ),
-};
+ * Used while building the 3p frame
+ **/
+const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
- * Plugins used by Babelify while compiling unminified code
+ * Used to debounce file edits during watch to prevent races.
  */
-const BABELIFY_PLUGINS = {
-  plugins: [
-    conf.getReplacePlugin(argv.esm || false),
-    conf.getJsonConfigurationPlugin(),
-  ],
-};
-
-const hostname = argv.hostname || 'cdn.ampproject.org';
-const hostname3p = argv.hostname3p || '3p.ampproject.net';
+const watchDebounceDelay = 1000;
 
 /**
  * @param {!Object} jsBundles
@@ -157,9 +139,10 @@ async function bootstrapThirdPartyFrames(watch, minify) {
   });
   if (watch) {
     thirdPartyFrames.forEach((frameObject) => {
-      gulpWatch(frameObject.max, function () {
+      const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, minify);
-      });
+      };
+      gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
     });
   }
   await Promise.all(promises);
@@ -279,14 +262,15 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   if (options.watch) {
-    gulpWatch(entryPoint, async function () {
+    const watchFunc = async () => {
       const compileComplete = await doCompileMinifiedJs(
         /* continueOnError */ true
       );
       if (options.onWatchBuild) {
         options.onWatchBuild(compileComplete);
       }
-    });
+    };
+    gulpWatch(entryPoint, debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -388,17 +372,6 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
- * Returns array of relative paths to "devDependencies" defined in package.json.
- * @return {!Array<string>}
- */
-function devDependencies() {
-  const file = fs.readFileSync('package.json', 'utf8');
-  const packageJson = JSON.parse(file);
-  const devDependencies = Object.keys(packageJson['devDependencies']);
-  return devDependencies.map((p) => `./node_modules/${p}`);
-}
-
-/**
  * Transforms a given JavaScript file entry point with browserify, and watches
  * it for changes (if required).
  * @param {string} srcDir
@@ -421,21 +394,20 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     ...options.browserifyOptions,
   };
 
-  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
-
-  let bundler = browserify(browserifyOptions).transform(
-    babelify,
-    babelifyOptions
-  );
+  let bundler = browserify(browserifyOptions).transform(babelify, {
+    caller: {name: 'unminified'},
+    global: true,
+  });
 
   if (options.watch) {
-    bundler = watchify(bundler);
-    bundler.on('update', () => {
+    const watchFunc = () => {
       const bundleComplete = performBundle(/* continueOnError */ true);
       if (options.onWatchBuild) {
         options.onWatchBuild(bundleComplete);
       }
-    });
+    };
+    bundler = watchify(bundler);
+    bundler.on('update', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
@@ -705,20 +677,17 @@ function toPromise(readable) {
 
 module.exports = {
   applyAmpConfig,
-  BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
   compileAllJs,
   compileCoreRuntime,
   compileJs,
   compileTs,
-  devDependencies,
   doBuildJs,
   endBuildStep,
-  hostname,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  watchDebounceDelay,
 };

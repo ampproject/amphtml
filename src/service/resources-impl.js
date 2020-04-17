@@ -536,11 +536,11 @@ export class ResourcesImpl {
     ) {
       return null;
     }
-    dev().fine(TAG_, 'build resource:', resource.debugid);
     const promise = resource.build();
     if (!promise) {
       return null;
     }
+    dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
     return promise.then(
       () => this.schedulePass(),
@@ -1157,13 +1157,24 @@ export class ResourcesImpl {
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
-      if (
+      if (this.intersectionObserver_) {
+        // With IntersectionObserver, we call applySizesAndMediaQuery() early
+        // in connectedCallback(), so we only need to re-apply on relayout.
+        // relayoutCount is also irrelevant and doesn't need an increment.
+        if (relayoutAll) {
+          r.applySizesAndMediaQuery();
+          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
+        }
+      } else if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
+        // TODO(willchou): We sometimes call this needlessly/repeatedly.
+        // All elements outside of the loading rect are NOT_LAID_OUT!
         r.applySizesAndMediaQuery();
+        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
@@ -1184,9 +1195,12 @@ export class ResourcesImpl {
         }
         // Difference: if we have a "premeasured" client rect, consume it
         // as the element's new measurements even if the element isn't built.
+        const requested = r.isMeasureRequested();
+        if (requested) {
+          dev().fine(TAG_, 'force remeasure:', r.debugid);
+        }
         const premeasured = r.hasBeenPremeasured();
-        const needsMeasure =
-          premeasured || this.relayoutAll_ || r.isMeasureRequested();
+        const needsMeasure = premeasured || requested || this.relayoutAll_;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
@@ -1420,14 +1434,28 @@ export class ResourcesImpl {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        // With IntersectionObserver, the element's client rect measurement
-        // is recent so immediate remeasuring shouldn't be necessary.
-        if (!this.intersectionObserver_) {
-          task.resource.measure();
+        const {resource} = task;
+
+        let stillDisplayed = true;
+        if (this.intersectionObserver_) {
+          // With IntersectionObserver, peek at the premeasured rect to see
+          // if the resource is still displayed (has a non-zero size).
+          // The premeasured rect is most analogous to an immediate measure.
+          if (resource.hasBeenPremeasured()) {
+            stillDisplayed = resource.isDisplayed(
+              /* usePremeasuredRect */ true
+            );
+          }
+        } else {
+          // Remeasure can only update isDisplayed(), not in-viewport state.
+          resource.measure();
         }
         // Check if the element has exited the viewport or the page has changed
         // visibility since the layout was scheduled.
-        if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
+        if (
+          stillDisplayed &&
+          this.isLayoutAllowed_(resource, task.forceOutsideViewport)
+        ) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1439,9 +1467,8 @@ export class ResourcesImpl {
             )
             .catch(/** @type {function (*)} */ (reportError));
         } else {
-          devAssert(!this.intersectionObserver_);
           dev().fine(TAG_, 'cancelled', task.id);
-          task.resource.layoutCanceled();
+          resource.layoutCanceled();
         }
       }
 

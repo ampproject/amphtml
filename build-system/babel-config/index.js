@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,5 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-const [a, ...b] = [1, 2, 3, 4, 5];
+const fs = require('fs');
+
+/**
+ * Populates a single object with the babel configs from all the *-config.js
+ * files in this directory.
+ *
+ * @return {!Object}
+ */
+function getAllBabelConfigs() {
+  const babelConfigFiles = fs
+    .readdirSync(__dirname)
+    .filter((file) => file.includes('-config.js'));
+  const babelConfigs = babelConfigFiles.map((file) => require(`./${file}`));
+  return Object.assign({}, ...babelConfigs);
+}
+
+module.exports = getAllBabelConfigs();

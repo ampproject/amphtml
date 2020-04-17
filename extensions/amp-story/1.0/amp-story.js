@@ -945,7 +945,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Renders the layout for the story
+   * Renders the layout for the story.
    * @return {!Promise} A promise that is resolved when the story layout is
    *       loaded
    * @private
@@ -1654,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * For some reason, Safari has an issue where sometimes when pages become
-   * visible, some descendants are not painted.  This is a hack where we detect
+   * visible, some descendants are not painted.  This is a hack, where we detect
    * that the browser is Safari and force it to repaint, to avoid this case.
    * See newmuis/amphtml-story#106 for details.
    * @private
@@ -1855,7 +1855,15 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           for (let i = 0; i < pageAttachments.length; i++) {
-            this.element.appendChild(pageAttachments[i]);
+            this.element.insertBefore(
+              pageAttachments[i],
+              // Attachments that are just links are rendered in-line with their
+              // story page.
+              pageAttachments[i].getAttribute('href')
+                ? pageAttachments[i].parentElement.nextElementSibling
+                : // Other attachments are rendered at the end.
+                  null
+            );
           }
         });
 

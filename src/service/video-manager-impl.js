@@ -819,14 +819,12 @@ class VideoEntry {
 
     /** @param {boolean} isPlaying */
     const toggleAnimation = (isPlaying) => {
-      video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', isPlaying);
-      });
+      video.mutateElementSkipRemeasure(() =>
+        animation.classList.toggle('amp-video-eq-play', isPlaying)
+      );
     };
 
-    video.mutateElement(() => {
-      element.appendChild(animation);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(animation));
 
     const unlisteners = [
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
@@ -865,16 +863,12 @@ class VideoEntry {
 
     /** @param {boolean} display */
     const setMaskDisplay = (display) => {
-      video.mutateElement(() => {
-        toggle(mask, display);
-      });
+      video.mutateElementSkipRemeasure(() => toggle(mask, display));
     };
 
     video.hideControls();
 
-    video.mutateElement(() => {
-      element.appendChild(mask);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(mask));
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
