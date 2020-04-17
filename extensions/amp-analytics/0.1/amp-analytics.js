@@ -557,6 +557,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Create the linker-manager that will append linker params as necessary.
+   * The initialization is asynchronous and non blocking
    * @private
    */
   initializeLinker_() {
