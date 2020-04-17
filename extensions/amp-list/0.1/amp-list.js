@@ -62,7 +62,7 @@ import {
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setStyles, toggle} from '../../../src/style';
+import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
 
@@ -565,10 +565,9 @@ export class AmpList extends AMP.BaseElement {
       (isFetch && this.element.hasAttribute('reset-on-refresh')) ||
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
-      // Placeholder and loading don't need a mutate context.
+      const reset = () => {
       this.togglePlaceholder(true);
       this.toggleLoading(true);
-      this.mutateElement(() => {
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -579,6 +578,14 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+      };
+
+      if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
+        this.lockHeightAndMutate_(reset);
+        return;
+      }
+      this.measureElement(() => {
+        reset();
         if (this.loadMoreEnabled_) {
           this.getLoadMoreService_().hideAllLoadMoreElements();
         }
@@ -1012,7 +1019,7 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
-    return this.mutateElement(() => {
+    const renderAndResize = () => {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
@@ -1039,8 +1046,18 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      this.maybeResizeListToFitItems_();
-    });
+      return this.maybeResizeListToFitItems_();
+    };
+
+    if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
+      return this.lockHeightAndMutate_(() =>
+        renderAndResize().then((resized) =>
+          resized ? this.unlockHeightInsideMutate_() : null
+        )
+      );
+    }
+
+    return this.mutateElement(renderAndResize);
   }
 
   /**
@@ -1135,6 +1152,40 @@ export class AmpList extends AMP.BaseElement {
         );
       }
     }
+  }
+
+  /**
+   * Measure and lock height before performing given mutate fn.
+   * Applicable for layout=container.
+   * @private
+   * @param {!Function} mutate
+   * @return {!Promise}
+   */
+  lockHeightAndMutate_(mutate) {
+    let currentHeight;
+    return this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+      },
+      () => {
+        setImportantStyles(this.element, {
+          'height': `${currentHeight}px`,
+          'overflow': 'hidden',
+        });
+        return mutate();
+      }
+    );
+  }
+
+  /**
+   * Applicable for layout=container.
+   * @private
+   */
+  unlockHeightInsideMutate_() {
+    setImportantStyles(this.element, {
+      'height': '',
+      'overflow': '',
+    });
   }
 
   /**
