@@ -40,4 +40,6 @@ export function installIntersectionObserverPolyfill(win) {
   registerServiceBuilder(win, TAG, install, /* instantiate */ true);
 }
 
-installIntersectionObserverPolyfill(window);
+AMP.extension(TAG, '0.1', function () {
+  installIntersectionObserverPolyfill(window);
+});

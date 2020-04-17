@@ -19,14 +19,14 @@
     "@ampproject/viewer-messaging": "1.1.0",
     "@ampproject/worker-dom": "0.24.0",
     "dompurify": "2.0.7",
+    "intersection-observer": "0.8.0",
     "moment": "2.24.0",
     "preact": "10.2.1",
     "promise-pjs": "1.1.4",
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
     "web-activities": "1.13.0",
-    "web-animations-js": "2.3.1",
-    "intersection-observer": "0.8.0"
+    "web-animations-js": "2.3.1"
   },
   "devDependencies": {
     "@ampproject/filesize": "3.2.1",

@@ -25,42 +25,9 @@ const UPGRADERS = '_upgraders';
  * @param {!Window} win
  */
 export function install(win) {
-  // DO NOT SUBMIT: remove, testing.
-  delete win.IntersectionObserver;
-  delete win.IntersectionObserverEntry;
-
   if (!win.IntersectionObserver) {
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
   }
-
-  /* DO NOT SUBMIT: examples */
-  (() => {
-    const inob1 = new win.IntersectionObserver((records) => {
-      console.log('inob1: ', records);
-    });
-    inob1.observe(win.document.body);
-
-    const iframe = win.document.createElement('iframe');
-    iframe.srcdoc = '<!doctype html><html><head><body>';
-    iframe.onload = () => {
-      const childWin = iframe.contentWindow;
-      installForChildWin(win, childWin);
-      const inob2 = new childWin.IntersectionObserver((records) => {
-        console.log('inob2: ', records);
-      });
-      inob2.observe(childWin.document.body);
-
-      IntersectionObserverStub[UPGRADERS].push(() => {
-        setTimeout(() => {
-          const inob3 = new IntersectionObserverStub((records) => {
-            console.log('inob3: ', records);
-          });
-          inob3.observe(childWin.document.body);
-        }, 1000);
-      });
-    };
-    win.document.body.appendChild(iframe);
-  })();
 }
 
 /**
@@ -68,22 +35,13 @@ export function install(win) {
  * @param {!Window} childWin
  */
 export function installForChildWin(parentWin, childWin) {
-  // DO NOT SUBMIT: remove, testing.
-  delete childWin.IntersectionObserver;
-  delete childWin.IntersectionObserverEntry;
-
   if (!childWin.IntersectionObserver && parentWin.IntersectionObserver) {
-    childWin.IntersectionObserver = parentWin.IntersectionObserver;
-    childWin.IntersectionObserverEntry = parentWin.IntersectionObserverEntry;
-    if (parentWin.IntersectionObserver === IntersectionObserverStub) {
-      // Wait until new polyfill is available and override with the upgraded
-      // classes.
-      IntersectionObserverStub[UPGRADERS].push(() => {
-        childWin.IntersectionObserver = parentWin.IntersectionObserver;
-        childWin.IntersectionObserverEntry =
-          parentWin.IntersectionObserverEntry;
-      });
-    }
+    Object.defineProperties(childWin, {
+      IntersectionObserver: {get: () => parentWin.IntersectionObserver},
+      IntersectionObserverEntry: {
+        get: () => parentWin.IntersectionObserverEntry,
+      },
+    });
   }
 }
 
@@ -139,8 +97,9 @@ export function upgradePolyfill(win, installer) {
  * The stub for `IntersectionObserver`. Implements the same interface, but
  * keeps the tracked elements in memory until the actual polyfill arives.
  * This stub is necessary because the polyfill itself is significantly bigger.
+ * @visibleForTesting
  */
-class IntersectionObserverStub {
+export class IntersectionObserverStub {
   /**
    * @param {!IntersectionObserverCallback} callback
    * @param {!IntersectionObserverInit=} options
@@ -156,11 +115,11 @@ class IntersectionObserverStub {
       ...options,
     };
 
-    // Must fail on the document root to ensure that the polyfill is not
-    // confused with the new spec that allows document as the root.
+    // Must fail on any non-element root. This is critical because this
+    // failure is used as a feature-detection for document root support.
     const {root} = this.options_;
     if (root && root.nodeType !== /* ELEMENT */ 1) {
-      throw new Error('root document is not supported');
+      throw new Error('root must be an Element');
     }
 
     /** @private {?Array<!Element>} */
@@ -262,7 +221,6 @@ class IntersectionObserverStub {
    * @private
    */
   upgrade_(constr) {
-    console.log('inob: upgraded');
     const inst = new constr(this.callback_, this.options_);
     this.inst_ = inst;
     this.elements_.forEach((e) => inst.observe(e));
@@ -274,3 +232,8 @@ class IntersectionObserverStub {
  * @type {!Array<function(typeof IntersectionObserver)>}
  */
 IntersectionObserverStub[UPGRADERS] = [];
+
+/** @visibleForTesting */
+export function resetSubsForTesting() {
+  IntersectionObserverStub[UPGRADERS] = [];
+}
