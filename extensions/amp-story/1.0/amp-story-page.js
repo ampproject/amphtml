@@ -358,6 +358,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setPageDescription_();
+    this.element.setAttribute('role', 'region');
   }
 
   /** @private */
