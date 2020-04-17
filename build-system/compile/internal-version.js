@@ -16,7 +16,7 @@
 'use strict';
 
 const minimist = require('minimist');
-const {gitCommitFormattedTime} = require('../common/git');
+const {gitCherryMaster, gitCommitFormattedTime} = require('../common/git');
 
 // Allow leading zeros in --version_override, e.g. 0000000000001
 const argv = minimist(process.argv.slice(2), {
@@ -31,35 +31,71 @@ function getVersion() {
       throw new Error('--version_override only accepts a 13-digit version');
     }
     return version;
-  } else {
-    // Generate a consistent version number by using the commit* time of the
-    // latest commit on the active branch as the twelve digits. The last,
-    // thirteenth digit defaults to 0, but can be changed by setting the
-    // --custom_version_mark flag to a different value. This should rarely be
-    // used by AMP release engineers.
-    //
-    // e.g., the version number of a clean (no uncommited changes) tree that was
-    // commited on August 1, 2018 at 14:31:11 EDT would be `1808011831110`
-    // (notice that due to timezone shift, the hour value changes from EDT's 14
-    // to UTC's 18. The last digit is the default value of 0 as
-    // --custom_version_mark was not set.)
-    //
-    // *Commit time is different from author time! Commit time is the time that
-    // the PR was merged into master; author time is when the author ran the
-    // "git commit" command.
-    const lastCommitFormattedTime = gitCommitFormattedTime();
-    let lastDigit = 0;
-    if (argv.custom_version_mark) {
-      lastDigit = parseInt(argv.custom_version_mark, 10);
-      if (isNaN(lastDigit) || lastDigit < 0 || lastDigit > 9) {
-        throw new Error(
-          `--custom_version_mark is set to ${argv.custom_version_mark}, ` +
-            'expected value between 0 and 9!'
-        );
-      }
-    }
-    return `${lastCommitFormattedTime}${lastDigit}`;
   }
+  // Version numbers are determined using the following algorithm:
+  // - Count the number (<X>) of cherry-picked releases on this branch that came
+  //   from the `master` branch, until reaching `master` or the first commit
+  //   that was added directly on this branch (if the current commit is on
+  //   `master`'s commit history, or only contains new commits that are not
+  //   cherry-picked from `master`, then <X> is 0).
+  //   - If <X> > 9 then cap it at 9 (or throw an error for `--strict_build`s).
+  // - Find the commit (<C>) before the last cherry-picked commit from the
+  //   `master` branch (if the current branch is `master`, or otherwise in
+  //   `master`'s commit history, then the current commit is <C>).
+  // - Find the commit time of <C> (<C>.time). Note that commit time might be
+  //   different from author time! e.g., commit time might be the time that a PR
+  //   was merged into `master`, or a commit was cherry-picked onto the brabnch;
+  //   author time is when the original author of the commit ran the
+  //   "git commit" command.
+  // - The version number is <C>.time.format("YYmmDDHHMMSS", "UTC") + <X> (the
+  //   pseudo-code assumes standard `.strftime` formatting).
+  //
+  // Examples:
+  // 1. The version number of a release built from the HEAD commit on `master`,
+  //    where that HEAD commit was committed on April 25, 2020 2:31:11 PM EDT
+  //    would be `2004251831110`.
+  //    - EDT is UTC-4, so the hour value changes from EDT's 14 to UTC's 18.
+  //    - The last digit is 0 as this commit is on `master`.
+  //
+  // 2. The version number of a release built from a local working branch (e.g.,
+  //    on a developer's workstation) that was split off from a `master` commit
+  //    from May 6, 2021 10:40:59 AM PDT and has multiple commits that exist
+  //    only on local working branch would be `2105061840590`.
+  //    - PDT is UTC-7, so the hour value changes from PST's 10 to UTC's 17.
+  //    - The last digit is 0 as this commit is on a branch that was split
+  //      from but does not have any commits since the split that were
+  //      cherry-picked from `master`.
+  //
+  // 3. For a release built from a local working branch that was split off from
+  //    a `master` commit from November 9, 2021 11:48:11 PM PST, and then:
+  //    - had one commit that was cherry-picked from `master`,
+  //    - followed by two commits that were created directly on the branch, the
+  //      last of which was commited on November 10, 2021 5:01:12 PM PST,
+  //    - followed by four commits that were cherry-picked from `master`,
+  //    then its version number would be `202111110101124`.
+  //    - The latest four commits are cherry-picks from `master`, and the one
+  //      before them is not, so our last digit is set to 4.
+  //    - PST is UTC-8, so the hour value changes from PST's 17 to UTC's 1, and
+  //      one day is added.
+  let numberOfCherryPicks = 0;
+  const commitCherriesInfo = gitCherryMaster().reverse();
+  for (const commitCherryInfo of commitCherriesInfo) {
+    if (!commitCherryInfo.isCherryPick) {
+      break;
+    }
+    numberOfCherryPicks++;
+  }
+  const lastCommitFormattedTime = gitCommitFormattedTime(
+    `HEAD~${numberOfCherryPicks}`
+  );
+
+  if (argv.strict_build && numberOfCherryPicks > 9) {
+    throw new Error(
+      `This branch has ${numberOfCherryPicks} cherry-picks. --strict_build caps the number of cherry-picks at 10. To build this branch use --version_override.`
+    );
+  }
+  const lastDigit = Math.min(numberOfCherryPicks, 9);
+  return `${lastCommitFormattedTime}${lastDigit}`;
 }
 
 // Used to e.g. references the ads binary from the runtime to get version lock.

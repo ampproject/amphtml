@@ -169,12 +169,30 @@ function gitCommitterEmail() {
 }
 
 /**
- * Returns the timestamp of the latest commit on the local branch.
+ * Returns list of commit SHAs and their cherry-pick status from master.
+ *
+ * @return {!Array<{sha: string, isCherryPick: boolean}>}
+ */
+function gitCherryMaster() {
+  return getStdout('git cherry master')
+    .trim()
+    .split('\n')
+    .map((line) => ({
+      isCherryPick: line.substring(0, 2) == '- ',
+      sha: line.substring(2),
+    }));
+}
+
+/**
+ * Returns the timestamp of a commit on the local branch.
+ *
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of. Leave out or set to empty string for HEAD.
  * @return {number}
  */
-function gitCommitFormattedTime() {
+function gitCommitFormattedTime(ref = '') {
   return getStdout(
-    'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S'
+    `TZ=UTC git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
 }
 
@@ -211,6 +229,7 @@ function gitDiffPath(path, commit) {
 module.exports = {
   gitBranchCreationPoint,
   gitBranchName,
+  gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
   gitCommitterEmail,
