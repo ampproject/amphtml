@@ -26,7 +26,6 @@ const argv = minimist(process.argv.slice(2), {
 function getVersion() {
   if (argv.version_override) {
     const version = String(argv.version_override);
-    // #27579: What are allowed version strings...?
     if (!/^\d{13}$/.test(version)) {
       throw new Error('--version_override only accepts a 13-digit version');
     }
