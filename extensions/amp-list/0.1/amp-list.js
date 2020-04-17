@@ -59,6 +59,7 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
@@ -131,6 +132,16 @@ export class AmpList extends AMP.BaseElement {
     this.layoutCompleted_ = false;
 
     /**
+     * Whether the amp-list has an initial `layout` value of `container`.
+     * If so, allow it to manage its own resizing in accordance to
+     * (1) requiring a placeholder to detect initial sizing,
+     * (2) fixing height on content change to prevent content jumping, and
+     * (3) allowing resizing to contents on user interaction.
+     * @private {boolean}
+     */
+    this.enableManagedResizing_ = false;
+
+    /**
      * The `src` attribute's initial value.
      * @private {?string}
      */
@@ -177,6 +188,23 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    if (layout === Layout.CONTAINER) {
+      const doc = this.element.ownerDocument;
+      userAssert(
+        (doc && isAmp4Email(doc)) ||
+          isExperimentOn(this.win, 'amp-list-layout-container'),
+        'Experiment "amp-list-layout-container" is not turned on.'
+      );
+      userAssert(
+        this.getPlaceholder(),
+        '%s with layout=container relies on a placeholder to determine an initial height. ' +
+          'For more info on adding a placeholder see: ' +
+          'https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+        TAG,
+        this.element
+      );
+      return (this.enableManagedResizing_ = true);
+    }
     return isLayoutSizeDefined(layout);
   }
 
