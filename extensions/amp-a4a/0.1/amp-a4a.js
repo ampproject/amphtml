@@ -65,6 +65,7 @@ import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
+import stringify from 'json-stable-stringify';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -136,6 +137,12 @@ export let SizeInfoDef;
       ctaUrl: (string|undefined),
     }} */
 export let CreativeMetaDataDef;
+
+/** @typedef {{
+    adUrl: ?string,
+    consentString: string,
+  }} */
+export let AdUrlAndConsent;
 
 /**
  * Name of A4A lifecycle triggers.
@@ -686,14 +693,8 @@ export class AmpA4A extends AMP.BaseElement {
 
         return Promise.resolve([null, null]);
       })
-      // This block returns the ad URL, if one is available.
-      /**
-       * @typedef {Object} AdUrlInfo
-       * @property {?string} adUrl
-       * @property {?string} consentString
-       *
-       * @return {!Promise<AdUrlInfo>}
-       */
+      // This block returns the ad URL, if one is available.   
+      /** @return {!Promise<AdUrlAndConsent>} */
       .then((consentResponse) => {
         checkStillCurrent();
 
@@ -719,7 +720,7 @@ export class AmpA4A extends AMP.BaseElement {
             XORIGIN_MODE.IFRAME_GET;
           return Promise.reject(IFRAME_GET);
         }
-        return adUrl && this.sendXhrRequest(adUrl, consentString);
+        return adUrl && this.sendXhrRequest(adUrl);
       })
       // The following block returns either the response (as a
       // {bytes, headers} object), or null if no response is available /
@@ -1363,11 +1364,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @param {?string} consentString
    * @return {!Promise<?Response>}
    * @protected
    */
-  sendXhrRequest(adUrl, consentString) {
+  sendXhrRequest(adUrl) {
     this.maybeTriggerAnalyticsEvent_('adRequestStart');
     const xhrInit = {
       mode: 'cors',

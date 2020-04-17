@@ -1327,15 +1327,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  sendXhrRequest(adUrl, consentString) {
+  sendXhrRequest(adUrl) {
     if (!this.useSra) {
-      return super.sendXhrRequest(adUrl, consentString);
+      return super.sendXhrRequest(adUrl);
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
     // responses returned such that sraDeferred being non-null indicates this
     // element was somehow not included so report.
-    this.initiateSraRequests(consentString).then(() => {
+    this.initiateSraRequests().then(() => {
       checkStillCurrent();
       if (!this.sraDeferred) {
         dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
@@ -1427,11 +1427,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
-   * @param {?string} consentString
    * @return {!Promise}
    * @visibleForTesting
    */
-  initiateSraRequests(consentString) {
+  initiateSraRequests() {
     // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
@@ -1487,7 +1486,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               let sraUrl;
               // Construct and send SRA request.
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
-              return constructSRARequest_(this, typeInstances, consentString)
+              return constructSRARequest_(this, typeInstances)
                 .then((sraUrlIn) => {
                   checkStillCurrent();
                   sraUrl = sraUrlIn;
@@ -1754,10 +1753,9 @@ export function getNetworkId(element) {
 /**
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
- * @param {?string} consentString
  * @return {!Promise<string>} SRA request URL
  */
-function constructSRARequest_(a4a, instances, consentString) {
+function constructSRARequest_(a4a, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
   devAssert(instances && instances.length);
   const startTime = Date.now();
