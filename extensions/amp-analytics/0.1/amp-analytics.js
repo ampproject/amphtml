@@ -574,27 +574,23 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Create the linker-manager that will append linker params as necessary.
    * @private
-   * @return {Promise}
    */
   initializeLinker_() {
     const type = this.element.getAttribute('type');
-    const linkerTaskDeferred = new Deferred();
+    this.linkerManager_ = new LinkerManager(
+      this.getAmpDoc(),
+      this.config_,
+      type,
+      this.element
+    );
     const linkerTask = () => {
-      this.linkerManager_ = new LinkerManager(
-        this.getAmpDoc(),
-        this.config_,
-        type,
-        this.element
-      );
       this.linkerManager_.init();
-      linkerTaskDeferred.resolve();
     };
     if (isExperimentOn(this.win, 'analytics-chunks')) {
       chunk(this.element, linkerTask, ChunkPriority.LOW);
     } else {
       linkerTask();
     }
-    return linkerTaskDeferred.promise;
   }
 
   /**
