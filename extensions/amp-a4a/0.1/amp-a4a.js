@@ -65,7 +65,6 @@ import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import stringify from 'json-stable-stringify';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -139,10 +138,10 @@ export let SizeInfoDef;
 export let CreativeMetaDataDef;
 
 /** @typedef {{
-    adUrl: ?string,
-    consentString: string,
-  }} */
-export let AdUrlAndConsent;
+      consentState: (?CONSENT_POLICY_STATE|undefined),
+      consentString: (?string|undefined),
+    }} */
+export let ConsentTuple;
 
 /**
  * Name of A4A lifecycle triggers.
@@ -693,23 +692,22 @@ export class AmpA4A extends AMP.BaseElement {
 
         return Promise.resolve([null, null]);
       })
-      // This block returns the ad URL, if one is available.   
-      /** @return {!Promise<AdUrlAndConsent>} */
+      // This block returns the ad URL, if one is available.
+      /** @return {!Promise<?string>} */
       .then((consentResponse) => {
         checkStillCurrent();
 
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
 
-        const adUrlPromise = /** @type {!Promise<?string>} */ (this.getAdUrl(
+        return /** @type {!Promise<?string>} */ (this.getAdUrl(
           { consentState, consentString },
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
-        return adUrlPromise.then((adUrl) => ({ adUrl, consentString }));
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
-      .then(({ adUrl, consentString }) => {
+      .then((adUrl) => {
         checkStillCurrent();
         this.adUrl_ = adUrl;
         // If we should skip the XHR, we will instead request and render
@@ -1242,12 +1240,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
   }
-
-  /**
-   * @typedef {Object} ConsentTuple
-   * @property {?CONSENT_POLICY_STATE} consentState
-   * @property {?string} consentString
-   */
 
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented

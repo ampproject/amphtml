@@ -615,12 +615,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl({consentState, consentString}, opt_rtcResponsesPromise) {
+  getAdUrl(consentTuple, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
     if (
-      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -636,7 +636,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
-    this.populateAdUrlState({consentState, consentString});
+    this.populateAdUrlState(consentTuple);
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -658,7 +658,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters({consentState, consentString}, /* instances= */undefined),
+          this.getPageParameters(consentTuple, /* instances= */undefined),
           rtcParams
         ),
         this.experimentIds
@@ -1362,7 +1362,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.sraDeferred.promise.then((response) => {
       checkStillCurrent();
       this.sraDeferred = null;
-      return response || super.sendXhrRequest(adUrl, consentString);
+      return response || super.sendXhrRequest(adUrl);
     });
   }
 
