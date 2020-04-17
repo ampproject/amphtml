@@ -452,18 +452,26 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   openButtonClicked(openInAppUrl, installAppUrl) {
+    const a = openWindowDialog(this.win, openInAppUrl, '_blank');
+    //openWindowDialog(this.win, openInAppUrl, '_blank');
     Services.timerFor(this.win).delay(() => {
-      this.redirectTopLocation_(installAppUrl);
+      this.redirectTopLocation_(a, installAppUrl);
     }, OPEN_LINK_TIMEOUT);
-    openWindowDialog(this.win, openInAppUrl, '_top');
+    //openWindowDialog(this.win, openInAppUrl, '_blank');
+    //const a = openWindowDialog(this.win, openInAppUrl, '_blank');
+    //return a;
   }
 
   /**
+   * @param win
    * @param {string} link
    * @private
    */
-  redirectTopLocation_(link) {
-    this.win.top.location.assign(link);
+  redirectTopLocation_(win, link) {
+    //debugger;
+    win.top.location.assign(link);
+    //openWindowDialog(this.win, link, '_blank');
+    //openWindowDialog(this.win, link, '_blank');
   }
 
   /**
