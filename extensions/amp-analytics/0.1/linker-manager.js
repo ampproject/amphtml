@@ -79,10 +79,13 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
+   * init() is asynchronouse and non blocking.
+   * Return a promise for testing only.
+   * @return {!Promise}
    */
   init() {
     if (!isObject(this.config_)) {
-      return;
+      return Promise.resolve();
     }
 
     this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);
@@ -134,6 +137,8 @@ export class LinkerManager {
     }
 
     this.enableFormSupport_();
+
+    return Promise.all(allLinkerPromises);
   }
 
   /**
