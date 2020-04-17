@@ -55,9 +55,6 @@ export class LinkerManager {
     /** @const @private {!Element} */
     this.element_ = element;
 
-    /** @private {!Array<Promise>} */
-    this.allLinkerPromises_ = [];
-
     /** @const @private {!JsonObject} */
     this.resolvedIds_ = dict();
 
@@ -82,7 +79,6 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
-   * @return {*} TODO(#23582): Specify return type
    */
   init() {
     if (!isObject(this.config_)) {
@@ -95,7 +91,7 @@ export class LinkerManager {
       /** @type {!JsonObject} */ (this.config_)
     );
     // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = Object.keys(this.config_).map((name) => {
+    const allLinkerPromises = Object.keys(this.config_).map((name) => {
       const ids = this.config_[name]['ids'];
       // Keys for linker data.
       const keys = Object.keys(ids);
@@ -123,7 +119,7 @@ export class LinkerManager {
       });
     });
 
-    if (this.allLinkerPromises_.length) {
+    if (allLinkerPromises.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator((element, event) => {
         if (!element.href || event.type !== 'click') {
@@ -138,8 +134,6 @@ export class LinkerManager {
     }
 
     this.enableFormSupport_();
-
-    return Promise.all(this.allLinkerPromises_);
   }
 
   /**
