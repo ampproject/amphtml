@@ -1055,7 +1055,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(
-        impl.getPageParameters(CONSENT_POLICY_STATE.INSUFFICIENT).npa
+        impl.getPageParameters({
+          consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        }).npa
       ).to.equal(1);
     });
   });

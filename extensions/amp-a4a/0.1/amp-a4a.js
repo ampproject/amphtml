@@ -687,7 +687,13 @@ export class AmpA4A extends AMP.BaseElement {
         return Promise.resolve([null, null]);
       })
       // This block returns the ad URL, if one is available.
-      /** @return {!Promise<{?string, ?string}>} */
+      /**
+       * @typedef {Object} AdUrlInfo
+       * @property {?string} adUrl
+       * @property {?string} consentString
+       *
+       * @return {!Promise<AdUrlInfo>}
+       */
       .then((consentResponse) => {
         checkStillCurrent();
 

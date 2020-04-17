@@ -172,6 +172,12 @@ let SizeDef;
 /** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
+/** @typedef {{
+      consentState: ?CONSENT_POLICY_STATE,
+      consentString: ?string,
+    }} */
+let ConsentTuple;
+
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
@@ -276,8 +282,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @protected {?CONSENT_POLICY_STATE} */
-    this.consentState = null;
+    /** @protected {ConsentTuple} */
+    this.consentTuple = {};
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -491,19 +497,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?ConsentTuple} consentTuple
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @param {?string} consentString
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState, instances, consentString) {
+  getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa':
-        consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+      consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
           ? 1
           : null,
       'gdfp_req': '1',
@@ -511,7 +517,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
-      'gdpr_consent': consentString,
+      'gdpr_consent': consentTuple.consentString,
     };
   }
 
@@ -576,11 +582,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {ConsentTuple} consentTuple
    * @visibleForTesting
    */
-  populateAdUrlState(consentState) {
-    this.consentState = consentState;
+  populateAdUrlState(consentTuple) {
+    this.consentTuple = consentTuple;
     // Allow for pub to override height/width via override attribute.
     const width =
       Number(this.element.getAttribute('data-override-width')) ||
@@ -630,7 +636,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
-    this.populateAdUrlState(consentState);
+    this.populateAdUrlState({consentState, consentString});
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -652,7 +658,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentState, /* instances= */undefined, consentString),
+          this.getPageParameters({consentState, consentString}, /* instances= */undefined),
           rtcParams
         ),
         this.experimentIds
@@ -972,7 +978,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraDeferred = null;
     this.qqid_ = null;
     this.shouldSandbox_ = false;
-    this.consentState = null;
+    this.consentTuple = {};
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();
   }
@@ -1767,7 +1773,7 @@ function constructSRARequest_(a4a, instances, consentString) {
           blockParameters,
           googPageLevelParameters,
           instances[0].getPageParameters(
-            instances[0].consentState, instances, consentString)
+            instances[0].consentTuple, instances)
         ),
         startTime
       );
