@@ -419,12 +419,7 @@ export class AmpScript extends AMP.BaseElement {
       // Emit an error message for each mutation type, including count.
       Object.keys(errors).forEach((type) => {
         const count = errors[type];
-        user().error(
-          TAG,
-          'Dropped %sx "%s" mutation(s); user gesture is required with [layout=container].',
-          count,
-          this.mutationTypeToString_(type)
-        );
+        user().error(this.mutationTypeToErrorMessage_(type, count));
       });
     });
 
@@ -446,22 +441,32 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @param {string} type
+   * @param {number} count
    * @return {string}
    */
-  mutationTypeToString_(type) {
+  mutationTypeToErrorMessage_(type, count) {
+    let target;
+
     // Matches TransferrableMutationType in worker-dom#src/transfer/TransferrableMutation.ts.
     switch (type) {
+      // Attributes and Properties
       case '0':
-        return 'ATTRIBUTES';
-      case '1':
-        return 'CHARACTER_DATA';
-      case '2':
-        return 'CHILD_LIST';
       case '3':
-        return 'PROPERTIES';
+        target = 'DOM element attributes or styles';
+      // Character data
+      case '1':
+        target = 'textContent or the like';
+      // Child list
+      case '2':
+        target = 'DOM element children, innerHTML, or the like';
+      // Other
       default:
-        return 'OTHER';
+        target = 'the DOM';
     }
+    return (
+      `Blocked ${count} attempts to modify ${target}.` +
+      ' For variable-sized <amp-script> containers, a user action has to happen first.'
+    );
   }
 }
 
