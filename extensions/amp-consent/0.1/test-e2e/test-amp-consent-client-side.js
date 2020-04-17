@@ -20,6 +20,7 @@ import {
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
+import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp-consent',
