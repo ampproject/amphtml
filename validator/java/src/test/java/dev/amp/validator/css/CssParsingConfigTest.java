@@ -42,9 +42,11 @@ public class CssParsingConfigTest {
     defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
     atRuleSpec = new HashMap<>();
 
-    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("font-face", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("keyframes", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
     atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
     atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("supports", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
   }
 
   @Test
@@ -67,15 +69,10 @@ public class CssParsingConfigTest {
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder2.build());
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder3.build());
 
-    final ValidatorProtos.CssSpec cssSpec = cssSpecBuilder.build();
-    try {
-      final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig(cssSpec);
-      Assert.assertEquals(cssParsingConfig.getAtRuleSpec().size(), 3);
-      Assert.assertEquals(cssParsingConfig.getAtRuleSpec(), atRuleSpec);
-      Assert.assertEquals(cssParsingConfig.getDefaultSpec(), defaultSpec);
-    } catch (CssValidationException e) {
-      e.printStackTrace();
-    }
+    final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig();
+    Assert.assertEquals(cssParsingConfig.getAtRuleSpec().size(), 5);
+    Assert.assertEquals(cssParsingConfig.getAtRuleSpec(), atRuleSpec);
+    Assert.assertEquals(cssParsingConfig.getDefaultSpec(), defaultSpec);
   }
 
   private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;

@@ -52,32 +52,20 @@ public class CssParsingConfig {
     /**
      * Generates a CssParsingConfig from a CssSpec.
      *
-     * @param cssSpec to extract validator parameters from
      * @return a CssParsingConfig representing the CssSpec
-     * @throws CssValidationException Css Validation Exception
      */
-    public static CssParsingConfig computeCssParsingConfig(@Nonnull final ValidatorProtos.CssSpec cssSpec)
-            throws CssValidationException {
-        final Map<String, ValidatorProtos.AtRuleSpec.BlockType> ampAtRuleParsingSpec = new HashMap<>();
-        for (final ValidatorProtos.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
-            if (atRuleSpec.getType() == ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR
-                    || (atRuleSpec.getType() == ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE)) {
-                ampAtRuleParsingSpec.put(atRuleSpec.getName(), ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-            } else if (atRuleSpec.getType() == ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES) {
-                ampAtRuleParsingSpec.put(atRuleSpec.getName(), ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-            } else if (atRuleSpec.getType() == ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS) {
-                ampAtRuleParsingSpec.put(atRuleSpec.getName(), ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
-            } else {
-                throw new CssValidationException("Unrecognized atRuleSpec type: " + atRuleSpec.getType());
-            }
-        }
-        final CssParsingConfig config =
-                new CssParsingConfig(ampAtRuleParsingSpec, ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    public static CssParsingConfig computeCssParsingConfig() {
+      final Map<String, ValidatorProtos.AtRuleSpec.BlockType> ampAtRuleParsingSpec = new HashMap<>();
+      ampAtRuleParsingSpec.put("font-face", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+      ampAtRuleParsingSpec.put("keyframes", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+      ampAtRuleParsingSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+      ampAtRuleParsingSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+      ampAtRuleParsingSpec.put("supports", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
 
-        if (cssSpec.getAtRuleSpecList().size() > 0) {
-            config.setDefaultSpec(ampAtRuleParsingSpec.get("$DEFAULT"));
-        }
-        return config;
+      final CssParsingConfig config =
+        new CssParsingConfig(ampAtRuleParsingSpec, ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+
+      return config;
     }
 
   /**
