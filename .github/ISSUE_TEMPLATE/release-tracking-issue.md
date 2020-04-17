@@ -46,8 +46,8 @@ Based on the above, if this release must be promoted to LTS, copy-paste the foll
 
 If you perform cherry picks, add/update the checkboxes above as needed e.g.
 
-- [ ] Release [<CHERRY_PICK_RELEASE_NUMBER>](...) created with cherry picks
-- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> promoted to Experimental and Beta channels
+- [ ] Release [<CHERRY_PICK_RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<CHERRY_PICK_RELEASE_NUMBER>) created with cherry picks #<CHERRY_PICK_ISSUE_NUMBER>, [#<CHERRY_PICK_ISSUE_NUMBER>, ...]
+- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> promoted to Experimental and Beta channels (<CL submit time>)
 -->
 
 See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Experimental channel.
