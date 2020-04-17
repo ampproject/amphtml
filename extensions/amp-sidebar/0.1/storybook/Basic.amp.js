@@ -29,14 +29,14 @@ storiesOf('amp-sidebar', module)
   .addDecorator(withAmp)
   .addParameters({extensions: [{name: 'amp-sidebar', version: 0.1}]})
   .add('Basic Sidebar', () => {
+    /*
+     * Use the buttons below to open / toggle the amp-sidebar. The sidebar
+     * will be displayed with various navigational elements.
+     */
     return (
       <div>
         <div id="main">
-          <h1>Main Body</h1>
-          <p>
-            Use the buttons below to open / toggle the amp-sidebar. The sidebar
-            will be displayed with various navigational elements.
-          </p>
+          <h1>Basic Sidebar</h1>
           <button on="tap:sidebar.open">Open Sidebar</button>
           <button on="tap:sidebar.toggle">Toggle Sidebar</button>
         </div>
@@ -54,21 +54,20 @@ storiesOf('amp-sidebar', module)
     );
   })
   .add('Toolbar', () => {
+    /*
+     * The toolbar feature allows elements within the amp-sidebar to be
+     * displayed within the main body of the article. In this example two
+     * Navigational Elements from the sidebar will be displayed under the
+     * Toolbar Target when the width of the page is 500px or more.
+     */
     const minWidth = 500;
     const mediaQuery = `(min-width: ${minWidth}px)`;
     return (
       <div>
         <div id="main">
-          <h1>Main Body</h1>
-          <p>
-            The toolbar feature allows elements within the amp-sidebar to be
-            displayed within the main body of the article. In this example two
-            Navigational Elements from the sidebar will be displayed under the
-            Toolbar Target when the width of the page is 500px or more.
-          </p>
           <button on="tap:toolbar.open">Open Sidebar</button>
           <button on="tap:toolbar.toggle">Toggle Sidebar</button>
-          <h2>Toolbar Target</h2>
+          <h1>Toolbar Target</h1>
           <div id="toolbar-target"></div>
         </div>
         <amp-sidebar id="toolbar" layout="nodisplay" side="right">
