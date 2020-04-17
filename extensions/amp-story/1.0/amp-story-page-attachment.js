@@ -97,6 +97,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     });
 
     toggle(this.element, true);
+    this.element.setAttribute('aria-live', 'assertive');
   }
 
   /**
