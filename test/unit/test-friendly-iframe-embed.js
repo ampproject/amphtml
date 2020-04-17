@@ -1108,46 +1108,56 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, (env) => {
   });
 
   it('should install runtime styles', () => {
-    fie.installExtensionsInChildWindow(extensions, iframeWin, []);
-    expect(iframeWin.document.querySelector('style[amp-runtime]')).to.exist;
+    return fie
+      .installExtensionsInChildWindow(extensions, iframeWin, [])
+      .then(() => {
+        expect(iframeWin.document.querySelector('style[amp-runtime]')).to.exist;
+      });
   });
 
   it('should install built-ins', () => {
-    fie.installExtensionsInChildWindow(extensions, iframeWin, []);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
-      ElementStub
-    );
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
-      ElementStub
-    );
-    // Legacy elements are installed as well.
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
-      ElementStub
-    );
-    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
-      ElementStub
-    );
+    return fie
+      .installExtensionsInChildWindow(extensions, iframeWin, [])
+      .then(() => {
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+          ElementStub
+        );
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
+          ElementStub
+        );
+        // Legacy elements are installed as well.
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(
+          ElementStub
+        );
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+          ElementStub
+        );
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+          ElementStub
+        );
+      });
   });
 
   it('should adopt standard services', () => {
-    fie.installExtensionsInChildWindow(extensions, iframeWin, []);
+    return fie
+      .installExtensionsInChildWindow(extensions, iframeWin, [])
+      .then(() => {
+        const any = {}; // Input doesn't matter since services are stubbed.
+        const url = Services.urlForDoc(any);
+        const actions = Services.actionServiceForDoc(any);
+        const standardActions = Services.standardActionsForDoc(any);
+        const navigation = Services.navigationForDoc(any);
 
-    const any = {}; // Input doesn't matter since services are stubbed.
-    const url = Services.urlForDoc(any);
-    const actions = Services.actionServiceForDoc(any);
-    const standardActions = Services.standardActionsForDoc(any);
-    const navigation = Services.navigationForDoc(any);
+        expect(url.constructor.installInEmbedWindow).to.be.called;
+        expect(actions.constructor.installInEmbedWindow).to.be.called;
+        expect(standardActions.constructor.installInEmbedWindow).to.be.called;
+        expect(navigation.constructor.installInEmbedWindow).to.be.called;
 
-    expect(url.constructor.installInEmbedWindow).to.be.called;
-    expect(actions.constructor.installInEmbedWindow).to.be.called;
-    expect(standardActions.constructor.installInEmbedWindow).to.be.called;
-    expect(navigation.constructor.installInEmbedWindow).to.be.called;
-
-    expect(getService(iframeWin, 'timer')).to.exist;
+        expect(getService(iframeWin, 'timer')).to.exist;
+      });
   });
 
   it('should install extensions in child window', () => {

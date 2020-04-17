@@ -113,7 +113,7 @@ function getDelayPromise(win) {
   ) {
     return (val) =>
       new Promise((resolve) => {
-        setTimeout(() => resolve(val), 0);
+        setTimeout(() => resolve(val), 1);
       });
   } else {
     return (val) => Promise.resolve(val);
@@ -790,6 +790,14 @@ export class FriendlyIframeEmbed {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
 
+    extensionIds.forEach((extensionId) => {
+      // This will extend automatic upgrade of custom elements from top
+      // window to the child window.
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementIfNotKnown(childWin, extensionId);
+      }
+    });
+
     const maybeDelay = getDelayPromise(parentWin);
     return Promise.resolve()
       .then(maybeDelay)
@@ -830,6 +838,7 @@ export class FriendlyIframeEmbed {
       .then(() => {
         const promises = [];
         extensionIds.forEach((extensionId) => {
+<<<<<<< HEAD
           // This will extend automatic upgrade of custom elements from top
           // window to the child window.
           if (!LEGACY_ELEMENTS.includes(extensionId)) {
@@ -859,6 +868,8 @@ export class FriendlyIframeEmbed {
                   /* isRuntime */ false,
                   extensionId
 =======
+=======
+>>>>>>> 912f443f0... Fix tests
           const promise = extensions
             .preloadExtension(extensionId)
             .then((extension) => {
