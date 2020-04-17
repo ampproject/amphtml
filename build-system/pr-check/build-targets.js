@@ -245,10 +245,12 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets on Travis during package upgrades.
+  // Test all targets except VALIDATOR_JAVA on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
-    allTargets.forEach((target) => buildTargets.add(target));
+    allTargets
+      .filter((target) => target != 'VALIDATOR_JAVA')
+      .forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }
