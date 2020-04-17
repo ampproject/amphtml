@@ -491,7 +491,10 @@ export class AmpList extends AMP.BaseElement {
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
-    if (!this.loadMoreEnabled_) {
+    // In the layout=container case, we allow the container
+    // to take the height of its children instead,
+    // whereas fill-content forces height:0
+    if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
       this.applyFillContent(container, true);
     }
     return container;
