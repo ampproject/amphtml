@@ -445,13 +445,15 @@ export class Bind {
    * If `options.update` is true, evaluates and applies changes to
    * `addedElements` after adding new bindings.
    *
+   * If `options.evaluate` is true, evaluates but does not apply changes.
+   *
    * If `options.fast` is true, uses a faster scan method that requires
    * (1) elements with bindings to have the attribute `i-amphtml-binding` and
    * (2) the parent element tag name be listed in FAST_RESCAN_TAGS.
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {BindRescanOptionsDef=} options
+   * @param {!BindRescanOptionsDef=} options
    * @return {!Promise} Resolved when all operations complete. If they don't
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
@@ -488,9 +490,12 @@ export class Bind {
       : this.slowScan_(addedElements, removedElements);
 
     return rescanPromise.then(() => {
-      if (options.update) {
+      if (options.update || options.evaluate) {
         return this.evaluate_().then((results) =>
-          this.apply_(results, {constrain: addedElements})
+          this.apply_(results, {
+            constrain: addedElements,
+            calculateOnly: options.evaluate,
+          })
         );
       }
     });
@@ -1225,9 +1230,12 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {Object} opts options bag
-   * @param {boolean=} opts.skipAmpState
-   * @param {Array<!Element>=} opts.constrain restricts the application to children of specified elements.
+   * @param {!Object} opts
+   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
+   * @param {Array<!Element>=} opts.constrain If provided, restricts application
+   *   to children of the provided elements.
+   * @param {boolean=} opts.calculateOnly If provided, caches the evaluated
+   *   result on each bound element and skips the actual DOM updates.
    * @return {!Promise}
    * @private
    */
@@ -1250,7 +1258,13 @@ export class Bind {
         return;
       }
 
-      promises.push(this.applyBoundElement_(results, boundElement));
+      const {element, boundProperties} = boundElement;
+      const updates = this.calculateUpdates_(boundProperties, results);
+      // If this is a "calculate only" application, skip the DOM mutations.
+      if (opts.calculateOnly) {
+        return;
+      }
+      promises.push(this.applyUpdatesToElement_(element, updates));
     });
 
     return Promise.all(promises);
@@ -1258,13 +1272,11 @@ export class Bind {
 
   /**
    * Applies expression results to a single BoundElementDef.
-   * @param {Object<string, BindExpressionResultDef>} results
-   * @param {BoundElementDef} boundElement
+   * @param {!Element} element
+   * @param {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>} updates
    * @return {!Promise}
    */
-  applyBoundElement_(results, boundElement) {
-    const {element, boundProperties} = boundElement;
-    const updates = this.calculateUpdates_(boundProperties, results);
+  applyUpdatesToElement_(element, updates) {
     if (updates.length === 0) {
       return Promise.resolve();
     }
