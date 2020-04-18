@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {Services} from '../../../src/services';
 
 /**
  * Class handling HTMLMediaElements sources.
@@ -133,6 +133,10 @@ export class Sources {
     // was specified.
     // cf: https://html.spec.whatwg.org/#concept-media-load-algorithm
     const sourcesToUse = srcEl ? [srcEl] : srcEls;
+    const urlService = Services.urlForDoc(element);
+    sourcesToUse.forEach((el) =>
+      urlService.assertHttpsUrl(el.getAttribute('src'), el)
+    );
 
     return new Sources(null /** srcAttr */, sourcesToUse, trackEls);
   }
@@ -147,7 +151,6 @@ export class Sources {
     const srcEl = win.document.createElement('source');
 
     const srcAttr = element.getAttribute('src');
-    Services.urlForDoc(element).assertHttpsUrl(srcAttr, element);
     srcEl.setAttribute('src', srcAttr);
 
     const origSrcAttr = element.getAttribute('amp-orig-src');
