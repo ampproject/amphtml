@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-import {Services} from '../../../src/services';
 
 /**
  * Class handling HTMLMediaElements sources.
