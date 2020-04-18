@@ -37,8 +37,8 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {devAssert, userAssert} from '../../../src/log';
 import {WindowInterface} from '../../../src/window-interface';
+import {devAssert, userAssert} from '../../../src/log';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -63,6 +63,11 @@ const AMP_ACTION_TO_SWG_EVENT = {
   [Action.SHOW_OFFERS]: {
     [ActionStatus.STARTED]: null, //ex: AnalyticsEvent.IMPRESSION_OFFERS
   },
+};
+
+const LOCAL_STORAGE_KEYS = {
+  HAS_PUBLISHER_ACCOUNT: 'account-exists-on-publisher-side',
+  HAS_REJECTED_ACCOUNT_CREATION: 'user-rejected-account-creation-request',
 };
 
 /**
@@ -125,9 +130,12 @@ export class GoogleSubscriptionsPlatform {
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {function(string):void} */
-    this.navigateTo_ = url => {
+    this.navigateTo_ = (url) => {
       Services.navigationForDoc(ampdoc).navigateTo(ampdoc.win, url);
     };
+
+    /** @const @private {!../../../src/service/storage-impl.Storage} */
+    this.storage_ = Services.storageForDoc(ampdoc);
 
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
@@ -494,29 +502,53 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * @param {?./entitlement.Entitlement} selectedEntitlement
-   * @return {!Promise<{found: boolean}>} 
-   * @private 
+   * @return {!Promise<{found: boolean}>}
+   * @private
    * */
   hasAssociatedUserAccount_(selectedEntitlement) {
-    const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
-      this.serviceConfig_['hasAssociatedAccountUrl'],
-      'hasAssociatedAccountUrl is null'
-    ));
+    let storage;
+    return new Promise((resolve) => {
+      // First try to fetch from storage
+      this.storage_
+        .then((s) => {
+          storage = s;
+          return s.get(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT);
+        })
+        .then((publisherAccountLocalValue) => {
+          if (publisherAccountLocalValue !== undefined) {
+            // We found a cached value for the API call, return.
+            resolve({found: publisherAccountLocalValue});
+            return;
+          }
+          const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
+            this.serviceConfig_['hasAssociatedAccountUrl'],
+            'hasAssociatedAccountUrl is null'
+          ));
 
-    const promise = this.urlBuilder_.buildUrl(
-      hasAssociatedAccountUrl,
-      /* useAuthData */ true
-    );
-    return promise.then(url => {
-      return this.xhr_.fetchJson(url, {
-        method: 'POST',
-        credentials: 'include',
-        body: {
-          entitlements: this.serviceAdapter_.stringifyForPingback(
-            selectedEntitlement
-          ),
-        },
-      });
+          // Do the actual call and then store the value in storage
+          this.urlBuilder_
+            .buildUrl(hasAssociatedAccountUrl, /* useAuthData */ true)
+            .then((url) =>
+              this.xhr_.fetchJson(url, {
+                method: 'POST',
+                credentials: 'include',
+                body: {
+                  entitlements: this.serviceAdapter_.stringifyForPingback(
+                    selectedEntitlement
+                  ),
+                },
+              })
+            )
+            .then((result) => result.json())
+            .then((jsonResult) => {
+              console.log(jsonResult);
+              storage
+                .set(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT, jsonResult.found)
+                .then(() => {
+                  resolve(jsonResult);
+                });
+            });
+        });
     });
   }
 
@@ -529,32 +561,50 @@ export class GoogleSubscriptionsPlatform {
       return;
     }
     return new Promise((resolve, unusedReject) => {
-      this.hasAssociatedUserAccount_(entitlements).then(result => {
-        result.json().then(jsonResult => {
-          if (jsonResult.found) {
+      // Check if user has denied account creation already
+      let storage;
+      this.storage_
+        .then((s) => {
+          storage = s;
+          return s.get(LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION);
+        })
+        .then((rejected) => {
+          if (rejected) {
             resolve();
             return;
           }
-          // This will ask the user for authorization
-          this.runtime_
-            .completeDeferredAccountCreation({
-              entitlements,
-            })
-            .then(
-              unusedResponse => {
-                // The user authorized the creation of a linked account.
-                // Redirect the user to URL provided for this purpose.
-                resolve();
-                this.navigateTo_(
-                  this.serviceConfig_['accountCreationRedirectUrl']
-                );
-              },
-              unusedError => {
-                resolve();
-              }
-            );
+          // Check if there is an associated user account
+          this.hasAssociatedUserAccount_(entitlements).then((jsonResult) => {
+            if (jsonResult.found) {
+              resolve();
+              return;
+            }
+            // This will ask the user for authorization
+            this.runtime_
+              .completeDeferredAccountCreation({
+                entitlements,
+              })
+              .then(
+                () => {
+                  // The user authorized the creation of a linked account.
+                  // Redirect the user to URL provided for this purpose.
+                  resolve();
+                  this.navigateTo_(
+                    this.serviceConfig_['accountCreationRedirectUrl']
+                  );
+                },
+                () => {
+                  // The user did not authorize the creation of a linked account.
+                  // Save response so we won't ask again (for a while).
+                  storage
+                    .set(LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION, true)
+                    .then(() => {
+                      resolve();
+                    });
+                }
+              );
+          });
         });
-      });
     });
   }
 

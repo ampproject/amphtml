@@ -57,6 +57,7 @@ The following AMP components and service are using the localStorage.
 - `<amp-app-banner>` : Store the user decision on dismiss banner
 - `<amp-user-notification>` : Store the user decision on dismiss notification
 - `<amp-consent>` : Store the user decision and granular information on consent
+- `<amp-subscriptions-google>` : Store whether Google subscrriptions user has corresponding account on publisher service
 - Client ID Service : Store the user decision to opt-out CID service.
 
 ## Guidance on localStorage Usage in AMP

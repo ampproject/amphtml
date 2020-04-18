@@ -123,6 +123,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let entitlementResponse;
   let win;
   let navigator;
+  let storage;
 
   beforeEach(() => {
     win = env.win;
@@ -135,6 +136,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
     navigator = Services.navigationForDoc(ampdoc);
+    storage = Services.storageForDoc(ampdoc);
     ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = env.sandbox.mock(serviceAdapter);
@@ -883,6 +885,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
 
     it('should not call deferred account creation when user is already found', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .callsFake(() => Promise.resolve(undefined));
+      env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
+
       const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
       const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
       platform = new GoogleSubscriptionsPlatform(
@@ -917,6 +925,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
 
     it('should redirect to new account creation page when associated account absent', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .callsFake(() => Promise.resolve(undefined));
+      env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
+
       const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
       const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
       platform = new GoogleSubscriptionsPlatform(
@@ -971,6 +985,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
 
     it('should not redirect to new account creation page when user gives no consent', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .callsFake(() => Promise.resolve(undefined));
+      env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
       const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
       const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
       platform = new GoogleSubscriptionsPlatform(
@@ -1015,6 +1034,193 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         method: 'POST',
       });
       expect(navigateToStub).to.not.be.called;
+    });
+
+    describe('local storage', async () => {
+      it('should skip call to publisher API when user is already found', async () => {
+        const actualStorage = await storage;
+        env.sandbox
+          .stub(actualStorage, 'get')
+          .withArgs('account-exists-on-publisher-side')
+          .callsFake(() => Promise.resolve(true));
+        env.sandbox
+          .stub(actualStorage, 'set')
+          .callsFake(() => Promise.resolve());
+
+        const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+        const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+        platform = new GoogleSubscriptionsPlatform(
+          ampdoc,
+          {
+            'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+            'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+          },
+          serviceAdapter
+        );
+
+        const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+        navigateToStub.callsFake(() => {
+          /* make fake to avoid redirect */
+        });
+
+        const entitlements = new Entitlement({
+          service: PLATFORM_ID,
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+          dataObject: {data: 'this is the data'},
+        });
+
+        const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+
+        const deferredCreationStub = env.sandbox.stub(
+          platform.runtime_,
+          'completeDeferredAccountCreation'
+        );
+        await platform.pingback(entitlements);
+        expect(fetchStub).to.not.be.called;
+        expect(deferredCreationStub).to.not.be.called;
+      });
+
+      it('should still redirect when user not found fetched by local storage', async () => {
+        const actualStorage = await storage;
+        env.sandbox
+          .stub(actualStorage, 'get')
+          .withArgs('account-exists-on-publisher-side')
+          .callsFake(() => Promise.resolve(false));
+        env.sandbox
+          .stub(actualStorage, 'set')
+          .callsFake(() => Promise.resolve());
+
+        const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+        const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+        platform = new GoogleSubscriptionsPlatform(
+          ampdoc,
+          {
+            'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+            'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+          },
+          serviceAdapter
+        );
+
+        const entitlements = new Entitlement({
+          service: PLATFORM_ID,
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+          dataObject: {data: 'this is the data'},
+        });
+
+        const navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+        navigateToStub.callsFake(() => {
+          /* make fake to avoid redirect */
+        });
+
+        const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+        fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+          Promise.resolve({
+            json: () => Promise.resolve({found: false}),
+          })
+        );
+        const deferredAccountCreationResponse = new DeferredAccountCreationResponse(
+          entitlements,
+          new UserData('ID_TOK', {
+            'email': 'test@example.org',
+          }),
+          [new PurchaseData()],
+          () => Promise.resolve()
+        );
+        const deferredCreationStub = env.sandbox
+          .stub(platform.runtime_, 'completeDeferredAccountCreation')
+          .resolves(deferredAccountCreationResponse);
+        await platform.pingback(entitlements);
+        expect(fetchStub).to.not.be.called;
+        expect(deferredCreationStub).to.be.called;
+      });
+    });
+
+    it('should save user found status and rejection', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .withArgs('account-exists-on-publisher-side')
+        .callsFake(() => Promise.resolve());
+      const saveStorageStub = env.sandbox
+        .stub(actualStorage, 'set')
+        .callsFake(() => Promise.resolve());
+
+      const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+      const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+      platform = new GoogleSubscriptionsPlatform(
+        ampdoc,
+        {
+          'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+          'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+        },
+        serviceAdapter
+      );
+
+      const entitlements = new Entitlement({
+        service: PLATFORM_ID,
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {data: 'this is the data'},
+      });
+
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+        Promise.resolve({
+          json: () => Promise.resolve({found: false}),
+        })
+      );
+
+      const deferredCreationStub = env.sandbox
+        .stub(platform.runtime_, 'completeDeferredAccountCreation')
+        .rejects();
+      await platform.pingback(entitlements);
+      expect(fetchStub).to.be.called;
+      expect(deferredCreationStub).to.be.called;
+      expect(saveStorageStub).to.be.calledWith(
+        'account-exists-on-publisher-side',
+        false
+      );
+      expect(saveStorageStub).to.be.calledWith(
+        'user-rejected-account-creation-request',
+        true
+      );
+    });
+
+    it('should not make any call if user has already rejected consent', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .withArgs('user-rejected-account-creation-request')
+        .callsFake(() => Promise.resolve(true));
+      env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
+
+      const HAS_ACCOUNT_URL = 'https://fakeUrl.com/hasAccount';
+      const CREATE_ACCOUNT_URL = 'https://fakeUrl.com/createAccount';
+      platform = new GoogleSubscriptionsPlatform(
+        ampdoc,
+        {
+          'hasAssociatedAccountUrl': HAS_ACCOUNT_URL,
+          'accountCreationRedirectUrl': CREATE_ACCOUNT_URL,
+        },
+        serviceAdapter
+      );
+      const entitlements = new Entitlement({
+        service: PLATFORM_ID,
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {data: 'this is the data'},
+      });
+
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+
+      const deferredCreationStub = env.sandbox
+        .stub(platform.runtime_, 'completeDeferredAccountCreation')
+        .rejects();
+      await platform.pingback(entitlements);
+      expect(fetchStub).to.not.be.called;
+      expect(deferredCreationStub).to.not.be.called;
     });
   });
 });
