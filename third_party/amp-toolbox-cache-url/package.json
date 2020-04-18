@@ -32,7 +32,7 @@
     "url-parse": "^1.4.3"
   },
   "devDependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "0.7.3",
+    "@ampproject/rollup-plugin-closure-compiler": "0.25.2",
     "eslint": "5.6.1",
     "eslint-config-google": "0.10.0",
     "jasmine": "3.2.0",
