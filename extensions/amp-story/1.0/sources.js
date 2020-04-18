@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 import {toArray} from '../../../src/types';
@@ -146,6 +147,7 @@ export class Sources {
     const srcEl = win.document.createElement('source');
 
     const srcAttr = element.getAttribute('src');
+    Services.urlForDoc(element).assertHttpsUrl(srcAttr, element);
     srcEl.setAttribute('src', srcAttr);
 
     const origSrcAttr = element.getAttribute('amp-orig-src');
