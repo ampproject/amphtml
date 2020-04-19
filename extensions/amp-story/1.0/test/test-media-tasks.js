@@ -27,14 +27,15 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, (env) => {
+describes.realWin('media-tasks', {amp: true}, (env) => {
   let win;
   let el;
   let vsyncApi;
 
   beforeEach(() => {
     win = env.win;
-    el = document.createElement('video');
+    el = win.document.createElement('video');
+    win.document.body.appendChild(el);
 
     // Mock vsync
     vsyncApi = {
@@ -132,7 +133,7 @@ describes.realWin('media-tasks', {}, (env) => {
      * @return {string}
      */
     function getFakeVideoUrl(index) {
-      return `http://example.com/video${index}.mp4`;
+      return `https://example.com/video${index}.mp4`;
     }
 
     /**
@@ -140,7 +141,7 @@ describes.realWin('media-tasks', {}, (env) => {
      * @return {!Element}
      */
     function getFakeSource(index) {
-      const source = document.createElement('source');
+      const source = env.win.document.createElement('source');
       source.src = getFakeVideoUrl(index);
       return source;
     }
