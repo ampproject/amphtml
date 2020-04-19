@@ -24,6 +24,7 @@ export default makeDecorator({
   wrapper: (getStory, context) => {
     const contents = render(getStory(context));
 
+    // DO NOT SUBMIT: QQQ: local-vs-CDN script URLs.
     const ampHtml = `
         <!doctype html>
         <html amp lang="en">
@@ -31,15 +32,15 @@ export default makeDecorator({
             <meta charSet="utf-8" />
             <title>AMP Page Example</title>
             <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1" />
-            <script async src="https://cdn.ampproject.org/v0.js"></script>
+            <script async src="http://localhost:8000/dist/amp.js"></script>
             <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
             ${(context?.parameters?.extensions || []).map(
               (ext) =>
                 `<script async custom-element="${
                   ext.name
-                }" src="https://cdn.ampproject.org/v0/${ext.name}-${
+                }" src="http://localhost:8000/dist/v0/${ext.name}-${
                   ext.version || 0.1
-                }.js"></script>`
+                }.max.js"></script>`
             )}
         </head>
         <body>
