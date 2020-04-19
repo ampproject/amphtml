@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 import {toArray} from '../../../src/types';
@@ -132,6 +133,10 @@ export class Sources {
     // was specified.
     // cf: https://html.spec.whatwg.org/#concept-media-load-algorithm
     const sourcesToUse = srcEl ? [srcEl] : srcEls;
+    const urlService = Services.urlForDoc(win.document.documentElement);
+    sourcesToUse.forEach((el) =>
+      urlService.assertHttpsUrl(el.getAttribute('src'), el)
+    );
 
     return new Sources(null /** srcAttr */, sourcesToUse, trackEls);
   }
