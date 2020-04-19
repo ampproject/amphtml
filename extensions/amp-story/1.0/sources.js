@@ -133,7 +133,7 @@ export class Sources {
     // was specified.
     // cf: https://html.spec.whatwg.org/#concept-media-load-algorithm
     const sourcesToUse = srcEl ? [srcEl] : srcEls;
-    const urlService = Services.urlForDoc(element);
+    const urlService = Services.urlForDoc(win.document.documentElement);
     sourcesToUse.forEach((el) =>
       urlService.assertHttpsUrl(el.getAttribute('src'), el)
     );
