@@ -498,14 +498,12 @@ export class AnimationRunner {
 /** Manager for animations in story pages. */
 export class AnimationManager {
   /**
-   * @param {!Element} root
+   * @param {!Element} page
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(root, ampdoc) {
-    devAssert(hasAnimations(root));
-
+  constructor(page, ampdoc) {
     /** @private @const */
-    this.root_ = root;
+    this.page_ = page;
 
     /** @private @const */
     this.ampdoc_ = ampdoc;
@@ -525,13 +523,13 @@ export class AnimationManager {
 
   /**
    * Decouples constructor so it can be stubbed in tests.
-   * @param {!Element} root
+   * @param {!Element} page
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} unusedBaseUrl
    * @return {!AnimationManager}
    */
-  static create(root, ampdoc, unusedBaseUrl) {
-    return new AnimationManager(root, ampdoc);
+  static create(page, ampdoc, unusedBaseUrl) {
+    return new AnimationManager(page, ampdoc);
   }
 
   /**
@@ -599,7 +597,7 @@ export class AnimationManager {
    * Gets or creates AnimationRunners.
    * These are either from an <amp-story-animation> config (WebAnimationDefs),
    * or resolved from presets via animate-in attributes (StoryAnimationDefs).
-   * If a root element contains both kinds of definitions, they'll run
+   * If a page element contains both kinds of definitions, they'll run
    * concurrently.
    * @return {!Array<!AnimationRunner>}
    * @private
@@ -608,7 +606,7 @@ export class AnimationManager {
     if (!this.runners_) {
       this.runners_ = Array.prototype.map
         .call(
-          scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
+          scopedQuerySelectorAll(this.page_, ANIMATABLE_ELEMENTS_SELECTOR),
           (el) =>
             this.createRunner_(
               this.createAnimationDefFromPreset_(el, this.getPreset_(el)),
@@ -617,7 +615,7 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            this.root_.querySelectorAll('amp-story-animation'),
+            this.page_.querySelectorAll('amp-story-animation'),
             (el) =>
               this.createRunner_(
                 // Casting since we're getting a JsonObject. This will be
@@ -637,7 +635,7 @@ export class AnimationManager {
    */
   createRunner_(animationDef, keyframeOptions) {
     return AnimationRunner.create(
-      this.root_,
+      this.page_,
       animationDef,
       devAssert(this.builderPromise_),
       this.vsync_,
@@ -677,7 +675,7 @@ export class AnimationManager {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-        this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
+        this.page_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
         `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
           `'${el.tagName}' is set to the invalid value ` +
           `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
@@ -705,8 +703,12 @@ export class AnimationManager {
   createAnimationBuilderPromise_() {
     return Services.extensionsFor(this.ampdoc_.win)
       .installExtensionForDoc(this.ampdoc_, 'amp-animation')
-      .then(() => Services.webAnimationServiceFor(this.root_))
-      .then((webAnimationService) => webAnimationService.createBuilder());
+      .then(() => Services.webAnimationServiceFor(this.page_))
+      .then((webAnimationService) =>
+        webAnimationService.createBuilder({
+          scope: this.page_,
+        })
+      );
   }
 
   /**
