@@ -31,7 +31,7 @@ import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {NavigationDirection, PageState} from '../amp-story-page';
+import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
@@ -1819,7 +1819,7 @@ describes.realWin(
 
     describe('amp-story playable', () => {
       it('should set playable to true if page has autoadvance', async () => {
-        await createStoryWithPages(1, ['cover', 'page-1'], true);
+        await createStoryWithPages(1, ['cover'], true);
 
         await story.layoutCallback();
         story
@@ -1840,7 +1840,7 @@ describes.realWin(
       });
 
       it('should set playable to false if page does not have playable', async () => {
-        await createStoryWithPages(1, ['cover', 'page-1']);
+        await createStoryWithPages(1, ['cover']);
 
         await story.layoutCallback();
         story
