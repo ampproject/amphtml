@@ -31,7 +31,7 @@ import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {PageState} from '../amp-story-page';
+import {NavigationDirection, PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
