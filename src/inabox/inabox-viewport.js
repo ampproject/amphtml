@@ -478,9 +478,7 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.isFriendlyIframed_ =
-      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-      canInspectWindow(this.win.top);
+    this.isFriendlyIframed_ = canInspectWindow(this.win.top);
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = this.isFriendlyIframed_
