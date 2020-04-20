@@ -26,8 +26,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue, isFiniteNumber} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -1429,12 +1428,10 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     const unlistenPromises = [];
-    const multiSelectorVisibilityOn =
-      isExperimentOn(this.root.ampdoc.win, 'visibility-trigger-improvements') &&
-      Array.isArray(selector);
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1482,12 +1479,13 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
+      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
       unlistenPromises.push(
         visibilityManagerPromise.then(
           (visibilityManager) => {
             return visibilityManager.listenRoot(
               visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector),
+              this.getReadyPromise(readyPromiseWaitForSpec),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(
                 this,
@@ -1506,32 +1504,32 @@ export class VisibilityTracker extends EventTracker {
       // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      const selectors = Array.isArray(selector) ? selector : [selector];
-      for (let i = 0; i < selectors.length; i++) {
-        unlistenPromises.push(
-          this.root
-            .getAmpElement(
-              context.parentElement || context,
-              selectors[i],
-              selectionMethod,
-              multiSelectorVisibilityOn
-            )
-            .then((element) =>
+      readyPromiseWaitForSpec = waitForSpec || 'ini-load';
+      this.assertUniqueSelectors_(selector);
+      this.root
+        .getAmpElements(
+          context.parentElement || context,
+          selector,
+          selectionMethod
+        )
+        .then((elements) => {
+          for (let i = 0; i < elements.length; i++) {
+            unlistenPromises.push(
               visibilityManagerPromise.then(
                 (visibilityManager) => {
                   return visibilityManager.listenElement(
-                    element,
+                    elements[i],
                     visibilitySpec,
-                    this.getReadyPromise(waitForSpec, selectors[i], element),
+                    this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
                     createReportReadyPromiseFunc,
-                    this.onEvent_.bind(this, eventType, listener, element)
+                    this.onEvent_.bind(this, eventType, listener, elements[i])
                   );
                 },
                 () => {}
               )
-            )
-        );
-      }
+            );
+          }
+        });
     }
 
     return function () {
@@ -1541,6 +1539,24 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
+  }
+
+  /**
+   * Assert that the selectors are all unique
+   * @param {!Array<string>|string} selectors
+   */
+  assertUniqueSelectors_(selectors) {
+    if (isArray(selectors)) {
+      const map = {};
+      for (let i = 0; i < selectors.length; i++) {
+        userAssert(
+          !map[selectors[i]],
+          'Cannot have duplicate selectors in selectors list: %s',
+          selectors
+        );
+        map[selectors[i]] = selectors[i];
+      }
+    }
   }
 
   /**
@@ -1642,21 +1658,14 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * @param {string|undefined} waitForSpec
-   * @param {string|undefined} selector
    * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, opt_element) {
+  getReadyPromise(waitForSpec, opt_element) {
     if (!waitForSpec) {
-      // Default case:
-      if (!selector) {
-        // waitFor selector is not defined, wait for nothing
-        return null;
-      } else {
-        // otherwise wait for ini-load by default
-        waitForSpec = 'ini-load';
-      }
+      // Default case, waitFor selector is not defined, wait for nothing
+      return null;
     }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');
