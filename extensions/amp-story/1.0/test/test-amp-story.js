@@ -31,7 +31,7 @@ import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
-import {PageState} from '../amp-story-page';
+import {NavigationDirection, PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
@@ -1814,6 +1814,50 @@ describes.realWin(
         const distanceGraph = story.getPagesByDistance_();
         expect(distanceGraph[1].includes('cover')).to.be.true;
         toggleExperiment(win, 'amp-story-branching', false);
+      });
+    });
+
+    describe('amp-story playable', () => {
+      it('should set playable to true if page has autoadvance', async () => {
+        await createStoryWithPages(1, ['cover', 'page-1'], true);
+
+        await story.layoutCallback();
+        story
+          .layoutCallback()
+          .then(() =>
+            story.activePage_.element
+              .signals()
+              .whenSignal(CommonSignals.LOAD_END)
+          )
+          .then(() => {
+            expect(
+              story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE)
+            ).to.be.true;
+            expect(
+              story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)
+            ).to.be.true;
+          });
+      });
+
+      it('should set playable to false if page does not have playable', async () => {
+        await createStoryWithPages(1, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story
+          .layoutCallback()
+          .then(() =>
+            story.activePage_.element
+              .signals()
+              .whenSignal(CommonSignals.LOAD_END)
+          )
+          .then(() => {
+            expect(
+              story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE)
+            ).to.be.false;
+            expect(
+              story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)
+            ).to.be.false;
+          });
       });
     });
   }
