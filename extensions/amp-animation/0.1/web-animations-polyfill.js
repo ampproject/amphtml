@@ -27,7 +27,8 @@ const POLYFILLED = '__AMP_WA';
  */
 function forceOnSafari(win) {
   if (Services.platformFor(win).isSafari()) {
-    win.document.documentElement.animate = () => /** @type {!Animation} */ ({});
+    // Using string access syntax to bypass typecheck.
+    win.Element.prototype['animate'] = null;
   }
 }
 
@@ -35,8 +36,8 @@ function forceOnSafari(win) {
  * @param {!Window} win
  */
 export function installWebAnimationsIfNecessary(win) {
-  forceOnSafari(win);
   if (!win[POLYFILLED]) {
+    forceOnSafari(win);
     win[POLYFILLED] = true;
     installWebAnimations(win);
   }
