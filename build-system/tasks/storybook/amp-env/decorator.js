@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {makeDecorator} from '@storybook/addons';
+import flush from 'styled-jsx/server';
 import render from 'preact-render-to-string/jsx';
 
 export default makeDecorator({
@@ -23,6 +24,19 @@ export default makeDecorator({
   parameterName: 'amp',
   wrapper: (getStory, context) => {
     const contents = render(getStory(context));
+    const styleElements = flush();
+    const styles = render(
+      <style
+        amp-custom=""
+        dangerouslySetInnerHTML={{
+          __html: styleElements
+            .map((style) => style.props.dangerouslySetInnerHTML.__html)
+            .join('')
+            .replace(/\/\*# sourceMappingURL=.*\*\//g, '')
+            .replace(/\/\*@ sourceURL=.*?\*\//g, ''),
+        }}
+      />
+    );
 
     const ampHtml = `
         <!doctype html>
@@ -41,6 +55,7 @@ export default makeDecorator({
                   ext.version || 0.1
                 }.js"></script>`
             )}
+            ${styles}
         </head>
         <body>
             ${contents}
