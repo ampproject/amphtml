@@ -408,7 +408,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
     });
   });
 
-  describe.only('min/max/clamp', () => {
+  describe('min/max/clamp', () => {
     function test(name, argsOrFunc, css, results) {
       it(`min: ${name}`, () => {
         const args =
