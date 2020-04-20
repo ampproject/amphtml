@@ -529,60 +529,10 @@ describes.realWin(
         });
 
         describe('actionPromptTrigger', () => {
-          it('should not expand when actionPromptTrigger is false', async () => {
-            consentUI = new ConsentUI(mockInstance, {
-              'promptUISrc': 'https//promptUISrc',
-            });
-
-            consentUI.show(false);
-            consentUI.iframeReady_.resolve();
-            await macroTask();
-
-            // Send expand
-            sendMessageConsentUi(consentUI, 'enter-fullscreen');
-
-            // not currently fullscreen
-            expect(consentUI.isFullscreen_).to.be.false;
-            expect(consentUI.isActionPromptTrigger_).to.be.false;
-            expect(
-              consentUI.parent_.classList.contains(
-                consentUiClasses.iframeFullscreen
-              )
-            ).to.be.false;
-          });
-
           it('should expand when actionPromptTrigger is true', async () => {
             consentUI = new ConsentUI(mockInstance, {
               'promptUISrc': 'https//promptUISrc',
             });
-
-            consentUI.show(true);
-            consentUI.iframeReady_.resolve();
-            await macroTask();
-
-            // Send expand
-            sendMessageConsentUi(consentUI, 'enter-fullscreen');
-
-            expect(consentUI.isFullscreen_).to.be.true;
-            expect(consentUI.isActionPromptTrigger_).to.be.true;
-            expect(
-              consentUI.parent_.classList.contains(
-                consentUiClasses.iframeFullscreen
-              )
-            ).to.be.true;
-          });
-
-          it('should expand after hidden', async () => {
-            consentUI = new ConsentUI(mockInstance, {
-              'promptUISrc': 'https//promptUISrc',
-            });
-
-            consentUI.show(false);
-            consentUI.iframeReady_.resolve();
-            await macroTask();
-
-            consentUI.hide();
-            await macroTask();
 
             consentUI.show(true);
             consentUI.iframeReady_.resolve();

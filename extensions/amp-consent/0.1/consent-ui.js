@@ -228,7 +228,8 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      // Set this for every iframe request to show, no need to reset.
+      // show() can be called multiple times, but notificationsUiManager
+      // ensures that only 1 is shown at a time, so no race condition here
       this.isActionPromptTrigger_ = isActionPromptTrigger;
       this.loadIframe_().then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
