@@ -15,7 +15,6 @@
  */
 
 import * as ast from '../parsers/css-expr-ast';
-import {parseCss} from '../parsers/css-expr';
 
 describes.sandboxed('CSS resolve calc', {}, (env) => {
   const normalize = true;
@@ -412,7 +411,8 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
   describe.only('min/max/clamp', () => {
     function test(name, argsOrFunc, css, results) {
       it(`min: ${name}`, () => {
-        const args = typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
+        const args =
+          typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
         const min = new ast.CssMinMaxNode('min', args);
         expect(min.isConst()).to.be.false;
         if (css) {
@@ -422,7 +422,8 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       });
 
       it(`max: ${name}`, () => {
-        const args = typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
+        const args =
+          typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
         const max = new ast.CssMinMaxNode('max', args);
         expect(max.isConst()).to.be.false;
         if (css) {
@@ -433,7 +434,8 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
 
       if (results.length > 2) {
         it(`clamp: ${name}`, () => {
-          const args = typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
+          const args =
+            typeof argsOrFunc == 'function' ? argsOrFunc() : argsOrFunc;
           const clamp = new ast.CssMinMaxNode('clamp', args);
           expect(clamp.isConst()).to.be.false;
           if (css) {
@@ -460,30 +462,21 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
 
     test(
       'should calc two same-unit values',
-      [
-        new ast.CssLengthNode(20, 'px'),
-        new ast.CssLengthNode(10, 'px'),
-      ],
+      [new ast.CssLengthNode(20, 'px'), new ast.CssLengthNode(10, 'px')],
       '20px,10px',
       ['10px', '20px']
     );
 
     test(
       'should calc two percent values',
-      [
-        new ast.CssPercentNode(20),
-        new ast.CssPercentNode(10),
-      ],
+      [new ast.CssPercentNode(20), new ast.CssPercentNode(10)],
       '20%,10%',
       ['10%', '20%']
     );
 
     test(
       'should calc two same-unit values',
-      [
-        new ast.CssLengthNode(20, 'em'),
-        new ast.CssLengthNode(10, 'em'),
-      ],
+      [new ast.CssLengthNode(20, 'em'), new ast.CssLengthNode(10, 'em')],
       '20em,10em',
       ['10em', '20em']
     );
@@ -501,10 +494,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
 
     test(
       'should calc two same-unit values - times',
-      [
-        new ast.CssLengthNode(20, 's'),
-        new ast.CssLengthNode(10, 's'),
-      ],
+      [new ast.CssLengthNode(20, 's'), new ast.CssLengthNode(10, 's')],
       '20s,10s',
       ['10s', '20s']
     );
@@ -567,10 +557,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
           .expects('getCurrentElementSize')
           .returns({width: 110, height: 220})
           .atLeast(1);
-        return [
-          new ast.CssLengthNode(25, 'px'),
-          new ast.CssPercentNode(10),
-        ];
+        return [new ast.CssLengthNode(25, 'px'), new ast.CssPercentNode(10)];
       },
       '25px,10%',
       // minmax(25px, 10% * 220) = min(25px, 22px) = 22px / 25px
@@ -586,10 +573,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
           .expects('getCurrentElementSize')
           .returns({width: 110, height: 220})
           .atLeast(1);
-        return [
-          new ast.CssLengthNode(10, 'em'),
-          new ast.CssPercentNode(10),
-        ];
+        return [new ast.CssLengthNode(10, 'em'), new ast.CssPercentNode(10)];
       },
       '10em,10%',
       // minmax(10em * 2px, 10% * 220) = min(20px, 22px) = 20px / 22px
@@ -632,7 +616,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       },
       '5%,10em,10rem',
       // minmax(5% * 110, 1 * 10px, 2 * 10px) = minmax(5.5px, 10px, 20px)
-      ['5.5px', '20px', '10px'],
+      ['5.5px', '20px', '10px']
     );
 
     test(
@@ -678,13 +662,10 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
         .withExactArgs('--var2')
         .returns(new ast.CssLengthNode(1, 'px'))
         .once();
-      const node = new ast.CssMinMaxNode(
-        'min',
-        [
-          new ast.CssVarNode('--var1'),
-          new ast.CssVarNode('--var2'),
-        ]
-      );
+      const node = new ast.CssMinMaxNode('min', [
+        new ast.CssVarNode('--var1'),
+        new ast.CssVarNode('--var2'),
+      ]);
       expect(node.isConst()).to.be.false;
       expect(node.css()).to.equal('min(var(--var1),var(--var2))');
       expect(resolvedCss(node)).to.equal('1px');
@@ -701,39 +682,30 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
         .withExactArgs('--var2')
         .returns(null)
         .once();
-      const node = new ast.CssMinMaxNode(
-        'min',
-        [
-          new ast.CssVarNode('--var1'),
-          new ast.CssVarNode('--var2'),
-        ]
-      );
+      const node = new ast.CssMinMaxNode('min', [
+        new ast.CssVarNode('--var1'),
+        new ast.CssVarNode('--var2'),
+      ]);
       expect(node.isConst()).to.be.false;
       expect(node.css()).to.equal('min(var(--var1),var(--var2))');
       expect(resolvedCss(node)).to.be.null;
     });
 
     it('should only allow numerics', () => {
-      const node = new ast.CssMinMaxNode(
-        'min',
-        [
-          new ast.CssPassthroughNode('A'),
-          new ast.CssPassthroughNode('B'),
-        ]
-      );
+      const node = new ast.CssMinMaxNode('min', [
+        new ast.CssPassthroughNode('A'),
+        new ast.CssPassthroughNode('B'),
+      ]);
       expect(() => {
         resolvedCss(node);
       }).to.throw(/numerical/);
     });
 
     it('should only allow same-type', () => {
-      const node = new ast.CssMinMaxNode(
-        'min',
-        [
-          new ast.CssLengthNode(30, 'px'),
-          new ast.CssTimeNode(20, 's'),
-        ]
-      );
+      const node = new ast.CssMinMaxNode('min', [
+        new ast.CssLengthNode(30, 'px'),
+        new ast.CssTimeNode(20, 's'),
+      ]);
       expect(() => {
         resolvedCss(node);
       }).to.throw(/same type/);

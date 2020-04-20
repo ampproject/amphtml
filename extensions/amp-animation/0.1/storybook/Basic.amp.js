@@ -15,10 +15,10 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
-import {button, text, number, select, withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 import {AnimationTemplate} from './template';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
+import {storiesOf} from '@storybook/preact';
+import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const KEYFRAMES_OPTIONS = {
   'rotate': {
@@ -34,7 +34,10 @@ const KEYFRAMES_OPTIONS = {
     clipPath: ['ellipse(60% 40% at 30% 30%)', 'ellipse(20% 20%)'],
   },
   'clip-path:polygon': {
-    clipPath: ['polygon(50% 0, 100% 50%, 50% 100%, 0 50%)', 'polygon(40% 0, 90% 40%, 40% 90%, 0 40%)'],
+    clipPath: [
+      'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
+      'polygon(40% 0, 90% 40%, 40% 90%, 0 40%)',
+    ],
   },
   'extension:minmax': {
     transform: ['translateX(min(100%, width() / 2))', 'translateX(0)'],
@@ -54,7 +57,11 @@ storiesOf('Animation', module)
   .addParameters({extensions: [{name: 'amp-animation', version: 0.1}]})
   .add('default', () => {
     const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
-    const keyframesName = select('Keyframes', keyframesOptions, keyframesOptions[0]);
+    const keyframesName = select(
+      'Keyframes',
+      keyframesOptions,
+      keyframesOptions[0]
+    );
     const keyframes = KEYFRAMES_OPTIONS[keyframesName];
     const easing = text('Easing', 'cubic-bezier(0,0,.21,1)');
     const spec = {

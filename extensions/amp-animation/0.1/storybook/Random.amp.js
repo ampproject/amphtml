@@ -15,10 +15,10 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
-import {button, text, number, select, withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 import {AnimationTemplate} from './template';
+import {storiesOf} from '@storybook/preact';
+import {withKnobs} from '@storybook/addon-knobs';
+import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const CONTAINER_STYLE = {
   position: 'absolute',

@@ -15,7 +15,6 @@
  */
 
 import * as ast from '../parsers/css-expr-ast';
-import {parseCss} from '../parsers/css-expr';
 
 describes.sandboxed('CSS resolve clip-path', {}, (env) => {
   const normalize = true;
@@ -30,11 +29,6 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
   afterEach(() => {
     contextMock.verify();
   });
-
-  function resolvedCss(node, opt_normalize) {
-    const resolved = node.resolve(context, opt_normalize);
-    return resolved ? resolved.css() : null;
-  }
 
   describe('box', () => {
     let dimStack;
@@ -75,10 +69,12 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve <vertical horizontal> inset box', () => {
-      const node = ast.createBoxNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('V'),
-        new ast.CssPassthroughNode('H'),
-      ]));
+      const node = ast.createBoxNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('V'),
+          new ast.CssPassthroughNode('H'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('Vh Hw');
       expect(node.isConst(normalize)).to.be.true;
@@ -86,11 +82,13 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve <top horizontal bottom> inset box', () => {
-      const node = ast.createBoxNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('T'),
-        new ast.CssPassthroughNode('H'),
-        new ast.CssPassthroughNode('B'),
-      ]));
+      const node = ast.createBoxNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('T'),
+          new ast.CssPassthroughNode('H'),
+          new ast.CssPassthroughNode('B'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('Th Hw Bh');
       expect(node.isConst(normalize)).to.be.true;
@@ -98,12 +96,14 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve <top right bottom left> inset box', () => {
-      const node = ast.createBoxNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('T'),
-        new ast.CssPassthroughNode('R'),
-        new ast.CssPassthroughNode('B'),
-        new ast.CssPassthroughNode('L'),
-      ]));
+      const node = ast.createBoxNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('T'),
+          new ast.CssPassthroughNode('R'),
+          new ast.CssPassthroughNode('B'),
+          new ast.CssPassthroughNode('L'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('Th Rw Bh Lw');
       expect(node.isConst(normalize)).to.be.true;
@@ -111,12 +111,15 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve <top right bottom left> w/o dimensions', () => {
-      const node = ast.createBoxNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('T'),
-        new ast.CssPassthroughNode('R'),
-        new ast.CssPassthroughNode('B'),
-        new ast.CssPassthroughNode('L'),
-      ]), []);
+      const node = ast.createBoxNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('T'),
+          new ast.CssPassthroughNode('R'),
+          new ast.CssPassthroughNode('B'),
+          new ast.CssPassthroughNode('L'),
+        ]),
+        []
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('T R B L');
       expect(node.isConst(normalize)).to.be.true;
@@ -129,10 +132,12 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
         .withExactArgs('--var1')
         .returns(null)
         .once();
-      const node = ast.createBoxNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('V'),
-        new ast.CssVarNode('--var1'),
-      ]));
+      const node = ast.createBoxNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('V'),
+          new ast.CssVarNode('--var1'),
+        ])
+      );
       expect(node.isConst()).to.be.false;
       expect(node.isConst(normalize)).to.be.false;
       expect(node.calc(context)).to.be.null;
@@ -225,7 +230,9 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
       expect(node.calc(context).css()).to.equal('inset(A A round R)');
       expect(node.isConst(normalize)).to.be.true;
       isConst = false;
-      expect(node.calc(context, normalize).css()).to.equal('inset(Ah Aw round R)');
+      expect(node.calc(context, normalize).css()).to.equal(
+        'inset(Ah Aw round R)'
+      );
     });
 
     it('should resolve inset with two borders', () => {
@@ -241,7 +248,9 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
       expect(node.calc(context).css()).to.equal('inset(A A round R1 / R2)');
       expect(node.isConst(normalize)).to.be.true;
       isConst = false;
-      expect(node.calc(context, normalize).css()).to.equal('inset(Ah Aw round R1 / R2)');
+      expect(node.calc(context, normalize).css()).to.equal(
+        'inset(Ah Aw round R1 / R2)'
+      );
     });
   });
 
@@ -281,10 +290,12 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve a position-2', () => {
-      const node = ast.createPositionNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('H'),
-        new ast.CssPassthroughNode('V'),
-      ]));
+      const node = ast.createPositionNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('H'),
+          new ast.CssPassthroughNode('V'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('Hw Vh');
       expect(node.isConst(normalize)).to.be.true;
@@ -293,21 +304,25 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
 
     it('should disallow a position-3', () => {
       expect(() => {
-        ast.createPositionNode(new ast.CssConcatNode([
-          new ast.CssPassthroughNode('H'),
-          new ast.CssPassthroughNode('V'),
-          new ast.CssPassthroughNode('X'),
-        ]));
+        ast.createPositionNode(
+          new ast.CssConcatNode([
+            new ast.CssPassthroughNode('H'),
+            new ast.CssPassthroughNode('V'),
+            new ast.CssPassthroughNode('X'),
+          ])
+        );
       }).to.throw(/1, 2, or 4/);
     });
 
     it('should resolve a position-4 left/top', () => {
-      const node = ast.createPositionNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('left'),
-        new ast.CssPassthroughNode('H'),
-        new ast.CssPassthroughNode('top'),
-        new ast.CssPassthroughNode('V'),
-      ]));
+      const node = ast.createPositionNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('left'),
+          new ast.CssPassthroughNode('H'),
+          new ast.CssPassthroughNode('top'),
+          new ast.CssPassthroughNode('V'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('leftw Hw toph Vh');
       expect(node.isConst(normalize)).to.be.true;
@@ -315,12 +330,14 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve a position-4 top/left', () => {
-      const node = ast.createPositionNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('top'),
-        new ast.CssPassthroughNode('V'),
-        new ast.CssPassthroughNode('left'),
-        new ast.CssPassthroughNode('H'),
-      ]));
+      const node = ast.createPositionNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('top'),
+          new ast.CssPassthroughNode('V'),
+          new ast.CssPassthroughNode('left'),
+          new ast.CssPassthroughNode('H'),
+        ])
+      );
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('toph Vh leftw Hw');
       expect(node.isConst(normalize)).to.be.true;
@@ -333,10 +350,12 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
         .withExactArgs('--var1')
         .returns(null)
         .once();
-      const node = ast.createPositionNode(new ast.CssConcatNode([
-        new ast.CssPassthroughNode('V'),
-        new ast.CssVarNode('--var1'),
-      ]));
+      const node = ast.createPositionNode(
+        new ast.CssConcatNode([
+          new ast.CssPassthroughNode('V'),
+          new ast.CssVarNode('--var1'),
+        ])
+      );
       expect(node.isConst()).to.be.false;
       expect(node.isConst(normalize)).to.be.false;
       expect(node.calc(context)).to.be.null;
@@ -392,10 +411,7 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
     });
 
     it('should resolve ellipse with position and w/o radii', () => {
-      const node = ast.createEllipseNode(
-        null,
-        new ast.CssPassthroughNode('H')
-      );
+      const node = ast.createEllipseNode(null, new ast.CssPassthroughNode('H'));
       expect(node.isConst()).to.be.true;
       expect(node.calc(context).css()).to.equal('ellipse(at H)');
       expect(node.isConst(normalize)).to.be.true;
@@ -415,7 +431,9 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
       expect(node.calc(context).css()).to.equal('ellipse(R1 R2 at H)');
       expect(node.isConst(normalize)).to.be.true;
       isConst = false;
-      expect(node.calc(context, normalize).css()).to.equal('ellipse(R1 R2 at Hw)');
+      expect(node.calc(context, normalize).css()).to.equal(
+        'ellipse(R1 R2 at Hw)'
+      );
     });
   });
 
@@ -450,7 +468,8 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
 
       expect(ast.isVarCss('polygon(10px 20px)', normalize)).to.be.false;
       expect(ast.isVarCss('polygon(10px 20px, 10% 20%)', normalize)).to.be.true;
-      expect(ast.isVarCss('polygon(10px 20px, 10em 20em)', normalize)).to.be.true;
+      expect(ast.isVarCss('polygon(10px 20px, 10em 20em)', normalize)).to.be
+        .true;
     });
 
     it('should resolve polygon with radii and w/o position', () => {
@@ -468,7 +487,9 @@ describes.sandboxed('CSS resolve clip-path', {}, (env) => {
       expect(node.calc(context).css()).to.equal('polygon(X1 Y1,X2 Y2)');
       expect(node.isConst(normalize)).to.be.true;
       isConst = false;
-      expect(node.calc(context, normalize).css()).to.equal('polygon(X1w Y1h,X2w Y2h)');
+      expect(node.calc(context, normalize).css()).to.equal(
+        'polygon(X1w Y1h,X2w Y2h)'
+      );
     });
   });
 });

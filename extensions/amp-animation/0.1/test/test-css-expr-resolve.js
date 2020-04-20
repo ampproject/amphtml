@@ -15,7 +15,6 @@
  */
 
 import * as ast from '../parsers/css-expr-ast';
-import {parseCss} from '../parsers/css-expr';
 
 describes.sandboxed('CSS resolve', {}, (env) => {
   const normalize = true;

@@ -205,9 +205,13 @@ export class CssConcatNode extends CssNode {
 
     /** @private {!Array<!CssNode>} */
     this.array_ =
-      opt_array instanceof CssConcatNode ? opt_array.array_ :
-      Array.isArray(opt_array) ? opt_array :
-      opt_array ? [opt_array] : [];
+      opt_array instanceof CssConcatNode
+        ? opt_array.array_
+        : Array.isArray(opt_array)
+        ? opt_array
+        : opt_array
+        ? [opt_array]
+        : [];
     /** @const @private {?Array<string>} */
     this.dimensions_ = opt_dimensions || null;
   }
@@ -248,8 +252,12 @@ export class CssConcatNode extends CssNode {
 
   /** @override */
   calc(context, normalize) {
-    const resolvedArray =
-      resolveArray(context, normalize, this.array_, this.dimensions_);
+    const resolvedArray = resolveArray(
+      context,
+      normalize,
+      this.array_,
+      this.dimensions_
+    );
     return resolvedArray ? new CssConcatNode(resolvedArray) : null;
   }
 }
@@ -616,8 +624,12 @@ export class CssFuncNode extends CssNode {
 
   /** @override */
   calc(context, normalize) {
-    const resolvedArgs =
-      resolveArray(context, normalize, this.args_, this.dimensions_);
+    const resolvedArgs = resolveArray(
+      context,
+      normalize,
+      this.args_,
+      this.dimensions_
+    );
     return resolvedArgs ? new CssFuncNode(this.name_, resolvedArgs) : null;
   }
 }
@@ -707,9 +719,11 @@ export function createPositionNode(value) {
     for (let i = 0; i < args.length; i += 2) {
       const kw = args[i].css().toLowerCase();
       const dim =
-        (kw == 'left' || kw == 'right') ? 'w' :
-        (kw == 'top' || kw == 'bottom') ? 'h' :
-        '';
+        kw == 'left' || kw == 'right'
+          ? 'w'
+          : kw == 'top' || kw == 'bottom'
+          ? 'h'
+          : '';
       dims[i] = dims[i + 1] = dim;
     }
   }
@@ -729,11 +743,9 @@ export function createPositionNode(value) {
 export function createInsetNode(box, opt_round) {
   const boxNode = createBoxNode(box);
   if (opt_round) {
-    return new CssFuncNode('inset', [new CssConcatNode([
-      boxNode,
-      new CssPassthroughNode('round'),
-      opt_round
-    ])]);
+    return new CssFuncNode('inset', [
+      new CssConcatNode([boxNode, new CssPassthroughNode('round'), opt_round]),
+    ]);
   }
   return new CssFuncNode('inset', [boxNode]);
 }
@@ -770,17 +782,14 @@ export function createEllipseNode(radii, opt_position, opt_name) {
     return new CssFuncNode(name, []);
   }
   if (radii && position) {
-    return new CssFuncNode(name, [new CssConcatNode([
-      radii,
-      new CssPassthroughNode('at'),
-      position
-    ])]);
+    return new CssFuncNode(name, [
+      new CssConcatNode([radii, new CssPassthroughNode('at'), position]),
+    ]);
   }
   if (position) {
-    return new CssFuncNode(name, [new CssConcatNode([
-      new CssPassthroughNode('at'),
-      position
-    ])]);
+    return new CssFuncNode(name, [
+      new CssConcatNode([new CssPassthroughNode('at'), position]),
+    ]);
   }
   return new CssFuncNode(name, [radii]);
 }
@@ -791,14 +800,15 @@ export function createEllipseNode(radii, opt_position, opt_name) {
  *
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#polygon()
  *
- * @param {!Array<CssNode>} tuples
+ * @param {!Array<!CssNode>} tuples
  * @return {!CssNode}
  */
 export function createPolygonNode(tuples) {
-  const tuplesWithDims = tuples.map(tuple => new CssConcatNode(tuple, TUPLE_DIMENSIONS));
+  const tuplesWithDims = tuples.map(
+    (tuple) => new CssConcatNode(tuple, TUPLE_DIMENSIONS)
+  );
   return new CssFuncNode('polygon', tuplesWithDims);
 }
-
 
 /**
  * A CSS translate family of functions:
@@ -1290,7 +1300,7 @@ export class CssMinMaxNode extends CssFuncNode {
     let firstNonPercent = null;
     let hasPercent = false;
     let hasDifferentUnits = false;
-    resolvedArgs.forEach(arg => {
+    resolvedArgs.forEach((arg) => {
       if (!(arg instanceof CssNumericNode)) {
         throw new Error('arguments must be numerical');
       }
@@ -1316,7 +1326,7 @@ export class CssMinMaxNode extends CssFuncNode {
       if (hasDifferentUnits) {
         firstNonPercent = firstNonPercent.norm(context);
       }
-      resolvedArgs = resolvedArgs.map(arg => {
+      resolvedArgs = resolvedArgs.map((arg) => {
         if (arg == firstNonPercent) {
           return arg;
         }
@@ -1329,14 +1339,14 @@ export class CssMinMaxNode extends CssFuncNode {
         // Units are the same, the math is simple: numerals are summed.
         // Otherwise, the units neeed to be normalized first.
         if (hasDifferentUnits) {
-          return arg.norm(context);
+          return /** @type {!CssNumericNode} */ (arg).norm(context);
         }
         return arg;
       });
     }
 
     // Calculate.
-    const nums = resolvedArgs.map(arg => arg.num_);
+    const nums = resolvedArgs.map((arg) => arg.num_);
     let value;
     if (this.name_ == 'min') {
       // min(...)
@@ -1384,6 +1394,7 @@ function getDimSide(dim, size) {
  * @param {boolean} normalize
  * @param {!Array<!CssNode>} array
  * @param {?Array<string>} dimensions
+ * @return {?Array<!CssNode>}
  */
 function resolveArray(context, normalize, array, dimensions) {
   const resolvedArray = [];

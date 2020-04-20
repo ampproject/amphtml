@@ -15,9 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
-import {button, text, number, select, withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {button, number, select, text} from '@storybook/addon-knobs';
 
 const FILL_OPTIONS = {
   none: 'none',
@@ -55,7 +53,12 @@ const INFO_STYLE = {
   overflow: 'auto',
 };
 
-export function AnimationTemplate({spec, children}) {
+/**
+ * @param {!Object} props
+ * @return {!Object}
+ */
+export function AnimationTemplate(props) {
+  const {spec, children} = props;
   const duration = text('Duration', '1s');
   const iterations = number('Iterations', 2);
   const fill = select('Fill', FILL_OPTIONS, 'both');
@@ -70,8 +73,10 @@ export function AnimationTemplate({spec, children}) {
   return (
     <main>
       <amp-animation id="anim1" layout="nodisplay">
-        <script type="application/json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(fullSpec) }} />
+        <script
+          type="application/json"
+          dangerouslySetInnerHTML={{__html: JSON.stringify(fullSpec)}}
+        />
       </amp-animation>
 
       <div class="buttons" style={{marginBottom: '8px'}}>

@@ -113,13 +113,15 @@ describe('CSS parse', () => {
     if (!array || array.length == 0) {
       return '';
     }
-    return array.map((n, i) => {
-      const v = pseudo(n);
-      if (dims && i < dims.length) {
-        return `${v}|${dims[i]}`;
-      }
-      return v;
-    }).join(delim);
+    return array
+      .map((n, i) => {
+        const v = pseudo(n);
+        if (dims && i < dims.length) {
+          return `${v}|${dims[i]}`;
+        }
+        return v;
+      })
+      .join(delim);
   }
 
   it('should parse empty string as null', () => {
@@ -246,7 +248,9 @@ describe('CSS parse', () => {
   });
 
   it('should parse a translate()', () => {
-    expect(parsePseudo('translate(100px)')).to.equal('TRANSLATE<LEN<100 PX>|w>');
+    expect(parsePseudo('translate(100px)')).to.equal(
+      'TRANSLATE<LEN<100 PX>|w>'
+    );
     expect(parsePseudo('translate(100px, 200px)')).to.equal(
       'TRANSLATE<LEN<100 PX>|w, LEN<200 PX>|h>'
     );
@@ -368,26 +372,32 @@ describe('CSS parse', () => {
   it('should parse clip-path:inset', () => {
     // No radius.
     // inset(<all>)
-    expect(parsePseudo('inset(10%)'))
-      .to.equal('INSET<CON<PRC<10>|h PRC<10>|w>>');
+    expect(parsePseudo('inset(10%)')).to.equal(
+      'INSET<CON<PRC<10>|h PRC<10>|w>>'
+    );
     // inset(<vert horiz>)
-    expect(parsePseudo('inset(10% 10%)'))
-      .to.equal('INSET<CON<PRC<10>|h PRC<10>|w>>');
+    expect(parsePseudo('inset(10% 10%)')).to.equal(
+      'INSET<CON<PRC<10>|h PRC<10>|w>>'
+    );
     // inset(<top horiz bottom>)
-    expect(parsePseudo('inset(10% 20% 30%)'))
-      .to.equal('INSET<CON<PRC<10>|h PRC<20>|w PRC<30>|h>>');
+    expect(parsePseudo('inset(10% 20% 30%)')).to.equal(
+      'INSET<CON<PRC<10>|h PRC<20>|w PRC<30>|h>>'
+    );
     // inset(<top right bottom left>)
-    expect(parsePseudo('inset(10% 20% 30% 40%)'))
-      .to.equal('INSET<CON<PRC<10>|h PRC<20>|w PRC<30>|h PRC<40>|w>>');
+    expect(parsePseudo('inset(10% 20% 30% 40%)')).to.equal(
+      'INSET<CON<PRC<10>|h PRC<20>|w PRC<30>|h PRC<40>|w>>'
+    );
 
     // With radius.
     // inset(<all> round 50%)
-    expect(parsePseudo('inset(10% round 50% 20%)'))
-      .to.equal('INSET<CON<CON<PRC<10>|h PRC<10>|w> round CON<PRC<50> PRC<20>>>>');
+    expect(parsePseudo('inset(10% round 50% 20%)')).to.equal(
+      'INSET<CON<CON<PRC<10>|h PRC<10>|w> round CON<PRC<50> PRC<20>>>>'
+    );
 
     // inset(<all> round 10px / 20px)
-    expect(parsePseudo('inset(10% round 10px / 20px)'))
-      .to.equal('INSET<CON<CON<PRC<10>|h PRC<10>|w> round CON<CON<LEN<10 PX>> / CON<LEN<20 PX>>>>>');
+    expect(parsePseudo('inset(10% round 10px / 20px)')).to.equal(
+      'INSET<CON<CON<PRC<10>|h PRC<10>|w> round CON<CON<LEN<10 PX>> / CON<LEN<20 PX>>>>>'
+    );
 
     // Do not allow empty box.
     expect(() => {
@@ -413,90 +423,107 @@ describe('CSS parse', () => {
   it('should parse clip-path:circle', () => {
     // No position.
     // circle()
-    expect(parsePseudo('circle()'))
-      .to.equal('CIRCLE<>');
+    expect(parsePseudo('circle()')).to.equal('CIRCLE<>');
     // circle(50%)
-    expect(parsePseudo('circle(50%)'))
-      .to.equal('CIRCLE<PRC<50>>');
+    expect(parsePseudo('circle(50%)')).to.equal('CIRCLE<PRC<50>>');
     // circle(50px)
-    expect(parsePseudo('circle(50px)'))
-      .to.equal('CIRCLE<LEN<50 PX>>');
+    expect(parsePseudo('circle(50px)')).to.equal('CIRCLE<LEN<50 PX>>');
     // circle(farthest-side)
-    expect(parsePseudo('circle(farthest-side)'))
-      .to.equal('CIRCLE<farthest-side>');
+    expect(parsePseudo('circle(farthest-side)')).to.equal(
+      'CIRCLE<farthest-side>'
+    );
 
     // With radius.
     // circle(at 10% 20%)
-    expect(parsePseudo('circle(at 10% 20%)'))
-      .to.equal('CIRCLE<CON<at CON<PRC<10>|w PRC<20>|h>>>');
+    expect(parsePseudo('circle(at 10% 20%)')).to.equal(
+      'CIRCLE<CON<at CON<PRC<10>|w PRC<20>|h>>>'
+    );
     // circle(50% at 10% 20%)
-    expect(parsePseudo('circle(50% at 10% 20%)'))
-      .to.equal('CIRCLE<CON<PRC<50> at CON<PRC<10>|w PRC<20>|h>>>');
+    expect(parsePseudo('circle(50% at 10% 20%)')).to.equal(
+      'CIRCLE<CON<PRC<50> at CON<PRC<10>|w PRC<20>|h>>>'
+    );
     // circle(50% at left top)
-    expect(parsePseudo('circle(50% at left top)'))
-      .to.equal('CIRCLE<CON<PRC<50> at CON<left|w top|h>>>');
+    expect(parsePseudo('circle(50% at left top)')).to.equal(
+      'CIRCLE<CON<PRC<50> at CON<left|w top|h>>>'
+    );
     // circle(50% at left 20%)
-    expect(parsePseudo('circle(50% at left 20%)'))
-      .to.equal('CIRCLE<CON<PRC<50> at CON<left|w PRC<20>|h>>>');
+    expect(parsePseudo('circle(50% at left 20%)')).to.equal(
+      'CIRCLE<CON<PRC<50> at CON<left|w PRC<20>|h>>>'
+    );
     // circle(50% at 10% top)
-    expect(parsePseudo('circle(50% at 10% top)'))
-      .to.equal('CIRCLE<CON<PRC<50> at CON<PRC<10>|w top|h>>>');
+    expect(parsePseudo('circle(50% at 10% top)')).to.equal(
+      'CIRCLE<CON<PRC<50> at CON<PRC<10>|w top|h>>>'
+    );
     // circle(50% at left 10% top 20%)
-    expect(parsePseudo('circle(50% at left 10% top 20%)'))
-      .to.equal('CIRCLE<CON<PRC<50> at CON<left|w PRC<10>|w top|h PRC<20>|h>>>');
+    expect(parsePseudo('circle(50% at left 10% top 20%)')).to.equal(
+      'CIRCLE<CON<PRC<50> at CON<left|w PRC<10>|w top|h PRC<20>|h>>>'
+    );
   });
 
   it('should parse clip-path:ellipse', () => {
     // No position.
     // ellipse()
-    expect(parsePseudo('ellipse()'))
-      .to.equal('ELLIPSE<>');
+    expect(parsePseudo('ellipse()')).to.equal('ELLIPSE<>');
     // ellipse(50%)
-    expect(parsePseudo('ellipse(20% 30%)'))
-      .to.equal('ELLIPSE<CON<PRC<20> PRC<30>>>');
+    expect(parsePseudo('ellipse(20% 30%)')).to.equal(
+      'ELLIPSE<CON<PRC<20> PRC<30>>>'
+    );
     // ellipse(50px)
-    expect(parsePseudo('ellipse(20px 30px)'))
-      .to.equal('ELLIPSE<CON<LEN<20 PX> LEN<30 PX>>>');
+    expect(parsePseudo('ellipse(20px 30px)')).to.equal(
+      'ELLIPSE<CON<LEN<20 PX> LEN<30 PX>>>'
+    );
     // ellipse(farthest-side)
-    expect(parsePseudo('ellipse(closest-side farthest-side)'))
-      .to.equal('ELLIPSE<CON<closest-side farthest-side>>');
+    expect(parsePseudo('ellipse(closest-side farthest-side)')).to.equal(
+      'ELLIPSE<CON<closest-side farthest-side>>'
+    );
 
     // With radius.
     // ellipse(at 10% 20%)
-    expect(parsePseudo('ellipse(at 10% 20%)'))
-      .to.equal('ELLIPSE<CON<at CON<PRC<10>|w PRC<20>|h>>>');
+    expect(parsePseudo('ellipse(at 10% 20%)')).to.equal(
+      'ELLIPSE<CON<at CON<PRC<10>|w PRC<20>|h>>>'
+    );
     // ellipse(30% 40% at 10% 20%)
-    expect(parsePseudo('ellipse(30% 40% at 10% 20%)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<PRC<10>|w PRC<20>|h>>>');
+    expect(parsePseudo('ellipse(30% 40% at 10% 20%)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<PRC<10>|w PRC<20>|h>>>'
+    );
     // ellipse(30% 40% at left top)
-    expect(parsePseudo('ellipse(30% 40% at left top)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w top|h>>>');
+    expect(parsePseudo('ellipse(30% 40% at left top)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w top|h>>>'
+    );
     // ellipse(30% 40% at left 20%)
-    expect(parsePseudo('ellipse(30% 40% at left 20%)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w PRC<20>|h>>>');
+    expect(parsePseudo('ellipse(30% 40% at left 20%)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w PRC<20>|h>>>'
+    );
     // ellipse(30% 40% at 10% top)
-    expect(parsePseudo('ellipse(30% 40% at 10% top)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<PRC<10>|w top|h>>>');
+    expect(parsePseudo('ellipse(30% 40% at 10% top)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<PRC<10>|w top|h>>>'
+    );
     // ellipse(30% 40% at left 10% top 20%)
-    expect(parsePseudo('ellipse(30% 40% at left 10% top 20%)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w PRC<10>|w top|h PRC<20>|h>>>');
+    expect(parsePseudo('ellipse(30% 40% at left 10% top 20%)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<left|w PRC<10>|w top|h PRC<20>|h>>>'
+    );
     // ellipse(30% 40% at top 10% left 20%)
-    expect(parsePseudo('ellipse(30% 40% at top 10% left 20%)'))
-      .to.equal('ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<top|h PRC<10>|h left|w PRC<20>|w>>>');
+    expect(parsePseudo('ellipse(30% 40% at top 10% left 20%)')).to.equal(
+      'ELLIPSE<CON<CON<PRC<30> PRC<40>> at CON<top|h PRC<10>|h left|w PRC<20>|w>>>'
+    );
   });
 
   it('should parse clip-path:polygon', () => {
     // 1 tuple.
-    expect(parsePseudo('polygon(10px 20px)'))
-      .to.equal('POLYGON<CON<LEN<10 PX>|w LEN<20 PX>|h>>');
-    expect(parsePseudo('polygon(10% 20%)'))
-      .to.equal('POLYGON<CON<PRC<10>|w PRC<20>|h>>');
+    expect(parsePseudo('polygon(10px 20px)')).to.equal(
+      'POLYGON<CON<LEN<10 PX>|w LEN<20 PX>|h>>'
+    );
+    expect(parsePseudo('polygon(10% 20%)')).to.equal(
+      'POLYGON<CON<PRC<10>|w PRC<20>|h>>'
+    );
 
     // 2 tuples.
-    expect(parsePseudo('polygon(10px 20px, 30px 40px)'))
-      .to.equal('POLYGON<CON<LEN<10 PX>|w LEN<20 PX>|h>, CON<LEN<30 PX>|w LEN<40 PX>|h>>');
-    expect(parsePseudo('polygon(10% 20%, 30% 40%)'))
-      .to.equal('POLYGON<CON<PRC<10>|w PRC<20>|h>, CON<PRC<30>|w PRC<40>|h>>');
+    expect(parsePseudo('polygon(10px 20px, 30px 40px)')).to.equal(
+      'POLYGON<CON<LEN<10 PX>|w LEN<20 PX>|h>, CON<LEN<30 PX>|w LEN<40 PX>|h>>'
+    );
+    expect(parsePseudo('polygon(10% 20%, 30% 40%)')).to.equal(
+      'POLYGON<CON<PRC<10>|w PRC<20>|h>, CON<PRC<30>|w PRC<40>|h>>'
+    );
   });
 
   it('should parse a var()', () => {
@@ -591,8 +618,12 @@ describe('CSS parse', () => {
     expect(parsePseudo('max(100px)')).to.equal('MAX<LEN<100 PX>>');
 
     // 2+ components.
-    expect(parsePseudo('min(100px, 200px, 300px)')).to.equal('MIN<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>');
-    expect(parsePseudo('max(100px, 200px, 300px)')).to.equal('MAX<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>');
+    expect(parsePseudo('min(100px, 200px, 300px)')).to.equal(
+      'MIN<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>'
+    );
+    expect(parsePseudo('max(100px, 200px, 300px)')).to.equal(
+      'MAX<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>'
+    );
 
     // With calc_sum.
     expect(parsePseudo('min(100px + 200px, 100px + 300px)')).to.equal(
@@ -633,10 +664,14 @@ describe('CSS parse', () => {
   });
 
   it('should parse a clamp()', () => {
-    expect(parsePseudo('clamp(100px, 200px, 300px)')).to.equal('CLAMP<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>');
+    expect(parsePseudo('clamp(100px, 200px, 300px)')).to.equal(
+      'CLAMP<LEN<100 PX>, LEN<200 PX>, LEN<300 PX>>'
+    );
 
     // With calc_sum.
-    expect(parsePseudo('clamp(100px + 1px, 100px + 2px, 100px + 3px)')).to.equal(
+    expect(
+      parsePseudo('clamp(100px + 1px, 100px + 2px, 100px + 3px)')
+    ).to.equal(
       'CLAMP<ADD<LEN<100 PX>, LEN<1 PX>>, ADD<LEN<100 PX>, LEN<2 PX>>, ADD<LEN<100 PX>, LEN<3 PX>>>'
     );
 
