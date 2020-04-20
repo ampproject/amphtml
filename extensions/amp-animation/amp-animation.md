@@ -411,7 +411,7 @@ performance. Currently the list contains:
 - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
 - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
 - [`clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path). Only supported values are
-`inset()`, `circle()`, `ellipse()`, and `polygon()`.
+  `inset()`, `circle()`, `ellipse()`, and `polygon()`.
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
 
