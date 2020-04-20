@@ -53,7 +53,10 @@ function maybeTimeoutFonts(win) {
   }
   // Set timeout such that we have some time to paint fonts in time for
   // the desired goal of a 2500ms for LCP.
-  const timeout = Math.max(1, 2000 - timeSinceNavigationStart);
+  const timeout = Math.max(
+    1,
+    2500 - 400 /* Estimated max time to paint */ - timeSinceNavigationStart
+  );
 
   // Avoid timer dependency since this runs very early in execution.
   win.setTimeout(() => {
