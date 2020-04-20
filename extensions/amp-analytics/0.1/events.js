@@ -26,7 +26,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue, isFiniteNumber} from '../../../src/types';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -35,7 +35,7 @@ const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
-const NO_UNLISTEN = function() {};
+const NO_UNLISTEN = function () {};
 const TAG = 'amp-analytics/events';
 
 /**
@@ -71,70 +71,70 @@ const TRACKER_TYPE = Object.freeze({
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
-    klass: function(root) {
+    klass: function (root) {
       return new ClickEventTracker(root);
     },
   },
   [AnalyticsEventType.CUSTOM]: {
     name: AnalyticsEventType.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new CustomEventTracker(root);
     },
   },
   [AnalyticsEventType.HIDDEN]: {
     name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VisibilityTracker(root);
     },
   },
   [AnalyticsEventType.INI_LOAD]: {
     name: AnalyticsEventType.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function(root) {
+    klass: function (root) {
       return new IniLoadTracker(root);
     },
   },
   [AnalyticsEventType.RENDER_START]: {
     name: AnalyticsEventType.RENDER_START,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
-    klass: function(root) {
+    klass: function (root) {
       return new SignalTracker(root);
     },
   },
   [AnalyticsEventType.SCROLL]: {
     name: AnalyticsEventType.SCROLL,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new ScrollEventTracker(root);
     },
   },
   [AnalyticsEventType.STORY]: {
     name: AnalyticsEventType.STORY,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function(root) {
+    klass: function (root) {
       return new AmpStoryEventTracker(root);
     },
   },
   [AnalyticsEventType.TIMER]: {
     name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function(root) {
+    klass: function (root) {
       return new TimerEventTracker(root);
     },
   },
   [AnalyticsEventType.VIDEO]: {
     name: AnalyticsEventType.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VideoEventTracker(root);
     },
   },
   [AnalyticsEventType.VISIBLE]: {
     name: AnalyticsEventType.VISIBLE,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
+    klass: function (root) {
       return new VisibilityTracker(root);
     },
   },
@@ -192,7 +192,7 @@ export function getTrackerKeyName(eventType) {
  */
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
-  Object.keys(TRACKER_TYPE).forEach(key => {
+  Object.keys(TRACKER_TYPE).forEach((key) => {
     if (
       hasOwn(TRACKER_TYPE, key) &&
       TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1
@@ -340,7 +340,7 @@ export class CustomEventTracker extends EventTracker {
 
     if (buffer) {
       const bufferLength = buffer.length;
-      targetReady.then(target => {
+      targetReady.then((target) => {
         setTimeout(() => {
           for (let i = 0; i < bufferLength; i++) {
             const event = buffer[i];
@@ -363,9 +363,9 @@ export class CustomEventTracker extends EventTracker {
       this.observables_[eventType] = observables;
     }
 
-    return this.observables_[eventType].add(event => {
+    return this.observables_[eventType].add((event) => {
       // Wait for target selected
-      targetReady.then(target => {
+      targetReady.then((target) => {
         if (target.contains(event['target'])) {
           listener(event);
         }
@@ -436,7 +436,7 @@ export class AmpStoryEventTracker extends CustomEventTracker {
       this.observables_[eventType] = observables;
     }
 
-    return this.observables_[eventType].add(event => {
+    return this.observables_[eventType].add((event) => {
       this.fireListener_(event, rootTarget, config, listener);
     });
   }
@@ -750,7 +750,7 @@ export class SignalTracker extends EventTracker {
           selector,
           selectionMethod
         )
-        .then(element => {
+        .then((element) => {
           target = element;
           return this.getElementSignal(eventType, target);
         });
@@ -811,7 +811,7 @@ export class IniLoadTracker extends EventTracker {
           selector,
           selectionMethod
         )
-        .then(element => {
+        .then((element) => {
           target = element;
           return this.getElementSignal('ini-load', target);
         });
@@ -1062,7 +1062,7 @@ export class TimerEventTracker extends EventTracker {
 
   /** @override */
   dispose() {
-    this.getTrackedTimerKeys().forEach(timerId => {
+    this.getTrackedTimerKeys().forEach((timerId) => {
       this.removeTracker_(timerId);
     });
   }
@@ -1241,7 +1241,7 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_
     );
 
-    Object.keys(VideoAnalyticsEvents).forEach(key => {
+    Object.keys(VideoAnalyticsEvents).forEach((key) => {
       this.root
         .getRoot()
         .addEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
@@ -1251,7 +1251,7 @@ export class VideoEventTracker extends EventTracker {
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(VideoAnalyticsEvents).forEach(key => {
+    Object.keys(VideoAnalyticsEvents).forEach((key) => {
       root.removeEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
     });
     this.boundOnSession_ = null;
@@ -1281,7 +1281,7 @@ export class VideoEventTracker extends EventTracker {
     let intervalCounter = 0;
     let lastPercentage = 0;
 
-    return this.sessionObservable_.add(event => {
+    return this.sessionObservable_.add((event) => {
       const {type} = event;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
       const normalizedType = normalizeVideoEventType(type, details);
@@ -1361,7 +1361,7 @@ export class VideoEventTracker extends EventTracker {
         event.target,
         'No target specified by video session event.'
       );
-      targetReady.then(target => {
+      targetReady.then((target) => {
         if (!target.contains(el)) {
           return;
         }
@@ -1428,9 +1428,10 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-
+    const unlistenPromises = [];
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1451,7 +1452,7 @@ export class VisibilityTracker extends EventTracker {
 
     const visibilityManagerPromise = this.root
       .isUsingHostAPI()
-      .then(hasHostAPI => {
+      .then((hasHostAPI) => {
         if (hasHostAPI) {
           this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
         }
@@ -1474,59 +1475,88 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      unlistenPromise = visibilityManagerPromise.then(
-        visibilityManager => {
-          return visibilityManager.listenRoot(
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector),
-            createReportReadyPromiseFunc,
-            this.onEvent_.bind(
-              this,
-              eventType,
-              listener,
-              this.root.getRootElement()
-            )
-          );
-        },
-        () => {}
+      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
+      unlistenPromises.push(
+        visibilityManagerPromise.then(
+          (visibilityManager) => {
+            return visibilityManager.listenRoot(
+              visibilitySpec,
+              this.getReadyPromise(readyPromiseWaitForSpec),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(
+                this,
+                eventType,
+                listener,
+                this.root.getRootElement()
+              )
+            );
+          },
+          () => {}
+        )
       );
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
+      // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      unlistenPromise = this.root
-        .getAmpElement(
+      readyPromiseWaitForSpec = waitForSpec || 'ini-load';
+      this.assertUniqueSelectors_(selector);
+      this.root
+        .getAmpElements(
           context.parentElement || context,
           selector,
           selectionMethod
         )
-        .then(element => {
-          return visibilityManagerPromise.then(
-            visibilityManager => {
-              return visibilityManager.listenElement(
-                element,
-                visibilitySpec,
-                this.getReadyPromise(waitForSpec, selector, element),
-                createReportReadyPromiseFunc,
-                this.onEvent_.bind(this, eventType, listener, element)
-              );
-            },
-            () => {}
-          );
+        .then((elements) => {
+          for (let i = 0; i < elements.length; i++) {
+            unlistenPromises.push(
+              visibilityManagerPromise.then(
+                (visibilityManager) => {
+                  return visibilityManager.listenElement(
+                    elements[i],
+                    visibilitySpec,
+                    this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+                    createReportReadyPromiseFunc,
+                    this.onEvent_.bind(this, eventType, listener, elements[i])
+                  );
+                },
+                () => {}
+              )
+            );
+          }
         });
     }
 
-    return function() {
-      unlistenPromise.then(unlisten => {
-        unlisten();
+    return function () {
+      return Promise.all(unlistenPromises).then((unlistenCallbacks) => {
+        for (let i = 0; i < unlistenCallbacks.length; i++) {
+          unlistenCallbacks[i]();
+        }
       });
     };
+  }
+
+  /**
+   * Assert that the selectors are all unique
+   * @param {!Array<string>|string} selectors
+   */
+  assertUniqueSelectors_(selectors) {
+    if (isArray(selectors)) {
+      const map = {};
+      for (let i = 0; i < selectors.length; i++) {
+        userAssert(
+          !map[selectors[i]],
+          'Cannot have duplicate selectors in selectors list: %s',
+          selectors
+        );
+        map[selectors[i]] = selectors[i];
+      }
+    }
   }
 
   /**
@@ -1560,7 +1590,7 @@ export class VisibilityTracker extends EventTracker {
       return Promise.resolve();
     }
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       ampdoc.onVisibilityChanged(() => {
         if (!ampdoc.isVisible()) {
           resolve();
@@ -1628,21 +1658,14 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * @param {string|undefined} waitForSpec
-   * @param {string|undefined} selector
    * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, opt_element) {
+  getReadyPromise(waitForSpec, opt_element) {
     if (!waitForSpec) {
-      // Default case:
-      if (!selector) {
-        // waitFor selector is not defined, wait for nothing
-        return null;
-      } else {
-        // otherwise wait for ini-load by default
-        waitForSpec = 'ini-load';
-      }
+      // Default case, waitFor selector is not defined, wait for nothing
+      return null;
     }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');

@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "description": "Gulp e2e",
   "devDependencies": {
-    "@babel/register": "7.8.6",
+    "@babel/register": "7.9.0",
     "babel-regenerator-runtime": "6.5.0",
-    "chromedriver": "80.0.1",
-    "puppeteer": "2.1.1",
+    "chromedriver": "81.0.0",
+    "puppeteer": "3.0.0",
     "geckodriver": "1.19.1",
     "selenium-webdriver": "4.0.0-alpha.7"
   }

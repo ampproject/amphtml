@@ -214,19 +214,25 @@
       "name": "amp-sidebar",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ol.amp.html",
       "name": "amp-sidebar toolbar > ol",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
-    },{
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
+    },
+    {
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
       "name": "amp-sidebar toolbar > ul",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
+      // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
+      "flaky": true,
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
       "viewport": {
@@ -355,7 +361,6 @@
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -460,7 +465,6 @@
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -553,7 +557,7 @@
       ]
     },
     {
-      // TODO(zombifier): disabled in #21935 because this test is not hermetic.
+      // TODO(#27453, @ampproject/wg-ads): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
@@ -572,7 +576,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
-      // TODO(#21665): Re-enable test.
+      // TODO(#21665, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
@@ -583,7 +587,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
-      // TODO(#22070): Re-enable test.
+      // TODO(#22070, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
@@ -594,7 +598,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
-      // TODO(#22499): Re-enable this test once the animations run.
+      // TODO(#22499, @ampproject/wg-stories): Re-enable this test once the animations run.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
@@ -624,7 +628,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
-      // TODO(#21749): Re-enable test.
+      // TODO(#21749, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
       "name": "amp-story: landscape templates",
@@ -689,8 +693,6 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
-      "flaky": true,
-      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
@@ -744,6 +746,8 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
+      // TODO(#27454, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
+      "flaky": true,
       "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
       "name": "amp-mega-menu: template render",
       "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],

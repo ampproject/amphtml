@@ -29,12 +29,12 @@ export function Timeago(props) {
     'cutoff': cutoff,
     'cutoffText': cutoffText,
   } = props;
-  const [timestamp, setTimestamp] = useState(null);
+  const [timestamp, setTimestamp] = useState('');
   const ref = useRef(null);
 
   useEffect(() => {
     const node = ref.current;
-    const observer = new IntersectionObserver(entries => {
+    const observer = new IntersectionObserver((entries) => {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(

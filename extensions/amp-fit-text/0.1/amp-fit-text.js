@@ -69,7 +69,7 @@ class AmpFitText extends AMP.BaseElement {
       lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
-    this.getRealChildNodes().forEach(node => {
+    this.getRealChildNodes().forEach((node) => {
       this.contentWrapper_.appendChild(node);
     });
     this.measurer_./*OK*/ innerHTML = this.contentWrapper_./*OK*/ innerHTML;
@@ -167,6 +167,6 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   });
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFitText, CSS);
 });

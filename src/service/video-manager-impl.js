@@ -268,7 +268,7 @@ export class VideoManager {
   maybeInstallVisibilityObserver_(entry) {
     const {element} = entry.video;
 
-    listen(element, VideoEvents.VISIBILITY, details => {
+    listen(element, VideoEvents.VISIBILITY, (details) => {
       const data = getData(details);
       if (data && data['visible'] == true) {
         entry.updateVisibility(/* opt_forceVisible */ true);
@@ -350,7 +350,7 @@ export class VideoManager {
     return (entry
       ? entry.getAnalyticsDetails()
       : Promise.resolve()
-    ).then(details => (details ? details[property] : ''));
+    ).then((details) => (details ? details[property] : ''));
   }
 
   // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
@@ -506,7 +506,7 @@ class VideoEntry {
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
 
-    listen(video.element, VideoEvents.CUSTOM_TICK, e => {
+    listen(video.element, VideoEvents.CUSTOM_TICK, (e) => {
       const data = getData(e);
       const eventType = data['eventType'];
       if (!eventType) {
@@ -570,7 +570,7 @@ class VideoEntry {
   logCustomAnalytics_(eventType, vars) {
     const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
 
-    Object.keys(vars).forEach(key => {
+    Object.keys(vars).forEach((key) => {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
@@ -758,7 +758,7 @@ class VideoEntry {
     if (!this.ampdoc_.isVisible()) {
       return;
     }
-    this.supportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then((supportsAutoplay) => {
       const canAutoplay = this.hasAutoplay && !this.userInteracted();
 
       if (canAutoplay && supportsAutoplay) {
@@ -783,7 +783,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.supportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then((supportsAutoplay) => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -818,15 +818,13 @@ class VideoEntry {
     const animation = renderIcon(win, element);
 
     /** @param {boolean} isPlaying */
-    const toggleAnimation = isPlaying => {
-      video.mutateElement(() => {
-        animation.classList.toggle('amp-video-eq-play', isPlaying);
-      });
+    const toggleAnimation = (isPlaying) => {
+      video.mutateElementSkipRemeasure(() =>
+        animation.classList.toggle('amp-video-eq-play', isPlaying)
+      );
     };
 
-    video.mutateElement(() => {
-      element.appendChild(animation);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(animation));
 
     const unlisteners = [
       listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
@@ -844,7 +842,7 @@ class VideoEntry {
           video.showControls();
         }
         video.unmute();
-        unlisteners.forEach(unlistener => {
+        unlisteners.forEach((unlistener) => {
           unlistener();
         });
         const animation = element.querySelector('.amp-video-eq');
@@ -864,17 +862,13 @@ class VideoEntry {
     const mask = renderInteractionOverlay(element);
 
     /** @param {boolean} display */
-    const setMaskDisplay = display => {
-      video.mutateElement(() => {
-        toggle(mask, display);
-      });
+    const setMaskDisplay = (display) => {
+      video.mutateElementSkipRemeasure(() => toggle(mask, display));
     };
 
     video.hideControls();
 
-    video.mutateElement(() => {
-      element.appendChild(mask);
-    });
+    video.mutateElementSkipRemeasure(() => element.appendChild(mask));
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
@@ -887,7 +881,7 @@ class VideoEntry {
         video.hideControls();
       }),
       listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
-    ].forEach(unlistener => unlisteners.push(unlistener));
+    ].forEach((unlistener) => unlisteners.push(unlistener));
   }
 
   /**
@@ -989,7 +983,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const {video} = this;
-    return this.supportsAutoplay_().then(supportsAutoplay => {
+    return this.supportsAutoplay_().then((supportsAutoplay) => {
       const {width, height} = video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
@@ -1064,7 +1058,7 @@ export class AutoFullscreenManager {
      * @param {!../video-interface.VideoOrBaseElementDef} video
      * @return {boolean}
      */
-    this.boundIncludeOnlyPlaying_ = video =>
+    this.boundIncludeOnlyPlaying_ = (video) =>
       this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
 
     /**
@@ -1080,7 +1074,7 @@ export class AutoFullscreenManager {
 
   /** @public */
   dispose() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
   }
 
@@ -1401,7 +1395,7 @@ function calculateActualPercentageFrequencyMs(durationSeconds) {
  * @param {?number=} duration
  * @return {boolean}
  */
-const isDurationFiniteNonZero = duration =>
+const isDurationFiniteNonZero = (duration) =>
   !!duration && !isNaN(duration) && duration > 1;
 
 /** @visibleForTesting */
@@ -1593,7 +1587,7 @@ export class AnalyticsPercentageTracker {
 function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
 
-  entry.getAnalyticsDetails().then(details => {
+  entry.getAnalyticsDetails().then((details) => {
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }

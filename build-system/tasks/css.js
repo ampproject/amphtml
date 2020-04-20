@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+const debounce = require('debounce');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
+const {
+  endBuildStep,
+  mkdirSync,
+  toPromise,
+  watchDebounceDelay,
+} = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
-const {endBuildStep, mkdirSync, toPromise} = require('./helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -75,9 +81,10 @@ const cssEntryPoints = [
  */
 function compileCss(watch) {
   if (watch) {
-    gulpWatch('css/**/*.css', function() {
+    const watchFunc = () => {
       compileCss();
-    });
+    };
+    gulpWatch('css/**/*.css', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
@@ -99,7 +106,7 @@ function compileCss(watch) {
         }
       )
         .pipe(gulp.dest('build'))
-        .on('end', function() {
+        .on('end', function () {
           mkdirSync('build');
           mkdirSync('build/css');
           if (append) {
@@ -119,7 +126,7 @@ function compileCss(watch) {
    * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
-    return jsifyCssAsync(`css/${path}`).then(css =>
+    return jsifyCssAsync(`css/${path}`).then((css) =>
       writeCss(css, outJs, outCss, append)
     );
   }
@@ -131,7 +138,7 @@ function compileCss(watch) {
 
   let promise = Promise.resolve();
 
-  cssEntryPoints.forEach(entryPoint => {
+  cssEntryPoints.forEach((entryPoint) => {
     const {path, outJs, outCss, append} = entryPoint;
     promise = promise.then(() =>
       writeCssEntryPoint(path, outJs, outCss, append)

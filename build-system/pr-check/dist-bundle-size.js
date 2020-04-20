@@ -17,9 +17,8 @@
 
 /**
  * @fileoverview
- * This script builds the AMP runtime for production and runs the bundle size
- * check.
- * This is run during the CI stage = build; job = dist.
+ * This script builds the minified AMP runtime and runs the bundle size check.
+ * This is run during the CI stage = build; job = dist, bundle size.
  */
 
 const colors = require('ansi-colors');
@@ -40,8 +39,7 @@ const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);

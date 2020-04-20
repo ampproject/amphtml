@@ -308,6 +308,9 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
+    /** @private */
+    this.hasTrackingIframe_ = false;
+
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
 
@@ -372,7 +375,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
-    this.unsubsribes_.forEach(unsubsribe => unsubsribe());
+    this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
   /**
@@ -431,7 +434,7 @@ export class AmpDoc {
     const metaEls = dev()
       .assertElement(this.win.document.head)
       .querySelectorAll('meta[name]');
-    iterateCursor(metaEls, metaEl => {
+    iterateCursor(metaEls, (metaEl) => {
       const name = metaEl.getAttribute('name');
       const content = metaEl.getAttribute('content');
       if (!name || content === null) {
@@ -748,6 +751,19 @@ export class AmpDoc {
    */
   onVisibilityChanged(handler) {
     return this.visibilityStateHandlers_.add(handler);
+  }
+
+  /**
+   * Allow one tracking iframe for each amp doc. Caller need to handle user
+   * error when registeration returns false
+   * @return {boolean}
+   */
+  registerTrackingIframe() {
+    if (this.hasTrackingIframe_) {
+      return false;
+    }
+    this.hasTrackingIframe_ = true;
+    return true;
   }
 }
 
@@ -1067,7 +1083,7 @@ function extractSingleDocParams(win, initParams) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installDocService(win, isSingleDoc, opt_initParams) {
-  registerServiceBuilder(win, 'ampdoc', function() {
+  registerServiceBuilder(win, 'ampdoc', function () {
     return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
 }

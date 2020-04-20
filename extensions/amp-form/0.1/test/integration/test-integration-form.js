@@ -35,7 +35,7 @@ describes.realWin(
     },
     mockFetch: false,
   },
-  env => {
+  (env) => {
     const {testServerPort} = window.ampTestRuntimeConfig;
     const baseUrl = `http://localhost:${testServerPort}`;
     let doc;
@@ -170,7 +170,7 @@ describes.realWin(
     });
 
     // TODO(cvializ, #19647): Broken on SL Chrome 71.
-    describeChrome.skip('Submit xhr-POST', function() {
+    describeChrome.skip('Submit xhr-POST', function () {
       this.timeout(RENDER_TIMEOUT);
 
       it('should submit and render success', () => {
@@ -232,7 +232,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
             return render.then(() => {
               const rendered = form.querySelector('[i-amphtml-rendered]');
@@ -247,7 +247,7 @@ describes.realWin(
     });
 
     // TODO(cvializ, #19647): Broken on SL Chrome 71.
-    describeChrome.skip('Submit xhr-GET', function() {
+    describeChrome.skip('Submit xhr-GET', function () {
       this.timeout(RENDER_TIMEOUT);
 
       it('should submit and render success', () => {
@@ -311,7 +311,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
             return render.then(() => {
               const rendered = form.querySelector('[i-amphtml-rendered]');
@@ -357,7 +357,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
 
             // It shouldn't have the i-amphtml-rendered attribute since no

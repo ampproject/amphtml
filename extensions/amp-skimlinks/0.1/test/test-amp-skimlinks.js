@@ -30,7 +30,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let ampSkimlinks, helpers, ampdoc;
 
     beforeEach(() => {

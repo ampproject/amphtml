@@ -31,12 +31,12 @@ const TAG = 'amp-story';
  * @param  {!Window} win
  * @return {!AmpStoryStoreService}
  */
-export const getStoreService = win => {
+export const getStoreService = (win) => {
   let service = Services.storyStoreService(win);
 
   if (!service) {
     service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return service;
     });
   }
@@ -80,6 +80,7 @@ export let InteractiveComponentDef;
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
+ *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
@@ -95,6 +96,7 @@ export let InteractiveComponentDef;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
+ *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
@@ -121,6 +123,7 @@ export const StateProperty = {
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
+  CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
@@ -138,6 +141,8 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
+  // Story preview state.
+  PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
@@ -483,7 +488,7 @@ export class AmpStoryStoreService {
     this.state_ = actions(this.state_, action, data);
 
     let comparisonFn;
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       comparisonFn = stateComparisonFunctions[key];
       if (
         comparisonFn
@@ -508,6 +513,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
@@ -544,6 +550,7 @@ export class AmpStoryStoreService {
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
+      [StateProperty.PREVIEW_STATE]: false,
     });
   }
 
@@ -561,6 +568,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
@@ -568,6 +576,16 @@ export class AmpStoryStoreService {
       case EmbedMode.NO_SHARING:
         return {
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+        };
+      case EmbedMode.PREVIEW:
+        return {
+          [StateProperty.PREVIEW_STATE]: true,
+          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty.CAN_SHOW_BOOKEND]: false,
+          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
+          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
       default:
         return {};

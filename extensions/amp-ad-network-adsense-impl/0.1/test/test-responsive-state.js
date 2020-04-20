@@ -41,7 +41,7 @@ describes.realWin(
       extensions: [],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lastSizeChangeAttempt;
     let element;
@@ -51,8 +51,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      const viewport = Services.viewportForDoc(doc);
-      env.sandbox.stub(viewport, 'getSize').returns({width: 375, height: 667});
       lastSizeChangeAttempt = null;
 
       const vsync = Services.vsyncFor(win);
@@ -66,7 +64,7 @@ describes.realWin(
       };
       const storage = await Services.storageForDoc(doc);
       storageContent = {};
-      env.sandbox.stub(storage, 'get').callsFake(key => {
+      env.sandbox.stub(storage, 'get').callsFake((key) => {
         return Promise.resolve(storageContent[key]);
       });
       env.sandbox.stub(storage, 'set').callsFake((key, value) => {
@@ -81,14 +79,7 @@ describes.realWin(
     });
 
     function createElement(attributes) {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        'type': 'adsense',
-        'data-ad-client': 'ca-pub-123',
-      });
-      addAttributesToElement(element, attributes);
-      const parent = createElementWithAttributes(doc, 'div', {});
-      parent.appendChild(element);
-      doc.body.appendChild(parent);
+      element = createElementWithNoStub(attributes);
       env.sandbox
         .stub(element, 'getLayoutBox')
         .returns(layoutRectLtwh(50, 200, 375, 100));
@@ -102,6 +93,21 @@ describes.realWin(
         })
       );
 
+      const viewport = Services.viewportForDoc(doc);
+      env.sandbox.stub(viewport, 'getSize').returns({width: 375, height: 667});
+
+      return element;
+    }
+
+    function createElementWithNoStub(attributes) {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'type': 'adsense',
+        'data-ad-client': 'ca-pub-123',
+      });
+      addAttributesToElement(element, attributes);
+      const parent = createElementWithAttributes(doc, 'div', {});
+      parent.appendChild(element);
+      doc.body.appendChild(parent);
       return element;
     }
 
@@ -341,6 +347,31 @@ describes.realWin(
           'width': '50vw',
         });
         storageContent[`aas-${AD_CLIENT_ID}`] = false;
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.be.null;
+      });
+
+      it('returns null when the viewport is too wide', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElementWithNoStub({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '500',
+          'width': '1024',
+        });
+        const viewport = Services.viewportForDoc(element);
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
+        storageContent[`aas-${AD_CLIENT_ID}`] = true;
 
         const result = await ResponsiveState.maybeUpgradeToResponsive(
           element,

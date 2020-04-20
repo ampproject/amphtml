@@ -103,14 +103,20 @@ export class ResponsiveState {
     if (element.hasAttribute('data-auto-format')) {
       return Promise.resolve(null);
     }
+
+    // If the user already has a wide viewport layout, we don't upgrade to responsive.
+    if (!ResponsiveState.isLayoutViewportNarrow_(element)) {
+      return Promise.resolve(null);
+    }
+
     return (
       Services.storageForDoc(element)
-        .then(storage =>
+        .then((storage) =>
           storage.get(
             ResponsiveState.getAdSizeOptimizationStorageKey_(adClientId)
           )
         )
-        .then(isAdSizeOptimizationEnabled => {
+        .then((isAdSizeOptimizationEnabled) => {
           if (isAdSizeOptimizationEnabled) {
             return ResponsiveState.upgradeToResponsive_(element);
           }
@@ -164,12 +170,12 @@ export class ResponsiveState {
       return null;
     }
     let promiseResolver;
-    const savePromise = new Promise(resolve => {
+    const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
     });
     const win = toWin(element.ownerDocument.defaultView);
 
-    const listener = event => {
+    const listener = (event) => {
       if (event['source'] != iframe.contentWindow) {
         return;
       }
@@ -191,7 +197,7 @@ export class ResponsiveState {
       win.removeEventListener('message', listener);
 
       Services.storageForDoc(element)
-        .then(storage =>
+        .then((storage) =>
           storage
             .set(
               ResponsiveState.getAdSizeOptimizationStorageKey_(adClientId),
@@ -268,7 +274,7 @@ export class ResponsiveState {
     // Nudge into the correct horizontal position by changing side margin.
     vsync.run(
       {
-        measure: state => {
+        measure: (state) => {
           // Check the parent element because amp-ad is explicitly styled to
           // have direction: ltr.
           state.direction = computedStyle(
@@ -276,7 +282,7 @@ export class ResponsiveState {
             dev().assertElement(this.element_.parentElement)
           )['direction'];
         },
-        mutate: state => {
+        mutate: (state) => {
           if (state.direction == 'rtl') {
             setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
           } else {
@@ -321,7 +327,7 @@ export class ResponsiveState {
     });
     const win = toWin(element.ownerDocument.defaultView);
     const setExps = randomlySelectUnsetExperiments(win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
+    Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], element)
     );
     return (
@@ -347,7 +353,7 @@ export class ResponsiveState {
       this.win_,
       experimentInfoMap
     );
-    Object.keys(setExps).forEach(expName =>
+    Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element_)
     );
     return setExps[MAX_HEIGHT_EXP.branch] == MAX_HEIGHT_EXP.experiment;
@@ -367,7 +373,7 @@ export class ResponsiveState {
     // affect it.
     return this.element_
       .getImpl(/* waitForBuild= */ false)
-      .then(impl =>
+      .then((impl) =>
         impl
           .attemptChangeSize(
             this.getResponsiveHeight_(viewportSize),
@@ -403,5 +409,17 @@ export class ResponsiveState {
       default:
         return 0;
     }
+  }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  static isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    return viewportSize.width < 488;
   }
 }
