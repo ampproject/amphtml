@@ -422,11 +422,10 @@ describes.realWin(
             ).to.eventually.be.true;
           });
 
-          it('defaults to consentRequired remote value', async () => {
+          it('defaults to inline config when checkConsentHref is not defined', async () => {
             const inlineConfig = {
               'consentInstanceId': 'abc',
-              'consentRequired': 'remote',
-              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
             };
             ampConsent = getAmpConsent(doc, inlineConfig);
             await ampConsent.buildCallback();

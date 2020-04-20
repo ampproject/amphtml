@@ -163,7 +163,7 @@ export class ConsentStateManager {
   }
 
   /**
-   * Sets a promise which resolves to a shareData object that is to be returned
+   * Sets a promise which resolves to a boolean that is to be returned
    * from the remote endpoint.
    *
    * @param {!Promise<boolean>} gdprAppliesPromise
@@ -195,7 +195,7 @@ export class ConsentStateManager {
   /**
    * Returns a promise that resolves to a gdprApplies value
    *
-   * @return {?Promise<?Object>}
+   * @return {?Promise<boolean>}
    */
   getConsentInstanceGdprApplies() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);

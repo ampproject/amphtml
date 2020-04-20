@@ -58,8 +58,8 @@ export function getConsentPolicySharedData(element, policyId) {
 }
 
 /**
- * TODO(zhouyx): Combine with getConsentPolicyState and return a consentInfo
- * object.
+ * TODO(micajuine-ho): Combine with getConsentPolicyState and
+ * getGdprAppliesInfo to return a consentInfo object.
  * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<string>}
