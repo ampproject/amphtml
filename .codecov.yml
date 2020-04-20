@@ -1,7 +1,7 @@
 # Overall settings for PR integration via codecov.io
 # See https://docs.codecov.io/docs/codecovyml-reference
 codecov:
-  bot: 'amphtml-codecov-bot'
+  bot: 'amp-coverage-bot'
   ci:
     - 'travis.org'
   max_report_age: 24
