@@ -46,8 +46,12 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  getCryptoRandomBytesArray,
+  utf8Decode,
+  utf8Encode,
+} from '../../../../src/utils/bytes';
 import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -1480,8 +1484,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     it('uses random subdomain if experiment is on without win.crypto', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
-      const cryptoLib = Services.cryptoFor(impl.win);
-      env.sandbox.stub(cryptoLib, 'getSecureRandomBytes').returns(null);
+      env.sandbox
+        .stub(getCryptoRandomBytesArray, 'getCryptoRandomBytesArray')
+        .returns(null);
 
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
