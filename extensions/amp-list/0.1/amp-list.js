@@ -187,8 +187,13 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+  isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
+  buildCallback() {
+    if (this.element.getAttribute('layout') === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
       userAssert(
         (doc && isAmp4Email(doc)) ||
@@ -203,13 +208,9 @@ export class AmpList extends AMP.BaseElement {
         TAG,
         this.element
       );
-      return (this.enableManagedResizing_ = true);
-    }
-    return isLayoutSizeDefined(layout);
+      this.enableManagedResizing_ = true;
   }
 
-  /** @override */
-  buildCallback() {
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
