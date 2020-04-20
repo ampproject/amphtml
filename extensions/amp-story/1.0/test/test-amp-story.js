@@ -1843,21 +1843,13 @@ describes.realWin(
         await createStoryWithPages(1, ['cover']);
 
         await story.layoutCallback();
-        story
-          .layoutCallback()
-          .then(() =>
-            story.activePage_.element
-              .signals()
-              .whenSignal(CommonSignals.LOAD_END)
-          )
-          .then(() => {
-            expect(
-              story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE)
-            ).to.be.false;
-            expect(
-              story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)
-            ).to.be.false;
-          });
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE))
+          .to.be.false;
+        expect(story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE))
+          .to.be.false;
       });
     });
   }

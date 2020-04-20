@@ -1428,9 +1428,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   checkPageHasPlayable_() {
     const pageHasPlayable =
       this.element.hasAttribute('background-audio') ||
+      this.element.hasAttribute('auto-advance-after') ||
       this.element.querySelector('amp-audio') ||
-      this.element.querySelector('amp-video') ||
-      this.element.hasAttribute('auto-advance-after');
+      this.element.querySelector('amp-video');
 
     this.storeService_.dispatch(
       Action.TOGGLE_PAGE_HAS_PLAYABLE,

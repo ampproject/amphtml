@@ -634,7 +634,6 @@ export class SystemLayer {
   /**
    * Reacts to the presence of playables on a page to determine if should disable
    * or not the play/pause button.
-   *
    * @param {boolean} pageHasPlayable
    * @private
    */
