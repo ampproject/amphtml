@@ -223,8 +223,10 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('${}', '', {});
     });
 
-    it('handles null vars', () => {
-      return check('${arr}', ',notNull', {'arr': [null, 'notNull']});
+    it('handles null and undefined vars', () => {
+      return check('${arr}', ',,notNull', {
+        'arr': [null, undefined, 'notNull'],
+      });
     });
 
     describe('should handle recursive vars', () => {
