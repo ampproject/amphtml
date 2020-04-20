@@ -17,7 +17,7 @@
 const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
-  compileAllUnminifiedJs,
+  compileAllJs,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -29,95 +29,72 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green} = require('ansi-colors');
-const {doServe} = require('./serve');
+const {cyan, green, yellow} = require('ansi-colors');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Enables watching for file changes in css, extensions.
- * @return {!Promise}
+ * Deprecated. Use `gulp build --watch` or `gulp dist --watch`.
+ *
+ * TODO(rsimha, #27471): Remove this after several weeks.
  */
 async function watch() {
-  maybeUpdatePackages();
-  createCtrlcHandler('watch');
-  await performBuild(/* watch */ true);
-}
-
-/**
- * Main build
- * @return {!Promise}
- */
-async function build() {
-  maybeUpdatePackages();
-  const handlerProcess = createCtrlcHandler('build');
-  await performBuild();
-  return exitCtrlcHandler(handlerProcess);
-}
-
-/**
- * Prints a useful help message prior to the default gulp task
- */
-function printDefaultTaskHelp() {
-  log(green('Running the default ') + cyan('gulp ') + green('task.'));
+  log(yellow('WARNING:'), cyan('gulp watch'), 'has been deprecated.');
   log(
-    green(
-      '⤷ JS and extensions will be lazily built when requested from the server.'
-    )
+    green('INFO:'),
+    'Use',
+    cyan('gulp build --watch'),
+    'or',
+    cyan('gulp dist --watch'),
+    'instead.'
+  );
+  log(
+    green('INFO:'),
+    'Run',
+    cyan('gulp help'),
+    'for a full list of commands and flags.'
   );
 }
 
 /**
- * Performs the pre-requisite build steps for gulp, gulp build, and gulp watch
+ * Perform the prerequisite steps before starting the unminified build.
+ * Used by `gulp` and `gulp build`.
+ *
  * @param {boolean} watch
- * @return {!Promise}
  */
-async function performPrerequisiteSteps(watch) {
+async function runPreBuildSteps(watch) {
   await compileCss(watch);
   await compileJison();
   await bootstrapThirdPartyFrames(watch);
 }
 
 /**
- * Performs the build steps for gulp build and gulp watch
- * @param {boolean} watch
- * @return {!Promise}
+ * Unminified build. Entry point for `gulp build`.
  */
-async function performBuild(watch) {
+async function build() {
+  maybeUpdatePackages();
+  const handlerProcess = createCtrlcHandler('build');
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  printConfigHelp('gulp build');
   parseExtensionFlags();
-  await performPrerequisiteSteps(watch);
+  await runPreBuildSteps(argv.watch);
   if (argv.core_runtime_only) {
-    await compileCoreRuntime(watch, /* minify */ false);
+    await compileCoreRuntime(argv.watch, /* minify */ false);
   } else {
-    await compileAllUnminifiedJs(watch);
-    await buildExtensions({watch});
+    await compileAllJs(/* minify */ false);
+    await buildExtensions({watch: argv.watch});
   }
-}
-
-/**
- * The default task run when `gulp` is executed
- * @return {!Promise}
- */
-async function defaultTask() {
-  maybeUpdatePackages();
-  createCtrlcHandler('gulp');
-  process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp');
-  printDefaultTaskHelp();
-  parseExtensionFlags(/* preBuild */ true);
-  await performPrerequisiteSteps(/* watch */ true);
-  await doServe(/* lazyBuild */ true);
-  log(green('JS and extensions will be lazily built when requested...'));
+  if (!argv.watch) {
+    exitCtrlcHandler(handlerProcess);
+  }
 }
 
 module.exports = {
   build,
-  defaultTask,
+  runPreBuildSteps,
   watch,
 };
 
@@ -126,29 +103,17 @@ module.exports = {
 build.description = 'Builds the AMP library';
 build.flags = {
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  fortesting: '  Builds the AMP library for local testing',
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
+  version_override: '  Overrides the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
+  watch: '  Watches for changes in files, re-builds when detected',
+  define_experiment_constant:
+    '  Builds runtime with the EXPERIMENT constant set to true',
 };
 
-watch.description = 'Watches for changes in files, re-builds when detected';
-watch.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  extensions: '  Watches and builds only the listed extensions.',
-  extensions_from:
-    '  Watches and builds only the extensions from the listed AMP(s).',
-  noextensions: '  Watches and builds with no extensions.',
-  core_runtime_only: '  Watches and builds only the core runtime.',
-};
-
-defaultTask.description =
-  'Starts the dev server and lazily builds JS and extensions when requested';
-defaultTask.flags = {
-  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  extensions: '  Watches and builds only the listed extensions.',
-  extensions_from:
-    '  Watches and builds only the extensions from the listed AMP(s).',
-  noextensions: '  Watches and builds with no extensions.',
-};
+watch.description = 'Deprecated. Use gulp build --watch or gulp dist --watch';

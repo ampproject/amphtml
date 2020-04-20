@@ -19,7 +19,7 @@ import {findIndex} from '../../../../src/utils/array';
 
 const NOOP = () => {};
 
-describes.realWin('media-pool', {}, env => {
+describes.realWin('media-pool', {amp: true}, (env) => {
   let win;
   let mediaPool;
   let distanceFnStub;
@@ -32,21 +32,22 @@ describes.realWin('media-pool', {}, env => {
     win = env.win;
     env.sandbox
       .stub(Services, 'vsyncFor')
-      .callsFake(() => ({mutate: task => task()}));
+      .callsFake(() => ({mutate: (task) => task()}));
     env.sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
 
-    mediaPool = new MediaPool(win, COUNTS, element => {
+    mediaPool = new MediaPool(win, COUNTS, (element) => {
       return distanceFnStub(element);
     });
   });
 
   /**
    * @param {string} tagName
+   * @param {string=} opt_url
    * @return {!HTMLMediaElement}
    */
-  function createMediaElement(tagName) {
+  function createMediaElement(tagName, opt_url) {
     const el = env.win.document.createElement(tagName);
-    el.src = `http://example.com/${tagName}.xyz`;
+    el.src = opt_url || `https://example.com/${tagName}.xyz`;
     env.win.document.body.appendChild(el);
     return el;
   }
@@ -71,7 +72,7 @@ describes.realWin('media-pool', {}, env => {
    * @return {function(!Element): number} The distance
    */
   function arrayOrderDistanceFn(elements) {
-    return element => {
+    return (element) => {
       const index = elements.indexOf(element);
       if (index < 0) {
         return Infinity;
@@ -89,9 +90,9 @@ describes.realWin('media-pool', {}, env => {
     const results = [];
 
     const pools = Array.isArray(poolOrPools) ? poolOrPools : [poolOrPools];
-    pools.forEach(pool => {
-      Object.keys(pool).forEach(key => {
-        pool[key].forEach(el => {
+    pools.forEach((pool) => {
+      Object.keys(pool).forEach((key) => {
+        pool[key].forEach((el) => {
           results.push(el);
         });
       });
@@ -106,7 +107,7 @@ describes.realWin('media-pool', {}, env => {
    * @return {boolean>}
    */
   function isElementInPool(array, element) {
-    const index = findIndex(array, el => {
+    const index = findIndex(array, (el) => {
       return el['replaced-media'] === element.getAttribute('id');
     });
 
@@ -122,7 +123,7 @@ describes.realWin('media-pool', {}, env => {
   });
 
   it('should allocate element on play', () => {
-    mediaPool = new MediaPool(win, {'video': 2}, unusedEl => 0);
+    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
 
     const videoEl = createMediaElement('video');
     mediaPool.register(videoEl);
@@ -136,6 +137,15 @@ describes.realWin('media-pool', {}, env => {
     expect(mediaPool.unallocated['video'].length).to.equal(1);
   });
 
+  it('should fail with http src', () => {
+    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
+
+    const videoEl = createMediaElement('video', 'http://example.com/video.mp4');
+    expect(() => {
+      mediaPool.register(videoEl);
+    }).to.throw(/from either https/);
+  });
+
   it.skip('should evict the element with the highest distance first', () => {
     const elements = createMediaElements('video', 3);
     mediaPool = new MediaPool(
@@ -144,8 +154,8 @@ describes.realWin('media-pool', {}, env => {
       arrayOrderDistanceFn(elements)
     );
 
-    elements.forEach(element => mediaPool.register(element));
-    elements.forEach(element => mediaPool.play(element));
+    elements.forEach((element) => mediaPool.register(element));
+    elements.forEach((element) => mediaPool.play(element));
 
     expect(mediaPool.allocated['video'].length).to.equal(2);
     expect(isElementInPool(mediaPool.allocated['video'], elements[0])).to.be
@@ -165,9 +175,9 @@ describes.realWin('media-pool', {}, env => {
       arrayOrderDistanceFn(elements)
     );
 
-    elements.forEach(element => mediaPool.register(element));
+    elements.forEach((element) => mediaPool.register(element));
 
     // Call play() to ensure it doesn't throw.
-    elements.forEach(element => mediaPool.play(element));
+    elements.forEach((element) => mediaPool.play(element));
   });
 });

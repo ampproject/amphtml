@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 import {toArray} from '../../../src/types';
@@ -49,7 +50,7 @@ export class Sources {
    * @private
    */
   applyTracksToElement_(element) {
-    Array.prototype.forEach.call(this.trackEls_, trackEl => {
+    Array.prototype.forEach.call(this.trackEls_, (trackEl) => {
       const track = document.createElement('track');
       track.id = trackEl.id;
       track.kind = trackEl.kind;
@@ -80,7 +81,7 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_, srcEl =>
+    Array.prototype.forEach.call(this.srcEls_, (srcEl) =>
       element.appendChild(srcEl)
     );
 
@@ -122,16 +123,20 @@ export class Sources {
     }
 
     const srcEls = toArray(elementToUse.querySelectorAll('source'));
-    srcEls.forEach(srcEl => removeElement(srcEl));
+    srcEls.forEach((srcEl) => removeElement(srcEl));
 
     const trackEls = toArray(elementToUse.querySelectorAll('track'));
-    trackEls.forEach(trackEl => removeElement(trackEl));
+    trackEls.forEach((trackEl) => removeElement(trackEl));
 
     // If the src attribute is present, browsers will follow it and ignore the
     // HTMLSourceElements. To ensure this behavior, drop the sources if the src
     // was specified.
     // cf: https://html.spec.whatwg.org/#concept-media-load-algorithm
     const sourcesToUse = srcEl ? [srcEl] : srcEls;
+    const urlService = Services.urlForDoc(win.document.documentElement);
+    sourcesToUse.forEach((el) =>
+      urlService.assertHttpsUrl(el.getAttribute('src'), el)
+    );
 
     return new Sources(null /** srcAttr */, sourcesToUse, trackEls);
   }

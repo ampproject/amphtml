@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-video'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let timer;
 
@@ -42,7 +42,12 @@ describes.realWin(
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
     }
 
-    async function getVideo(attributes, children, opt_beforeLayoutCallback) {
+    async function getVideo(
+      attributes,
+      children,
+      opt_beforeLayoutCallback,
+      opt_noLayout
+    ) {
       const v = doc.createElement('amp-video');
       for (const key in attributes) {
         v.setAttribute(key, attributes[key]);
@@ -55,6 +60,9 @@ describes.realWin(
       doc.body.appendChild(v);
       await v.build();
 
+      if (opt_noLayout) {
+        return;
+      }
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(v);
       }
@@ -209,7 +217,7 @@ describes.realWin(
           'autoplay': '',
           'muted': '',
           'loop': '',
-        }).catch(e => {
+        }).catch((e) => {
           const v = doc.querySelector('amp-video');
           // preconnectCallback could get called again after this test is done, and
           // trigger an other "start with https://" error that would crash mocha.
@@ -257,7 +265,7 @@ describes.realWin(
           'controlsList': 'nofullscreen nodownload noremoteplayback',
         },
         null,
-        function(element) {
+        function (element) {
           // Should set appropriate attributes in buildCallback
           const video = element.querySelector('video');
           expect(video.getAttribute('controls')).to.exist;
@@ -285,7 +293,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -308,7 +316,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -343,7 +351,7 @@ describes.realWin(
           'loop': '',
         },
         sources,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.children.length).to.equal(0);
         }
@@ -373,7 +381,7 @@ describes.realWin(
           'poster': 'img.png',
         },
         null,
-        function(element) {
+        function (element) {
           const video = element.querySelector('video');
           expect(video.getAttribute('preload')).to.equal('none');
           expect(video.hasAttribute('poster')).to.be.false;
@@ -407,7 +415,7 @@ describes.realWin(
           height: 90,
         },
         null,
-        function(element) {
+        function (element) {
           const impl = element.implementation_;
           env.sandbox.stub(impl, 'isVideoSupported_').returns(false);
           env.sandbox.spy(impl, 'toggleFallback');
@@ -428,7 +436,7 @@ describes.realWin(
           height: 90,
         },
         null,
-        function(element) {
+        function (element) {
           const impl = element.implementation_;
           env.sandbox.stub(impl.video_, 'play').returns(playPromise);
           impl.play();
@@ -465,7 +473,7 @@ describes.realWin(
         controls: null,
         controlsList: 'nodownload nofullscreen',
       };
-      Object.keys(mutations).forEach(property => {
+      Object.keys(mutations).forEach((property) => {
         const value = mutations[property];
         if (value === null) {
           v.removeAttribute(property);
@@ -668,7 +676,7 @@ describes.realWin(
           whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
         };
         visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
-        visiblePromise = new Promise(resolve => {
+        visiblePromise = new Promise((resolve) => {
           makeVisible = resolve;
         });
         visibilityStubs.whenFirstVisible.returns(visiblePromise);
@@ -676,7 +684,7 @@ describes.realWin(
 
       describe('should not prerender if no cached sources', () => {
         it('with just src', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 src: 'video.mp4',
@@ -684,7 +692,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.false;
                 resolve();
               }
@@ -693,7 +701,7 @@ describes.realWin(
         });
 
         it('with just source', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             const source = doc.createElement('source');
             source.setAttribute('src', 'video.mp4');
             getVideo(
@@ -702,7 +710,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.false;
                 resolve();
               }
@@ -711,7 +719,7 @@ describes.realWin(
         });
 
         it('with both src and source', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             const source = doc.createElement('source');
             source.setAttribute('src', 'video.mp4');
             getVideo(
@@ -721,7 +729,7 @@ describes.realWin(
                 height: 90,
               },
               [source],
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.false;
                 resolve();
               }
@@ -732,7 +740,7 @@ describes.realWin(
 
       describe('should prerender cached sources', () => {
         it('with just cached src', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
@@ -741,7 +749,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.true;
                 resolve();
               }
@@ -750,7 +758,7 @@ describes.realWin(
         });
 
         it('with just cached source', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             const source = doc.createElement('source');
             source.setAttribute(
               'src',
@@ -766,7 +774,7 @@ describes.realWin(
                 height: 90,
               },
               [source],
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.true;
                 resolve();
               }
@@ -775,7 +783,7 @@ describes.realWin(
         });
 
         it('with a mix or cached and non-cached', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             const source = doc.createElement('source');
             source.setAttribute('src', 'video.mp4');
 
@@ -796,7 +804,7 @@ describes.realWin(
                 height: 90,
               },
               [source, cachedSource],
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.true;
                 resolve();
               }
@@ -807,7 +815,7 @@ describes.realWin(
 
       describe('should prerender poster image', () => {
         it('with just cached src', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 src: 'https://example.com/video.mp4',
@@ -816,7 +824,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.prerenderAllowed()).to.be.true;
                 resolve();
               }
@@ -825,7 +833,7 @@ describes.realWin(
         });
       });
 
-      describe('should preconnect to the first cached source', () => {
+      describe('should preconnect to all sources', () => {
         let preconnect;
 
         beforeEach(() => {
@@ -834,14 +842,23 @@ describes.realWin(
         });
 
         it('no cached source', async () => {
-          await getVideo({
-            src: 'https://example.com/video.mp4',
-            poster: 'https://example.com/poster.jpg',
-            width: 160,
-            height: 90,
-          });
+          await getVideo(
+            {
+              src: 'https://example.com/video.mp4',
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            null,
+            null,
+            /* opt_noLayout */ true
+          );
 
-          expect(preconnect.url).to.not.have.been.called;
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
         });
 
         it('cached source', async () => {
@@ -861,19 +878,25 @@ describes.realWin(
               width: 160,
               height: 90,
             },
-            [cachedSource]
+            [cachedSource],
+            null,
+            /* opt_noLayout */ true
           );
 
-          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledTwice;
           expect(preconnect.url.getCall(0)).to.have.been.calledWith(
             env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(1)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
           );
         });
 
         it('mixed sources', async () => {
           const source = doc.createElement('source');
-          source.setAttribute('src', 'video.mp4');
+          source.setAttribute('src', 'https://example.com/video.mp4');
 
           const cachedSource = doc.createElement('source');
           cachedSource.setAttribute(
@@ -890,12 +913,22 @@ describes.realWin(
               width: 160,
               height: 90,
             },
-            [source, cachedSource]
+            [source, cachedSource],
+            null,
+            /* opt_noLayout */ true
           );
-          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledThrice;
           expect(preconnect.url.getCall(0)).to.have.been.calledWith(
             env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
+          );
+          expect(preconnect.url.getCall(1)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(preconnect.url.getCall(2)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
+            'https://example.com/video.mp4'
           );
         });
       });
@@ -1067,7 +1100,7 @@ describes.realWin(
 
       describe('isCachedByCDN', () => {
         it('must have amp-orig-src attribute', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
@@ -1075,7 +1108,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.isCachedByCDN_(element)).to.be
                   .false;
                 resolve();
@@ -1085,7 +1118,7 @@ describes.realWin(
         });
 
         it('must be CDN url', () => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             getVideo(
               {
                 'src':
@@ -1095,7 +1128,7 @@ describes.realWin(
                 height: 90,
               },
               null,
-              element => {
+              (element) => {
                 expect(element.implementation_.isCachedByCDN_(element)).to.be
                   .false;
                 resolve();
@@ -1108,7 +1141,7 @@ describes.realWin(
 
     describe('seekTo', () => {
       it('changes `currentTime`', () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           getVideo(
             {
               'src': 'https://example-com.cdn.FAKEampproject.org/m/s/video.mp4',
@@ -1116,13 +1149,13 @@ describes.realWin(
               height: 90,
             },
             /* children */ null,
-            element => {
+            (element) => {
               const {implementation_} = element;
               const {video_} = implementation_;
 
               expect(video_.currentTime).to.equal(0);
 
-              [20, 100, 0, 50, 22].forEach(timeSeconds => {
+              [20, 100, 0, 50, 22].forEach((timeSeconds) => {
                 implementation_.seekTo(timeSeconds);
                 expect(video_.currentTime).to.equal(timeSeconds);
               });

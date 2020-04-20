@@ -15,18 +15,28 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const minimist = require('minimist');
 const {gitCommitFormattedTime} = require('../common/git');
 
+// Allow leading zeros in --version_override, e.g. 0000000000001
+const argv = minimist(process.argv.slice(2), {
+  string: ['version_override'],
+});
+
 function getVersion() {
-  if (argv.version) {
-    return String(argv.version);
+  if (argv.version_override) {
+    const version = String(argv.version_override);
+    // #27579: What are allowed version strings...?
+    if (!/^\d{13}$/.test(version)) {
+      throw new Error('--version_override only accepts a 13-digit version');
+    }
+    return version;
   } else {
     // Generate a consistent version number by using the commit* time of the
     // latest commit on the active branch as the twelve digits. The last,
     // thirteenth digit defaults to 0, but can be changed by setting the
-    // --custom_version_mark flag to a different value. This is an undocumented
-    // feature and should rarely be used by AMP release engineers.
+    // --custom_version_mark flag to a different value. This should rarely be
+    // used by AMP release engineers.
     //
     // e.g., the version number of a clean (no uncommited changes) tree that was
     // commited on August 1, 2018 at 14:31:11 EDT would be `1808011831110`

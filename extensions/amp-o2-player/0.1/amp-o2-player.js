@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
@@ -59,6 +60,8 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     this.pid_ = userAssert(
       this.element.getAttribute('data-pid'),
       'data-pid attribute is required for <amp-o2-player> %s',
@@ -140,6 +143,6 @@ class AmpO2Player extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-o2-player', '0.1', AMP => {
+AMP.extension('amp-o2-player', '0.1', (AMP) => {
   AMP.registerElement('amp-o2-player', AmpO2Player);
 });

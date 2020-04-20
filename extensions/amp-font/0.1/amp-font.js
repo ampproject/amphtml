@@ -127,7 +127,7 @@ export class AmpFont extends AMP.BaseElement {
       .then(() => {
         this.onFontLoadSuccess_();
       })
-      .catch(unusedError => {
+      .catch((unusedError) => {
         this.onFontLoadError_();
         user().warn(TAG, 'Font download timed out for ' + this.fontFamily_);
       });
@@ -197,6 +197,6 @@ export class AmpFont extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFont);
 });

@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * Changes the
- * The above said variables are in src/mode.js file.
- * @param {Object} babelTypes
- * @return {!Object}
- */
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   return {
     visitor: {
       VariableDeclaration(path) {

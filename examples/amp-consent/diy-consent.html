@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
     <style>
 html {
   width: 100%;
@@ -139,6 +139,21 @@ if (window && window.name) {
     console.log('Caught error when parsing window.name,', e)
   }
 }
+
+
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data.reqestType === 'enter-fullscreen' && data.state === 'error') {
+    console.log('Could not complete fullscreen request:', data.message);
+  }
+  else if (data.reqestType === 'enter-fullscreen' && data.state === 'success') {
+    console.log('Fullscreen command successfuly sent:', data.message);
+  }
+  else {
+    console.log('Unknown request type:', data.reqestType);
+  }
+});
+
 
 // Add event listener for focus for a11y
 window.addEventListener('focus', () => {

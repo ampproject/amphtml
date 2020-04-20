@@ -34,6 +34,9 @@ import {dev, devAssert, user} from '../../../src/log';
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
 
+/** @visibleForTesting */
+export const CONSENT_STRING_MAX_LENGTH = 200;
+
 export class ConsentStateManager {
   /**
    * Creates an instance of ConsentStateManager.
@@ -118,7 +121,7 @@ export class ConsentStateManager {
    */
   getConsentInstanceInfo() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    return this.instance_.get().then(info => {
+    return this.instance_.get().then((info) => {
       if (hasDirtyBit(info)) {
         return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
       }
@@ -142,7 +145,7 @@ export class ConsentStateManager {
     this.consentChangeHandler_ = handler;
 
     // Fire first consent instance state.
-    this.getConsentInstanceInfo().then(info => {
+    this.getConsentInstanceInfo().then((info) => {
       handler(info);
     });
   }
@@ -254,7 +257,7 @@ export class ConsentInstance {
     // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
     // is set to true and we need to set dirtyBit for next visit.
     this.hasDirtyBitNext_ = true;
-    return this.get().then(info => {
+    return this.get().then((info) => {
       if (hasDirtyBit(info)) {
         // Current stored value has dirtyBit and is no longer valid.
         // No need to update with dirtyBit
@@ -325,7 +328,7 @@ export class ConsentInstance {
    * @param {!ConsentInfoDef} consentInfo
    */
   updateStoredValue_(consentInfo) {
-    this.storagePromise_.then(storage => {
+    this.storagePromise_.then((storage) => {
       if (
         !isConsentInfoStoredValueSame(
           consentInfo,
@@ -346,14 +349,15 @@ export class ConsentInstance {
       }
 
       const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > 150) {
+      if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
         // Verify the length of consentString.
-        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
+        // 200 * 2 (utf8Encode) * 4/3 (base64) = 533 bytes.
         // TODO: Need utf8Encode if necessary.
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds 150 ' +
-            'Previous stored consentInfo will be cleared'
+          'Cannot store consentString which length exceeds %s. ' +
+            'Previous stored consentInfo will be cleared',
+          CONSENT_STRING_MAX_LENGTH
         );
         // If new consentInfo value cannot be stored, need to remove previous
         // value
@@ -386,11 +390,11 @@ export class ConsentInstance {
 
     let storage;
     return this.storagePromise_
-      .then(s => {
+      .then((s) => {
         storage = s;
         return storage.get(this.storageKey_);
       })
-      .then(storedValue => {
+      .then((storedValue) => {
         if (this.localConsentInfo_) {
           // If local value has been updated, return most updated value;
           return this.localConsentInfo_;
@@ -413,7 +417,7 @@ export class ConsentInstance {
         this.localConsentInfo_ = consentInfo;
         return this.localConsentInfo_;
       })
-      .catch(e => {
+      .catch((e) => {
         dev().error(TAG, 'Failed to read storage', e);
         return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
       });
@@ -435,13 +439,13 @@ export class ConsentInstance {
     const legacyConsentState = calculateLegacyStateValue(
       consentInfo['consentState']
     );
-    const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
+    const cidPromise = Services.cidForDoc(this.ampdoc_).then((cid) => {
       return cid.get(
         {scope: CID_SCOPE, createCookieIfNotPresent: true},
         Promise.resolve()
       );
     });
-    cidPromise.then(userId => {
+    cidPromise.then((userId) => {
       const request = /** @type {!JsonObject} */ ({
         // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,

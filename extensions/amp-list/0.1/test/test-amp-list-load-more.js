@@ -36,7 +36,7 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
@@ -82,7 +82,7 @@ describes.realWin(
 
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
         env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -171,7 +171,7 @@ describes.realWin(
         env.sandbox
           .stub(list, 'prepareAndSendFetch_')
           .returns(Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 

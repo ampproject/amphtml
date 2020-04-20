@@ -27,20 +27,21 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, env => {
+describes.realWin('media-tasks', {amp: true}, (env) => {
   let win;
   let el;
   let vsyncApi;
 
   beforeEach(() => {
     win = env.win;
-    el = document.createElement('video');
+    el = win.document.createElement('video');
+    win.document.body.appendChild(el);
 
     // Mock vsync
     vsyncApi = {
       mutatePromise: () => {},
     };
-    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
+    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
       callback();
     });
   });
@@ -132,7 +133,7 @@ describes.realWin('media-tasks', {}, env => {
      * @return {string}
      */
     function getFakeVideoUrl(index) {
-      return `http://example.com/video${index}.mp4`;
+      return `https://example.com/video${index}.mp4`;
     }
 
     /**
@@ -140,7 +141,7 @@ describes.realWin('media-tasks', {}, env => {
      * @return {!Element}
      */
     function getFakeSource(index) {
-      const source = document.createElement('source');
+      const source = env.win.document.createElement('source');
       source.src = getFakeVideoUrl(index);
       return source;
     }
@@ -150,7 +151,7 @@ describes.realWin('media-tasks', {}, env => {
      * @return {!Array<!Element>}
      */
     function getFakeSources(indices) {
-      return indices.map(index => getFakeSource(index));
+      return indices.map((index) => getFakeSource(index));
     }
 
     it('should clear existing src attribute', () => {
@@ -167,7 +168,7 @@ describes.realWin('media-tasks', {}, env => {
 
     it('should clear existing source elements', () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
@@ -196,7 +197,7 @@ describes.realWin('media-tasks', {}, env => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
       const NEW_SRC_ELS = getFakeSources([4, 5, 6]);
 
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
@@ -233,7 +234,7 @@ describes.realWin('media-tasks', {}, env => {
 
     it('should drop sources if a src attribute is specified', () => {
       el.setAttribute('src', './foo.mp4');
-      getFakeSources([1, 2, 3]).forEach(source => {
+      getFakeSources([1, 2, 3]).forEach((source) => {
         el.appendChild(source);
       });
       const newSources = Sources.removeFrom(win, el);

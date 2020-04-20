@@ -62,7 +62,7 @@ export class AmpAdTemplateHelper {
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
         .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
-        .then(response => response.text());
+        .then((response) => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
     devAssert(templatePromise);

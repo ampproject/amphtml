@@ -99,7 +99,7 @@ def CheckPrereqs():
 
   # Ensure that yarn is installed.
   try:
-    subprocess.check_output(['yarn', '--version'])
+    subprocess.check_output(['npx', 'yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
     Die('Yarn package manager not found. Run '
         '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
@@ -136,11 +136,11 @@ def InstallNodeDependencies():
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       cwd='nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
@@ -173,6 +173,7 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
+  protoascii_segments.append(open('validator-css.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
@@ -320,9 +321,7 @@ def CompileValidatorMinified(out_dir):
       ],
       definitions=[],
       entry_points=[
-          'amp.validator.validateString',
-          'amp.validator.renderValidationResult',
-          'amp.validator.renderErrorMessage'
+          'amp.validator',
       ],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')

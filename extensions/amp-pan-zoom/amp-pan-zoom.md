@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-pan-zoom
 
-Provides zooming and panning for arbitrary content.
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js">&lt;/script></code></td>
-  </tr>
-    <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, responsive</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `<amp-pan-zoom>` component takes one child of arbitrary content and enables the ability for the user to zoom and pan the content via double tap or pinch-to-zoom actions. Tap events registered on the zoomable content or its children will trigger after a 300ms delay.
@@ -137,9 +118,7 @@ Assuming that there is an `<amp-pan-zoom>` component with the id `pan-zoom` on t
 The following public CSS classes are exposed to allow customization for the zoom buttons:
 
 ```css
-.amp-pan-zoom-button
-.amp-pan-zoom-in-icon
-.amp-pan-zoom-out-icon
+.amp-pan-zoom-button .amp-pan-zoom-in-icon .amp-pan-zoom-out-icon;
 ```
 
 Use `.amp-pan-zoom-button` to customize the dimensions, positioning, background-color, border-radius of all buttons.

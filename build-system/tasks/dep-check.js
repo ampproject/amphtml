@@ -29,7 +29,6 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
-const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
@@ -77,7 +76,10 @@ function Rule(config) {
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
   /** @private @const {!Array<string>} */
-  this.whitelist_ = toArrayOrDefault(config.whitelist, []);
+  this.allowlist_ = toArrayOrDefault(config.allowlist, []);
+
+  /** @const {!Set<string>} */
+  this.unusedAllowlistEntries = new Set(this.allowlist_);
 }
 
 /**
@@ -85,16 +87,14 @@ function Rule(config) {
  * @param {!Array<string>} deps
  * @return {!Array<string>}
  */
-Rule.prototype.run = function(moduleName, deps) {
-  const errors = [];
-
+Rule.prototype.run = function (moduleName, deps) {
   // If forbidden rule and current module has no dependencies at all
   // then no need to match.
   if (this.type_ == 'forbidden' && !deps.length) {
-    return errors;
+    return [];
   }
 
-  return errors.concat(this.matchBadDeps(moduleName, deps));
+  return this.matchBadDeps(moduleName, deps);
 };
 
 /**
@@ -102,12 +102,12 @@ Rule.prototype.run = function(moduleName, deps) {
  * @param {!Array<string>} deps
  * @return {!Array<string>}
  */
-Rule.prototype.matchBadDeps = function(moduleName, deps) {
+Rule.prototype.matchBadDeps = function (moduleName, deps) {
   if (this.type_ != 'forbidden') {
     return [];
   }
 
-  const isFilenameMatch = this.filesMatching_.some(x =>
+  const isFilenameMatch = this.filesMatching_.some((x) =>
     minimatch(moduleName, x)
   );
   if (!isFilenameMatch) {
@@ -117,8 +117,8 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   const mustNotDependErrors = [];
   // These nested loops are ok as we usually only have a few rules
   // to run against.
-  deps.forEach(dep => {
-    this.mustNotDependOn_.forEach(badDepPattern => {
+  deps.forEach((dep) => {
+    this.mustNotDependOn_.forEach((badDepPattern) => {
       if (minimatch(dep, badDepPattern)) {
         // Allow extension files to depend on their own code.
         const dir = path.dirname(dep);
@@ -130,17 +130,18 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
           }
         }
 
-        const inWhitelist = this.whitelist_.some(entry => {
+        for (const entry of this.allowlist_) {
           const pair = entry.split('->');
-          const whitelistedModuleName = pair[0];
-          const whitelistedDep = pair[1];
-          if (!minimatch(moduleName, whitelistedModuleName)) {
-            return false;
+          const allowlistedModuleName = pair[0];
+          const allowlistedDep = pair[1];
+          if (!minimatch(moduleName, allowlistedModuleName)) {
+            continue;
           }
-          return dep == whitelistedDep;
-        });
-        if (inWhitelist) {
-          return;
+
+          if (dep == allowlistedDep) {
+            this.unusedAllowlistEntries.delete(entry);
+            return;
+          }
         }
         mustNotDependErrors.push(
           cyan(moduleName) + ' must not depend on ' + cyan(dep)
@@ -148,10 +149,11 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
       }
     });
   });
+
   return mustNotDependErrors;
 };
 
-const rules = depCheckConfig.rules.map(config => new Rule(config));
+const rules = depCheckConfig.rules.map((config) => new Rule(config));
 
 /**
  * Returns a list of entryPoint modules.
@@ -164,18 +166,18 @@ const rules = depCheckConfig.rules.map(config => new Rule(config));
 function getSrcs() {
   return fs
     .readdir('extensions')
-    .then(dirItems => {
+    .then((dirItems) => {
       // Look for extension entry points
       return flatten(
         dirItems
-          .map(x => `extensions/${x}`)
-          .filter(x => fs.statSync(x).isDirectory())
+          .map((x) => `extensions/${x}`)
+          .filter((x) => fs.statSync(x).isDirectory())
           .map(getEntryModule)
           // Concat the core binary and integration binary as entry points.
           .concat('src/amp.js', '3p/integration.js')
       );
     })
-    .then(files => {
+    .then((files) => {
       // Write all the entry modules into a single file so they can be processed
       // together.
       fs.mkdirpSync('./.amp-build');
@@ -183,7 +185,7 @@ function getSrcs() {
       fs.writeFileSync(
         filename,
         files
-          .map(file => {
+          .map((file) => {
             return `import '../${file}';`;
           })
           .join('\n')
@@ -198,7 +200,7 @@ function getSrcs() {
  */
 function getGraph(entryModule) {
   let resolve;
-  const promise = new Promise(r => {
+  const promise = new Promise((r) => {
     resolve = r;
   });
   const module = Object.create(null);
@@ -210,10 +212,10 @@ function getGraph(entryModule) {
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
-  }).transform(babelify, {...BABELIFY_GLOBAL_TRANSFORM, compact: false});
+  }).transform(babelify, {caller: {name: 'dep-check'}, global: true});
 
   bundler.pipeline.get('deps').push(
-    through.obj(function(row, enc, next) {
+    through.obj(function (row, enc, next) {
       module.deps.push({
         name: row.file.replace(absPathRegExp, ''),
         deps: row.deps,
@@ -241,11 +243,11 @@ function getEntryModule(extensionFolder) {
   const extension = path.basename(extensionFolder);
   return fs
     .readdirSync(extensionFolder)
-    .map(x => `${extensionFolder}/${x}`)
-    .filter(x => fs.statSync(x).isDirectory())
-    .map(x => `${x}/${extension}.js`)
-    .filter(x => fs.existsSync(x))
-    .filter(x => fs.statSync(x).isFile());
+    .map((x) => `${extensionFolder}/${x}`)
+    .filter((x) => fs.statSync(x).isDirectory())
+    .map((x) => `${x}/${extension}.js`)
+    .filter((x) => fs.existsSync(x))
+    .filter((x) => fs.statSync(x).isFile());
 }
 
 /**
@@ -260,14 +262,14 @@ function getEntryModule(extensionFolder) {
 function flattenGraph(entryPoints) {
   // Flatten the graph by just getting all the deps from all
   // the entry points.
-  entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
+  entryPoints = entryPoints.map((entryPoint) => entryPoint.deps);
   // Now make the graph have unique entries
   return flatten(entryPoints).reduce((acc, cur) => {
     const {name} = cur;
     if (!acc[name]) {
       acc[name] = Object.keys(cur.deps)
         // Get rid of the absolute path for minimatch'ing
-        .map(x => cur.deps[x].replace(absPathRegExp, ''));
+        .map((x) => cur.deps[x].replace(absPathRegExp, ''));
     }
     return acc;
   }, Object.create(null));
@@ -277,23 +279,27 @@ function flattenGraph(entryPoints) {
  * Run Module dependency graph against the rules.
  *
  * @param {!ModuleDef} modules
- * @return {boolean}
+ * @return {boolean} true if violations were discovered.
  */
 function runRules(modules) {
-  let errorsFound = false;
-  Object.keys(modules).forEach(moduleName => {
-    const deps = modules[moduleName];
+  const errors = [];
+  Object.entries(modules).forEach(([moduleName, deps]) => {
     // Run Rules against the modules and flatten for reporting.
-    const errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
-
-    if (errors.length) {
-      errorsFound = true;
-      errors.forEach(error => {
-        log(red('ERROR:'), error);
-      });
-    }
+    const results = rules.flatMap((rule) => rule.run(moduleName, deps));
+    errors.push(...results);
   });
-  return errorsFound;
+
+  rules
+    .flatMap((r) => Array.from(r.unusedAllowlistEntries))
+    .forEach((unusedEntry) => {
+      errors.push(cyan(unusedEntry) + ' is an unused allowlist entry');
+    });
+
+  errors.forEach((error) => {
+    log(red('ERROR:'), error);
+  });
+
+  return errors.length > 0;
 }
 
 async function depCheck() {
@@ -304,19 +310,19 @@ async function depCheck() {
     log('Checking dependencies...');
   }
   return getSrcs()
-    .then(entryPoints => {
+    .then((entryPoints) => {
       // This check is for extension folders that actually dont have
       // an extension entry point module yet.
-      entryPoints = entryPoints.filter(x => fs.existsSync(x));
+      entryPoints = entryPoints.filter((x) => fs.existsSync(x));
       return Promise.all(entryPoints.map(getGraph));
     })
     .then(flattenGraph)
     .then(runRules)
-    .then(errorsFound => {
+    .then((errorsFound) => {
       if (errorsFound) {
         log(
           yellow('NOTE:'),
-          'If a dependency is valid, add it to one of the whitelists in',
+          'Valid dependencies should be added whereas unused ones should be deleted. Please fix',
           cyan('build-system/test-configs/dep-check-config.js')
         );
         const reason = new Error('Dependency checks failed');

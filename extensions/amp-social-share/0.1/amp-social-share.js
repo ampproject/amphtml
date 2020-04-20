@@ -115,13 +115,13 @@ class AmpSocialShare extends AMP.BaseElement {
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
-      bindingVars.forEach(name => {
+      bindingVars.forEach((name) => {
         const bindingName = name.toUpperCase();
         bindings[bindingName] = this.params_[name];
       });
     }
 
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((href) => {
       this.href_ = href;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
       const {protocol} = Services.urlForDoc(element).parse(href);
@@ -176,9 +176,13 @@ class AmpSocialShare extends AMP.BaseElement {
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      devAssert(navigator.share !== undefined, 'navigator.share disappeared.');
-      // navigator.share() fails 'gulp check-types' validation on Travis
-      navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
+      const {navigator} = this.win;
+      devAssert(navigator.share);
+      const dataStr = href.substr(href.indexOf('?'));
+      const data = parseQueryString(dataStr);
+      navigator.share(data).catch((e) => {
+        user().warn(TAG, e.message, dataStr);
+      });
     } else {
       const windowFeatures = 'resizable,scrollbars,width=640,height=480';
       openWindowDialog(this.win, href, target, windowFeatures);
@@ -199,6 +203,6 @@ class AmpSocialShare extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-social-share', '0.1', AMP => {
+AMP.extension('amp-social-share', '0.1', (AMP) => {
   AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
 });

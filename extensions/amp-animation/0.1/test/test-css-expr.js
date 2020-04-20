@@ -111,7 +111,7 @@ describe('CSS parse', () => {
     if (!array || array.length == 0) {
       return '';
     }
-    return array.map(n => pseudo(n)).join(', ');
+    return array.map((n) => pseudo(n)).join(', ');
   }
 
   it('should parse empty string as null', () => {
@@ -441,7 +441,7 @@ describe('CSS parse', () => {
   });
 });
 
-describes.sandboxed('CSS resolve', {}, env => {
+describes.sandboxed('CSS resolve', {}, (env) => {
   const normalize = true;
   let context;
   let contextMock;
@@ -463,14 +463,8 @@ describes.sandboxed('CSS resolve', {}, env => {
   it('should not resolve value for a const', () => {
     const node = new ast.CssNode();
     const nodeMock = env.sandbox.mock(node);
-    nodeMock
-      .expects('css')
-      .returns('CSS')
-      .atLeast(1);
-    nodeMock
-      .expects('isConst')
-      .returns(true)
-      .atLeast(1);
+    nodeMock.expects('css').returns('CSS').atLeast(1);
+    nodeMock.expects('isConst').returns(true).atLeast(1);
     nodeMock.expects('calc').never();
     expect(node.css()).to.equal('CSS');
     expect(node.resolve(context)).to.equal(node);
@@ -483,18 +477,9 @@ describes.sandboxed('CSS resolve', {}, env => {
     const node2 = new ast.CssNode();
     node2.css = () => 'CSS2';
     const nodeMock = env.sandbox.mock(node);
-    nodeMock
-      .expects('isConst')
-      .returns(false)
-      .atLeast(1);
-    nodeMock
-      .expects('css')
-      .returns('CSS')
-      .atLeast(1);
-    nodeMock
-      .expects('calc')
-      .returns(node2)
-      .atLeast(1);
+    nodeMock.expects('isConst').returns(false).atLeast(1);
+    nodeMock.expects('css').returns('CSS').atLeast(1);
+    nodeMock.expects('calc').returns(node2).atLeast(1);
     expect(node.css()).to.equal('CSS');
     expect(node.resolve(context)).to.equal(node2);
     expect(resolvedCss(node)).to.equal('CSS2');
@@ -545,11 +530,7 @@ describes.sandboxed('CSS resolve', {}, env => {
   });
 
   it('should resolve a null concat node', () => {
-    contextMock
-      .expects('getVar')
-      .withExactArgs('--var1')
-      .returns(null)
-      .twice();
+    contextMock.expects('getVar').withExactArgs('--var1').returns(null).twice();
     const node = new ast.CssConcatNode([
       new ast.CssPassthroughNode('css1'),
       new ast.CssVarNode('--var1'),
@@ -586,10 +567,7 @@ describes.sandboxed('CSS resolve', {}, env => {
   });
 
   it('should resolve a percent node w/dimension', () => {
-    contextMock
-      .expects('getDimension')
-      .returns('w')
-      .twice();
+    contextMock.expects('getDimension').returns('w').twice();
     contextMock
       .expects('getCurrentElementSize')
       .returns({width: 110, height: 220});
@@ -709,10 +687,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       expect(resolvedCss(node)).to.equal('11.5em');
       expect(node.createSameUnits(20.5).css()).to.equal('20.5em');
 
-      contextMock
-        .expects('getCurrentFontSize')
-        .returns(10)
-        .twice();
+      contextMock.expects('getCurrentFontSize').returns(10).twice();
       const norm = node.norm(context);
       expect(norm).to.not.equal(node);
       expect(norm.css()).to.equal('115px');
@@ -727,10 +702,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       expect(resolvedCss(node)).to.equal('11.5rem');
       expect(node.createSameUnits(20.5).css()).to.equal('20.5rem');
 
-      contextMock
-        .expects('getRootFontSize')
-        .returns(2)
-        .twice();
+      contextMock.expects('getRootFontSize').returns(2).twice();
       const norm = node.norm(context);
       expect(norm).to.not.equal(node);
       expect(norm.css()).to.equal('23px');
@@ -970,14 +942,8 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should norm function', () => {
-      contextMock
-        .expects('getDimension')
-        .returns('w')
-        .atLeast(1);
-      contextMock
-        .expects('getCurrentFontSize')
-        .returns(10)
-        .atLeast(1);
+      contextMock.expects('getDimension').returns('w').atLeast(1);
+      contextMock.expects('getCurrentFontSize').returns(10).atLeast(1);
       contextMock
         .expects('getCurrentElementSize')
         .returns({width: 110, height: 220})
@@ -997,7 +963,7 @@ describes.sandboxed('CSS resolve', {}, env => {
     it('should push a dimension when specified', () => {
       let index = 0;
       const stack = [];
-      context.withDimension = function(dim, callback) {
+      context.withDimension = function (dim, callback) {
         stack.push(dim);
         const res = callback();
         stack.pop();
@@ -1005,7 +971,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       };
 
       const arg1 = new ast.CssNumberNode(201);
-      arg1.resolve = function() {
+      arg1.resolve = function () {
         expect(index).to.equal(0);
         expect(stack).to.deep.equal(['w']);
         index++;
@@ -1013,7 +979,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       };
 
       const arg2 = new ast.CssNumberNode(202);
-      arg2.resolve = function() {
+      arg2.resolve = function () {
         expect(index).to.equal(1);
         expect(stack).to.deep.equal(['h']);
         index++;
@@ -1021,7 +987,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       };
 
       const arg3 = new ast.CssNumberNode(203);
-      arg3.resolve = function() {
+      arg3.resolve = function () {
         expect(index).to.equal(2);
         expect(stack).to.deep.equal([]);
         index++;
@@ -1057,7 +1023,7 @@ describes.sandboxed('CSS resolve', {}, env => {
 
     beforeEach(() => {
       dimStack = [];
-      context.withDimension = function(dim, callback) {
+      context.withDimension = function (dim, callback) {
         dimStack.push(dim);
         const res = callback();
         dimStack.pop();
@@ -1065,7 +1031,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       };
       env.sandbox
         .stub(ast.CssPassthroughNode.prototype, 'resolve')
-        .callsFake(function() {
+        .callsFake(function () {
           return new ast.CssPassthroughNode(this.css_ + dimStack.join(''));
         });
     });
@@ -1154,10 +1120,10 @@ describes.sandboxed('CSS resolve', {}, env => {
         'null(.class)': {width: 111, height: 222},
         'closest(.class > div)': {width: 112, height: 224},
       };
-      context.getCurrentElementSize = function() {
+      context.getCurrentElementSize = function () {
         return {width: 110, height: 220};
       };
-      context.getElementSize = function(selector, selectionMethod) {
+      context.getElementSize = function (selector, selectionMethod) {
         return sizes[`${selectionMethod}(${selector})`];
       };
     });
@@ -1248,10 +1214,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       const node = new ast.CssNumConvertNode(new ast.CssPercentNode(10));
       expect(resolvedCss(node)).to.equal('10');
 
-      contextMock
-        .expects('getDimension')
-        .returns('w')
-        .atLeast(1);
+      contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
         .expects('getCurrentElementSize')
         .returns({width: 110, height: 220})
@@ -1353,10 +1316,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       );
       expect(resolvedCss(node)).to.equal('12.5%');
 
-      contextMock
-        .expects('getDimension')
-        .returns('w')
-        .atLeast(1);
+      contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
         .expects('getCurrentElementSize')
         .returns({width: 110, height: 220})
@@ -1421,14 +1381,8 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should normalize units', () => {
-      contextMock
-        .expects('getCurrentFontSize')
-        .returns(1)
-        .once();
-      contextMock
-        .expects('getRootFontSize')
-        .returns(2)
-        .once();
+      contextMock.expects('getCurrentFontSize').returns(1).once();
+      contextMock.expects('getRootFontSize').returns(2).once();
       const node = new ast.CssRandNode(
         new ast.CssLengthNode(10, 'em'),
         new ast.CssLengthNode(10, 'rem')
@@ -1451,19 +1405,13 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should resolve a no-arg', () => {
-      contextMock
-        .expects('getCurrentIndex')
-        .withExactArgs()
-        .returns(11);
+      contextMock.expects('getCurrentIndex').withExactArgs().returns(11);
       const node = new ast.CssIndexNode();
       expect(resolvedCss(node)).to.equal('11');
     });
 
     it('should combine with calc', () => {
-      contextMock
-        .expects('getCurrentIndex')
-        .withExactArgs()
-        .returns(11);
+      contextMock.expects('getCurrentIndex').withExactArgs().returns(11);
       const node = new ast.CssCalcProductNode(
         new ast.CssTimeNode(2, 's'),
         new ast.CssIndexNode(),
@@ -1488,19 +1436,13 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should resolve a no-arg', () => {
-      contextMock
-        .expects('getTargetLength')
-        .withExactArgs()
-        .returns(12);
+      contextMock.expects('getTargetLength').withExactArgs().returns(12);
       const node = new ast.CssLengthFuncNode();
       expect(resolvedCss(node)).to.equal('12');
     });
 
     it('should combine with calc', () => {
-      contextMock
-        .expects('getTargetLength')
-        .withExactArgs()
-        .returns(12);
+      contextMock.expects('getTargetLength').withExactArgs().returns(12);
       const node = new ast.CssCalcProductNode(
         new ast.CssTimeNode(2, 's'),
         new ast.CssLengthFuncNode(),
@@ -1532,10 +1474,7 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should resolve a var node and normalize', () => {
-      contextMock
-        .expects('getDimension')
-        .returns('w')
-        .atLeast(1);
+      contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
         .expects('getCurrentElementSize')
         .returns({width: 110, height: 220})
@@ -1569,10 +1508,7 @@ describes.sandboxed('CSS resolve', {}, env => {
     });
 
     it('should resolve a var node by fallback to def', () => {
-      contextMock
-        .expects('getVar')
-        .returns(null)
-        .once();
+      contextMock.expects('getVar').returns(null).once();
       const node = new ast.CssVarNode(
         '--var1',
         new ast.CssPassthroughNode('10px')
@@ -1651,10 +1587,7 @@ describes.sandboxed('CSS resolve', {}, env => {
         expect(node.css()).to.equal('10em + 20em');
         expect(resolvedCss(node)).to.equal('30em');
 
-        contextMock
-          .expects('getCurrentFontSize')
-          .returns(10)
-          .atLeast(1);
+        contextMock.expects('getCurrentFontSize').returns(10).atLeast(1);
         expect(node.isConst(normalize)).to.be.false;
         expect(resolvedCss(node, normalize)).to.equal('300px');
       });
@@ -1746,14 +1679,8 @@ describes.sandboxed('CSS resolve', {}, env => {
       });
 
       it('should normalize units', () => {
-        contextMock
-          .expects('getCurrentFontSize')
-          .returns(1)
-          .once();
-        contextMock
-          .expects('getRootFontSize')
-          .returns(2)
-          .once();
+        contextMock.expects('getCurrentFontSize').returns(1).once();
+        contextMock.expects('getRootFontSize').returns(2).once();
         const node = new ast.CssCalcSumNode(
           new ast.CssLengthNode(10, 'em'),
           new ast.CssLengthNode(10, 'rem'),
@@ -1800,10 +1727,7 @@ describes.sandboxed('CSS resolve', {}, env => {
       });
 
       it('should normalize the non-percent part', () => {
-        contextMock
-          .expects('getCurrentFontSize')
-          .returns(2)
-          .once();
+        contextMock.expects('getCurrentFontSize').returns(2).once();
         contextMock.expects('getDimension').returns('h');
         contextMock
           .expects('getCurrentElementSize')

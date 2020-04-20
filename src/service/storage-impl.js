@@ -76,7 +76,7 @@ export class Storage {
    * @return {!Promise<*>}
    */
   get(name) {
-    return this.getStore_().then(store => store.get(name));
+    return this.getStore_().then((store) => store.get(name));
   }
 
   /**
@@ -102,7 +102,7 @@ export class Storage {
    * @return {!Promise}
    */
   setNonBoolean(name, value, opt_isUpdate) {
-    return this.saveStore_(store => store.set(name, value, opt_isUpdate));
+    return this.saveStore_((store) => store.set(name, value, opt_isUpdate));
   }
 
   /**
@@ -112,7 +112,7 @@ export class Storage {
    * @return {!Promise}
    */
   remove(name) {
-    return this.saveStore_(store => store.remove(name));
+    return this.saveStore_((store) => store.remove(name));
   }
 
   /**
@@ -123,12 +123,12 @@ export class Storage {
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_
         .loadBlob(this.origin_)
-        .then(blob => (blob ? parseJson(atob(blob)) : {}))
-        .catch(reason => {
+        .then((blob) => (blob ? parseJson(atob(blob)) : {}))
+        .catch((reason) => {
           dev().expectedError(TAG, 'Failed to load store: ', reason);
           return {};
         })
-        .then(obj => new Store(obj));
+        .then((obj) => new Store(obj));
     }
     return this.storePromise_;
   }
@@ -140,7 +140,7 @@ export class Storage {
    */
   saveStore_(mutator) {
     return this.getStore_()
-      .then(store => {
+      .then((store) => {
         mutator(store);
         // Need to encode stored object to avoid plain text,
         // but doesn't need to be base64encode. Can convert to some other
@@ -153,7 +153,7 @@ export class Storage {
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onBroadcast(message => {
+    this.viewer_.onBroadcast((message) => {
       if (
         message['type'] == 'amp-storage-reset' &&
         message['origin'] == this.origin_
@@ -355,7 +355,7 @@ export class LocalStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve(null);
         return;
@@ -366,7 +366,7 @@ export class LocalStorageBinding {
 
   /** @override */
   saveBlob(origin, blob) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve();
         return;
@@ -395,15 +395,19 @@ export class ViewerStorageBinding {
   loadBlob(origin) {
     return this.viewer_
       .sendMessageAwaitResponse('loadStore', dict({'origin': origin}))
-      .then(response => response['blob']);
+      .then((response) => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-      'saveStore',
-      dict({'origin': origin, 'blob': blob})
-    ));
+    return /** @type {!Promise} */ (this.viewer_
+      .sendMessageAwaitResponse(
+        'saveStore',
+        dict({'origin': origin, 'blob': blob})
+      )
+      .catch((reason) => {
+        throw dev().createExpectedError(TAG, 'Failed to save store: ', reason);
+      }));
   }
 }
 
@@ -414,7 +418,7 @@ export function installStorageServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
     ampdoc,
     'storage',
-    function() {
+    function () {
       const viewer = Services.viewerForDoc(ampdoc);
       const overrideStorage = parseInt(viewer.getParam('storage'), 10);
       const binding = overrideStorage

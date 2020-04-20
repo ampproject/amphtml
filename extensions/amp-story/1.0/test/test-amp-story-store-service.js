@@ -22,7 +22,7 @@ import {
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
-describes.fakeWin('amp-story-store-service', {}, env => {
+describes.fakeWin('amp-story-store-service', {}, (env) => {
   let storeService;
 
   beforeEach(() => {
@@ -63,7 +63,7 @@ describes.fakeWin('amp-story-store-service', {}, env => {
   });
 });
 
-describes.fakeWin('amp-story-store-service embed mode', {}, env => {
+describes.fakeWin('amp-story-store-service embed mode', {}, (env) => {
   let storeService;
 
   beforeEach(() => {
@@ -77,7 +77,7 @@ describes.fakeWin('amp-story-store-service embed mode', {}, env => {
   });
 });
 
-describes.fakeWin('amp-story-store-service actions', {}, env => {
+describes.fakeWin('amp-story-store-service actions', {}, (env) => {
   let storeService;
 
   beforeEach(() => {
