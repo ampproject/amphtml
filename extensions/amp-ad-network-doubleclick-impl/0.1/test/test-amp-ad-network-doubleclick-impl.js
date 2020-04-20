@@ -1474,7 +1474,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
-      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath)); 
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
     it('uses random subdomain if experiment is on without win.crypto', () => {
