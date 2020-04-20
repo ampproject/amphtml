@@ -56,7 +56,7 @@ class NativeIntersectionObserverEntry {
   get isIntersecting() {}
 }
 
-describe('shouldLoadPolyfill', () => {
+describes.sandboxed('shouldLoadPolyfill', () => {
   it('should not load with native', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
