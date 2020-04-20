@@ -24,12 +24,7 @@ import {
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
-import {
-  Layout,
-  getLayoutClass,
-  isLayoutSizeDefined,
-  parseLayout,
-} from '../../../src/layout';
+import {Layout, getLayoutClass, parseLayout} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -134,9 +129,12 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Whether the amp-list has an initial `layout` value of `container`.
      * If so, allow it to manage its own resizing in accordance to
-     * (1) requiring a placeholder to detect initial sizing,
-     * (2) fixing height on content change to prevent content jumping, and
-     * (3) allowing resizing to contents on user interaction.
+     * (1) requiring a placeholder to detect initial sizing and
+     * (2) fixing height on content change to prevent content jumping
+     *
+     * TODO: This configuration should eventually allow resizing to
+     * contents on user interaction with an AMP action that mimics the
+     * spirit of "changeToLayoutContainer" but more aptly named.
      * @private {boolean}
      */
     this.enableManagedResizing_ = false;
@@ -209,7 +207,7 @@ export class AmpList extends AMP.BaseElement {
         this.element
       );
       this.enableManagedResizing_ = true;
-  }
+    }
 
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
@@ -1167,12 +1165,18 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Measure and lock height before performing given mutate fn.
-   * Applicable for layout=container.
+   * Applicable for amp-list initialized with layout=container.
    * @private
    * @param {!Function} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
+    devAssert(
+      this.enableManagedResizing_ && !this.loadMoreEnabled_,
+      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+      TAG,
+      this.element
+    );
     let currentHeight;
     return this.measureMutateElement(
       () => {
@@ -1189,7 +1193,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Applicable for layout=container.
+   * Applicable for amp-list initialized with layout=container.
    * @private
    */
   unlockHeightInsideMutate_() {
@@ -1313,6 +1317,7 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     if (this.enableManagedResizing_) {
+      // TODO: Link to amp.dev documentation in warning message.
       user().warn(
         '%s [is-layout-container] and changeToLayoutContainer are ineffective ' +
           'when an amp-list initially sets layout=container',
