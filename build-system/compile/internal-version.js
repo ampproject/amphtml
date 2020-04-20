@@ -78,8 +78,8 @@ function getVersion() {
   //      one day is added.
   let numberOfCherryPicks = 0;
   const commitCherriesInfo = gitCherryMaster().reverse();
-  for (const commitCherryInfo of commitCherriesInfo) {
-    if (!commitCherryInfo.isCherryPick) {
+  for (const {isCherryPick} of commitCherriesInfo) {
+    if (!isCherryPick) {
       break;
     }
     numberOfCherryPicks++;
