@@ -36,7 +36,7 @@
     "eslint": "5.16.0",
     "eslint-config-google": "0.14.0",
     "jasmine": "3.5.0",
-    "karma": "3.0.0",
+    "karma": "3.1.4",
     "karma-chrome-launcher": "2.2.0",
     "karma-jasmine": "1.1.2",
     "npm-run-all": "4.1.3",
