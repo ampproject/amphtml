@@ -141,7 +141,7 @@ export let CreativeMetaDataDef;
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
     }} */
-export let ConsentTuple;
+export let ConsentTupleDef;
 
 /**
  * Name of A4A lifecycle triggers.
@@ -701,7 +701,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentString = consentResponse[1];
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          { consentState, consentString },
+          {consentState, consentString},
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
       })
@@ -1244,7 +1244,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {!ConsentTuple} unusedConsentTuple
+   * @param {!ConsentTupleDef} unusedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */

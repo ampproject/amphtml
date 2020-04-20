@@ -24,6 +24,7 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
+  ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
@@ -172,12 +173,6 @@ let SizeDef;
 /** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
-/** @typedef {{
-      consentState: ?CONSENT_POLICY_STATE,
-      consentString: ?string,
-    }} */
-let ConsentTuple;
-
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
@@ -282,7 +277,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @protected {ConsentTuple} */
+    /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
 
     /** @protected {!Deferred<string>} */
@@ -497,9 +492,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?ConsentTuple} consentTuple
+   * @param {?ConsentTupleDef} consentTuple
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
-   * @param {?string} consentString
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
@@ -508,8 +502,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa':
-      consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
           ? 1
           : null,
       'gdfp_req': '1',
@@ -658,7 +652,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentTuple, /* instances= */undefined),
+          this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
         this.experimentIds
@@ -1770,8 +1764,7 @@ function constructSRARequest_(a4a, instances) {
         Object.assign(
           blockParameters,
           googPageLevelParameters,
-          instances[0].getPageParameters(
-            instances[0].consentTuple, instances)
+          instances[0].getPageParameters(instances[0].consentTuple, instances)
         ),
         startTime
       );
