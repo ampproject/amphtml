@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as bytesUtils from '../../../../src/utils/bytes';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -47,7 +48,6 @@ import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import bytesUtil from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -1171,7 +1171,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       return {
         arrayBuffer: () =>
           Promise.resolve(
-            bytesUtil.utf8Encode('<html><body>Hello, World!</body></html>')
+            bytesUtils.utf8Encode('<html><body>Hello, World!</body></html>')
           ),
         headers: {
           get(prop) {
@@ -1480,7 +1480,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     it('uses random subdomain if experiment is on without win.crypto', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
-      env.sandbox.stub(bytesUtil, 'getCryptoRandomBytesArray').returns(null);
+      env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
 
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
@@ -1935,7 +1935,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            bytesUtil.utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.equal('foo');
@@ -1956,10 +1956,13 @@ describes.realWin(
           },
         };
         return AmpAdNetworkDoubleclickImpl.prototype
-          .maybeValidateAmpCreative(bytesUtil.utf8Encode(creative), mockHeaders)
+          .maybeValidateAmpCreative(
+            bytesUtils.utf8Encode(creative),
+            mockHeaders
+          )
           .then((result) => {
             expect(result).to.be.ok;
-            expect(bytesUtil.utf8Decode(result)).to.equal(creative);
+            expect(bytesUtils.utf8Decode(result)).to.equal(creative);
           });
       });
 
@@ -1979,7 +1982,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            bytesUtil.utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.not.be.ok;
