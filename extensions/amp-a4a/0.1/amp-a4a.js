@@ -218,7 +218,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    window.top.console.log('AMP-A4A constructor');
     devAssert(AMP.AmpAdUIHandler);
     devAssert(AMP.AmpAdXOriginIframeHandler);
 
