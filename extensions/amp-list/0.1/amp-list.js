@@ -332,12 +332,13 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {?Promise<boolean>}
    */
   maybeResizeListToFitItems_() {
     if (this.loadMoreEnabled_) {
       this.attemptToFitLoadMore_(dev().assertElement(this.container_));
     } else {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      return this.attemptToFit_(dev().assertElement(this.container_));
     }
   }
 
@@ -1205,17 +1206,25 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
+   * @return {!Promise<boolean>}
    */
   attemptToFit_(target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
-      return;
+    if (
+      this.element.getAttribute('layout') == Layout.CONTAINER &&
+      !this.enableManagedResizing_
+    ) {
+      return Promise.resolve();
     }
-    this.measureElement(() => {
+    return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
-        this.attemptChangeHeight(targetHeight).catch(() => {});
+        return this.attemptChangeHeight(targetHeight).then(
+          () => true,
+          () => false
+        );
       }
+      return true;
     });
   }
 
