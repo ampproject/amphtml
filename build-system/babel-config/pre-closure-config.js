@@ -16,8 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getExperimentConstant} = require('./helpers');
-const {getReplacePlugin} = require('./replace-plugin');
+const {getExperimentConstant, getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
