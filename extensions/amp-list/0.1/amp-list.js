@@ -1319,9 +1319,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.enableManagedResizing_) {
       // TODO: Link to amp.dev documentation in warning message.
       user().warn(
-        '%s [is-layout-container] and changeToLayoutContainer are ineffective ' +
-          'when an amp-list initially sets layout=container',
         TAG,
+        '[is-layout-container] and changeToLayoutContainer are ineffective ' +
+          'when an amp-list initially sets layout=container',
         this.element
       );
       return Promise.resolve();
