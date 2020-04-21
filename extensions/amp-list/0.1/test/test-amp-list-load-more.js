@@ -42,6 +42,7 @@ describes.realWin(
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -55,13 +56,19 @@ describes.realWin(
       };
       env.sandbox.stub(Services, 'templatesFor').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy.notCalled).to.be.true;
+      expect(unlockHeightSpy.notCalled).to.be.true;
     });
 
     describe('manual', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 
@@ -147,9 +154,6 @@ describes.realWin(
 
     describe('loading states', () => {
       beforeEach(() => {
-        element = doc.createElement('amp-list');
-        list = new AmpList(element);
-
         env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
         env.sandbox.stub(list, 'getFallback').returns(null);
 

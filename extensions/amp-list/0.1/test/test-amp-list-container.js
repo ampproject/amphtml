@@ -37,6 +37,7 @@ describes.realWin(
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -72,6 +73,14 @@ describes.realWin(
       env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
       list.element.applySize = () => {};
       list.buildCallback();
+
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy.notCalled).to.be.true;
+      expect(unlockHeightSpy.notCalled).to.be.true;
     });
 
     it('should change to layout container', async () => {
