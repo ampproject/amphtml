@@ -56,7 +56,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       out.push(']');
       return;
     } else if (
-      obj instanceof String || obj instanceof Number ||
+        obj instanceof String || obj instanceof Number ||
         obj instanceof Boolean) {
       obj = obj.valueOf();
       // Fall through to switch below.
@@ -65,7 +65,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       const keys = [];
       for (const key in obj) {
         if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object}*/ (obj), key)) {
+                /** @type {Object}*/ (obj), key)) {
           keys.push(key);
         }
       }
@@ -111,7 +111,8 @@ function objToJsonSegments(obj, out, cmpFn) {
  * Default key comparator for ordering the json output.
  * @param {string} a
  * @param {string} b
- * @return {number} */
+ * @return {number}
+ */
 const defaultCmpFn = function(a, b) {
   if (a < b) {
     return -1;
@@ -212,8 +213,8 @@ const renderJSON = function(obj, cmpFn, offset) {
   objToJsonSegments(obj, segments, cmpFn);
 
   const lines = [];
-  let current = ''; // current line
-  let nesting = offset; // Keep track of how deep inside {[]} etc.
+  let current = '';      // current line
+  let nesting = offset;  // Keep track of how deep inside {[]} etc.
 
   // Walk over the segments emitted by objToJsonSegments.
   for (const segment of segments) {
@@ -222,12 +223,12 @@ const renderJSON = function(obj, cmpFn, offset) {
     // with an opening block character (but keep multiple opening blocks
     // together).
     if ((current.length > 60 &&
-            (endsWithChar(current, ',') || endsWithChar(current, ':'))) ||
+         (endsWithChar(current, ',') || endsWithChar(current, ':'))) ||
         ((segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
-            !endsWithChar(current, '['))) {
+         !endsWithChar(current, '['))) {
       lines.push(current);
       current = '';
-      for (let i = 0; i < nesting; i++) { // Emit indentation.
+      for (let i = 0; i < nesting; i++) {  // Emit indentation.
         current += ' ';
       }
     }

@@ -286,8 +286,9 @@ class TagNameStack {
           if (HeadElements.hasOwnProperty(tag.upperName())) {
             this.startTag(new parserInterface.ParsedHtmlTag('HEAD'));
           } else {
-            if (this.handler_.markManufacturedBody)
-            {this.handler_.markManufacturedBody();}
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
             this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
           }
         }
@@ -300,8 +301,9 @@ class TagNameStack {
         } else if (!HeadElements.hasOwnProperty(tag.upperName())) {
           this.endTag(new parserInterface.ParsedHtmlTag('HEAD'));
           if (tag.upperName() !== 'BODY') {
-            if (this.handler_.markManufacturedBody)
-            {this.handler_.markManufacturedBody();}
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
             this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
           } else {
             this.region_ = TagRegion.IN_BODY;
@@ -314,8 +316,9 @@ class TagNameStack {
             tag.upperName() === 'HEAD') {
           return;
         } else if (tag.upperName() !== 'BODY') {
-          if (this.handler_.markManufacturedBody)
-          {this.handler_.markManufacturedBody();}
+          if (this.handler_.markManufacturedBody) {
+            this.handler_.markManufacturedBody();
+          }
           this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
         } else {
           this.region_ = TagRegion.IN_BODY;
@@ -346,7 +349,7 @@ class TagNameStack {
             // <dd> and <dt> tags can be implicitly closed by other <dd> and
             // <dt> tags. See https://www.w3.org/TR/html-markup/dd.html
           } else if (
-            (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
+              (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
               (parentTagName == 'DD' || parentTagName == 'DT')) {
             this.endTag(new parserInterface.ParsedHtmlTag(parentTagName));
             // <li> tags can be implicitly closed by other <li> tags.
@@ -433,15 +436,18 @@ class TagNameStack {
    * @param {!parserInterface.ParsedHtmlTag} tag
    */
   endTag(tag) {
-    if (this.region_ == TagRegion.IN_HEAD && tag.upperName() === 'HEAD')
-    {this.region_ = TagRegion.PRE_BODY;}
+    if (this.region_ == TagRegion.IN_HEAD && tag.upperName() === 'HEAD') {
+      this.region_ = TagRegion.PRE_BODY;
+    }
 
     // We ignore close body tags (</body) and instead insert them when their
     // outer scope is closed (/html). This is closer to how a browser parser
     // works. The idea here is if other tags are found after the <body>,
     // (ex: <div>) which are only allowed in the <body>, we will effectively
     // move them into the body section.
-    if (tag.upperName() === 'BODY') {return;}
+    if (tag.upperName() === 'BODY') {
+      return;
+    }
 
     // We look for tag.upperName() from the end. If we can find it, we pop
     // everything from thereon off the stack. If we can't find it,
@@ -536,7 +542,7 @@ const HtmlParser = class {
 
       // TODO(goto): cleanup this code breaking it into separate methods.
       if (inTag) {
-        if (m[1]) { // Attribute.
+        if (m[1]) {  // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
           const attribName = parserInterface.toLowerCase(m[1]);
           // Use empty string as value for valueless attribs, so
@@ -557,7 +563,7 @@ const HtmlParser = class {
           }
           attribs.push(attribName, decodedValue);
         } else if (m[4]) {
-          if (eflags !== void 0) { // False if not in whitelist.
+          if (eflags !== void 0) {  // False if not in whitelist.
             if (openTag) {
               tagStack.startTag(new parserInterface.ParsedHtmlTag(
                   /** @type {string} */ (tagName), attribs));
@@ -600,9 +606,9 @@ const HtmlParser = class {
           inTag = false;
         }
       } else {
-        if (m[1]) { // Entity.
+        if (m[1]) {  // Entity.
           tagStack.pcdata(m[0]);
-        } else if (m[3]) { // Tag.
+        } else if (m[3]) {  // Tag.
           openTag = !m[2];
           if (locator) {
             locator.snapshotPos();
@@ -611,12 +617,12 @@ const HtmlParser = class {
           tagName = parserInterface.toUpperCase(m[3]);
           eflags = Elements.hasOwnProperty(tagName) ? Elements[tagName] :
                                                       EFlags.UNKNOWN_OR_CUSTOM;
-        } else if (m[4]) { // Text.
+        } else if (m[4]) {  // Text.
           if (locator) {
             locator.snapshotPos();
           }
           tagStack.pcdata(m[4]);
-        } else if (m[5]) { // Cruft.
+        } else if (m[5]) {  // Cruft.
           switch (m[5]) {
             case '<':
               tagStack.pcdata('&lt;');
@@ -1088,8 +1094,8 @@ const DocLocatorImpl = class extends parserInterface.DocLocator {
  * to remain unchanged for these objects.
  */
 function unusedHtmlParser() {
-  console./*OK*/log(ElementsWithNoEndElements['']);
-  console./*OK*/log(HtmlStructureElements['']);
-  console./*OK*/log(HeadElements['']);
-  console./*OK*/log(ElementsWhichClosePTag['']);
+  console./*OK*/ log(ElementsWithNoEndElements['']);
+  console./*OK*/ log(HtmlStructureElements['']);
+  console./*OK*/ log(HeadElements['']);
+  console./*OK*/ log(ElementsWhichClosePTag['']);
 }

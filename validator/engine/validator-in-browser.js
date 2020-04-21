@@ -50,7 +50,8 @@ function getUrl(url) {
  * @return {boolean}
  */
 const isAmpCacheUrl = function(url) {
-  return url.toLowerCase().indexOf('cdn.ampproject.org') !== -1; // lgtm [js/incomplete-url-substring-sanitization]
+  return url.toLowerCase().indexOf('cdn.ampproject.org') !==
+      -1;  // lgtm [js/incomplete-url-substring-sanitization]
 };
 exports.isAmpCacheUrl = isAmpCacheUrl;
 goog.exportSymbol('amp.validator.isAmpCacheUrl', isAmpCacheUrl);
