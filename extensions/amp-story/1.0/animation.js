@@ -31,11 +31,15 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {
+  childElementsByTag,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** @const {string} */
@@ -60,7 +64,7 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  * TODO(alanorozco): maybe memoize?
  */
 export function hasAnimations(element) {
-  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},amp-story-animation`;
+  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},>amp-story-animation`;
   return !!scopedQuerySelector(element, selector);
 }
 
@@ -615,7 +619,7 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            this.page_.querySelectorAll('amp-story-animation'),
+            childElementsByTag(this.page_, 'amp-story-animation'),
             (el) =>
               this.createRunner_(
                 // Casting since we're getting a JsonObject. This will be

@@ -34,7 +34,7 @@ import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {
-  closest,
+  closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -857,7 +857,7 @@ class CssContextImpl {
     this.rootNode_ = rootNode;
 
     const {scope = rootNode} = options;
-    /** @const @private {!Node} */
+    /** @const @private {!Document|!ShadowRoot} */
     this.scope_ = scope;
 
     /** @const @private */
@@ -1242,11 +1242,14 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closest(
+        const maybeFoundInScope = closestAncestorElementBySelector(
           this.requireTarget_(),
-          (element) => matches(element, selector),
-          this.scope_
+          selector
         );
+        element =
+          maybeFoundInScope && this.scope_.contains(maybeFoundInScope)
+            ? maybeFoundInScope
+            : null;
       } else {
         element = this.scopedQuerySelector_(selector);
       }
@@ -1286,7 +1289,7 @@ class CssContextImpl {
 
   /**
    * @param {string} selector
-   * @return {?Element}
+   * @return {!NodeList}
    * @private
    */
   scopedQuerySelectorAll_(selector) {
