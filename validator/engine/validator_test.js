@@ -454,7 +454,7 @@ describe('ValidationResultTransformerVersion', () => {
   });
 });
 
-describe('Validatorvalidator.CssLength', () => {
+describe('Validator.CssLength', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
   }
@@ -568,7 +568,7 @@ describe('Validatorvalidator.CssLength', () => {
      });
 });
 
-describe('Validatorvalidator.CssLengthAmpActions', () => {
+describe('Validator.CssLengthAmpActions', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
   }
@@ -691,7 +691,7 @@ describe('Validatorvalidator.CssLengthAmpActions', () => {
      });
 });
 
-describe('Validatorvalidator.CssLengthAmpEmail', () => {
+describe('Validator.CssLengthAmpEmail', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
   }
@@ -757,10 +757,11 @@ describe('Validatorvalidator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom (AMP4EMAIL)\' is too long - document ' +
-           'contains 75002 bytes whereas the limit is 75000 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/' +
+           'amp4email_feature_tests/css_length.html:28:2 The author ' +
+           'stylesheet specified in tag \'style amp-custom (AMP4EMAIL)\' is ' +
+           'too long - document contains 75002 bytes whereas the limit is ' +
+           '75000 bytes. (see ' +
+           'https://amp.dev/documentation/guides-and-tutorials/' +
            'learn/spec/amphtml#maximum-size)';
        test.run();
      });
@@ -791,7 +792,12 @@ describe('Validatorvalidator.CssLengthAmpEmail', () => {
        test.expectedOutputFile = null;
        // TODO(gregable): This should not pass, as we have more than 75,000
        // bytes of inline style.
-       test.expectedOutput = 'PASS';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:34:6 The author stylesheet ' +
+           'specified in tag \'style amp-custom\' and the combined inline styles ' +
+           'is too large - document contains 75010 bytes whereas the limit is ' +
+           '75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/' +
+           'learn/spec/amphtml#maximum-size)';
        test.run();
      });
 
@@ -809,7 +815,13 @@ describe('Validatorvalidator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '<b style=display:block;></b>');
        // TODO(gregable): This should not pass, as we have more than 75,000
        // bytes of total style.
-       test.expectedOutput = 'PASS';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:7534:6 The author ' +
+           'stylesheet specified in tag \'style amp-custom\' and the ' +
+           'combined inline styles is too large - document contains 75014 ' +
+           'bytes whereas the limit is 75000 bytes. (see https://amp.dev/' +
+           'documentation/guides-and-tutorials/learn/spec/amphtml' +
+           '#maximum-size)';
        test.run();
      });
 });
@@ -818,7 +830,7 @@ describe('Validatorvalidator.CssLengthAmpEmail', () => {
 // non-transformed AMP, to show that behavior should differ from non-transformed
 // in that URLs are not counted towards the URL length, unless they are data:
 // urls.
-describe('Validatorvalidator.CssLengthWithUrls', () => {
+describe('Validator.CssLengthWithUrls', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
   }
@@ -947,7 +959,7 @@ describe('Validatorvalidator.CssLengthWithUrls', () => {
      });
 });
 
-describe('ValidatorTransformedAmpvalidator.CssLengthWithUrls', () => {
+describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
   }
@@ -1026,7 +1038,7 @@ describe('ValidatorTransformedAmpvalidator.CssLengthWithUrls', () => {
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
         'transformed_feature_tests/css_length.html:29:2 The author ' +
-        'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
+        'stylesheet specified in tag \'style amp-custom\' ' +
         'is too long - document contains 75010 bytes whereas the limit ' +
         'is 75000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
@@ -1486,21 +1498,6 @@ describe('ValidatorRulesMakeSense', () => {
     expect(rules.templateSpecUrl).not.toEqual(null);
   });
 
-  // Verify at most one css_length_spec defined per html_format and that the
-  // html_format is never UNKNOWN_CODE.
-  const cssLengthSpecs = {};
-  for (const cssLengthSpec of rules.cssLengthSpec) {
-    it('cssLengthSpec.htmlFormat should never be set to UNKNOWN_CODE', () => {
-      expect(cssLengthSpec.htmlFormat)
-          .not.toEqual(generated.HtmlFormat.Code.UNKNOWN_CODE);
-    });
-    it('css_length_spec defined only at most once per html_format', () => {
-      expect(cssLengthSpecs.hasOwnProperty(cssLengthSpec.htmlFormat))
-          .toBe(false);
-      cssLengthSpecs[cssLengthSpec.htmlFormat] = 0;
-    });
-  }
-
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
   // generated.TagSpec that's marked REFERENCE_POINT.
   const allReferencePoints = {};
@@ -1848,12 +1845,6 @@ describe('ValidatorRulesMakeSense', () => {
             atRuleSpecNameIsUnique[atRuleSpec.name] = 0;
           });
         }
-        it('at_rule_spec has image_url_spec defined', () => {
-          expect(tagSpec.cdata.cssSpec.imageUrlSpec).toBeDefined();
-        });
-        it('at_rule_spec has font_url_spec defined', () => {
-          expect(tagSpec.cdata.cssSpec.fontUrlSpec).toBeDefined();
-        });
       }
 
       if (tagSpec.tagName === 'SCRIPT' || tagSpec.tagName === 'STYLE') {

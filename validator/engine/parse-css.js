@@ -1108,7 +1108,7 @@ class ImportantPropertyVisitor extends RuleVisitor {
  * @param {!Array<!ParsedCssUrl>} parsedUrls
  * @param {!Array<!tokenize_css.ErrorToken>} errors
  */
-const extractUrls = function(stylesheet, parsedUrls, errors) {
+const extractUrlsFromStylesheet = function(stylesheet, parsedUrls, errors) {
   const parsedUrlsOldLength = parsedUrls.length;
   const errorsOldLength = errors.length;
   const visitor = new UrlFunctionVisitor(parsedUrls, errors);
@@ -1118,7 +1118,26 @@ const extractUrls = function(stylesheet, parsedUrls, errors) {
     parsedUrls.splice(parsedUrlsOldLength);
   }
 };
-exports.extractUrls = extractUrls;
+exports.extractUrlsFromStylesheet = extractUrlsFromStylesheet;
+
+/**
+ * Same as the stylesheet variant above, but operates on a single declaration at
+ * a time. Usedful when operating on parsed style attributes.
+ * @param {!Declaration} declaration
+ * @param {!Array<!ParsedCssUrl>} parsedUrls
+ * @param {!Array<!tokenize_css.ErrorToken>} errors
+ */
+const extractUrlsFromDeclaration = function(declaration, parsedUrls, errors) {
+  const parsedUrlsOldLength = parsedUrls.length;
+  const errorsOldLength = errors.length;
+  const visitor = new UrlFunctionVisitor(parsedUrls, errors);
+  declaration.accept(visitor);
+  // If anything went wrong, delete the urls we've already emitted.
+  if (errorsOldLength !== errors.length) {
+    parsedUrls.splice(parsedUrlsOldLength);
+  }
+};
+exports.extractUrlsFromDeclaration = extractUrlsFromDeclaration;
 
 /**
  * Extracts the declarations marked `!important` within within the provided

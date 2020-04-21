@@ -914,8 +914,7 @@ describe('parseAStylesheet', () => {
   });
 });
 
-describe('extractUrls', () => {
-
+describe('extractUrlsFromStylesheet', () => {
   // Tests that font urls are parsed with font-face atRuleScope.
   it('finds font in font-face', () => {
     const css =
@@ -926,7 +925,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [{
@@ -950,7 +949,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [{
@@ -1024,7 +1023,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [
@@ -1077,7 +1076,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [
@@ -1116,7 +1115,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals(
         [{
           'line': 4,

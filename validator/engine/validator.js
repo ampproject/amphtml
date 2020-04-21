@@ -441,6 +441,121 @@ class ParsedReferencePoints {
 }
 
 /**
+ * Wrapper around DocCssSpec.
+ * @private
+ */
+class ParsedDocCssSpec {
+  /**
+   * @param {!generated.DocCssSpec} spec
+   * @param {!Array<!generated.DeclarationList>} declLists
+   */
+  constructor(spec, declLists) {
+    /**
+     * @type {!generated.DocCssSpec}
+     * @private
+     */
+    this.spec_ = spec;
+
+    /**
+     * @type {!Object<string, !generated.CssDeclaration>}
+     * @private
+     */
+    this.cssDeclarationByName_ = Object.create(null);
+
+    /**
+     * @type {!Object<string, !generated.CssDeclaration>}
+     * @private
+     */
+    this.cssDeclarationSvgByName_ = Object.create(null);
+
+    for (const declaration of spec.declaration) {
+      if (declaration.name === null) continue;
+      this.cssDeclarationByName_[declaration.name] = declaration;
+      this.cssDeclarationSvgByName_[declaration.name] = declaration;
+    }
+    for (const declaration of spec.declarationSvg) {
+      if (declaration.name === null) continue;
+      this.cssDeclarationSvgByName_[declaration.name] = declaration;
+    }
+    // Expand the list of declarations tracked by this spec by merging in any
+    // declarations mentioned in declaration_lists referenced by this spec. This
+    // mechanism reduces redundancy in the lists themselves, making rules more
+    // readable.
+    for (const declListName of spec.declarationList) {
+      for (const declList of declLists) {
+        if (declList.name === declListName) {
+          for (const declaration of declList.declaration) {
+            if (declaration.name !== null) {
+              this.cssDeclarationByName_[declaration.name] = declaration;
+              this.cssDeclarationSvgByName_[declaration.name] = declaration;
+            }
+          }
+        }
+      }
+    }
+    for (const declListName of spec.declarationListSvg) {
+      for (const declList of declLists) {
+        if (declList.name === declListName) {
+          for (const declaration of declList.declaration) {
+            if (declaration.name !== null)
+              this.cssDeclarationSvgByName_[declaration.name] = declaration;
+          }
+        }
+      }
+    }
+
+    /**
+     * @type {!ParsedUrlSpec}
+     * @private
+     */
+    this.parsedImageUrlSpec_ = new ParsedUrlSpec(
+        /** @type{!generated.UrlSpec} */ (spec.imageUrlSpec));
+
+    /**
+     * @type {!ParsedUrlSpec}
+     * @private
+     */
+    this.parsedFontUrlSpec_ = new ParsedUrlSpec(
+        /** @type{!generated.UrlSpec} */ (spec.fontUrlSpec));
+  }
+
+  /** @return {!generated.DocCssSpec} */
+  spec() {
+    return this.spec_;
+  }
+
+  /** @return {!Array<string>} */
+  disabledBy() {
+    return this.spec_.disabledBy;
+  }
+
+  /** @return {!Array<string>} */
+  enabledBy() {
+    return this.spec_.enabledBy;
+  }
+
+  /** @return {!Object<string, !generated.CssDeclaration>} */
+  cssDeclarationByName() {
+    return this.cssDeclarationByName_;
+  }
+
+  /** @return {!Object<string, !generated.CssDeclaration>} */
+  cssDeclarationSvgByName() {
+    return this.cssDeclarationSvgByName_;
+  }
+
+  /** @return {!ParsedUrlSpec} */
+  imageUrlSpec() {
+    return this.parsedImageUrlSpec_;
+  }
+
+  /** @return {!ParsedUrlSpec} */
+  fontUrlSpec() {
+    return this.parsedFontUrlSpec_;
+  }
+}
+
+/**
  * TagSpecs specify attributes that are valid for a particular tag.
  * They can also reference lists of attributes (AttrLists), thereby
  * sharing those definitions. This abstraction instantiates
@@ -1060,7 +1175,8 @@ class ChildTagMatcher {
  * Return type tuple for ValidateTag.
  * @typedef {{ validationResult: !generated.ValidationResult,
  *             bestMatchTagSpec: ?ParsedTagSpec,
- *             devModeSuppress: (boolean|undefined) }}
+ *             devModeSuppress: (boolean|undefined),
+ *             inlineStyleCssBytes: number }}
  */
 let ValidateTagResult;
 
@@ -1123,8 +1239,14 @@ class ReferencePointMatcher {
    */
   validateTag(tag, context) {
     // Look for a matching reference point, if we find one, record and exit.
-    let resultForBestAttempt = new generated.ValidationResult();
-    resultForBestAttempt.status = generated.ValidationResult.Status.UNKNOWN;
+    /** @type {!ValidateTagResult} */
+    let resultForBestAttempt = {
+      validationResult: new generated.ValidationResult(),
+      bestMatchTagSpec: null,
+      inlineStyleCssBytes: 0,
+    };
+    resultForBestAttempt.validationResult.status =
+        generated.ValidationResult.Status.UNKNOWN;
     for (const p of this.parsedReferencePoints_.iterate()) {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
@@ -1138,19 +1260,20 @@ class ReferencePointMatcher {
       const resultForAttempt = validateTagAgainstSpec(
           parsedTagSpec, /*bestMatchReferencePoint=*/null, context, tag);
       if (context.getRules().betterValidationResultThan(
-          resultForAttempt, resultForBestAttempt))
-      {resultForBestAttempt = resultForAttempt;}
-      if (resultForBestAttempt.status ===
+              resultForAttempt.validationResult,
+              resultForBestAttempt.validationResult)) {
+        resultForBestAttempt = resultForAttempt;
+      }
+      if (resultForBestAttempt.validationResult.status ===
           generated.ValidationResult.Status.PASS) {
-        return {
-          validationResult: resultForBestAttempt,
-          bestMatchTagSpec: parsedTagSpec,
-        };
+        resultForBestAttempt.bestMatchTagSpec = parsedTagSpec;
+        return resultForBestAttempt;
       }
     }
     // This check cannot fail as a successful validation above exits early.
     asserts.assert(
-        resultForBestAttempt.status === generated.ValidationResult.Status.FAIL);
+        resultForBestAttempt.validationResult.status ===
+        generated.ValidationResult.Status.FAIL);
     // Special case: only one reference point defined - emit a singular
     // error message *and* merge in the errors from the best attempt above.
     if (this.parsedReferencePoints_.size() === 1) {
@@ -1165,8 +1288,9 @@ class ReferencePointMatcher {
             this.parsedValidatorRules_.getReferencePointName(
                 this.parsedReferencePoints_.iterate()[0]),
           ],
-          this.parsedReferencePoints_.parentSpecUrl(), resultForBestAttempt);
-      return {validationResult: resultForBestAttempt, bestMatchTagSpec: null};
+          this.parsedReferencePoints_.parentSpecUrl(),
+          resultForBestAttempt.validationResult);
+      return resultForBestAttempt;
     }
     // General case: more than one reference point defined. Emit a plural
     // message with the acceptable reference points listed.
@@ -1189,6 +1313,7 @@ class ReferencePointMatcher {
     return {
       validationResult: resultForMultipleAttempts,
       bestMatchTagSpec: null,
+      inlineStyleCssBytes: 0,
     };
   }
 
@@ -1657,12 +1782,13 @@ class TagStack {
   }
 
   /**
-   * @return {boolean} true if this within <style amp-custom>. Else false.
+   * @return {boolean} true iff the parent tagspec indicates that these bytes
+   * should be counted against the document CSS byte limit.
    */
-  isStyleAmpCustomChild() {
-    return (this.parentStackEntry_().tagSpec !== null) &&
-        (this.parentStackEntry_().tagSpec.getSpec().namedId ===
-         generated.TagSpec.NamedId.STYLE_AMP_CUSTOM);
+  countDocCssBytes() {
+    const parentSpec = this.parentStackEntry_().tagSpec;
+    return (parentSpec !== null) && (parentSpec.getSpec().cdata !== null) &&
+        (parentSpec.getSpec().cdata.docCssBytes);
   }
 
   /**
@@ -1851,6 +1977,38 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
   }
 }
 
+/** @private */
+class InvalidDeclVisitor extends parse_css.RuleVisitor {
+  /**
+   * @param {!ParsedDocCssSpec} spec
+   * @param {!Context} context
+   * @param {!generated.ValidationResult} result
+   */
+  constructor(spec, context, result) {
+    super();
+    /** @type {!ParsedDocCssSpec} */
+    this.spec = spec;
+    /** @type {!Context} */
+    this.context = context;
+    /** @type {!generated.ValidationResult} */
+    this.result = result;
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    // Use the list that includes SVG declarations for style tags, since these
+    // rules can apply to inline SVG elements.
+    const declName = parse_css.stripVendorPrefix(declaration.name);
+    if (!this.spec.cssDeclarationSvgByName().hasOwnProperty(declName)) {
+      this.context.addError(
+          generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+          new LineCol(declaration.line, declaration.col),
+          ['style amp-custom', declaration.name], this.spec.spec().specUrl,
+          this.result);
+    }
+  }
+}
+
 /**
  * @typedef {{ atRuleSpec: !Object<string, parse_css.BlockType>,
  *             defaultSpec: !parse_css.BlockType }}
@@ -1963,13 +2121,15 @@ class CdataMatcher {
     }
     // } end oneof
 
+    const maybeDocCssSpec = context.matchingDocCssSpec();
+
     /** @type {number} */
     let adjustedCdataLength = byteLength(cdata);
-    if (!cdataSpec.urlBytesIncluded) {
+    if (maybeDocCssSpec !== null && !maybeDocCssSpec.spec().urlBytesIncluded) {
       adjustedCdataLength -= urlBytes;
     }
 
-    // Max CDATA Byte Length
+    // Max CDATA Byte Length, specific to this CDATA (not the document limit).
     if (cdataSpec.maxBytes !== -2 && adjustedCdataLength > cdataSpec.maxBytes) {
       context.addError(
           generated.ValidationError.Code.STYLESHEET_TOO_LONG,
@@ -1985,8 +2145,8 @@ class CdataMatcher {
     }
 
     // Record <style amp-custom> byte size
-    if (context.getTagStack().isStyleAmpCustomChild()) {
-      context.addStyleAmpCustomByteSize(adjustedCdataLength);
+    if (context.getTagStack().countDocCssBytes()) {
+      context.addStyleTagByteSize(adjustedCdataLength);
     }
 
     // Blacklisted CDATA Regular Expressions
@@ -2080,14 +2240,14 @@ class CdataMatcher {
     const stylesheet = parse_css.parseAStylesheet(
         tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
         cssErrors);
-    /** @type {number} */
-    let urlBytes = 0;
+
+    const maybeDocCssSpec = context.matchingDocCssSpec();
 
     // We extract the urls from the stylesheet. As a side-effect, this can
     // generate errors for url(…) functions with invalid parameters.
     /** @type {!Array<!parse_css.ParsedCssUrl>} */
     const parsedUrls = [];
-    parse_css.extractUrls(stylesheet, parsedUrls, cssErrors);
+    parse_css.extractUrlsFromStylesheet(stylesheet, parsedUrls, cssErrors);
     // Similarly we extract query types and features from @media rules.
     for (const atRuleSpec of cssSpec.atRuleSpec) {
       if (atRuleSpec.mediaQuerySpec !== null) {
@@ -2144,10 +2304,8 @@ class CdataMatcher {
       }
     }
 
-    const parsedFontUrlSpec = new ParsedUrlSpec(
-        /** @type{!generated.UrlSpec} */ (cssSpec.fontUrlSpec));
-    const parsedImageUrlSpec = new ParsedUrlSpec(
-        /** @type{!generated.UrlSpec} */ (cssSpec.imageUrlSpec));
+    /** @type {number} */
+    let urlBytes = 0;
     for (const url of parsedUrls) {
       // Some CSS specs can choose to not count URLs against the byte limit,
       // but data URLs are always counted (or in other words, they aren't
@@ -2155,15 +2313,28 @@ class CdataMatcher {
       if (!isDataUrl(url.utf8Url)) {
         urlBytes += byteLength(url.utf8Url);
       }
-      const adapter = new UrlErrorInStylesheetAdapter(url.line, url.col);
-      validateUrlAndProtocol(
-          ((url.atRuleScope === 'font-face') ? parsedFontUrlSpec :
-            parsedImageUrlSpec),
-          adapter, context, url.utf8Url, this.tagSpec_, validationResult);
+      if (maybeDocCssSpec !== null) {
+        const adapter = new UrlErrorInStylesheetAdapter(url.line, url.col);
+        validateUrlAndProtocol(
+            ((url.atRuleScope === 'font-face') ?
+                 maybeDocCssSpec.fontUrlSpec() :
+                 maybeDocCssSpec.imageUrlSpec()),
+            adapter, context, url.utf8Url, this.tagSpec_, validationResult);
+      }
     }
-    const visitor = new InvalidRuleVisitor(
+    // Validate the allowed CSS AT rules (eg: `@media`)
+    const invalidRuleVisitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
-    stylesheet.accept(visitor);
+    stylesheet.accept(invalidRuleVisitor);
+
+    // Validate the allowed CSS declarations (eg: `background-color`)
+    if (maybeDocCssSpec !== null &&
+        !maybeDocCssSpec.spec().allowAllDeclarationInStyleTag) {
+      const invalidDeclVisitor =
+          new InvalidDeclVisitor(maybeDocCssSpec, context, validationResult);
+      stylesheet.accept(invalidDeclVisitor);
+    }
+
     return urlBytes;
   }
 
@@ -2472,7 +2643,7 @@ class Context {
      * @type {number}
      * @private
      */
-    this.styleAmpCustomByteSize_ = 0;
+    this.styleTagByteSize_ = 0;
 
     /**
      * Size of all inline styles (style attribute) combined.
@@ -2700,6 +2871,7 @@ class Context {
     this.updateFromTagResult_(tagResult);
     this.recordScriptReleaseVersionFromTagResult_(
         encounteredTag, tagResult.validationResult);
+    this.addInlineStyleByteSize(tagResult.inlineStyleCssBytes);
   }
 
   /**
@@ -2814,8 +2986,8 @@ class Context {
    * Records how much of the document is used towards <style amp-custom>.
    * @param {number} byteSize
    */
-  addStyleAmpCustomByteSize(byteSize) {
-    this.styleAmpCustomByteSize_ += byteSize;
+  addStyleTagByteSize(byteSize) {
+    this.styleTagByteSize_ += byteSize;
   }
 
   /**
@@ -2830,8 +3002,8 @@ class Context {
    * Returns the size of <style amp-custom>.
    * @return {number}
    */
-  getStyleAmpCustomByteSize() {
-    return this.styleAmpCustomByteSize_;
+  getStyleTagByteSize() {
+    return this.styleTagByteSize_;
   }
 
   /**
@@ -2856,6 +3028,37 @@ class Context {
    */
   getTypeIdentifiers() {
     return this.typeIdentifiers_;
+  }
+
+  /**
+   * Returns true iff `spec` should be used for the type identifiers recorded in
+   * this context, as seen in the document so far. If called before type
+   * identifiers have been recorded, will always return false.
+   * @param {!ParsedDocCssSpec} spec
+   * @return {boolean}
+   */
+  isDocCssSpecValidForTypeIdentifiers(spec) {
+    return isUsedForTypeIdentifiers(
+        this.getTypeIdentifiers(), spec.enabledBy(), spec.disabledBy());
+  }
+
+  /**
+   * Returns the first (there should be at most one) DocCssSpec which matches
+   * both the html format and type identifiers recorded so far in this context.
+   * If called before identifiers have been recorded, it may return an incorrect
+   * selection.
+   * @return {?ParsedDocCssSpec}
+   */
+  matchingDocCssSpec() {
+    // The specs are usually already filtered by HTML format, so this loop
+    // should be very short, often 1:
+    for (const spec of this.rules_.getCss()) {
+      if (this.rules_.isDocCssSpecCorrectHtmlFormat_(spec.spec()) &&
+          this.isDocCssSpecValidForTypeIdentifiers(spec)) {
+        return spec;
+      }
+    }
+    return null;
   }
 
   /**
@@ -4355,6 +4558,171 @@ function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
  * Helper method for ValidateAttributes.
  * @param {!ParsedAttrSpec} parsedAttrSpec
  * @param {!Context} context
+ * @param {!generated.TagSpec} tagSpec
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!ValidateTagResult} result
+ */
+function validateAttrCss(
+    parsedAttrSpec, context, tagSpec, attrName, attrValue, result) {
+  /** @type {number} */
+  const attrByteLen = byteLength(attrValue);
+  // Track the number of CSS bytes. If this tagspec is selected as the best
+  // match, this count will be added to the overall document inline style byte
+  // count for determining if that byte count has been exceeded.
+  /** @type {number} */
+  result.inlineStyleCssBytes = attrByteLen;
+
+  /** @type {!Array<!tokenize_css.ErrorToken>} */
+  const cssErrors = [];
+  // The line/col we are passing in here is not the actual start point in the
+  // text for the attribute string. It's the start point for the tag. This means
+  // that any line/col values for tokens are also similarly offset incorrectly.
+  // For error messages, this means we just use the line/col of the tag instead
+  // of the token so as to minimize confusion. This could be improved further.
+  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
+  // offsets for use in CSS error messages.
+  /** @type {!Array<!tokenize_css.Token>} */
+  const tokenList = tokenize_css.tokenize(
+      attrValue, context.getLineCol().getLine(), context.getLineCol().getCol(),
+      cssErrors);
+
+  /** @type {!Array<!parse_css.Declaration>} */
+  const declarations = parse_css.parseInlineStyle(tokenList, cssErrors);
+
+  for (const errorToken of cssErrors) {
+    // Override the first parameter with the name of this style tag.
+    const {params} = errorToken;
+    // Override the first parameter with the name of this style tag.
+    params[0] = getTagSpecName(tagSpec);
+    context.addError(
+        errorToken.code, context.getLineCol(), params, /* url */ '',
+        result.validationResult);
+  }
+
+  // If there were errors parsing, exit from validating further.
+  if (cssErrors.length > 0) {
+    return;
+  }
+
+  /** @type {?ParsedDocCssSpec} */
+  const maybeSpec = context.matchingDocCssSpec();
+  if (maybeSpec) {
+    // Determine if we've exceeded the maximum bytes per inline style
+    // requirements.
+    if (maybeSpec.spec().maxBytesPerInlineStyle >= 0 &&
+        attrByteLen > maybeSpec.spec().maxBytesPerInlineStyle) {
+      if (maybeSpec.spec().maxBytesIsWarning) {
+        context.addWarning(
+            generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), /* params */
+            [
+              getTagSpecName(tagSpec), attrByteLen.toString(),
+              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+            ],
+            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+      } else {
+        context.addError(
+            generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), /* params */
+            [
+              getTagSpecName(tagSpec), attrByteLen.toString(),
+              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+            ],
+            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+      }
+    }
+
+    // Allowed declarations vary by context. SVG has its own set of CSS
+    // declarations not supported generally in HTML.
+    const cssDeclarationByName =
+        parsedAttrSpec.getSpec().valueDocSvgCss === true ?
+        maybeSpec.cssDeclarationSvgByName() :
+        maybeSpec.cssDeclarationByName();
+
+    // Loop over the declarations found in the document, verify that they are
+    // in the allowed list for this DocCssSpec, and have allowed values if
+    // relevant.
+    for (const declaration of declarations) {
+      const declarationName =
+          parse_css.stripVendorPrefix(declaration.name.toLowerCase());
+      const cssDeclaration = cssDeclarationByName[declarationName];
+      if (cssDeclaration === undefined) {
+        context.addError(
+            generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+            context.getLineCol(), /* params */
+            [declaration.name, attrName, getTagSpecName(tagSpec)],
+            context.getRules().getStylesSpecUrl(), result.validationResult);
+        // Don't emit additional errors for this declaration.
+        continue;
+      } else if (cssDeclaration.valueCasei.length > 0) {
+        let hasValidValue = false;
+        const firstIdent = declaration.firstIdent();
+        for (const value of cssDeclaration.valueCasei) {
+          if (firstIdent.toLowerCase() == value) {
+            hasValidValue = true;
+            break;
+          }
+        }
+        if (!hasValidValue) {
+          // Declaration value not allowed.
+          context.addError(
+              generated.ValidationError.Code
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.getLineCol(), /* params */
+              [getTagSpecName(tagSpec), declaration.name, firstIdent],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+        }
+      }
+      if (!maybeSpec.spec().allowImportant) {
+        if (declaration.important)
+          // TODO(gregable): Use a more specific error message for `!important`
+          // errors.
+          context.addError(
+              generated.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getLineCol(),
+              /* params */[attrName, getTagSpecName(tagSpec), 'CSS !important'],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+      }
+      /** @type {!Array<!tokenize_css.ErrorToken>} */
+      let urlErrors = [];
+      /** @type {!Array<!parse_css.ParsedCssUrl>} */
+      let parsedUrls = [];
+      parse_css.extractUrlsFromDeclaration(declaration, parsedUrls, urlErrors);
+      for (const errorToken of urlErrors) {
+        // Override the first parameter with the name of the tag.
+        /** @type {!Array<string>} */
+        let params = errorToken.params;
+        params[0] = getTagSpecName(tagSpec);
+        context.addError(
+            errorToken.code, context.getLineCol(), params, /* spec_url*/ '',
+            result.validationResult);
+      }
+      if (urlErrors.length > 0) continue;
+      for (const url of parsedUrls) {
+        // Validate that the URL itself matches the spec.
+        // Only image specs apply to inline styles. Fonts are only defined in
+        // @font-face rules which we require a full stylesheet to define.
+        if (maybeSpec.spec().imageUrlSpec !== null) {
+          const adapter = new UrlErrorInStylesheetAdapter(
+              context.getLineCol().getLine(), context.getLineCol().getCol());
+          validateUrlAndProtocol(
+              maybeSpec.imageUrlSpec(), adapter, context, url.utf8Url, tagSpec,
+              result.validationResult);
+        }
+        // Subtract off URL lengths from doc-level inline style bytes, if
+        // specified by the DocCssSpec.
+        if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
+          result.inlineStyleCssBytes -= byteLength(url.utf8Url);
+      }
+    }
+  }
+}
+
+/**
+ * Helper method for ValidateAttributes.
+ * @param {!ParsedAttrSpec} parsedAttrSpec
+ * @param {!Context} context
  * @param {string} tagSpecName
  * @param {string} attrName
  * @param {string} attrValue
@@ -4458,13 +4826,14 @@ function ShouldSuppressDevModeErrors(encounteredTag, context) {
  * @param {?ParsedTagSpec} bestMatchReferencePoint
  * @param {!Context} context
  * @param {!parserInterface.ParsedHtmlTag} encounteredTag
- * @param {!generated.ValidationResult} result
+ * @param {!ValidateTagResult} result
  */
 function validateAttributes(
   parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result) {
   const spec = parsedTagSpec.getSpec();
   if (spec.ampLayout !== null) {
-    validateLayout(parsedTagSpec, context, encounteredTag, result);
+    validateLayout(
+        parsedTagSpec, context, encounteredTag, result.validationResult);
   }
   // For extension TagSpecs, we track if we've validated a src attribute.
   // We must have done so for the extension to be valid.
@@ -4505,7 +4874,7 @@ function validateAttributes(
     if (attr.name == 'src' &&
         (IsExtensionScript(encounteredTag) ||
          IsAmpRuntimeScript(encounteredTag))) {
-      validateScriptSrcAttr(attr, spec, context, result);
+      validateScriptSrcAttr(attr, spec, context, result.validationResult);
     }
 
     if (!(attr.name in attrsByName)) {
@@ -4529,25 +4898,32 @@ function validateAttributes(
       // method.  For 'src', we also keep track whether we validated it this
       // way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
-          validateAttributeInExtension(spec, context, attr, result)) {
+          validateAttributeInExtension(
+              spec, context, attr, result.validationResult)) {
         if (attr.name === 'src') {seenExtensionSrcAttr = true;}
         continue;
       }
-      validateAttrNotFoundInSpec(parsedTagSpec, context, attr.name, result);
-      if (result.status === generated.ValidationResult.Status.FAIL) {
+      validateAttrNotFoundInSpec(
+          parsedTagSpec, context, attr.name, result.validationResult);
+      if (result.validationResult.status ===
+          generated.ValidationResult.Status.FAIL) {
         continue;
       }
       if (hasTemplateAncestor) {
-        validateAttrValueBelowTemplateTag(parsedTagSpec, context, attr, result);
-        if (result.status === generated.ValidationResult.Status.FAIL) {
+        validateAttrValueBelowTemplateTag(
+            parsedTagSpec, context, attr, result.validationResult);
+        if (result.validationResult.status ===
+            generated.ValidationResult.Status.FAIL) {
           continue;
         }
       }
       continue;
     }
     if (hasTemplateAncestor) {
-      validateAttrValueBelowTemplateTag(parsedTagSpec, context, attr, result);
-      if (result.status === generated.ValidationResult.Status.FAIL) {
+      validateAttrValueBelowTemplateTag(
+          parsedTagSpec, context, attr, result.validationResult);
+      if (result.validationResult.status ===
+          generated.ValidationResult.Status.FAIL) {
         continue;
       }
     }
@@ -4564,7 +4940,7 @@ function validateAttributes(
       context.addError(
           generated.ValidationError.Code.DISALLOWED_ATTR, context.getLineCol(),
           /* params */[attr.name, getTagSpecName(spec)], getTagSpecUrl(spec),
-          result);
+          result.validationResult);
       continue;
     }
     const attrSpec = parsedAttrSpec.getSpec();
@@ -4573,21 +4949,26 @@ function validateAttributes(
           generated.ValidationError.Code.DEPRECATED_ATTR, context.getLineCol(),
           /* params */
           [attr.name, getTagSpecName(spec), attrSpec.deprecation],
-          attrSpec.deprecationUrl, result);
+          attrSpec.deprecationUrl, result.validationResult);
       // Deprecation is only a warning, so we don't return.
     }
     if (attrSpec.requiresExtension.length > 0) {
-      validateAttrRequiredExtensions(parsedAttrSpec, context, result);
+      validateAttrRequiredExtensions(
+          parsedAttrSpec, context, result.validationResult);
     }
-    if (attrSpec.cssDeclaration.length > 0) {
+    if (attrSpec.valueDocCss || attrSpec.valueDocSvgCss) {
+      validateAttrCss(
+          parsedAttrSpec, context, spec, attr.name, attr.value, result);
+    } else if (attrSpec.cssDeclaration.length > 0) {
       validateAttrDeclaration(
           parsedAttrSpec, context, getTagSpecName(spec), attr.name, attr.value,
-          result);
+          result.validationResult);
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attr.value)) {
       validateNonTemplateAttrValueAgainstSpec(
-          parsedAttrSpec, context, attr, spec, result);
-      if (result.status === generated.ValidationResult.Status.FAIL) {
+          parsedAttrSpec, context, attr, spec, result.validationResult);
+      if (result.validationResult.status ===
+          generated.ValidationResult.Status.FAIL) {
         continue;
       }
     }
@@ -4599,7 +4980,7 @@ function validateAttributes(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
             context.getLineCol(),
             /* params */[attr.name, getTagSpecName(spec), attr.value],
-            getTagSpecUrl(spec), result);
+            getTagSpecUrl(spec), result.validationResult);
         continue;
       }
     }
@@ -4612,7 +4993,7 @@ function validateAttributes(
           generated.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
           context.getLineCol(),
           /* params */[context.firstSeenUrlTagName()], getTagSpecUrl(spec),
-          result);
+          result.validationResult);
       continue;
     }
     const {mandatoryOneof} = attrSpec;
@@ -4629,7 +5010,7 @@ function validateAttributes(
               getTagSpecName(spec),
               context.getRules().getInternedString(mandatoryOneof),
             ],
-            getTagSpecUrl(spec), result);
+            getTagSpecUrl(spec), result.validationResult);
         continue;
       }
       mandatoryOneofsSeen.push(mandatoryOneof);
@@ -4652,7 +5033,7 @@ function validateAttributes(
               attr.name,
               getTagSpecName(spec),
             ],
-            getTagSpecUrl(spec), result);
+            getTagSpecUrl(spec), result.validationResult);
         continue;
       }
     }
@@ -4673,7 +5054,8 @@ function validateAttributes(
       triggersToCheck.push(attrSpec);
     }
   }
-  if (result.status === generated.ValidationResult.Status.FAIL) {
+  if (result.validationResult.status ===
+      generated.ValidationResult.Status.FAIL) {
     return;
   }
   // The "exactly 1" part of mandatory_oneof: If none of the
@@ -4688,7 +5070,7 @@ function validateAttributes(
             getTagSpecName(spec),
             context.getRules().getInternedString(mandatoryOneof),
           ],
-          getTagSpecUrl(spec), result);
+          getTagSpecUrl(spec), result.validationResult);
     }
   }
   // The "at least 1" part of mandatory_anyof: If none of the
@@ -4703,7 +5085,7 @@ function validateAttributes(
             getTagSpecName(spec),
             context.getRules().getInternedString(mandatoryAnyof),
           ],
-          getTagSpecUrl(spec), result);
+          getTagSpecUrl(spec), result.validationResult);
     }
   }
   for (const attrSpec of triggersToCheck) {
@@ -4723,7 +5105,7 @@ function validateAttributes(
               getTagSpecName(spec),
               attrSpec.name,
             ],
-            getTagSpecUrl(spec), result);
+            getTagSpecUrl(spec), result.validationResult);
       }
     }
   }
@@ -4742,14 +5124,15 @@ function validateAttributes(
         generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
         /* params */[missingAttr, getTagSpecName(spec)], getTagSpecUrl(spec),
-        result);
+        result.validationResult);
   }
   // Extension specs mandate the 'src' attribute.
   if (spec.extensionSpec !== null && !seenExtensionSrcAttr) {
     context.addError(
         generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
-        /* params */['src', getTagSpecName(spec)], getTagSpecUrl(spec), result);
+        /* params */['src', getTagSpecName(spec)], getTagSpecUrl(spec),
+        result.validationResult);
   }
 }
 
@@ -4883,59 +5266,71 @@ class TagSpecDispatch {
 }
 
 /**
+ *
  * Validates the provided |tagName| with respect to a single tag
  * specification.
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {?ParsedTagSpec} bestMatchReferencePoint
  * @param {!Context} context
  * @param {!parserInterface.ParsedHtmlTag} encounteredTag
- * @return {!generated.ValidationResult}
+ * @return {!ValidateTagResult}
  */
 function validateTagAgainstSpec(
   parsedTagSpec, bestMatchReferencePoint, context, encounteredTag) {
-  const resultForAttempt = new generated.ValidationResult();
-  resultForAttempt.status = generated.ValidationResult.Status.PASS;
-  validateParentTag(parsedTagSpec, context, resultForAttempt);
-  validateAncestorTags(parsedTagSpec, context, resultForAttempt);
+  /** @type {!ValidateTagResult} */
+  const attempt = {
+    validationResult: new generated.ValidationResult(),
+    bestMatchTagSpec: null,
+    inlineStyleCssBytes: 0,
+  };
+  attempt.validationResult.status = generated.ValidationResult.Status.PASS;
+  validateParentTag(parsedTagSpec, context, attempt.validationResult);
+  validateAncestorTags(parsedTagSpec, context, attempt.validationResult);
   // Some parent tag specs also define allowed child tag names for the first
   // child or all children. Validate that we aren't violating any of those
   // rules either.
   context.getTagStack().matchChildTagName(
-      encounteredTag, context, resultForAttempt);
+      encounteredTag, context, attempt.validationResult);
   // Only validate attributes if we haven't yet found any errors. The
   // Parent/Ancestor errors are informative without adding additional errors
   // about attributes.
-  if (resultForAttempt.status === generated.ValidationResult.Status.PASS) {
+  if (attempt.validationResult.status ===
+      generated.ValidationResult.Status.PASS) {
     validateAttributes(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
-        resultForAttempt);
+        attempt);
   }
   // Only validate that this is a valid descendant if it's not already invalid.
-  if (resultForAttempt.status === generated.ValidationResult.Status.PASS) {
+  if (attempt.validationResult.status ===
+      generated.ValidationResult.Status.PASS) {
     validateDescendantTags(
-        encounteredTag, parsedTagSpec, context, resultForAttempt);
+        encounteredTag, parsedTagSpec, context, attempt.validationResult);
   }
-  validateNoSiblingsAllowedTags(parsedTagSpec, context, resultForAttempt);
-  validateLastChildTags(context, resultForAttempt);
+  validateNoSiblingsAllowedTags(
+      parsedTagSpec, context, attempt.validationResult);
+  validateLastChildTags(context, attempt.validationResult);
   // If we haven't reached the body element yet, we may not have seen the
   // necessary extension. That case is handled elsewhere.
   if (context.getTagStack().hasAncestor('BODY')) {
-    validateRequiredExtensions(parsedTagSpec, context, resultForAttempt);
+    validateRequiredExtensions(
+        parsedTagSpec, context, attempt.validationResult);
   }
   // Only validate uniqueness if we haven't yet found any errors, as it's
   // likely that this is not the correct tagspec if we have.
-  if (resultForAttempt.status === generated.ValidationResult.Status.PASS) {
-    validateUniqueness(parsedTagSpec, context, resultForAttempt);
+  if (attempt.validationResult.status ===
+      generated.ValidationResult.Status.PASS) {
+    validateUniqueness(parsedTagSpec, context, attempt.validationResult);
   }
 
   // Append some warnings, only if no errors.
-  if (resultForAttempt.status === generated.ValidationResult.Status.PASS) {
+  if (attempt.validationResult.status ===
+      generated.ValidationResult.Status.PASS) {
     const tagSpec = parsedTagSpec.getSpec();
     if (tagSpec.deprecation !== null) {
       context.addWarning(
           generated.ValidationError.Code.DEPRECATED_TAG, context.getLineCol(),
           /* params */[getTagSpecName(tagSpec), tagSpec.deprecation],
-          tagSpec.deprecationUrl, resultForAttempt);
+          tagSpec.deprecationUrl, attempt.validationResult);
     }
     if (tagSpec.uniqueWarning &&
         context.getTagspecsValidated().hasOwnProperty(parsedTagSpec.id())) {
@@ -4943,10 +5338,10 @@ function validateTagAgainstSpec(
           generated.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
           context.getLineCol(),
           /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec),
-          resultForAttempt);
+          attempt.validationResult);
     }
   }
-  return resultForAttempt;
+  return attempt;
 }
 
 /**
@@ -4992,7 +5387,11 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_TAG, context.getLineCol(),
         /* params */[encounteredTag.lowerName()], specUrl, result);
-    return {validationResult: result, bestMatchTagSpec: null};
+    return {
+      validationResult: result,
+      bestMatchTagSpec: null,
+      inlineStyleCssBytes: 0
+    };
   }
 
   // At this point, we have dispatch keys, tagspecs, or both.
@@ -5013,11 +5412,13 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           attr.value.toLowerCase(), context.getTagStack().parentTagName());
-      let ret = {
+      let bestAttempt = {
         validationResult: new generated.ValidationResult(),
-        bestMatchTagSpec: null
+        bestMatchTagSpec: null,
+        inlineStyleCssBytes: 0,
       };
-      ret.validationResult.status = generated.ValidationResult.Status.UNKNOWN;
+      bestAttempt.validationResult.status =
+          generated.ValidationResult.Status.UNKNOWN;
       for (const tagSpecId of tagSpecIds) {
         const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
         // Skip TagSpecs that aren't used for these type identifiers.
@@ -5025,22 +5426,22 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
             context.getTypeIdentifiers())) {
           continue;
         }
-        let resultForAttempt = validateTagAgainstSpec(
+        let attempt = validateTagAgainstSpec(
             parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
         if (context.getRules().betterValidationResultThan(
-                resultForAttempt, ret.validationResult)) {
-          ret.bestMatchTagSpec = parsedTagSpec;
-          ret.validationResult = resultForAttempt;
+                attempt.validationResult, bestAttempt.validationResult)) {
+          bestAttempt = attempt;
+          bestAttempt.bestMatchTagSpec = parsedTagSpec;
           // Exit early on success
-          if (ret.validationResult.status ===
+          if (bestAttempt.validationResult.status ===
               generated.ValidationResult.Status.PASS) {
-            return ret;
+            return bestAttempt;
           }
         }
       }
-      if (ret.validationResult.status !==
+      if (bestAttempt.validationResult.status !==
           generated.ValidationResult.Status.UNKNOWN) {
-        return ret;
+        return bestAttempt;
       }
     }
   }
@@ -5063,37 +5464,39 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
           /* params */[encounteredTag.lowerName()],
           /* specUrl */ '', result);
     }
-    return {validationResult: result, bestMatchTagSpec: null};
+    return {
+      validationResult: result,
+      bestMatchTagSpec: null,
+      inlineStyleCssBytes: 0
+    };
   }
   // Validate against all remaining tagspecs. Each tagspec will produce a
   // different set of errors. Even if none of them match, we only want to
   // return errors from a single tagspec, not all of them. We keep around
   // the 'best' attempt until we have found a matching TagSpec or have
   // tried them all.
-  let resultForBestAttempt = new generated.ValidationResult();
-  resultForBestAttempt.status = generated.ValidationResult.Status.UNKNOWN;
-  let bestMatchTagSpec = null;
+  let bestAttempt = {
+    validationResult: new generated.ValidationResult(),
+    bestMatchTagSpec: null,
+    inlineStyleCssBytes: 0,
+  };
+  bestAttempt.validationResult.status =
+      generated.ValidationResult.Status.UNKNOWN;
   for (const parsedTagSpec of filteredTagSpecs) {
-    const resultForAttempt = validateTagAgainstSpec(
+    const attempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
     if (context.getRules().betterValidationResultThan(
-        resultForAttempt, resultForBestAttempt)) {
-      resultForBestAttempt = resultForAttempt;
-      bestMatchTagSpec = parsedTagSpec;
+            attempt.validationResult, bestAttempt.validationResult)) {
+      bestAttempt = attempt;
+      bestAttempt.bestMatchTagSpec = parsedTagSpec;
       // Exit early
-      if (resultForBestAttempt.status ===
+      if (bestAttempt.validationResult.status ===
           generated.ValidationResult.Status.PASS) {
-        return {
-          bestMatchTagSpec,
-          validationResult: resultForBestAttempt,
-        };
+        return bestAttempt;
       }
     }
   }
-  return {
-    bestMatchTagSpec,
-    validationResult: resultForBestAttempt,
-  };
+  return bestAttempt;
 }
 
 /**
@@ -5200,6 +5603,8 @@ class ParsedValidatorRules {
     this.expandExtensionSpec_();
 
     /**
+     * Returns true if `tagSpec` is usable for the HTML format these rules are
+     * built for.
      * @type {function(!generated.TagSpec) : boolean}
      * @private
      */
@@ -5211,14 +5616,16 @@ class ParsedValidatorRules {
     };
 
     /**
-     * @type {function(!generated.CssLengthSpec) : boolean}
+     * Returns true if `spec` is usable for the HTML format these rules are
+     * built for.
+     * @type {function(!generated.DocCssSpec) : boolean}
      * @private
      */
-    this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
+    this.isDocCssSpecCorrectHtmlFormat_ = function(docCssSpec) {
       const castedHtmlFormat =
           /** @type {!generated.HtmlFormat.Code} */ (
               /** @type {*} */ (htmlFormat));
-      return cssLengthSpec.htmlFormat == castedHtmlFormat;
+      return docCssSpec.htmlFormat == castedHtmlFormat;
     };
 
     /**
@@ -5226,6 +5633,16 @@ class ParsedValidatorRules {
      * @private
      */
     this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_);
+
+    /**
+     * @type {!Array<!ParsedDocCssSpec>}
+     * @private
+     */
+    this.parsedCss_ = [];
+    for (const cssSpec of this.rules_.css) {
+      this.parsedCss_.push(
+          new ParsedDocCssSpec(cssSpec, this.rules_.declarationList));
+    }
 
     /** @private @type {!Array<boolean>} */
     this.tagSpecIdsToTrack_ = [];
@@ -5754,18 +6171,28 @@ class ParsedValidatorRules {
    */
   maybeEmitCssLengthSpecErrors(context, validationResult) {
     const bytesUsed =
-        context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
+        context.getInlineStyleByteSize() + context.getStyleTagByteSize();
 
-    for (const cssLengthSpec of context.getRules().getCssLengthSpec()) {
-      if (!this.isCssLengthSpecCorrectHtmlFormat_(cssLengthSpec)) {
-        continue;
-      }
-      if (cssLengthSpec.maxBytes !== -2 && bytesUsed > cssLengthSpec.maxBytes) {
-        context.addError(
-            generated.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
-            context.getLineCol(), /* params */
-            [bytesUsed.toString(), cssLengthSpec.maxBytes.toString()],
-            /* specUrl */ cssLengthSpec.specUrl, validationResult);
+    const parsedCssSpec = context.matchingDocCssSpec();
+    if (parsedCssSpec !== null) {
+      /** @type {!generated.DocCssSpec} */
+      const cssSpec = parsedCssSpec.spec();
+      if (cssSpec.maxBytes !== -2 && bytesUsed > cssSpec.maxBytes) {
+        if (cssSpec.maxBytesIsWarning) {
+          context.addWarning(
+              generated.ValidationError.Code
+                  .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+              context.getLineCol(), /* params */
+              [bytesUsed.toString(), cssSpec.maxBytes.toString()],
+              cssSpec.maxBytesSpecUrl, validationResult);
+        } else {
+          context.addError(
+              generated.ValidationError.Code
+                  .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+              context.getLineCol(), /* params */
+              [bytesUsed.toString(), cssSpec.maxBytes.toString()],
+              cssSpec.maxBytesSpecUrl, validationResult);
+        }
       }
     }
   }
@@ -5843,10 +6270,10 @@ class ParsedValidatorRules {
   }
 
   /**
-   * @return {!Array<!generated.CssLengthSpec>}
+   * @return {!Array<!ParsedDocCssSpec>}
    */
-  getCssLengthSpec() {
-    return this.rules_.cssLengthSpec;
+  getCss() {
+    return this.parsedCss_;
   }
 
   /**
@@ -6066,33 +6493,12 @@ const ValidationHandler =
       this.emitMissingExtensionErrors();
     }
 
-    const attrsByKey = encounteredTag.attrsByKey();
-    const styleAttr = attrsByKey['style'];
-    if (styleAttr !== undefined) {
-      const styleLen = byteLength(styleAttr);
-      this.context_.addInlineStyleByteSize(styleLen);
-      for (const cssLengthSpec of this.context_.getRules().getCssLengthSpec()) {
-        if (cssLengthSpec.maxBytesPerInlineStyle !== -1 &&
-            styleLen > cssLengthSpec.maxBytesPerInlineStyle) {
-          this.context_.addError(
-              generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
-              this.context_.getLineCol(),
-              /* params */
-              [
-                encounteredTag.lowerName(), styleLen.toString(),
-                cssLengthSpec.maxBytesPerInlineStyle.toString()
-              ],
-              cssLengthSpec.specUrl, this.validationResult_);
-          encounteredTag.dedupeAttrs();
-        }
-      }
-    }
-
     /** @type {ValidateTagResult} */
     let resultForReferencePoint = {
       bestMatchTagSpec: null,
       validationResult: new generated.ValidationResult(),
       devModeSuppress: false,
+      inlineStyleCssBytes: 0,
     };
     resultForReferencePoint.validationResult.status =
         generated.ValidationResult.Status.UNKNOWN;
