@@ -105,7 +105,9 @@ const ParsedHtmlTag = class {
       attr.value = attrs[i + 1];
       // Our html parser repeats the key as the value if there is no value. We
       // replace the value with an empty string instead in this case.
-      if (attr.name === attr.value) {attr.value = '';}
+      if (attr.name === attr.value) {
+        attr.value = '';
+      }
       this.attrs_.push(attr);
     }
     // Sort the attribute array by (lower case) name.
