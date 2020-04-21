@@ -46,7 +46,7 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
  */
 const getTemplate = (element) => {
   return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset">
+    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
         <span class="i-amphtml-story-share-menu-close-button" role="button">
           &times;
@@ -230,6 +230,7 @@ export class ShareMenu {
     if (!this.isSystemShareSupported_) {
       this.vsync_.mutate(() => {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+        this.element_.setAttribute('aria-hidden', !isOpen);
       });
     }
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
