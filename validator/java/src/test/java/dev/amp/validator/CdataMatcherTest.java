@@ -236,7 +236,6 @@ public class CdataMatcherTest {
         cDataBuilder.setMaxBytes(6);
         cDataBuilder.setCssSpec(ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
-//                        .setName("font-face").setType(CssSpecUtils.BlockType.PARSE_AS_ERROR).build()).build());
                   .setName("font-face").build()).build());
 
         tagSpecBuilder.setCdata(cDataBuilder.build());
@@ -520,7 +519,6 @@ public class CdataMatcherTest {
         cDataBuilder.setCssSpec(ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("font-face").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder()
-//                                .build()).setType(CssSpecUtils.BlockType.PARSE_AS_ERROR).build()).build());
                                 .build()).build()).build());
 
                     tagSpecBuilder.setCdata(cDataBuilder.build());
@@ -585,7 +583,6 @@ public class CdataMatcherTest {
         final ValidatorProtos.CssSpec cssSpec = ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("media").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder().setIssuesAsError(true)
-//                                .build()).setType(CssSpecUtils.BlockType.PARSE_AS_ERROR).build())
                                 .build()).build())
                 .setValidateAmp4Ads(true).setValidateKeyframes(true).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
@@ -664,7 +661,6 @@ public class CdataMatcherTest {
         final ValidatorProtos.CssSpec cssSpec = ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("media").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder().setIssuesAsError(false)
-//                                .build()).setType(CssSpecUtils.BlockType.PARSE_AS_ERROR).build())
                     .build()).build())
                 .setValidateAmp4Ads(false).setValidateKeyframes(false).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
