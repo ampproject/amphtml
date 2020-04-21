@@ -45,7 +45,7 @@ export function shouldLoadPolyfill(win) {
  */
 export function scheduleUpgradeIfNeeded(win) {
   if (shouldLoadPolyfill(win)) {
-    Services.extensionsFor(win).preloadExtension(
+    Services.extensionsFor(win)./*OK*/ preloadExtension(
       'amp-intersection-observer-polyfill'
     );
   }
