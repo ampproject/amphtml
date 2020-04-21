@@ -853,11 +853,11 @@ class CssContextImpl {
     /** @const @private */
     this.win_ = win;
 
-    /** @const @private {!Node} */
+    /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
 
     const {scope = rootNode} = options;
-    /** @const @private {!Document|!ShadowRoot} */
+    /** @const @private {!Node} */
     this.scope_ = scope;
 
     /** @const @private */
