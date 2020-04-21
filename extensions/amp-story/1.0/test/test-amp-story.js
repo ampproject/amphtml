@@ -1836,7 +1836,7 @@ describes.realWin(
       });
 
       it('should set playable to false if page does not have playable', async () => {
-        await createStoryWithPages(1, ['cover']);
+        await createStoryWithPages(1, ['cover'], false);
 
         await story.layoutCallback();
         await story.activePage_.element

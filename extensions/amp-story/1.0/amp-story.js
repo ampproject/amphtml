@@ -2587,9 +2587,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updatePausedIcon_() {
-    const containsPlayableElement = !!this.element.scopedQuerySelectorAll(
-      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
-    );
+    const containsPlayableElement =
+      scopedQuerySelectorAll(
+        this.element,
+        'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+      ).length > 0;
 
     const storyHasBackgroundAudio = this.element.hasAttribute(
       'background-audio'
