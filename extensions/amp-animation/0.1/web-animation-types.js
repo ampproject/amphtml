@@ -151,7 +151,7 @@ export let WebAnimationSubtargetDef;
 
 /**
  * @typedef {{
- *   scope: (!Node|undefined),
+ *   scope: (!Element|undefined),
  * }}
  */
 export let WebAnimationBuilderOptionsDef;

@@ -856,8 +856,8 @@ class CssContextImpl {
     /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
 
-    const {scope = rootNode} = options;
-    /** @const @private {!Node} */
+    const {scope = null} = options;
+    /** @const @private {?Element} */
     this.scope_ = scope;
 
     /** @const @private */
@@ -1281,10 +1281,10 @@ class CssContextImpl {
    * @private
    */
   scopedQuerySelector_(selector) {
-    if (this.canUseScopedQuerySelector_()) {
+    if (this.scope_) {
       return /*OK*/ scopedQuerySelector(this.scope_, selector);
     }
-    return this.scope_./*OK*/ querySelector(selector);
+    return this.rootNode_./*OK*/ querySelector(selector);
   }
 
   /**
@@ -1293,20 +1293,9 @@ class CssContextImpl {
    * @private
    */
   scopedQuerySelectorAll_(selector) {
-    if (this.canUseScopedQuerySelector_()) {
+    if (this.scope_) {
       return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
     }
-    return this.scope_./*OK*/ querySelectorAll(selector);
-  }
-
-  /**
-   * On non-element nodes scopedQuerySelectionFallback will try to
-   * add a className, which is not possible. We don't need to scope these,
-   * since they're either a Document or a ShadowRoot.
-   * @return {boolean}
-   * @private
-   */
-  canUseScopedQuerySelector_() {
-    return this.scope_.nodeType === /* ELEMENT */ 1;
+    return this.rootNode_./*OK*/ querySelectorAll(selector);
   }
 }
