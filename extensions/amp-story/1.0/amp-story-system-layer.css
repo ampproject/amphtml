@@ -65,6 +65,7 @@
   width: 48px !important;
   cursor: pointer !important;
   border-radius: 50% !important;
+  border-width: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
   pointer-events: auto !important;

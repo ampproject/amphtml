@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../src/amp-events';
+import {createCustomEvent} from '../../src/event-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
@@ -57,7 +58,9 @@ describe
           12
         );
         fixture.iframe.height = 2000;
-        fixture.win.dispatchEvent(new fixture.win.Event('resize'));
+        fixture.win.dispatchEvent(
+          createCustomEvent(fixture.win, 'resize', null)
+        );
         return fixture.awaitEvent(AmpEvents.LOAD_START, 13).then(function () {
           expect(
             fixture.doc.querySelectorAll('amp-img img[src]')
@@ -65,7 +68,7 @@ describe
         });
       });
       fixture.iframe.height = 1500;
-      fixture.win.dispatchEvent(new fixture.win.Event('resize'));
+      fixture.win.dispatchEvent(createCustomEvent(fixture.win, 'resize', null));
       return p;
     });
 
@@ -87,7 +90,9 @@ describe
           expect(smallScreen.offsetHeight).to.not.equal(0);
           expect(largeScreen.offsetHeight).to.equal(0);
           fixture.iframe.width = 600;
-          fixture.win.dispatchEvent(new fixture.win.Event('resize'));
+          fixture.win.dispatchEvent(
+            createCustomEvent(fixture.win, 'resize', null)
+          );
           return fixture
             .awaitEvent(AmpEvents.LOAD_START, 4)
             .then(() => fixture.awaitEvent(AmpEvents.UNLOAD, 1))

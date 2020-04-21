@@ -1763,18 +1763,12 @@ class TagStack {
  * @return {boolean}
  */
 function isAtRuleValid(cssSpec, atRuleName) {
-  let defaultType = '';
-
   for (const atRuleSpec of cssSpec.atRuleSpec) {
-    if (atRuleSpec.name === '$DEFAULT') {
-      defaultType = atRuleSpec.type;
-    } else if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName)) {
-      return atRuleSpec.type !== generated.AtRuleSpec.BlockType.PARSE_AS_ERROR;
+    if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName)) {
+      return true;
     }
   }
-
-  asserts.assert(defaultType !== '');
-  return defaultType !== generated.AtRuleSpec.BlockType.PARSE_AS_ERROR;
+  return false;
 }
 
 /**
@@ -1864,41 +1858,24 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
 let CssParsingConfig;
 
 /**
- * Generates a CssParsingConfig from a CssSpec.
- * @param {!generated.CssSpec} cssSpec
+ * Generates a CssParsingConfig.
  * @return {!CssParsingConfig}
  */
-function computeCssParsingConfig(cssSpec) {
+function GenCssParsingConfig() {
   /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = Object.create(null);
-  for (const atRuleSpec of cssSpec.atRuleSpec) {
-    if (atRuleSpec.type === generated.AtRuleSpec.BlockType.PARSE_AS_ERROR ||
-        atRuleSpec.type === generated.AtRuleSpec.BlockType.PARSE_AS_IGNORE) {
-      ampAtRuleParsingSpec[atRuleSpec.name] =
-          parse_css.BlockType.PARSE_AS_IGNORE;
-    } else if (
-        atRuleSpec.type === generated.AtRuleSpec.BlockType.PARSE_AS_RULES) {
-      ampAtRuleParsingSpec[atRuleSpec.name] =
-          parse_css.BlockType.PARSE_AS_RULES;
-    } else if (
-        atRuleSpec.type ===
-        generated.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS) {
-      ampAtRuleParsingSpec[atRuleSpec.name] =
-          parse_css.BlockType.PARSE_AS_DECLARATIONS;
-    } else {
-      asserts.fail('Unrecognized atRuleSpec type: ' + atRuleSpec.type);
-    }
-  }
+  ampAtRuleParsingSpec['font-face'] = parse_css.BlockType.PARSE_AS_DECLARATIONS;
+  ampAtRuleParsingSpec['keyframes'] = parse_css.BlockType.PARSE_AS_RULES;
+  ampAtRuleParsingSpec['media'] = parse_css.BlockType.PARSE_AS_RULES;
+  ampAtRuleParsingSpec['page'] = parse_css.BlockType.PARSE_AS_DECLARATIONS;
+  ampAtRuleParsingSpec['supports'] = parse_css.BlockType.PARSE_AS_RULES;
   const config = {
     atRuleSpec: ampAtRuleParsingSpec,
     defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE,
   };
-  if (cssSpec.atRuleSpec.length > 0) {
-    config.defaultSpec =
-        /** @type {!parse_css.BlockType} */ (ampAtRuleParsingSpec['$DEFAULT']);
-  }
   return config;
 }
+exports.GenCssParsingConfig = GenCssParsingConfig;
 
 /**
  * CdataMatcher maintains a constraint to check which an opening tag
@@ -2098,7 +2075,7 @@ class CdataMatcher {
         cdata, this.getLineCol().getLine(), this.getLineCol().getCol(),
         cssErrors);
     /** @type {!CssParsingConfig} */
-    const cssParsingConfig = computeCssParsingConfig(cssSpec);
+    const cssParsingConfig = GenCssParsingConfig();
     /** @type {!parse_css.Stylesheet} */
     const stylesheet = parse_css.parseAStylesheet(
         tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
@@ -4388,6 +4365,13 @@ function validateAttrDeclaration(
   validationResult) {
   /** @type {!Array<!tokenize_css.ErrorToken>} */
   const cssErrors = [];
+  // The line/col we are passing in here is not the actual start point in the
+  // text for the attribute string. It's the start point for the tag. This means
+  // that any line/col values for tokens are also similarly offset incorrectly.
+  // For error messages, this means we just use the line/col of the tag instead
+  // of the token so as to minimize confusion. This could be improved further.
+  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
+  // offsets for use in CSS error messages.
   /** @type {!Array<!tokenize_css.Token>} */
   const tokenList = tokenize_css.tokenize(
       attrValue, context.getLineCol().getLine(), context.getLineCol().getCol(),
@@ -4402,8 +4386,8 @@ function validateAttrDeclaration(
     // Override the first parameter with the name of this style tag.
     params[0] = tagSpecName;
     context.addError(
-        errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
-        /* url */ '', validationResult);
+        errorToken.code, context.getLineCol(), params, /* url */ '',
+        validationResult);
   }
 
   // If there were errors parsing, exit from validating further.
@@ -5769,11 +5753,6 @@ class ParsedValidatorRules {
    * @param {!generated.ValidationResult} validationResult
    */
   maybeEmitCssLengthSpecErrors(context, validationResult) {
-    // Only emit an error if there have been inline styles used. Otherwise
-    // if there was to be an error it would have been caught by
-    // CdataMatcher::Match().
-    if (context.getInlineStyleByteSize() == 0) {return;}
-
     const bytesUsed =
         context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
 
@@ -6499,3 +6478,4 @@ goog.exportSymbol(
 goog.exportSymbol('amp.validator.categorizeError', categorizeError);
 goog.exportSymbol(
     'amp.validator.annotateWithErrorCategories', annotateWithErrorCategories);
+goog.exportSymbol('amp.validator.isSeverityWarning', isSeverityWarning);

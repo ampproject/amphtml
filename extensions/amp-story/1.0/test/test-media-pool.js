@@ -19,7 +19,7 @@ import {findIndex} from '../../../../src/utils/array';
 
 const NOOP = () => {};
 
-describes.realWin('media-pool', {}, (env) => {
+describes.realWin('media-pool', {amp: true}, (env) => {
   let win;
   let mediaPool;
   let distanceFnStub;
@@ -42,11 +42,12 @@ describes.realWin('media-pool', {}, (env) => {
 
   /**
    * @param {string} tagName
+   * @param {string=} opt_url
    * @return {!HTMLMediaElement}
    */
-  function createMediaElement(tagName) {
+  function createMediaElement(tagName, opt_url) {
     const el = env.win.document.createElement(tagName);
-    el.src = `http://example.com/${tagName}.xyz`;
+    el.src = opt_url || `https://example.com/${tagName}.xyz`;
     env.win.document.body.appendChild(el);
     return el;
   }
@@ -134,6 +135,15 @@ describes.realWin('media-pool', {}, (env) => {
 
     expect(mediaPool.allocated['video'].length).to.equal(1);
     expect(mediaPool.unallocated['video'].length).to.equal(1);
+  });
+
+  it('should fail with http src', () => {
+    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
+
+    const videoEl = createMediaElement('video', 'http://example.com/video.mp4');
+    expect(() => {
+      mediaPool.register(videoEl);
+    }).to.throw(/from either https/);
   });
 
   it.skip('should evict the element with the highest distance first', () => {

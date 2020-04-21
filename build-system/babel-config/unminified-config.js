@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
 
 /**
@@ -51,10 +50,8 @@ function getUnminifiedConfig() {
     reactJsxPlugin,
   ];
   const unminifiedPresets = [presetEnv];
-  const devDependencies = getDevDependencies();
   return {
     compact: false,
-    ignore: devDependencies,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
   };

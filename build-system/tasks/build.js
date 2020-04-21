@@ -112,6 +112,8 @@ build.flags = {
   version_override: '  Overrides the version written to AMP_CONFIG',
   custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-builds when detected',
+  define_experiment_constant:
+    '  Builds runtime with the EXPERIMENT constant set to true',
 };
 
 watch.description = 'Deprecated. Use gulp build --watch or gulp dist --watch';
