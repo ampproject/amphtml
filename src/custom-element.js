@@ -1227,8 +1227,7 @@ function createBaseCustomElementClass(win) {
               this.isInViewport_ &&
               this.ownerDocument &&
               this.ownerDocument.defaultView &&
-              this.layoutCount_ === 0 // Ensures that layoutCallback hasn't completed in this 100ms window. 
-
+              this.layoutCount_ === 0 // Ensures that layoutCallback hasn't completed in this 100ms window.
             ) {
               this.toggleLoading(true, {startTime: loadingStartTime});
             }
