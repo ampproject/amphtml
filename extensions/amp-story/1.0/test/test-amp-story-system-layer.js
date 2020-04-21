@@ -186,7 +186,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     ).to.have.attribute('disabled');
   });
 
-  it('setting paused state to true should show the paused button', () => {
+  it('setting paused state to true should add the paused flag', () => {
     systemLayer.build();
 
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
@@ -195,7 +195,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
 
-  it('setting paused state to false should show the play button', () => {
+  it('setting paused state to false should not add the paused flag', () => {
     systemLayer.build();
 
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);

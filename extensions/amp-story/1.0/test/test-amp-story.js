@@ -1819,7 +1819,7 @@ describes.realWin(
 
     describe('amp-story play/pause', () => {
       it('should set playable to true if page has autoadvance', async () => {
-        await createStoryWithPages(1, ['cover'], true);
+        await createStoryWithPages(1, ['cover'], true /** autoAdvance */);
 
         await story.layoutCallback();
         await story.activePage_.element
@@ -1836,7 +1836,7 @@ describes.realWin(
       });
 
       it('should set playable to false if page does not have playable', async () => {
-        await createStoryWithPages(1, ['cover'], false);
+        await createStoryWithPages(1, ['cover'], false /** autoAdvance */);
 
         await story.layoutCallback();
         await story.activePage_.element
