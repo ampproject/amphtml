@@ -45,7 +45,7 @@ The `amp-3d-gltf` component displays 3D models that are in gITF format.
 
 ### Limitations
 
-Currently, only works with glTF 2.0.
+Currently only works with glTF 2.0.
 
 Unsupported features:
 
