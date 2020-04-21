@@ -576,7 +576,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
-   * @param {ConsentTuple} consentTuple
+   * @param {ConsentTupleDef} consentTuple
    * @visibleForTesting
    */
   populateAdUrlState(consentTuple) {
