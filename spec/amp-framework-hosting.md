@@ -77,7 +77,7 @@ If you have advanced hosting capabilities or would like to manually assign a ver
 
 - `--config`: Indicate the release type, production (`prod`) or canary (`canary`). Defaults to `prod`.
 - `--version_override`: Assign a version to the distribution. The version must consist of 13-digits. Defaults to the latest git commit time of the active branch.
-- `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `http://localhost:8000/`.
+- `--sourcemap_url`: Provide the base URL for JavaScript source map links. This URL should contain placeholder `{version}` that will be replaced with the actual version when the AMP framework is built, for example `https://raw.githubusercontent.com/<github-username>/amphtml/{version}/`. Defaults to `https://raw.githubusercontent.com/ampproject/amphtml/{version}/`.
 
 ### Option 2: Download the framework with an AMP Toolbox tool
 
@@ -100,7 +100,7 @@ A listing of files in each release can be found in `files.txt` at the root of th
 
 When you request `amp-geo-0.1.js` from `cdn.ampproject.org` using an HTTP client, the CDN detects the country where the request originated and patches `amp-geo-0.1.js` on-the-fly. This patch needs to be reversed to ensure users are not all assigned the same country when amp-geo loads.
 
-When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 country code or an ISO 3166-2 country-subdivision code, followed by enough spaces to maintain the length of the string being replaced. Reversal of this patch can be accomplished by a RegEx replacement: search for `/[a-zA-Z]{2}(?:-[a-zA-Z0-9]{1,3} {22,24}| {26})/` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
+When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with an ISO 3166-1 country code or an ISO 3166-2 country-subdivision code, followed by enough spaces to maintain the length of the string being replaced. Reversal of this patch can be accomplished by a RegEx replacement: search for `/ {28}|[a-z]{2} {26}|[a-z]{2} [a-z]{2}-[a-z0-9]{1,3} {19,21}/i` and replace with `{{AMP_ISO_COUNTRY_HOTPATCH}}`.
 
 In addition to `amp-geo-0.1.js`, you may find module JS (`.mjs`) and unversioned (`amp-geo-latest.js`) variants of the same file. The same RegEx replacement should be performed in these files as well.
 
@@ -187,6 +187,12 @@ The AMP Project has a [weekly release channel](https://amp.dev/documentation/gui
 <script async custom-element="amp-geo" src="https://example.com/amp/v0/amp-geo-0.1.js"></script>
 ```
 
+If you inspect the DOM after an AMP page loads, you'll notice additional components are dynamically loaded by the runtime and use versioned URLs, for example
+
+```
+<script async custom-element="amp-auto-lightbox" data-script="amp-auto-lightbox" i-amphtml-inserted crossorigin="anonymous" src="https://example.com/amp/rtv/012002290616360/v0/amp-auto-lightbox-0.1.js"></script>
+```
+
 ### Metadata
 
 The AMP Project hosts a metadata endpoint at [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata) that returns information on current releases. Hosting this endpoint yourself is optional, but may be useful if you use [AMP Toolbox](https://github.com/ampproject/amp-toolbox):
@@ -219,9 +225,28 @@ The properties are defined as follows:
 
 ### amp-geo hotpatching
 
-[amp-geo](https://amp.dev/documentation/components/amp-geo/) requires special attention when hosting the AMP framework. When `cdn.ampproject.org` serves any of `amp-geo-0.1.js`, `amp-geo-0.1.mjs`, `amp-geo-latest.js`, or `amp-geo-latest.mjs`, it detects the country where the request originated and replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with the ISO 3166-1 alpha-2 country code (two ascii letter characters) followed by 26 spaces to maintain the string length. Ideally, when hosting the AMP framework, your content distribution platform would perform the same manipulation.
+[amp-geo](https://amp.dev/documentation/components/amp-geo/) requires special attention when hosting the AMP framework. When `cdn.ampproject.org` serves any of `amp-geo-0.1.js`, `amp-geo-0.1.mjs`, `amp-geo-latest.js`, or `amp-geo-latest.mjs`, it detects the country and subdivision where the request originated and replaces string `{{AMP_ISO_COUNTRY_HOTPATCH}}` with region data and enough trailing spaces to maintain the original string length. Ideally, when hosting the AMP framework, your content distribution platform would perform the same manipulation. The logic is as follows:
 
-If country code detection and file modification at time of delivery are not possible, amp-geo supports use of an API to fetch the user's country at run time. Be aware that usage of an API for this feature increases the chances of visible content or style shifts due to the delay of an additional network request. The AMP Project does not provide this API service; you need to supply your own API. Two example providers (not a comprehensive list) that offer IP-to-country databases from which an API could be created include [MaxMind](https://www.maxmind.com) and [IP2Location](https://www.ip2location.com/).
+- If country could not be determined, substitute 28 spaces:
+  ```
+  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+  After:  "                            "
+  ```
+- If country could be determined, substitute the ISO 3166-1 alpha-2 country code followed by 26 spaces:
+  ```
+  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+  After:  "xx                          "
+  ```
+  where `xx` is the country code (e.g. `de` for Germany).
+- If country and subdivision could be determined and are exactly `us` (United States) and `ca` (California), respectively (this is the only subdivision supported by amp-geo as of this writing), substitute the ISO 3166-1 alpha-2 country code _and_ the ISO 3166-2 country-subdivision code followed by 20 spaces:
+  ```
+  Before: "{{AMP_ISO_COUNTRY_HOTPATCH}}"
+  After:  "us us-ca                    "
+  ```
+
+#### amp-geo fallback API
+
+If location detection and file modification at time of delivery are not possible, amp-geo supports use of an API to fetch the user's country at run time. Be aware that usage of an API for this feature increases the chances of visible content or style shifts due to the delay of an additional network request. The AMP Project does not provide this API service; you need to supply your own API. Two example providers (not a comprehensive list) that offer IP-to-country databases from which an API could be created include [MaxMind](https://www.maxmind.com) and [IP2Location](https://www.ip2location.com/).
 
 The API must meet the following requirements:
 
@@ -238,6 +263,12 @@ The API must meet the following requirements:
         "title": "ISO 3166-1 alpha-2 (case insensitive) country code of client request",
         "default": "",
         "pattern": "^[a-zA-Z]{2}$"
+      },
+      "subdivision": {
+        "type": "string",
+        "title": "Subdivision part of ISO 3166-2 (case insensitive) country-subdivision code of client request",
+        "default": "",
+        "pattern": "^[a-zA-Z0-9]{1,3}$"
       }
     },
     "required": [
@@ -254,6 +285,17 @@ A sample response for a user in Germany looks like:
 }
 ```
 
+A sample response for a user in California, US looks like:
+
+```
+{
+  "country": "us",
+  "subdivision": "ca"
+}
+```
+
+Note: As of April 2020, `us-ca` is the only subdivision supported by amp-geo.
+
 There are trade-offs in accuracy and performance when you set the client cache time for this API. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. For reference, `https://cdn.ampproject.org/v0/amp-geo-0.1.js` has a client cache time of 30 minutes.
 
 ### HTTP response headers
@@ -269,6 +311,7 @@ In addition to following [TLS best practices](https://infosec.mozilla.org/guidel
 
   A complete list of files in each AMP release can be found in `files.txt`, for example `https://cdn.ampproject.org/files.txt`.
 
-- `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active. Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
+- `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active (amp-geo is an exception, see below). Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
   - Versioned URL example: `cdn.ampproject.org` sets a 1 year client cache time on resources served under `cdn.ampproject.org/rtv/<rtv>`: `cache-control: public, max-age=31536000`.
   - Versionless URL example: `cdn.ampproject.org` sets a 50 minute client cache time for resources served from versionless URLs, but also allows a long 2 week stale-while-revalidate time in the event that versionless URLs experience an outage: `cache-control: private, max-age=3000, stale-while-revalidate=1206600`.
+  - `amp-geo-*.(m)js`: If amp-geo hotpatching is utilized, there is a trade-off in accuracy and performance when you set this cache time. Longer cache times are better for performance on subsequent page loads but can lead to incorrect country detection. Both `cdn.ampproject.org/v0/amp-geo-0.1.js` and `cdn.ampproject.org/rtv/<rtv>/v0/amp-geo-0.1.js` set the client cache time to 30 minutes.
