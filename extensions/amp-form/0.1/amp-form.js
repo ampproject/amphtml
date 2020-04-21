@@ -224,8 +224,8 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(this.form_, () => this.handleXhrVerify_());
 
     /** If the element is in an email document, allow its `clear` and `submit` actions. */
-    this.actions_.maybeAddToEmailWhitelist('FORM', 'clear');
-    this.actions_.maybeAddToEmailWhitelist('FORM', 'submit');
+    this.actions_.addToWhitelist('FORM', 'clear', {isAllowedInEmail: true});
+    this.actions_.addToWhitelist('FORM', 'submit', {isAllowedInEmail: true});
     this.actions_.installActionHandler(
       this.form_,
       this.actionHandler_.bind(this)

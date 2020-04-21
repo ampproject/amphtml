@@ -197,11 +197,12 @@ export class AmpList extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     /** If the element is in an email document,
      * allow its `changeToLayoutContainer` and `refresh` actions. */
-    this.action_.maybeAddToEmailWhitelist(
-      'AMP-LIST',
-      'changeToLayoutContainer'
-    );
-    this.action_.maybeAddToEmailWhitelist('AMP-LIST', 'refresh');
+    this.action_.addToWhitelist('AMP-LIST', 'changeToLayoutContainer', {
+      isAllowedInEmail: true,
+    });
+    this.action_.addToWhitelist('AMP-LIST', 'refresh', {
+      isAllowedInEmail: true,
+    });
 
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());

@@ -1535,7 +1535,7 @@ describes.repeated(
           const actions = {
             installActionHandler: () => {},
             trigger: env.sandbox.spy(),
-            maybeAddToEmailWhitelist: () => {},
+            addToWhitelist: () => {},
           };
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 

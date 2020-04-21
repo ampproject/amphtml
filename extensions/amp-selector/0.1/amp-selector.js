@@ -160,10 +160,11 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** If the element is in an email document, allow its `clear`,
      * `selectDown`, `selectUp`, and `toggle` actions. */
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'clear');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectDown');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'selectUp');
-    this.action_.maybeAddToEmailWhitelist('AMP-SELECTOR', 'toggle');
+    const allowOpts = {isAllowedInEmail: true};
+    this.action_.addToWhitelist('AMP-SELECTOR', 'clear', allowOpts);
+    this.action_.addToWhitelist('AMP-SELECTOR', 'selectDown', allowOpts);
+    this.action_.addToWhitelist('AMP-SELECTOR', 'selectUp', allowOpts);
+    this.action_.addToWhitelist('AMP-SELECTOR', 'toggle', allowOpts);
 
     // Triggers on DOM children updates
     this.element.addEventListener(

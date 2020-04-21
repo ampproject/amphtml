@@ -229,9 +229,10 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     /** If the element is in an email document,
      * allow its `open`, `close`, and `toggle` actions. */
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'open');
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'close');
-    this.action_.maybeAddToEmailWhitelist('AMP-SIDEBAR', 'toggle');
+    const allowOpts = {isAllowedInEmail: true};
+    this.action_.addToWhitelist('AMP-SIDEBAR', 'open', allowOpts);
+    this.action_.addToWhitelist('AMP-SIDEBAR', 'close', allowOpts);
+    this.action_.addToWhitelist('AMP-SIDEBAR', 'toggle', allowOpts);
 
     element.addEventListener(
       'click',

@@ -593,8 +593,16 @@ export class ActionService {
    * @param {string} tagOrTarget The tag or target to whitelist, e.g.
    *     'AMP-LIST', '*'.
    * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
+   * @param {{isAllowedInEmail: boolean}=} opts
    */
-  addToWhitelist(tagOrTarget, method) {
+  addToWhitelist(tagOrTarget, method, opts) {
+    if (
+      opts &&
+      hasOwn(opts, 'isAllowedInEmail') &&
+      opts.isAllowedInEmail !== this.isEmail_
+    ) {
+      return;
+    }
     if (!this.whitelist_) {
       this.whitelist_ = [];
     }
@@ -606,17 +614,6 @@ export class ActionService {
       return;
     }
     this.whitelist_.push({tagOrTarget, method});
-  }
-
-  /**
-   * Adds an action to the whitelist only if the document is in the email format.
-   * @param {string} tagOrTarget
-   * @param {string} method
-   */
-  maybeAddToEmailWhitelist(tagOrTarget, method) {
-    if (this.isEmail_) {
-      this.addToWhitelist(tagOrTarget, method);
-    }
   }
 
   /**

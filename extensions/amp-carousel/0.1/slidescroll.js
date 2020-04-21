@@ -148,7 +148,9 @@ export class AmpSlideScroll extends BaseSlides {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
     /** If the element is in an email document, allow its `goToSlide` action. */
-    this.action_.maybeAddToEmailWhitelist('AMP-CAROUSEL', 'goToSlide');
+    this.action_.addToWhitelist('AMP-CAROUSEL', 'goToSlide', {
+      isAllowedInEmail: true,
+    });
 
     this.hasNativeSnapPoints_ =
       getStyle(this.element, 'scrollSnapType') != undefined;

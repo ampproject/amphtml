@@ -793,10 +793,9 @@ class AmpImageLightbox extends AMP.BaseElement {
       return;
     }
     /** If the element is in an email document, allow its `open` action. */
-    Services.actionServiceForDoc(this.element).maybeAddToEmailWhitelist(
-      'AMP-IMAGE-LIGHTBOX',
-      'open'
-    );
+    Services.actionServiceForDoc(
+      this.element
+    ).addToWhitelist('AMP-IMAGE-LIGHTBOX', 'open', {isAllowedInEmail: true});
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-image-lightbox-container');
