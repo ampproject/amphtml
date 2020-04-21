@@ -1995,8 +1995,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('should NOT turn on when enters viewport but already laid out', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
-        element.layoutCount_ = 1;
         element.viewportCallback(true);
+        element.layoutCount_ = 1;
         clock.tick(1000);
         expect(toggle).to.have.not.been.called;
       });
