@@ -83,6 +83,7 @@
       <option>mediator</option>
       <option>memo</option>
       <option>mobify</option>
+      <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
       <option>newrelic</option>
@@ -972,6 +973,31 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mobify example -->
+
+<!-- start MoEngage Analytics example -->
+<amp-analytics type="moengage" id="moengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "appId": "78FL7RI8NHROB3HLU4X42O44"
+      },
+      "triggers": {
+        "clickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "extraUrlParams": {
+            "a": {
+              "title": "${title}"
+            },
+            "e": "amp example button click"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end MoEngage Analytics example -->
 
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
