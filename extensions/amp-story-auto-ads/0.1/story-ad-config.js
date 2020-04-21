@@ -32,6 +32,7 @@ const DisallowedAdAttributes = {
 
 /** @enum {boolean} */
 const AllowedAdTypes = {
+  'adsense': true,
   'custom': true,
   'doubleclick': true,
   'fake': true,
