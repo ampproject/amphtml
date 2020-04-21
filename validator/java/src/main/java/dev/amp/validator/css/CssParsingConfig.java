@@ -22,6 +22,7 @@
 package dev.amp.validator.css;
 
 import dev.amp.validator.ValidatorProtos;
+import dev.amp.validator.utils.CssSpecUtils;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -42,8 +43,8 @@ public class CssParsingConfig {
      * @param atRuleSpec  the AtRule spec to validate against
      * @param defaultSpec the default blocktype to validate for
      */
-    public CssParsingConfig(@Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
-                            @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec) {
+    public CssParsingConfig(@Nonnull final Map<String, CssSpecUtils.BlockType> atRuleSpec,
+                            @Nonnull final CssSpecUtils.BlockType defaultSpec) {
         // TODO: atRuleSpec could be split into a string and BlockType, as the map is only ever size = 1
         this.atRuleSpec = atRuleSpec;
         this.defaultSpec = defaultSpec;
@@ -55,15 +56,16 @@ public class CssParsingConfig {
      * @return a CssParsingConfig representing the CssSpec
      */
     public static CssParsingConfig computeCssParsingConfig() {
-      final Map<String, ValidatorProtos.AtRuleSpec.BlockType> ampAtRuleParsingSpec = new HashMap<>();
-      ampAtRuleParsingSpec.put("font-face", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
-      ampAtRuleParsingSpec.put("keyframes", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-      ampAtRuleParsingSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-      ampAtRuleParsingSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
-      ampAtRuleParsingSpec.put("supports", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+      final Map<String, CssSpecUtils.BlockType> ampAtRuleParsingSpec = new HashMap<>();
+      ampAtRuleParsingSpec.put("font-face", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
+      ampAtRuleParsingSpec.put("keyframes", CssSpecUtils.BlockType.PARSE_AS_RULES);
+      ampAtRuleParsingSpec.put("media", CssSpecUtils.BlockType.PARSE_AS_RULES);
+      ampAtRuleParsingSpec.put("page", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
+      ampAtRuleParsingSpec.put("supports", CssSpecUtils.BlockType.PARSE_AS_RULES);
 
       final CssParsingConfig config =
-        new CssParsingConfig(ampAtRuleParsingSpec, ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+
+        new CssParsingConfig(ampAtRuleParsingSpec, CssSpecUtils.BlockType.PARSE_AS_IGNORE);
 
       return config;
     }
@@ -73,7 +75,7 @@ public class CssParsingConfig {
      *
      * @return the AtRule spec
      */
-    public Map<String, ValidatorProtos.AtRuleSpec.BlockType> getAtRuleSpec() {
+    public Map<String, CssSpecUtils.BlockType> getAtRuleSpec() {
         return this.atRuleSpec;
     }
 
@@ -82,7 +84,7 @@ public class CssParsingConfig {
      *
      * @return the default spec blocktype
      */
-    public ValidatorProtos.AtRuleSpec.BlockType getDefaultSpec() {
+    public CssSpecUtils.BlockType getDefaultSpec() {
         return this.defaultSpec;
     }
 
@@ -91,15 +93,15 @@ public class CssParsingConfig {
      *
      * @param defaultSpec the value to set default spec to.
      */
-    public void setDefaultSpec(@Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec) {
+    public void setDefaultSpec(@Nonnull final CssSpecUtils.BlockType defaultSpec) {
         this.defaultSpec = defaultSpec;
     }
 
     /** Default block type. */
     @Nonnull
-    private ValidatorProtos.AtRuleSpec.BlockType defaultSpec;
+    private CssSpecUtils.BlockType defaultSpec;
 
     /** AtRuleSpec map. */
     @Nonnull
-    private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
+    private Map<String, CssSpecUtils.BlockType> atRuleSpec;
 }
