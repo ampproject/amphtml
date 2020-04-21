@@ -422,7 +422,7 @@ export class AmpScript extends AMP.BaseElement {
         user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
       });
 
-      if (disallowedTypes.length > 0) {
+      if (disallowedTypes.length > 0 && phase > Phase.HYDRATING) {
         this.workerDom_.terminate();
 
         this.element.classList.remove('i-amphtml-hydrated');

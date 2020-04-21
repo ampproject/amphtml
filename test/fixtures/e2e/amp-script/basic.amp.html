@@ -35,13 +35,8 @@
       el.textContent = lipsum;
       document.body.appendChild(el);
     });
-  </script>
 
-  <amp-script id="mutate-error" script=illegal layout=container>
-    <button>I'm a button</button>
-  </amp-script>
-  <script type=text/plain target=amp-script id="illegal">
-    document.body.textContent = "Lorem Ipsum";
+    document.body.textContent = lipsum;
   </script>
 </body>
 </html>
