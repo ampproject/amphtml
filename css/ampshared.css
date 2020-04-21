@@ -402,20 +402,12 @@ html.i-amphtml-fie > amp-analytics {
   position: initial !important;
 }
 
-
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
 form [submitting],
 form [submit-success],
 form [submit-error] {
-  display: none;
-}
-
-/**
- * amp-list error messaging container should be hidden at first.
- */
-amp-list [fetch-error] {
   display: none;
 }
 

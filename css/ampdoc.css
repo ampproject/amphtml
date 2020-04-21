@@ -277,6 +277,20 @@ amp-list[load-more] [load-more-end]
 }
 
 /**
+ * amp-list error messaging container should be hidden at first.
+ */
+ amp-list [fetch-error] {
+  display: none;
+}
+
+/**
+ * amp-list initial content should be displayed (similar to placeholder).
+ */
+amp-list[diffable] div[role="list"] {
+  display: block;
+}
+
+/**
  * amp-story
  */
 amp-story[standalone], amp-story-page {
