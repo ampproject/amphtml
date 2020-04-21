@@ -22,15 +22,25 @@ const PATH = './config.json';
 
 /**
  * Loads test config from ./config.json
- * @return {{concurrency:number, headless:boolean, runs:number, urls:Array<string>}}
+ * @return {{concurrency:number, headless:boolean, runs:number, handlers:Array<Object>, urlToHandlers:Object}}
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
   const config = JSON.parse(file);
-  if (argv.url) {
-    config.urls = [argv.url];
-  }
-  if (config.urls.length < 1) {
+  // Create mapping of url to handlers for ease of use later
+  config.urlToHandlers = config.handlers.reduce((mapping, handlerOptions) => {
+    if (argv.url && handlerOptions.handlerName === 'defaultHandler') {
+      handlerOptions.urls = [argv.url];
+    }
+    handlerOptions.urls.forEach((url) => {
+      if (mapping[url]) {
+        throw new Error('All urls must be unique: %s.', url);
+      }
+      mapping[url] = handlerOptions;
+    });
+    return mapping;
+  }, {});
+  if (Object.keys(config.urlToHandlers).length < 1) {
     throw new Error('No URLs found in config.');
   }
   return config;
