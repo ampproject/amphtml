@@ -55,15 +55,12 @@ public class CssParsingConfigTest {
     final ValidatorProtos.CssSpec.Builder cssSpecBuilder = ValidatorProtos.CssSpec.newBuilder();
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder1 = ValidatorProtos.AtRuleSpec.newBuilder();
-//    atRuleSpecBuilder1.setType(CssSpecUtils.BlockType.PARSE_AS_RULES);
     atRuleSpecBuilder1.setName("media");
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder2 = ValidatorProtos.AtRuleSpec.newBuilder();
-//    atRuleSpecBuilder2.setType(CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
     atRuleSpecBuilder2.setName("page");
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder3 = ValidatorProtos.AtRuleSpec.newBuilder();
-//    atRuleSpecBuilder3.setType(CssSpecUtils.PARSE_AS_ERROR);
     atRuleSpecBuilder3.setName("$DEFAULT");
 
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder1.build());
