@@ -920,10 +920,7 @@ class CssContextImpl {
    * @return {?Element}
    */
   getElementById(id) {
-    return /*OK*/ scopedQuerySelector(
-      this.scope_,
-      `#${escapeCssSelectorIdent(id)}`
-    );
+    return this.scopedQuerySelector_(`#${escapeCssSelectorIdent(id)}`);
   }
 
   /**
@@ -932,7 +929,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(/*OK*/ scopedQuerySelectorAll(this.scope_, selector));
+      return toArray(this.scopedQuerySelectorAll_(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -1251,7 +1248,7 @@ class CssContextImpl {
           this.scope_
         );
       } else {
-        element = /*OK*/ scopedQuerySelector(this.scope_, selector);
+        element = this.scopedQuerySelector_(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1273,5 +1270,40 @@ class CssContextImpl {
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
     return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelector_(selector) {
+    if (this.canUseScopedQuerySelector_()) {
+      return /*OK*/ scopedQuerySelector(this.scope_, selector);
+    }
+    return this.scope_./*OK*/ querySelector(selector);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelectorAll_(selector) {
+    if (this.canUseScopedQuerySelector_()) {
+      return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
+    }
+    return this.scope_./*OK*/ querySelectorAll(selector);
+  }
+
+  /**
+   * On non-element nodes scopedQuerySelectionFallback will try to
+   * add a className, which is not possible. We don't need to scope these,
+   * since they're either a Document or a ShadowRoot.
+   * @return {boolean}
+   * @private
+   */
+  canUseScopedQuerySelector_() {
+    return this.scope_.nodeType === /* ELEMENT */ 1;
   }
 }
