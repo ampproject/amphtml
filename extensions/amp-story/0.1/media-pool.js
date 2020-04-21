@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   BlessTask,
@@ -385,7 +386,7 @@ export class MediaPool {
     const allocatedEls = this.allocated[mediaType];
     const removeFromDom = isConnectedNode(poolMediaEl)
       ? this.swapPoolMediaElementOutOfDom_(poolMediaEl)
-      : Promise.resolve();
+      : resolvedPromise();
 
     return removeFromDom.then(() => {
       const index = allocatedEls.indexOf(poolMediaEl);
@@ -566,7 +567,7 @@ export class MediaPool {
   loadInternal_(domMediaEl) {
     if (!isConnectedNode(domMediaEl)) {
       // Don't handle nodes that aren't even in the document.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const mediaType = this.getMediaType_(domMediaEl);
@@ -589,7 +590,7 @@ export class MediaPool {
     if (!poolMediaEl) {
       // If there is no space in the pool to allocate a new element, and no
       // element can be evicted, do not return any element.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.allocateMediaElement_(mediaType, poolMediaEl);
@@ -611,7 +612,7 @@ export class MediaPool {
    */
   bless_(poolMediaEl) {
     if (poolMediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask());
@@ -631,13 +632,13 @@ export class MediaPool {
     const mediaType = this.getMediaType_(domMediaEl);
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
       // This media element originated from the media pool.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const id = domMediaEl.id || this.createDomMediaElementId_();
     if (this.sources_[id] && this.domMediaEls_[id]) {
       // This media element is already registered.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // This media element has not yet been registered.
@@ -650,7 +651,7 @@ export class MediaPool {
     domMediaEl.setAttribute('muted', '');
     domMediaEl.pause();
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -677,7 +678,7 @@ export class MediaPool {
   play(domMediaEl) {
     return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
-        return Promise.resolve();
+        return resolvedPromise();
       }
 
       return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
@@ -700,7 +701,7 @@ export class MediaPool {
     );
 
     if (!poolMediaEl) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask()).then(
@@ -729,7 +730,7 @@ export class MediaPool {
     );
 
     if (!poolMediaEl) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
@@ -749,7 +750,7 @@ export class MediaPool {
     );
 
     if (!poolMediaEl) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -769,7 +770,7 @@ export class MediaPool {
     );
 
     if (!poolMediaEl) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
@@ -784,7 +785,7 @@ export class MediaPool {
    */
   blessAll() {
     if (this.blessed_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const blessPromises = [];

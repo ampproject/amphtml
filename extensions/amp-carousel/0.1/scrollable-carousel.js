@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
@@ -108,7 +109,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.setControlsState();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -157,7 +158,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     if (!isFinite(index) || index < 0 || index >= noOfSlides) {
       this.user().error(TAG, 'Invalid [slide] value: %s', index);
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const oldPos = this.pos_;

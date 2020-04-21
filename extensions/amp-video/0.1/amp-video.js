@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -307,7 +308,7 @@ class AmpVideo extends AMP.BaseElement {
 
     if (!this.isVideoSupported_()) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.propagateAttributes(

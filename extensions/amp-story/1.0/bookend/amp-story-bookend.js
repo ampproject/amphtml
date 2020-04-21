@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
@@ -242,7 +243,7 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @override
    */
   layoutCallback() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -628,7 +629,7 @@ export class AmpStoryBookend extends DraggableDrawer {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
 
     if (!components.length) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return Services.localizationServiceForOrNull(this.win)

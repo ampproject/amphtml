@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
@@ -182,7 +183,7 @@ export class LinkRewriter {
 
     //  Ask for the affiliate status of the new anchors.
     if (!unknownAnchors.length) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Register all new anchors discovered as "unknown" status.
@@ -211,7 +212,7 @@ export class LinkRewriter {
       });
     }
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

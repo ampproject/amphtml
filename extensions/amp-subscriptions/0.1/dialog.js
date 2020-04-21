@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
@@ -44,7 +45,7 @@ export class Dialog {
     this.content_ = null;
 
     /** @private {!Promise} */
-    this.lastAction_ = Promise.resolve();
+    this.lastAction_ = resolvedPromise();
 
     const doc = this.ampdoc_.win.document;
 
@@ -135,7 +136,7 @@ export class Dialog {
     }
     this.content_ = content;
     if (this.visible_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.visible_ = true;
     return this.vsync_
@@ -175,7 +176,7 @@ export class Dialog {
    */
   close_() {
     if (!this.visible_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.vsync_
       .mutatePromise(() => {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -99,7 +100,7 @@ export class AnalyticsConfig {
   fetchVendorConfig_() {
     const type = this.element_.getAttribute('type');
     if (!type) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const vendorUrl = this.getVendorUrl_(type);
@@ -130,7 +131,7 @@ export class AnalyticsConfig {
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element_.getAttribute('config');
     if (!remoteConfigUrl || this.isSandbox_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     assertHttpsUrl(remoteConfigUrl, this.element_);
     const TAG = this.getName_();
@@ -183,7 +184,7 @@ export class AnalyticsConfig {
     if (!configRewriterUrl || this.isSandbox_) {
       this.config_ = this.mergeConfigs_(config);
       // use default configuration merge.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.handleConfigRewriter_(config, configRewriterUrl);
@@ -270,7 +271,7 @@ export class AnalyticsConfig {
     const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
 
     if (!pubVarGroups && !vendorVarGroups) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (pubVarGroups && !vendorVarGroups) {
@@ -279,7 +280,7 @@ export class AnalyticsConfig {
         TAG,
         'This analytics provider does not currently support varGroups'
       );
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Create object that will later hold all the resolved variables, and any

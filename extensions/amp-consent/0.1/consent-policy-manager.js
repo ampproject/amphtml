@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
@@ -287,7 +288,7 @@ export class ConsentPolicyManager {
    */
   whenPolicyInstanceRegistered_(policyId) {
     if (this.instances_[policyId]) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     if (!this.policyInstancesDeferred_[policyId]) {
       this.policyInstancesDeferred_[policyId] = new Deferred();

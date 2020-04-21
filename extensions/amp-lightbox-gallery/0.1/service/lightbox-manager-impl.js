@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
   AutoLightboxEvents,
@@ -346,7 +347,7 @@ export class LightboxManager {
   getVideoTimestamp_(element) {
     return VIDEO_TAGS[element.tagName]
       ? element.getImpl().then((videoPlayer) => videoPlayer.getDuration())
-      : Promise.resolve();
+      : resolvedPromise();
   }
 
   /**

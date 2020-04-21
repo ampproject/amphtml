@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
@@ -352,7 +353,7 @@ export class AccessSource {
     if (!this.adapter_.isAuthorizationEnabled()) {
       dev().fine(TAG, 'Ignore authorization for type=', this.type_);
       this.firstAuthorizationResolver_();
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const responsePromise = this.adapter_.authorize().catch((error) => {

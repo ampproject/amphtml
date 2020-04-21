@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
@@ -181,7 +182,7 @@ export class MediaTask {
    * @protected
    */
   executeInternal(unusedMediaEl) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -217,7 +218,7 @@ export class PlayTask extends MediaTask {
     if (!mediaEl.paused) {
       // We do not want to invoke play() if the media element is already
       // playing, as this can interrupt playback in some browsers.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // The play() invocation is wrapped in a Promise.resolve(...) due to the
@@ -241,7 +242,7 @@ export class PauseTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     mediaEl.pause();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -260,7 +261,7 @@ export class UnmuteTask extends MediaTask {
   executeInternal(mediaEl) {
     mediaEl.muted = false;
     mediaEl.removeAttribute('muted');
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -279,7 +280,7 @@ export class MuteTask extends MediaTask {
   executeInternal(mediaEl) {
     mediaEl.muted = true;
     mediaEl.setAttribute('muted', '');
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -297,7 +298,7 @@ export class SetCurrentTimeTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     mediaEl.currentTime = this.options.currentTime;
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -315,7 +316,7 @@ export class LoadTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     mediaEl.load();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -344,7 +345,7 @@ export class BlessTask extends MediaTask {
     if (isMuted) {
       mediaEl.muted = true;
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -371,7 +372,7 @@ export class UpdateSourcesTask extends MediaTask {
   executeInternal(mediaEl) {
     Sources.removeFrom(this.win_, mediaEl);
     this.newSources_.applyToElement(this.win_, mediaEl);
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -394,7 +395,7 @@ export class SwapIntoDomTask extends MediaTask {
   executeInternal(mediaEl) {
     if (!isConnectedNode(this.placeholderEl_)) {
       this.failTask('Cannot swap media for element that is not in DOM.');
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     copyCssClasses(this.placeholderEl_, mediaEl);
@@ -403,7 +404,7 @@ export class SwapIntoDomTask extends MediaTask {
       mediaEl,
       this.placeholderEl_
     );
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 
@@ -427,6 +428,6 @@ export class SwapOutOfDomTask extends MediaTask {
     copyCssClasses(mediaEl, this.placeholderEl_);
     copyAttributes(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }

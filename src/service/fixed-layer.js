@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -343,7 +344,7 @@ export class FixedLayer {
       opt_forceTransfer
     );
     if (!added) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.sortInDomOrder_();
 
@@ -417,7 +418,7 @@ export class FixedLayer {
     toRemove.forEach((fe) => this.tearDownElement_(fe.element));
 
     if (this.elements_.length == 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Clear out the update pass since we're doing the work now.

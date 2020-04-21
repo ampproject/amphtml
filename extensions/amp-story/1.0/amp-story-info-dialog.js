@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -92,7 +93,7 @@ export class InfoDialog {
    */
   build() {
     if (this.isBuilt()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.isBuilt_ = true;
@@ -198,7 +199,7 @@ export class InfoDialog {
    */
   requestMoreInfoLink_() {
     if (!this.viewer_.isEmbedded()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.viewer_
       ./*OK*/ sendMessageAwaitResponse('moreInfoLinkUrl', /* data */ undefined)
@@ -253,7 +254,7 @@ export class InfoDialog {
    */
   setMoreInfoLinkUrl_(moreInfoUrl) {
     if (!moreInfoUrl) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.moreInfoLinkEl_ = dev().assertElement(

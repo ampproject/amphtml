@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust} from '../action-constants';
 import {
   EMPTY_METADATA,
@@ -349,7 +350,7 @@ export class VideoManager {
     const entry = this.getEntry_(videoElement);
     return (entry
       ? entry.getAnalyticsDetails()
-      : Promise.resolve()
+      : resolvedPromise()
     ).then((details) => (details ? details[property] : ''));
   }
 
@@ -1231,7 +1232,7 @@ export class AutoFullscreenManager {
       const vh = viewport.getSize().height;
       const fullyVisible = top >= 0 && bottom <= vh;
       if (fullyVisible) {
-        return Promise.resolve();
+        return resolvedPromise();
       }
       const pos = optPos
         ? dev().assertString(optPos)

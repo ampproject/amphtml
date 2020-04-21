@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
@@ -201,7 +202,7 @@ export class AmpAnimation extends AMP.BaseElement {
     if (this.triggerOnVisibility_) {
       this.startAction_();
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -221,7 +222,7 @@ export class AmpAnimation extends AMP.BaseElement {
     if (this.visible_) {
       return this.startOrResume_(opt_invocation ? opt_invocation.args : null);
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -237,7 +238,7 @@ export class AmpAnimation extends AMP.BaseElement {
     if (this.visible_) {
       return this.startOrResume_(invocation.args);
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -246,7 +247,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   pauseAction_() {
     if (!this.triggered_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.createRunnerIfNeeded_().then(() => {
       this.pause_();
@@ -260,7 +261,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   resumeAction_() {
     if (!this.triggered_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.createRunnerIfNeeded_().then(() => {
       if (this.visible_) {
@@ -276,7 +277,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   togglePauseAction_() {
     if (!this.triggered_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.createRunnerIfNeeded_().then(() => {
       if (this.visible_) {
@@ -330,7 +331,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   reverseAction_() {
     if (!this.triggered_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.createRunnerIfNeeded_().then(() => {
       if (this.visible_) {
@@ -345,7 +346,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   finishAction_() {
     this.finish_();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -354,7 +355,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   cancelAction_() {
     this.cancel_();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 /**
  * @typedef {{
  *   promise: !Promise<undefined>,
@@ -184,7 +185,7 @@ class CustomElementRegistry {
     assertValidName(SyntaxError, name);
 
     if (this.registry_.getByName(name)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const pending = this.pendingDefines_;

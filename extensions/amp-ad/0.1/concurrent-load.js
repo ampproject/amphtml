@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {user, userAssert} from '../../../src/log';
@@ -39,7 +40,7 @@ export function is3pThrottled(win) {
 
 /** @return {!Promise} resolves when no 3p throttle */
 export function waitFor3pThrottle() {
-  return throttlePromise_ || Promise.resolve();
+  return throttlePromise_ || resolvedPromise();
 }
 
 /**

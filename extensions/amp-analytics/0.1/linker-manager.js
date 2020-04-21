@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -85,7 +86,7 @@ export class LinkerManager {
    */
   init() {
     if (!isObject(this.config_)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -110,7 +111,7 @@ export class AmpAudio extends AMP.BaseElement {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Force controls otherwise there is no player UI.

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 /**
  * @fileoverview Embeds a single page in a story
  *
@@ -888,7 +889,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseMedia_(mediaPool, mediaEl, rewindToBeginning) {
     if (this.isBotUserAgent_) {
       mediaEl.pause();
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       return mediaPool.pause(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl),
@@ -918,10 +919,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   playMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       mediaEl.play();
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       if (!this.isMediaDisplayed_(mediaEl)) {
-        return Promise.resolve();
+        return resolvedPromise();
       }
 
       return this.loadPromise(mediaEl).then(
@@ -983,7 +984,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   preloadMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       // No-op.
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       return mediaPool.preload(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
@@ -1012,7 +1013,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isBotUserAgent_) {
       mediaEl.muted = true;
       mediaEl.setAttribute('muted', '');
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       return mediaPool.mute(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
@@ -1044,7 +1045,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
         mediaEl.play();
       }
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
       const promises = [mediaPool.unmute(mediaEl)];
@@ -1094,7 +1095,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   registerMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       // No-op.
-      return Promise.resolve();
+      return resolvedPromise();
     } else {
       return mediaPool.register(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
@@ -1111,7 +1112,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
         mediaEl.currentTime = 0;
-        return Promise.resolve();
+        return resolvedPromise();
       } else {
         return mediaPool.rewindToBeginning(
           /** @type {!./media-pool.DomElementDef} */ (mediaEl)
@@ -1162,7 +1163,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   maybeApplyFirstAnimationFrame() {
     if (!this.animationManager_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.animationManager_.applyFirstFrame();
   }

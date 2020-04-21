@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
@@ -161,7 +162,7 @@ export class AccessService {
   getReaderId_() {
     if (!this.readerIdPromise_) {
       // No consent - an essential part of the access system.
-      const consent = Promise.resolve();
+      const consent = resolvedPromise();
       this.readerIdPromise_ = this.cid_.then((cid) => {
         return cid.get(
           {scope: 'amp-access', createCookieIfNotPresent: true},
@@ -479,7 +480,7 @@ export class AccessService {
   applyAuthorizationAttrs_(element, on) {
     const wasOn = !element.hasAttribute('amp-access-hide');
     if (on == wasOn) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.mutator_.mutateElement(element, () => {
       if (on) {
@@ -621,7 +622,7 @@ export class AccessService {
     if (timeToView == 0) {
       // Immediate view has been registered. This will happen when this method
       // is called as the result of the user action.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Viewing kick off: document is visible.

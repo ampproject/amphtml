@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -391,7 +392,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     if (!this.iframeSrc) {
       // This failed already, lets not signal another error.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.isTrackingFrame_) {
@@ -403,7 +404,7 @@ export class AmpIframe extends AMP.BaseElement {
               'for your use case: ' +
               'https://github.com/ampproject/amphtml/issues/new'
           );
-        return Promise.resolve();
+        return resolvedPromise();
       }
     }
 

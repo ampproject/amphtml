@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
@@ -53,7 +54,7 @@ export class AmpAd extends AMP.BaseElement {
       ? Services.userNotificationManagerForDoc(this.element).then((service) =>
           service.get(consentId)
         )
-      : Promise.resolve();
+      : resolvedPromise();
     const type = this.element.getAttribute('type');
     return consent.then(() => {
       const isCustom = type === 'custom';

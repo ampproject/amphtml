@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
@@ -96,7 +98,7 @@ export function getTimingDataAsync(win, startEvent, endEvent) {
   // set wait for onload to be default
   let readyPromise;
   if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
-    readyPromise = Promise.resolve();
+    readyPromise = resolvedPromise();
   } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
     readyPromise = whenDocumentComplete(win.document);
   } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {

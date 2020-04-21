@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from './visibility-state';
@@ -198,7 +199,7 @@ export class AmpStoryPlayer {
     this.messagingPromises_[iframeIdx] = new Promise((resolve) => {
       this.initializeHandshake_(story, iframeEl).then(
         (messaging) => {
-          messaging.setDefaultHandler(() => Promise.resolve());
+          messaging.setDefaultHandler(() => resolvedPromise());
           messaging.registerHandler('touchstart', (event, data) => {
             this.onTouchStart_(data);
           });

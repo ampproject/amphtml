@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
 
@@ -73,7 +74,7 @@ export class AccessOtherAdapter {
   /** @override */
   pingback() {
     dev().fine(TAG, 'Ignore pingback');
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

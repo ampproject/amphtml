@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
@@ -733,7 +734,7 @@ export class Resource {
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // See if pre-existing promise.
     const viewportNum = dev().assertNumber(viewport);
@@ -743,7 +744,7 @@ export class Resource {
     }
     // See if already within viewport multiplier.
     if (this.isWithinViewportRatio(viewportNum)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // return promise that will trigger when within viewport multiple.
     this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
@@ -882,7 +883,7 @@ export class Resource {
       return this.layoutPromise_;
     }
     if (this.state_ == ResourceState.LAYOUT_COMPLETE) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
@@ -905,7 +906,7 @@ export class Resource {
         this.state_
       );
       this.state_ = ResourceState.LAYOUT_COMPLETE;
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);

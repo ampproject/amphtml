@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev} from '../../../src/log';
@@ -91,7 +92,7 @@ export class ViewerTracker {
     if (timeToView == 0) {
       // Immediate view has been registered. This will happen when this method
       // is called as the result of the user action.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Viewing kick off: document is visible.

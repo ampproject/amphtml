@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
@@ -963,7 +965,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt
       ? this.element_.whenBuilt()
-      : Promise.resolve()
+      : resolvedPromise()
     ).then(() => this.startWhenBuilt_());
   }
 

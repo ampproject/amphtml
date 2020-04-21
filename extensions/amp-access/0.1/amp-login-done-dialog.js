@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseQueryString,
@@ -67,7 +68,7 @@ export class LoginDoneDialog {
         url = tryDecodeUriComponent(url);
       }
       this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(url));
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const error = new Error('No opener or return location available');

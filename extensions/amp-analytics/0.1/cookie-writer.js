@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
@@ -101,16 +102,16 @@ export class CookieWriter {
     if (!isCookieAllowed(this.win_, this.element_)) {
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (!hasOwn(this.config_, 'cookies')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (!isObject(this.config_['cookies'])) {
       user().error(TAG, 'cookies config must be an object');
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const inputConfig = this.config_['cookies'];
@@ -118,7 +119,7 @@ export class CookieWriter {
     if (inputConfig['enabled'] === false) {
       // Enabled by default
       // TODO: Allow indiviual cookie object to override the value
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const cookieExpireDateMs = this.getCookieMaxAgeMs_(inputConfig);

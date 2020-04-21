@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
@@ -60,7 +61,7 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
-const ASYNC_NOOP = () => Promise.resolve();
+const ASYNC_NOOP = () => resolvedPromise();
 
 export class NextPageService {
   /**
@@ -170,7 +171,7 @@ export class NextPageService {
   build(element) {
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.ampdoc_.getBody().lastElementChild !== element) {
@@ -259,7 +260,7 @@ export class NextPageService {
       this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
 
     if (this.finished_ || isFetching || isTooEarly) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const pageCount = this.pages_.length;
@@ -522,7 +523,7 @@ export class NextPageService {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const container = dev().assertElement(page.container);
@@ -581,7 +582,7 @@ export class NextPageService {
       return separatorPromise.then(() => amp);
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
-      return Promise.resolve();
+      return resolvedPromise();
     }
   }
 
@@ -593,7 +594,7 @@ export class NextPageService {
    */
   closeDocument(page) {
     if (page.is(PageState.PAUSED)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const container = dev().assertElement(page.container);
@@ -758,7 +759,7 @@ export class NextPageService {
     return this.getRemotePages_().then((remotePages) => {
       if (remotePages.length === 0) {
         user().warn(TAG, 'Could not find recommendations');
-        return Promise.resolve();
+        return resolvedPromise();
       }
       return this.queuePages_(remotePages);
     });
@@ -776,7 +777,7 @@ export class NextPageService {
       this.pages_.length > this.maxPages_ ||
       this.finished_
     ) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // Queue the given pages
     pages.forEach((meta) => {
@@ -925,7 +926,7 @@ export class NextPageService {
    */
   maybeRenderSeparatorTemplate_(separator, page) {
     if (!this.templates_.hasTemplate(separator)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const data = /** @type {!JsonObject} */ ({

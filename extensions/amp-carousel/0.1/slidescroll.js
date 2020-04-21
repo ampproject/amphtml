@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
@@ -316,7 +317,7 @@ export class AmpSlideScroll extends BaseSlides {
       '[i-amphtml-scale-animation]'
     );
     if (isScaled) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.slideIndex_ === null) {
@@ -340,7 +341,7 @@ export class AmpSlideScroll extends BaseSlides {
       this.slidesContainer_./*OK*/ scrollLeft = scrollLeft;
       this.previousScrollLeft_ = scrollLeft;
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -832,7 +833,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);

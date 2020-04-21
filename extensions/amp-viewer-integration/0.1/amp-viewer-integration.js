@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -86,7 +87,7 @@ export class AmpViewerIntegration {
     const origin = viewer.getParam('origin') || '';
 
     if (!this.isWebView_ && !origin) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.isWebView_ || this.isHandShakePoll_) {

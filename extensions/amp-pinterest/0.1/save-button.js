@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
@@ -195,7 +197,7 @@ export class SaveButton {
     if (this.count === 'above' || this.count === 'beside') {
       promise = this.fetchCount();
     } else {
-      promise = Promise.resolve();
+      promise = resolvedPromise();
     }
     return promise.then(this.renderTemplate.bind(this));
   }

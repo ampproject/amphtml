@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
@@ -279,7 +280,7 @@ export class AnimationRunner {
    */
   applyFirstFrame() {
     if (this.hasStarted()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.runner_) {
@@ -323,7 +324,7 @@ export class AnimationRunner {
     if (this.startAfterId_) {
       return this.sequence_.waitFor(this.startAfterId_);
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -431,7 +432,7 @@ export class AnimationRunner {
         'Tried to execute playbackWhenReady_ before runner was resolved.'
       ));
 
-    (wait || Promise.resolve()).then(() => {
+    (wait || resolvedPromise()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
         return;
       }

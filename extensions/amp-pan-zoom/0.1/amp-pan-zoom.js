@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
@@ -853,7 +854,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
     if (dir == 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const {width, height} = this.elementBox_;
     const dist = magnitude(deltaX, deltaY);
@@ -877,7 +878,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   onZoom_(scale, deltaX, deltaY, animate) {
     const newScale = this.boundScale_(scale, true);
     if (newScale == this.scale_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.updatePanZoomBounds_(newScale);
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);

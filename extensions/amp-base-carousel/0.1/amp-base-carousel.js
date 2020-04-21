@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionSource} from './action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
@@ -205,7 +206,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.carousel_.updateUi();
     this.childLayoutManager_.wasLaidOut();
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

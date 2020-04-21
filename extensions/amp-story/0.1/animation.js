@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
@@ -197,7 +198,7 @@ class AnimationRunner {
   /** @return {!Promise<void>} */
   applyFirstFrame() {
     if (this.hasStarted()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.runner_) {
@@ -225,7 +226,7 @@ class AnimationRunner {
    * @private
    */
   getStartWaitPromise_() {
-    let promise = Promise.resolve();
+    let promise = resolvedPromise();
 
     if (this.animationDef_.startAfterId) {
       const startAfterId = /** @type {string} */ (this.animationDef_
@@ -317,7 +318,7 @@ class AnimationRunner {
         'Tried to execute playbackWhenReady_ before runner was resolved.'
       ));
 
-    (wait || Promise.resolve()).then(() => {
+    (wait || resolvedPromise()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
         return;
       }

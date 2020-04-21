@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -147,7 +149,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   layoutCallback() {
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);

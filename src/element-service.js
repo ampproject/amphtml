@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import * as dom from './dom';
 import {
   getAmpdoc,
@@ -269,7 +270,7 @@ function waitForExtensionIfPresent(win, extension, head) {
   // TODO(jpettitt) investigate registerExtension to short circuit
   // the dom call in extensionScriptsInNode()
   if (!extensionScriptInNode(head, extension)) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   const extensions = getService(win, 'extensions');

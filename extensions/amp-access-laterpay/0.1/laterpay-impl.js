@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
@@ -302,7 +303,7 @@ export class LaterpayVendor {
   emptyContainer_() {
     // no need to do all of this if the container is already empty
     if (this.containerEmpty_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     let unlistener;
     while ((unlistener = this.purchaseOptionListeners_.shift())) {
@@ -562,6 +563,6 @@ export class LaterpayVendor {
    * @return {!Promise}
    */
   pingback() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }

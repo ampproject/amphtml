@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -235,7 +236,7 @@ export class WebLoginDialog {
       dev().fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
-        this.dialogReadyPromise_ = Promise.resolve();
+        this.dialogReadyPromise_ = resolvedPromise();
       }
     } else {
       dev().fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);

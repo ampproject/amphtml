@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
@@ -192,7 +193,7 @@ export function installFriendlyIframeEmbed(
   // we have to fallback to polling.
   let readyPromise;
   if (isIframeReady(iframe)) {
-    readyPromise = Promise.resolve();
+    readyPromise = resolvedPromise();
   } else {
     readyPromise = new Promise((resolve) => {
       /** @const {number} */

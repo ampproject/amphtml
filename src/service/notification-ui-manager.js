@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 export const NOTIFICATION_UI_MANAGER = 'notificationUIManager';
 
 export class NotificationUiManager {
@@ -25,7 +26,7 @@ export class NotificationUiManager {
     this.queueSize_ = 0;
 
     /** @private {!Promise} */
-    this.queuePromise_ = Promise.resolve();
+    this.queuePromise_ = resolvedPromise();
 
     /** @private {function()} */
     this.queueEmptyHandler_ = () => {}; // Make this an observable if requested

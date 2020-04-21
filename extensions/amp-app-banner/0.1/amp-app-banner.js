@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
@@ -277,14 +278,14 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   /** @override */
   layoutCallback() {
     if (!this.metaContent_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.canShowBuiltinBanner_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -433,11 +434,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   /** @override */
   layoutCallback() {
     if (this.missingDataSources_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     if (this.canShowBuiltinBanner_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return Services.xhrFor(this.win)

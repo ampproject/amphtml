@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -235,7 +236,7 @@ export class Performance {
     // is off we only need to know if the AMP page has a messaging
     // channel or not.
     if (!channelPromise) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return channelPromise

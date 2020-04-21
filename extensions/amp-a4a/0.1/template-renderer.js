@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Renderer} from './amp-ad-type-defs';
 import {devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from './template-validator';
@@ -59,7 +60,7 @@ export class TemplateRenderer extends Renderer {
       const templateData = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (creativeData.templateData);
       const {data} = templateData;
       if (!data) {
-        return Promise.resolve();
+        return resolvedPromise();
       }
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper

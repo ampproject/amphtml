@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
@@ -563,7 +564,7 @@ export class AmpLiveList extends AMP.BaseElement {
     const numOfItemsToDelete = this.curNumOfLiveItems_ - this.maxItemsPerPage_;
 
     if (numOfItemsToDelete < 1) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const deleteItemsCandidates = [];
     const actualDeleteItems = [];

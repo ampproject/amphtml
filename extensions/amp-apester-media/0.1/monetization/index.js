@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {getConsentData} from './consent-util';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
@@ -30,5 +32,5 @@ export function handleCompanionAds(media, apesterElement) {
       handleCompanionVideo(media, apesterElement, consentData);
     });
   }
-  return Promise.resolve();
+  return resolvedPromise();
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
@@ -35,7 +36,7 @@ let allowLongTasks = false;
 /**
  * @const {!Promise}
  */
-const resolved = Promise.resolve();
+const resolved = resolvedPromise();
 
 /**
  * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc

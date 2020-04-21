@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -333,7 +334,7 @@ export class ImageViewer {
   updateSrc_() {
     if (!this.srcset_) {
       // Do not update source if the lightbox has already exited.
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
@@ -342,7 +343,7 @@ export class ImageViewer {
       WindowInterface.getDevicePixelRatio()
     );
     if (src == this.image_.getAttribute('src')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
@@ -632,7 +633,7 @@ export class ImageViewer {
   onZoomRelease_(centerClientX, centerClientY, deltaX, deltaY, veloX, veloY) {
     let promise;
     if (veloX == 0 && veloY == 0) {
-      promise = Promise.resolve();
+      promise = resolvedPromise();
     } else {
       promise = continueMotion(
         this.image_,
@@ -714,7 +715,7 @@ export class ImageViewer {
       this.posY_ = newPosY;
       this.updatePanZoom_();
       if (animate) {
-        promise = Promise.resolve();
+        promise = resolvedPromise();
       } else {
         promise = undefined;
       }

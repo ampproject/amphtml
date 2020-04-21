@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -86,7 +87,7 @@ function fetchCaptions(page, videoEl) {
   const track =
     videoEl.querySelector('track[default]') || videoEl.querySelector('track');
   if (!track || !track.src) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
   return Services.xhrFor(page.win)
     .fetchText(track.src, {

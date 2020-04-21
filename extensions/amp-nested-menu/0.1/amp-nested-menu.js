@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -84,7 +85,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.registerSubmenuElements_();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** Give submenu open/close buttons appropriate roles and

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
@@ -266,7 +267,7 @@ export class Bind {
     }
 
     if (opts.skipEval) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const promise = this.initializePromise_
@@ -299,7 +300,7 @@ export class Bind {
     // setState() or pushState() event per sequence.
     if (this.actionSequenceIds_.includes(sequenceId)) {
       user().error(TAG, 'One state action allowed per event.');
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.actionSequenceIds_.push(sequenceId);
     // Flush stored sequence IDs five seconds after the last invoked action.
@@ -337,7 +338,7 @@ export class Bind {
           '"AMP.setState(foo=\'bar\')".'
       );
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -536,7 +537,7 @@ export class Bind {
     if (bindings.length > 0) {
       return this.sendBindingsToWorker_(bindings);
     } else {
-      return Promise.resolve();
+      return resolvedPromise();
     }
   }
 
@@ -1266,7 +1267,7 @@ export class Bind {
     const {element, boundProperties} = boundElement;
     const updates = this.calculateUpdates_(boundProperties, results);
     if (updates.length === 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.mutator_.mutateElement(element, () => {
       const mutations = map();

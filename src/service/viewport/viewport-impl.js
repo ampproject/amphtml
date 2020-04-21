@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../resolvedPromise';
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
@@ -887,7 +888,7 @@ export class ViewportImpl {
   animateFixedElements_(duration, curve, transient) {
     this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
     if (duration <= 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // Add transit effect on position fixed element
     const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);

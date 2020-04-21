@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
@@ -619,7 +620,7 @@ export class AmpList extends AMP.BaseElement {
   fetchList_(opt_refresh = false) {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     let fetch;
@@ -661,7 +662,7 @@ export class AmpList extends AMP.BaseElement {
    */
   fetchListAndAppend_() {
     if (!this.element.getAttribute('src')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.prepareAndSendFetch_().then((data) => {
       const items = this.computeListItems_(data);
@@ -868,7 +869,7 @@ export class AmpList extends AMP.BaseElement {
       );
       return Promise.all(promises);
     } else {
-      return Promise.resolve();
+      return resolvedPromise();
     }
   }
 
@@ -889,7 +890,7 @@ export class AmpList extends AMP.BaseElement {
           });
         });
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -1217,7 +1218,7 @@ export class AmpList extends AMP.BaseElement {
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.mutateElement(() => {
       this.undoLayout_(previousLayout);
@@ -1246,7 +1247,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreEnabled_) {
       return this.setLoadMore_();
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -1294,7 +1295,7 @@ export class AmpList extends AMP.BaseElement {
       this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
       // Nothing more to load or previous fetch still inflight
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const container = dev().assertElement(this.container_);
     const lastTabbableChild = this.lastTabbableChild_(container);

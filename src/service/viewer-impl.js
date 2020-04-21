@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
@@ -700,13 +701,13 @@ export class ViewerImpl {
         this.prerenderSizeDeprecation_();
       }
       this.setVisibilityState_(data['state']);
-      return Promise.resolve();
+      return resolvedPromise();
     }
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
         /** @type {!JsonObject|undefined} */ (data)
       );
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const observable = this.messageObservables_[eventType];
     if (observable) {
@@ -716,7 +717,7 @@ export class ViewerImpl {
     if (responder) {
       return responder(data);
     } else if (observable) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
     return undefined;
@@ -790,7 +791,7 @@ export class ViewerImpl {
       if (awaitResponse) {
         return Promise.reject(getChannelError());
       } else {
-        return Promise.resolve();
+        return resolvedPromise();
       }
     }
 

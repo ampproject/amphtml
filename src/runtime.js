@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
@@ -81,7 +82,7 @@ export let ShadowDoc;
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
   if (global.__AMP_TAG) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
   global.__AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
@@ -293,7 +294,7 @@ function preloadDeps(extensions, fnOrStruct) {
     'dependency is neither an array or a string',
     fnOrStruct.i
   );
-  return Promise.resolve();
+  return resolvedPromise();
 }
 
 /**
@@ -312,7 +313,7 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
     // - if in doubt, that is a better default
     // - the only actual  user is a viewer integration that should
     //   be high priority.
-    Promise.resolve().then(register);
+    resolvedPromise().then(register);
   } else {
     register.displayName = fnOrStruct.n;
     startupChunk(global.document, register);
@@ -402,7 +403,7 @@ export function adoptShadowMode(global) {
   return adoptShared(global, (global, extensions) => {
     // shadow mode already adopted
     if (global.AMP.attachShadowDoc) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Dependencies to the MultiDocManager

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {childElementsByTag, iterateCursor, removeElement} from '../dom';
 import {dev, devAssert} from '../log';
@@ -98,7 +99,7 @@ export class DomWriterStreamer {
     this.mergeScheduled_ = false;
 
     /** @const @private {!Promise} */
-    this.success_ = Promise.resolve();
+    this.success_ = resolvedPromise();
 
     /** @private {boolean} */
     this.eof_ = false;
@@ -239,7 +240,7 @@ export class DomWriterBulk {
     this.onEnd_ = null;
 
     /** @const @private {!Promise} */
-    this.success_ = Promise.resolve();
+    this.success_ = resolvedPromise();
 
     /** @private {boolean} */
     this.eof_ = false;

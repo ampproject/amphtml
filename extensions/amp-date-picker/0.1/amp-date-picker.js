@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
@@ -1284,7 +1285,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   fetchSrc_() {
     return this.element.getAttribute('src')
       ? batchFetchJsonFor(this.getAmpDoc(), this.element)
-      : Promise.resolve();
+      : resolvedPromise();
   }
 
   /**

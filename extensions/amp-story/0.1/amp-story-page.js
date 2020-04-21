@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 /**
  * @fileoverview Embeds a story
  *
@@ -453,7 +454,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   maybeApplyFirstAnimationFrame() {
     if (!this.animationManager_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.animationManager_.applyFirstFrame();
   }

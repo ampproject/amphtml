@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../resolvedPromise';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {
@@ -212,7 +213,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

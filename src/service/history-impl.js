@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
@@ -152,7 +153,7 @@ export class History {
     return this.enque_(() => {
       if (this.stackIndex_ <= 0) {
         // Nothing left to pop.
-        return Promise.resolve();
+        return resolvedPromise();
       }
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
@@ -760,7 +761,7 @@ export class HistoryBindingNatural_ {
         this.win.addEventListener('popstate', this.popstateHandler_);
       }
       this.historyReplaceState_();
-      return Promise.resolve();
+      return resolvedPromise();
     });
   }
 
@@ -1104,7 +1105,7 @@ export class HistoryBindingVirtual_ {
    */
   updateFragment(fragment) {
     if (!this.viewer_.hasCapability('fragment')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
       'replaceHistory',

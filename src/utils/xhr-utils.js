@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
@@ -195,11 +196,11 @@ export function fromStructuredCloneable(response, responseType) {
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   const whenUnblocked = init.prerenderSafe
-    ? Promise.resolve()
+    ? resolvedPromise()
     : ampdocSingle.whenFirstVisible();
   const viewer = Services.viewerForDoc(ampdocSingle);
   const urlIsProxy = isProxyOrigin(input);

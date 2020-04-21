@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -175,7 +176,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       this.tickCountDown_(differentBetween);
       differentBetween -= DELAY;
     }, DELAY);
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
@@ -141,7 +142,7 @@ export class MultidocManager {
       // Special messages.
       if (eventType == 'broadcast') {
         this.broadcast_(data, shadowRoot);
-        return awaitResponse ? Promise.resolve() : undefined;
+        return awaitResponse ? resolvedPromise() : undefined;
       }
 
       // All other messages.
@@ -256,7 +257,7 @@ export class MultidocManager {
           setStyle(hostElement, 'visibility', 'visible');
         }, 50);
 
-        return Promise.resolve();
+        return resolvedPromise();
       }
     );
   }

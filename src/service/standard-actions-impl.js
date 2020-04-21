@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
@@ -201,7 +202,7 @@ export class StandardActions {
     const {node, caller, method, args} = invocation;
     const win = (node.ownerDocument || node).defaultView;
     // Some components have additional constraints on allowing navigation.
-    let permission = Promise.resolve();
+    let permission = resolvedPromise();
     if (startsWith(caller.tagName, 'AMP-')) {
       permission = caller.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
@@ -258,7 +259,7 @@ export class StandardActions {
       return this.handleNavigateTo_(invocation);
     }
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
   /**
    * Handles the `scrollTo` action where given an element, we smooth scroll to

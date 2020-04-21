@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
@@ -191,7 +192,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
         scope: dev().assertString(opt_cidScope),
         createCookieIfNotPresent: true,
       },
-      Promise.resolve()
+      resolvedPromise()
     )
   );
 

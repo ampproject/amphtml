@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
@@ -463,7 +464,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   layoutCallback() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

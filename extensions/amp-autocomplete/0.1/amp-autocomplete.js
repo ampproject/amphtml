@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
@@ -318,7 +319,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -508,7 +509,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src === undefined || src === null) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     if (typeof src === 'string') {
       return this.getRemoteData_().then(
@@ -655,7 +656,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   autocomplete_(data, opt_input = '') {
     this.clearAllItems_();
     if (opt_input.length < this.minChars_ || !data) {
-      return Promise.resolve();
+      return resolvedPromise();
     } else if (this.isSsr_) {
       return hasOwn(data, 'html')
         ? this.renderResults_(
@@ -663,7 +664,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             dev().assertElement(this.container_),
             opt_input
           )
-        : Promise.resolve();
+        : resolvedPromise();
     } else {
       return this.filterDataAndRenderResults_(data, opt_input);
     }
@@ -679,7 +680,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   filterDataAndRenderResults_(sourceData, input) {
     if (!sourceData.length) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const filteredData = this.filterData_(sourceData, input);
     return this.renderResults_(
@@ -698,7 +699,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   renderResults_(filteredData, container, input) {
-    let renderPromise = Promise.resolve();
+    let renderPromise = resolvedPromise();
     this.resetActiveElement_();
     if (this.hasTemplate_) {
       renderPromise = this.getSsrTemplateHelper()
@@ -949,7 +950,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   checkFirstInteractionAndMaybeFetchData_() {
     if (this.interacted_ || !this.element.hasAttribute('src')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.interacted_ = true;
     return this.getRemoteData_().then(
@@ -1114,14 +1115,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
       !this.areResultsDisplayed_() ||
       this.fallbackDisplayed_
     ) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // Active element logic
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const enabledElements = this.getEnabledItems_();
     if (enabledElements.length === 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
@@ -1240,7 +1241,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           // Disrupt loop around to display user input.
           if (this.activeIndex_ === this.getEnabledItems_().length - 1) {
             this.displayUserInput_();
-            return Promise.resolve();
+            return resolvedPromise();
           }
           return this.updateActiveItem_(1);
         }
@@ -1253,7 +1254,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
           this.displayUserInput_();
-          return Promise.resolve();
+          return resolvedPromise();
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
@@ -1291,12 +1292,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.selectItem_(selectedValue);
           });
         }
-        return Promise.resolve();
+        return resolvedPromise();
       case Keys.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
-        return Promise.resolve();
+        return resolvedPromise();
       default:
-        return Promise.resolve();
+        return resolvedPromise();
     }
   }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {devAssert} from '../../../src/log';
@@ -188,7 +189,7 @@ export class Page {
    */
   pause() {
     if (!this.shadowDoc_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
@@ -222,7 +223,7 @@ export class Page {
       this.state_ === PageState.LOADED ||
       this.state_ === PageState.FAILED
     ) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.state_ = PageState.FETCHING;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 /**
  * @fileoverview Embeds a story
  *
@@ -607,7 +608,7 @@ export class AmpStory extends AMP.BaseElement {
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const firstPageEl = user().assertElement(

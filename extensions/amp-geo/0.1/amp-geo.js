@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 /**
  * @fileoverview Sets location specific CSS, bind variables, and attributes on
  * AMP pages
@@ -239,7 +240,7 @@ export class AmpGeo extends AMP.BaseElement {
     }
 
     return this.mode_ !== mode.GEO_API
-      ? Promise.resolve()
+      ? resolvedPromise()
       : this.fetchCountry_().then((country) => {
           if (country) {
             this.country_ = country;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
@@ -203,7 +204,7 @@ export class AccessIframeAdapter {
       .then((data) => {
         if (data) {
           // Store the value in a non-blocking microtask.
-          Promise.resolve().then(() => this.store_(data));
+          resolvedPromise().then(() => this.store_(data));
         }
         return data;
       });

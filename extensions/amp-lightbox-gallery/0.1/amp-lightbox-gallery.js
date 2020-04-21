@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -232,7 +233,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // layoutCallback for lightbox-viewer is meaningless, lightbox-viewer
     // doesn't have children, it just manages elements elsewhere in the page in
     // `open_` `close_` and `updateViewer_` methods.
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -1138,7 +1139,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   close_() {
     if (!this.isActive_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.maybeSyncSourceCarousel_();

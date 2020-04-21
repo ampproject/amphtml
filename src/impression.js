@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {
@@ -118,7 +119,7 @@ export function maybeTrackImpression(win) {
  * Signal that impression tracking is not relevant in this environment.
  */
 export function doNotTrackImpression() {
-  trackImpressionPromise = Promise.resolve();
+  trackImpressionPromise = resolvedPromise();
 }
 
 /**
@@ -139,14 +140,14 @@ function handleReplaceUrl(win) {
   if (!viewer.getParam('replaceUrl')) {
     // The init replaceUrl param serve as a signal on whether replaceUrl is
     // required for this doc.
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   if (!viewer.hasCapability('replaceUrl')) {
     // If Viewer is not capability of providing async replaceUrl, use the legacy
     // init replaceUrl param.
     viewer.replaceUrl(viewer.getParam('replaceUrl') || null);
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   // request async replaceUrl is viewer support getReplaceUrl.
@@ -192,7 +193,7 @@ function handleClickUrl(win) {
   /** @const {?string} */
   const clickUrl = viewer.getParam('click');
   if (!clickUrl) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   if (clickUrl.indexOf('https://') != 0) {
@@ -201,7 +202,7 @@ function handleClickUrl(win) {
       'click fragment param should start with https://. Found ',
       clickUrl
     );
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   if (win.location.hash) {

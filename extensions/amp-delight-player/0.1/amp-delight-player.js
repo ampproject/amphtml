@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -230,7 +232,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       el.classList.add('i-amphtml-delight-player-faded');
       promise = listenOncePromise(el, 'transitionend');
     } else {
-      promise = Promise.resolve();
+      promise = resolvedPromise();
     }
     return promise.then(() => super.firstLayoutCompleted());
   }

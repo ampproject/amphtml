@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   Action,
   StateProperty,
@@ -167,7 +168,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         Services.ownersForDoc(this.element).setOwner(el, this.element);
       }
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

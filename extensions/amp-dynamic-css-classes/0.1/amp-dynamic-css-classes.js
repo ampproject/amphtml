@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 
 /**
@@ -159,7 +160,7 @@ class AmpDynamicCssClasses {
    * @return {!Promise}
    */
   whenReady() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }
 

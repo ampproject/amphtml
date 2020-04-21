@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {LayoutPriority} from '../../../src/layout';
@@ -124,7 +125,7 @@ export class AmpState extends AMP.BaseElement {
         return this.updateState_(this.localData_, /* isInit */ true);
       }
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -245,7 +246,7 @@ export class AmpState extends AMP.BaseElement {
    */
   getFetchingPromise() {
     if (!this.element.hasAttribute('src')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.loadingDeferred_.promise;
   }
@@ -258,7 +259,7 @@ export class AmpState extends AMP.BaseElement {
    */
   updateState_(json, isInit) {
     if (json === undefined || json === null) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
     return Services.bindForDocOrNull(this.element).then((bind) => {

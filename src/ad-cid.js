@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
@@ -27,7 +28,7 @@ import {dev} from '../src/log';
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
   if (!config || !config['clientIdScope']) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
   return getOrCreateAdCid(
     adElement.getAmpDoc(),

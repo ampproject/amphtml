@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -186,7 +187,7 @@ export class ConsentStateManager {
    */
   whenConsentReady() {
     if (this.instance_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     if (!this.consentReadyPromise_) {
       const deferred = new Deferred();
@@ -442,7 +443,7 @@ export class ConsentInstance {
     const cidPromise = Services.cidForDoc(this.ampdoc_).then((cid) => {
       return cid.get(
         {scope: CID_SCOPE, createCookieIfNotPresent: true},
-        Promise.resolve()
+        resolvedPromise()
       );
     });
     cidPromise.then((userId) => {

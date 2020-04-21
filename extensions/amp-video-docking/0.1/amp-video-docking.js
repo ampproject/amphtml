@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
@@ -912,7 +914,7 @@ export class VideoDocking {
    */
   placeAt_(video, x, y, scale, step, transitionDurationMs, opt_relativeX) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.isTransitioning_ = true;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -245,7 +246,7 @@ export class StoryAdPage {
    * @return {Promise<boolean>}
    */
   maybeCreateCta() {
-    return Promise.resolve().then(() => {
+    return resolvedPromise().then(() => {
       // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
       if (this.adDoc_) {
         this.extractA4AVars_();

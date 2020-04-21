@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
@@ -31,7 +32,7 @@ export class NameFrameRenderer extends Renderer {
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const creative =
@@ -72,6 +73,6 @@ export class NameFrameRenderer extends Renderer {
     );
     // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
     element.appendChild(iframe);
-    return Promise.resolve();
+    return resolvedPromise();
   }
 }

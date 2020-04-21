@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -177,7 +178,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.isAutomaticAdInsertionAllowed_()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return this.ampStory_
@@ -595,7 +596,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
     this.tryingToPlace_ = true;
 
-    return Promise.resolve().then(() => {
+    return resolvedPromise().then(() => {
       const nextAdPage = lastItem(this.adPages_);
       if (!nextAdPage.isLoaded() && nextAdPage.hasTimedOut()) {
         // Timeout fail.

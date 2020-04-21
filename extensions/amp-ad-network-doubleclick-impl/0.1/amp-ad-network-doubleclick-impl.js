@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 // Because AdSense and DoubleClick are both operated by Google and their A4A
 // implementations share some behavior in common, part of the logic for this
 // implementation is located in the ads/google/a4a directory rather than here.
@@ -624,7 +625,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
-    opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
+    opt_rtcResponsesPromise = opt_rtcResponsesPromise || resolvedPromise();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -1200,7 +1201,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
       });
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
@@ -358,7 +359,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       // (to never resolve).
       return cid.get(
         {scope: TAG, createCookieIfNotPresent: true},
-        Promise.resolve(),
+        resolvedPromise(),
         this.dialogPromise_
       );
     });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {bytesToString, stringToBytes} from '../utils/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
@@ -87,7 +88,7 @@ export class OriginExperiments {
     const head = this.ampdoc_.getHeadNode();
     const metas = head.querySelectorAll('meta[name="amp-experiment-token"]');
     if (metas.length == 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const {win} = this.ampdoc_;
     const crypto = Services.cryptoFor(win);

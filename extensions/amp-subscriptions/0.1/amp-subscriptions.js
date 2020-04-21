@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ActionStatus,
   SubscriptionAnalytics,
@@ -237,7 +238,7 @@ export class SubscriptionService {
   getReaderId(serviceId) {
     let readerIdPromise = this.serviceIdToReaderIdPromiseMap_[serviceId];
     if (!readerIdPromise) {
-      const consent = Promise.resolve();
+      const consent = resolvedPromise();
       // Scope is kept "amp-access" by default to avoid unnecessary CID
       // rotation.
       const scope =
@@ -517,7 +518,7 @@ export class SubscriptionService {
   fetchEntitlements_(subscriptionPlatform) {
     // Don't fetch entitlements on free pages.
     if (this.isPageFree_()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     let timeout = ENTITLEMENTS_REQUEST_TIMEOUT;
@@ -527,7 +528,7 @@ export class SubscriptionService {
     // Prerender safe platforms don't have to wait for the
     // page to become visible, all others wait for whenFirstVisible()
     const visiblePromise = subscriptionPlatform.isPrerenderSafe()
-      ? Promise.resolve()
+      ? resolvedPromise()
       : this.ampdoc_.whenFirstVisible();
     return visiblePromise.then(() =>
       this.timer_

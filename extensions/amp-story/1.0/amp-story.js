@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 /**
  * @fileoverview Embeds a story
  *
@@ -453,7 +454,7 @@ export class AmpStory extends AMP.BaseElement {
         // If open, closes the sidebar before navigating.
         const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
           ? Services.historyForDoc(this.getAmpDoc()).goBack()
-          : Promise.resolve();
+          : resolvedPromise();
         promise.then(() =>
           this.switchTo_(args['id'], NavigationDirection.NEXT)
         );
@@ -940,7 +941,7 @@ export class AmpStory extends AMP.BaseElement {
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.layoutStory_();
   }
@@ -1405,7 +1406,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // If the next page might be paywall protected, and the access
@@ -1416,7 +1417,7 @@ export class AmpStory extends AMP.BaseElement {
       !this.areAccessAuthorizationsCompleted_
     ) {
       this.navigateToPageAfterAccess_ = targetPage;
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // If the next page is paywall protected, display the access UI and wait for
@@ -1424,7 +1425,7 @@ export class AmpStory extends AMP.BaseElement {
     if (targetPage.element.hasAttribute('amp-access-hide')) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
       this.navigateToPageAfterAccess_ = targetPage;
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     const oldPage = this.activePage_;

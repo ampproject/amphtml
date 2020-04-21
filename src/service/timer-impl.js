@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {getMode} from '../mode';
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';

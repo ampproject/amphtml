@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
@@ -164,7 +165,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.children_
     );
     this.observeNewChildren_();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
@@ -815,7 +816,7 @@ export class AmpA4A extends AMP.BaseElement {
         // we should restructure the promise chain to pass this info along
         // more cleanly, without use of an object variable outside the chain.
         if (!responseParts) {
-          return Promise.resolve();
+          return resolvedPromise();
         }
         const {bytes, headers} = responseParts;
         const size = this.extractSize(responseParts.headers);
@@ -990,7 +991,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.adPromise_) {
       // For whatever reasons, the adPromise has been nullified, and we will be
       // unable to proceed. The current creative will continue to be displayed.
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const promiseId = this.promiseId_;
     return devAssert(this.adPromise_).then(() => {
@@ -1089,7 +1090,7 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.shouldInitializePromiseChain_()) {
         dev().error(TAG, 'Null promise in layoutCallback');
       }
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
@@ -1097,13 +1098,13 @@ export class AmpA4A extends AMP.BaseElement {
       .then((creativeMetaData) => {
         checkStillCurrent();
         if (this.isCollapsed_) {
-          return Promise.resolve();
+          return resolvedPromise();
         }
         // If this.iframe already exists, and we're not currently in the middle
         // of refreshing, bail out here. This should only happen in
         // testing context, not in production.
         if (this.iframe && !this.isRefreshing) {
-          return Promise.resolve();
+          return resolvedPromise();
         }
         if (!creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.

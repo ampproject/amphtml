@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
@@ -266,12 +267,12 @@ class InaboxViewportImpl {
 
   /** @override */
   scrollIntoView(unusedElement) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
   animateScrollIntoView(unusedElement, unusedPos, opt_duration, opt_curve) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -282,7 +283,7 @@ class InaboxViewportImpl {
     opt_duration,
     opt_curve
   ) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -353,7 +354,7 @@ class InaboxViewportImpl {
 
   /** @override */
   addToFixedLayer(unusedElement, opt_forceTransfer) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */
@@ -517,7 +518,7 @@ export class ViewportBindingInabox {
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
       }
     );
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @private */

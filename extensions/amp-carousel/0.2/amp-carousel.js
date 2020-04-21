@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -205,12 +206,12 @@ class AmpCarousel extends AMP.BaseElement {
       '[i-amphtml-scale-animation]'
     );
     if (isScaled) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.childLayoutManager_.wasLaidOut();
     this.carousel_.updateUi();
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

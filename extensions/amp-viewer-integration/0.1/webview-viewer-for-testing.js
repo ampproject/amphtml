@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Messaging} from './messaging/messaging';
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
@@ -203,7 +204,7 @@ export class WebviewViewerForTesting {
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console /*OK*/
         .log('viewer receiving message: ', type, payload, awaitResponse);
-      return Promise.resolve();
+      return resolvedPromise();
     });
 
     this.sendRequest_(

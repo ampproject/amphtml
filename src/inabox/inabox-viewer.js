@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {ViewerInterface} from '../service/viewer-interface';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -145,7 +146,7 @@ class InaboxViewer {
 
   /** @override */
   sendMessageAwaitResponse() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

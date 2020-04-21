@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
@@ -177,7 +178,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       '[i-amphtml-scale-animation]'
     );
     if (isScaled) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     // Check to see if have an image that we created already. This is necessary
     // as we hide the original amp-img, so it will never finish layout again
@@ -191,7 +192,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     const ampImg = dev().assertElement(this.sourceAmpImage_);
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
-      ? Promise.resolve()
+      ? resolvedPromise()
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
@@ -310,7 +311,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   init_() {
     if (this.image_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.image_ = this.element.ownerDocument.createElement('img');
@@ -416,7 +417,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   updateSrc_() {
     if (!this.srcset_) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = Math.max(
@@ -428,7 +429,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       WindowInterface.getDevicePixelRatio()
     );
     if (src == this.image_.getAttribute('src')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.mutateElement(() => {
       this.image_.setAttribute('src', src);
@@ -796,7 +797,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   ) {
     let promise;
     if (veloX == 0 && veloY == 0) {
-      promise = Promise.resolve();
+      promise = resolvedPromise();
     } else {
       promise = continueMotion(
         dev().assertElement(this.image_),
@@ -891,7 +892,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.posY_ = newPosY;
       this.updatePanZoom_();
       if (animate) {
-        promise = Promise.resolve();
+        promise = resolvedPromise();
       } else {
         promise = undefined;
       }

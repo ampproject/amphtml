@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
@@ -113,7 +115,7 @@ export class ProgressBar {
     this.segments_ = [];
 
     /** @private {!Promise} */
-    this.segmentsAddedPromise_ = Promise.resolve();
+    this.segmentsAddedPromise_ = resolvedPromise();
 
     /**
      * First expanded segment after ellipsis (if any) for stories with segments

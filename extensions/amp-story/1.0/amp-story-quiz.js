@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -154,7 +155,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   layoutCallback() {
     return (this.responseDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveReactionData_()
-      : Promise.resolve());
+      : resolvedPromise());
   }
 
   /**
@@ -168,7 +169,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.clientIdPromise_ = this.clientIdService_.then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
-          /* consent */ Promise.resolve()
+          /* consent */ resolvedPromise()
         );
       });
     }

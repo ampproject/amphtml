@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
@@ -61,7 +62,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     super(element);
 
     /** @private {!Promise} */
-    this.consentPromise_ = Promise.resolve();
+    this.consentPromise_ = resolvedPromise();
 
     /**
      * The html id of the `amp-user-notification` element.
@@ -281,7 +282,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
       user().fine(TAG, 'User has opted out. No hits will be sent.');
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.generateRequests_();
@@ -293,7 +294,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
       );
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     this.processExtraUrlParams_(
@@ -425,7 +426,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
-      return Promise.resolve();
+      return resolvedPromise();
     }
     try {
       return this.analyticsGroup_.addTrigger(
@@ -436,7 +437,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
-      return Promise.resolve();
+      return resolvedPromise();
     }
   }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
@@ -255,7 +256,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**

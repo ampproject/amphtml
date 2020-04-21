@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../src/resolvedPromise';
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
@@ -272,7 +273,7 @@ export class AmpImg extends BaseElement {
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.element.getLayoutWidth() <= 0) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return this.loadPromise(img);
   }

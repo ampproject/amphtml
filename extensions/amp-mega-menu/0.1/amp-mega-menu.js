@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
@@ -104,7 +105,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
       this.maskElement_ = this.createMaskElement_();
     }
 
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /** @override */

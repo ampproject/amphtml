@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
@@ -415,7 +416,7 @@ export class AmpSelector extends AMP.BaseElement {
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // There is a change of the `selected` attribute for the element
@@ -502,7 +503,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     if (this.element.hasAttribute('disabled')) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const {key} = event;
     switch (key) {
@@ -515,13 +516,13 @@ export class AmpSelector extends AMP.BaseElement {
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
-        return Promise.resolve();
+        return resolvedPromise();
       case Keys.ENTER: /* fallthrough */
       case Keys.SPACE:
         this.selectionKeyDownHandler_(event);
-        return Promise.resolve();
+        return resolvedPromise();
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -560,7 +561,7 @@ export class AmpSelector extends AMP.BaseElement {
         dir = -1;
         break;
       default:
-        return Promise.resolve();
+        return resolvedPromise();
     }
 
     event.preventDefault();

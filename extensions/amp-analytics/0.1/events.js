@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
@@ -771,7 +772,7 @@ export class SignalTracker extends EventTracker {
   /** @override */
   getElementSignal(eventType, element) {
     if (typeof element.signals != 'function') {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     return element.signals().whenSignal(eventType);
   }
@@ -831,7 +832,7 @@ export class IniLoadTracker extends EventTracker {
   /** @override */
   getElementSignal(unusedEventType, element) {
     if (typeof element.signals != 'function') {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     const signals = element.signals();
     return Promise.race([
@@ -1587,7 +1588,7 @@ export class VisibilityTracker extends EventTracker {
     const {ampdoc} = this.root;
 
     if (!ampdoc.isVisible()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     return new Promise((resolve) => {

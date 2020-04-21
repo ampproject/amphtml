@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpFormTextarea} from './amp-form-textarea';
@@ -639,7 +640,7 @@ export class AmpForm {
 
         this.handleNonXhrGet_(shouldSubmitFormElement);
         this.dirtinessHandler_.onSubmitSuccess();
-        return Promise.resolve();
+        return resolvedPromise();
       }
 
       if (event) {
@@ -718,7 +719,7 @@ export class AmpForm {
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(/* shouldSubmitFormElement */ true);
     }
-    return Promise.resolve();
+    return resolvedPromise();
   }
 
   /**
@@ -728,7 +729,7 @@ export class AmpForm {
    */
   handleXhrVerify_() {
     if (this.state_ === FormState.SUBMITTING) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
     this.setState_(FormState.VERIFYING);
     this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
@@ -1284,7 +1285,7 @@ export class AmpForm {
       );
     }
     const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
-    let p = Promise.resolve();
+    let p = resolvedPromise();
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {dev, user, userAssert} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
@@ -114,7 +115,7 @@ export class Toolbar {
    */
   attemptShow_() {
     if (this.isToolbarShown_()) {
-      return Promise.resolve();
+      return resolvedPromise();
     }
 
     // Display the elements

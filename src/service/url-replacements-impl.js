@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../resolvedPromise';
 import {
   AsyncResolverDef,
   ResolverReturnDef,
@@ -284,7 +285,7 @@ export class GlobalVariableSource extends VariableSource {
             /*OK*/ ' Cookie name, is required'
         );
 
-        let consent = Promise.resolve();
+        let consent = resolvedPromise();
 
         // If no `opt_userNotificationId` argument is provided then
         // assume consent is given by default.

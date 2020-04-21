@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {listenOncePromise} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
@@ -33,7 +34,7 @@ const BACKGROUND_OVERLAY_CLASS = 'i-amphtml-story-background-overlay';
  */
 function maybeLoadImage(url) {
   if (!url) {
-    return Promise.resolve();
+    return resolvedPromise();
   }
   const img = new Image();
   img.src = url;
