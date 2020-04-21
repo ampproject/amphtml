@@ -15,12 +15,17 @@
 # limitations under the license.
 #
 # This script builds the Java AMP Validator.
-
 set -e # Exit on error
-
+echo 'clean start';
 bazel clean
+echo 'clean done, run //:fetchAMPResources start';
 bazel run //:fetchAMPResources
+echo 'run //:fetchAMPResources done, build //:amphtml_validator_java_proto_lib start';
 bazel build //:amphtml_validator_java_proto_lib
+echo 'build //:amphtml_validator_java_proto_lib done, run //:copyValidatorJavaSource start';
 bazel run //:copyValidatorJavaSource
+echo 'run //:copyValidatorJavaSource done, build //:amphtml_validator_lib start';
 bazel build //:amphtml_validator_lib
+echo 'build //:amphtml_validator_lib done, build //:amphtml_validator_test start';
 bazel build //:amphtml_validator_test
+echo 'build //:amphtml_validator_test done';
