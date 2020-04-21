@@ -443,9 +443,8 @@ export class Bind {
    * `addedElements`.
    *
    * If `options.update` is true, evaluates and applies changes to
-   * `addedElements` after adding new bindings.
-   *
-   * If `options.evaluate` is true, evaluates but does not apply changes.
+   * `addedElements` after adding new bindings. If "evaluate",
+   * it skips the actual DOM update but caches the expression results.
    *
    * If `options.fast` is true, uses a faster scan method that requires
    * (1) elements with bindings to have the attribute `i-amphtml-binding` and
