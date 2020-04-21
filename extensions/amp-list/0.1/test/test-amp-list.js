@@ -1121,7 +1121,7 @@ describes.repeated(
               element.setAttribute('binding', 'refresh');
             });
 
-            it('should rescan() with {update: false} before FIRST_MUTATE', async () => {
+            it('should rescan() with {update: false, evaluate: false} before FIRST_MUTATE', async () => {
               const child = doc.createElement('div');
               child.setAttribute('i-amphtml-binding', '');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
@@ -1130,6 +1130,45 @@ describes.repeated(
               expect(bind.rescan).calledWithExactly([child], [], {
                 update: false,
                 fast: true,
+                evaluate: false,
+              });
+            });
+
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
+              bind.signals = () => {
+                return {get: (name) => name === 'FIRST_MUTATE'};
+              };
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
+            });
+          });
+
+          describe('binding="refresh-evaluate"', () => {
+            beforeEach(() => {
+              element.setAttribute('binding', 'refresh-evaluate');
+            });
+
+            it('should rescan() with {update: false, evaluate: true} before FIRST_MUTATE', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly([child], [], {
+                update: false,
+                fast: true,
+                evaluate: true,
               });
             });
 
