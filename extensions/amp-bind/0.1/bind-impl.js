@@ -490,11 +490,11 @@ export class Bind {
       : this.slowScan_(addedElements, removedElements);
 
     return rescanPromise.then(() => {
-      if (options.update || options.evaluate) {
+      if (options.update) {
         return this.evaluate_().then((results) =>
           this.apply_(results, {
             constrain: addedElements,
-            calculateOnly: options.evaluate,
+            evaluateOnly: options.update === 'evaluate',
           })
         );
       }
@@ -1234,7 +1234,7 @@ export class Bind {
    * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
    * @param {Array<!Element>=} opts.constrain If provided, restricts application
    *   to children of the provided elements.
-   * @param {boolean=} opts.calculateOnly If provided, caches the evaluated
+   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
    *   result on each bound element and skips the actual DOM updates.
    * @return {!Promise}
    * @private
@@ -1260,8 +1260,8 @@ export class Bind {
 
       const {element, boundProperties} = boundElement;
       const updates = this.calculateUpdates_(boundProperties, results);
-      // If this is a "calculate only" application, skip the DOM mutations.
-      if (opts.calculateOnly) {
+      // If this is a "evaluate only" application, skip the DOM mutations.
+      if (opts.evaluateOnly) {
         return;
       }
       promises.push(this.applyUpdatesToElement_(element, updates));

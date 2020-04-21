@@ -960,8 +960,7 @@ export class AmpList extends AMP.BaseElement {
             const evaluate = binding == 'refresh-evaluate';
             bind.rescan(elements, [], {
               'fast': true,
-              'update': false,
-              'evaluate': evaluate,
+              'update': evaluate ? 'evaluate' : false,
             });
           }
         });

@@ -1364,10 +1364,9 @@ describe
             expect(toRemove.textContent).to.not.equal('bar');
           });
 
-          it('{evaluate: true}', async () => {
+          it('{update: "evaluate"}', async () => {
             toAdd = createElement(env, /* container */ null, '[text]="x"');
-
-            const options = {update: false, fast: false, evaluate: true};
+            const options = {update: 'evaluate', fast: false};
 
             // `toRemove` is updated normally before removal.
             await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});

@@ -1130,7 +1130,6 @@ describes.repeated(
               expect(bind.rescan).calledWithExactly([child], [], {
                 update: false,
                 fast: true,
-                evaluate: false,
               });
             });
 
@@ -1166,9 +1165,8 @@ describes.repeated(
               await list.layoutCallback();
               expect(bind.rescan).to.have.been.calledOnce;
               expect(bind.rescan).calledWithExactly([child], [], {
-                update: false,
+                update: 'evaluate',
                 fast: true,
-                evaluate: true,
               });
             });
 
