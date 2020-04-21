@@ -17,7 +17,7 @@
 import * as ast from '../parsers/css-expr-ast';
 import {parseCss} from '../parsers/css-expr';
 
-describes.sandboxed('CSS parse', () => {
+describes.sandboxed('CSS parse', {}, () => {
   /**
    * @param {string} cssString
    * @return {string}
