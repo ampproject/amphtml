@@ -20,6 +20,7 @@ import {
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
+import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp-consent',
@@ -36,7 +37,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.skip('should work with client side decision', async () => {
+    it('should work with client side decision', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
 
@@ -95,7 +96,9 @@ describes.endtoend(
         'postPromptUi': false,
       });
 
-      // Check the analytics request consentState
+      // Check the analytics request consentState. Wait for 1 second for the
+      // request to arrive to avoid flaky test.
+      await sleep(3000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;
