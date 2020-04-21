@@ -1822,21 +1822,17 @@ describes.realWin(
         await createStoryWithPages(1, ['cover'], true);
 
         await story.layoutCallback();
-        story
-          .layoutCallback()
-          .then(() =>
-            story.activePage_.element
-              .signals()
-              .whenSignal(CommonSignals.LOAD_END)
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.true;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
-          .then(() => {
-            expect(
-              story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE)
-            ).to.be.true;
-            expect(
-              story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)
-            ).to.be.true;
-          });
+        ).to.be.true;
       });
 
       it('should set playable to false if page does not have playable', async () => {
@@ -1846,10 +1842,14 @@ describes.realWin(
         await story.activePage_.element
           .signals()
           .whenSignal(CommonSignals.LOAD_END);
-        expect(story.storeService_.get(StateProperty.STORY_HAS_PLAYABLE_STATE))
-          .to.be.false;
-        expect(story.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE))
-          .to.be.false;
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.false;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+          )
+        ).to.be.false;
       });
     });
   }

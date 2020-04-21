@@ -148,15 +148,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
   it('should show paused button if story has playable', () => {
     systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    expect(systemLayer.getShadowRoot()).to.have.class(
-      'i-amphtml-story-has-playable'
-    );
-  });
-
-  it('should show paused button if story has playable', () => {
-    systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
     expect(systemLayer.getShadowRoot()).to.have.class(
       'i-amphtml-story-has-playable'
     );
@@ -164,8 +156,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
   it('should enable paused button if page has playable', () => {
     systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
     expect(systemLayer.getShadowRoot()).to.have.attribute(
       'i-amphtml-current-page-has-playable'
     );
@@ -173,8 +165,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
   it('should disable paused button if page does not has playable', () => {
     systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, false);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, false);
     expect(systemLayer.getShadowRoot()).to.not.have.attribute(
       'i-amphtml-current-page-has-playable'
     );
@@ -183,8 +175,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   it('setting paused state to true should show the paused button', () => {
     systemLayer.build();
 
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
     storeService.dispatch(Action.TOGGLE_PAUSED, true);
     expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
@@ -192,8 +184,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   it('setting paused state to false should show the play button', () => {
     systemLayer.build();
 
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
     storeService.dispatch(Action.TOGGLE_PAUSED, false);
     expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
   });
@@ -201,8 +193,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   it('click on the play button should change state to false', () => {
     systemLayer.build();
 
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
     storeService.dispatch(Action.TOGGLE_PAUSED, true);
     systemLayer
       .getShadowRoot()
@@ -215,8 +207,8 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   it('click on the pause button should change state to true', () => {
     systemLayer.build();
 
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
-    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
     storeService.dispatch(Action.TOGGLE_PAUSED, false);
     systemLayer
       .getShadowRoot()

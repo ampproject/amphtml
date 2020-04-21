@@ -2587,13 +2587,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updatePausedIcon_() {
-    const containsPlayableElement = !!this.element.querySelector(
-      'amp-audio, amp-video, [background-audio], amp-story-page.auto-advance-after'
+    const containsPlayableElement = !!this.element.scopedQuerySelectorAll(
+      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+    );
+
+    const storyHasBackgroundAudio = this.element.hasAttribute(
+      'background-audio'
     );
 
     this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_PLAYABLE,
-      containsPlayableElement
+      Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
+      containsPlayableElement || storyHasBackgroundAudio
     );
   }
 

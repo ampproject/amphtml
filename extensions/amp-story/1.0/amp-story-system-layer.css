@@ -195,6 +195,7 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
+.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -213,8 +214,8 @@
   display: block !important;
 }
 
-.i-amphtml-story-mobile .i-amphtml-paused-display {
-  display: none !important;
+.i-amphtml-story-desktop-panels .i-amphtml-paused-display, .i-amphtml-story-desktop-fullbleed .i-amphtml-paused-display {
+  display: block !important;
 }
 
 .i-amphtml-story-system-layer:not([i-amphtml-current-page-has-playable]) .i-amphtml-paused-display * {

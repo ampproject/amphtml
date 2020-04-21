@@ -198,16 +198,14 @@ const TEMPLATE = {
           }),
           children: [
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
               }),
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
               }),
             },
@@ -426,7 +424,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.STORY_HAS_PLAYABLE_STATE,
+      StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
       (hasPlayable) => {
         this.onStoryHasPlayableStateUpdate_(hasPlayable);
       },
@@ -482,7 +480,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_HAS_PLAYABLE_STATE,
+      StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
       (hasPlayable) => {
         this.onPageHasPlayableStateUpdate_(hasPlayable);
       },
@@ -644,6 +642,11 @@ export class SystemLayer {
         : this.getShadowRoot().removeAttribute(
             CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE
           );
+      this.getShadowRoot()
+        .querySelectorAll('.i-amphtml-paused-display button')
+        .forEach((button) => {
+          button.disabled = !pageHasPlayable;
+        });
     });
   }
 
@@ -713,7 +716,6 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
-      shadowRoot.classList.remove('i-amphtml-story-mobile');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
@@ -721,9 +723,6 @@ export class SystemLayer {
           break;
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
-          break;
-        case UIType.MOBILE:
-          shadowRoot.classList.add('i-amphtml-story-mobile');
           break;
       }
     });
@@ -794,9 +793,7 @@ export class SystemLayer {
    * @private
    */
   onPausedClick_(paused) {
-    if (this.storeService_.get(StateProperty.PAGE_HAS_PLAYABLE_STATE)) {
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
-    }
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
   }
 
   /**

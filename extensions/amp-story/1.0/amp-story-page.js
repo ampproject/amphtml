@@ -1434,13 +1434,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   checkPageHasPlayable_() {
     const pageHasPlayable =
+      this.isAutoAdvance() ||
       this.element.hasAttribute('background-audio') ||
-      this.element.hasAttribute('auto-advance-after') ||
-      this.element.querySelector('amp-audio') ||
-      this.element.querySelector('amp-video');
+      this.getAllMedia_().length > 0;
 
     this.storeService_.dispatch(
-      Action.TOGGLE_PAGE_HAS_PLAYABLE,
+      Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
       pageHasPlayable
     );
   }
