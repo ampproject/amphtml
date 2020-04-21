@@ -171,6 +171,12 @@ function gitCommitterEmail() {
 /**
  * Returns list of commit SHAs and their cherry-pick status from master.
  *
+ * `git cherry <branch>` returns a list of commit SHAs. While the exact
+ * mechanism is too complicated for this comment (run `git help cherry` for a
+ * full explanation), the gist of it is that commits that were cherry-picked
+ * from <branch> are prefixed with '- ', and those that were not are prefixed
+ * with '+ '.
+ *
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
@@ -184,13 +190,13 @@ function gitCherryMaster() {
 }
 
 /**
- * Returns the timestamp of a commit on the local branch.
+ * Returns (UTC) time of a commit on the local branch, in %y%m%d%H%M%S format.
  *
  * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
- *   commit to get the time of. Leave out or set to empty string for HEAD.
- * @return {number}
+ *   commit to get the time of.
+ * @return {string}
  */
-function gitCommitFormattedTime(ref = '') {
+function gitCommitFormattedTime(ref = 'HEAD') {
   return getStdout(
     `TZ=UTC git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
