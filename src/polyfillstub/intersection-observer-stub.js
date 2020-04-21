@@ -28,6 +28,7 @@ const UPGRADERS = '_upgraders';
 /**
  * @param {!Window} win
  * @return {boolean}
+ * @visibleForTesting
  */
 export function shouldLoadPolyfill(win) {
   return (
@@ -35,6 +36,17 @@ export function shouldLoadPolyfill(win) {
     win.IntersectionObserver === IntersectionObserverStub ||
     !win.IntersectionObserverEntry
   );
+}
+
+/**
+ * @param {!Window} win
+ */
+export function scheduleUpgradeIfNeeded(win) {
+  if (shouldLoadInObPolyfill(win)) {
+    Services.extensionsFor(win).preloadExtension(
+      'amp-intersection-observer-polyfill'
+    );
+  }
 }
 
 /**

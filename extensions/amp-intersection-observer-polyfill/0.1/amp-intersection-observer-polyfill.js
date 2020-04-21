@@ -24,7 +24,7 @@ const TAG = 'amp-intersection-observer-polyfill';
  * @param {!Window} win
  * @return {!Object}
  */
-function install(win) {
+function upgrade(win) {
   upgradePolyfill(win, () => {
     installIntersectionObserver();
     // TODO(dvoytenko): hookup 3p host updater for inabox.
@@ -36,11 +36,11 @@ function install(win) {
  * Registers the polyfill.
  * @param {!Window} win
  */
-export function installIntersectionObserverPolyfill(win) {
-  registerServiceBuilder(win, TAG, install, /* instantiate */ true);
+export function upgradeIntersectionObserverPolyfill(win) {
+  registerServiceBuilder(win, TAG, upgrade, /* instantiate */ true);
 }
 
 // eslint-disable-next-line no-unused-vars
 AMP.extension(TAG, '0.1', function (AMP) {
-  installIntersectionObserverPolyfill(window);
+  upgradeIntersectionObserverPolyfill(window);
 });
