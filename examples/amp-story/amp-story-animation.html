@@ -33,13 +33,9 @@
           </div>
         </amp-story-grid-layer>
         <amp-story-animation layout="nodisplay">
-          <!--
-            TODO(alanorozco, https://go.amp.dev/issue/27758):
-            Remove parent for scoping selector.
-          -->
           <script type="application/json">
             {
-              "selector": "#cover .animate",
+              "selector": ".animate",
               "duration": "1s",
               "keyframes": {"transform": "rotate(360deg)"}
             }
@@ -58,13 +54,9 @@
           </div>
         </amp-story-grid-layer>
         <amp-story-animation layout="nodisplay">
-          <!--
-            TODO(alanorozco, https://go.amp.dev/issue/27758):
-            Remove parent for scoping selector.
-          -->
           <script type="application/json">
             {
-              "selector": "#page1 .animate",
+              "selector": ".animate",
               "duration": "0.5s",
               "keyframes": [
                 {"transform": "scale(1)"},
