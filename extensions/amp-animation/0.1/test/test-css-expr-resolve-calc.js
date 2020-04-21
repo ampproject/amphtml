@@ -446,6 +446,13 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       }
     }
 
+    it('should always consider as non-const', () => {
+      expect(ast.isVarCss('min(10px)')).to.be.true;
+      expect(ast.isVarCss('max(10px)', normalize)).to.be.true;
+      expect(ast.isVarCss('clamp(10px 20px 30px)', normalize)).to.be.true;
+      expect(ast.isVarCss('min(10em)', normalize)).to.be.true;
+    });
+
     test(
       'should return for a single value',
       [new ast.CssLengthNode(10, 'px')],
