@@ -16,7 +16,7 @@
 
 import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
 import {registerServiceBuilder} from '../../../src/service';
-import {upgradePolyfill} from '../../../src/polyfills/intersection-observer';
+import {upgradePolyfill} from '../../../src/polyfillstub/intersection-observer-stub';
 
 const TAG = 'amp-intersection-observer-polyfill';
 

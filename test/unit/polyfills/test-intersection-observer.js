@@ -16,11 +16,13 @@
 
 import {
   IntersectionObserverStub,
-  install,
-  installForChildWin,
   resetSubsForTesting,
   shouldLoadPolyfill,
   upgradePolyfill,
+} from '../../../src/polyfillstub/intersection-observer-stub';
+import {
+  install,
+  installForChildWin,
 } from '../../../src/polyfills/intersection-observer';
 
 class NativeIntersectionObserver {

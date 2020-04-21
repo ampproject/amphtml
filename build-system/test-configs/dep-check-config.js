@@ -374,6 +374,23 @@ exports.rules = [
     mustNotDependOn: 'src/base-element.js',
   },
   {
+    filesMatching: 'src/polyfills/**/*.js',
+    mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfills/fetch.js->src/log.js',
+      'src/polyfills/fetch.js->src/types.js',
+      'src/polyfills/fetch.js->src/json.js',
+      'src/polyfills/fetch.js->src/utils/object.js',
+      'src/polyfills/fetch.js->src/utils/bytes.js',
+      'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
+    ],
+  },
+  {
+    filesMatching: 'src/polyfillstub/**/*.js',
+    mustNotDependOn: '**/*.js',
+  },
+  {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
     allowlist: [
@@ -395,11 +412,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
-      'src/runtime.js->src/polyfills/intersection-observer.js',
-      // This is the polyfilling extension to upgrade IntersectionObserver
-      // from a stub to the actual implementation.
-      'extensions/amp-intersection-observer-polyfill/0.1/amp-intersection-observer-polyfill.js->' +
-        'src/polyfills/intersection-observer.js',
     ],
   },
   {

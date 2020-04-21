@@ -42,7 +42,7 @@ import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
-import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/intersection-observer';
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfillstub/intersection-observer-stub';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
