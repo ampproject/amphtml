@@ -320,6 +320,13 @@ requirement: {
   whitelist: 'ads/google/deprecated_doubleclick.js'
 }
 
+requirement: {
+  type: RESTRICTED_NAME_CALL
+  error_message: 'import resolvedPromise instead of calling Promise.resolve'
+  value: 'Promise.resolve:function(*),!Promise)'
+}
+
+
 # Cookies
 
 requirement: {
