@@ -331,6 +331,7 @@ css {
     protocol: "data"
     allow_empty: true
   }
+  expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
   declaration_list: "AMP_ONLY_DECLARATIONS"
@@ -364,6 +365,7 @@ css {
     protocol: "data"
     allow_empty: true
   }
+  expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
   declaration_list: "AMP_ONLY_DECLARATIONS"
@@ -398,6 +400,7 @@ css {
     protocol: "data"
     allow_empty: true
   }
+  expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
@@ -427,6 +430,7 @@ css {
     protocol: "data"
     allow_empty: true
   }
+  expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }

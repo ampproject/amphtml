@@ -547,14 +547,36 @@ class ParsedDocCssSpec {
     return this.spec_.enabledBy;
   }
 
-  /** @return {!Object<string, !generated.CssDeclaration>} */
-  cssDeclarationByName() {
-    return this.cssDeclarationByName_;
+  /**
+   * @return {?generated.CssDeclaration}
+   * @param {string} candidate
+   * Returns the CssDeclaration rules for a matching css declaration name, if is
+   * found, else null.
+   */
+  cssDeclarationByName(candidate) {
+    let key = candidate.toLowerCase();
+    if (this.spec_.expandVendorPrefixes) key = parse_css.stripVendorPrefix(key);
+    const cssDeclaration = this.cssDeclarationByName_[key];
+    if (cssDeclaration !== undefined) {
+      return cssDeclaration;
+    }
+    return null;
   }
 
-  /** @return {!Object<string, !generated.CssDeclaration>} */
-  cssDeclarationSvgByName() {
-    return this.cssDeclarationSvgByName_;
+  /**
+   * @return {?generated.CssDeclaration}
+   * @param {string} candidate
+   * Returns the CssDeclaration rules for a matching css declaration name, if is
+   * found, else null.
+   */
+  cssDeclarationSvgByName(candidate) {
+    let key = candidate.toLowerCase();
+    if (this.spec_.expandVendorPrefixes) key = parse_css.stripVendorPrefix(key);
+    const cssDeclaration = this.cssDeclarationSvgByName_[key];
+    if (cssDeclaration !== undefined) {
+      return cssDeclaration;
+    }
+    return null;
   }
 
   /** @return {!ParsedUrlSpec} */
@@ -572,10 +594,10 @@ class ParsedDocCssSpec {
  * TagSpecs specify attributes that are valid for a particular tag.
  * They can also reference lists of attributes (AttrLists), thereby
  * sharing those definitions. This abstraction instantiates
- * ParsedAttrSpec for each generated.AttrSpec (from validator-*.protoascii, our
- * specification file) exactly once, and provides quick access to the
- * attr spec names as well, including for simple attr specs (those
- * which only have a name but no specification for their value).
+ * ParsedAttrSpec for each generated.AttrSpec (from validator-*.protoascii,
+ * our specification file) exactly once, and provides quick access to the attr
+ * spec names as well, including for simple attr specs (those which only have
+ * a name but no specification for their value).
  * @private
  */
 class ParsedAttrSpecs {
@@ -644,8 +666,9 @@ const RecordValidated = {
 };
 
 /**
- * We only track (that is, add them to Context.RecordTagspecValidated) validated
- * tagspecs as necessary. That is, if it's needed for document scope validation:
+ * We only track (that is, add them to Context.RecordTagspecValidated)
+ * validated tagspecs as necessary. That is, if it's needed for document scope
+ * validation:
  * - Mandatory tags
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
@@ -665,8 +688,9 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
   // output less verbose even if the tag is failing.
   if (tag.mandatory || tagSpecIdsToTrack.hasOwnProperty(tagSpecId))
     return RecordValidated.ALWAYS;
-  // Unique and similar can introduce requirements, ie: there cannot be another
-  // such tag. We don't want to introduce requirements for failing tags.
+  // Unique and similar can introduce requirements, ie: there cannot be
+  // another such tag. We don't want to introduce requirements for failing
+  // tags.
   if (tag.unique || tag.requires.length > 0 || tag.uniqueWarning)
     return RecordValidated.IF_PASSING;
   return RecordValidated.NEVER;
@@ -894,8 +918,8 @@ class ParsedTagSpec {
   }
 
   /**
-   * Returns true if this tagSpec contains an attribute of name "type" and value
-   * "application/json".
+   * Returns true if this tagSpec contains an attribute of name "type" and
+   * value "application/json".
    * @return {boolean}
    */
   isTypeJson() {
@@ -911,8 +935,8 @@ class ParsedTagSpec {
   }
 
   /**
-   * Returns true if this TagSpec should be used for the given type identifiers
-   * based on the TagSpec's disabled_by or enabled_by fields.
+   * Returns true if this TagSpec should be used for the given type
+   * identifiers based on the TagSpec's disabled_by or enabled_by fields.
    * @param {!Array<string>} typeIdentifiers
    * @return {boolean}
    */
@@ -1533,8 +1557,8 @@ class TagStack {
   }
 
   /**
-   * Update tagstack state after validating an encountered tag. Called with the
-   * best matching specs, even if not a match.
+   * Update tagstack state after validating an encountered tag. Called with
+   * the best matching specs, even if not a match.
    * @param {!parserInterface.ParsedHtmlTag} encounteredTag
    * @param {!ValidateTagResult} referencePointResult
    * @param {!ValidateTagResult} tagResult
@@ -1686,8 +1710,8 @@ class TagStack {
   }
 
   /**
-   * The spec_name of the parent of the current tag if one exists, otherwise the
-   * tag_name.
+   * The spec_name of the parent of the current tag if one exists, otherwise
+   * the tag_name.
    * @return {string}
    */
   parentTagSpecName() {
@@ -1752,8 +1776,8 @@ class TagStack {
   }
 
   /**
-   * Tells the parent of the current stack entry that its last child must be me
-   * (the current stack entry).
+   * Tells the parent of the current stack entry that its last child must be
+   * me (the current stack entry).
    * @param {string} tagName The current stack entry's tag name.
    * @param {string} url The current stack entry's spec url.
    * @param {!LineCol} lineCol
@@ -1795,7 +1819,8 @@ class TagStack {
   }
 
   /**
-   * @return {boolean} true if this within <script type=application/json>. Else
+   * @return {boolean} true if this within <script type=application/json>.
+   *     Else
    * false.
    */
   isScriptTypeJsonChild() {
@@ -1835,7 +1860,8 @@ class TagStack {
   }
 
   /**
-   * Returns true if the current tag has an ancestor which set the given marker.
+   * Returns true if the current tag has an ancestor which set the given
+   * marker.
    * @param {!generated.AncestorMarker.Marker} query
    * @return {boolean}
    */
@@ -1896,8 +1922,8 @@ class TagStack {
   }
 
   /**
-   * Updates the allowed descendants list if a tag introduced constraints. This
-   * is called when exiting a tag.
+   * Updates the allowed descendants list if a tag introduced constraints.
+   * This is called when exiting a tag.
    */
   unSetDescendantConstraintList() {
     if (this.hasDescendantConstraintLists()) {
@@ -2032,10 +2058,7 @@ class InvalidDeclVisitor extends parse_css.RuleVisitor {
 
   /** @inheritDoc */
   visitDeclaration(declaration) {
-    // Use the list that includes SVG declarations for style tags, since these
-    // rules can apply to inline SVG elements.
-    const declName = parse_css.stripVendorPrefix(declaration.name);
-    if (!this.spec.cssDeclarationSvgByName().hasOwnProperty(declName)) {
+    if (!this.spec.cssDeclarationByName(declaration.name)) {
       this.context.addError(
           generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
           new LineCol(declaration.line, declaration.col),
@@ -2560,8 +2583,8 @@ class ExtensionsContext {
   }
 }
 
-// If any script in the page uses LTS, all scripts must use LTS. This is used to
-// record when a script is seen and validate following script tags.
+// If any script in the page uses LTS, all scripts must use LTS. This is used
+// to record when a script is seen and validate following script tags.
 /** @enum {string} */
 const ScriptReleaseVersion = {
   UNKNOWN: 'UNKNOWN',
@@ -2594,8 +2617,8 @@ function ExtensionScriptNameAttribute(tag) {
 function ExtensionScriptName(tag) {
   const nameAttr = ExtensionScriptNameAttribute(tag);
   if (nameAttr) {
-    // Extension script names are required to be in lowercase by the validator,
-    // so we don't need to lowercase them here.
+    // Extension script names are required to be in lowercase by the
+    // validator, so we don't need to lowercase them here.
     return tag.attrsByKey()[nameAttr] || '';
   }
   return '';
@@ -3079,8 +3102,8 @@ class Context {
   }
 
   /**
-   * Returns true iff `spec` should be used for the type identifiers recorded in
-   * this context, as seen in the document so far. If called before type
+   * Returns true iff `spec` should be used for the type identifiers recorded
+   * in this context, as seen in the document so far. If called before type
    * identifiers have been recorded, will always return false.
    * @param {!ParsedDocCssSpec} spec
    * @return {boolean}
@@ -3092,9 +3115,9 @@ class Context {
 
   /**
    * Returns the first (there should be at most one) DocCssSpec which matches
-   * both the html format and type identifiers recorded so far in this context.
-   * If called before identifiers have been recorded, it may return an incorrect
-   * selection.
+   * both the html format and type identifiers recorded so far in this
+   * context. If called before identifiers have been recorded, it may return
+   * an incorrect selection.
    * @return {?ParsedDocCssSpec}
    */
   matchingDocCssSpec() {
@@ -3405,13 +3428,13 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
  * @return {string}
  */
 function urlProtocol(urlStr, url) {
-  // Technically, an URL such as "script :alert('foo')" is considered a relative
-  // URL, similar to "./script%20:alert(%27foo%27)" since space is not a legal
-  // character in a URL protocol. This is what URL will determine.
-  // However, some very old browsers will ignore whitespace in URL protocols and
-  // will treat this as javascript execution. We must be safe regardless of the
-  // client. This RE is much more aggressive at extracting a protcol than
-  // URL for this reason.
+  // Technically, an URL such as "script :alert('foo')" is considered a
+  // relative URL, similar to "./script%20:alert(%27foo%27)" since space is
+  // not a legal character in a URL protocol. This is what URL will determine.
+  // However, some very old browsers will ignore whitespace in URL protocols
+  // and will treat this as javascript execution. We must be safe regardless
+  // of the client. This RE is much more aggressive at extracting a protcol
+  // than URL for this reason.
   const re = /^([^:\/?#.]+):.*$/;
   const match = re.exec(urlStr);
   let protocol = '';
@@ -3543,9 +3566,9 @@ function validateAttrValueProperties(
  */
 function validateNonTemplateAttrValueAgainstSpec(
     parsedAttrSpec, context, attr, tagSpec, result) {
-  // The value, value_regex, value_url, and value_properties fields are treated
-  // like a oneof, but we're not using oneof because it's a feature that was
-  // added after protobuf 2.5.0 (which our open-source version uses).
+  // The value, value_regex, value_url, and value_properties fields are
+  // treated like a oneof, but we're not using oneof because it's a feature
+  // that was added after protobuf 2.5.0 (which our open-source version uses).
   // begin oneof {
   const spec = parsedAttrSpec.getSpec();
   if (spec.addValueToSet !== null) {
@@ -3781,8 +3804,8 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
 }
 
 /**
- * Calculates the effective height from the input layout, input height and tag.
- * For certain tags it uses explicit dimensions.
+ * Calculates the effective height from the input layout, input height and
+ * tag. For certain tags it uses explicit dimensions.
  * @param {!generated.AmpLayout.Layout} inputLayout
  * @param {!CssLength} inputHeight
  * @param {string} tagName
@@ -4064,8 +4087,8 @@ function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
 }
 
 /**
- * If this attribute requires an extension and we have processed all extensions,
- * report an error if that extension has not been loaded.
+ * If this attribute requires an extension and we have processed all
+ * extensions, report an error if that extension has not been loaded.
  * @param {!ParsedAttrSpec} parsedAttrSpec
  * @param {!Context} context
  * @param {!generated.ValidationResult} validationResult
@@ -4181,7 +4204,8 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
 
 /**
  * Helper method for validateLayout.
- * Validates the server-side rendering related attributes for the given layout.
+ * Validates the server-side rendering related attributes for the given
+ * layout.
  * @param {!generated.TagSpec} spec
  * @param {!parserInterface.ParsedHtmlTag} encounteredTag
  * @param {!generated.AmpLayout.Layout} inputLayout
@@ -4342,13 +4366,13 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     const code = layoutAttr === undefined ?
         generated.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
         generated.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
-    // Special case. If no layout related attributes were provided, this implies
-    // the CONTAINER layout. However, telling the user that the implied layout
-    // is unsupported for this tag is confusing if all they need is to provide
-    // width and height in, for example, the common case of creating
-    // an AMP-IMG without specifying dimensions. In this case, we emit a
-    // less correct, but simpler error message that could be more useful to
-    // the average user.
+    // Special case. If no layout related attributes were provided, this
+    // implies the CONTAINER layout. However, telling the user that the
+    // implied layout is unsupported for this tag is confusing if all they
+    // need is to provide width and height in, for example, the common case of
+    // creating an AMP-IMG without specifying dimensions. In this case, we
+    // emit a less correct, but simpler error message that could be more
+    // useful to the average user.
     if (code === generated.ValidationError.Code.IMPLIED_LAYOUT_INVALID &&
         layout == generated.AmpLayout.Layout.CONTAINER &&
         spec.ampLayout.supportedLayouts.indexOf(
@@ -4452,8 +4476,8 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
   // http://w3c.github.io/aria-in-html/
   // However, to avoid parsing differences, we restrict the set of allowed
   // characters in the document.
-  // If explicitAttrsOnly is true then do not allow data- attributes by default.
-  // They must be explicitly added to the tagSpec.
+  // If explicitAttrsOnly is true then do not allow data- attributes by
+  // default. They must be explicitly added to the tagSpec.
   const dataAttrRe = /^data-[A-Za-z0-9-_:.]*$/;
   if (!parsedTagSpec.getSpec().explicitAttrsOnly &&
       (attrName.match(dataAttrRe) !== null)) {
@@ -4503,8 +4527,8 @@ function validateAttrValueBelowTemplateTag(
 }
 
 /**
- * Determines the name of the attribute where you find the name of this sort of
- * extension.  Typically, this will return 'custom-element'.
+ * Determines the name of the attribute where you find the name of this sort
+ * of extension.  Typically, this will return 'custom-element'.
  *
  * @param {!generated.ExtensionSpec} extensionSpec
  * @return {string}
@@ -4523,8 +4547,8 @@ function getExtensionNameAttribute(extensionSpec) {
 /**
  * Validates whether an encountered attribute is validated by an
  * generated.ExtensionSpec. ExtensionSpec's validate the 'custom-element',
- * 'custom-template', and 'src' attributes. If an error is found, it is added to
- * the |result|. The return value indicates whether or not the provided
+ * 'custom-template', and 'src' attributes. If an error is found, it is added
+ * to the |result|. The return value indicates whether or not the provided
  * attribute is explained by this validation function.
  * @param {!generated.TagSpec} tagSpec
  * @param {!Context} context
@@ -4537,10 +4561,11 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 
   const {extensionSpec} = tagSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template/host-service
-  // field attribute value. The dispatch key matching is case-insensitive for
-  // faster lookups, so it still possible for the attribute value to not match
-  // if it contains upper-case letters.
+  // matches, which is based on this
+  // custom-element/custom-template/host-service field attribute value. The
+  // dispatch key matching is case-insensitive for faster lookups, so it still
+  // possible for the attribute value to not match if it contains upper-case
+  // letters.
   if (extensionSpec !== null &&
       getExtensionNameAttribute(extensionSpec) === attr.name) {
     if (extensionSpec.name !== attr.value) {
@@ -4631,12 +4656,13 @@ function validateAttrCss(
   /** @type {!Array<!tokenize_css.ErrorToken>} */
   const cssErrors = [];
   // The line/col we are passing in here is not the actual start point in the
-  // text for the attribute string. It's the start point for the tag. This means
-  // that any line/col values for tokens are also similarly offset incorrectly.
-  // For error messages, this means we just use the line/col of the tag instead
-  // of the token so as to minimize confusion. This could be improved further.
-  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
-  // offsets for use in CSS error messages.
+  // text for the attribute string. It's the start point for the tag. This
+  // means that any line/col values for tokens are also similarly offset
+  // incorrectly. For error messages, this means we just use the line/col of
+  // the tag instead of the token so as to minimize confusion. This could be
+  // improved further.
+  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute
+  // attribute offsets for use in CSS error messages.
   /** @type {!Array<!tokenize_css.Token>} */
   const tokenList = tokenize_css.tokenize(
       attrValue, context.getLineCol().getLine(), context.getLineCol().getCol(),
@@ -4688,21 +4714,18 @@ function validateAttrCss(
       }
     }
 
-    // Allowed declarations vary by context. SVG has its own set of CSS
-    // declarations not supported generally in HTML.
-    const cssDeclarationByName =
-        parsedAttrSpec.getSpec().valueDocSvgCss === true ?
-        maybeSpec.cssDeclarationSvgByName() :
-        maybeSpec.cssDeclarationByName();
-
     // Loop over the declarations found in the document, verify that they are
     // in the allowed list for this DocCssSpec, and have allowed values if
     // relevant.
     for (const declaration of declarations) {
-      const declarationName =
-          parse_css.stripVendorPrefix(declaration.name.toLowerCase());
-      const cssDeclaration = cssDeclarationByName[declarationName];
-      if (cssDeclaration === undefined) {
+      // Allowed declarations vary by context. SVG has its own set of CSS
+      // declarations not supported generally in HTML.
+      const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
+          maybeSpec.cssDeclarationSvgByName(declaration.name) :
+          maybeSpec.cssDeclarationByName(declaration.name);
+      // If there is no matching declaration in the rules, then this declaration
+      // is not allowed.
+      if (cssDeclaration === null) {
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.getLineCol(), /* params */
@@ -4731,12 +4754,13 @@ function validateAttrCss(
       }
       if (!maybeSpec.spec().allowImportant) {
         if (declaration.important)
-          // TODO(gregable): Use a more specific error message for `!important`
-          // errors.
+          // TODO(gregable): Use a more specific error message for
+          // `!important` errors.
           context.addError(
               generated.ValidationError.Code.INVALID_ATTR_VALUE,
               context.getLineCol(),
-              /* params */[attrName, getTagSpecName(tagSpec), 'CSS !important'],
+              /* params */
+              [attrName, getTagSpecName(tagSpec), 'CSS !important'],
               context.getRules().getStylesSpecUrl(), result.validationResult);
       }
       /** @type {!Array<!tokenize_css.ErrorToken>} */
@@ -4789,12 +4813,13 @@ function validateAttrDeclaration(
   /** @type {!Array<!tokenize_css.ErrorToken>} */
   const cssErrors = [];
   // The line/col we are passing in here is not the actual start point in the
-  // text for the attribute string. It's the start point for the tag. This means
-  // that any line/col values for tokens are also similarly offset incorrectly.
-  // For error messages, this means we just use the line/col of the tag instead
-  // of the token so as to minimize confusion. This could be improved further.
-  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
-  // offsets for use in CSS error messages.
+  // text for the attribute string. It's the start point for the tag. This
+  // means that any line/col values for tokens are also similarly offset
+  // incorrectly. For error messages, this means we just use the line/col of
+  // the tag instead of the token so as to minimize confusion. This could be
+  // improved further.
+  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute
+  // attribute offsets for use in CSS error messages.
   /** @type {!Array<!tokenize_css.Token>} */
   const tokenList = tokenize_css.tokenize(
       attrValue, context.getLineCol().getLine(), context.getLineCol().getCol(),
@@ -4954,9 +4979,9 @@ function validateAttributes(
       }
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', 'host-service', and 'src' attributes by calling this
-      // method.  For 'src', we also keep track whether we validated it this
-      // way, (seen_src_attr), since it's a mandatory attr.
+      // 'custom-template', 'host-service', and 'src' attributes by calling
+      // this method.  For 'src', we also keep track whether we validated it
+      // this way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
           validateAttributeInExtension(
               spec, context, attr, result.validationResult)) {
@@ -5231,8 +5256,8 @@ class TagSpecDispatch {
     if (this.tagSpecsByDispatch_ === null) {
       this.tagSpecsByDispatch_ = Object.create(null);
     }
-    // Multiple TagSpecs may have the same dispatch key. These are added in the
-    // order in which they are found.
+    // Multiple TagSpecs may have the same dispatch key. These are added in
+    // the order in which they are found.
     if (!(dispatchKey in this.tagSpecsByDispatch_)) {
       this.tagSpecsByDispatch_[dispatchKey] = [tagSpecId];
     } else {
@@ -5304,8 +5329,8 @@ class TagSpecDispatch {
       tagSpecIds.push.apply(tagSpecIds, noValueMatch);
     }
 
-    // Special case for foo=foo. We consider this a match for a dispatch key of
-    // foo="" or just <tag foo>.
+    // Special case for foo=foo. We consider this a match for a dispatch key
+    // of foo="" or just <tag foo>.
     if (attrName === attrValue) {
       tagSpecIds.push.apply(
           tagSpecIds, this.matchingDispatchKey(attrName, '', mandatoryParent));
@@ -5364,7 +5389,8 @@ function validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
         attempt);
   }
-  // Only validate that this is a valid descendant if it's not already invalid.
+  // Only validate that this is a valid descendant if it's not already
+  // invalid.
   if (attempt.validationResult.status ===
       generated.ValidationResult.Status.PASS) {
     validateDescendantTags(
@@ -5416,8 +5442,8 @@ function validateTagAgainstSpec(
  * Also passes back a reference to the tag spec which matched, if a match
  * was found.
  * Context is not mutated; instead, pending mutations are stored in the return
- * value, and are merged only if the tag spec is applied (pending some reference
- * point stuff).
+ * value, and are merged only if the tag spec is applied (pending some
+ * reference point stuff).
  * @param {!parserInterface.ParsedHtmlTag} encounteredTag
  * @param {?ParsedTagSpec} bestMatchReferencePoint
  * @param {!Context} context
@@ -5642,8 +5668,8 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
 
-    // For every tagspec that contains an ExtensionSpec, we add several TagSpec
-    // fields corresponding to the data found in the ExtensionSpec.
+    // For every tagspec that contains an ExtensionSpec, we add several
+    // TagSpec fields corresponding to the data found in the ExtensionSpec.
     this.expandExtensionSpec_ = function() {
       const numTags = this.rules_.tags.length;
       for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
@@ -5879,16 +5905,16 @@ class ParsedValidatorRules {
       if (this.isTypeIdentifier(attr.name)) {
         // Verify this type identifier is allowed for this format.
         if (formatIdentifiers.indexOf(attr.name) !== -1) {
-          // Only add the type identifier once per representation. That is, both
-          // "⚡" and "amp", which represent the same type identifier.
+          // Only add the type identifier once per representation. That is,
+          // both "⚡" and "amp", which represent the same type identifier.
           const typeIdentifier =
               attr.name.replace('\u26a1\ufe0f', 'amp').replace('\u26a1', 'amp');
           if (validationResult.typeIdentifier.indexOf(typeIdentifier) === -1) {
             validationResult.typeIdentifier.push(typeIdentifier);
             context.recordTypeIdentifier(typeIdentifier);
           }
-          // The type identifier "actions" and "transformed" are not considered
-          // mandatory unlike other type identifiers.
+          // The type identifier "actions" and "transformed" are not
+          // considered mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
               typeIdentifier !== 'transformed' &&
               typeIdentifier !== 'data-ampdevmode') {
@@ -6072,9 +6098,10 @@ class ParsedValidatorRules {
     }
 
     // If one of the error sets by error.code is a subset of the other
-    // error set's error.codes, use the subset one. It's essentially saying, if
-    // you fix these errors that we both complain about, then you'd be passing
-    // for my tagspec, but not the other one, regardless of specificity.
+    // error set's error.codes, use the subset one. It's essentially saying,
+    // if you fix these errors that we both complain about, then you'd be
+    // passing for my tagspec, but not the other one, regardless of
+    // specificity.
     if (this.isErrorSubset_(resultB.errors, resultA.errors)) {
       return true;
     }
@@ -6466,8 +6493,8 @@ const ValidationHandler =
       return;
     }
     // So now we compare the attributes from the tag that we encountered
-    // (htmlparser.HtmlParser sent us a startTag event for it earlier) with the
-    // attributes from the effective body tag that we're just receiving
+    // (htmlparser.HtmlParser sent us a startTag event for it earlier) with
+    // the attributes from the effective body tag that we're just receiving
     // now, which contains all attributes on body tags within the doc. It's
     // correct to think of this synthetic tag simply as a concatenation -
     // there is in general no elimination of duplicate attributes or
@@ -6515,8 +6542,8 @@ const ValidationHandler =
 
   /**
    * Callback for informing that the parser is manufacturing a <body> tag not
-   * actually found on the page. This will be followed by a startTag() with the
-   * actual body tag in question.
+   * actually found on the page. This will be followed by a startTag() with
+   * the actual body tag in question.
    * @override
    */
   markManufacturedBody() {
@@ -6619,8 +6646,9 @@ const ValidationHandler =
   }
 
   /**
-   * Callback for pcdata. I'm not sure what this is supposed to include, but it
-   * seems to be called for contents of <p> tags, looking at a few examples.
+   * Callback for pcdata. I'm not sure what this is supposed to include, but
+   * it seems to be called for contents of <p> tags, looking at a few
+   * examples.
    * @param {string} unused
    * @override
    */
@@ -6665,8 +6693,8 @@ exports.ValidationHandler = ValidationHandler;
  * Convenience function which informs caller if given ValidationError is
  * severity warning.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {!generated.ValidationError} error
@@ -6680,8 +6708,8 @@ exports.isSeverityWarning = isSeverityWarning;
 /**
  * Validates a document input as a string.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {string} inputDocContents
@@ -6826,8 +6854,8 @@ function applyFormat(format, error) {
 /**
  * Renders the error message for a single error.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {!generated.ValidationError} error
@@ -6870,8 +6898,8 @@ function errorLine(filenameOrUrl, error) {
  * Careful when modifying this - it's called from
  * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {!generated.ValidationResult} validationResult
@@ -6902,11 +6930,12 @@ exports.isAuthorStylesheet = isAuthorStylesheet;
 /**
  * This function was removed in October 2019. Older versions of the nodejs
  * amphtml-validator library still call this function, so this stub is left
- * in place for now so as not to break them. TODO(#25188): Delete this function
- * after most usage had moved to a newer version of the amphtml-validator lib.
+ * in place for now so as not to break them. TODO(#25188): Delete this
+ * function after most usage had moved to a newer version of the
+ * amphtml-validator lib.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {!generated.ValidationError} error
@@ -6921,8 +6950,8 @@ exports.categorizeError = categorizeError;
  * Convenience function which calls |CategorizeError| for each error
  * in |result| and sets its category field accordingly.
  *
- * WARNING: This is exported; htmlparser changes may break downstream users like
- * https://www.npmjs.com/package/amphtml-validator and
+ * WARNING: This is exported; htmlparser changes may break downstream users
+ * like https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
  *
  * @param {!generated.ValidationResult} result

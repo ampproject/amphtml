@@ -226,7 +226,7 @@ message BlackListedCDataRegex {
 }
 
 // This spec is used when parsing a media query inside a CSS @media rule.
-// NEXT AVAILABLE TAG: 4
+// NEXT AVAILABLE TAG: 5
 message MediaQuerySpec {
   // If issues_as_error is true, then parsing errors and invalid
   // types / features will be treated as validator errors, otherwise warnings.
@@ -281,9 +281,9 @@ message CssSpec {
 // NEXT AVAILABLE TAG: 12
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes. A
-  // of -2 (default) indicates that there is no limit (unlimited). A value of -1
-  // will always cause validation failure on match. -1 is used to implement the
-  // `amp-custom-length-check` attribute:
+  // value of -2 (default) indicates that there is no limit (unlimited). A value
+  // of -1 will always cause validation failure on match. -1 is used to
+  // implement the `amp-custom-length-check` attribute:
   // (https://github.com/ampproject/amphtml/issues/22315#issuecomment-496681165)
   optional int32 max_bytes = 1 [default = -2];
   // If provided, a URL which linking to a section / sentence in the
@@ -664,7 +664,7 @@ message TagSpec {
 // Exactly one DocCssSpec will match each AMP document. This spec defines the
 // default css rules for style attributes and publisher style tags across the
 // entire document. Rules for specific tags may be overridden by those tags.
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 20
 message DocCssSpec {
   // The html_format field tells the val:idator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
@@ -705,6 +705,10 @@ message DocCssSpec {
   // of declarations. If true, all declarations are allowed in style tags,
   // regardless of the contents of the `declaration` list.
   optional bool allow_all_declaration_in_style_tag = 10 [default = false];
+  // If true, all variants of declarations that are vendor prefixes are allowed.
+  // for example, if `gradient` is an allowed declaration and this is true, then
+  // `-webkit-gradient` is also an allowed declaration.
+  optional bool expand_vendor_prefixes = 19;
   // Any declaration listed here is allowed in custom style tags and style
   // attributes in any tag.
   repeated CssDeclaration declaration = 11;
