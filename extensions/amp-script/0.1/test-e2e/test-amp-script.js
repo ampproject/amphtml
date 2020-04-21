@@ -72,10 +72,17 @@ describes.endtoend(
       await expect(realRatio).to.equal(targetRatio);
     });
 
+    it('should not allow mutate on load in layout=container', async () => {
+      const element = await controller.findElement('amp-script#mutate-error');
+      await expect(controller.getElementAttribute(element, 'class')).to.contain(
+        'i-amphtml-broken'
+      );
+    });
+
     // In layout=container, amp-script requires mutations to be backed by
     // user gestures. This ensures that this requirement is also enforced
     // on load AKA "hydration".
-    it('should not mutate on load in layout=container', async () => {
+    it('should allow user-backed mutates in layout=container', async () => {
       const element = await controller.findElement('amp-script#mutate');
       await expect(controller.getElementAttribute(element, 'class')).to.contain(
         'i-amphtml-hydrated'
