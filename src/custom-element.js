@@ -32,7 +32,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {parseSizeList} from './size-list';
