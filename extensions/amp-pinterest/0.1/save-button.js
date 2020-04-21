@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 import {toWin} from '../../../src/types';
 

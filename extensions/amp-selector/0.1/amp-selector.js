@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
@@ -30,6 +29,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-selector';

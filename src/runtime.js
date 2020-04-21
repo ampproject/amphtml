@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
@@ -42,6 +41,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
+import {resolvedPromise} from '../resolvedPromise';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';

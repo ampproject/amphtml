@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
@@ -43,6 +42,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 

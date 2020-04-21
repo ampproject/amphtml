@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {
   AsyncResolverDef,
   ResolverReturnDef,
@@ -39,6 +38,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {resolvedPromise} from '../resolvedPromise';
 
 import {Expander} from './url-expander/expander';
 import {Services} from '../services';

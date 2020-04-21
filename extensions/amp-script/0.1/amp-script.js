@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
@@ -28,6 +27,7 @@ import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -25,6 +24,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-3d-gltf';
 

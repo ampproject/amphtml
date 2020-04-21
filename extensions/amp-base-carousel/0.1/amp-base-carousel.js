@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionSource} from './action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
@@ -38,6 +37,7 @@ import {
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 /**

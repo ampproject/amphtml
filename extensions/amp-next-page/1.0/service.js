@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
@@ -43,6 +42,7 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -27,6 +26,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';

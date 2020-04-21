@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseQueryString,
   tryDecodeUriComponent,
 } from '../../../src/url';
 import {listen} from '../../../src/event-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * @private Visible for testing.

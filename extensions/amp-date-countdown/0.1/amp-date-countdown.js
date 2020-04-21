@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */

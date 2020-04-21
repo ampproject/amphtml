@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
@@ -67,6 +66,7 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-video-docking';
 

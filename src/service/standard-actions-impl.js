@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
@@ -26,6 +25,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isFiniteNumber, toWin} from '../types';
+import {resolvedPromise} from '../resolvedPromise';
 import {startsWith} from '../string';
 import {tryFocus} from '../dom';
 

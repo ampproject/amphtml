@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
@@ -22,6 +21,7 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
+import {resolvedPromise} from '../resolvedPromise';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

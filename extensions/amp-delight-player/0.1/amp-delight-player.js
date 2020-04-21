@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -31,6 +30,7 @@ import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
@@ -31,6 +30,7 @@ import {
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {mod} from '../../../src/utils/math';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/types';
 

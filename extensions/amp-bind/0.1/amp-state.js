@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {LayoutPriority} from '../../../src/layout';
@@ -29,6 +28,7 @@ import {dict, map} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
@@ -53,6 +52,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {resolvedPromise} from '../resolvedPromise';
 import {toWin} from './types';
 import {whenContentIniLoad} from './ini-load';
 

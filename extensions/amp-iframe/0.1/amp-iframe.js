@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -38,6 +37,7 @@ import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes.js';

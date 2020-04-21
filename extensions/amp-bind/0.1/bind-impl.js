@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
@@ -41,6 +40,7 @@ import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';

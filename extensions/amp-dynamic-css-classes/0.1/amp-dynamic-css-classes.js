@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * Strips everything but the domain from referrer string.

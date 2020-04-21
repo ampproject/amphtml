@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';

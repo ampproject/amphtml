@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -24,6 +23,7 @@ import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
+import {resolvedPromise} from '../resolvedPromise';
 import {throttle} from '../utils/rate-limit';
 import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';

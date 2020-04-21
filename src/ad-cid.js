@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
+import {resolvedPromise} from '../resolvedPromise';
 
 /**
  * @param {AMP.BaseElement} adElement

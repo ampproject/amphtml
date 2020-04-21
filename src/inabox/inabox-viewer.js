@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {ViewerInterface} from '../service/viewer-interface';
 import {registerServiceBuilderForDoc} from '../service';
+import {resolvedPromise} from '../resolvedPromise';
 
 /**
  * A dummy impl of ViewerInterface for inabox.

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {devAssert} from '../log';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
+import {resolvedPromise} from '../resolvedPromise';
 import {whenDocumentComplete} from '../document-ready';
 
 /** @typedef {string|number|boolean|undefined|null} */

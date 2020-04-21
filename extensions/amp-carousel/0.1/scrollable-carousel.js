@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
@@ -24,6 +23,7 @@ import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';

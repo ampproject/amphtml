@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
 import {devAssert} from '../../../src/log';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @enum {number} */
 export const PageState = {

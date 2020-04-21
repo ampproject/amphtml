@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -35,6 +34,7 @@ import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

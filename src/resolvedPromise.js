@@ -16,6 +16,11 @@
 
 let resolved;
 
+/**
+ * Returns a cached resolved promise.
+ * Use this instead of directly calling Promise.resolve().
+ * @return {!Promise<undefined>}
+ */
 export function resolvedPromise() {
   if (!resolved) {
     return (resolved = Promise./* initializer */ resolve());

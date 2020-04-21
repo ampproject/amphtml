@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
@@ -22,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-access-poool';
 

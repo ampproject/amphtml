@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev} from '../../../src/log';
 import {listenOnce} from '../../../src/event-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'local-viewer';
 

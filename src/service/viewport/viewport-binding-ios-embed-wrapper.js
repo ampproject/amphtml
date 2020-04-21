@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../resolvedPromise';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {
@@ -25,6 +24,7 @@ import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
+import {resolvedPromise} from '../../resolvedPromise';
 import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 

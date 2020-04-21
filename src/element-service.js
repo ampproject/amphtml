@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import * as dom from './dom';
 import {
   getAmpdoc,
@@ -26,6 +25,7 @@ import {
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
+import {resolvedPromise} from '../resolvedPromise';
 import {toWin} from './types';
 import {userAssert} from './log';
 

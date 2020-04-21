@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from './visibility-state';
@@ -26,6 +25,7 @@ import {
 } from './url';
 import {applySandbox} from './3p-frame';
 import {dict, map} from './utils/object';
+import {resolvedPromise} from '../resolvedPromise';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from './style';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Messaging} from './messaging/messaging';
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const APP = '__AMPHTML__';
 const MessageType = {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {
@@ -26,6 +25,7 @@ import {
 import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {resolvedPromise} from '../resolvedPromise';
 
 const TIMEOUT_VALUE = 8000;
 

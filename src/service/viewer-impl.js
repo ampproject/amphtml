@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
@@ -40,6 +39,7 @@ import {isIframed} from '../dom';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {resolvedPromise} from '../resolvedPromise';
 import {urls} from '../config';
 
 const TAG_ = 'Viewer';

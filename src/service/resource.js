@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
@@ -27,6 +26,7 @@ import {
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
+import {resolvedPromise} from '../resolvedPromise';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
@@ -30,6 +29,7 @@ import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -28,6 +27,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

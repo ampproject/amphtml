@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {user, userAssert} from '../../../src/log';
 
 /**

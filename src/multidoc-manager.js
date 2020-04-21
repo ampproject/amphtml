@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
@@ -30,6 +29,7 @@ import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
 import {parseUrlDeprecated} from './url';
+import {resolvedPromise} from '../resolvedPromise';
 import {setStyle} from './style';
 
 /** @const @private {string} */

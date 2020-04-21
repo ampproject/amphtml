@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../src/resolvedPromise';
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
@@ -25,6 +24,7 @@ import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
 import {removeElement} from '../src/dom';
+import {resolvedPromise} from '../src/resolvedPromise';
 
 /** @const {string} */
 const TAG = 'amp-img';

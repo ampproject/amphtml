@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import * as dom from '../../../src/dom';
 import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
@@ -24,6 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {

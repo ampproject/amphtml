@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   Action,
   StateProperty,
@@ -30,6 +29,7 @@ import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;

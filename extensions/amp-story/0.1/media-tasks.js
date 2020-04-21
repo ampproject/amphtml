@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * The name for a boolean property on an element indicating whether that element

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 export const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

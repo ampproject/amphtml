@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -32,6 +31,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */

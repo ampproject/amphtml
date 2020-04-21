@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -43,6 +42,7 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
@@ -40,6 +39,7 @@ import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   setupAMPCors,
   setupInput,

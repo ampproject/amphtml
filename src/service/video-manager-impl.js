@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {ActionTrust} from '../action-constants';
 import {
   EMPTY_METADATA,
@@ -54,6 +53,7 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
+import {resolvedPromise} from '../resolvedPromise';
 import {startsWith} from '../string';
 import {toggle} from '../style';
 

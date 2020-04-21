@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
@@ -34,6 +33,7 @@ import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listen, listenOnce} from '../../../src/event-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toArray} from '../../../src/types';
 
 /** @private @const {number} */

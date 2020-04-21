@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
@@ -63,6 +62,7 @@ import {
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
 

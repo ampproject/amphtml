@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
@@ -46,6 +45,7 @@ import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {toggle} from '../../../../src/style';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.

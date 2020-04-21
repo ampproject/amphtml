@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
@@ -24,6 +23,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {childElementByAttr} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {user, userAssert} from '../../../src/log';
 
 /**

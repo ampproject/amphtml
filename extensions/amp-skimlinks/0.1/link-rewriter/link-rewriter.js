@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {userAssert} from '../../../../src/log';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */

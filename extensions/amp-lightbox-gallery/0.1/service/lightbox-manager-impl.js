@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
   AutoLightboxEvents,
@@ -36,6 +35,7 @@ import {
 } from '../../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../../src/log';
 import {map} from '../../../../src/utils/object';
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
@@ -26,6 +25,7 @@ import {
 } from '../../../src/style';
 import {dev, user, userAssert} from '../../../src/log';
 import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */

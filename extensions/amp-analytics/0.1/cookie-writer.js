@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
@@ -23,6 +22,7 @@ import {hasOwn} from '../../../src/utils/object';
 import {isCookieAllowed} from './cookie-reader';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 import {variableServiceForDoc} from './variables';

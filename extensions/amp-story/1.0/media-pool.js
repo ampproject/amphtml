@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   BlessTask,
@@ -37,6 +36,7 @@ import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
 

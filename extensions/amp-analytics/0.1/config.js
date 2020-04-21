@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -25,6 +24,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';

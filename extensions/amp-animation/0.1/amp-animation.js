@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
@@ -28,6 +27,7 @@ import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 

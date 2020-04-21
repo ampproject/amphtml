@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {childElementsByTag, iterateCursor, removeElement} from '../dom';
 import {dev, devAssert} from '../log';
+import {resolvedPromise} from '../resolvedPromise';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs

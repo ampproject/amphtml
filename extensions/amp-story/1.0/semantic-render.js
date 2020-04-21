@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.

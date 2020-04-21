@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -43,6 +42,7 @@ import {dict} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */

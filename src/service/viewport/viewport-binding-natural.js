@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../resolvedPromise';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {
@@ -24,6 +23,7 @@ import {
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {layoutRectLtwh} from '../../layout-rect';
+import {resolvedPromise} from '../../resolvedPromise';
 
 const TAG_ = 'Viewport';
 

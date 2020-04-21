@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
@@ -23,6 +22,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;

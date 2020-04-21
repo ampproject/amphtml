@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpFormTextarea} from './amp-form-textarea';
@@ -72,6 +71,7 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 

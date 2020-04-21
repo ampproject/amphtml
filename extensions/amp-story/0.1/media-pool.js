@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   BlessTask,
@@ -35,6 +34,7 @@ import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toWin} from '../../../src/types';
 
 /** @const @enum {string} */

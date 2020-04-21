@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {bytesToString, stringToBytes} from '../utils/bytes';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {parseJson} from '../json';
+import {resolvedPromise} from '../resolvedPromise';
 import {user} from '../log';
 
 /** @const {string} */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
@@ -28,6 +27,7 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;

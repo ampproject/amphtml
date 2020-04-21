@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -53,6 +52,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

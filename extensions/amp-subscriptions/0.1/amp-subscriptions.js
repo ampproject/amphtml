@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ActionStatus,
   SubscriptionAnalytics,
@@ -45,6 +44,7 @@ import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const */
 const TAG = 'amp-subscriptions';

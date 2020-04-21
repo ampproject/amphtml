@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
@@ -45,6 +44,7 @@ import {isArray, isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';

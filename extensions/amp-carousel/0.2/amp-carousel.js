@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -29,6 +28,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**

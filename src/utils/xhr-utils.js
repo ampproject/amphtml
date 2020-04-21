@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from '../services';
 import {devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
@@ -30,6 +29,7 @@ import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {resolvedPromise} from '../resolvedPromise';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];

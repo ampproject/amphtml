@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -25,6 +24,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
+import {resolvedPromise} from '../resolvedPromise';
 import PriorityQueue from './utils/priority-queue';
 
 /**

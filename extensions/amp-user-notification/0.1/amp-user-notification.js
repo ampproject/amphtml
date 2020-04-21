@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
@@ -30,6 +29,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-user-notification';

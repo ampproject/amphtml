@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;

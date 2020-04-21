@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
@@ -32,6 +31,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

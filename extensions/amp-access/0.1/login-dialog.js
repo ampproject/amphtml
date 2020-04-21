@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -22,6 +21,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrlDeprecated} from '../../../src/url';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {urls} from '../../../src/config';
 
 /** @const */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
@@ -36,6 +35,7 @@ import {dict} from '../../../src/utils/object';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

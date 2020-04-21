@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../../src/resolvedPromise';
 import {getConsentData} from './consent-util';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
+import {resolvedPromise} from '../../../../src/resolvedPromise';
 
 /**
  * @param {!JsonObject} media

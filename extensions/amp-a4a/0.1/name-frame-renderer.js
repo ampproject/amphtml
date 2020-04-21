@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**

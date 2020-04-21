@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../resolvedPromise';
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
@@ -46,6 +45,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
+import {resolvedPromise} from '../../resolvedPromise';
 import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';

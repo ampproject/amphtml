@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
@@ -34,6 +33,7 @@ import {
 } from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
+import {resolvedPromise} from '../resolvedPromise';
 import {throttle} from '../utils/rate-limit';
 
 /** @const {string} */

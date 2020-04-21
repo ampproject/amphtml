@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -31,6 +30,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';

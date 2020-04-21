@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -25,6 +24,7 @@ import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '../../../src/types';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {user} from '../../../src/log';
 
 /** @const {string} */

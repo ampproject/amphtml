@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Renderer} from './amp-ad-type-defs';
 import {devAssert} from '../../../src/log';
 import {getAmpAdTemplateHelper} from './template-validator';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * @typedef {{

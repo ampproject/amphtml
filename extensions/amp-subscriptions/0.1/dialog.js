@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {setImportantStyles, toggle} from '../../../src/style';
 
 export class Dialog {

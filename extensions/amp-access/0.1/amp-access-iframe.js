@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
@@ -24,6 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;

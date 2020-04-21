@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
@@ -23,6 +22,7 @@ import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 const TAG = 'amp-access-laterpay';
 

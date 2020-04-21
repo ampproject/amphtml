@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
@@ -21,6 +20,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {userAssert} from '../../../src/log';
 
 /**

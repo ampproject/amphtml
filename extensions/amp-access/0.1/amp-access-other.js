@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {string} */
 const TAG = 'amp-access-other';

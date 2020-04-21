@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
@@ -44,6 +43,7 @@ import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /**
  * @typedef {{

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {
@@ -34,6 +33,7 @@ import {endsWith} from '../string';
 import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
+import {resolvedPromise} from '../resolvedPromise';
 
 const TAG = 'FixedLayer';
 

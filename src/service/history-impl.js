@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../resolvedPromise';
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
 import {dev, devAssert} from '../log';
@@ -26,6 +25,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {getState} from '../history';
+import {resolvedPromise} from '../resolvedPromise';
 
 /** @private @const {string} */
 const TAG_ = 'History';

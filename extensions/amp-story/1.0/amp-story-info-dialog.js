@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -34,6 +33,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';

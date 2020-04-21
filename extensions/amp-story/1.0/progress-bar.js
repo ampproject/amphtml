@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
@@ -28,6 +27,7 @@ import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';
 import {removeChildren, scopedQuerySelector} from '../../../src/dom';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {scale, setImportantStyles} from '../../../src/style';
 
 /**

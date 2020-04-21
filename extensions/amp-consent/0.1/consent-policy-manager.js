@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
@@ -22,6 +21,7 @@ import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {map} from '../../../src/utils/object';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 import {user, userAssert} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';

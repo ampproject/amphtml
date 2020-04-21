@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {resolvedPromise} from '../../../src/resolvedPromise';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -39,6 +38,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {lastItem} from '../../../src/utils/array';
+import {resolvedPromise} from '../../../src/resolvedPromise';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;
