@@ -40,6 +40,7 @@ export function installIntersectionObserverPolyfill(win) {
   registerServiceBuilder(win, TAG, install, /* instantiate */ true);
 }
 
-AMP.extension(TAG, '0.1', function () {
+// eslint-disable-next-line no-unused-vars
+AMP.extension(TAG, '0.1', function (AMP) {
   installIntersectionObserverPolyfill(window);
 });

@@ -56,7 +56,7 @@ class NativeIntersectionObserverEntry {
   get isIntersecting() {}
 }
 
-describes.sandboxed('shouldLoadPolyfill', () => {
+describes.sandboxed('shouldLoadPolyfill', {}, () => {
   it('should not load with native', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
@@ -85,13 +85,13 @@ describes.sandboxed('shouldLoadPolyfill', () => {
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
-  it('should load when entry doesn not have isIntersecting', () => {
+  it('should not load even if entry doesn not have isIntersecting', () => {
     class IntersectionObserverEntryWithMissingIsIntersecting {}
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: IntersectionObserverEntryWithMissingIsIntersecting,
     };
-    expect(shouldLoadPolyfill(win)).to.be.true;
+    expect(shouldLoadPolyfill(win)).to.be.false;
   });
 });
 
@@ -109,6 +109,49 @@ describes.fakeWin('install', {}, (env) => {
     win.IntersectionObserver = native;
     install(win);
     expect(win.IntersectionObserver).to.equal(native);
+  });
+
+  it('should polyfill isIntersecting when absent in native', () => {
+    const {win} = env;
+    const native = function () {};
+    const nativeEntry = function () {};
+    win.IntersectionObserver = native;
+    win.IntersectionObserverEntry = nativeEntry;
+    expect('isIntersecting' in win.IntersectionObserverEntry.prototype).to.be
+      .false;
+    install(win);
+    expect(win.IntersectionObserver).to.equal(native);
+    expect(win.IntersectionObserverEntry).to.equal(nativeEntry);
+    expect('isIntersecting' in win.IntersectionObserverEntry.prototype).to.be
+      .true;
+
+    const entry = new win.IntersectionObserverEntry();
+    expect(entry).to.be.instanceOf(nativeEntry);
+    entry.intersectionRatio = 0;
+    expect(entry.isIntersecting).to.be.false;
+    entry.intersectionRatio = 1;
+    expect(entry.isIntersecting).to.be.true;
+  });
+
+  it('should keep native isIntersecting when available', () => {
+    const {win} = env;
+    const native = function () {};
+    const nativeEntry = function () {};
+    Object.defineProperty(nativeEntry.prototype, 'isIntersecting', {
+      value: 'A',
+    });
+    win.IntersectionObserver = native;
+    win.IntersectionObserverEntry = nativeEntry;
+    expect('isIntersecting' in win.IntersectionObserverEntry.prototype).to.be
+      .true;
+    install(win);
+
+    const entry = new win.IntersectionObserverEntry();
+    expect(entry).to.be.instanceOf(nativeEntry);
+    entry.intersectionRatio = 0;
+    expect(entry.isIntersecting).to.equal('A');
+    entry.intersectionRatio = 1;
+    expect(entry.isIntersecting).to.equal('A');
   });
 });
 

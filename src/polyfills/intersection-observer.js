@@ -28,6 +28,7 @@ export function install(win) {
   if (!win.IntersectionObserver) {
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
   }
+  fixEntry(win);
 }
 
 /**
@@ -35,13 +36,37 @@ export function install(win) {
  * @param {!Window} childWin
  */
 export function installForChildWin(parentWin, childWin) {
-  if (!childWin.IntersectionObserver && parentWin.IntersectionObserver) {
+  if (childWin.IntersectionObserver) {
+    fixEntry(childWin);
+  } else if (parentWin.IntersectionObserver) {
     Object.defineProperties(childWin, {
       IntersectionObserver: {get: () => parentWin.IntersectionObserver},
       IntersectionObserverEntry: {
         get: () => parentWin.IntersectionObserverEntry,
       },
     });
+  }
+}
+
+/** @param {!Window} win */
+function fixEntry(win) {
+  // Minimal polyfill for Edge 15's lack of `isIntersecting`
+  // See: https://github.com/w3c/IntersectionObserver/issues/211
+  if (
+    win.IntersectionObserverEntry &&
+    !('isIntersecting' in win.IntersectionObserverEntry.prototype)
+  ) {
+    Object.defineProperty(
+      win.IntersectionObserverEntry.prototype,
+      'isIntersecting',
+      {
+        enumerable: true,
+        configurable: true,
+        get() {
+          return this.intersectionRatio > 0;
+        },
+      }
+    );
   }
 }
 
@@ -53,10 +78,7 @@ export function shouldLoadPolyfill(win) {
   return (
     !win.IntersectionObserver ||
     win.IntersectionObserver === IntersectionObserverStub ||
-    !win.IntersectionObserverEntry ||
-    // Some browsers implement `intersectionRatio`, but not `isIntersecting`.
-    // Polyfill smooths this out.
-    !('isIntersecting' in win.IntersectionObserverEntry.prototype)
+    !win.IntersectionObserverEntry
   );
 }
 
