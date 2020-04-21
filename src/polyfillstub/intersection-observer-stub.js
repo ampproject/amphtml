@@ -23,6 +23,8 @@
  * amp-intersection-observer-polyfill extension.
  */
 
+import {Services} from '../services';
+
 const UPGRADERS = '_upgraders';
 
 /**
@@ -42,7 +44,7 @@ export function shouldLoadPolyfill(win) {
  * @param {!Window} win
  */
 export function scheduleUpgradeIfNeeded(win) {
-  if (shouldLoadInObPolyfill(win)) {
+  if (shouldLoadPolyfill(win)) {
     Services.extensionsFor(win).preloadExtension(
       'amp-intersection-observer-polyfill'
     );

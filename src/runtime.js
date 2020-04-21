@@ -41,8 +41,8 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
-import {setStyle} from './style';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
+import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyOpenPromise} from './dom';
@@ -272,7 +272,9 @@ function adoptShared(global, callback) {
   // Some deferred polyfills.
   if (
     // eslint-disable-next-line no-undef
-    (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test)
+    INTERSECTION_OBSERVER_POLYFILL ||
+    getMode().localDev ||
+    getMode().test
   ) {
     scheduleInObUpgradeIfNeeded(global);
   }
