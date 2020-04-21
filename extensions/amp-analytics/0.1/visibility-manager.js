@@ -18,7 +18,7 @@ import {
   DEFAULT_THRESHOLD,
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../src/intersection-observer-polyfill';
+} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';

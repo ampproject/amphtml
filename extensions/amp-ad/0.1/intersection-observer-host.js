@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {SubscriptionApi} from './iframe-helper';
-import {devAssert} from './log';
-import {dict} from './utils/object';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
+import {Services} from '../../../src/services';
+import {SubscriptionApi} from '../../../src/iframe-helper';
+import {devAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '../../../src/layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -38,8 +42,8 @@ export let DOMRect;
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!./layout-rect.LayoutRectDef} smaller
- * @param {!./layout-rect.LayoutRectDef} larger
+ * @param {!../../../src/layout-rect.LayoutRectDef} smaller
+ * @param {!../../../src/layout-rect.LayoutRectDef} larger
  * @return {number}
  */
 function intersectionRatio(smaller, larger) {
@@ -52,12 +56,13 @@ function intersectionRatio(smaller, larger) {
  *
  * Mutates passed in rootBounds to have x and y according to spec.
  *
- * @param {!./layout-rect.LayoutRectDef} element The element's layout rectangle
- * @param {?./layout-rect.LayoutRectDef} owner The owner's layout rect, if
+ * @param {!../../../src/layout-rect.LayoutRectDef} element The element's layout rectangle
+ * @param {?../../../src/layout-rect.LayoutRectDef} owner The owner's layout rect, if
  *     there is an owner.
- * @param {!./layout-rect.LayoutRectDef} viewport The viewport's layout rect.
+ * @param {!../../../src/layout-rect.LayoutRectDef} viewport The viewport's layout rect.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
+ * @visibleForTesting
  */
 export function getIntersectionChangeEntry(element, owner, viewport) {
   devAssert(
@@ -120,7 +125,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
  * over to the iframe if it had not requested the intersection data already via
  * a postMessage.
  */
-export class IntersectionObserver {
+export class IntersectionObserverHostForAd {
   /**
    * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe Iframe element which requested the
@@ -130,7 +135,7 @@ export class IntersectionObserver {
   constructor(baseElement, iframe, opt_is3p) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
-    /** @private @const {!./service/timer-impl.Timer} */
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
@@ -262,7 +267,6 @@ export class IntersectionObserver {
    * @private
    */
   flush_() {
-    // TODO(zhouyx): One potential place to check if element is still in doc.
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;

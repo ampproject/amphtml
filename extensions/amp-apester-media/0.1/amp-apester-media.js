@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
@@ -92,8 +92,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.mediaId_ = null;
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserverHostApi} */
+    this.intersectionObserverHostApi_ = null;
   }
 
   /**
@@ -114,8 +114,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    if (this.intersectionObserverHostApi_) {
+      this.intersectionObserverHostApi_.onViewportCallback(inViewport);
     }
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
@@ -166,8 +166,8 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
+    if (this.intersectionObserverHostApi_) {
+      this.intersectionObserverHostApi_.fire();
     }
   }
 
@@ -309,7 +309,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
-        this.intersectionObserverApi_ = new IntersectionObserverApi(
+        this.intersectionObserverHostApi_ = new IntersectionObserverHostApi(
           this,
           iframe
         );
@@ -401,8 +401,8 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
-      this.intersectionObserverApi_.destroy();
-      this.intersectionObserverApi_ = null;
+      this.intersectionObserverHostApi_.destroy();
+      this.intersectionObserverHostApi_ = null;
       this.unlisteners_.forEach((unlisten) => unlisten());
       removeElement(this.iframe_);
       this.iframe_ = null;

@@ -17,7 +17,7 @@
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserver} from '../../../src/intersection-observer';
+import {IntersectionObserverHostForAd} from './intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -63,8 +63,8 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /** @private {?IntersectionObserverHostForAd} */
+    this.intersectionObserverHost_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -101,7 +101,7 @@ export class AmpAdXOriginIframeHandler {
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
-    this.intersectionObserver_ = new IntersectionObserver(
+    this.intersectionObserverHost_ = new IntersectionObserverHostForAd(
       this.baseInstance_,
       this.iframe,
       true
@@ -411,9 +411,9 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
     }
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.destroy();
-      this.intersectionObserver_ = null;
+    if (this.intersectionObserverHost_) {
+      this.intersectionObserverHost_.destroy();
+      this.intersectionObserverHost_ = null;
     }
   }
 
@@ -573,8 +573,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
+    if (this.intersectionObserverHost_) {
+      this.intersectionObserverHost_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -585,8 +585,8 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.intersectionObserverHost_) {
+      this.intersectionObserverHost_.fire();
     }
   }
 
