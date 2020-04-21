@@ -958,6 +958,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       navigateToStub.callsFake(() => {
         /* make fake to avoid redirect */
       });
+      const loggingPromiseStub = env.sandbox
+      .stub(platform.runtime_.analytics(), 'getLoggingPromise')
+      .returns(Promise.resolve());
 
       const deferredAccountCreationResponse = new DeferredAccountCreationResponse(
         entitlements,
@@ -982,6 +985,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         method: 'POST',
       });
       expect(navigateToStub).to.be.calledWith(win, CREATE_ACCOUNT_URL);
+      expect(loggingPromiseStub).to.be.calledOnce;
     });
 
     it('should not redirect to new account creation page when user gives no consent', async () => {

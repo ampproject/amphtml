@@ -587,11 +587,17 @@ export class GoogleSubscriptionsPlatform {
               .then(
                 () => {
                   // The user authorized the creation of a linked account.
-                  // Redirect the user to URL provided for this purpose.
-                  resolve();
-                  this.navigateTo_(
-                    this.serviceConfig_['accountCreationRedirectUrl']
-                  );
+                  // Complete all the logging and then...
+                  this.runtime_
+                    .analytics()
+                    .getLoggingPromise()
+                    .then(() => {
+                      // ...redirect the user to URL provided for this purpose.
+                      resolve();
+                      this.navigateTo_(
+                        this.serviceConfig_['accountCreationRedirectUrl']
+                      );
+                    });
                 },
                 () => {
                   // The user did not authorize the creation of a linked account.
