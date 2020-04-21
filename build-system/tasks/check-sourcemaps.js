@@ -16,31 +16,18 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const astCompare = require('ast-compare');
-const babelParser = require('@babel/parser');
 const fs = require('fs');
 const log = require('fancy-log');
-const {cyan, red} = require('ansi-colors');
-const {exec, execOrDie} = require('../common/exec');
+const {cyan, green, red} = require('ansi-colors');
+const {execOrDie} = require('../common/exec');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'gulp dist --core_runtime_only --full_sourcemaps';
-const ampJs = 'src/amp.js';
 const v0JsMap = 'dist/v0.js.map';
 
 // Sourcemap URL related constants
 const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
-
-// Unpack related constants
-const unpackExecutable = './node_modules/source-map-unpacker/unmap.js';
-const unpackedDir = 'dist/unpacked/';
-const unpackCmd = `${unpackExecutable} -o ${unpackedDir} -p ${v0JsMap}`;
-const unpackedAmpJs = `${unpackedDir}${ampJs}`;
-
-// Diff related constants
-const diffExecutable = 'git diff --unified=1 --ignore-all-space --no-index';
-const diffCmd = `${diffExecutable} ${ampJs} ${unpackedAmpJs}`;
 
 /**
  * Throws an error with the given message
@@ -91,68 +78,16 @@ function checkSourcemapUrl() {
 }
 
 /**
- * Unpacks a copy of amp.js from v0.js.map.
- */
-function unpackRuntime() {
-  log(
-    'Unpacking source code from',
-    cyan(v0JsMap),
-    'to',
-    cyan(unpackedDir) + '...'
-  );
-  execOrDie(unpackCmd, {'stdio': 'ignore'});
-  if (!fs.existsSync(unpackedAmpJs)) {
-    log(
-      red('ERROR:'),
-      'Could not unpack',
-      cyan(v0JsMap),
-      'to',
-      cyan(unpackedAmpJs)
-    );
-    throwError('Error while unpacking sourcemap');
-  }
-}
-
-/**
- * Gets the AST from the JS contents of a given file
- *
- * @param {string} file
- * @return {!Object}
- */
-function getAstFromFile(file) {
-  const contents = fs.readFileSync(file, 'utf8').toString();
-  return babelParser.parse(contents, {sourceType: 'module'});
-}
-
-/**
- * Compares the unpacked runtime with the original source.
- */
-function checkUnpackedRuntime() {
-  log('Comparing', cyan(ampJs), 'with', cyan(unpackedAmpJs) + '...');
-  exec(diffCmd);
-  log('Comparing ASTs of', cyan(ampJs), 'and', cyan(unpackedAmpJs) + '...');
-  const ampJsAst = getAstFromFile(ampJs);
-  const unpackedAmpJsAst = getAstFromFile(unpackedAmpJs);
-  // TODO(rsimha): Figure out how to meaningfully compare ASTs.
-  log(ampJsAst);
-  log(unpackedAmpJsAst);
-  log(
-    astCompare(ampJsAst, unpackedAmpJsAst, {
-      hungryForWhitespace: true,
-      verboseWhenMismatches: true,
-    })
-  );
-}
-
-/**
  * Checks sourcemaps generated during minified compilation for correctness.
  * Entry point for `gulp check-sourcemaps`.
  */
 async function checkSourcemaps() {
   maybeBuild();
   checkSourcemapUrl();
-  unpackRuntime();
-  checkUnpackedRuntime();
+  // TODO(#27681): Add a meaningful check for sourcemap content that doesn't
+  // require updating a golden file for every single change to the compilation
+  // code in `build-system/`.
+  log(green('SUCCESS:'), 'All sourcemaps checks passed.');
 }
 
 module.exports = {

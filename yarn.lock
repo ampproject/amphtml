@@ -723,11 +723,6 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@babel/parser@7.9.4":
-  version "7.9.4"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.9.4.tgz#68a35e6b0319bbc014465be43828300113f2f2e8"
-  integrity sha512-bC49otXX6N0/VYhgOMh4gnP26E9xnDZK3TmbNpxYzzz9BQLBosQwfyOe9/cXUU3txYhTzLCbcqd5c8y/OmCjHA==
-
 "@babel/parser@^7.0.0", "@babel/parser@^7.1.0", "@babel/parser@^7.4.3", "@babel/parser@^7.6.0", "@babel/parser@^7.6.2":
   version "7.6.2"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.6.2.tgz#205e9c95e16ba3b8b96090677a67c9d6075b70a1"
@@ -3406,29 +3401,6 @@ assign-symbols@^1.0.0:
   resolved "https://registry.yarnpkg.com/assign-symbols/-/assign-symbols-1.0.0.tgz#59667f41fadd4f20ccbc2bb96b8d4f7f78ec0367"
   integrity sha1-WWZ/QfrdTyDMvCu5a41Pf3jsA2c=
 
-ast-compare@1.13.3:
-  version "1.13.3"
-  resolved "https://registry.yarnpkg.com/ast-compare/-/ast-compare-1.13.3.tgz#70d7421f38aa28b3c5c4b2eb9a9a6d0f3c7caeb8"
-  integrity sha512-ZbhsQq6v2dhiBDCsrvbx7WAJqAd078/PfB50UugGOGhWtZIYvSycY9w0UE85LE5flNUZsBhWQDOXZZXpVyCrbQ==
-  dependencies:
-    ast-contains-only-empty-space "^1.9.3"
-    matcher "^2.1.0"
-    type-detect "^4.0.8"
-
-ast-contains-only-empty-space@^1.9.3:
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/ast-contains-only-empty-space/-/ast-contains-only-empty-space-1.9.3.tgz#9d7fba7048b68a97b1ca0dae1bcb4a112a89e263"
-  integrity sha512-h2WEVVYrrs8pKpgMr6aVVcobHMWxKDi5boB+5xtGRbsXswhMzLcAxEIZXsassll3pDrCkmqFu1bonXhz2BkMtw==
-  dependencies:
-    ast-monkey-traverse "^1.12.8"
-
-ast-monkey-traverse@^1.12.8:
-  version "1.12.8"
-  resolved "https://registry.yarnpkg.com/ast-monkey-traverse/-/ast-monkey-traverse-1.12.8.tgz#fef90a537c4b98dcbf443759793b2bb01b0d3c85"
-  integrity sha512-lx0eJySmLGAQNoTjTj5B55YGq5j5tINlF/9E6CP8J9xfaxNNs57toQjLlt/c8i8wxyZACVy2wdwFqtdvKoMacw==
-  dependencies:
-    lodash.clonedeep "^4.5.0"
-
 ast-replace@1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/ast-replace/-/ast-replace-1.1.3.tgz#b9fc248a63fdc67a2656bef6f65d4c1d014d9a8d"
@@ -5071,11 +5043,6 @@ commander@2.15.1:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
   integrity sha512-VlfT9F3V0v+jr4yxPc5gg9s62/fIVWsd2Bk2iD435um1NlGMYdVCq+MjcXnhYq2icNOizHr1kK+5TI6H0Hy0ag==
-
-commander@2.20.0:
-  version "2.20.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
-  integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
 
 commander@5.0.0, commander@^5.0.0:
   version "5.0.0"
@@ -7789,15 +7756,6 @@ from@^0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/from/-/from-0.1.7.tgz#83c60afc58b9c56997007ed1a768b3ab303a44fe"
   integrity sha1-g8YK/Fi5xWmXAH7Rp2izqzA6RP4=
-
-fs-extra@8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.0.1.tgz#90294081f978b1f182f347a440a209154344285b"
-  integrity sha512-W+XLrggcDzlle47X/XnS7FXrXu9sDo+Ze9zpndeBxdgv88FHLm1HtmkhEwavruS6koanBjp098rUpHs65EmG7A==
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^4.0.0"
-    universalify "^0.1.0"
 
 fs-extra@9.0.0:
   version "9.0.0"
@@ -11715,13 +11673,6 @@ matcher@^2.0.0:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-matcher@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/matcher/-/matcher-2.1.0.tgz#64e1041c15b993e23b786f93320a7474bf833c28"
-  integrity sha512-o+nZr+vtJtgPNklyeUKkkH42OsK8WAfdgaJE2FNxcjLPg+5QbeEoT6vRj8Xq/iv18JlQ9cmKsEu0b94ixWf1YQ==
-  dependencies:
-    escape-string-regexp "^2.0.0"
-
 math-random@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/math-random/-/math-random-1.0.4.tgz#5dd6943c938548267016d4e34f057583080c514c"
@@ -15470,14 +15421,6 @@ source-map-support@^0.5.13, source-map-support@^0.5.5, source-map-support@^0.5.6
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
-
-source-map-unpacker@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/source-map-unpacker/-/source-map-unpacker-1.2.0.tgz#1679deec6874a8f404c3b2e188555f5f492e33a8"
-  integrity sha512-fmID4OAQinb7kx5T2crj8aWF6rVK8UyMyJ4P0BYsokrsBIEraiCDhQ6GwUxKs+vj13sizRZfScRJA3HT5ErZmQ==
-  dependencies:
-    commander "2.20.0"
-    fs-extra "8.0.1"
 
 source-map-url@^0.4.0:
   version "0.4.0"
