@@ -477,7 +477,10 @@ describe('IntersectionObserverHost', () => {
   });
 
   it('should init listeners when element is in viewport', () => {
-    const fireSpy = window.sandbox.spy(IntersectionObserverHost.prototype, 'fire');
+    const fireSpy = window.sandbox.spy(
+      IntersectionObserverHost.prototype,
+      'fire'
+    );
     const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
@@ -488,7 +491,10 @@ describe('IntersectionObserverHost', () => {
   });
 
   it('should unlisten listeners when element is out of viewport', () => {
-    const fireSpy = window.sandbox.spy(IntersectionObserverHost.prototype, 'fire');
+    const fireSpy = window.sandbox.spy(
+      IntersectionObserverHost.prototype,
+      'fire'
+    );
     const ioInstance = new IntersectionObserverHost(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);

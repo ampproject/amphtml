@@ -18,7 +18,11 @@ import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../../../src/layout-rect';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '../../../src/layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
