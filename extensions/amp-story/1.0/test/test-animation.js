@@ -437,6 +437,19 @@ describes.realWin('amp-story animations', {}, (env) => {
         .returns(runner);
     });
 
+    it('creates WebAnimation Builder with options', async () => {
+      const page = html`<div></div>`;
+      new AnimationManager(page, ampdoc);
+      await nextTick();
+      expect(
+        webAnimationService.createBuilder.withArgs(
+          env.sandbox.match({
+            scope: page,
+          })
+        )
+      ).to.have.been.calledOnce;
+    });
+
     it('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>

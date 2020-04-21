@@ -17,6 +17,8 @@ import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
+import {closestAncestorElementBySelector} from '../../../../src/dom';
+import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
@@ -1675,6 +1677,143 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
           expect(requireLayoutSpy).to.be.calledWith(amp1);
           expect(requireLayoutSpy).to.be.calledWith(amp2);
         });
+    });
+  });
+});
+
+describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
+  function scan(spec, builderOptions) {
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      builderOptions
+    );
+    env.sandbox.stub(builder, 'requireLayout');
+    const scanner = builder.createScanner_([]);
+    const success = scanner.scan(spec);
+    if (success) {
+      return scanner.requests_;
+    }
+    expect(scanner.requests_).to.have.length(0);
+    return null;
+  }
+
+  let html;
+
+  beforeEach(() => {
+    html = htmlFor(env.win.document);
+  });
+
+  it('should scope selector', () => {
+    const tree = html`
+      <div>
+        <div class="target"></div>
+        <div id="target"></div>
+        <div id="scope" ref="scope">
+          <div class="target"></div>
+          <div id="target"></div>
+        </div>
+      </div>
+    `;
+
+    const {scope} = htmlRefs(tree);
+
+    env.win.document.body.appendChild(tree);
+
+    const requests = scan(
+      [
+        {selector: '#target', duration: 200, keyframes: {}},
+        {selector: '.target', duration: 300, keyframes: {}},
+      ],
+      {scope}
+    );
+
+    expect(requests).to.have.length(2);
+
+    // #target
+    expect(requests[0].target.id).to.equal('target');
+    expect(closestAncestorElementBySelector(requests[0].target, '#scope')).to
+      .not.be.null;
+
+    // .target
+    expect(requests[1].target.className).to.deep.equal('target');
+    expect(closestAncestorElementBySelector(requests[1].target, '#scope')).to
+      .not.be.null;
+  });
+
+  it('should not scope selector if no scope is provided', () => {
+    const tree = html`
+      <div>
+        <div class="target"></div>
+        <div id="target"></div>
+        <div>
+          <div class="target"></div>
+          <div id="target"></div>
+        </div>
+      </div>
+    `;
+
+    env.win.document.body.appendChild(tree);
+
+    const requests = scan(
+      [
+        {selector: '#target', duration: 200, keyframes: {}},
+        {selector: '.target', duration: 300, keyframes: {}},
+      ],
+      {}
+    );
+
+    expect(requests).to.have.length(4);
+
+    // #target
+    expect(requests[0].target.id).to.equal('target');
+    expect(requests[1].target.id).to.equal('target');
+
+    // .target
+    expect(requests[2].target.className).to.deep.equal('target');
+    expect(requests[3].target.className).to.deep.equal('target');
+  });
+
+  it('should resolve the closest element inside scope', () => {
+    const tree = html`
+      <div class="parent">
+        <div id="scope" ref="scope">
+          <div class="parent">
+            <div id="target1" ref="target1"></div>
+          </div>
+          <div id="target2" ref="target2"></div>
+        </div>
+      </div>
+    `;
+
+    const {scope, target1, target2} = htmlRefs(tree);
+
+    env.win.document.body.appendChild(tree);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope}
+    );
+
+    const css = builder.css_;
+
+    expect(() =>
+      css.withTarget(target1, 0, () => css.getElementSize('.parent', 'closest'))
+    ).to.not.throw();
+
+    allowConsoleError(() => {
+      expect(() =>
+        css.withTarget(target2, 0, () =>
+          css.getElementSize('.parent', 'closest')
+        )
+      ).to.throw(/Element not found/);
     });
   });
 });

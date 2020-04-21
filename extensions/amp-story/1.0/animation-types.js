@@ -15,12 +15,18 @@
  */
 
 import {
+  WebAnimationBuilderOptionsDef,
   WebAnimationDef,
   WebAnimationPlayState,
   WebKeyframesDef,
 } from '../../amp-animation/0.1/web-animation-types';
 
-export {WebAnimationDef, WebAnimationPlayState, WebKeyframesDef};
+export {
+  WebAnimationBuilderOptionsDef,
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+};
 
 /** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
 export let WebKeyframesCreateFnDef;
