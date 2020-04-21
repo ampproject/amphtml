@@ -389,6 +389,9 @@ exports.rules = [
   {
     filesMatching: 'src/polyfillstub/**/*.js',
     mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfillstub/intersection-observer-stub.js->src/services.js',
+    ],
   },
   {
     filesMatching: '**/*.js',

@@ -79,7 +79,7 @@ function patchWebAnimations() {
 /**
  * Patches Intersection Observer polyfill by wrapping its body into `install`
  * function.
- * This gives us an option to controll when and how the polyfill is installed.
+ * This gives us an option to control when and how the polyfill is installed.
  * The polyfill can only be installed on the root context.
  */
 function patchIntersectionObserver() {
