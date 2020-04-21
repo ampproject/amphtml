@@ -580,7 +580,7 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        return impl.getAdUrl({}).then((adUrl) => {
+        return impl.getAdUrl().then((adUrl) => {
           expect(adUrl).to.contain('act=sa');
         });
       });
@@ -605,7 +605,7 @@ describes.realWin(
             element.setAttribute('data-no-fill', `${noFill}`);
             ampStickyAd.appendChild(element);
             doc.body.appendChild(ampStickyAd);
-            return impl.getAdUrl({}).then((url) => {
+            return impl.getAdUrl().then((url) => {
               if (notPresent) {
                 expect(url).to.not.match(
                   new RegExp(`(\\?|&)aanf=${noFill}(&|$)`)
@@ -620,14 +620,14 @@ describes.realWin(
 
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
-        return impl.getAdUrl({}).then((url) => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/\\?client=ca-someclient/);
         });
       });
       it('has correct format when width == "auto"', () => {
         element.setAttribute('width', 'auto');
         expect(impl.element.getAttribute('width')).to.equal('auto');
-        return impl.getAdUrl({}).then((url) =>
+        return impl.getAdUrl().then((url) =>
           // With exp as-use-attr-for-format off, we can't test for specific
           // numbers, but we know that the values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
@@ -636,7 +636,7 @@ describes.realWin(
       it('has correct format when height == "auto"', () => {
         element.setAttribute('height', 'auto');
         expect(impl.element.getAttribute('height')).to.equal('auto');
-        return impl.getAdUrl({}).then((url) =>
+        return impl.getAdUrl().then((url) =>
           // With exp as-use-attr-for-format off, we can't test for specific
           // numbers, but we know that the values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
@@ -648,7 +648,7 @@ describes.realWin(
         const width = element.getAttribute('width');
         const height = element.getAttribute('height');
         return impl
-          .getAdUrl({})
+          .getAdUrl()
           .then((url) =>
             expect(url).to.match(
               new RegExp(`format=${width}x${height}&w=${width}&h=${height}`)
@@ -659,21 +659,21 @@ describes.realWin(
         forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
         impl.divertExperiments();
         return impl
-          .getAdUrl({})
+          .getAdUrl()
           .then((url) => expect(url).to.match(/eid=[^&]*21062004/));
       });
       it('has control eid in adsense frmt exp and width/height numeric', () => {
         forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
         impl.divertExperiments();
         return impl
-          .getAdUrl({})
+          .getAdUrl()
           .then((url) => expect(url).to.match(/eid=[^&]*21062003/));
       });
       it('returns the right URL', () => {
         env.sandbox.stub(impl, 'isXhrAllowed').returns(true);
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-language', 'lxz');
-        return impl.getAdUrl({}).then((url) => {
+        return impl.getAdUrl().then((url) => {
           [
             /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
             /(\?|&)adk=\d+(&|$)/,
@@ -715,14 +715,14 @@ describes.realWin(
         it('sets rafmt for responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'rspv');
-          return impl.getAdUrl({}).then((url) => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=13(&|$)/);
           });
         });
         it('sets rafmt for matched content responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'mcrspv');
-          return impl.getAdUrl({}).then((url) => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=15(&|$)/);
           });
         });
@@ -730,7 +730,7 @@ describes.realWin(
           element.setAttribute('data-matched-content-ui-type', 'ui');
           element.setAttribute('data-matched-content-rows-num', 'rows');
           element.setAttribute('data-matched-content-columns-num', 'cols');
-          return impl.getAdUrl({}).then((url) => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)crui=ui(&|$)/);
             expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
             expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
@@ -738,7 +738,7 @@ describes.realWin(
         });
         it('sets appropriate is_amp for canonical', () => {
           env.sandbox.stub(impl, 'isXhrAllowed').returns(false);
-          return expect(impl.getAdUrl({})).to.eventually.match(
+          return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)is_amp=5(&|$)/
           );
         });
@@ -788,17 +788,17 @@ describes.realWin(
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
         toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-        return impl1.getAdUrl({}).then((adUrl1) => {
+        return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
           expect(adUrl1).to.not.match(/prev_slotnames/);
           expect(adUrl1).to.match(/ifi=1/);
-          return impl2.getAdUrl({}).then((adUrl2) => {
+          return impl2.getAdUrl().then((adUrl2) => {
             expect(adUrl2).to.match(/pv=1/);
             expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
             expect(adUrl2).to.not.match(/prev_slotnames/);
             expect(adUrl2).to.match(/ifi=2/);
-            return impl3.getAdUrl({}).then((adUrl3) => {
+            return impl3.getAdUrl().then((adUrl3) => {
               expect(adUrl3).to.match(/pv=2/);
               // By some quirk of the test infrastructure, when this test
               // is ran individually, each added slot after the first one
@@ -823,7 +823,7 @@ describes.realWin(
         });
         impl.win['goog_identity_prom'] = Promise.resolve(token);
         impl.buildCallback();
-        return impl.getAdUrl({}).then((url) => {
+        return impl.getAdUrl().then((url) => {
           [
             /(\?|&)adsid=abcdef(&|$)/,
             /(\?|&)jar=some_jar(&|$)/,
@@ -834,7 +834,7 @@ describes.realWin(
 
       it('includes adsense package code when present', () => {
         element.setAttribute('data-package', 'package_code');
-        return expect(impl.getAdUrl({})).to.eventually.match(
+        return expect(impl.getAdUrl()).to.eventually.match(
           /pwprc=package_code(&|$)/
         );
       });
@@ -881,7 +881,7 @@ describes.realWin(
 
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
-        return impl.getAdUrl({}).then((url) => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/format=1x1/);
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);

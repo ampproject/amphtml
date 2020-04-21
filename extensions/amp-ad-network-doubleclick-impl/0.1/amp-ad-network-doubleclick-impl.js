@@ -609,10 +609,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
