@@ -390,9 +390,16 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
+      'src/polyfills.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
+      'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
+      'src/runtime.js->src/polyfills/intersection-observer.js',
+      // This is the polyfilling extension to upgrade IntersectionObserver
+      // from a stub to the actual implementation.
+      'extensions/amp-intersection-observer-polyfill/0.1/amp-intersection-observer-polyfill.js->' +
+        'src/polyfills/intersection-observer.js',
     ],
   },
   {
