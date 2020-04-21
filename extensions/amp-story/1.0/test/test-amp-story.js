@@ -1817,7 +1817,7 @@ describes.realWin(
       });
     });
 
-    describe('amp-story playable', () => {
+    describe('amp-story play/pause', () => {
       it('should set playable to true if page has autoadvance', async () => {
         await createStoryWithPages(1, ['cover'], true);
 

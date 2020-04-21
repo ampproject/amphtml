@@ -509,7 +509,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
-      this.checkPageHasPlayable_();
+      this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
       this.startMeasuringVideoPerformance_();
@@ -1361,8 +1361,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId, NavigationDirection.PREVIOUS);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.switchTo_(pageId, NavigationDirection.PREVIOUS);
   }
 
   /**
@@ -1384,8 +1384,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId, NavigationDirection.NEXT);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.switchTo_(pageId, NavigationDirection.NEXT);
   }
 
   /**
@@ -1429,18 +1429,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has playable elements.
+   * Checks if the page has elements with playback.
    * @private
    */
-  checkPageHasPlayable_() {
-    const pageHasPlayable =
+  checkPageHasElementWithPlayback_() {
+    const pageHasElementWithPlayback =
       this.isAutoAdvance() ||
       this.element.hasAttribute('background-audio') ||
       this.getAllMedia_().length > 0;
 
     this.storeService_.dispatch(
       Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
-      pageHasPlayable
+      pageHasElementWithPlayback
     );
   }
 

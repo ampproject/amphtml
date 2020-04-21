@@ -89,6 +89,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -2583,15 +2584,14 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Shows the play/pause icon if there is a playable element in the story
+   * Shows the play/pause icon if there is an element with playback on the story.
    * @private
    */
   updatePausedIcon_() {
-    const containsPlayableElement =
-      scopedQuerySelectorAll(
-        this.element,
-        'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
-      ).length > 0;
+    const containsElementsWithPlayback = !!scopedQuerySelector(
+      this.element,
+      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+    );
 
     const storyHasBackgroundAudio = this.element.hasAttribute(
       'background-audio'
@@ -2599,7 +2599,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
-      containsPlayableElement || storyHasBackgroundAudio
+      containsElementsWithPlayback || storyHasBackgroundAudio
     );
   }
 

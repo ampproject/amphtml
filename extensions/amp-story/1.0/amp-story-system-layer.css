@@ -218,13 +218,13 @@
   display: block !important;
 }
 
-.i-amphtml-story-system-layer:not([i-amphtml-current-page-has-playable]) .i-amphtml-paused-display * {
-  opacity: 0.3;
+.i-amphtml-paused-display button[disabled] {
+  opacity: 0.3 !important;
   cursor: initial !important;
 }
 
-.i-amphtml-story-has-playable:not([paused]) .i-amphtml-story-pause-control,
-.i-amphtml-story-has-playable[paused] .i-amphtml-story-play-control {
+.i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
+.i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
   display: block !important;
 }
 

@@ -146,30 +146,44 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(shareButton.href).to.equal('http://localhost:9876/context.html');
   });
 
-  it('should show paused button if story has playable', () => {
+  it('should show paused button if story has element with playback', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
     expect(systemLayer.getShadowRoot()).to.have.class(
-      'i-amphtml-story-has-playable'
+      'i-amphtml-story-has-playback-ui'
     );
   });
 
-  it('should enable paused button if page has playable', () => {
+  it('should enable paused button if page has element with playback', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
-    expect(systemLayer.getShadowRoot()).to.have.attribute(
-      'i-amphtml-current-page-has-playable'
-    );
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.not.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.not.have.attribute('disabled');
   });
 
-  it('should disable paused button if page does not has playable', () => {
+  it('should disable paused button if page does not has elements with playback', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, false);
-    expect(systemLayer.getShadowRoot()).to.not.have.attribute(
-      'i-amphtml-current-page-has-playable'
-    );
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.have.attribute('disabled');
   });
 
   it('setting paused state to true should show the paused button', () => {

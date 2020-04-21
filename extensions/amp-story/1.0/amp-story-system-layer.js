@@ -65,10 +65,6 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
-const CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE =
-  'i-amphtml-current-page-has-playable';
-
-/** @private @const {string} */
 const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
 
 /** @private @const {string} */
@@ -425,8 +421,8 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
-      (hasPlayable) => {
-        this.onStoryHasPlayableStateUpdate_(hasPlayable);
+      (hasPlaybackUi) => {
+        this.onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi);
       },
       true /** callToInitialize */
     );
@@ -481,8 +477,8 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
-      (hasPlayable) => {
-        this.onPageHasPlayableStateUpdate_(hasPlayable);
+      (hasPlaybackUi) => {
+        this.onPageHasElementsWithPlaybackStateUpdate_(hasPlaybackUi);
       },
       true /** callToInitialize */
     );
@@ -591,15 +587,15 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to has playable state updates, determining if the story has an element that can be paused.
-   * @param {boolean} hasPlayable
+   * Reacts to story having elements with playback.
+   * @param {boolean} hasPlaybackUi
    * @private
    */
-  onStoryHasPlayableStateUpdate_(hasPlayable) {
+  onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi) {
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-has-playable',
-        hasPlayable
+        'i-amphtml-story-has-playback-ui',
+        hasPlaybackUi
       );
     });
   }
@@ -627,25 +623,16 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to the presence of playables on a page to determine if should disable
-   * or not the play/pause button.
-   * @param {boolean} pageHasPlayable
+   * Reacts to the presence of elements with playback on the page.
+   * @param {boolean} pageHasElementsWithPlayback
    * @private
    */
-  onPageHasPlayableStateUpdate_(pageHasPlayable) {
+  onPageHasElementsWithPlaybackStateUpdate_(pageHasElementsWithPlayback) {
     this.vsync_.mutate(() => {
-      pageHasPlayable
-        ? this.getShadowRoot().setAttribute(
-            CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE,
-            ''
-          )
-        : this.getShadowRoot().removeAttribute(
-            CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE
-          );
       this.getShadowRoot()
         .querySelectorAll('.i-amphtml-paused-display button')
         .forEach((button) => {
-          button.disabled = !pageHasPlayable;
+          button.disabled = !pageHasElementsWithPlayback;
         });
     });
   }

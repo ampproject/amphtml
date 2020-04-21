@@ -95,7 +95,7 @@ export let InteractiveComponentDef;
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
- *    pagePlayableState: boolean,
+ *    pageHasElementsWithPlaybackState: boolean,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -154,7 +154,7 @@ export const StateProperty = {
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
-  // Any page has playable element.
+  // Any page has elements with playback.
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
