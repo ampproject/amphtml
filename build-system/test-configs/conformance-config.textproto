@@ -322,7 +322,7 @@ requirement: {
 
 requirement: {
   type: RESTRICTED_NAME_CALL
-  error_message: 'import resolvedPromise instead of calling Promise.resolve'
+  error_message: 'import resolvedPromise() instead of calling Promise.resolve() directly.'
   value: 'Promise.resolve:function(*),!Promise)'
 }
 
