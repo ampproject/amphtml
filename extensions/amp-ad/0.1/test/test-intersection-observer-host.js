@@ -22,7 +22,7 @@ import {
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
-describe('getIntersectionChangeEntry', () => {
+describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   beforeEach(() => {
     window.sandbox.useFakeTimers();
   });
@@ -283,7 +283,7 @@ describe('getIntersectionChangeEntry', () => {
   });
 });
 
-describe('IntersectionObserverHostForAd', () => {
+describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
