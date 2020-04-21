@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  Text: Embeds videos from 3Q SDN.
+  text: Embeds videos from 3Q SDN.
 ---
 
 <!---
