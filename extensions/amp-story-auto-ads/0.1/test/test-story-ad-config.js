@@ -47,6 +47,26 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
       });
     });
 
+    it('handles valid adsense config', () => {
+      const config = {
+        type: 'adsense',
+        'data-ad-client': 'ca-pub-8588820008944775',
+      };
+      const storyAdEl = createStoryAdElementAndConfig(
+        doc,
+        doc.body, // Parent.
+        config
+      );
+      const result = new StoryAdConfig(storyAdEl).getConfig();
+      expect(result).to.eql({
+        'amp-story': '',
+        class: 'i-amphtml-story-ad',
+        layout: 'fill',
+        'data-ad-client': 'ca-pub-8588820008944775',
+        type: 'adsense',
+      });
+    });
+
     it('stringifies additional attributes passed in as objects', () => {
       const config = {
         type: 'doubleclick',
