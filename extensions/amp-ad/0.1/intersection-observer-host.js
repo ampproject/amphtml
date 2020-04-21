@@ -125,7 +125,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
  * over to the iframe if it had not requested the intersection data already via
  * a postMessage.
  */
-export class IntersectionObserverHost {
+export class IntersectionObserverHostForAd {
   /**
    * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe Iframe element which requested the

@@ -17,7 +17,7 @@
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserverHost} from './intersection-observer-host';
+import {IntersectionObserverHostForAd} from './intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -63,7 +63,7 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverHost} */
+    /** @private {?IntersectionObserverHostForAd} */
     this.intersectionObserverHost_ = null;
 
     /** @private {SubscriptionApi} */
@@ -101,7 +101,7 @@ export class AmpAdXOriginIframeHandler {
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
-    this.intersectionObserverHost_ = new IntersectionObserverHost(
+    this.intersectionObserverHost_ = new IntersectionObserverHostForAd(
       this.baseInstance_,
       this.iframe,
       true

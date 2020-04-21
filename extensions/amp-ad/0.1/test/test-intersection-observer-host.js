@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../../../../src/base-element';
 import {
-  IntersectionObserverHost,
+  IntersectionObserverHostForAd,
   getIntersectionChangeEntry,
 } from '../intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
@@ -283,7 +283,7 @@ describe('getIntersectionChangeEntry', () => {
   });
 });
 
-describe('IntersectionObserverHost', () => {
+describe('IntersectionObserverHostForAd', () => {
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
@@ -401,7 +401,7 @@ describe('IntersectionObserverHost', () => {
   });
 
   it('should not send intersection', () => {
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
@@ -412,7 +412,7 @@ describe('IntersectionObserverHost', () => {
 
   it('should send intersection', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
@@ -432,7 +432,7 @@ describe('IntersectionObserverHost', () => {
 
   it('should send more intersections', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       // Copy because arg is modified in place.
@@ -478,10 +478,10 @@ describe('IntersectionObserverHost', () => {
 
   it('should init listeners when element is in viewport', () => {
     const fireSpy = window.sandbox.spy(
-      IntersectionObserverHost.prototype,
+      IntersectionObserverHostForAd.prototype,
       'fire'
     );
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     expect(fireSpy).to.be.calledOnce;
@@ -492,10 +492,10 @@ describe('IntersectionObserverHost', () => {
 
   it('should unlisten listeners when element is out of viewport', () => {
     const fireSpy = window.sandbox.spy(
-      IntersectionObserverHost.prototype,
+      IntersectionObserverHostForAd.prototype,
       'fire'
     );
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
@@ -505,7 +505,7 @@ describe('IntersectionObserverHost', () => {
 
   it('should go into in-viewport state for initially visible element', () => {
     element.isInViewport = () => true;
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
@@ -516,7 +516,7 @@ describe('IntersectionObserverHost', () => {
 
   it('should not send intersection after destroy is called', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHost(element, testIframe);
+    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     testIframe.contentWindow.postMessage = (message) => {
