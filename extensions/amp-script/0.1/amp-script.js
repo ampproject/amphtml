@@ -419,49 +419,57 @@ export class AmpScript extends AMP.BaseElement {
       // Emit an error message for each mutation type, including count.
       Object.keys(errors).forEach((type) => {
         const count = errors[type];
+        user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
+      });
+
+      if (disallowedTypes.length > 0 && phase === Phase.MUTATING) {
+        this.workerDom_.terminate();
+
+        this.element.classList.remove('i-amphtml-hydrated');
+        this.element.classList.add('i-amphtml-broken');
+
         user().error(
           TAG,
-          'Dropped %sx "%s" mutation(s); user gesture is required with [layout=container].',
-          count,
-          this.mutationTypeToString_(type)
+          '%s was terminated due to illegal mutation.',
+          this.debugId_
         );
-      });
+      }
     });
-
-    // TODO(amphtml): flush(false) already filters all user-visible mutations,
-    // so we could just remove this code block for gentler failure mode.
-    if (!allowMutation && phase == Phase.MUTATING) {
-      this.workerDom_.terminate();
-
-      this.element.classList.remove('i-amphtml-hydrated');
-      this.element.classList.add('i-amphtml-broken');
-
-      user().error(
-        TAG,
-        '%s was terminated due to illegal mutation.',
-        this.debugId_
-      );
-    }
   }
 
   /**
    * @param {string} type
+   * @param {number} count
    * @return {string}
    */
-  mutationTypeToString_(type) {
+  mutationTypeToErrorMessage_(type, count) {
+    let target;
+
     // Matches TransferrableMutationType in worker-dom#src/transfer/TransferrableMutation.ts.
     switch (type) {
+      // Attributes and Properties
       case '0':
-        return 'ATTRIBUTES';
-      case '1':
-        return 'CHARACTER_DATA';
-      case '2':
-        return 'CHILD_LIST';
       case '3':
-        return 'PROPERTIES';
+        target = 'DOM element attributes or styles';
+        break;
+      // Character data
+      case '1':
+        target = 'textContent or the like';
+        break;
+      // Child list
+      case '2':
+        target = 'DOM element children, innerHTML, or the like';
+        break;
+      // Other
       default:
-        return 'OTHER';
+        target = 'the DOM';
+        break;
     }
+
+    return (
+      `Blocked ${count} attempts to modify ${target}.` +
+      ' For variable-sized <amp-script> containers, a user action has to happen first.'
+    );
   }
 }
 
