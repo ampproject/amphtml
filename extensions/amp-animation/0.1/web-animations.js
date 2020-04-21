@@ -1246,10 +1246,12 @@ class CssContextImpl {
           this.requireTarget_(),
           selector
         );
-        element =
-          maybeFoundInScope && this.scope_.contains(maybeFoundInScope)
-            ? maybeFoundInScope
-            : null;
+        if (
+          maybeFoundInScope &&
+          (!this.scope_ || this.scope_.contains(maybeFoundInScope))
+        ) {
+          element = maybeFoundInScope;
+        }
       } else {
         element = this.scopedQuerySelector_(selector);
       }
