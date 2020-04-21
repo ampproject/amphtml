@@ -332,7 +332,7 @@ export class VariableSource {
 
   /**
    * For email documents, all URL macros are disallowed by default.
-   * @return {?Array<string>} The allowlist of substitutable AMP variables
+   * @return {Array<string>|undefined} The allowlist of substitutable AMP variables
    * @private
    */
   getUrlMacroWhitelist_() {
