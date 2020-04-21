@@ -147,6 +147,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     );
 
     this.element.appendChild(templateEl);
+    this.element.setAttribute('aria-hidden', true);
   }
 
   /** @override */
@@ -487,6 +488,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
+      this.element.setAttribute('aria-hidden', false);
       resetStyles(this.element, ['transform', 'transition']);
 
       if (!shouldAnimate) {
@@ -530,6 +532,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
+      this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
 
       if (!shouldAnimate) {

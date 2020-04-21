@@ -66,6 +66,7 @@ export function renderPageDescription(page, videos) {
   videos.forEach((videoEl) => {
     addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
     addTagToDescriptionEl('p', videoEl.getAttribute('title'));
+    addTagToDescriptionEl('p', videoEl.getAttribute('aria-label'));
     fetchCaptions(page, videoEl).then((text) => {
       addTagToDescriptionEl('p', text);
     });

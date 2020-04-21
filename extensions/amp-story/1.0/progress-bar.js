@@ -146,6 +146,7 @@ export class ProgressBar {
     }
 
     this.root_ = this.win_.document.createElement('ol');
+    this.root_.setAttribute('aria-hidden', true);
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();

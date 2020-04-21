@@ -161,18 +161,16 @@ const TEMPLATE = {
               ],
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
               localizedLabelId:
                 LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
               localizedLabelId:
@@ -189,9 +187,8 @@ const TEMPLATE = {
           localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
-          tag: 'div',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
           localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
