@@ -75,7 +75,7 @@ const TokenStream = class {
     // line / col!) so any request past the length of the array
     // fetches that.
     return (num < this.tokens.length) ? this.tokens[num] :
-      this.tokens[this.tokens.length - 1];
+                                        this.tokens[this.tokens.length - 1];
   }
 
   /**
@@ -758,16 +758,20 @@ const kMaximumCssRecursion = 100;
  * @return {boolean}
  */
 function consumeAComponentValue(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) {return false;}
+  if (depth > kMaximumCssRecursion) {
+    return false;
+  }
   const current = tokenStream.current().tokenType;
   if (current === tokenize_css.TokenType.OPEN_CURLY ||
       current === tokenize_css.TokenType.OPEN_SQUARE ||
       current === tokenize_css.TokenType.OPEN_PAREN) {
-    if (!consumeASimpleBlock(tokenStream, tokenList, depth + 1))
-    {return false;}
+    if (!consumeASimpleBlock(tokenStream, tokenList, depth + 1)) {
+      return false;
+    }
   } else if (current === tokenize_css.TokenType.FUNCTION_TOKEN) {
-    if (!consumeAFunction(tokenStream, tokenList, depth + 1))
-    {return false;}
+    if (!consumeAFunction(tokenStream, tokenList, depth + 1)) {
+      return false;
+    }
   } else {
     tokenList.push(tokenStream.current());
   }
@@ -784,7 +788,9 @@ function consumeAComponentValue(tokenStream, tokenList, depth) {
  * @return {boolean}
  */
 function consumeASimpleBlock(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) {return false;}
+  if (depth > kMaximumCssRecursion) {
+    return false;
+  }
   const current = tokenStream.current().tokenType;
   asserts.assert(
       (current === tokenize_css.TokenType.OPEN_CURLY ||
@@ -812,8 +818,9 @@ function consumeASimpleBlock(tokenStream, tokenList, depth) {
       tokenList.push(tokenStream.current());
       return true;
     } else {
-      if (!consumeAComponentValue(tokenStream, tokenList, depth + 1))
-      {return false;}
+      if (!consumeAComponentValue(tokenStream, tokenList, depth + 1)) {
+        return false;
+      }
     }
   }
 }
@@ -828,7 +835,7 @@ function consumeASimpleBlock(tokenStream, tokenList, depth) {
 const extractASimpleBlock = function(tokenStream, errors) {
   /** @type {!Array<!tokenize_css.Token>} */
   const consumedTokens = [];
-  if (!consumeASimpleBlock(tokenStream, consumedTokens, /*depth*/0)) {
+  if (!consumeASimpleBlock(tokenStream, consumedTokens, /*depth*/ 0)) {
     errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
         ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
   }
@@ -855,7 +862,9 @@ exports.extractASimpleBlock = extractASimpleBlock;
  * @return {boolean}
  */
 function consumeAFunction(tokenStream, tokenList, depth) {
-  if (depth > kMaximumCssRecursion) {return false;}
+  if (depth > kMaximumCssRecursion) {
+    return false;
+  }
   asserts.assert(
       tokenStream.current().tokenType === tokenize_css.TokenType.FUNCTION_TOKEN,
       'Internal Error: consumeAFunction precondition not met');
@@ -868,8 +877,9 @@ function consumeAFunction(tokenStream, tokenList, depth) {
       tokenList.push(tokenStream.current());
       return true;
     } else {
-      if (!consumeAComponentValue(tokenStream, tokenList, depth + 1))
-      {return false;}
+      if (!consumeAComponentValue(tokenStream, tokenList, depth + 1)) {
+        return false;
+      }
     }
   }
 }
@@ -885,7 +895,7 @@ function consumeAFunction(tokenStream, tokenList, depth) {
 const extractAFunction = function(tokenStream, errors) {
   /** @type {!Array<!tokenize_css.Token>} */
   const consumedTokens = [];
-  if (!consumeAFunction(tokenStream, consumedTokens, /*depth*/0)) {
+  if (!consumeAFunction(tokenStream, consumedTokens, /*depth*/ 0)) {
     errors.push(tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
         ValidationError.Code.CSS_EXCESSIVELY_NESTED, ['style'])));
   }
@@ -972,7 +982,7 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
   asserts.assert(
       tokens[tokens.length - 1].tokenType === tokenize_css.TokenType.EOF_TOKEN);
   token.copyPosTo(parsed);
-  ++tokenIdx; // We've digested the function token above.
+  ++tokenIdx;  // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
   asserts.assert(tokenIdx < tokens.length);
 
@@ -1174,10 +1184,12 @@ class MediaQueryVisitor extends RuleVisitor {
 
   /** @inheritDoc */
   visitAtRule(atRule) {
-    if (atRule.name.toLowerCase() !== 'media') {return;}
+    if (atRule.name.toLowerCase() !== 'media') {
+      return;
+    }
 
     const tokenStream = new TokenStream(atRule.prelude);
-    tokenStream.consume(); // Advance to first token.
+    tokenStream.consume();  // Advance to first token.
     if (!this.parseAMediaQueryList_(tokenStream)) {
       this.errors.push(atRule.copyPosTo(new tokenize_css.ErrorToken(
           ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY, ['style'])));
@@ -1210,11 +1222,15 @@ class MediaQueryVisitor extends RuleVisitor {
     // ;
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     if (tokenStream.current().tokenType !== tokenize_css.TokenType.EOF_TOKEN) {
-      if (!this.parseAMediaQuery_(tokenStream)) {return false;}
+      if (!this.parseAMediaQuery_(tokenStream)) {
+        return false;
+      }
       while (tokenStream.current().tokenType === tokenize_css.TokenType.COMMA) {
-        tokenStream.consume(); // ','
+        tokenStream.consume();  // ','
         this.maybeConsumeAWhitespaceToken_(tokenStream);
-        if (!this.parseAMediaQuery_(tokenStream)) {return false;}
+        if (!this.parseAMediaQuery_(tokenStream)) {
+          return false;
+        }
       }
     }
     return tokenStream.current().tokenType === tokenize_css.TokenType.EOF_TOKEN;
@@ -1240,7 +1256,9 @@ class MediaQueryVisitor extends RuleVisitor {
     // '(', so it's simpler to use as a check to distinguis the expression case
     // from the media type case.
     if (tokenStream.current().tokenType === tokenize_css.TokenType.OPEN_PAREN) {
-      if (!this.parseAMediaExpression_(tokenStream)) {return false;}
+      if (!this.parseAMediaExpression_(tokenStream)) {
+        return false;
+      }
     } else {
       if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
           (
@@ -1248,18 +1266,22 @@ class MediaQueryVisitor extends RuleVisitor {
               (tokenStream.current()).ASCIIMatch('only') ||
               /** @type {!tokenize_css.IdentToken} */
               (tokenStream.current()).ASCIIMatch('not'))) {
-        tokenStream.consume(); // 'ONLY' | 'NOT'
+        tokenStream.consume();  // 'ONLY' | 'NOT'
       }
       this.maybeConsumeAWhitespaceToken_(tokenStream);
-      if (!this.parseAMediaType_(tokenStream)) {return false;}
+      if (!this.parseAMediaType_(tokenStream)) {
+        return false;
+      }
       this.maybeConsumeAWhitespaceToken_(tokenStream);
     }
     while (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
            /** @type {!tokenize_css.IdentToken} */
            (tokenStream.current()).ASCIIMatch('and')) {
-      tokenStream.consume(); // 'AND'
+      tokenStream.consume();  // 'AND'
       this.maybeConsumeAWhitespaceToken_(tokenStream);
-      if (!this.parseAMediaExpression_(tokenStream)) {return false;}
+      if (!this.parseAMediaExpression_(tokenStream)) {
+        return false;
+      }
     }
     return true;
   }
@@ -1294,12 +1316,14 @@ class MediaQueryVisitor extends RuleVisitor {
     if (tokenStream.current().tokenType !== tokenize_css.TokenType.OPEN_PAREN) {
       return false;
     }
-    tokenStream.consume(); // '('
+    tokenStream.consume();  // '('
     this.maybeConsumeAWhitespaceToken_(tokenStream);
-    if (!this.parseAMediaFeature_(tokenStream)) {return false;}
+    if (!this.parseAMediaFeature_(tokenStream)) {
+      return false;
+    }
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     if (tokenStream.current().tokenType === tokenize_css.TokenType.COLON) {
-      tokenStream.consume(); // '('
+      tokenStream.consume();  // '('
       this.maybeConsumeAWhitespaceToken_(tokenStream);
       // The CSS3 grammar at this point just tells us to expect some
       // expr. Which tokens are accepted here are defined by the media
@@ -1323,7 +1347,7 @@ class MediaQueryVisitor extends RuleVisitor {
         tokenize_css.TokenType.CLOSE_PAREN) {
       return false;
     }
-    tokenStream.consume(); // ')'
+    tokenStream.consume();  // ')'
     this.maybeConsumeAWhitespaceToken_(tokenStream);
     return true;
   }

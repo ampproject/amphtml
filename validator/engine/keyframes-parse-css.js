@@ -59,7 +59,9 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
           ['style', qualifiedRule.ruleName()]));
       return;
     }
-    if (qualifiedRule.declarations.length > 0) {return;}
+    if (qualifiedRule.declarations.length > 0) {
+      return;
+    }
     this.errors.push(createErrorTokenAt(
         qualifiedRule,
         ValidationError.Code.CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
