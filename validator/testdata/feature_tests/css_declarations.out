@@ -380,8 +380,6 @@ feature_tests/css_declarations.html:333:0 The property 'baseline-shift' in attri
 |  <b style='caret-color: foo'></b>
 |  <b style='clear: foo'></b>
 |  <b style='clip-path: foo'></b>
->> ^~~~~~~~~
-feature_tests/css_declarations.html:377:0 The property 'clip-path' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
 |  <b style='clip-rule: foo'></b>
 >> ^~~~~~~~~
 feature_tests/css_declarations.html:378:0 The property 'clip-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)

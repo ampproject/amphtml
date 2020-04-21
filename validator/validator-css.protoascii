@@ -295,6 +295,11 @@ declaration_list {
   declaration: { name: "text-rendering" }
 }
 
+declaration_list {
+  name: "AMP_ONLY_DECLARATIONS"
+  declaration: { name: "clip-path" }
+}
+
 # DocCSS rules for AMP for non-transformed documents.
 css {
   html_format: AMP
@@ -328,6 +333,7 @@ css {
   }
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
+  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss Rules for AMP transformed documents.
@@ -360,6 +366,7 @@ css {
   }
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
+  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss rules for ACTIONS
