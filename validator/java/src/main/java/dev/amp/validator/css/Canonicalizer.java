@@ -52,7 +52,7 @@ public class Canonicalizer {
     public Canonicalizer(@Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
                          @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec) {
         this.atRuleSpec = atRuleSpec;
-         this.defaultAtRuleSpec = defaultSpec;
+        this.defaultAtRuleSpec = defaultSpec;
     }
 
     /**
