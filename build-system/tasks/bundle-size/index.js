@@ -37,7 +37,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
-const {serialReport} = require('@ampproject/filesize');
+const {report, Report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
@@ -58,18 +58,22 @@ async function getBrotliBundleSizes() {
   const bundleSizes = {};
 
   log(cyan('brotli'), 'bundle sizes are:');
-  const values = serialReport(process.cwd(), (content) =>
-    content.replace(replacementExpression, normalizedRtvNumber)
+  await report(
+    process.cwd(),
+    (content) => content.replace(replacementExpression, normalizedRtvNumber),
+    class extends Report {
+      update(context) {
+        const completed = super.getUpdated(context);
+        for (const complete of completed) {
+          const [filePath, sizeMap] = complete;
+          const relativePath = path.relative('.', filePath);
+          const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
+          log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
+          bundleSizes[relativePath] = reportedSize;
+        }
+      }
+    }
   );
-  let next = await values.next();
-  while (!next.done) {
-    const [filePath, brotliSize] = next.value;
-    const relativePath = path.relative('.', filePath);
-    const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
-    log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
-    bundleSizes[relativePath] = reportedSize;
-    next = await values.next();
-  }
 
   return bundleSizes;
 }

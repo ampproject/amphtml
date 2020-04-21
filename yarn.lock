@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/filesize@3.2.1":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-3.2.1.tgz#5ed28338dd6213a72acea14cead69ce34e14f378"
-  integrity sha512-b5Q0dg0t5fizZMX3qL4SuoUKNQ5i1WCiD4MNAWGokX2hFWPCeroa5UxxPIP2LmORDwtkgcZksZ6QrmiA/AU2Ng==
+"@ampproject/filesize@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-4.0.1.tgz#a969318ec06b440e66f3b16df0f25cb826c2cd30"
+  integrity sha512-YDaHU5d4RL6xuJV4W+1Eh3QxXtU0Y8i4hdrtRY7OLyG93wfYOLiabkSFbg5HQmxFWqj+NYko/3pjpBiXnEuhdw==
   dependencies:
     bytes "3.1.0"
     fast-glob "3.2.2"
