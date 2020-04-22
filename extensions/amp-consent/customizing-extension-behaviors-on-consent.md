@@ -41,22 +41,26 @@ The state has the following valid values.
 - `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED` : The consent state is unknown, and `<amp-consent>` is informed to not prompt UI.
 
 #### If you integrate with AMP as a first party AMP extension
+
 Use the `getConsentPolicyState` API. It returns a promise with one of the `CONSENT_POLICY_STATE` value.
 
 #### If you integrate with AMP as a third party ad vendor
+
 Access the value within the ad iframe using `window.context.initialConsentState`. Check [this](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration) for more details.
 
 #### If you integrate with AMP as an analytics vendor
+
 Get the value using `CONSENT_STATE` macro, or `${consentState}`. A request with the varaible will only be sent out after the state has resolved to one of the above state.
 
-### On Consent String ###
+### On Consent String
 
 AMP collects raw consent string value from `checkConsentHref` endpoint or from the CMP. The it passes the raw consent string to vendors without modification.
-It is then up to the vendor to intepret the string and customize behavior accordingly. AMP recommends handle the string on the server side.
+It is then up to the vendor to intepret the string and customize behavior accordingly. AMP recommends handling the string on the server side.
 
 AMP will always pass the local stored consent string if there's one. Update to the string will only be reflected the next page load.
 
 #### If you integrate with AMP as a first party AMP extension
+
 Use the `getConsentPolicyInfo` API. `getConsentPolicyInfo` returns a promise with the raw consent string value.
 
 Ways to get the consent string for ad/analytics vendors coming soon.
