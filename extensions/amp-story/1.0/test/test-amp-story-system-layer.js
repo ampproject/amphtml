@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
@@ -140,5 +144,91 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(shareButton.tagName).to.equal('A');
     // Default "canonical"
     expect(shareButton.href).to.equal('http://localhost:9876/context.html');
+  });
+
+  it('should show paused button if story has element with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    expect(systemLayer.getShadowRoot()).to.have.class(
+      'i-amphtml-story-has-playback-ui'
+    );
+  });
+
+  it('should enable paused button if page has element with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.not.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.not.have.attribute('disabled');
+  });
+
+  it('should disable paused button if page does not has elements with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, false);
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.have.attribute('disabled');
+  });
+
+  it('setting paused state to true should add the paused flag', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
+  });
+
+  it('setting paused state to false should not add the paused flag', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the play button should change state to false', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-play-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the pause button should change state to true', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-pause-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
 });
