@@ -1996,7 +1996,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         stubInA4A(false);
         const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
         const toggle = env.sandbox.spy(element, 'toggleLoading');
-
         element.layoutCount_ = 1;
         element.viewportCallback(true);
         clock.tick(1000);

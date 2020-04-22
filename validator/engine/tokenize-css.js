@@ -191,7 +191,9 @@ function preprocess(str) {
       code = /* '\n' */ 0xa;
       i++;
     }
-    if (code === /* '\r' */ 0xd || code === 0xc) {code = /* '\n' */ 0xa;}
+    if (code === /* '\r' */ 0xd || code === 0xc) {
+      code = /* '\n' */ 0xa;
+    }
     if (code === 0x0) {
       code = 0xfffd;
     }
@@ -393,7 +395,7 @@ class Tokenizer {
           this.areAValidEscape(this.next(1), this.next(2))) {
         let type = null;
         if (this.wouldStartAnIdentifier(
-            this.next(1), this.next(2), this.next(3))) {
+                this.next(1), this.next(2), this.next(3))) {
           type = 'id';
         }
         const token = new HashToken();
@@ -439,7 +441,7 @@ class Tokenizer {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else if (
-        this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
+          this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
         return mark.copyPosTo(new CDCToken());
       } else if (this./*OK*/ startsWithAnIdentifier()) {
@@ -469,7 +471,7 @@ class Tokenizer {
       }
     } else if (this.code_ === /* '@' */ 0x40) {
       if (this.wouldStartAnIdentifier(
-          this.next(1), this.next(2), this.next(3))) {
+              this.next(1), this.next(2), this.next(3))) {
         const token = new AtKeywordToken();
         token.value = this.consumeAName();
         return mark.copyPosTo(token);
@@ -608,7 +610,7 @@ class Tokenizer {
         token.value = name;
         return token;
       } else if (
-        whitespace(this.next()) &&
+          whitespace(this.next()) &&
           (this.next(2) === /* '"' */ 0x22 ||
            this.next(2) === /* ''' */ 0x27)) {
         const token = new FunctionToken();
@@ -696,7 +698,7 @@ class Tokenizer {
               ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else if (
-        this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
+          this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
         return new ErrorToken(
@@ -724,7 +726,7 @@ class Tokenizer {
   consumeEscape() {
     // Assume the the current character is the \
     // and the next code point is not a newline.
-    this.consume(); // '\'
+    this.consume();  // '\'
     if (hexDigit(this.code_)) {
       // Consume 1-6 hex digits
       const digits = [this.code_];
@@ -776,7 +778,8 @@ class Tokenizer {
 
   /**
    * Returns true if the next two codepoints are the start of an escape token.
-   * @return {boolean} */
+   * @return {boolean}
+   */
   /*OK*/ startsWithAValidEscape() {
     return this.areAValidEscape(this.code_, this.next());
   }
@@ -879,19 +882,19 @@ class Tokenizer {
     let type = 'integer';
     if (this.next() === /* '+' */ 0x2b || this.next() === /* '-' */ 0x2d) {
       this.consume();
-      repr += stringFromCode(this.code_); // + or -
+      repr += stringFromCode(this.code_);  // + or -
     }
     while (digit(this.next())) {
       this.consume();
-      repr += stringFromCode(this.code_); // 0-9
+      repr += stringFromCode(this.code_);  // 0-9
     }
     if (this.next(1) === /* '.' */ 0x2e && digit(this.next(2))) {
       this.consume();
-      repr += stringFromCode(this.code_); // '.'
+      repr += stringFromCode(this.code_);  // '.'
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_); // 0-9
+        repr += stringFromCode(this.code_);  // 0-9
       }
     }
     const c1 = this.next(1);
@@ -899,23 +902,23 @@ class Tokenizer {
     const c3 = this.next(3);
     if ((c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) && digit(c2)) {
       this.consume();
-      repr += stringFromCode(this.code_); // E or e
+      repr += stringFromCode(this.code_);  // E or e
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_); // 0-9
+        repr += stringFromCode(this.code_);  // 0-9
       }
     } else if (
-      (c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
+        (c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
         (c2 === /* '+' */ 0x2b || c2 === /* '-' */ 0x2d) && digit(c3)) {
       this.consume();
-      repr += stringFromCode(this.code_); // E or e
+      repr += stringFromCode(this.code_);  // E or e
       this.consume();
-      repr += stringFromCode(this.code_); // + or -
+      repr += stringFromCode(this.code_);  // + or -
       type = 'number';
       while (digit(this.next())) {
         this.consume();
-        repr += stringFromCode(this.code_); // 0-9
+        repr += stringFromCode(this.code_);  // 0-9
       }
     }
     const numberToken = new NumberToken();

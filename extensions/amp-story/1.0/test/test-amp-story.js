@@ -1816,5 +1816,41 @@ describes.realWin(
         toggleExperiment(win, 'amp-story-branching', false);
       });
     });
+
+    describe('amp-story play/pause', () => {
+      it('should set playable to true if page has autoadvance', async () => {
+        await createStoryWithPages(1, ['cover'], true /** autoAdvance */);
+
+        await story.layoutCallback();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.true;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+          )
+        ).to.be.true;
+      });
+
+      it('should set playable to false if page does not have playable', async () => {
+        await createStoryWithPages(1, ['cover'], false /** autoAdvance */);
+
+        await story.layoutCallback();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.false;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+          )
+        ).to.be.false;
+      });
+    });
   }
 );

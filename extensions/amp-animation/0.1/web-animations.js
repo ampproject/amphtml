@@ -33,10 +33,16 @@ import {
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -162,13 +168,14 @@ export class Builder {
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!../../../src/service/owners-interface.OwnersInterface} owners
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef=} options
    */
-  constructor(win, rootNode, baseUrl, vsync, owners) {
+  constructor(win, rootNode, baseUrl, vsync, owners, options = {}) {
     /** @const @private */
     this.win_ = win;
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl, options);
 
     /** @const @private */
     this.vsync_ = vsync;
@@ -465,7 +472,7 @@ export class MeasureScanner extends Scanner {
     let specKeyframes = spec.keyframes;
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
-      const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
+      const keyframes = extractKeyframes(this.css_.rootNode, specKeyframes);
       userAssert(
         keyframes,
         `Keyframes not found in stylesheet: "${specKeyframes}"`
@@ -840,13 +847,18 @@ class CssContextImpl {
    * @param {!Window} win
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
-  constructor(win, rootNode, baseUrl) {
+  constructor(win, rootNode, baseUrl, options) {
     /** @const @private */
     this.win_ = win;
 
-    /** @const @private */
+    /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
+
+    const {scope = null} = options;
+    /** @const @private {?Element} */
+    this.scope_ = scope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -879,6 +891,11 @@ class CssContextImpl {
     this.viewportSize_ = null;
   }
 
+  /** @return {!Document|!ShadowRoot} */
+  get rootNode() {
+    return this.rootNode_;
+  }
+
   /**
    * @param {string} mediaQuery
    * @return {boolean}
@@ -903,7 +920,7 @@ class CssContextImpl {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.rootNode_.getElementById(id);
+    return this.scopedQuerySelector_(`#${escapeCssSelectorIdent(id)}`);
   }
 
   /**
@@ -912,7 +929,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
+      return toArray(this.scopedQuerySelectorAll_(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -1225,12 +1242,18 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestAncestorElementBySelector(
+        const maybeFoundInScope = closestAncestorElementBySelector(
           this.requireTarget_(),
           selector
         );
+        if (
+          maybeFoundInScope &&
+          (!this.scope_ || this.scope_.contains(maybeFoundInScope))
+        ) {
+          element = maybeFoundInScope;
+        }
       } else {
-        element = this.rootNode_./*OK*/ querySelector(selector);
+        element = this.scopedQuerySelector_(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1252,5 +1275,29 @@ class CssContextImpl {
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
     return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelector_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelector(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelector(selector);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!NodeList}
+   * @private
+   */
+  scopedQuerySelectorAll_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelectorAll(selector);
   }
 }
