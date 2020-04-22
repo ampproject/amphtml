@@ -768,7 +768,6 @@ export class Navigation {
       .documentElement.hasAttribute('allow-navigation-interception');
 
     if (!viewerHasCapability || !docOptedIn) {
-      console.log('Did not navigate with viewer');
       return false;
     }
 
@@ -784,10 +783,8 @@ export class Navigation {
             'requestedBy': requestedBy,
           })
         );
-        console.log('Did navigate with viewer');
         return true;
       } else {
-        console.log('Did not do navigation with viewer.');
         return false;
       }
     });
