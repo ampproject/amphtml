@@ -89,6 +89,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -616,6 +617,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
+    this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
@@ -1950,8 +1952,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
-    isPaused ? this.advancement_.stop() : this.advancement_.start();
-
     this.activePage_.setState(pageState);
   }
 
@@ -2580,6 +2580,26 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
+    );
+  }
+
+  /**
+   * Shows the play/pause icon if there is an element with playback on the story.
+   * @private
+   */
+  updatePausedIcon_() {
+    const containsElementsWithPlayback = !!scopedQuerySelector(
+      this.element,
+      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+    );
+
+    const storyHasBackgroundAudio = this.element.hasAttribute(
+      'background-audio'
+    );
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
+      containsElementsWithPlayback || storyHasBackgroundAudio
     );
   }
 
