@@ -38,6 +38,8 @@ const COMMON_GLOBS = [
   'third_party/webcomponentsjs/ShadowCSS.js',
   'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/intersection-observer/package.json',
+  'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/web-animations-js/package.json',
