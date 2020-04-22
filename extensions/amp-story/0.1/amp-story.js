@@ -1403,7 +1403,7 @@ export class AmpStory extends AMP.BaseElement {
         this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (childElement(
           this.element,
           (el) => {
-            return el.tagName.toLowerCase() === 'audio';
+            return el.localName === 'audio';
           }
         ));
       });

@@ -222,7 +222,7 @@ function updateEmbedStyleEl(target, embedStyleEl, embedData) {
  * @return {string}
  */
 function buildStringStyleFromEl(target, embedData) {
-  switch (target.tagName.toLowerCase()) {
+  switch (target.localName) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
       return buildStringStyleForTweet(embedData);
     default:
@@ -269,7 +269,7 @@ function buildDefaultStringStyle(embedData) {
  * @return {!Object}
  */
 function measureStyleForEl(element, state, pageRect, elRect) {
-  switch (element.tagName.toLowerCase()) {
+  switch (element.localName) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
       return measureStylesForTwitter(state, pageRect, elRect);
     default:
@@ -336,7 +336,7 @@ function measureDefaultStyles(state, pageRect, elRect) {
  * @return {!Object}
  */
 function updateStyleForEl(element, elId, state) {
-  switch (element.tagName.toLowerCase()) {
+  switch (element.localName) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
       return updateStylesForTwitter(elId, state);
     default:
@@ -883,7 +883,7 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
-    if (EXPANDABLE_COMPONENTS[target.tagName.toLowerCase()]) {
+    if (EXPANDABLE_COMPONENTS[target.localName]) {
       this.tooltip_.addEventListener(
         'click',
         this.expandComponentHandler_,
@@ -929,7 +929,7 @@ export class AmpStoryEmbeddedComponent {
    * @return {?Object}
    */
   getEmbedConfigFor_(target) {
-    const config = INTERACTIVE_COMPONENTS[target.tagName.toLowerCase()];
+    const config = INTERACTIVE_COMPONENTS[target.localName];
     if (config && matches(target, config.selector)) {
       return config;
     }

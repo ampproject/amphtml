@@ -1019,7 +1019,7 @@ function supportsFullscreenViaApi(video) {
   return !!{
     'amp-dailymotion': true,
     'amp-ima-video': true,
-  }[video.tagName.toLowerCase()];
+  }[video.localName];
 }
 
 /** Manages rotate-to-fullscreen video. */
@@ -1133,7 +1133,7 @@ export class AutoFullscreenManager {
     // rely on a postMessage API to fullscreen. Such an API is not necessarily
     // provided by every player.
     const internalElement = getInternalVideoElementFor(video);
-    if (internalElement.tagName.toLowerCase() == 'video') {
+    if (internalElement.localName == 'video') {
       return true;
     }
     const platform = Services.platformFor(this.ampdoc_.win);

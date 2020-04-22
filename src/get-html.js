@@ -89,7 +89,7 @@ function appendToResult(node, attrs, result) {
       result.push(node.textContent);
     } else if (node.nodeType === Node.ELEMENT_NODE && isApplicableNode(node)) {
       appendOpenTag(node, allowedAttrs, result);
-      stack.push(`</${node.tagName.toLowerCase()}>`);
+      stack.push(`</${node.localName}>`);
 
       for (let child = node.lastChild; child; child = child.previousSibling) {
         stack.push(child);
@@ -104,7 +104,7 @@ function appendToResult(node, attrs, result) {
  * @return {boolean}
  */
 function isApplicableNode(node) {
-  const tagName = node.tagName.toLowerCase();
+  const tagName = node.localName;
 
   if (startsWith(tagName, 'amp-')) {
     return !!(allowedAmpTags.includes(tagName) && node.textContent);
@@ -120,7 +120,7 @@ function isApplicableNode(node) {
  * @param {Array<string>} result
  */
 function appendOpenTag(node, attrs, result) {
-  result.push(`<${node.tagName.toLowerCase()}`);
+  result.push(`<${node.localName}`);
 
   attrs.forEach(function (attr) {
     if (node.hasAttribute(attr)) {

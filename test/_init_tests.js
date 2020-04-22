@@ -496,7 +496,7 @@ chai.use(require('chai-as-promised')); // eslint-disable-line
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;
-  const tagName = obj.tagName.toLowerCase();
+  const tagName = obj.localName;
   this.assert(
     obj.hasAttribute(attr),
     "expected element '" + tagName + "' to have attribute #{exp}",
@@ -508,7 +508,7 @@ chai.Assertion.addMethod('attribute', function (attr) {
 
 chai.Assertion.addMethod('class', function (className) {
   const obj = this._obj;
-  const tagName = obj.tagName.toLowerCase();
+  const tagName = obj.localName;
   this.assert(
     obj.classList.contains(className),
     "expected element '" + tagName + "' to have class #{exp}",
@@ -524,7 +524,7 @@ chai.Assertion.addProperty('visible', function () {
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
   const isOpaque = parseInt(opacity, 10) > 0;
-  const tagName = obj.tagName.toLowerCase();
+  const tagName = obj.localName;
   this.assert(
     visibility === 'visible' && isOpaque,
     "expected element '" +
@@ -545,7 +545,7 @@ chai.Assertion.addProperty('hidden', function () {
   const computedStyle = window.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
-  const tagName = obj.tagName.toLowerCase();
+  const tagName = obj.localName;
   this.assert(
     visibility === 'hidden' || parseInt(opacity, 10) == 0,
     "expected element '" +
@@ -564,7 +564,7 @@ chai.Assertion.addProperty('hidden', function () {
 chai.Assertion.addMethod('display', function (display) {
   const obj = this._obj;
   const value = window.getComputedStyle(obj).getPropertyValue('display');
-  const tagName = obj.tagName.toLowerCase();
+  const tagName = obj.localName;
   this.assert(
     value === display,
     "expected element '" + tagName + "' to be display #{exp}, got #{act}.",

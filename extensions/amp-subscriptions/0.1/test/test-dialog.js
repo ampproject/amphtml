@@ -44,9 +44,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, (env) => {
   });
 
   it('should construct correctly', () => {
-    expect(dialog.getRoot().tagName.toLowerCase()).to.equal(
-      'amp-subscriptions-dialog'
-    );
+    expect(dialog.getRoot().localName).to.equal('amp-subscriptions-dialog');
     expect(dialog.getRoot().getAttribute('role')).to.equal('dialog');
     expect(dialog.getRoot().parentNode).to.equal(doc.body);
     expect(dialog.closeButton_).to.have.display('none');

@@ -211,7 +211,7 @@ describe('amp-a4a', () => {
    * @param {!Element} element
    */
   function verifyA4ARender(element) {
-    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element.localName).to.equal('amp-a4a');
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     expect(element.querySelector('iframe[name]')).to.not.be.ok;
     expect(element.querySelector('iframe[src]')).to.not.be.ok;
@@ -246,7 +246,7 @@ describe('amp-a4a', () => {
    * @param {boolean=} shouldSandbox
    */
   function verifySafeFrameRender(element, sfVersion, shouldSandbox = true) {
-    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element.localName).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const safeFrameUrl =
@@ -282,7 +282,7 @@ describe('amp-a4a', () => {
    * @param {boolean} shouldSandbox
    */
   function verifyNameFrameRender(element, shouldSandbox = true) {
-    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element.localName).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const child = element.querySelector('iframe[src][name]');
@@ -305,7 +305,7 @@ describe('amp-a4a', () => {
     srcUrl,
     shouldSandbox = true
   ) {
-    expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
+    expect(element.localName).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const child = element.querySelector('iframe[src]');

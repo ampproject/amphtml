@@ -597,7 +597,7 @@ export class FriendlyIframeEmbed {
 
     // Security assertion. Otherwise any 3p frame could request lighbox mode.
     userAssert(
-      ampAdParent.tagName.toLowerCase() == 'amp-ad',
+      ampAdParent.localName == 'amp-ad',
       'Only <amp-ad> is allowed to enter lightbox mode.'
     );
 

@@ -95,7 +95,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sections_ = this.getRealChildren();
     this.sections_.forEach((section, index) => {
       userAssert(
-        section.tagName.toLowerCase() == 'section',
+        section.localName == 'section',
         'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s',

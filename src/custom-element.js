@@ -779,7 +779,7 @@ function createBaseCustomElementClass(win) {
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
         // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
+        const extensionId = this.localName;
         if (
           isStub(this.implementation_) &&
           !ampdoc.declaresExtension(extensionId)

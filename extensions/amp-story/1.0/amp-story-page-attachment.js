@@ -187,7 +187,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       'click',
       (event) => {
         const {target} = event;
-        if (target.tagName.toLowerCase() === 'a') {
+        if (target.localName === 'a') {
           target.setAttribute('target', '_blank');
         }
       },
@@ -198,9 +198,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.element.addEventListener(
       'click',
       (event) => {
-        if (
-          event.target.tagName.toLowerCase() === 'amp-story-page-attachment'
-        ) {
+        if (event.target.localName === 'amp-story-page-attachment') {
           this.close_();
         }
       },

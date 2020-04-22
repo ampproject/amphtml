@@ -463,8 +463,7 @@ export class ActionService {
     const targetId = target.getAttribute('id') || '';
 
     devAssert(
-      isAmpTagName(targetId) ||
-        target.tagName.toLowerCase() in NON_AMP_ELEMENTS_ACTIONS_,
+      isAmpTagName(targetId) || target.localName in NON_AMP_ELEMENTS_ACTIONS_,
       'AMP or special element expected: %s',
       target.tagName + '#' + targetId
     );
@@ -687,7 +686,7 @@ export class ActionService {
     }
 
     // Handle element-specific actions.
-    const lowerTagName = node.tagName.toLowerCase();
+    const lowerTagName = node.localName;
     if (isAmpTagName(lowerTagName)) {
       if (node.enqueAction) {
         node.enqueAction(invocation);

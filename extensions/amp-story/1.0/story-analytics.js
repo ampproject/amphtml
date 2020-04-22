@@ -168,8 +168,7 @@ export class StoryAnalyticsService {
     }
 
     if (element) {
-      details.tagName =
-        element[ANALYTICS_TAG_NAME] || element.tagName.toLowerCase();
+      details.tagName = element[ANALYTICS_TAG_NAME] || element.localName;
       Object.assign(
         vars,
         getDataParamsFromAttributes(

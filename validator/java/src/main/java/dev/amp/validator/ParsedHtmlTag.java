@@ -31,7 +31,7 @@ public class ParsedHtmlTag {
      * @return returns a lower case tag name.
      */
     public String lowerName() {
-        return this.tagName.toLowerCase();
+        return this.localName;
     }
 
     /**

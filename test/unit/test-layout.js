@@ -356,7 +356,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-responsive');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].localName).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -370,7 +370,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-responsive');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].localName).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -384,9 +384,9 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].localName).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
-    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].localName).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
       'data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>'
     );
@@ -403,9 +403,9 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
-    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].localName).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
-    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].localName).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
       'data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>'
     );

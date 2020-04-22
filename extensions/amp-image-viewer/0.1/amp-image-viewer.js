@@ -279,7 +279,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return ELIGIBLE_TAGS[element.localName];
   }
 
   /**

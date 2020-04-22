@@ -110,7 +110,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      if (child.tagName.toLowerCase() === 'amp-img') {
+      if (child.localName === 'amp-img') {
         // First encountered = left image
         // Second encountered = right image
         if (!this.leftAmpImage_) {
@@ -123,7 +123,7 @@ export class AmpImageSlider extends AMP.BaseElement {
             'Should not contain more than 2 <amp-img>s.'
           );
         }
-      } else if (child.tagName.toLowerCase() === 'div') {
+      } else if (child.localName === 'div') {
         if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('second')) {

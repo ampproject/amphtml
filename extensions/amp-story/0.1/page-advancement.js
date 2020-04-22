@@ -498,7 +498,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * @private
    */
   getMediaElement_() {
-    const tagName = this.element_.tagName.toLowerCase();
+    const tagName = this.element_.localName;
 
     if (this.element_ instanceof HTMLMediaElement) {
       return this.element_;

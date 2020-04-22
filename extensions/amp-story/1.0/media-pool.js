@@ -363,7 +363,7 @@ export class MediaPool {
    * @private
    */
   getMediaType_(mediaElement) {
-    const tagName = mediaElement.tagName.toLowerCase();
+    const tagName = mediaElement.localName;
     switch (tagName) {
       case 'audio':
         return MediaType.AUDIO;
@@ -566,7 +566,7 @@ export class MediaPool {
       return;
     }
 
-    if (componentEl.tagName.toLowerCase() == 'amp-audio') {
+    if (componentEl.localName == 'amp-audio') {
       // TODO(alanorozco): Implement reset for amp-audio
       return;
     }

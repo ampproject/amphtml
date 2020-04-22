@@ -209,7 +209,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   adjustGridLayer_() {
     const gridLayer = closest(dev().assertElement(this.element), (el) => {
-      return el.tagName.toLowerCase() === 'amp-story-grid-layer';
+      return el.localName === 'amp-story-grid-layer';
     });
 
     gridLayer.classList.add('i-amphtml-story-has-quiz');
@@ -237,7 +237,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     // First child must be heading h1-h3
-    if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
+    if (!['h1', 'h2', 'h3'].includes(promptInput.localName)) {
       dev().error(
         TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
@@ -608,7 +608,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     if (this.reactionId_ === null) {
       const quizPageId = closest(dev().assertElement(this.element), (el) => {
-        return el.tagName.toLowerCase() === 'amp-story-page';
+        return el.localName === 'amp-story-page';
       }).getAttribute('id');
 
       this.reactionId_ = `CANONICAL_URL#page=${quizPageId}`;

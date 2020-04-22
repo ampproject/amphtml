@@ -61,8 +61,8 @@ const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
  * @return {!Element}
  */
 function getBaseElementForSlide(slide) {
-  const tagName = slide.tagName.toUpperCase();
-  if (tagName == 'AMP-IMG' || tagName == 'FIGURE') {
+  const tagName = slide.localName;
+  if (tagName == 'amp-img' || tagName == 'figure') {
     return slide;
   }
   const figure = slide.querySelector('figure');

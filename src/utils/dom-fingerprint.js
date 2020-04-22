@@ -54,7 +54,7 @@ export function domFingerprintPlain(element) {
     if (element.id) {
       id = `/${element.id}`;
     }
-    const nodeName = element.nodeName.toLowerCase();
+    const nodeName = element.localName;
     ids.push(`${nodeName}${id}${indexWithinParent(element)}`);
     level++;
     element = element.parentElement;

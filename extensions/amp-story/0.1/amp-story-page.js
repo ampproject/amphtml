@@ -259,7 +259,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
     const mediaPromises = Array.prototype.map.call(mediaSet, (mediaEl) => {
       return new Promise((resolve) => {
-        switch (mediaEl.tagName.toLowerCase()) {
+        switch (mediaEl.localName) {
           case 'amp-img':
           case 'amp-anim':
             mediaEl.addEventListener('load', resolve, true /* useCapture */);
@@ -565,7 +565,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     const previousElement = this.element.previousElementSibling;
-    if (previousElement && previousElement.tagName.toLowerCase() === TAG) {
+    if (previousElement && previousElement.localName === TAG) {
       return previousElement.id;
     }
 
@@ -592,7 +592,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     const nextElement = this.element.nextElementSibling;
-    if (nextElement && nextElement.tagName.toLowerCase() === TAG) {
+    if (nextElement && nextElement.localName === TAG) {
       return nextElement.id;
     }
 

@@ -343,7 +343,7 @@ class ParsedAttrSpec {
  */
 function getTagSpecName(tagSpec) {
   return (tagSpec.specName !== null) ? tagSpec.specName :
-                                       tagSpec.tagName.toLowerCase();
+                                       tagSpec.localName;
 }
 
 /**
@@ -4001,7 +4001,7 @@ function validateDescendantTags(
           /* params */
           [
             encounteredTag.lowerName(),
-            allowedDescendantsList.tagName.toLowerCase(),
+            allowedDescendantsList.localName,
           ],
           getTagSpecUrl(parsedTagSpec), validationResult);
       return;
@@ -4025,7 +4025,7 @@ function validateNoSiblingsAllowedTags(
         generated.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
         context.getLineCol(),
         /* params */
-        [spec.tagName.toLowerCase(), tagStack.parentTagName().toLowerCase()],
+        [spec.localName, tagStack.parentTagName().toLowerCase()],
         getTagSpecUrl(spec), validationResult);
   }
 

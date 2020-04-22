@@ -786,7 +786,7 @@ export function getEnclosingContainerTypes(adElement) {
     el && counter < 20;
     el = el.parentElement, counter++
   ) {
-    const tagName = el.tagName.toUpperCase();
+    const {tagName} = el;
     if (ValidAdContainerTypes[tagName]) {
       containerTypeSet[ValidAdContainerTypes[tagName]] = true;
     }

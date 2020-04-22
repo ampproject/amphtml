@@ -400,3 +400,21 @@ requirement: {
   value: 'DocumentType.prototype.after'
   value: 'CharacterData.prototype.after'
 }
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Element.localName is already lowercase'
+  value: '/** @param {!Element} el */'
+         'function template(el) { el.tagName.toLowerCase(); }'
+  value: '/** @param {!Element} el */'
+         'function template(el) { el.localName.toLowerCase(); }'
+}
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Element.tagName is already uppercase'
+  value: '/** @param {!Element} el */'
+         'function template(el) { el.tagName.toUpperCase(); }'
+  value: '/** @param {!Element} el */'
+         'function template(el) { el.localName.toUpperCase(); }'
+}

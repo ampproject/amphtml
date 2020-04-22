@@ -1635,11 +1635,11 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     const nodes = element.getRealChildNodes();
     expect(nodes.length).to.equal(2);
     expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
+    expect(nodes[1].localName).to.equal('content');
 
     const elements = element.getRealChildren();
     expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
+    expect(elements[0].localName).to.equal('content');
   });
 
   it('getPlaceholder should return nothing', () => {

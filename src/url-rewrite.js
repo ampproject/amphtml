@@ -48,7 +48,7 @@ export function rewriteAttributesForElement(
   opt_location,
   opt_updateProperty
 ) {
-  const tag = element.tagName.toLowerCase();
+  const tag = element.localName;
   const attr = attrName.toLowerCase();
   const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
   // When served from proxy (CDN), changing an <a> tag from a hash link to a

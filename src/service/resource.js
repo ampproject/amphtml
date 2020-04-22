@@ -141,7 +141,7 @@ export class Resource {
     this.element = element;
 
     /** @export @const {string} */
-    this.debugid = element.tagName.toLowerCase() + '#' + id;
+    this.debugid = element.localName + '#' + id;
 
     /** @const {!Window} */
     this.hostWin = toWin(element.ownerDocument.defaultView);

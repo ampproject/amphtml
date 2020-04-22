@@ -232,7 +232,7 @@ function renderExtensionDropdown(doc, opt_extension) {
   const select = doc.createElement('select');
 
   const usedExtension =
-      opt_extension || getSubstitutable(doc).tagName.toLowerCase();
+      opt_extension || getSubstitutable(doc).localName;
 
   availableExtensions.forEach(extension => {
     const option = doc.createElement('option');
@@ -314,7 +314,7 @@ function removeAttrs(node) {
 function replaceExtension(doc, toExtension) {
   const substitutable = getSubstitutable(doc);
 
-  const substitutableTagNameLowerCase = substitutable.tagName.toLowerCase();
+  const substitutableTagNameLowerCase = substitutable.localName;
   const toExtensionLowerCase = toExtension.toLowerCase();
 
   if (substitutableTagNameLowerCase == toExtensionLowerCase) {

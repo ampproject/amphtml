@@ -864,7 +864,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     const source = invocation.caller;
     userAssert(
-      source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+      source && SUPPORTED_ELEMENTS_[source.localName],
       'Unsupported element: %s',
       source.tagName
     );

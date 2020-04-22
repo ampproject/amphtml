@@ -637,7 +637,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const mediaPromises = Array.prototype.map.call(mediaSet, (mediaEl) => {
       return new Promise((resolve) => {
-        switch (mediaEl.tagName.toLowerCase()) {
+        switch (mediaEl.localName) {
           case 'amp-img':
           case 'amp-anim':
             whenUpgradedToCustomElement(mediaEl)
@@ -1281,7 +1281,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     // If the page was loaded with a `#page=foo` hash, it could have no
     // navigation path but still a previous page in the DOM.
     const previousElement = this.element.previousElementSibling;
-    if (previousElement && previousElement.tagName.toLowerCase() === TAG) {
+    if (previousElement && previousElement.localName === TAG) {
       return previousElement.id;
     }
 
@@ -1308,7 +1308,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute(advanceAttr);
     }
     const nextElement = this.element.nextElementSibling;
-    if (nextElement && nextElement.tagName.toLowerCase() === TAG) {
+    if (nextElement && nextElement.localName === TAG) {
       return nextElement.id;
     }
 

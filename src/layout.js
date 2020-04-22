@@ -272,7 +272,7 @@ export function hasNaturalDimensions(tagName) {
  * @return {DimensionsDef}
  */
 export function getNaturalDimensions(element) {
-  const tagName = element.tagName.toUpperCase();
+  const {tagName} = element;
   devAssert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
@@ -302,7 +302,7 @@ export function getNaturalDimensions(element) {
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
-  const tagName = element.tagName.toUpperCase();
+  const {tagName} = element;
   return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
 }
 

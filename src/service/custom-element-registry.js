@@ -66,10 +66,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const {element} = stub;
-    if (
-      element.tagName.toLowerCase() == name &&
-      element.ownerDocument.defaultView == win
-    ) {
+    if (element.localName == name && element.ownerDocument.defaultView == win) {
       tryUpgradeElement_(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);

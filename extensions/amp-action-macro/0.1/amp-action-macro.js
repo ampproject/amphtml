@@ -79,7 +79,7 @@ export class AmpActionMacro extends AMP.BaseElement {
         );
       }
     }
-    if (invocation.caller.tagName.toLowerCase() === TAG) {
+    if (invocation.caller.localName === TAG) {
       userAssert(
         this.isValidMacroReference_(invocation.caller),
         'Action macro with ID "%s" cannot reference itself or macros defined ' +

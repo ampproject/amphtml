@@ -621,7 +621,7 @@ export class SanitizerImpl {
   sanitize(node) {
     // TODO(choumx): allowedTags_[] is more strict than purifier.sanitize()
     // because the latter has attribute-specific allowances.
-    const tag = node.nodeName.toLowerCase();
+    const tag = node.localName;
     const clean = this.allowedTags_[tag];
     if (!clean) {
       if (!this.warnIfFormsAreDisallowed_(tag)) {
@@ -641,7 +641,7 @@ export class SanitizerImpl {
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
-    const tag = node.nodeName.toLowerCase();
+    const tag = node.localName;
     // DOMPurify's attribute validation is tag-agnostic, so we need to check
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
     if (this.allowedTags_[tag]) {

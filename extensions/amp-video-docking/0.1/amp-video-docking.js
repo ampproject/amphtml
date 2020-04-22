@@ -177,7 +177,7 @@ function throttleByAnimationFrame(win, fn) {
  */
 function complainAboutPortrait(element) {
   // Constant named `TAG` per lint rules.
-  const TAG = element.tagName.toUpperCase();
+  const TAG = element.tagName;
   user().error(
     TAG,
     'Minimize-to-corner (`dock`) does not support portrait video.',
@@ -429,7 +429,7 @@ export class VideoDocking {
 
     if (el) {
       userAssert(
-        el.tagName.toLowerCase() == 'amp-layout',
+        el.localName == 'amp-layout',
         'Dock slot must be an <amp-layout> element.'
       );
     }

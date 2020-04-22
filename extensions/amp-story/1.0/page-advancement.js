@@ -432,7 +432,7 @@ export class ManualAdvancement extends AdvancementConfig {
     closest(
       dev().assertElement(event.target),
       (el) => {
-        tagName = el.tagName.toLowerCase();
+        tagName = el.localName;
 
         if (tagName === 'amp-story-page-attachment') {
           shouldHandleEvent = false;
@@ -495,7 +495,7 @@ export class ManualAdvancement extends AdvancementConfig {
     return !!closest(
       target,
       (el) => {
-        tagName = el.tagName.toLowerCase();
+        tagName = el.localName;
 
         if (
           tagName === 'amp-story-cta-layer' ||
@@ -676,7 +676,7 @@ export class ManualAdvancement extends AdvancementConfig {
    *                              an amp-story tag.
    */
   static fromElement(win, element) {
-    if (element.tagName.toLowerCase() !== 'amp-story') {
+    if (element.localName !== 'amp-story') {
       return null;
     }
     return new ManualAdvancement(win, element);
@@ -933,7 +933,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
    * @private
    */
   getMediaElement_() {
-    const tagName = this.element_.tagName.toLowerCase();
+    const tagName = this.element_.localName;
 
     if (this.element_ instanceof HTMLMediaElement) {
       return this.element_;
