@@ -16,12 +16,14 @@
 
 /** @fileoverview */
 
+import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
@@ -42,6 +44,10 @@ if (self.document) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(self, class {});
+  // eslint-disable-next-line no-undef
+  if (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) {
+    installIntersectionObserver(self);
+  }
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no
