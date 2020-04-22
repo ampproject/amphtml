@@ -95,12 +95,14 @@ export let InteractiveComponentDef;
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
+ *    pageHasElementsWithPlaybackState: boolean,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
+ *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
@@ -140,6 +142,7 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -151,6 +154,8 @@ export const StateProperty = {
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
+  // Any page has elements with playback.
+  STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
   VIEWPORT_WARNING_STATE: 'viewportWarningState',
@@ -186,6 +191,7 @@ export const Action = {
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
@@ -193,6 +199,7 @@ export const Action = {
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
@@ -314,6 +321,12 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
+    // Shows or hides the play/pause controls.
+    case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+      });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ ({
@@ -324,6 +337,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: !!data,
       });
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ ({
@@ -529,6 +547,7 @@ export class AmpStoryStoreService {
       },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
@@ -536,6 +555,7 @@ export class AmpStoryStoreService {
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.VIEWPORT_WARNING_STATE]: false,
