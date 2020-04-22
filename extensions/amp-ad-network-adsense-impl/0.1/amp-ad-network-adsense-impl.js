@@ -21,11 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
-import {Navigation} from '../../../src/service/navigation';
 import {
   AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
@@ -46,6 +41,7 @@ import {
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
