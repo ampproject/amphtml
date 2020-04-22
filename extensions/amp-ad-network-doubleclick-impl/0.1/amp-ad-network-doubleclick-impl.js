@@ -87,6 +87,7 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -108,7 +109,6 @@ import {
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -137,6 +137,19 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
+};
+
+/** @const {string} */
+const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
+
+/**
+ * Branches of the random subdomain for SafeFrame experiment.
+ * @const @enum{string}
+ * @visibleForTesting
+ */
+export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
+  CONTROL: '21065817',
+  EXPERIMENT: '21065818',
 };
 
 /**
@@ -276,6 +289,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
+    /**
+     * The random subdomain to load SafeFrame from, if SafeFrame is
+     * being loaded from a random subdomain and if the subdomain
+     * has been generated.
+     * @private {?string}
+     */
+    this.safeFrameRandomSubdomain_ = null;
+
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
 
@@ -401,6 +422,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [ZINDEX_EXP]: {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
+      },
+      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+        ifTrafficEligible: () => true,
+        branches: [
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
+        ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
@@ -1019,6 +1047,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.unlayoutCallback();
   }
 
+  /** @override */
+  getSafeframePath() {
+    const randomSubdomainExperimentBranch =
+      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
+    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
+      return super.getSafeframePath();
+    }
+    this.safeFrameRandomSubdomain_ =
+      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+
+    return (
+      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `${this.safeframeVersion}/html/container.html`
+    );
+  }
+
   /** @visibleForTesting */
   cleanupAfterTest() {
     this.destroySafeFrameApi_();
@@ -1572,6 +1616,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   warnOnError(message, error) {
     dev().warn(TAG, message, error);
+  }
+
+  /**
+   * Generate a 32-byte random string.
+   * Uses the win.crypto when available.
+   * @return {string} The random string
+   * @private
+   */
+  getRandomString_() {
+    // 16 hex characters * 2 bytes per character = 32 bytes
+    const length = 16;
+
+    const randomValues = getCryptoRandomBytesArray(this.win, length);
+
+    let randomSubdomain = '';
+    for (let i = 0; i < length; i++) {
+      // If crypto isn't available, just use Math.random.
+      const randomValue = randomValues
+        ? randomValues[i]
+        : Math.floor(Math.random() * 255);
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
   }
 
   /** @override */
