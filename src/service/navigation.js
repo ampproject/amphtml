@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isLocalhostOrigin} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -744,8 +745,14 @@ export class Navigation {
   }
 
   /**
-   * Requests navigation through a Viewer to the given destination. If the viewer does
-   * not support this operation, does nothing.
+   * Requests navigation through a Viewer to the given destination.
+   *
+   * This function only proceeds if:
+   * 1. The viewer supports the 'interceptNavigation' capability.
+   * 2. The contained AMP doc has 'opted in' via including the 'allow-navigation-interception'
+   * attribute on the <html> tag.
+   * 3. The viewer is trusted or from localhost.
+   *
    * @param {string} url A URL.
    * @param {string} requestedBy Informational string about the entity that
    *     requested the navigation.
@@ -753,17 +760,37 @@ export class Navigation {
    *     Otherwise, returns false.
    */
   navigateToUrlWithViewer(url, requestedBy) {
-    if (this.viewer_.hasCapability('interceptNavigation')) {
-      this.viewer_.sendMessage(
-        'navigateTo',
-        dict({
-          'url': url,
-          'requestedBy': requestedBy,
-        })
-      );
-      return true;
+    const viewerHasCapability = this.viewer_.hasCapability(
+      'interceptNavigation'
+    );
+    const docOptedIn = this.ampdoc
+      .getRootNode()
+      .documentElement.hasAttribute('allow-navigation-interception');
+
+    if (!viewerHasCapability || !docOptedIn) {
+      console.log('Did not navigate with viewer');
+      return false;
     }
-    return false;
+
+    return Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      if (values[0] || isLocalhostOrigin(values[1])) {
+        this.viewer_.sendMessage(
+          'navigateTo',
+          dict({
+            'url': url,
+            'requestedBy': requestedBy,
+          })
+        );
+        console.log('Did navigate with viewer');
+        return true;
+      } else {
+        console.log('Did not do navigation with viewer.');
+        return false;
+      }
+    });
   }
 }
 
