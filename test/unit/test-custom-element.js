@@ -2006,10 +2006,12 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should NOT turn on when enters viewport but already laid out', () => {
         stubInA4A(false);
+        const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
         const toggle = env.sandbox.spy(element, 'toggleLoading');
         element.viewportCallback(true);
         element.layoutCount_ = 1;
         clock.tick(1000);
+        expect(timerDelay).to.have.been.called;
         expect(toggle).to.have.not.been.called;
       });
 
