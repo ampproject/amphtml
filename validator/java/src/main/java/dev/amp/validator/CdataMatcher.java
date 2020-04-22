@@ -219,7 +219,7 @@ public class CdataMatcher {
         final CssParser cssParser = new CssParser(cdata,
                 this.getLineCol().getLineNumber(), this.getLineCol().getColumnNumber(), cssErrors);
         final List<Token> tokenList = cssParser.tokenize();
-        final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig(cssSpec);
+        final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig();
         final Stylesheet stylesheet = CssSpecUtils.parseAStylesheet(
                 tokenList, cssParsingConfig.getAtRuleSpec(), cssParsingConfig.getDefaultSpec(),
                 cssErrors);

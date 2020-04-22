@@ -65,7 +65,7 @@ maven_install(
 	"ch.qos.logback:logback-classic:1.2.3",
 	"org.slf4j:slf4j-api:1.7.25",
 	"com.google.protobuf:protobuf-java:3.8.0",
-	"com.yahoo.tagchowder:tagchowder.core:2.0.10",
+	"com.yahoo.tagchowder:tagchowder.core:2.0.17",
 	"org.apache.commons:commons-lang3:3.9",
 	"org.apache.commons:commons-text:1.8",
 	"org.mockito:mockito-all:1.10.19",

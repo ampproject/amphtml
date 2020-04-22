@@ -220,30 +220,23 @@ message MediaQuerySpec {
 // This spec is used by our CSS parser to determine how the contents of a given
 // AT rule should be parsed, if at all. The term 'rule' here refers to the AT
 // Rule in CSS, not a validation rule.
+// NEXT AVAILABLE TAG: 4
 message AtRuleSpec {
-  enum BlockType {
-    // Invalid, ignore contents.
-    PARSE_AS_ERROR = 0;
-    // Valid, ignore contents.
-    PARSE_AS_IGNORE = 1;
-    // Valid, parse contents (as CSS rules).
-    PARSE_AS_RULES = 2;
-    // Valid, parse contents (as CSS declarations).
-    PARSE_AS_DECLARATIONS = 3;
-  }
   // Name of the AT rule to parse. Do not include the '@' symbol (e.g. '@media'
   // should be encoded as 'media'. A value of '$DEFAULT' indicates the default
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
-  optional BlockType type = 2 [default = PARSE_AS_ERROR];
 
   // A MediaQuerySpec may only be set for an AtRuleSpec with the name
   // "media". If not set, media queries will be left unparsed, so no errors or
   // warnings about them will be reported.
   optional MediaQuerySpec media_query_spec = 3;
+
+  // Deprecated fields, do not reuse.
+  // reserved 2;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -262,6 +255,11 @@ message CssSpec {
 
   // Any declaration listed here are allowed.
   repeated string declaration = 7;
+
+  // If fase, declarations tagged with `!important` are considered errors.
+  // Most AMP stylesheets disallow `!important` to reserve this override
+  // for AMP's own styles.
+  optional bool allow_important = 8 [default = false];
 }
 
 // NEXT AVAILABLE TAG: 10
@@ -693,9 +691,7 @@ message ValidatorRules {
 // on this in new code.
 // TODO(#25188): Remove ErrorCategory completely.
 message ErrorCategory {
-  enum Code {
-    UNKNOWN = 0;
-  }
+  enum Code { UNKNOWN = 0; }
 }
 
 // We record validation errors in a structured form, so that they can be

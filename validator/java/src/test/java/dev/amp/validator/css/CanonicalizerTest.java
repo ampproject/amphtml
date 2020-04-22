@@ -24,6 +24,7 @@ package dev.amp.validator.css;
 import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.SACParserCSS3Constants;
 import com.steadystate.css.parser.Token;
+import dev.amp.validator.utils.CssSpecUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
@@ -46,12 +47,12 @@ public class CanonicalizerTest {
 
   @BeforeSuite
   public void init() {
-    defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    defaultSpec = CssSpecUtils.BlockType.PARSE_AS_IGNORE;
     atRuleSpec = new HashMap<>();
 
-    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("$DEFAULT", CssSpecUtils.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media",CssSpecUtils.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
   }
 
   @BeforeTest
@@ -179,8 +180,8 @@ public class CanonicalizerTest {
     }
   }
 
-  private ValidatorProtos.AtRuleSpec.BlockType defaultSpec;
-  private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
+  private CssSpecUtils.BlockType defaultSpec;
+  private Map<String, CssSpecUtils.BlockType> atRuleSpec;
   private Canonicalizer canonicalizer;
   private List<com.steadystate.css.parser.Token> tokenList;
   private CssParser cssParser;

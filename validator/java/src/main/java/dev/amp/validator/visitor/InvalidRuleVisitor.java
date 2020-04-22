@@ -92,21 +92,13 @@ public class InvalidRuleVisitor implements RuleVisitor {
      * @throws CssValidationException Css Validation Exception
      */
     public boolean isAtRuleValid(@Nonnull final ValidatorProtos.CssSpec cssSpec,
-                                 @Nonnull final String atRuleName) throws CssValidationException {
-        String defaultType = "";
-
-        for (final ValidatorProtos.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
-            if (atRuleSpec.getName().equals("$DEFAULT")) {
-                defaultType = atRuleSpec.getType().toString();
-            } else if (atRuleSpec.getName().equals(stripVendorPrefix(atRuleName))) {
-                return atRuleSpec.getType() != ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR;
-            }
+                                 @Nonnull final String atRuleName) {
+      for (final ValidatorProtos.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
+        if (atRuleSpec.getName().equals(stripVendorPrefix(atRuleName))) {
+          return true;
         }
-
-        if (defaultType.equals("")) {
-            throw new CssValidationException("Default type not defined");
-        }
-        return !defaultType.equals(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR.toString());
+      }
+      return false;
     }
 
     /**

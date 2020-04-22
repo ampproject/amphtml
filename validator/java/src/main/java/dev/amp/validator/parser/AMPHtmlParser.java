@@ -89,7 +89,7 @@ public class AMPHtmlParser {
         final AMPHtmlHandler handler = new AMPHtmlHandler(validatorManager, htmlFormat, condition, maxNodes);
         try {
             parser.setContentHandler(handler);
-            parser.setProperty(Parser.SCHEMA_PROPERTY, new HTMLSchema());
+            parser.setProperty(Parser.SCHEMA_PROPERTY, new HTMLSchema(true));
             parser.setFeature(Parser.DEFAULT_ATTRIBUTES_FEATURE, false);
             parser.parse(new InputSource(new StringReader(inputHtml)));
         } catch (IOException | SAXException ex) {
