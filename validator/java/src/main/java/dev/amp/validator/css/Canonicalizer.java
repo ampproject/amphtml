@@ -23,12 +23,15 @@ package dev.amp.validator.css;
 
 import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
+import dev.amp.validator.utils.CssSpecUtils;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.amp.validator.utils.CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS;
+import static dev.amp.validator.utils.CssSpecUtils.BlockType.PARSE_AS_RULES;
 import static dev.amp.validator.utils.CssSpecUtils.asciiMatch;
 import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
 
@@ -49,8 +52,8 @@ public class Canonicalizer {
      * @param atRuleSpec  the AtRule Spec to validate against
      * @param defaultSpec the block type to process as
      */
-    public Canonicalizer(@Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
-                         @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec) {
+    public Canonicalizer(@Nonnull final Map<String, CssSpecUtils.BlockType> atRuleSpec,
+                         @Nonnull final CssSpecUtils.BlockType defaultSpec) {
         this.atRuleSpec = atRuleSpec;
         this.defaultAtRuleSpec = defaultSpec;
     }
@@ -289,8 +292,8 @@ public class Canonicalizer {
      * @param atRule
      * @return the block type of an atRule
      */
-    private ValidatorProtos.AtRuleSpec.BlockType blockTypeFor(@Nonnull final AtRule atRule) {
-        final ValidatorProtos.AtRuleSpec.BlockType maybeBlockType = this.atRuleSpec.get(stripVendorPrefix(atRule.getName()));
+    private CssSpecUtils.BlockType blockTypeFor(@Nonnull final AtRule atRule) {
+        final CssSpecUtils.BlockType maybeBlockType = this.atRuleSpec.get(stripVendorPrefix(atRule.getName()));
         if (maybeBlockType != null) {
             return maybeBlockType;
         } else {
@@ -502,9 +505,9 @@ public class Canonicalizer {
     }
 
     @Nonnull
-    private final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
+    private final Map<String, CssSpecUtils.BlockType> atRuleSpec;
 
     @Nonnull
-    private final ValidatorProtos.AtRuleSpec.BlockType defaultAtRuleSpec;
+    private final CssSpecUtils.BlockType defaultAtRuleSpec;
 
 }

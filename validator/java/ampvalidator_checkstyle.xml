@@ -9,8 +9,6 @@
         <!-- Make the @SuppressWarnings annotations available to Checkstyle -->
         <module name="SuppressWarningsHolder" />
         <module name="JavadocMethod">
-            <property name="suppressLoadErrors" value="true"/>
-            <property name="allowUndeclaredRTE" value="true"/>
             <property name="scope" value="public"/>
         </module>
         <module name="JavadocType">

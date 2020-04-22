@@ -76,8 +76,8 @@ public final class CssSpecUtils {
      * @throws CssValidationException css validation exception
      */
     public static Stylesheet parseAStylesheet(@Nonnull final List<Token> tokenList,
-                                              @Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
-                                              @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec,
+                                              @Nonnull final Map<String, BlockType> atRuleSpec,
+                                              @Nonnull final BlockType defaultSpec,
                                               @Nonnull final List<ErrorToken> errors) throws CssValidationException {
         final Canonicalizer canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
         final Stylesheet stylesheet = new Stylesheet();
@@ -328,11 +328,25 @@ public final class CssSpecUtils {
                                                      @Nonnull final List<ErrorToken> errors)
             throws CssValidationException {
         final Canonicalizer canonicalizer =
-                new Canonicalizer(new HashMap<String, ValidatorProtos.AtRuleSpec.BlockType>(),
-                        ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+                new Canonicalizer(new HashMap<String, BlockType>(),
+                        BlockType.PARSE_AS_DECLARATIONS);
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);
     }
 
     /** Max number of allowed declarations. */
     private static final int MAX_NUM_ALLOWED_DECLARATIONS = 5;
+
+  /**
+   * Enum describing how to parse the rules inside a CSS AT Rule.
+   *
+   */
+  public enum BlockType {
+    /** Parse this simple block as a list of rules (Either Qualified Rules or AT Rules) */
+    PARSE_AS_RULES,
+    /** Parse this simple block as a list of declarations */
+    PARSE_AS_DECLARATIONS,
+    /** Ignore this simple block, do not parse. This is generally used
+     in conjunction with a later step emitting an error for this rule. */
+    PARSE_AS_IGNORE,
+  }
 }
