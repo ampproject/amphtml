@@ -25,7 +25,7 @@
 </head>
 <body>
   <h3>Doesn't overflow</h3>
-  <amp-list id="list1" width="300" height="130" src="./amp-list-data.json?RANDOM">
+  <amp-list id="list1" width="300" height="130" src="./amp-list-data.json">
     <template type="amp-mustache" id="template1">
       <div>
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -36,17 +36,17 @@
   </amp-list>
 
   <h3>Overflows (layout=fixed)</h3>
-  <amp-list id="list2" width="300" height="100" src="./amp-list-data.json?RANDOM" template="template1">
+  <amp-list id="list2" width="300" height="100" src="./amp-list-data.json" template="template1">
     <div overflow>div[overflow]</div>
   </amp-list>
 
   <h3>Overflows (layout=responsive)</h3>
-  <amp-list id="list3" width="300" height="50" layout="responsive" src="./amp-list-data.json?RANDOM" template="template1">
+  <amp-list id="list3" width="300" height="50" layout="responsive" src="./amp-list-data.json" template="template1">
     <div overflow>div[overflow]</div>
   </amp-list>
 
   <h3>Diffable</h3>
-  <amp-list id="list4" diffable width="auto" height="130" layout="fixed-height" src="./amp-list-data.json?RANDOM" template="template1">
+  <amp-list id="list4" diffable width="auto" height="130" layout="fixed-height" src="./amp-list-data.json" template="template1">
     <div fetch-error>div[fetch-error]</div>
     <div role="list" class="i-amphtml-fill-content i-amphtml-replaced-content"><div role="listitem" tabindex="0">
       <amp-img height="60" width="80" src="http://localhost:8000/examples/visual-tests/amp-list/img1.jpg" i-amphtml-ignore="" class="i-amphtml-element i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-layout" i-amphtml-layout="fixed" style="width: 80px; height: 60px;"><img decoding="async" src="http://localhost:8000/examples/visual-tests/amp-list/img1.jpg" class="i-amphtml-fill-content i-amphtml-replaced-content"></amp-img>
