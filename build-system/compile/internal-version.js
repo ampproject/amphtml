@@ -42,7 +42,7 @@ function getVersion() {
   //   `master`'s commit history, then the current commit is <C>).
   // - Find the commit time of <C> (<C>.time). Note that commit time might be
   //   different from author time! e.g., commit time might be the time that a PR
-  //   was merged into `master`, or a commit was cherry-picked onto the brabnch;
+  //   was merged into `master`, or a commit was cherry-picked onto the branch;
   //   author time is when the original author of the commit ran the
   //   "git commit" command.
   // - The version number is <C>.time.format("YYmmDDHHMM", "UTC") + <X> (the
@@ -72,9 +72,9 @@ function getVersion() {
   //    - followed by two commits that were created directly on the branch, the
   //      last of which was commited on November 23, 2021 6:38 PM PST,
   //    - followed by twelve commits that were cherry-picked from `master`,
-  //    then its version number would be `2111240238014`.
+  //    then its version number would be `2111240238012`.
   //    - The latest twelve commits are cherry-picks from `master`, and the one
-  //      before them is not, so our last three digits are set to 014.
+  //      before them is not, so our last three digits are set to 012.
   //    - PST is UTC-8, so the hour value changes from PST's 18 to UTC's 2, and
   //      one day is added.
   let numberOfCherryPicks = 0;
