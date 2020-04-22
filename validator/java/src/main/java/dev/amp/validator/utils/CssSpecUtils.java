@@ -406,8 +406,8 @@ public final class CssSpecUtils {
     if (maybeSpec != null) {
       // Determine if we've exceeded the maximum bytes per inline style
       // requirements.
-      if (maybeSpec.spec().maxBytesPerInlineStyle >= 0 &&
-        attrByteLen > maybeSpec.spec().maxBytesPerInlineStyle) {
+      if (maybeSpec.getSpec().maxBytesPerInlineStyle >= 0 &&
+        attrByteLen > maybeSpec.getSpec().maxBytesPerInlineStyle) {
         if (maybeSpec.spec().maxBytesIsWarning) {
           context.addWarning(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
