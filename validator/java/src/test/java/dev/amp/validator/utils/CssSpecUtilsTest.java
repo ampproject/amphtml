@@ -65,12 +65,12 @@ public class CssSpecUtilsTest {
     tokens.add(new Token(1, "\n"));
     tokens.add(new Token(0, ""));
 
-    final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
-    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    final Map<String, CssSpecUtils.BlockType> atRuleSpec = new HashMap<>();
+    atRuleSpec.put("$DEFAULT", CssSpecUtils.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", CssSpecUtils.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
 
-    final ValidatorProtos.AtRuleSpec.BlockType defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    final CssSpecUtils.BlockType defaultSpec = CssSpecUtils.BlockType.PARSE_AS_IGNORE;
     final List<ErrorToken> errors = new ArrayList<>();
 
     try {
@@ -111,12 +111,12 @@ public class CssSpecUtilsTest {
     tokens.add(new Token(0, ""));
 
 
-    final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
-    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    final Map<String, CssSpecUtils.BlockType> atRuleSpec = new HashMap<>();
+    atRuleSpec.put("$DEFAULT", CssSpecUtils.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", CssSpecUtils.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
 
-    final ValidatorProtos.AtRuleSpec.BlockType defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    final CssSpecUtils.BlockType defaultSpec = CssSpecUtils.BlockType.PARSE_AS_IGNORE;
     final List<ErrorToken> errors = new ArrayList<>();
     final List<ParsedCssUrl> parsedUrls = new ArrayList<>();
 
