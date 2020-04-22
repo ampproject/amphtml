@@ -90,7 +90,7 @@
     "find-imports-forked": "1.3.2",
     "formidable": "1.2.2",
     "fs-extra": "9.0.0",
-    "fuse.js": "5.1.0",
+    "fuse.js": "5.2.3",
     "globby": "11.0.0",
     "google-closure-compiler": "20200406.0.0",
     "gulp": "4.0.2",
