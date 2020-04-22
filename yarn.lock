@@ -8838,6 +8838,11 @@ interpret@^1.1.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.2.0.tgz#d5061a6224be58e8083985f5014d844359576296"
   integrity sha512-mT34yGKMNceBQUoVn7iCDKDntA7SC6gycMAWzGx1z/CMCTV7b2AAtXlo3nRyHZ1FelRkQbQjprHSYGwzLtkVbw==
 
+intersection-observer@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/intersection-observer/-/intersection-observer-0.9.0.tgz#c2f07322764c7bfa235c52fe893760e3d3a84321"
+  integrity sha512-n2rP8fawV1EtOFPk5VsQ8uxBx1GqT/5kYYc/GwCQqMqgUJRryMJ4nqAlvqXlh6JmJWRp7PkJW+RrgSeIfOshgA==
+
 invariant@^2.2.2, invariant@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
