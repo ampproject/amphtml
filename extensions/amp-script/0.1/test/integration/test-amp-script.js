@@ -16,7 +16,6 @@
 
 import {BrowserController} from '../../../../../testing/test-helper';
 import {poll as classicPoll} from '../../../../../testing/iframe';
-import {h} from 'preact';
 
 const TIMEOUT = 10000;
 
@@ -87,9 +86,12 @@ describe
             .callsFake(() => false);
           browser.click('button#hello');
 
-          yield poll('dropped', () => {
-            const h1 = doc.querySelector('h1');
-            expect(h1.textContent).to.equal('Insert Hello World!');
+          // Wait for mutations to be processed
+          yield browser.wait(100);
+
+          yield poll('mutations should be dropped', () => {
+            // Mutation was dropped, therefore no h1s were added.
+            return !doc.querySelector('h1');
           });
         });
 

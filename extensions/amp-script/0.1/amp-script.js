@@ -72,9 +72,6 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?Worker} */
-    this.workerDom_ = null;
-
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
 
@@ -245,9 +242,7 @@ export class AmpScript extends AMP.BaseElement {
       container || this.element,
       workerAndAuthorScripts,
       config
-    ).then((workerDom) => {
-      this.workerDom_ = workerDom;
-    });
+    );
     return workerAndAuthorScripts;
   }
 
