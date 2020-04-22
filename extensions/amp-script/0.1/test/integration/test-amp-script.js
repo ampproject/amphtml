@@ -16,6 +16,7 @@
 
 import {BrowserController} from '../../../../../testing/test-helper';
 import {poll as classicPoll} from '../../../../../testing/iframe';
+import {h} from 'preact';
 
 const TIMEOUT = 10000;
 
@@ -86,9 +87,10 @@ describe
             .callsFake(() => false);
           browser.click('button#hello');
 
-          // Give mutations time to apply.
-          yield browser.wait(100);
-          yield poll('dropped', () => {});
+          yield poll('dropped', () => {
+            const h1 = doc.querySelector('h1');
+            expect(h1.textContent).to.equal('Insert Hello World!');
+          });
         });
 
         it('should start long task', function* () {
