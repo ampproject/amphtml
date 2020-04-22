@@ -144,7 +144,7 @@ exports.jsBundles = {
     },
   },
   'amp-story-player.js': {
-    srcDir: './src/',
+    srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',

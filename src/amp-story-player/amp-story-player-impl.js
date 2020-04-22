@@ -16,19 +16,19 @@
 
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {VisibilityState} from './visibility-state';
+import {VisibilityState} from '../visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   parseUrlWithA,
   removeFragment,
-} from './url';
-import {applySandbox} from './3p-frame';
-import {dict, map} from './utils/object';
+} from '../url';
+import {applySandbox} from '../3p-frame';
+import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../build/amp-story-player-iframe.css';
-import {resetStyles, setStyle, setStyles} from './style';
-import {toArray} from './types';
+import {cssText} from '../../build/amp-story-player-iframe.css';
+import {resetStyles, setStyle, setStyles} from '../style';
+import {toArray} from '../types';
 
 /** @enum {string} */
 const LoadStateClass = {
