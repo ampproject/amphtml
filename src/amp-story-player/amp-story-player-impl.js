@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as ampCaches from '../build-system/global-configs/caches.json';
+import * as ampCaches from '../../build-system/global-configs/caches.json';
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
@@ -429,17 +429,15 @@ export class AmpStoryPlayer {
    * @private
    */
   maybeGetCacheUrl_(url) {
-    const ampCache = this.getAttribute('amp-cache');
+    const ampCache = this.element_.getAttribute('amp-cache');
 
     if (!ampCache || isProxyOrigin(url)) {
       return Promise.resolve(url);
     }
 
     if (!SUPPORTED_CACHES.includes(ampCache)) {
-      Promise.reject(
-        new Error(
-          `Unsupported cache, use one of following: ${SUPPORTED_CACHES}`
-        )
+      throw new Error(
+        `Unsupported cache, use one of following: ${SUPPORTED_CACHES}`
       );
     }
 
