@@ -173,7 +173,7 @@ class AmpVideo extends AMP.BaseElement {
       return [videoSrc];
     }
     const srcs = [];
-    childElementsByTag(this.element, 'source').forEach((source) => {
+    toArray(childElementsByTag(this.element, 'source')).forEach((source) => {
       const src = source.getAttribute('src');
       if (src) {
         srcs.push(src);
