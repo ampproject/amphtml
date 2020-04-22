@@ -593,7 +593,7 @@ export class AmpList extends AMP.BaseElement {
         this.lockHeightAndMutate_(reset);
         return;
       }
-      this.measureElement(() => {
+      this.mutateElement(() => {
         reset();
         if (this.loadMoreEnabled_) {
           this.getLoadMoreService_().hideAllLoadMoreElements();
@@ -1167,7 +1167,7 @@ export class AmpList extends AMP.BaseElement {
    * Measure and lock height before performing given mutate fn.
    * Applicable for amp-list initialized with layout=container.
    * @private
-   * @param {!Function} mutate
+   * @param {function():Promise|undefined} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
