@@ -250,10 +250,8 @@ describe('amp-a4a', () => {
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const safeFrameUrl =
-      'https://tpc.googlesyndication.com/safeframe/' +
-      sfVersion +
-      '/html/container.html';
-    const child = element.querySelector(`iframe[src^="${safeFrameUrl}"][name]`);
+      'googlesyndication.com/safeframe/' + sfVersion + '/html/container.html';
+    const child = element.querySelector(`iframe[src*="${safeFrameUrl}"][name]`);
     expect(child).to.be.ok;
     const name = child.getAttribute('name');
     expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
@@ -945,11 +943,11 @@ describe('amp-a4a', () => {
               expect(devStub).to.not.be.called;
             }
             const safeframeUrl =
-              'https://tpc.googlesyndication.com/safeframe/' +
+              '.googlesyndication.com/safeframe/' +
               DEFAULT_SAFEFRAME_VERSION +
               '/html/container.html';
             const safeChild = a4aElement.querySelector(
-              `iframe[src^="${safeframeUrl}"]`
+              `iframe[src*="${safeframeUrl}"]`
             );
             expect(safeChild).to.not.be.ok;
             if (headerVal != 'nameframe') {
@@ -1769,7 +1767,7 @@ describe('amp-a4a', () => {
       expect(
         doc.querySelector(
           'link[rel=preload]' +
-            '[href="https://tpc.googlesyndication.com/safeframe/' +
+            '[href*=".googlesyndication.com/safeframe/' +
             '1-2-3/html/container.html"]'
         )
       ).to.be.ok;
