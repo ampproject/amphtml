@@ -23,7 +23,6 @@ package dev.amp.validator;
 
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
-import dev.amp.validator.utils.CssSpecUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.Assert;

@@ -21,6 +21,7 @@
 
 package dev.amp.validator;
 
+import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.utils.ExtensionsUtils;
 import dev.amp.validator.utils.TagSpecUtils;
@@ -546,6 +547,14 @@ public class Context {
   }
 
   /**
+   *
+   * @return
+   */
+  public ParsedDocCssSpec matchingDocCssSpec() {
+    return this.parsedDocCssSpec;
+  }
+
+  /**
    * An instance of ParsedValidatorRules.
    */
   private ParsedValidatorRules rules;
@@ -614,4 +623,9 @@ public class Context {
    * flag for LTS runtime engine present
    */
   private ExtensionsUtils.ScriptReleaseVersion scriptReleaseVersion;
+
+  /**
+   * associated ParsedDocCssSpec
+   */
+  private ParsedDocCssSpec parsedDocCssSpec;
 }
