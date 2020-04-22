@@ -7544,10 +7544,10 @@ functions-have-names@^1.2.0:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.1.tgz#a981ac397fa0c9964551402cdc5533d7a4d52f91"
   integrity sha512-j48B/ZI7VKs3sgeI2cZp7WXWmZXu7Iq5pl5/vptV5N2mq+DGFuS/ulaDjtaoLpYzuD6u8UgrUKHfgo7fDTSiBA==
 
-fuse.js@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-5.1.0.tgz#192a670e48bc3ac0247cf9a61590714ab991f7a8"
-  integrity sha512-R8nPr9tQx0HdjRJsqkESimL7o/2Xe0/Lw0cMBrBjkAKAJFq6D6u/o3obteqxkvOJNEgS4xPP78dxoNMaCWNoGg==
+fuse.js@5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-5.2.3.tgz#fdf3aa62859782b3f73ddfa57a9ca81517280c91"
+  integrity sha512-ld3AEgKtKnnXCtJavtygAb+aLlD5aVvLwTocXXBSStLA6JGFI6oMxTvumwh46N2/3gs3A7JNDu1px5F1/cq84g==
 
 gauge@~2.7.3:
   version "2.7.4"
