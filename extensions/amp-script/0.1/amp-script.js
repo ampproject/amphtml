@@ -421,19 +421,6 @@ export class AmpScript extends AMP.BaseElement {
         const count = errors[type];
         user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
       });
-
-      if (disallowedTypes.length > 0 && phase === Phase.MUTATING) {
-        this.workerDom_.terminate();
-
-        this.element.classList.remove('i-amphtml-hydrated');
-        this.element.classList.add('i-amphtml-broken');
-
-        user().error(
-          TAG,
-          '%s was terminated due to illegal mutation.',
-          this.debugId_
-        );
-      }
     });
   }
 

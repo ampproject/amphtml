@@ -72,7 +72,7 @@ describe
           });
         });
 
-        it('should terminate without gesture', function* () {
+        it('should drop mutations without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -88,9 +88,7 @@ describe
 
           // Give mutations time to apply.
           yield browser.wait(100);
-          yield poll('terminated', () => {
-            return element.classList.contains('i-amphtml-broken');
-          });
+          yield poll('dropped', () => {});
         });
 
         it('should start long task', function* () {
