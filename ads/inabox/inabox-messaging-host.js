@@ -48,8 +48,7 @@ class NamedObservable {
    */
   listen(key, callback) {
     if (key in this.map_) {
-      dev().warn(TAG, `Overriding message callback [${key}] not allowed`);
-      return;
+      dev().fine(TAG, `Overriding message callback [${key}]`);
     }
     this.map_[key] = callback;
   }
