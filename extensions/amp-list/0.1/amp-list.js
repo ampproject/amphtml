@@ -1059,11 +1059,12 @@ export class AmpList extends AMP.BaseElement {
     };
 
     if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
-      return this.lockHeightAndMutate_(() =>
-        renderAndResize().then((resized) =>
+      return this.lockHeightAndMutate_(() => {
+        const promise = renderAndResize() || Promise.resolve(true);
+        promise.then((resized) =>
           resized ? this.unlockHeightInsideMutate_() : null
-        )
-      );
+        );
+      });
     }
 
     return this.mutateElement(renderAndResize);
@@ -1167,7 +1168,7 @@ export class AmpList extends AMP.BaseElement {
    * Measure and lock height before performing given mutate fn.
    * Applicable for amp-list initialized with layout=container.
    * @private
-   * @param {function():Promise|undefined} mutate
+   * @param {function():(Promise|undefined)} mutate
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
