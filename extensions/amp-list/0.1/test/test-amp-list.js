@@ -1158,7 +1158,7 @@ describes.repeated(
               element.setAttribute('binding', 'refresh-evaluate');
             });
 
-            it('should rescan() with {update: false, evaluate: true} before FIRST_MUTATE', async () => {
+            it('should rescan() with {update: "evaluate"} before FIRST_MUTATE', async () => {
               const child = doc.createElement('div');
               child.setAttribute('i-amphtml-binding', '');
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
