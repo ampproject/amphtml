@@ -358,6 +358,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setPageDescription_();
+    this.element.setAttribute('role', 'region');
   }
 
   /** @private */
@@ -508,6 +509,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
       this.startMeasuringVideoPerformance_();
@@ -1184,6 +1186,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.element.setAttribute('distance', distance);
+    this.element.setAttribute('aria-hidden', distance != 0);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.findAndPrepareEmbeddedComponents_();
@@ -1358,6 +1361,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.PREVIOUS);
   }
 
@@ -1380,6 +1384,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.NEXT);
   }
 
@@ -1420,6 +1425,22 @@ export class AmpStoryPage extends AMP.BaseElement {
     return Array.prototype.some.call(
       ampVideoEls,
       (video) => !video.hasAttribute('noaudio')
+    );
+  }
+
+  /**
+   * Checks if the page has elements with playback.
+   * @private
+   */
+  checkPageHasElementWithPlayback_() {
+    const pageHasElementWithPlayback =
+      this.isAutoAdvance() ||
+      this.element.hasAttribute('background-audio') ||
+      this.getAllMedia_().length > 0;
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
+      pageHasElementWithPlayback
     );
   }
 
@@ -1552,7 +1573,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.registerMedia_(mediaPool, videoEl)
           .then(() => this.preloadMedia_(mediaPool, videoEl))
           .then((poolVideoEl) => {
-            this.playMedia_(mediaPool, poolVideoEl);
+            if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+              this.playMedia_(mediaPool, poolVideoEl);
+            }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
             }

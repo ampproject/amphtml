@@ -1,5 +1,23 @@
 {
   "headless": true,
   "runs": 100,
-  "urls": []
+  "handlers": [
+    {
+      "handlerName": "defaultHandler",
+      "urls": []
+    },
+    {
+      "handlerName": "analyticsHandler",
+      "urls": [],
+      "timeout": 2000,
+      "extraUrlParam": {
+        "analytics": "amp-analytics-performance-param"
+      }
+    },
+    {
+      "handlerName": "adsHander",
+      "urls": [],
+      "timeout": 5000
+    }
+  ]
 }
