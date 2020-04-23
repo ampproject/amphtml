@@ -1944,14 +1944,10 @@ describes.realWin('Events', {amp: 1}, (env) => {
       describe('multi selector visibility trigger', () => {
         let unlisten;
         let unlisten2;
-        let unlisten3;
-        let target3;
         let config;
         let readyPromise;
         let targetSignals2;
-        let targetSignals3;
         let saveCallback2;
-        let saveCallback3;
         let eventsSpy;
         let res;
         let error;
@@ -1961,26 +1957,13 @@ describes.realWin('Events', {amp: 1}, (env) => {
           readyPromise = Promise.resolve();
           unlisten = env.sandbox.spy();
           unlisten2 = env.sandbox.spy();
-          unlisten3 = env.sandbox.spy();
           config = {};
 
           eventsSpy = env.sandbox.spy(tracker, 'onEvent_');
 
-          target3 = win.document.createElement('div');
-          target3.classList.add('target2');
-          win.document.body.appendChild(target3);
-
           target2.classList.add('i-amphtml-element');
           targetSignals2 = new Signals();
           target2.signals = () => targetSignals2;
-
-          target3.classList.add('i-amphtml-element');
-          targetSignals3 = new Signals();
-          target3.signals = () => targetSignals3;
-
-          target.setAttribute('data-vars-id', '123');
-          target2.setAttribute('data-vars-id', '456');
-          target3.setAttribute('data-vars-id', '789');
 
           saveCallback2 = env.sandbox.match((arg) => {
             if (typeof arg == 'function') {
@@ -1989,25 +1972,18 @@ describes.realWin('Events', {amp: 1}, (env) => {
             }
             return false;
           });
-          saveCallback3 = env.sandbox.match((arg) => {
-            if (typeof arg == 'function') {
-              saveCallback3.callback = arg;
-              return true;
-            }
-            return false;
-          });
         });
 
         afterEach(async () => {
           if (!error) {
-            [unlisten, unlisten2, unlisten3].forEach((value) => {
+            [unlisten, unlisten2].forEach((value) => {
               if (value) {
                 expect(value).to.not.be.called;
               }
             });
             expect(res).to.be.a('function');
             await res();
-            [unlisten, unlisten2, unlisten3].forEach((value) => {
+            [unlisten, unlisten2].forEach((value) => {
               if (value) {
                 expect(value).to.be.calledOnce;
               }
@@ -2032,11 +2008,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
             .withExactArgs('ini-load', target2)
             .returns(readyPromise)
             .once();
-          iniLoadTrackerMock
-            .expects('getElementSignal')
-            .withExactArgs('ini-load', target3)
-            .returns(readyPromise)
-            .once();
           visibilityManagerMock
             .expects('listenElement')
             .withExactArgs(
@@ -2059,32 +2030,18 @@ describes.realWin('Events', {amp: 1}, (env) => {
             )
             .returns(unlisten2)
             .once();
-          visibilityManagerMock
-            .expects('listenElement')
-            .withExactArgs(
-              target3,
-              config.visibilitySpec,
-              readyPromise,
-              /* createReportReadyPromiseFunc */ null,
-              saveCallback3
-            )
-            .returns(unlisten3)
-            .once();
           // Dispose function
           res = tracker.add(analyticsElement, 'visible', config, eventResolver);
           const unlistenReady = getAmpElementSpy.returnValues[0];
           const unlistenReady2 = getAmpElementSpy.returnValues[1];
-          const unlistenReady3 = getAmpElementSpy.returnValues[2];
           // #getAmpElement Promise
           await unlistenReady;
           await unlistenReady2;
-          await unlistenReady3;
           // #assertMeasurable_ Promise
           await macroTask();
           await macroTask();
           saveCallback.callback({totalVisibleTime: 10});
           saveCallback2.callback({totalVisibleTime: 15});
-          saveCallback3.callback({totalVisibleTime: 20});
 
           // Testing that visibilty manager mock sends state to onEvent_
           expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
@@ -2092,21 +2049,12 @@ describes.realWin('Events', {amp: 1}, (env) => {
           expect(eventsSpy.getCall(0).args[2]).to.equal(target);
           expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
             totalVisibleTime: 10,
-            id: '123',
           });
           expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
           expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
           expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
           expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
             totalVisibleTime: 15,
-            id: '456',
-          });
-          expect(eventsSpy.getCall(2).args[0]).to.equal('visible');
-          expect(eventsSpy.getCall(2).args[1]).to.equal(eventResolver);
-          expect(eventsSpy.getCall(2).args[2]).to.equal(target3);
-          expect(eventsSpy.getCall(2).args[3]).to.deep.equal({
-            totalVisibleTime: 20,
-            id: '789',
           });
         });
 

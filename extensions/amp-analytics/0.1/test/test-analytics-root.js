@@ -26,6 +26,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;
@@ -391,16 +392,21 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
       });
 
       it('should only find elements with data-vars-*', async () => {
+        const spy = env.sandbox.spy(user(), 'warn');
+
         child.classList.add('myClass');
         child2.classList.add('myClass');
         child3.classList.add('myClass');
 
         child3.removeAttribute('data-vars-id');
-
-        expect(await root.getAmpElements(body, ['.myClass'])).to.deep.equal([
-          child,
-          child2,
-        ]);
+        const children = await root.getAmpElements(body, ['.myClass']);
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'amp-analytics/analytics-root',
+          'An element was ommited from selector "%s" because no data-vars-* attribute was found.',
+          '.myClass'
+        );
+        expect(children).to.deep.equal([child, child2]);
       });
 
       it('should remove duplicate elements found', async () => {
@@ -756,6 +762,7 @@ describes.realWin(
       });
 
       it('should find all elements by selector', async () => {
+        const spy = env.sandbox.spy(user(), 'warn');
         const child2 = win.document.createElement('child');
         const child3 = win.document.createElement('child');
         const child4 = win.document.createElement('child');
@@ -778,9 +785,14 @@ describes.realWin(
         child2.setAttribute('data-vars-id', '456');
         child3.setAttribute('data-vars-id', '789');
         parentChild.setAttribute('data-vars-id', 'abc');
-        expect(
-          await root.getAmpElements(body, ['.myClass'], null)
-        ).to.deep.equals([child, child2]);
+        const elements = await root.getAmpElements(body, ['.myClass'], null);
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'amp-analytics/analytics-root',
+          'An element was ommited from selector "%s" because no data-vars-* attribute was found.',
+          '.myClass'
+        );
+        expect(elements).to.deep.equals([child, child2]);
         // Check that non-experiment version works
         toggleExperiment(win, 'visibility-trigger-improvements', false);
         expect(

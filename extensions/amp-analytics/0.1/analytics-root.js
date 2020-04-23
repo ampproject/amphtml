@@ -301,11 +301,8 @@ export class AnalyticsRoot {
           userAssert(false, `Invalid query selector ${selector}`);
         }
         for (let j = 0; j < nodeList.length; j++) {
-          if (
-            this.contains(nodeList[j]) &&
-            this.elementContainsDataVarsAttribute_(nodeList[j])
-          ) {
-            elementArray.push(nodeList[j]);
+          if (this.contains(nodeList[j])) {
+            this.checkElementDataVars(nodeList[j], elementArray, selector);
           }
         }
         userAssert(elementArray.length, `Element "${selector}" not found`);
@@ -317,6 +314,33 @@ export class AnalyticsRoot {
         (element, index) => elements.indexOf(element) === index
       );
     });
+  }
+
+  /**
+   * Check if the given element has a data-vars attribute.
+   * Warn if not the case.
+   * @param {!Element} element
+   * @param {!Array<!Element>} elementArray
+   * @param {string} selector
+   */
+  checkElementDataVars(element, elementArray, selector) {
+    const dataVarKeys = Object.keys(
+      getDataParamsFromAttributes(
+        element,
+        /* computeParamNameFunc */ undefined,
+        VARIABLE_DATA_ATTRIBUTE_KEY
+      )
+    );
+    if (dataVarKeys.length) {
+      elementArray.push(element);
+    } else {
+      user().warn(
+        TAG,
+        'An element was ommited from selector "%s"' +
+          ' because no data-vars-* attribute was found.',
+        selector
+      );
+    }
   }
 
   /**
@@ -382,24 +406,6 @@ export class AnalyticsRoot {
         selector
       );
     }
-  }
-
-  /**
-   * Ensure that the element has a data-vars attribute for
-   * unique requests.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  elementContainsDataVarsAttribute_(element) {
-    return (
-      Object.keys(
-        getDataParamsFromAttributes(
-          element,
-          /* computeParamNameFunc */ undefined,
-          VARIABLE_DATA_ATTRIBUTE_KEY
-        )
-      ).length !== 0
-    );
   }
 
   /**
