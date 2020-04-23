@@ -621,15 +621,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     let url = this.element.getAttribute('endpoint');
 
-    if (requestOptions['method'] === 'POST') {
-      requestVars['reactionValue'] = reactionValue;
-      requestOptions['body'] = requestVars;
-    } else if (requestOptions['method'] === 'GET') {
-      url = addParamsToUrl(url, requestVars);
-    }
-
     return this.getClientId_().then((clientId) => {
       requestVars['clientId'] = clientId;
+      if (requestOptions['method'] === 'POST') {
+        requestVars['reactionValue'] = reactionValue;
+        requestOptions['body'] = requestVars;
+      }
+      url = addParamsToUrl(url, requestVars);
       return this.requestService_.executeRequest(url, requestOptions);
     });
   }
