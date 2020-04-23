@@ -24,7 +24,12 @@ import {
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
-import {Layout, getLayoutClass, parseLayout} from '../../../src/layout';
+import {
+  Layout,
+  getLayoutClass,
+  isLayoutSizeDefined,
+  parseLayout,
+} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -185,13 +190,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  buildCallback() {
-    if (this.element.getAttribute('layout') === Layout.CONTAINER) {
+  isLayoutSupported(layout) {
+    if (layout === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
       userAssert(
         (doc && isAmp4Email(doc)) ||
@@ -206,9 +206,13 @@ export class AmpList extends AMP.BaseElement {
         TAG,
         this.element
       );
-      this.enableManagedResizing_ = true;
+      return (this.enableManagedResizing_ = true);
     }
+    return isLayoutSizeDefined(layout);
+  }
 
+  /** @override */
+  buildCallback() {
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
@@ -589,6 +593,7 @@ export class AmpList extends AMP.BaseElement {
         removeChildren(dev().assertElement(this.container_));
       };
 
+      // amp-list[layout=container] can manage resizing.
       if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
         this.lockHeightAndMutate_(reset);
         return;
@@ -1058,6 +1063,7 @@ export class AmpList extends AMP.BaseElement {
       return this.maybeResizeListToFitItems_();
     };
 
+    // amp-list[layout=container] can manage resizing.
     if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
       return this.lockHeightAndMutate_(() => {
         const promise = renderAndResize() || Promise.resolve(true);
@@ -1172,12 +1178,14 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   lockHeightAndMutate_(mutate) {
-    devAssert(
-      this.enableManagedResizing_ && !this.loadMoreEnabled_,
-      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
-      TAG,
-      this.element
-    );
+    if (!this.enableManagedResizing_ || this.loadMoreEnabled_) {
+      dev().error(
+        TAG,
+        '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+        this.element
+      );
+      return Promise.resolve();
+    }
     let currentHeight;
     return this.measureMutateElement(
       () => {
