@@ -21,6 +21,8 @@
 
 package dev.amp.validator;
 
+import dev.amp.validator.css.Declaration;
+import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.exception.TagValidationException;
 import com.steadystate.css.parser.Token;
 
@@ -48,6 +50,7 @@ import static dev.amp.validator.utils.ByteUtils.byteLength;
 import static dev.amp.validator.utils.CssSpecUtils.stripMinMax;
 import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
 import static dev.amp.validator.utils.TagSpecUtils.getTagSpecName;
+import static dev.amp.validator.utils.TagSpecUtils.getTagSpecUrl;
 import static dev.amp.validator.utils.UrlUtils.isDataUrl;
 import static dev.amp.validator.visitor.MediaQueryVisitor.parseMediaQueries;
 
@@ -122,7 +125,7 @@ public class CdataMatcher {
                         ValidatorProtos.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
                         context.getLineCol(),
                         params,
-                        TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
+                        getTagSpecUrl(this.getTagSpec()),
                         validationResult);
             }
             // We return early if the cdata has an exact match rule. The
@@ -136,7 +139,7 @@ public class CdataMatcher {
                         ValidatorProtos.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
                         context.getLineCol(),
                         params,
-                        TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
+                        getTagSpecUrl(this.getTagSpec()),
                         validationResult);
                 return;
             }
@@ -148,19 +151,21 @@ public class CdataMatcher {
                         ValidatorProtos.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
                         context.getLineCol(),
                         params,
-                        TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
+                        getTagSpecUrl(this.getTagSpec()),
                         validationResult);
             }
         }
 
+        final ParsedDocCssSpec maybeDocCssSpec = context.matchingDocCssSpec();
+
         int adjustedCdataLength = byteLength(cdata);
-        if (!cdataSpec.hasUrlBytesIncluded()) {
+        if (maybeDocCssSpec != null && !maybeDocCssSpec.getSpec().getUrlBytesIncluded()) {
             adjustedCdataLength -= urlBytes;
         }
 
         // Record <style amp-custom> byte size
-        if (context.getTagStack().isStyleAmpCustomChild()) {
-            context.addStyleAmpCustomByteSize(adjustedCdataLength);
+      if (context.getTagStack().countDocCssBytes()) {
+        context.addStyleTagByteSize(adjustedCdataLength);
         }
 
         // Blacklisted CDATA Regular Expressions
@@ -188,7 +193,7 @@ public class CdataMatcher {
                         context.getLineCol(),
                         /* params */
                         params,
-                        TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
+                        getTagSpecUrl(this.getTagSpec()),
                         validationResult);
             }
         }
@@ -223,6 +228,8 @@ public class CdataMatcher {
         final Stylesheet stylesheet = CssSpecUtils.parseAStylesheet(
                 tokenList, cssParsingConfig.getAtRuleSpec(), cssParsingConfig.getDefaultSpec(),
                 cssErrors);
+
+        final ParsedDocCssSpec maybeDocCssSpec = context.matchingDocCssSpec();
         int urlBytes = 0;
 
         // We extract the urls from the stylesheet. As a side-effect, this can
@@ -278,6 +285,19 @@ public class CdataMatcher {
                     params,
                     /* url */ "",
                     validationResult);
+        }
+
+      // If `!important` is not allowed, record instances as errors.
+      if (!cssSpec.getAllowImportant()) {
+        final List<Declaration> important = new ArrayList<>();
+        // TODO extractImportantDeclarations(stylesheet, important);
+        for (final Declaration decl : important) {
+          context.addError(
+            ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            new LineCol(decl.important_line, decl.important_col),
+            /* params */
+            [getTagSpecName(this.tagSpec_), 'CSS !important'],
+          getTagSpecUrl(this.tagSpec_), validationResult);
         }
 
         final ParsedUrlSpec parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.getFontUrlSpec());

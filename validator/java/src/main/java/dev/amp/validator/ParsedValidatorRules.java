@@ -21,6 +21,7 @@
 
 package dev.amp.validator;
 
+import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
 import dev.amp.validator.utils.AttributeSpecUtils;
@@ -80,6 +81,12 @@ public class ParsedValidatorRules {
     expandExtensionSpec();
 
     this.parsedAttrSpecs = new ParsedAttrSpecs(ampValidatorManager);
+
+    this.parsedCss = new ArrayList<>();
+    for (final ValidatorProtos.DocCssSpec cssSpec : this.ampValidatorManager.getRules().getCssList()) {
+      this.parsedCss.add(
+        new ParsedDocCssSpec(cssSpec, this.ampValidatorManager.getRules().getDeclarationListList()));
+    }
 
     this.tagSpecIdsToTrack = new HashMap<>();
     final int numTags = this.ampValidatorManager.getRules().getTagsList().size();
@@ -616,8 +623,8 @@ public class ParsedValidatorRules {
    *
    * @return returns the list of Css length spec.
    */
-  public List<ValidatorProtos.CssLengthSpec> getCssLengthSpec() {
-    return this.ampValidatorManager.getRules().getCssLengthSpecList();
+  public List<ParsedDocCssSpec> getCss() {
+    return this.parsedCss;
   }
 
   /**
@@ -698,24 +705,10 @@ public class ParsedValidatorRules {
     }
 
     final int bytesUsed =
-      context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
+      context.getInlineStyleByteSize() + context.getStyleTagByteSize();
 
-    for (final ValidatorProtos.CssLengthSpec cssLengthSpec : getCssLengthSpec()) {
-      if (!this.isCssLengthSpecCorrectHtmlFormat(cssLengthSpec)) {
-        continue;
-      }
-      if (cssLengthSpec.hasMaxBytes() && bytesUsed > cssLengthSpec.getMaxBytes()) {
-        final List<String> params = new ArrayList<>();
-        params.add(String.valueOf(bytesUsed));
-        params.add(String.valueOf(cssLengthSpec.getMaxBytes()));
-        context.addError(
-          ValidatorProtos.ValidationError.Code
-            .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
-          context.getLineCol(), /* params */
-          params,
-          /* specUrl */ cssLengthSpec.getSpecUrl(), validationResult);
-      }
-    }
+//      }
+//    }
   }
 
   /**
@@ -867,13 +860,20 @@ public class ParsedValidatorRules {
 
 
   /**
-   * Returns true if Css length spec's html format is equal to this html format.
+   * Returns true if `spec` is usable for the HTML format these rules are
+   * built for.
    *
-   * @param cssLengthSpec the CssLengthSpec.
-   * @return returns true of Css length spec's html format is same as this html format.
+   * @param docCssSpec the DocCssSpec.
+   * @return Returns true if `spec` is usable for the HTML format these rules are
+   * built for.
    */
-  private boolean isCssLengthSpecCorrectHtmlFormat(@Nonnull final ValidatorProtos.CssLengthSpec cssLengthSpec) {
-    return cssLengthSpec.hasHtmlFormat() ? cssLengthSpec.getHtmlFormat() == htmlFormat : false;
+  public boolean isDocCssSpecCorrectHtmlFormat(@Nonnull final ValidatorProtos.DocCssSpec docCssSpec) {
+//    castedHtmlFormat =
+//      /** @type {!generated.HtmlFormat.Code} */ (
+//      /** @type {*} */ (htmlFormat));
+//    return docCssSpec.html() ? cssLengthSpec.getHtmlFormat() == htmlFormat : false;
+    // TODO
+    return true;
   }
 
   /**
@@ -1004,4 +1004,9 @@ public class ParsedValidatorRules {
    * Transformed value regex pattern.
    */
   private static final Pattern TRANSFORMED_VALUE_REGEX = Pattern.compile("^\\w+;v=(\\d+)$");
+
+  /**
+   *
+   */
+  private List<ParsedDocCssSpec> parsedCss;
 }

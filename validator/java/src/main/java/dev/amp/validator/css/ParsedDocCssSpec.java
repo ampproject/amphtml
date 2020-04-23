@@ -60,6 +60,24 @@ public class ParsedDocCssSpec {
 //    }
   }
 
+  public ValidatorProtos.DocCssSpec getSpec() {
+    return spec;
+  }
+
+  /**
+   * @return list of enabled by elements
+   */
+  public List<String> enabledBy() {
+    return this.spec.getEnabledByList();
+  }
+
+  /**
+   * @return list of disabled by elements
+   */
+  public List<String> disabledBy() {
+    return this.spec.getDisabledByList();
+  }
+
   /**
    *
    */

@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static dev.amp.validator.utils.AttributeSpecUtils.isUsedForTypeIdentifiers;
 import static dev.amp.validator.utils.ExtensionsUtils.isAmpRuntimeScript;
 import static dev.amp.validator.utils.ExtensionsUtils.isExtensionScript;
 import static dev.amp.validator.utils.ExtensionsUtils.isLtsScriptUrl;
@@ -66,7 +67,7 @@ public class Context {
     //TODO - it's a hack, remove this when DOCTYPE is fixed
     tagspecsValidated.put(0, true);
 
-    this.styleAmpCustomByteSize = 0;
+    this.styleTagByteSize = 0;
     this.inlineStyleByteSize = 0;
     this.typeIdentifiers = new ArrayList<>();
     this.valueSetsProvided = new HashSet<>();
@@ -449,8 +450,8 @@ public class Context {
    *
    * @param byteSize byte size.
    */
-  public void addStyleAmpCustomByteSize(final int byteSize) {
-    this.styleAmpCustomByteSize += byteSize;
+  public void addStyleTagByteSize(final int byteSize) {
+    this.styleTagByteSize += byteSize;
   }
 
   /**
@@ -476,8 +477,8 @@ public class Context {
    *
    * @return returns the size of style of amp-custom
    */
-  public int getStyleAmpCustomByteSize() {
-    return this.styleAmpCustomByteSize;
+  public int getStyleTagByteSize() {
+      return this.styleTagByteSize;
   }
 
   /**
@@ -551,7 +552,27 @@ public class Context {
    * @return
    */
   public ParsedDocCssSpec matchingDocCssSpec() {
-    return this.parsedDocCssSpec;
+    // The specs are usually already filtered by HTML format, so this loop
+    // should be very short, often 1:
+    for (ParsedDocCssSpec spec : this.rules.getCss()) {
+      if (this.rules.isDocCssSpecCorrectHtmlFormat(spec.getSpec()) &&
+        this.isDocCssSpecValidForTypeIdentifiers(spec)) {
+        return spec;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns true iff `spec` should be used for the type identifiers recorded
+   * in this context, as seen in the document so far. If called before type
+   * identifiers have been recorded, will always return false.
+   * @param spec
+   * @return true iff `spec` should be used for the type identifiers recorded in context
+   */
+  private boolean isDocCssSpecValidForTypeIdentifiers(final ParsedDocCssSpec spec) {
+    return isUsedForTypeIdentifiers(
+      this.getTypeIdentifiers(), spec.enabledBy(), spec.disabledBy());
   }
 
   /**
@@ -582,7 +603,7 @@ public class Context {
   /**
    * Size of &lt;style amp-custom&gt;.
    */
-  private int styleAmpCustomByteSize = 0;
+  private int styleTagByteSize = 0;
 
   /**
    * Size of all inline styles (style attribute) combined.
@@ -623,9 +644,4 @@ public class Context {
    * flag for LTS runtime engine present
    */
   private ExtensionsUtils.ScriptReleaseVersion scriptReleaseVersion;
-
-  /**
-   * associated ParsedDocCssSpec
-   */
-  private ParsedDocCssSpec parsedDocCssSpec;
 }

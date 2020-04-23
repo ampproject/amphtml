@@ -60,10 +60,10 @@ public class TagStack {
    * @return returns true if this within lt;style amp-custom gt; Else false.
    * @throws TagValidationException the TagValidationException.
    */
-  public boolean isStyleAmpCustomChild() throws TagValidationException {
-    return (this.parentStackEntry().getTagSpec() != null)
-      && (this.parentStackEntry().getTagSpec().getSpec().getNamedId()
-      == ValidatorProtos.TagSpec.NamedId.STYLE_AMP_CUSTOM);
+   public boolean countDocCssBytes() throws TagValidationException {
+    final ParsedTagSpec parentSpec = this.parentStackEntry().getTagSpec();
+      return (parentSpec != null) && (parentSpec.getSpec().hasCdata()) &&
+        (parentSpec.getSpec().getCdata().hasDocCssBytes());
   }
 
   /**
