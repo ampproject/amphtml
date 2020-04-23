@@ -1372,7 +1372,7 @@ describe
             await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
             expect(toRemove.textContent).to.equal('foo');
 
-            // `toAdd` should be scanned but not updated. With {evaluate: true},
+            // `toAdd` should be scanned but not updated. With {update: 'evaluate'},
             // its expression "x" is now cached on the element.
             await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
             expect(toAdd.textContent).to.equal('');
