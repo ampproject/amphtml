@@ -421,3 +421,32 @@ export function getViewerAuthTokenIfAvailable(element) {
   // If crossorigin attribute is missing, always resolve with undefined.
   return Promise.resolve(undefined);
 }
+
+/**
+ * Format data for pingback.
+ * @param {any} obj
+ * @return {string}
+ */
+export function stringifyForPingback(obj) {
+  // If there's json for pingback use that if not use json if not go deeper
+  if (obj.jsonForPingback) {
+    return JSON.stringify(obj.jsonForPingback());
+  } else if (obj.json) {
+    return JSON.stringify(obj.json());
+  }
+  if (isObject(obj)) {
+    const result = {};
+    Object.keys(obj).forEach((key) => {
+      result[key] = this.stringifyForPingback(obj[key]);
+    });
+    return JSON.stringify(result);
+  }
+  if (isArray(obj)) {
+    const objArray = [];
+    obj.forEach((element) => {
+      objArray.push(this.stringifyForPingback(element));
+    });
+    return '[' + objArray.join(',') + ']';
+  }
+  return JSON.stringify(obj);
+}
