@@ -332,7 +332,7 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>3.1.12</version>
+            <version>4.0.2</version>
           </dependency>
           <dependency>
             <groupId>com.github.spotbugs</groupId>
