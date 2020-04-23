@@ -78,7 +78,7 @@ export class InaboxHost {
     });
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
-        queuedMsgs.forEach((message) => {
+        /** @type {!Array} */ (queuedMsgs).forEach((message) => {
           // Pending messages are added by external scripts.
           // Validate their data types to avoid client errors.
           if (!validateMessage(message)) {

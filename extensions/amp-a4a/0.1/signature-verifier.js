@@ -348,7 +348,7 @@ export class SignatureVerifier {
                 );
                 return false;
               }
-              jwkSet['keys'].forEach((jwk) => {
+              /** @type {!Array} */ (jwkSet['keys']).forEach((jwk) => {
                 if (!jwk || typeof jwk['kid'] != 'string') {
                   signingServiceError(
                     signingServiceName,

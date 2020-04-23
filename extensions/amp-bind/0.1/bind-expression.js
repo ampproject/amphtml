@@ -542,7 +542,7 @@ export class BindExpression {
 
           const names = this.eval_(args[0], scope);
           if (names) {
-            names.forEach((name, i) => {
+            /** @type {!Array} */ (names).forEach((name, i) => {
               functionScope[name] = values[i];
             });
           }

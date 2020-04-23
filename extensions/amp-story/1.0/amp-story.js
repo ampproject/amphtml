@@ -114,6 +114,7 @@ import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -529,7 +530,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     };
 
-    mediaQueryEls.forEach((el) => {
+    toArray(mediaQueryEls).forEach((el) => {
       const className = el.getAttribute('class-name');
       const media = el.getAttribute('media');
 

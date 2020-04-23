@@ -344,12 +344,16 @@ export class LaterpayVendor {
     listContainer.appendChild(
       this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
     );
-    this.purchaseConfig_['timepasses'].forEach((timepass) => {
-      listContainer.appendChild(this.createPurchaseOption_(timepass));
-    });
-    this.purchaseConfig_['subscriptions'].forEach((subscription) => {
-      listContainer.appendChild(this.createPurchaseOption_(subscription));
-    });
+    /** @type {!Array} */ (this.purchaseConfig_['timepasses']).forEach(
+      (timepass) => {
+        listContainer.appendChild(this.createPurchaseOption_(timepass));
+      }
+    );
+    /** @type {!Array} */ (this.purchaseConfig_['subscriptions']).forEach(
+      (subscription) => {
+        listContainer.appendChild(this.createPurchaseOption_(subscription));
+      }
+    );
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_['defaultButton'];

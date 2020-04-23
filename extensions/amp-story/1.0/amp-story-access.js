@@ -301,7 +301,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     const actions = [];
 
-    accessConfig.forEach((config) => {
+    /** @type {!Array} */ (accessConfig).forEach((config) => {
       const {login, namespace} = /** @type {{login, namespace}} */ (config);
 
       if (isObject(login)) {

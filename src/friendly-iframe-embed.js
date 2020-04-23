@@ -797,7 +797,7 @@ export class FriendlyIframeEmbed {
         .preloadExtension(extensionId)
         .then((extension) => {
           // Adopt embeddable extension services.
-          extension.services.forEach((service) => {
+          /** @type {!Array} */ (extension.services).forEach((service) => {
             installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
           });
 

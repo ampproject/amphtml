@@ -86,7 +86,7 @@ function appnexusAst(global, data) {
         });
       }
 
-      data.adUnits.forEach((adUnit) => {
+      /** @type {!Array} */ (data.adUnits).forEach((adUnit) => {
         apntag.defineTag(adUnit);
       });
     });
@@ -124,7 +124,7 @@ function appnexusAst(global, data) {
     });
     if (newAddUnits.length) {
       apntag.anq.push(() => {
-        newAddUnits.forEach((adUnit) => {
+        /** @type {!Array} */ (newAddUnits).forEach((adUnit) => {
           apntag.defineTag(adUnit);
           context.master.adUnitTargetIds.push(adUnit.targetId);
         });

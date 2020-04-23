@@ -72,7 +72,7 @@ export function _ping_(global, data) {
     }
     if (data.enableIo) {
       global.context.observeIntersection(function (changes) {
-        changes.forEach(function (c) {
+        /** @type {!Array} */ (changes).forEach(function (c) {
           dev().info(
             'AMP-AD',
             'Intersection: (WxH)' +

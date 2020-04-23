@@ -154,7 +154,7 @@ export function fromStructuredCloneable(response, responseType) {
   if (response['init']) {
     const init = response['init'];
     if (isArray(init.headers)) {
-      init.headers.forEach((entry) => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] = String(

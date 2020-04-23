@@ -70,7 +70,7 @@ export function upgradePolyfill(win, installer) {
       microtask.then(() => upgrader(Impl));
     };
     if (upgraders.length > 0) {
-      upgraders.forEach(upgrade);
+      /** @type {!Array} */ (upgraders).forEach(upgrade);
     }
     Stub[
       UPGRADERS

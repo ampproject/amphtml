@@ -77,6 +77,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -686,9 +687,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   addClickShieldToEmbeddedComponents_() {
-    const componentEls = scopedQuerySelectorAll(
-      this.element,
-      EMBEDDED_COMPONENTS_SELECTORS
+    const componentEls = toArray(
+      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
     );
 
     if (componentEls.length <= 0) {
@@ -708,9 +708,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   resizeInteractiveEmbeddedComponents_(forceResize) {
-    scopedQuerySelectorAll(
-      this.element,
-      INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS
+    toArray(
+      scopedQuerySelectorAll(
+        this.element,
+        INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS
+      )
     ).forEach((el) => {
       const debouncePrepareForAnimation = debounceEmbedResize(
         this.win,
@@ -735,12 +737,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Initializes affiliate links.
    */
   buildAffiliateLinks_() {
-    scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR).forEach(
-      (el) => {
-        const link = new AmpStoryAffiliateLink(this.win, el);
-        link.build();
-      }
-    );
+    toArray(
+      scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR)
+    ).forEach((el) => {
+      const link = new AmpStoryAffiliateLink(this.win, el);
+      link.build();
+    });
   }
 
   /** @private */
@@ -1333,7 +1335,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     return actionAttrs.reduce((res, actions) => {
       // Handling for multiple actions on one event or multiple events.
-      const actionList = actions.split(/[;,]+/);
+      const actionList = /** @type {!Array} */ (actions.split(/[;,]+/));
       actionList.forEach((action) => {
         if (action.indexOf('goToPage') >= 0) {
           // The pageId is in between the equals sign & closing parenthesis.
