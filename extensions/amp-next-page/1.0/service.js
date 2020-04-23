@@ -252,27 +252,34 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
+    // If we already fetched the maximum number of pages
+    const exceededMaximum =
+      this.pages_.filter((page) => !page.is(PageState.QUEUED)).length >
+      this.maxPages_;
     // If a page is already queued to be fetched, we need to wait for it
     const isFetching = this.pages_.some((page) => page.is(PageState.FETCHING));
     // If we're still too far from the bottom, we don't need to perform this now
     const isTooEarly =
       this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
 
-    if (this.finished_ || isFetching || isTooEarly) {
+    if (this.finished_ || isFetching || isTooEarly || exceededMaximum) {
       return Promise.resolve();
     }
 
     const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (nextPage) {
-      return nextPage.fetch().then(() => {
-        if (nextPage.is(PageState.FAILED)) {
-          // Silently skip this page and get the recommendation box
-          // ready in case this page is the last one
-          this.setLastFetchedPage(nextPage);
+      return nextPage
+        .fetch()
+        .then(() => {
+          if (nextPage.is(PageState.FAILED)) {
+            // Silently skip this page
+            this.setLastFetchedPage(nextPage);
+          }
+        })
+        .finally(() => {
           return this.refreshRecBox_();
-        }
-      });
+        });
     }
 
     // Attempt to get more pages
@@ -771,11 +778,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
-    if (
-      !pages.length ||
-      this.pages_.length > this.maxPages_ ||
-      this.finished_
-    ) {
+    if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
     // Queue the given pages
@@ -785,10 +788,7 @@ export class NextPageService {
         // Prevent loops by checking if the page already exists
         // we use initialUrl since the url can get updated if
         // the page issues a redirect
-        if (
-          this.pages_.some((page) => page.initialUrl == meta.url) ||
-          this.pages_.length > this.maxPages_
-        ) {
+        if (this.pages_.some((page) => page.initialUrl == meta.url)) {
           return;
         }
         // Queue the page for fetching
@@ -955,7 +955,6 @@ export class NextPageService {
       this.refreshRecBox_ = this.templates_.hasTemplate(providedRecBox)
         ? () => this.renderRecBoxTemplate_()
         : ASYNC_NOOP;
-      removeElement(providedRecBox);
       return providedRecBox;
     }
     // If no recommendation box is provided then we build a default one
@@ -983,6 +982,9 @@ export class NextPageService {
   renderRecBoxTemplate_() {
     const recBox = dev().assertElement(this.recBox_);
     devAssert(this.templates_.hasTemplate(recBox));
+    const templateElement = dev().assertElement(
+      this.templates_.maybeFindTemplate(recBox)
+    );
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
@@ -1000,6 +1002,7 @@ export class NextPageService {
       .then((rendered) => {
         return this.mutator_.mutateElement(recBox, () => {
           removeChildren(dev().assertElement(recBox));
+          recBox.appendChild(templateElement);
           recBox.appendChild(rendered);
         });
       });
