@@ -255,11 +255,11 @@ export class AnimationRunner {
   /**
    * Resolves an animation spec that may be incomplete, like from an
    * [animate-in] preset.
-   * @param {!StoryAnimationConfigDef} storyAnimationConfig
+   * @param {!StoryAnimationConfigDef} config
    * @return {!Promise<!WebAnimationDef>}
    */
-  resolveSpec_(storyAnimationConfig) {
-    const {keyframeOptions, preset, spec} = storyAnimationConfig;
+  resolveSpec_(config) {
+    const {keyframeOptions, preset, spec} = config;
     if (!preset) {
       // This is an amp-animation config, so it's already formed how the
       // WebAnimations Builder wants it.
@@ -652,13 +652,13 @@ export class AnimationManager {
   }
 
   /**
-   * @param {!StoryAnimationConfigDef} storyAnimationConfig
+   * @param {!StoryAnimationConfigDef} config
    * @return {!AnimationRunner}
    */
-  createRunner_(storyAnimationConfig) {
+  createRunner_(config) {
     return AnimationRunner.create(
       this.page_,
-      storyAnimationConfig,
+      config,
       devAssert(this.builderPromise_),
       this.vsync_,
       this.sequence_
