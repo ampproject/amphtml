@@ -15,13 +15,15 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {CSS} from '../../../build/amp-selector-0.1.css';
+import {ActionTrust} from '../../../src/action-constants';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
 } from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -33,7 +35,11 @@ const TAG = 'amp-selector';
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
+    // TODO: Remove and replace with <template> approach.
+    this.container_ = this.element.attachShadow({mode: 'open'});
+
     const {/** @type {!Element} */ element} = this;
+    const action = Services.actionServiceForDoc(this.element);
 
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'listbox');
@@ -64,6 +70,7 @@ class AmpSelector extends PreactBaseElement {
             child.setAttribute('aria-disabled', 'true');
           }
           const props = {
+            // TODO: Remove and replace with <template> approach.
             as: 'Slot',
             option,
             disabled: isDisabled,
@@ -103,6 +110,14 @@ class AmpSelector extends PreactBaseElement {
       isMultiple
         ? selectOption(element, option)
         : selectUniqueOption(element, option);
+      fireSelectEvent(
+        this.win,
+        action,
+        element,
+        option,
+        value,
+        ActionTrust.HIGH
+      );
       this.mutateProps(dict({'value': value}));
     };
     return dict({
@@ -170,6 +185,29 @@ function selectUniqueOption(element, option) {
     .querySelectorAll('[selected]')
     .forEach((selected) => selected.removeAttribute('selected'));
   selectOption(element, option);
+}
+
+/**
+ * Triggers a 'select' event with two data params:
+ * 'targetOption' - option value of the selected or deselected element.
+ * 'selectedOptions' - array of option values of selected elements.
+ *
+ * @param {!Window} win
+ * @param {!../../../src/service/action-impl.ActionService} action
+ * @param {!Element} el The element that was selected or deslected.
+ * @param {string} option
+ * @param {Array<string>} value
+ * @param {!ActionTrust} trust
+ * @private
+ */
+function fireSelectEvent(win, action, el, option, value, trust) {
+  const name = 'select';
+  const selectEvent = createCustomEvent(
+    win,
+    `amp-selector.${name}`,
+    dict({'targetOption': option, 'selectedOptions': value})
+  );
+  action.trigger(el, name, selectEvent, trust);
 }
 
 /** @override */
