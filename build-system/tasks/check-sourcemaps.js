@@ -51,29 +51,57 @@ function maybeBuild() {
 }
 
 /**
- * Verifies that a correctly formatted sourcemap URL is present in v0.js.map.
+ * Verifies that the sourcemap file exists, and returns its contents.
+ *
+ * @return {!Object}
  */
-function checkSourcemapUrl() {
-  log('Inspecting sourcemaps URL in', cyan(v0JsMap) + '...');
-  const v0JsMapJson = JSON.parse(fs.readFileSync(v0JsMap, 'utf8'));
-  if (!v0JsMapJson.sourceRoot) {
-    log(
-      red('ERROR:'),
-      'Could not find',
-      cyan('sourceRoot'),
-      'in',
-      cyan(v0JsMap)
-    );
-    throwError('Error in finding sourcemap URL');
+function getSourcemapJson() {
+  if (!fs.existsSync(v0JsMap)) {
+    log(red('ERROR:'), 'Could not find', cyan(v0JsMap));
+    throwError('Error in finding sourcemap file');
   }
-  if (!v0JsMapJson.sourceRoot.match(sourcemapUrlMatcher)) {
+  return JSON.parse(fs.readFileSync(v0JsMap, 'utf8'));
+}
+
+/**
+ * Verifies that a correctly formatted sourcemap URL is present in v0.js.map.
+ *
+ * @param {!Object} sourcemapJson
+ */
+function checkSourcemapUrl(sourcemapJson) {
+  log('Inspecting', cyan('sourceRoot'), 'in', cyan(v0JsMap) + '...');
+  if (!sourcemapJson.sourceRoot) {
+    log(red('ERROR:'), 'Could not find', cyan('sourceRoot'));
+    throwError('Could not find sourcemap URL');
+  }
+  if (!sourcemapJson.sourceRoot.match(sourcemapUrlMatcher)) {
+    log(red('ERROR:'), cyan(sourcemapJson.sourceRoot), 'is badly formatted');
+    throwError('Error in sourcemap URL format');
+  }
+}
+
+/**
+ * Verifies all the paths in the sources field are as expected.
+ *
+ * @param {!Object} sourcemapJson
+ */
+function checkSourcemapSources(sourcemapJson) {
+  log('Inspecting', cyan('sources'), 'in', cyan(v0JsMap) + '...');
+  if (!sourcemapJson.sources) {
+    log(red('ERROR:'), 'Could not find', cyan('sources'));
+    throwError('Could not find sources array');
+  }
+  const invalidSources = sourcemapJson.sources
+    .filter((source) => !source.match(/\[.*\]/)) // Ignore non-path sources '[...]'
+    .filter((source) => !fs.existsSync(source)); // All source paths should exist
+  if (invalidSources.length > 0) {
     log(
       red('ERROR:'),
-      'Sourcemaps URL',
-      cyan(v0JsMapJson.sourceRoot),
-      'is of the wrong format'
+      'Found invalid paths in',
+      cyan('sources') + ':',
+      cyan(invalidSources.join(', '))
     );
-    throwError('Error in sourcemap URL format');
+    throwError('Invalid paths in sources array');
   }
 }
 
@@ -83,8 +111,10 @@ function checkSourcemapUrl() {
  */
 async function checkSourcemaps() {
   maybeBuild();
-  checkSourcemapUrl();
-  // TODO(#27681): Add a meaningful check for sourcemap content that doesn't
+  const sourcemapJson = getSourcemapJson();
+  checkSourcemapUrl(sourcemapJson);
+  checkSourcemapSources(sourcemapJson);
+  // TODO(#27681): Add a meaningful check for the 'mappings' field that doesn't
   // require updating a golden file for every single change to the compilation
   // code in `build-system/`.
   log(green('SUCCESS:'), 'All sourcemaps checks passed.');
