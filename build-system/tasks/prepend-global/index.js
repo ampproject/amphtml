@@ -26,6 +26,7 @@ const util = require('util');
 const exec = util.promisify(childProcess.exec);
 
 const {red, cyan} = colors;
+const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -136,17 +137,34 @@ function applyConfig(
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
     .then(() => {
       return Promise.all([
-        fs.promises.readFile(filename),
-        fs.promises.readFile(target),
+        fs.promises.readFile(filename, 'utf8'),
+        fs.promises.readFile(target, 'utf8'),
+        fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
       ]);
     })
     .then((files) => {
+      let configString = files[0];
+      const targetString = files[1];
+      const overlayString = files[2];
+
       let configJson;
       try {
-        configJson = JSON.parse(files[0].toString());
+        configJson = JSON.parse(configString);
       } catch (e) {
         log(red(`Error parsing config file: ${filename}`));
         throw e;
+      }
+      if (overlayString) {
+        try {
+          const overlayJson = JSON.parse(overlayString);
+          Object.assign(configJson, overlayJson);
+          log('Overlayed config with', cyan(path.basename(customConfigFile)));
+        } catch (e) {
+          log(
+            red('Could not apply overlay from'),
+            cyan(path.basename(customConfigFile))
+          );
+        }
       }
       if (opt_localDev) {
         configJson = enableLocalDev(config, target, configJson);
@@ -154,8 +172,7 @@ function applyConfig(
       if (opt_fortesting) {
         configJson = {test: true, ...configJson};
       }
-      const targetString = files[1].toString();
-      const configString = JSON.stringify(configJson);
+      configString = JSON.stringify(configJson);
       return prependConfig(configString, targetString);
     })
     .then((fileString) => {
