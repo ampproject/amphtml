@@ -176,9 +176,6 @@ function selectUniqueOption(element, option) {
 AmpSelector.Component = Selector;
 
 /** @override */
-AmpSelector.attachShadow = true;
-
-/** @override */
 AmpSelector.props = {
   // TODO: Add 'forms' attribute when form integrations are supported.
   'disabled': {attr: 'disabled'},

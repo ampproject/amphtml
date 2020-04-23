@@ -169,7 +169,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor['children'] || Ctor['passthrough'] || Ctor['attachShadow']) {
+      if (Ctor['children'] || Ctor['passthrough']) {
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
@@ -226,14 +226,6 @@ PreactBaseElement['className'] = '';
  * @protected {boolean}
  */
 PreactBaseElement['passthrough'] = false;
-
-/**
- * Enabling attachShadow creates a shadow root without necessarily appending 'children'.
- * This leaves the option for the component to define its 'children' prop itself,
- * which may be of a non-prescriptive structure.
- * @protected {boolean}
- */
-PreactBaseElement['attachShadow'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
