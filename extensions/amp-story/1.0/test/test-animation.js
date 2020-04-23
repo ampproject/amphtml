@@ -301,13 +301,13 @@ describes.realWin('amp-story animations', {}, (env) => {
         page,
         {
           source: target,
+          preset: {
+            keyframes: [{}],
+          },
           spec: {
             duration: 0,
             delay: 0,
             target,
-            preset: {
-              keyframes: [{}],
-            },
           },
         },
         webAnimationBuilderPromise,
