@@ -88,11 +88,9 @@ describe
 
           // Wait for mutations to be processed
           yield browser.wait(100);
-
-          yield poll('mutations should be dropped', () => {
-            // Mutation was dropped, therefore no h1s were added.
-            return !doc.querySelector('h1');
-          });
+          
+          // Mutation was dropped, therefore no h1s were added.
+          expect(!doc.querySelector('h1')).to.be.undefined;
         });
 
         it('should start long task', function* () {
