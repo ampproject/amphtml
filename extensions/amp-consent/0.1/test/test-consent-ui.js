@@ -475,13 +475,14 @@ describes.realWin(
           ).to.be.true;
         });
 
-        it('should show error and send messages back to iframe', async () => {
+        it('should show error and send messages back to iframe if not user interaction', async () => {
           const errorSpy = env.sandbox.spy(user(), 'warn');
 
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
 
+          // No user interation through actionPromptTrigger
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();
@@ -524,6 +525,29 @@ describes.realWin(
             'requestAction': 'enter-fullscreen',
             'state': 'success',
             'info': 'Entering fullscreen.',
+          });
+        });
+
+        describe('actionPromptTrigger', () => {
+          it('should expand when actionPromptTrigger is true', async () => {
+            consentUI = new ConsentUI(mockInstance, {
+              'promptUISrc': 'https//promptUISrc',
+            });
+
+            consentUI.show(true);
+            consentUI.iframeReady_.resolve();
+            await macroTask();
+
+            // Send expand
+            sendMessageConsentUi(consentUI, 'enter-fullscreen');
+
+            expect(consentUI.isFullscreen_).to.be.true;
+            expect(consentUI.isActionPromptTrigger_).to.be.true;
+            expect(
+              consentUI.parent_.classList.contains(
+                consentUiClasses.iframeFullscreen
+              )
+            ).to.be.true;
           });
         });
       });
