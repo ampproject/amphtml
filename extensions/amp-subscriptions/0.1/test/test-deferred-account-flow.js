@@ -76,9 +76,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
     const deferredFlow = new DeferredAccountFlow(
       env.ampdoc,
       HAS_ACCOUNT_URL,
-      CREATE_ACCOUNT_URL
+      CREATE_ACCOUNT_URL,
+      platform
     );
-    await deferredFlow.run(platform, ENTITLEMENT);
+    await deferredFlow.run(ENTITLEMENT);
 
     expect(deferredCreationStub).to.not.be.called;
   });
@@ -101,9 +102,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
     const deferredFlow = new DeferredAccountFlow(
       env.ampdoc,
       HAS_ACCOUNT_URL,
-      CREATE_ACCOUNT_URL
+      CREATE_ACCOUNT_URL,
+      platform
     );
-    await deferredFlow.run(platform, ENTITLEMENT);
+    await deferredFlow.run(ENTITLEMENT);
 
     expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
       body: {
@@ -133,9 +135,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
     const deferredFlow = new DeferredAccountFlow(
       env.ampdoc,
       HAS_ACCOUNT_URL,
-      CREATE_ACCOUNT_URL
+      CREATE_ACCOUNT_URL,
+      platform
     );
-    await deferredFlow.run(platform, ENTITLEMENT);
+    await deferredFlow.run(ENTITLEMENT);
 
     expect(fetchStub).to.be.calledWith(HAS_ACCOUNT_URL, {
       body: {
@@ -161,9 +164,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const deferredFlow = new DeferredAccountFlow(
         env.ampdoc,
         HAS_ACCOUNT_URL,
-        CREATE_ACCOUNT_URL
+        CREATE_ACCOUNT_URL,
+        platform
       );
-      await deferredFlow.run(platform, ENTITLEMENT);
+      await deferredFlow.run(ENTITLEMENT);
 
       expect(fetchStub).to.not.be.called;
       expect(deferredCreationStub).to.not.be.called;
@@ -188,9 +192,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const deferredFlow = new DeferredAccountFlow(
         env.ampdoc,
         HAS_ACCOUNT_URL,
-        CREATE_ACCOUNT_URL
+        CREATE_ACCOUNT_URL,
+        platform
       );
-      await deferredFlow.run(platform, ENTITLEMENT);
+      await deferredFlow.run(ENTITLEMENT);
 
       expect(fetchStub).to.not.be.called;
       expect(deferredCreationStub).to.be.called;
@@ -217,9 +222,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const deferredFlow = new DeferredAccountFlow(
         env.ampdoc,
         HAS_ACCOUNT_URL,
-        CREATE_ACCOUNT_URL
+        CREATE_ACCOUNT_URL,
+        platform
       );
-      await deferredFlow.run(platform, ENTITLEMENT);
+      await deferredFlow.run(ENTITLEMENT);
 
       expect(fetchStub).to.be.called;
       expect(deferredCreationStub).to.be.called;
@@ -246,9 +252,10 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const deferredFlow = new DeferredAccountFlow(
         env.ampdoc,
         HAS_ACCOUNT_URL,
-        CREATE_ACCOUNT_URL
+        CREATE_ACCOUNT_URL,
+        platform
       );
-      await deferredFlow.run(platform, ENTITLEMENT);
+      await deferredFlow.run(ENTITLEMENT);
 
       expect(fetchStub).to.not.be.called;
       expect(deferredCreationStub).to.not.be.called;

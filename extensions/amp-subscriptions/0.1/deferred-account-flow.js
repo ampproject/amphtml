@@ -30,8 +30,14 @@ export class DeferredAccountFlow {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} hasAssociatedAccountUrl
    * @param {string} accountCreationRedirectUrl
+   * @param {../subscription-platform.SubscriptionPlatform} platform
    */
-  constructor(ampdoc, hasAssociatedAccountUrl, accountCreationRedirectUrl) {
+  constructor(
+    ampdoc,
+    hasAssociatedAccountUrl,
+    accountCreationRedirectUrl,
+    platform
+  ) {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
     /**
@@ -44,17 +50,21 @@ export class DeferredAccountFlow {
 
     /** @const @private {!../../../src/service/storage-impl.Storage} */
     this.storage_ = Services.storageForDoc(ampdoc);
+
     /** @private @const {?string} */
     this.hasAssociatedAccountUrl_ = hasAssociatedAccountUrl || null;
 
     /** @private @const {?string} */
     this.accountCreationRedirectUrl_ = accountCreationRedirectUrl || null;
     /**
-     * @private @const {function():!UrlBuilder}
-     * @param {string} platformId
-     * @return {!UrlBuilder}
+     * @private @const {!UrlBuilder}
      */
-    this.getUrlBuilder_ = (platformId) => new UrlBuilder(ampdoc, platformId);
+    this.urlBuilder_ = new UrlBuilder(ampdoc, platform.getServiceId());
+
+    /**
+     * @private @const {../subscription-platform.SubscriptionPlatform}
+     */
+    this.platform_ = platform;
   }
 
   /**
@@ -65,12 +75,11 @@ export class DeferredAccountFlow {
   }
 
   /**
-   * @param {../subscription-platform.SubscriptionPlatform} platform
    * @param {?./entitlement.Entitlement} selectedEntitlement
    * @return {!Promise<{found: boolean}>}
    * @private
    */
-  hasAssociatedUserAccount_(platform, selectedEntitlement) {
+  hasAssociatedUserAccount_(selectedEntitlement) {
     let storage;
     return this.storage_
       .then((s) => {
@@ -84,7 +93,7 @@ export class DeferredAccountFlow {
         }
 
         // Do the actual call and then store the value in storage
-        return this.getUrlBuilder_(platform.getServiceId())
+        return this.urlBuilder_
           .buildUrl(this.hasAssociatedAccountUrl_, /* useAuthData */ true)
           .then((url) =>
             this.xhr_.fetchJson(url, {
@@ -109,15 +118,14 @@ export class DeferredAccountFlow {
 
   /**
    * Runs the flow, checking if an account corresponding to the
-   * entitlement exists on the given platform. If the account doesn't
+   * entitlement exists on the platform. If the account doesn't
    * exist and the user gives consent, the user will then be redirected
    * to the accountCreationRedirectUrl passed in the constructor.
    *
-   * @param {../subscription-platform.SubscriptionPlatform} platform
    * @param {?./entitlement.Entitlement} entitlements
    * @return {!Promise|undefined}
    */
-  run(platform, entitlements) {
+  run(entitlements) {
     // Check if user has denied account creation already
     let storage;
     return this.storage_
@@ -130,25 +138,27 @@ export class DeferredAccountFlow {
           return;
         }
         // Check if there is an associated user account
-        return this.hasAssociatedUserAccount_(platform, entitlements).then(
+        return this.hasAssociatedUserAccount_(entitlements).then(
           (jsonResult) => {
             if (jsonResult.found) {
               return;
             }
 
-            platform.completeDeferredAccountCreation().then((accepted) => {
-              if (accepted) {
-                // ...redirect the user to URL provided for this purpose.
-                this.navigateTo_(this.accountCreationRedirectUrl_);
-              } else {
-                // The user did not authorize the creation of a linked account.
-                // Save response so we won't ask again (for a while).
-                return storage.set(
-                  LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION,
-                  true
-                );
-              }
-            });
+            this.platform_
+              .completeDeferredAccountCreation()
+              .then((accepted) => {
+                if (accepted) {
+                  // ...redirect the user to URL provided for this purpose.
+                  this.navigateTo_(this.accountCreationRedirectUrl_);
+                } else {
+                  // The user did not authorize the creation of a linked account.
+                  // Save response so we won't ask again (for a while).
+                  return storage.set(
+                    LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION,
+                    true
+                  );
+                }
+              });
           }
         );
       });
