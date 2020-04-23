@@ -741,7 +741,7 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('should only register pages up to the given limit', async () => {
+      it('should only fetch pages up to the given limit', async () => {
         const element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           maxPages: 1,
@@ -750,7 +750,13 @@ describes.realWin(
         const service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
-        expect(service.pages_.length).to.equal(2);
+        // Try to fetch more pages than necessary to make sure
+        // pages above the maximum are not fetched
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 3);
+
+        expect(
+          service.pages_.filter((page) => !page.isLoaded()).length
+        ).to.equal(1);
         element.parentNode.removeChild(element);
       });
     });
