@@ -83,6 +83,7 @@ export function SocialShare(props) {
       onClick={handleActivation}
       style={{...size, ...props['style']}}
       {...props}
+      aria-label={`amp-social-share component of type: ${type}`}
     >
       <SocialShareIcon
         style={{...backgroundStyle, ...baseStyle, ...size}}
