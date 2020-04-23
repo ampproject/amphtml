@@ -88,9 +88,6 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    // Platform service must be installed before performance service is
-    this.platform_ = Services.platformFor(this.win);
-
     /** @private {Object} */
     this.metrics_ = {};
 
@@ -116,7 +113,7 @@ export class Performance {
 
     // If Paint Timing API is not supported, cannot determine first contentful paint
     if (!supportedEntryTypes.includes('paint')) {
-      this.metrics_['fcp'] = Promise.resolve(null);
+      this.metrics_['fcp-v'] = Promise.resolve(null);
     }
 
     /**
@@ -140,7 +137,7 @@ export class Performance {
     this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
     if (!this.supportsEventTiming_) {
-      this.metrics_['fid'] = Promise.resolve(null);
+      this.metrics_['fid-v'] = Promise.resolve(null);
     }
 
     /**
@@ -153,7 +150,7 @@ export class Performance {
     );
 
     if (!this.supportsLargestContentfulPaint_) {
-      this.metrics_['lcpl'] = Promise.resolve(null);
+      this.metrics_['lcp-v'] = Promise.resolve(null);
     }
 
     /**
@@ -324,13 +321,17 @@ export class Performance {
         entry.name == 'first-contentful-paint' &&
         !recordedFirstContentfulPaint
       ) {
-        this.tickDelta('fcp', entry.startTime + entry.duration);
+        const value = entry.startTime + entry.duration;
+        this.tickDelta('fcp', value);
+        this.tickSinceVisible('fcp-v', value);
         recordedFirstContentfulPaint = true;
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
       ) {
-        this.tickDelta('fid', entry.processingStart - entry.startTime);
+        const value = entry.processingStart - entry.startTime;
+        this.tickDelta('fid', value);
+        this.tickSinceVisible('fid-v', value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -530,9 +531,11 @@ export class Performance {
   tickLargestContentfulPaint_() {
     if (this.largestContentfulPaintLoadTime_ !== null) {
       this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
+      this.tickSinceVisible('lcp-v', this.largestContentfulPaintLoadTime_);
     }
     if (this.largestContentfulPaintRenderTime_ !== null) {
       this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
+      this.tickSinceVisible('lcp-v', this.largestContentfulPaintRenderTime_);
     }
     this.flush();
   }

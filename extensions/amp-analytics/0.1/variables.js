@@ -237,7 +237,7 @@ export class VariableService {
 
     // Call performance-impl.js to get promise returning value for metric
     this.register_('FIRST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('fcp')
+      Services.performanceFor(this.ampdoc_.win).getMetric('fcp-v')
     );
     this.register_('FIRST_VIEWPORT_READY', () =>
       Services.performanceFor(this.ampdoc_.win).getMetric('pc')
@@ -246,10 +246,10 @@ export class VariableService {
       Services.performanceFor(this.ampdoc_.win).getMetric('mbv')
     );
     this.register_('LARGEST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('lcp')
+      Services.performanceFor(this.ampdoc_.win).getMetric('lcp-v')
     );
     this.register_('FIRST_INPUT_DELAY', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('fid')
+      Services.performanceFor(this.ampdoc_.win).getMetric('fid-v')
     );
     this.register_('CUMULATIVE_LAYOUT_SHIFT', () =>
       Services.performanceFor(this.ampdoc_.win).getMetric('cls')
