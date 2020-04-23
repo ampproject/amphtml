@@ -77,7 +77,7 @@ export class StoryAdLocalization {
   constructor(win) {
     /** @private @const {!Window} win */
     this.win_ = win;
-    /** @private {?LocalizationService} */
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
   }
 
