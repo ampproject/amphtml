@@ -613,7 +613,7 @@ export class AnimationManager {
    * Gets or creates AnimationRunners.
    * These are either from an <amp-story-animation> spec or resolved from
    * presets via animate-in attributes.
-   * If a root element contains both kinds of definitions, they'll run
+   * If a page element contains both kinds of definitions, they'll run
    * concurrently.
    * @return {!Array<!AnimationRunner>}
    * @private
