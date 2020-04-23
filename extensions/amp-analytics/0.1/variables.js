@@ -309,61 +309,41 @@ export class VariableService {
       }
 
       let value = options.getVar(name);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
 
       if (typeof value == 'string') {
-        value = this.expandValue_(
+        value = this.expandValueAndReplaceAsync_(
           value,
           options,
           element,
+          urlReplacements,
           opt_bindings,
-          opt_whitelist
+          opt_whitelist,
+          argList
         );
       } else if (isArray(value)) {
         // Treat each value as a template and expand
         for (let i = 0; i < value.length; i++) {
           value[i] =
             typeof value[i] == 'string'
-              ? this.expandValue_(
+              ? this.expandValueAndReplaceAsync_(
                   value[i],
                   options,
                   element,
+                  urlReplacements,
                   opt_bindings,
                   opt_whitelist
                 )
               : value[i];
         }
+        value = Promise.all(/** @type {!Array<string>} */ (value));
       }
 
-      const bindings = opt_bindings || this.getMacros(element);
-      const urlReplacements = Services.urlReplacementsForDoc(element);
-
-      return Promise.resolve(value)
-        .then((value) => {
-          if (isArray(value)) {
-            return Promise.all(
-              value.map((item) =>
-                typeof item == 'string'
-                  ? urlReplacements.expandStringAsync(
-                      item,
-                      bindings,
-                      opt_whitelist
-                    )
-                  : item
-              )
-            );
-          }
-          return urlReplacements.expandStringAsync(
-            value + argList,
-            bindings,
-            opt_whitelist
-          );
-        })
-        .then((value) => {
-          if (!options.noEncode) {
-            value = encodeVars(/** @type {string|?Array<string>} */ (value));
-          }
-          return value;
-        });
+      return Promise.resolve(value).then((value) =>
+        !options.noEncode
+          ? encodeVars(/** @type {string|?Array<string>} */ (value))
+          : value
+      );
     });
   }
 
@@ -371,11 +351,21 @@ export class VariableService {
    * @param {string} value
    * @param {!ExpansionOptions} options
    * @param {!Element} element amp-analytics element.
+   * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
    * @param {!JsonObject=} opt_bindings
    * @param {!Object=} opt_whitelist
+   * @param {string=} opt_argList
    * @return {Promise<string>}
    */
-  expandValue_(value, options, element, opt_bindings, opt_whitelist) {
+  expandValueAndReplaceAsync_(
+    value,
+    options,
+    element,
+    urlReplacements,
+    opt_bindings,
+    opt_whitelist,
+    opt_argList
+  ) {
     return this.expandTemplate(
       value,
       new ExpansionOptions(
@@ -386,6 +376,12 @@ export class VariableService {
       element,
       opt_bindings,
       opt_whitelist
+    ).then((val) =>
+      urlReplacements.expandStringAsync(
+        opt_argList ? val + opt_argList : val,
+        opt_bindings || this.getMacros(element),
+        opt_whitelist
+      )
     );
   }
 

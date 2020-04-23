@@ -1060,7 +1060,7 @@ export class AmpList extends AMP.BaseElement {
     // (1) AMP elements and (2) elements with bindings need diff marking.
     // But, we only need to do (1) here because bindings in initial content
     // are inert by design (as are bindings in placeholder content).
-    const elements = container.querySelectorAll('.i-amphtml-element');
+    const elements = toArray(container.querySelectorAll('.i-amphtml-element'));
     elements.forEach((element) => {
       markElementForDiffing(element, () => String(key--));
     });

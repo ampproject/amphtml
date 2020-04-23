@@ -1791,16 +1791,18 @@ export class AmpA4A extends AMP.BaseElement {
         }
 
         const urls = Services.urlForDoc(this.element);
-        metaData.customStylesheets.forEach((stylesheet) => {
-          if (
-            !isObject(stylesheet) ||
-            !stylesheet['href'] ||
-            typeof stylesheet['href'] !== 'string' ||
-            !urls.isSecure(stylesheet['href'])
-          ) {
-            throw new Error(errorMsg);
+        /** @type {!Array} */ (metaData.customStylesheets).forEach(
+          (stylesheet) => {
+            if (
+              !isObject(stylesheet) ||
+              !stylesheet['href'] ||
+              typeof stylesheet['href'] !== 'string' ||
+              !urls.isSecure(stylesheet['href'])
+            ) {
+              throw new Error(errorMsg);
+            }
           }
-        });
+        );
       }
       if (isArray(metaDataObj['images'])) {
         // Load maximum of 5 images.

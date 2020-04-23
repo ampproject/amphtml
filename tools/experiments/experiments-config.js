@@ -311,4 +311,14 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/26823',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
+  {
+    id: 'random-subdomains-for-safeframe',
+    name: 'Enable Random Subdomains for SafeFrame',
+  },
+  {
+    id: 'analytics-chunks',
+    name: 'AMP Analytics Break long tasks to chunks',
+    spec: 'TODO: add before merge',
+    cleanupIssue: 'TODO: create issue before merge',
+  },
 ];
