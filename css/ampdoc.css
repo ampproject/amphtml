@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS specifically for non-AMP4ADS formats.
+ */
+
+/**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
  *
