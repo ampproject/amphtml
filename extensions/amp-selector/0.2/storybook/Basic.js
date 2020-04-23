@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Selector} from '../selector';
+import {Option, Selector} from '../selector';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -25,35 +25,65 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-export const _default = () => {
+const imgStyle = {
+  width: '90px',
+  height: '60px',
+  display: 'inline-block',
+  margin: '2px',
+};
+
+export const listItems = () => {
   return (
     <Selector>
-      <amp-img
-        src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
-        width="90"
-        height="60"
-        option="1"
-      ></amp-img>
-      <amp-img
-        src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
-        width="90"
-        height="60"
-        disabled
-        option="2"
-      ></amp-img>
-      <div class="divider inline-block mx1"></div>
-      <amp-img
-        src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
-        width="90"
-        height="60"
-        option="3"
-      ></amp-img>
-      <amp-img
-        src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
-        width="90"
-        height="60"
-        option="4"
-      ></amp-img>
+      <Option style={imgStyle} option="1">
+        <img
+          style="width: 90px; height: 60px"
+          src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
+        />
+      </Option>
+      <Option style={imgStyle} option="2">
+        <img
+          style="width: 90px; height: 60px"
+          src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
+        />
+      </Option>
+      <br></br>
+      <Option style={imgStyle} option="3">
+        <img
+          style="width: 90px; height: 60px"
+          option="3"
+          src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
+        />
+      </Option>
+      <Option style={imgStyle} option="4">
+        <img
+          style="width: 90px; height: 60px"
+          option="4"
+          src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
+        />
+      </Option>
+    </Selector>
+  );
+};
+
+export const optionItems = () => {
+  return (
+    <Selector>
+      <Option option="1">Option 1</Option>
+      <Option option="2">Option 2</Option>
+      <Option option="3">Option 3</Option>
+      <Option option="4">Option 4</Option>
+    </Selector>
+  );
+};
+
+export const multiselect = () => {
+  return (
+    <Selector multiple>
+      <Option option="1">Option 1</Option>
+      <Option option="2">Option 2</Option>
+      <Option option="3">Option 3</Option>
+      <Option option="4">Option 4</Option>
     </Selector>
   );
 };
