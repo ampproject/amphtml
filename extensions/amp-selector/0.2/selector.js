@@ -16,6 +16,7 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
+import {omit} from '../../../src/utils/object';
 import {useContext, useState} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext({});
@@ -101,8 +102,17 @@ export function Option(props) {
     : isSelected
     ? CSS.SELECTED
     : CSS.OPTION;
+  const rest = omit(props, [
+    'as',
+    'disabled',
+    'getOption',
+    'onClick',
+    'option',
+    'role',
+    'style',
+  ]);
   const optionProps = {
-    ...props,
+    ...rest,
     'aria-disabled': disabled,
     onClick: clickHandler,
     option,
