@@ -738,12 +738,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              this.jsonTargeting['categoryExclusions'].forEach((exclusion) => {
+              /** @type {!Array} */ (this.jsonTargeting[
+                'categoryExclusions'
+              ]).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          rtcResponse.response['categoryExclusions'].forEach((exclusion) => {
+          /** @type {!Array} */ (rtcResponse.response[
+            'categoryExclusions'
+          ]).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }

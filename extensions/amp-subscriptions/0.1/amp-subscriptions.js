@@ -160,9 +160,11 @@ export class SubscriptionService {
 
       this.initializePlatformStore_(serviceIds);
 
-      this.platformConfig_['services'].forEach((service) => {
-        this.initializeLocalPlatforms_(service);
-      });
+      /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+        (service) => {
+          this.initializeLocalPlatforms_(service);
+        }
+      );
 
       this.platformStore_
         .getAvailablePlatforms()
@@ -577,30 +579,32 @@ export class SubscriptionService {
     const origin = getWinOrigin(this.ampdoc_.win);
     this.initializePlatformStore_(serviceIds);
 
-    this.platformConfig_['services'].forEach((service) => {
-      if ((service['serviceId'] || 'local') == 'local') {
-        const viewerPlatform = new ViewerSubscriptionPlatform(
-          this.ampdoc_,
-          service,
-          this.serviceAdapter_,
-          origin
-        );
-        this.platformStore_.resolvePlatform('local', viewerPlatform);
-        this.getEntitlements_(viewerPlatform)
-          .then((entitlement) => {
-            devAssert(entitlement, 'Entitlement is null');
-            // Viewer authorization is redirected to use local platform instead.
-            this.resolveEntitlementsToStore_(
-              'local',
-              /** @type {!./entitlement.Entitlement}*/ (entitlement)
-            );
-          })
-          .catch((reason) => {
-            this.platformStore_.reportPlatformFailureAndFallback('local');
-            dev().error(TAG, 'Viewer auth failed:', reason);
-          });
+    /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+      (service) => {
+        if ((service['serviceId'] || 'local') == 'local') {
+          const viewerPlatform = new ViewerSubscriptionPlatform(
+            this.ampdoc_,
+            service,
+            this.serviceAdapter_,
+            origin
+          );
+          this.platformStore_.resolvePlatform('local', viewerPlatform);
+          this.getEntitlements_(viewerPlatform)
+            .then((entitlement) => {
+              devAssert(entitlement, 'Entitlement is null');
+              // Viewer authorization is redirected to use local platform instead.
+              this.resolveEntitlementsToStore_(
+                'local',
+                /** @type {!./entitlement.Entitlement}*/ (entitlement)
+              );
+            })
+            .catch((reason) => {
+              this.platformStore_.reportPlatformFailureAndFallback('local');
+              dev().error(TAG, 'Viewer auth failed:', reason);
+            });
+        }
       }
-    });
+    );
   }
 
   /**

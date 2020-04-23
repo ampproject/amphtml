@@ -1023,7 +1023,7 @@ export class NextPageService {
     });
 
     const html = htmlFor(this.getHost_());
-    const links = data['pages'].map((page) => {
+    const links = /** @type {!Array} */ (data['pages']).map((page) => {
       const link = html`
         <a class="amp-next-page-link">
           <img ref="image" class="amp-next-page-image" />

@@ -407,12 +407,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     const percentages = this.preprocessPercentages_(this.responseData_);
 
-    this.responseData_['responses'].forEach((response) => {
-      // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      options[response['reactionValue']].querySelector(
-        '.i-amphtml-story-quiz-percentage-text'
-      ).textContent = `${percentages[response['reactionValue']]}%`;
-    });
+    /** @type {!Array} */ (this.responseData_['responses']).forEach(
+      (response) => {
+        // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
+        options[response['reactionValue']].querySelector(
+          '.i-amphtml-story-quiz-percentage-text'
+        ).textContent = `${percentages[response['reactionValue']]}%`;
+      }
+    );
 
     this.quizEl_.setAttribute(
       'style',
@@ -537,11 +539,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
       if (this.responseData_) {
         this.responseData_['totalResponseCount']++;
-        this.responseData_['responses'].forEach((response) => {
-          if (Number(response['reactionValue']) === optionEl.optionIndex_) {
-            response['totalCount']++;
+        /** @type {!Array} */ (this.responseData_['responses']).forEach(
+          (response) => {
+            if (Number(response['reactionValue']) === optionEl.optionIndex_) {
+              response['totalCount']++;
+            }
           }
-        });
+        );
       }
 
       this.mutateElement(() => {
@@ -677,11 +681,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateQuizOnDataRetrieval_() {
     let selectedOptionKey;
-    this.responseData_['responses'].forEach((response) => {
-      if (response.selectedByUser) {
-        selectedOptionKey = response.reactionValue;
+    /** @type {!Array} */ (this.responseData_['responses']).forEach(
+      (response) => {
+        if (response.selectedByUser) {
+          selectedOptionKey = response.reactionValue;
+        }
       }
-    });
+    );
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);

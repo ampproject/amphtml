@@ -546,7 +546,7 @@ export class MediaPool {
     [this.allocated, this.unallocated].forEach((mediaSet) => {
       this.forEachMediaType_((key) => {
         const type = MediaType[key];
-        const els = mediaSet[type];
+        const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
         }
