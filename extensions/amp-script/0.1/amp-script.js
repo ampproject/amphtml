@@ -413,7 +413,7 @@ export class AmpScript extends AMP.BaseElement {
       const disallowedTypes = flush(allowMutation);
       // Count the number of mutations dropped by type.
       const errors = map();
-      disallowedTypes.forEach((type) => {
+      /** @type {!Array} */ (disallowedTypes).forEach((type) => {
         errors[type] = errors[type] + 1 || 1;
       });
       // Emit an error message for each mutation type, including count.

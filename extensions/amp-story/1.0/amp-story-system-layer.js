@@ -33,6 +33,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
+import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -629,11 +630,13 @@ export class SystemLayer {
    */
   onPageHasElementsWithPlaybackStateUpdate_(pageHasElementsWithPlayback) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-        .querySelectorAll('.i-amphtml-paused-display button')
-        .forEach((button) => {
-          button.disabled = !pageHasElementsWithPlayback;
-        });
+      toArray(
+        this.getShadowRoot().querySelectorAll(
+          '.i-amphtml-paused-display button'
+        )
+      ).forEach((button) => {
+        button.disabled = !pageHasElementsWithPlayback;
+      });
     });
   }
 

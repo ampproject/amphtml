@@ -304,7 +304,7 @@ export class LaterpayVendor {
     purchaseOptions['singlePurchases'] = purchaseOptionsList.filter(
       (option) => option['sales_model'] === 'single_purchase'
     );
-    purchaseOptions['singlePurchases'].forEach(
+    /** @type {!Array} */ (purchaseOptions['singlePurchases']).forEach(
       (option) => (option.description = articleTitle)
     );
     purchaseOptions['timepasses'] = purchaseOptionsList.filter(
@@ -394,15 +394,21 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseOptions_['singlePurchases'].forEach((singlePurchase) => {
-      listContainer.appendChild(this.createPurchaseOption_(singlePurchase));
-    });
-    this.purchaseOptions_['timepasses'].forEach((timepass) => {
-      listContainer.appendChild(this.createPurchaseOption_(timepass));
-    });
-    this.purchaseOptions_['subscriptions'].forEach((subscription) => {
-      listContainer.appendChild(this.createPurchaseOption_(subscription));
-    });
+    /** @type {!Array} */ (this.purchaseOptions_['singlePurchases']).forEach(
+      (singlePurchase) => {
+        listContainer.appendChild(this.createPurchaseOption_(singlePurchase));
+      }
+    );
+    /** @type {!Array} */ (this.purchaseOptions_['timepasses']).forEach(
+      (timepass) => {
+        listContainer.appendChild(this.createPurchaseOption_(timepass));
+      }
+    );
+    /** @type {!Array} */ (this.purchaseOptions_['subscriptions']).forEach(
+      (subscription) => {
+        listContainer.appendChild(this.createPurchaseOption_(subscription));
+      }
+    );
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_['defaultButton'];

@@ -739,7 +739,7 @@ export class Bind {
     } else {
       return this.ww_('bind.addMacros', [macros]).then((errors) => {
         // Report macros that failed to parse (e.g. expression size exceeded).
-        errors.forEach((e, i) => {
+        /** @type {!Array} */ (errors).forEach((e, i) => {
           this.reportWorkerError_(
             e,
             `${TAG}: Parsing amp-bind-macro failed.`,

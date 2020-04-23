@@ -366,7 +366,7 @@ export class ShareWidget {
    * TODO(alanorozco): Set story metadata in share config.
    */
   setProviders_(providers) {
-    providers.forEach((provider) => {
+    /** @type {!Array} */ (providers).forEach((provider) => {
       if (isObject(provider)) {
         this.add_(
           buildProvider(

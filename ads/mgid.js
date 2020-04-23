@@ -49,7 +49,7 @@ export function mgid(global, data) {
   ).slice(-5);
 
   global.context.observeIntersection(function (changes) {
-    changes.forEach(function (c) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       window['intersectionRect' + data.widget + '_' + global.uniqId] =
         c.intersectionRect;
       window['boundingClientRect' + data.widget + '_' + global.uniqId] =

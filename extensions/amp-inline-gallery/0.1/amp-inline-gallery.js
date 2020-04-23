@@ -81,7 +81,7 @@ class AmpInlineGallery extends AMP.BaseElement {
       const thumbnailsImpls = data[1];
       const slides = carouselImpl.getSlides();
 
-      thumbnailsImpls.forEach((impl) => impl.setSlides(slides));
+      toArray(thumbnailsImpls).forEach((impl) => impl.setSlides(slides));
     });
   }
 

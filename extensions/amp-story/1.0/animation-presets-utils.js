@@ -117,7 +117,7 @@ export function calculateTargetScalingFactor(dimensions) {
  * @return {WebKeyframesDef}
  */
 function enlargeKeyFrames(keyframes, scalingFactor) {
-  keyframes.forEach((frame) => {
+  /** @type {!Array} */ (keyframes).forEach((frame) => {
     frame['transform'] += ' ' + scale(scalingFactor);
     frame['transform-origin'] = 'left top';
   });

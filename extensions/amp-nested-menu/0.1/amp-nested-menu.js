@@ -92,8 +92,10 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   registerSubmenuElements_() {
-    const submenuBtns = this.element.querySelectorAll(
-      '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+    const submenuBtns = toArray(
+      this.element.querySelectorAll(
+        '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+      )
     );
     submenuBtns.forEach((submenuBtn) => {
       if (!submenuBtn.hasAttribute('tabindex')) {
