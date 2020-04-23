@@ -153,6 +153,12 @@ export class Navigation {
       this.appendExtraParams_ = res;
     });
 
+    /** @private {boolean} */
+    this.isTrustedViewer_ = false;
+    /** @private {boolean} */
+    this.isLocalViewer_ = false;
+    this.setTrustedViewerStatus();
+
     /**
      * Lazy-generated list of A2A-enabled navigation features.
      * @private {?Array<string>}
@@ -172,6 +178,19 @@ export class Navigation {
      * @const
      */
     this.navigateToMutators_ = new PriorityQueue();
+  }
+
+  /**
+   *  Sets values for boolean fields isTrustedViewer_ and isLocalViewer_
+   */
+  setTrustedViewerStatus() {
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
+    });
   }
 
   /**
@@ -767,27 +786,22 @@ export class Navigation {
       .getRootNode()
       .documentElement.hasAttribute('allow-navigation-interception');
 
-    if (!viewerHasCapability || !docOptedIn) {
+    if (
+      !viewerHasCapability ||
+      !docOptedIn ||
+      !(this.isTrustedViewer_ || this.isLocalViewer_)
+    ) {
       return false;
     }
 
-    return Promise.all([
-      this.viewer_.isTrustedViewer(),
-      this.viewer_.getViewerOrigin(),
-    ]).then((values) => {
-      if (values[0] || isLocalhostOrigin(values[1])) {
-        this.viewer_.sendMessage(
-          'navigateTo',
-          dict({
-            'url': url,
-            'requestedBy': requestedBy,
-          })
-        );
-        return true;
-      } else {
-        return false;
-      }
-    });
+    this.viewer_.sendMessage(
+      'navigateTo',
+      dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      })
+    );
+    return true;
   }
 }
 
