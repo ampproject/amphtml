@@ -611,7 +611,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       );
     });
 
-    it('fails when animate-in-aafter element does not exist', async () => {
+    it('fails when animate-in-after element does not exist', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left" animate-in-after="does-not-exist"></div>
