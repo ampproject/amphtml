@@ -26,6 +26,9 @@ const util = require('util');
 const exec = util.promisify(childProcess.exec);
 
 const {red, cyan} = colors;
+
+// custom-config.json overlays the active config. It is not part of checked-in source (.gitignore'd). See:
+// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
 const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
@@ -142,11 +145,7 @@ function applyConfig(
         fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
       ]);
     })
-    .then((files) => {
-      let configString = files[0];
-      const targetString = files[1];
-      const overlayString = files[2];
-
+    .then(([configString, targetString, overlayString]) => {
       let configJson;
       try {
         configJson = JSON.parse(configString);
@@ -158,7 +157,7 @@ function applyConfig(
         try {
           const overlayJson = JSON.parse(overlayString);
           Object.assign(configJson, overlayJson);
-          log('Overlayed config with', cyan(path.basename(customConfigFile)));
+          log('Overlaid config with', cyan(path.basename(customConfigFile)));
         } catch (e) {
           log(
             red('Could not apply overlay from'),
