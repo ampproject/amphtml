@@ -157,7 +157,13 @@ export class Navigation {
     this.isTrustedViewer_ = false;
     /** @private {boolean} */
     this.isLocalViewer_ = false;
-    this.setTrustedViewerStatus();
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
+    });
 
     /**
      * Lazy-generated list of A2A-enabled navigation features.
@@ -178,19 +184,6 @@ export class Navigation {
      * @const
      */
     this.navigateToMutators_ = new PriorityQueue();
-  }
-
-  /**
-   *  Sets values for boolean fields isTrustedViewer_ and isLocalViewer_
-   */
-  setTrustedViewerStatus() {
-    Promise.all([
-      this.viewer_.isTrustedViewer(),
-      this.viewer_.getViewerOrigin(),
-    ]).then((values) => {
-      this.isTrustedViewer_ = values[0];
-      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
-    });
   }
 
   /**
@@ -587,7 +580,7 @@ export class Navigation {
         this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
       }
 
-      if (this.navigateToUrlWithViewer(to, 'external nav')) {
+      if (this.viewerInterceptsNavigation(to, 'intercept_click')) {
         e.preventDefault();
       }
     }
@@ -778,7 +771,7 @@ export class Navigation {
    * @return {boolean} Returns true if navigation message was sent to viewer.
    *     Otherwise, returns false.
    */
-  navigateToUrlWithViewer(url, requestedBy) {
+  viewerInterceptsNavigation(url, requestedBy) {
     const viewerHasCapability = this.viewer_.hasCapability(
       'interceptNavigation'
     );
