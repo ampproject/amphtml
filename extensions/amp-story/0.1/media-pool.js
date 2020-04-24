@@ -560,7 +560,7 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
    *     whose content should be loaded.
-   * @return {Promise<!HTMLMediaElement>} A media element from the pool that can be used
+   * @return {Promise<!HTMLMediaElement|undefined>} A media element from the pool that can be used
    *     to replace the specified element.
    */
   loadInternal_(domMediaEl) {
@@ -677,7 +677,7 @@ export class MediaPool {
   play(domMediaEl) {
     return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
-        return Promise.resolve();
+        return;
       }
 
       return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
