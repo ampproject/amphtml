@@ -143,6 +143,13 @@ describes.realWin(
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });
+
+      it('should allow adding action lists to the whitelist', () => {
+        const i = getActionInvocation(target, 'print', 'AMP');
+        action.addToWhitelist('AMP', ['print']);
+        action.invoke_(i);
+        expect(spy).to.be.calledWithExactly(i);
+      });
     });
 
     it('should not allow any action with empty whitelist', () => {

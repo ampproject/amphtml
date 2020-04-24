@@ -592,28 +592,35 @@ export class ActionService {
    * Adds an action to the whitelist.
    * @param {string} tagOrTarget The tag or target to whitelist, e.g.
    *     'AMP-LIST', '*'.
-   * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
-   * @param {{isAllowedInEmail: boolean}=} opts
+   * @param {string|Array<string>} methods The method(s) to whitelist, e.g. 'show', 'hide'.
+   * @param {Array<string>=} opt_allowedFormats
    */
-  addToWhitelist(tagOrTarget, method, opts) {
+  addToWhitelist(tagOrTarget, methods, opt_allowedFormats) {
+    // TODO: When it becomes possible to getFormat(),
+    // we can store `format_` instead of `isEmail_` and check
+    // (opt_allowedFormats && !opt_allowedFormats.includes(this.format_))
     if (
-      opts &&
-      hasOwn(opts, 'isAllowedInEmail') &&
-      opts.isAllowedInEmail !== this.isEmail_
+      opt_allowedFormats &&
+      opt_allowedFormats.includes('email') !== this.isEmail_
     ) {
       return;
     }
     if (!this.whitelist_) {
       this.whitelist_ = [];
     }
-    if (
-      this.whitelist_.some(
-        (v) => v.tagOrTarget == tagOrTarget && v.method == method
-      )
-    ) {
-      return;
+    if (!isArray(methods)) {
+      methods = [methods];
     }
-    this.whitelist_.push({tagOrTarget, method});
+    methods.forEach((method) => {
+      if (
+        this.whitelist_.some(
+          (v) => v.tagOrTarget == tagOrTarget && v.method == method
+        )
+      ) {
+        return;
+      }
+      this.whitelist_.push({tagOrTarget, method});
+    });
   }
 
   /**

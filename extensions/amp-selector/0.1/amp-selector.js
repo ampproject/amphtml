@@ -158,13 +158,13 @@ export class AmpSelector extends AMP.BaseElement {
       ActionTrust.LOW
     );
 
-    /** If the element is in an email document, allow its `clear`,
+    /** If the element is in an `email` document, allow its `clear`,
      * `selectDown`, `selectUp`, and `toggle` actions. */
-    const allowOpts = {isAllowedInEmail: true};
-    this.action_.addToWhitelist('AMP-SELECTOR', 'clear', allowOpts);
-    this.action_.addToWhitelist('AMP-SELECTOR', 'selectDown', allowOpts);
-    this.action_.addToWhitelist('AMP-SELECTOR', 'selectUp', allowOpts);
-    this.action_.addToWhitelist('AMP-SELECTOR', 'toggle', allowOpts);
+    this.action_.addToWhitelist(
+      TAG,
+      ['clear', 'selectDown', 'selectUp', 'toggle'],
+      ['email']
+    );
 
     // Triggers on DOM children updates
     this.element.addEventListener(
