@@ -278,9 +278,16 @@ export class NextPageService {
             this.setLastFetchedPage(nextPage);
           }
         })
-        .finally(() => {
-          return this.refreshRecBox_();
-        });
+        .then(
+          () => {
+            return this.refreshRecBox_();
+          },
+          (reason) => {
+            return this.refreshRecBox_().then(() => {
+              throw reason;
+            });
+          }
+        );
     }
 
     // Attempt to get more pages
