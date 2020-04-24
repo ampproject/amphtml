@@ -265,10 +265,9 @@ describes.repeated(
                 .atLeast(1);
             }
 
-            it('should not build without experiment', () => {
-              element.setAttribute('layout', 'container');
+            it('should error without experiment', () => {
               allowConsoleError(() => {
-                expect(() => createAmpList(element)).to.throw(
+                expect(() => list.isLayoutSupported('container')).to.throw(
                   'Experiment "amp-list-layout-container" is not turned on.'
                 );
               });
@@ -279,13 +278,11 @@ describes.repeated(
 
               beforeEach(() => {
                 toggleExperiment(win, 'amp-list-layout-container', true);
-                element.setAttribute('layout', 'container');
                 itemElement = doc.createElement('div');
                 const placeholder = doc.createElement('div');
                 placeholder.style.height = '1337px';
                 element.appendChild(placeholder);
                 element.getPlaceholder = () => placeholder;
-                list = createAmpList(element);
               });
 
               afterEach(() => {
@@ -293,16 +290,16 @@ describes.repeated(
               });
 
               it('should require placeholder', () => {
-                element.setAttribute('layout', 'container');
-                element.getPlaceholder = () => null;
+                list.getPlaceholder = () => null;
                 allowConsoleError(() => {
-                  expect(() => createAmpList(element)).to.throw(
+                  expect(() => list.isLayoutSupported('container')).to.throw(
                     /amp-list with layout=container relies on a placeholder/
                   );
                 });
               });
 
               it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
@@ -318,6 +315,7 @@ describes.repeated(
               });
 
               it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
@@ -333,6 +331,7 @@ describes.repeated(
               });
 
               it('should not unlock height for layout=container for null return', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
@@ -353,26 +352,24 @@ describes.repeated(
 
               beforeEach(() => {
                 doc.documentElement.setAttribute('amp4email', '');
-                element.setAttribute('layout', 'container');
                 itemElement = doc.createElement('div');
                 const placeholder = doc.createElement('div');
                 placeholder.style.height = '1337px';
                 element.appendChild(placeholder);
                 element.getPlaceholder = () => placeholder;
-                list = createAmpList(element);
               });
 
               it('should require placeholder', () => {
-                element.setAttribute('layout', 'container');
-                element.getPlaceholder = () => null;
+                list.getPlaceholder = () => null;
                 allowConsoleError(() => {
-                  expect(() => createAmpList(element)).to.throw(
+                  expect(() => list.isLayoutSupported('container')).to.throw(
                     /amp-list with layout=container relies on a placeholder/
                   );
                 });
               });
 
               it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
@@ -388,6 +385,7 @@ describes.repeated(
               });
 
               it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
@@ -403,6 +401,7 @@ describes.repeated(
               });
 
               it('should not unlock height for layout=container for null return', () => {
+                expect(list.isLayoutSupported('container')).to.be.true;
                 expect(list.enableManagedResizing_).to.be.true;
                 expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
                 expectLockedRender();
