@@ -9,8 +9,8 @@
     {
       "handlerName": "analyticsHandler",
       "urls": [
-        "http://localhost:8000/test/manual/amp-analytics/performanceTestPages/performance-longer.html",
-        "http://localhost:8000/test/manual/amp-analytics/performanceTestPages/performance-shorter.html"
+        "http://localhost:8000/test/manual/amp-analytics/performanceTestPages/visible-basic.html",
+        "http://localhost:8000/test/manual/amp-analytics/performanceTestPages/visible-multiple.html"
       ],
       "timeout": 2000,
       "extraUrlParam": {
