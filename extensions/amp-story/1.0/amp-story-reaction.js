@@ -273,19 +273,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * @param {Element} selectedOption
-   * @protected
-   */
-  updateReactionToPostSelectionState_(selectedOption) {
-    this.quizEl_.classList.add('i-amphtml-story-reaction-post-selection');
-    selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
-
-    if (this.responseData_) {
-      this.quizEl_.classList.add('i-amphtml-story-reaction-has-data');
-    }
-  }
-
-  /**
    * Update component to reflect values in the data obtained.
    * Called when user has responded (in this session or before).
    *

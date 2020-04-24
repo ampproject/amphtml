@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
-import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -186,5 +175,37 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     this.rootEl_
       .querySelector('.i-amphtml-story-reaction-quiz-option-container')
       .appendChild(convertedOption);
+  }
+
+  /**
+   * @override
+   */
+  updateOptionPercentages_() {
+    if (!this.responseData_) {
+      return;
+    }
+
+    const options = toArray(
+      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-quiz-option')
+    );
+
+    const percentages = this.preprocessPercentages_(this.responseData_);
+
+    this.responseData_['responses'].forEach((response) => {
+      // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
+      options[response['reactionValue']].querySelector(
+        '.i-amphtml-story-reaction-quiz-percentage-text'
+      ).textContent = `${percentages[response['reactionValue']]}%`;
+    });
+
+    this.rootEl_.setAttribute(
+      'style',
+      `
+      --option-1-percentage: ${percentages[0]}%;
+      --option-2-percentage: ${percentages[1]}%;
+      --option-3-percentage: ${percentages[2]}%;
+      --option-4-percentage: ${percentages[3]}%;
+    `
+    );
   }
 }

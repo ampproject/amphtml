@@ -153,11 +153,11 @@
      margin-left: 0px !important;
  }
  
- .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-quiz-has-data .i-amphtml-story-reaction-quiz-percentage-text {
+ .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-percentage-text {
      visibility: visible !important;
  }
  
- .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-quiz-option-selected > .i-amphtml-story-reaction-quiz-percentage-text {
+ .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected > .i-amphtml-story-reaction-quiz-percentage-text {
      color: white !important;
  }
  
