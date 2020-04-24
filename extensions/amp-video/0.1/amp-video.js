@@ -97,6 +97,9 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
+
+    /** @private {boolean} */
+    this.hasEverAttemptedToPlay_ = false;
   }
 
   /**
@@ -405,7 +408,9 @@ class AmpVideo extends AMP.BaseElement {
     // Unfortunately we don't know exactly what operation caused the decode to
     // fail. But to help, we need to retry. Since play is most common, we're
     // doing that.
-    this.play(false);
+    if (this.hasEverAttemptedToPlay_) {
+      this.play(false);
+    }
   }
 
   /**
@@ -620,6 +625,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
+    this.hasEverAttemptedToPlay_ = true;
     const ret = this.video_.play();
 
     if (ret && ret.catch) {

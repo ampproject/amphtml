@@ -465,11 +465,39 @@ describes.realWin(
           code: MediaError.MEDIA_ERR_DECODE,
         },
       });
+      video.implementation_.play();
       expect(ele.childElementCount).to.equal(2);
       ele.dispatchEvent(new ErrorEvent('error'));
       expect(ele.childElementCount).to.equal(1);
       expect(ele.load).to.have.been.called;
       expect(ele.play).to.have.been.called;
+    });
+
+    it('decode error retries the next source but does not play if never played', async () => {
+      const s0 = doc.createElement('source');
+      s0.setAttribute('src', 'https://example.com/0.mp4');
+      const s1 = doc.createElement('source');
+      s1.setAttribute('src', 'https://example.com/1.mp4');
+      const video = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [s0, s1]
+      );
+      const ele = video.implementation_.video_;
+      ele.play = env.sandbox.stub();
+      ele.load = env.sandbox.stub();
+      Object.defineProperty(ele, 'error', {
+        value: {
+          code: MediaError.MEDIA_ERR_DECODE,
+        },
+      });
+      expect(ele.childElementCount).to.equal(2);
+      ele.dispatchEvent(new ErrorEvent('error'));
+      expect(ele.childElementCount).to.equal(1);
+      expect(ele.load).to.have.been.called;
+      expect(ele.play).to.not.have.been.called;
     });
 
     it('non-decode error has no side effect', async () => {
