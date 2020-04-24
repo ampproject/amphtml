@@ -47,6 +47,13 @@ const AmpAdImplementation = {
   AMP_AD_IFRAME_GET: '5',
 };
 
+/** @const {!{id: string, control: string, experiment: string}} */
+export const AMP_AD_NO_CENTER_CSS_EXP = {
+  id: 'amp-ad-no-center-css',
+  control: '21065897',
+  experiment: '21065898',
+};
+
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
   'AMP-CAROUSEL': 'ac',
