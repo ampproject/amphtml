@@ -92,6 +92,7 @@ async function prCheck(cb) {
   if (buildTargets.has('RUNTIME')) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
+    runCheck('gulp check-sourcemaps');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
