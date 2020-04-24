@@ -102,7 +102,7 @@ function createFormProxyConstr(win) {
     return all;
   }, []);
 
-  inheritance.forEach((proto) => {
+  /** @type {!Array} */ (inheritance).forEach((proto) => {
     for (const name in proto) {
       const property = win.Object.getOwnPropertyDescriptor(proto, name);
       if (

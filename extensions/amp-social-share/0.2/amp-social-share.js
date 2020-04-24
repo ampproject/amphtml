@@ -136,7 +136,7 @@ class AmpSocialShare extends PreactBaseElement {
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
-      bindingVars.forEach((name) => {
+      /** @type {!Array} */ (bindingVars).forEach((name) => {
         const bindingName = name.toUpperCase();
         bindings[bindingName] = urlParams[name];
       });
