@@ -40,11 +40,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
       return storeService;
     });
 
-    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
-
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {

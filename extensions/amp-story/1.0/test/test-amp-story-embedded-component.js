@@ -52,11 +52,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       },
     });
 
-    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
-
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
 

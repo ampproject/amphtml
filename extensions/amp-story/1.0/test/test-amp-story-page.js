@@ -19,7 +19,6 @@ import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
 import {MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
@@ -51,11 +50,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
-    });
-
-    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     registerServiceBuilder(win, 'performance', function () {

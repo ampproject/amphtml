@@ -136,13 +136,6 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = Services.localizationServiceForDoc(
-        env.ampdoc
-      );
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
-
       AmpStory.isBrowserSupported = () => true;
     });
 

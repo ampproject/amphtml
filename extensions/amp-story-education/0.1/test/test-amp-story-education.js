@@ -35,11 +35,6 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
 
-    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
-
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;

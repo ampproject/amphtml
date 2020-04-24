@@ -50,11 +50,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
       return storeService;
     });
 
-    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
-
     registerServiceBuilder(win, 'performance', function () {
       return {
         isPerformanceTrackingOn: () => false,

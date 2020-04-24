@@ -149,13 +149,6 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = Services.localizationServiceForDoc(
-        env.ampdoc
-      );
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
-
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
       const gridLayer = win.document.createElement('amp-story-grid-layer');
