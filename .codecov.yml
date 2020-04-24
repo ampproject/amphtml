@@ -24,15 +24,13 @@ coverage:
       default:
         base: auto
         if_not_found: success
-        informational: true # TODO(rsimha): Remove this line after testing
         only_pulls: true
         target: 80%
-        threshold: 10%
+        threshold: 1%
     patch:
       default:
         base: auto
-        informational: true # TODO(rsimha): Remove this line after testing
         if_not_found: success
         only_pulls: true
         target: 80%
-        threshold: 10%
+        threshold: 1%
