@@ -110,7 +110,6 @@ build.flags = {
   core_runtime_only: '  Builds only the core runtime.',
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
   version_override: '  Overrides the version written to AMP_CONFIG',
-  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-builds when detected',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
