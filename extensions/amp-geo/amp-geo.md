@@ -141,7 +141,7 @@ In addition to user specifed country groups `amp-geo` supports preset country li
 
 ##### U.S. California Detection
 
-As a special case, `amp-geo` provides the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when the request is determined to be from the U.S. California. This is supported via the `preset-us-ca` preset list.
+The `amp-geo` component provides the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it determines a request is from California. The `preset-us-ca` value from the preset list supports this feature.
 
 Additional countries may be included with the preset list as in the `myList` example below.
 
