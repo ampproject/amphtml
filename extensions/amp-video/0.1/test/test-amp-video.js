@@ -447,7 +447,7 @@ describes.realWin(
 
     it('decode error retries the next source', async () => {
       const s0 = doc.createElement('source');
-      s0.setAttribute('src', 'https://example.com/0.mp4');
+      s0.setAttribute('src', './0.mp4');
       const s1 = doc.createElement('source');
       s1.setAttribute('src', 'https://example.com/1.mp4');
       const video = await getVideo(
