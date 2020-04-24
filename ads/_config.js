@@ -881,6 +881,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'relappro': {
+    prefetch: 'https://cdn.relappro.com/adservices/amp/relappro.amp.min.js',
+    preconnect: 'https://tags.relappro.com',
+    renderStartImplemented: true,
+  },
+
   'revcontent': {
     prefetch:
       'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
