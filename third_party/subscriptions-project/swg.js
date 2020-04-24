@@ -1624,7 +1624,7 @@ function pushIfNonEmpty(array, val) {
 function toString(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
-    return val.localName + (val.id ? '#' + val.id : '');
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
   return /** @type {string} */ (val);
 }
