@@ -367,8 +367,9 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * Gracefully handle media errors if possible.
+   * @param {!Event} event
    */
-  handleMediaError_() {
+  handleMediaError_(event) {
     if (
       !this.video_.error ||
       this.video_.error.code != MediaError.MEDIA_ERR_DECODE
@@ -405,6 +406,7 @@ class AmpVideo extends AMP.BaseElement {
     );
     removeElement(currentSource);
     // Resets the loading and will catch the new source if any.
+    event.stopImmediatePropagation();
     this.video_.load();
     // Unfortunately we don't know exactly what operation caused the decode to
     // fail. But to help, we need to retry. Since play is most common, we're
@@ -546,7 +548,7 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    video.addEventListener('error', () => this.handleMediaError_());
+    video.addEventListener('error', (e) => this.handleMediaError_(e));
 
     const forwardEventsUnlisten = this.forwardEvents(
       [

@@ -465,11 +465,14 @@ describes.realWin(
           code: MediaError.MEDIA_ERR_DECODE,
         },
       });
+      const secondErrorHandler = env.sandbox.stub();
+      ele.addEventListener('error', secondErrorHandler);
       expect(ele.childElementCount).to.equal(2);
       ele.dispatchEvent(new ErrorEvent('error'));
       expect(ele.childElementCount).to.equal(1);
       expect(ele.load).to.have.been.called;
       expect(ele.play).to.have.been.called;
+      expect(secondErrorHandler).to.not.have.been.called;
     });
 
     it('non-decode error has no side effect', async () => {
@@ -492,9 +495,12 @@ describes.realWin(
           code: MediaError.MEDIA_ERR_ABORTED,
         },
       });
+      const secondErrorHandler = env.sandbox.stub();
+      ele.addEventListener('error', secondErrorHandler);
       expect(ele.childElementCount).to.equal(2);
       ele.dispatchEvent(new ErrorEvent('error'));
       expect(ele.childElementCount).to.equal(2);
+      expect(secondErrorHandler).to.have.been.called;
     });
 
     it('should propagate ARIA attributes', async () => {
