@@ -431,7 +431,9 @@ export class AmpStory extends AMP.BaseElement {
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
-    this.element.removeAttribute('title');
+    if (!this.platform_.isBot()) {
+      this.element.removeAttribute('title');
+    }
 
     // Remove text nodes which would be shown outside of the amp-story
     const textNodes = childNodes(
