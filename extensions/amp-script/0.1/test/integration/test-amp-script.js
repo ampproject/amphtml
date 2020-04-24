@@ -90,7 +90,7 @@ describe
           yield browser.wait(100);
 
           // Mutation was dropped, therefore no h1s were added.
-          expect(!doc.querySelector('h1')).to.be.null;
+          expect(doc.querySelector('h1')).to.be.null;
         });
 
         it('should start long task', function* () {
