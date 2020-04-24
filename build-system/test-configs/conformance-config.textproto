@@ -349,6 +349,12 @@ requirement: {
   value: 'Function.prototype.name'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'NodeList.prototype.forEach is not available in IE11. Convert to Array first.'
+  value: 'NodeList.prototype.forEach'
+}
+
 
 # Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
 
