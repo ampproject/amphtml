@@ -88,7 +88,7 @@ describe
 
           // Wait for mutations to be processed
           yield browser.wait(100);
-          
+
           // Mutation was dropped, therefore no h1s were added.
           expect(!doc.querySelector('h1')).to.be.null;
         });
