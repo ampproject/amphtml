@@ -57,7 +57,7 @@ function getActionInvocation(element, action, opt_tagOrTarget) {
 }
 
 describes.realWin(
-  'Action allowlist on components',
+  'Action whitelist on components',
   {
     amp: {
       runtimeOn: true,
@@ -84,13 +84,9 @@ describes.realWin(
       target = createExecElement('foo', spy, getDefaultActionAlias);
     });
 
-    describe('with null action allowlist', () => {
+    describe('with null action whitelist', () => {
       beforeEach(() => {
         action = new ActionService(env.ampdoc, env.win.document);
-      });
-
-      afterEach(() => {
-        action = null;
       });
 
       it('should allow all actions by default', () => {
@@ -106,7 +102,7 @@ describes.realWin(
       });
     });
 
-    describe('with non-null action allowlist', () => {
+    describe('with non-null action whitelist', () => {
       beforeEach(() => {
         action = new ActionService(env.ampdoc, env.win.document);
         action.setWhitelist([
@@ -136,12 +132,8 @@ describes.realWin(
         const i = getActionInvocation(target, 'print', 'AMP');
         env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
-        expect(action.error_).to.be.calledWith(
-          '"AMP.print" is not whitelisted ' +
-            '[{"tagOrTarget":"AMP","method":"pushState"},' +
-            '{"tagOrTarget":"AMP","method":"setState"},' +
-            '{"tagOrTarget":"*","method":"show"},' +
-            '{"tagOrTarget":"amp-element","method":"defaultAction"}].'
+        expect(action.error_).to.be.calledWithMatch(
+          /"AMP.print" is not whitelisted/
         );
       });
 
@@ -191,7 +183,7 @@ describes.realWin(
         action = new ActionService(env.ampdoc, env.win.document);
       });
 
-      it('should supply default actions allowlist', () => {
+      it('should supply default actions whitelist', () => {
         const i = getActionInvocation(target, 'toggleClass', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
@@ -201,14 +193,8 @@ describes.realWin(
         const i = getActionInvocation(target, 'print', 'AMP');
         env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
-        expect(action.error_).to.be.calledWith(
-          '"AMP.print" is not whitelisted ' +
-            '[{"tagOrTarget":"AMP","method":"setState"},' +
-            '{"tagOrTarget":"*","method":"focus"},' +
-            '{"tagOrTarget":"*","method":"hide"},' +
-            '{"tagOrTarget":"*","method":"show"},' +
-            '{"tagOrTarget":"*","method":"toggleClass"},' +
-            '{"tagOrTarget":"*","method":"toggleVisibility"}].'
+        expect(action.error_).to.be.calledWithMatch(
+          /"AMP.print" is not whitelisted/
         );
       });
 
@@ -217,11 +203,7 @@ describes.realWin(
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
         });
 
-        afterEach(() => {
-          Services.actionServiceForDoc.restore();
-        });
-
-        it('should add actions to the allowlist for amp-carousel[type=slides]', async () => {
+        it('should add actions to the whitelist for amp-carousel[type=slides]', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-carousel',
@@ -242,19 +224,12 @@ describes.realWin(
           i = getActionInvocation(element, 'toggleAutoplay');
           env.sandbox.stub(action, 'error_');
           expect(action.invoke_(i)).to.be.null;
-          expect(action.error_).to.be.calledWith(
-            '"AMP-CAROUSEL.toggleAutoplay" is not whitelisted ' +
-              '[{"tagOrTarget":"AMP","method":"setState"},' +
-              '{"tagOrTarget":"*","method":"focus"},' +
-              '{"tagOrTarget":"*","method":"hide"},' +
-              '{"tagOrTarget":"*","method":"show"},' +
-              '{"tagOrTarget":"*","method":"toggleClass"},' +
-              '{"tagOrTarget":"*","method":"toggleVisibility"},' +
-              '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"}].'
+          expect(action.error_).to.be.calledWithMatch(
+            /"AMP.CAROUSEL.toggleAutoplay" is not whitelisted/
           );
         });
 
-        it('should add actions to the allowlist for amp-carousel[type=carousel]', async () => {
+        it('should add actions to the whitelist for amp-carousel[type=carousel]', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-carousel',
@@ -275,19 +250,12 @@ describes.realWin(
           i = getActionInvocation(element, 'toggleAutoplay');
           env.sandbox.stub(action, 'error_');
           expect(action.invoke_(i)).to.be.null;
-          expect(action.error_).to.be.calledWith(
-            '"AMP-CAROUSEL.toggleAutoplay" is not whitelisted ' +
-              '[{"tagOrTarget":"AMP","method":"setState"},' +
-              '{"tagOrTarget":"*","method":"focus"},' +
-              '{"tagOrTarget":"*","method":"hide"},' +
-              '{"tagOrTarget":"*","method":"show"},' +
-              '{"tagOrTarget":"*","method":"toggleClass"},' +
-              '{"tagOrTarget":"*","method":"toggleVisibility"},' +
-              '{"tagOrTarget":"AMP-CAROUSEL","method":"goToSlide"}].'
+          expect(action.error_).to.be.calledWithMatch(
+            /"AMP.CAROUSEL.toggleAutoplay" is not whitelisted/
           );
         });
 
-        it('should add actions to the allowlist for amp-form', async () => {
+        it('should add actions to the whitelist for amp-form', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'form',
@@ -322,7 +290,7 @@ describes.realWin(
           expect(submitSpy).to.be.calledWithExactly(i);
         });
 
-        it('should add actions to the allowlist for amp-image-lightbox', async () => {
+        it('should add actions to the whitelist for amp-image-lightbox', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-image-lightbox',
@@ -338,7 +306,7 @@ describes.realWin(
           expect(spy).to.be.calledWithExactly(i);
         });
 
-        it('should add actions to the allowlist for amp-lightbox', async () => {
+        it('should add actions to the whitelist for amp-lightbox', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-lightbox',
@@ -363,7 +331,7 @@ describes.realWin(
           expect(spy).to.be.calledWithExactly(i);
         });
 
-        it('should add actions to the allowlist for amp-list', async () => {
+        it('should add actions to the whitelist for amp-list', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-list',
@@ -391,7 +359,7 @@ describes.realWin(
           expect(spy).to.be.calledWithExactly(i);
         });
 
-        it('should add actions to the allowlist for amp-selector', async () => {
+        it('should add actions to the whitelist for amp-selector', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-selector',
@@ -418,7 +386,7 @@ describes.realWin(
           expect(spy).to.be.calledWithExactly(i);
         });
 
-        it('should add actions to the allowlist for amp-sidebar', async () => {
+        it('should add actions to the whitelist for amp-sidebar', async () => {
           const element = createElementWithAttributes(
             env.win.document,
             'amp-sidebar',
