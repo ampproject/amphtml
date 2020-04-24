@@ -556,14 +556,14 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return;
     }
 
-    const options = this.quizEl_.querySelectorAll(
-      '.i-amphtml-story-quiz-option'
+    const options = this.rootEl_.querySelectorAll(
+      '.i-amphtml-story-reaction-option'
     );
 
     if (selectedOptionKey >= options.length) {
       dev().error(
         TAG,
-        `Quiz #${this.element.getAttribute('id')} does not have option ${
+        `Reaction #${this.element.getAttribute('id')} does not have option ${
           this.answerChoiceOptions_[selectedOptionKey]
         }, but user selected option ${
           this.answerChoiceOptions_[selectedOptionKey]
@@ -575,7 +575,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     if (this.responseData_['responses'].length > options.length) {
       dev().error(
         TAG,
-        `Quiz #${this.element.getAttribute('id')} has ${
+        `Reaction #${this.element.getAttribute('id')} has ${
           options.length
         } options, but response returned ${
           this.responseData_['responses'].length
@@ -586,7 +586,20 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     this.mutateElement(() => {
       this.updateOptionPercentages_();
-      this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
+      this.updateToPostSelectionState_(options[selectedOptionKey]);
     });
+  }
+
+  /**
+   * Updates the selected classes on option selected.
+   * @param selectedOption
+   */
+  updateToPostSelectionState_(selectedOption) {
+    this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
+    selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
+
+    if (this.responseData_) {
+      this.rootEl_.classList.add('i-amphtml-story-reaction-has-data');
+    }
   }
 }

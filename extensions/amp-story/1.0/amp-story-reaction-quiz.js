@@ -46,7 +46,9 @@ const TAG = 'amp-story-reaction-quiz';
 const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-reaction-quiz-container">
+    <div
+      class="i-amphtml-story-reaction-quiz-container i-amphtml-story-reaction-container"
+    >
       <div class="i-amphtml-story-reaction-quiz-prompt-container"></div>
       <div class="i-amphtml-story-reaction-quiz-option-container"></div>
     </div>
@@ -62,7 +64,9 @@ const buildQuizTemplate = (element) => {
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <span class="i-amphtml-story-reaction-quiz-option">
+    <span
+      class="i-amphtml-story-reaction-quiz-option i-amphtml-story-reaction-option"
+    >
       <span class="i-amphtml-story-reaction-quiz-answer-choice"></span>
     </span>
   `;
@@ -80,6 +84,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     /** @private {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = Services.localizationService(this.win);
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
   }
 
   /** @override */

@@ -381,19 +381,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * @param {Element} selectedOption
-   * @private
-   */
-  updateQuizToPostSelectionState_(selectedOption) {
-    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
-    selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
-
-    if (this.responseData_) {
-      this.quizEl_.classList.add('i-amphtml-story-quiz-has-data');
-    }
-  }
-
-  /**
    * @private
    */
   updateOptionPercentages_() {
@@ -718,5 +705,18 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.updateOptionPercentages_();
       this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
     });
+  }
+
+  /**
+   * Updates the selected classes on option selected.
+   * @param selectedOption
+   */
+  updateQuizToPostSelectionState_(selectedOption) {
+    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+    selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
+
+    if (this.responseData_) {
+      this.quizEl_.classList.add('i-amphtml-story-quiz-has-data');
+    }
   }
 }
