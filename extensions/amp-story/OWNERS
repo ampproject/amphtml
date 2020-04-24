@@ -13,7 +13,10 @@
           name: 'newmuis',
           notify: true,
         },
-        {name: 'enriqe'},
+        {
+          name: 'enriqe',
+          notify: true,
+        },
       ],
     },
   ],
