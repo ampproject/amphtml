@@ -383,6 +383,10 @@ class AmpVideo extends AMP.BaseElement {
       `Decode error in ${this.video_.currentSrc}`,
       this.element
     );
+    // No fallback available for bare src.
+    if (this.video_.src) {
+      return;
+    }
     // Find the source element that caused the decode error.
     let sourceCount = 0;
     const currentSource = childElement(this.video_, (source) => {
