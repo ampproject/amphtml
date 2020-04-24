@@ -77,6 +77,15 @@ export class SubscriptionPlatform {
   pingback(unusedSelectedPlatform) {}
 
   /**
+   * Asks authorizations and does logging for deferred account
+   * creation on the subscription platform.
+   * @param {!./entitlement.Entitlement} unusedEntitlement
+   * @return {!Promise<boolean>|undefined} wheether the
+   *     deferred creation was authorized.
+   */
+  completeDeferredAccountCreation(unusedEntitlement) {}
+
+  /**
    * Tells if the platform supports a score factor
    * @param {string} unusedFactor
    * @return {number}

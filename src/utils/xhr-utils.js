@@ -437,14 +437,14 @@ export function stringifyForPingback(obj) {
   if (isObject(obj)) {
     const result = {};
     Object.keys(obj).forEach((key) => {
-      result[key] = this.stringifyForPingback(obj[key]);
+      result[key] = stringifyForPingback(obj[key]);
     });
     return JSON.stringify(result);
   }
   if (isArray(obj)) {
     const objArray = [];
     obj.forEach((element) => {
-      objArray.push(this.stringifyForPingback(element));
+      objArray.push(stringifyForPingback(element));
     });
     return '[' + objArray.join(',') + ']';
   }

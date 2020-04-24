@@ -15,6 +15,7 @@
  */
 
 import * as utilsStory from '../../../../src/utils/story';
+import {DeferredAccountFlow} from '../deferred-account-flow';
 import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
@@ -52,6 +53,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     services: [
       {
         authorizationUrl: 'https://lipsum.com/authorize',
+        hasAssociatedAccountUrl: 'https://lipsum.com/hasAssociatedAccountUrl',
+        accountCreationRedirectUrl: 'https://lipsum.com/accountCreationRedirectUrl',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
@@ -592,6 +595,75 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.not.be.called;
     });
+
+    describe('deferredAccountCreation', async () => {
+      let remoteEntitlement;
+      let localPlatform;
+      let rermotePlatform;
+
+      beforeEach(() => {
+        subscriptionService.platformStore_ = new PlatformStore([
+          'local',
+          'swg-google',
+        ]);
+        const entitlementData = {
+          source: 'swg-google',
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        };
+        remoteEntitlement = Entitlement.parseFromJson(entitlementData);
+        localPlatform = new SubscriptionPlatform();
+        rermotePlatform =  new SubscriptionPlatform();
+        subscriptionService.platformStore_.resolvePlatform(
+          'local',
+          localPlatform
+        );
+        subscriptionService.platformStore_.resolvePlatform(
+          'swg-google',
+          rermotePlatform
+        );
+      });
+      it('should start deferred account flow if granted', async () => {       
+        const getGrantStatus = env.sandbox
+          .stub(subscriptionService.platformStore_, 'getGrantStatus')
+          .callsFake(() => Promise.resolve(true));
+        env.sandbox
+          .stub(subscriptionService, 'processGrantState_');
+        env.sandbox
+          .stub(subscriptionService, 'performPingback_');
+        const startFlowStub = env.sandbox
+          .stub(subscriptionService, 'maybeStartDeferredAccountFlow_')
+          .callsFake(() => Promise.resolve(true));
+        const getPlatformStub = env.sandbox
+          .stub(subscriptionService.platformStore_, 'getPlatform')
+          .callsFake((serviceId) => callback(rermotePlatform));
+
+        await subscriptionService.initialize_();
+        await subscriptionService.startAuthorizationFlow_();
+
+        expect(getGrantStatus).to.be.called;
+        expect(startFlowStub).to.be.called;
+        //expect(getPlatformStub).to.be.calledWith('swg-google')
+      });
+
+      it('should start deferred account flow if granted by non-local', async () => {       
+        const getGrantEntitlement = env.sandbox
+          .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+          .callsFake(() => Promise.resolve(remoteEntitlement));
+        const getPlatformStub = env.sandbox
+          .stub(subscriptionService.platformStore_, 'getPlatform')
+          .callsFake((serviceId) => remotePlatform);
+        
+        const flowStub = sinon.createStubInstance(DeferredAccountFlow);
+
+        await subscriptionService.initialize_();
+        await subscriptionService.maybeStartDeferredAccountFlow_();
+
+        expect(getGrantEntitlement).to.be.called;
+        expect(flowStub.start).to.be.called;
+        expect(getPlatformStub).to.be.calledWith('swg-google')
+      });
+    });
   });
 
   describe('fetchEntitlements_', () => {
@@ -995,7 +1067,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'local';
       platform.isPingbackEnabled = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
       env.sandbox
@@ -1017,7 +1088,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'local';
       platform.isPingbackEnabled = () => true;
       platform.pingbackReturnsAllEntitlements = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
@@ -1035,7 +1105,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'local';
       platform.isPingbackEnabled = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
       env.sandbox
@@ -1045,123 +1114,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await subscriptionService.performPingback_();
       expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
-    });
-
-    describe('multiple platforms with pingbacks', () => {
-      it('should only send granted entitlement to platform they were granted to with "pingbackAllEntitlements" set', async () => {
-        const entitlementDataRemote = {
-          source: 'remote',
-          granted: true,
-          grantReason: GrantReason.SUBSCRIBER,
-        };
-        const entitlementDataLocal = {
-          source: 'local',
-          granted: true,
-          grantReason: GrantReason.SUBSCRIBER,
-        };
-        const entitlementRemote = Entitlement.parseFromJson(
-          entitlementDataRemote
-        );
-        const entitlementLocal = Entitlement.parseFromJson(
-          entitlementDataLocal
-        );
-        subscriptionService.viewTrackerPromise_ = Promise.resolve();
-        subscriptionService.platformStore_ = new PlatformStore([
-          'local',
-          'remote',
-        ]);
-        const platform = new SubscriptionPlatform();
-        platform.getServiceId = () => 'local';
-        platform.isPingbackEnabled = () => true;
-        platform.pingbackReturnsAllEntitlements = () => true;
-        subscriptionService.platformStore_.resolvePlatform('local', platform);
-        const platformRemote = new SubscriptionPlatform();
-        platformRemote.getServiceId = () => 'remote';
-        platformRemote.isPingbackEnabled = () => true;
-        platformRemote.pingbackReturnsAllEntitlements = () => true;
-        subscriptionService.platformStore_.resolvePlatform(
-          'remote',
-          platformRemote
-        );
-        env.sandbox
-          .stub(
-            subscriptionService.platformStore_,
-            'getAllPlatformsEntitlements'
-          )
-          .callsFake(() =>
-            Promise.resolve([entitlementRemote, entitlementLocal])
-          );
-        const pingbackStub = env.sandbox.stub(platform, 'pingback');
-        const pingbackStubRemote = env.sandbox.stub(platformRemote, 'pingback');
-
-        await subscriptionService.performPingback_();
-        expect(pingbackStub).to.be.calledWith([entitlementLocal]);
-        expect(pingbackStubRemote).to.be.calledWith([entitlementRemote]);
-      });
-
-      it('should only send granted entitlement to platform they were granted to', async () => {
-        const entitlementData = {
-          source: 'remote',
-          granted: true,
-          grantReason: GrantReason.SUBSCRIBER,
-        };
-        const entitlement = Entitlement.parseFromJson(entitlementData);
-        subscriptionService.viewTrackerPromise_ = Promise.resolve();
-        subscriptionService.platformStore_ = new PlatformStore([
-          'local',
-          'remote',
-        ]);
-        const platform = new SubscriptionPlatform();
-        platform.getServiceId = () => 'local';
-        platform.isPingbackEnabled = () => true;
-        subscriptionService.platformStore_.resolvePlatform('local', platform);
-        const platformRemote = new SubscriptionPlatform();
-        platformRemote.getServiceId = () => 'remote';
-        platformRemote.isPingbackEnabled = () => true;
-        subscriptionService.platformStore_.resolvePlatform(
-          'remote',
-          platformRemote
-        );
-        env.sandbox
-          .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
-          .callsFake(() => Promise.resolve(entitlement));
-        const pingbackStub = env.sandbox.stub(platform, 'pingback');
-        const pingbackStubRemote = env.sandbox.stub(platformRemote, 'pingback');
-
-        await subscriptionService.performPingback_();
-        expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
-        expect(pingbackStubRemote).to.be.calledWith(entitlement);
-      });
-
-      it('should send empty pingbacks to platforms where resolved entitlement is null', async () => {
-        subscriptionService.viewTrackerPromise_ = Promise.resolve();
-        subscriptionService.platformStore_ = new PlatformStore([
-          'local',
-          'remote',
-        ]);
-        const platform = new SubscriptionPlatform();
-        platform.getServiceId = () => 'local';
-        platform.isPingbackEnabled = () => true;
-        subscriptionService.platformStore_.resolvePlatform('local', platform);
-        const platformRemote = new SubscriptionPlatform();
-        platformRemote.getServiceId = () => 'remote';
-        platformRemote.isPingbackEnabled = () => true;
-        subscriptionService.platformStore_.resolvePlatform(
-          'remote',
-          platformRemote
-        );
-        env.sandbox
-          .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
-          .callsFake(() => Promise.resolve(null));
-        const pingbackStub = env.sandbox.stub(platform, 'pingback');
-        const pingbackStubRemote = env.sandbox.stub(platformRemote, 'pingback');
-
-        await subscriptionService.performPingback_();
-        expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
-        expect(pingbackStubRemote).to.be.calledWith(
-          Entitlement.empty('remote')
-        );
-      });
     });
   });
 

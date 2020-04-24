@@ -21,6 +21,7 @@ import {
 } from './analytics';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
+import {DeferredAccountFlow} from './deferred-account-flow';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
@@ -609,9 +610,17 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
+    console.log("hjere4");
     this.platformStore_.getGrantStatus().then((grantState) => {
       this.processGrantState_(grantState);
       this.performPingback_();
+
+      console.log("hjere3");
+      console.log(grantState)
+      if (grantState) {
+        console.log("hjere2");
+        this.maybeStartDeferredAccountFlow_();
+      }
     });
 
     if (doPlatformSelection) {
@@ -668,51 +677,69 @@ export class SubscriptionService {
   }
 
   /**
-   * Performs pingback on all platform.
+   * Performs pingback on local platform.
    * @return {?Promise}
    * @private
    */
   performPingback_() {
     if (this.viewTrackerPromise_) {
-      const availablePlatforms = this.platformStore_.getAvailablePlatforms();
+      const localPlatform = this.platformStore_.getLocalPlatform();
       return this.viewTrackerPromise_
         .then(() => {
-          return Promise.all(
-            availablePlatforms.map(platform => {
-              if (platform.pingbackReturnsAllEntitlements()) {
-                return this.platformStore_.getAllPlatformsEntitlements();
-              }
-              return this.platformStore_.getGrantEntitlement();
-            })
-          );
+          if (localPlatform.pingbackReturnsAllEntitlements()) {
+            return this.platformStore_.getAllPlatformsEntitlements();
+          }
+          return this.platformStore_
+            .getGrantEntitlement()
+            .then(
+              (grantStateEntitlement) =>
+                grantStateEntitlement || Entitlement.empty('local')
+            );
         })
-        .then(resolveEntitlements => {
-          availablePlatforms.forEach((platform, index) => {
-            if (platform.isPingbackEnabled()) {
-              const platformEntitlements = resolveEntitlements[index];
-              // If the platform requested all the entitlements, then send an array of its entitlements.
-              // If the platform requested the granted entitlement, then send the granted entitlement only
-              // to the platform it belongs to.
-              // In all other cases, send an empty entitlement to the platform.
-              let entitlementsToSend = Entitlement.empty(
-                platform.getServiceId()
-              );
-              if (platform.pingbackReturnsAllEntitlements()) {
-                entitlementsToSend = platformEntitlements.filter(
-                  entitlement => entitlement.source == platform.getServiceId()
-                );
-              } else if (
-                platformEntitlements &&
-                platformEntitlements.source == platform.getServiceId()
-              ) {
-                entitlementsToSend = platformEntitlements;
-              }
-              platform.pingback(entitlementsToSend);
-            }
-          });
+        .then((resolveEntitlements) => {
+          if (localPlatform.isPingbackEnabled()) {
+            localPlatform.pingback(resolveEntitlements);
+          }
         });
     }
     return null;
+  }
+
+  maybeStartDeferredAccountFlow_() {
+    console.log("hjere");
+    const localService = this.platformConfig_['services'].filter(
+      (service) => 'local' === (service.serviceId || 'local')
+    );
+
+    const matchedServiceConfig = userAssert(
+      localService[0],
+      'No matching services for local found'
+    );
+    if (
+      !matchedServiceConfig['hasAssociatedAccountUrl'] ||
+      !matchedServiceConfig['accountCreationRedirectUrl']
+    ) {
+      return;
+    }
+    console.log("hjere2");
+    this.platformStore_.getGrantEntitlement().then((entitlement) => {
+      if (entitlement.source == 'local') {
+        return;
+      }
+      console.log(entitlement.source);
+      const remotePlatform = this.platformStore_.getPlatform(
+        entitlement.source
+      );
+      console.log(remotePlatform);
+      
+      const deferredAccountFlow = new DeferredAccountFlow(
+        this.ampdoc_,
+        matchedServiceConfig['hasAssociatedAccountUrl'],
+        matchedServiceConfig['accountCreationRedirectUrl'],
+        remotePlatform
+      );
+      deferredAccountFlow.start(entitlement);
+    });
   }
 
   /**
