@@ -405,7 +405,7 @@ class AmpVideo extends AMP.BaseElement {
     // Unfortunately we don't know exactly what operation caused the decode to
     // fail. But to help, we need to retry. Since play is most common, we're
     // doing that.
-    this.play();
+    this.play(false);
   }
 
   /**
