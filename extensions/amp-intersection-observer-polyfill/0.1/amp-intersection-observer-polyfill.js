@@ -28,9 +28,7 @@ const TAG = 'amp-intersection-observer-polyfill';
 function upgrade(win) {
   upgradePolyfill(win, () => {
     installIntersectionObserver();
-    if (win != win.top) {
-      maybeSetupCrossOriginObserver(win);
-    }
+    maybeSetupCrossOriginObserver(win);
   });
   return {};
 }

@@ -15,6 +15,7 @@
  */
 
 import {MessageType} from '../../../../src/3p-frame-messaging';
+import {WindowInterface} from '../../../../src/window-interface';
 import {
   calculateIntersectionRect,
   maybeSetupCrossOriginObserver,
@@ -70,6 +71,7 @@ describes.realWin('maybeSetupCrossOriginObserver', {amp: false}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+    win.__AMP_MODE = {runtime: 'inabox'};
     updaterSpy = null;
     win.IntersectionObserver = {
       _setupCrossOriginUpdater: () => {
@@ -84,7 +86,7 @@ describes.realWin('maybeSetupCrossOriginObserver', {amp: false}, (env) => {
     expect(updaterSpy).to.be.null;
   });
 
-  describe('in iframe', () => {
+  describe('with iframe client', () => {
     let iframeClient;
     let sendMessageCallback;
 
@@ -108,6 +110,20 @@ describes.realWin('maybeSetupCrossOriginObserver', {amp: false}, (env) => {
         },
         /* opt_instantiate */ true
       );
+    });
+
+    it('should not instantiate when on top-level context', () => {
+      env.sandbox.stub(WindowInterface, 'getTop').callsFake(() => win);
+      maybeSetupCrossOriginObserver(win);
+      expect(updaterSpy).to.be.null;
+      expect(sendMessageCallback).to.be.null;
+    });
+
+    it('should not instantiate in non-inabox context', () => {
+      win.__AMP_MODE.runtime = 'other';
+      maybeSetupCrossOriginObserver(win);
+      expect(updaterSpy).to.be.null;
+      expect(sendMessageCallback).to.be.null;
     });
 
     it('should not instantiate when no polyfill', () => {

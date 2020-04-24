@@ -15,6 +15,8 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {WindowInterface} from '../../../src/window-interface';
+import {getMode} from '../../../src/mode';
 import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
@@ -24,7 +26,12 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
  * @param {!Window} win
  */
 export function maybeSetupCrossOriginObserver(win) {
-  // Cross-origin iframe polyfill for AMP iframes, such as inabox.
+  if (win == WindowInterface.getTop(win) || getMode(win).runtime != 'inabox') {
+    // Not an iframe at all.
+    return;
+  }
+
+  // Check if there is an iframe client connected and if it's indeed a polyfill.
   const iframeClient = iframeMessagingClientFor(win);
   const setupPolyfillUpdater =
     win.IntersectionObserver['_setupCrossOriginUpdater'];
