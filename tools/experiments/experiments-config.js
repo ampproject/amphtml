@@ -321,4 +321,9 @@ export const EXPERIMENTS = [
     spec: 'TODO: add before merge',
     cleanupIssue: 'TODO: create issue before merge',
   },
+  {
+    id: 'amp-ad-no-center-css',
+    name: 'Removing the centering css rule for amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+  },
 ];
