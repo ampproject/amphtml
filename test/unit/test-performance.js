@@ -1271,6 +1271,39 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     });
   });
 
+  describe('getMetric', () => {
+    beforeEach(() => {
+      setupFakesForVisibilityStateManipulation();
+    });
+
+    function getPerformance() {
+      installPerformanceService(fakeWin);
+      return Services.performanceFor(fakeWin);
+    }
+
+    it('returns a promise that resolves to the value', async () => {
+      const perf = getPerformance();
+      const value = await perf.getMetric('mbv');
+      expect(value).to.eq(1);
+    });
+
+    describe('offset for visible', () => {
+      it('returns offset value', async () => {
+        const perf = getPerformance();
+        const value = await perf.getMetric('mbv');
+        expect(value).to.eq(1);
+      });
+    });
+
+    describe('when not supported', () => {
+      it('returns null', async () => {
+        const perf = getPerformance();
+        const value = await perf.getMetric('lcp-v');
+        expect(value).to.eq(1);
+      });
+    });
+  });
+
   describe('forwards navigation metrics', () => {
     let PerformanceObserverConstructorStub, performanceObserver;
     beforeEach(() => {

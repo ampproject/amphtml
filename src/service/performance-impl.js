@@ -787,7 +787,7 @@ export class Performance {
     if (!this.metrics_[label]) {
       this.metrics_[label] = new Deferred();
     }
-    return this.metrics_[label];
+    return this.metrics_[label].promise;
   }
 }
 
