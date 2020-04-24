@@ -584,7 +584,7 @@ export class ActionService {
    */
   setWhitelist(whitelist) {
     this.whitelist_ = whitelist.filter(
-      (value) => hasOwn(value, 'tagOrTarget') && hasOwn(value, 'method')
+      (value) => value.tagOrTarget && value.method
     );
   }
 
