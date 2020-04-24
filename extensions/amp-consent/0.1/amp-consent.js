@@ -16,8 +16,10 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertEnumValueToConsentType,
   convertEnumValueToState,
   getConsentStateValue,
+  getConsentTypeValue,
   hasStoredValue,
 } from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
@@ -249,6 +251,9 @@ export class AmpConsent extends AMP.BaseElement {
    * Listen to external consent flow iframe's response
    */
   enableExternalInteractions_() {
+    // Should we also listen for consentType being passed in?
+    // i.e. data['type']? Then use this inconjunction with
+    // consent string to update state manager?
     this.win.addEventListener('message', (event) => {
       if (!this.isPromptUIOn_) {
         return;
@@ -504,7 +509,8 @@ export class AmpConsent extends AMP.BaseElement {
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString'] || undefined
+          response['consentString'] || undefined,
+          response['consentType']
         );
       }
     });
@@ -514,14 +520,20 @@ export class AmpConsent extends AMP.BaseElement {
    * Sync with local storage if consentRequired is true.
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
+   * @param {string=} responseConsentType
    */
-  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+  updateCacheIfNotNull_(
+    responseStateValue,
+    responseConsentString,
+    responseConsentType
+  ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        responseConsentString
+        responseConsentString,
+        convertEnumValueToConsentType(responseConsentType) || undefined
       );
     }
   }
@@ -545,6 +557,7 @@ export class AmpConsent extends AMP.BaseElement {
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
+          'consentType': getConsentTypeValue(storedInfo['consentType']),
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
         });

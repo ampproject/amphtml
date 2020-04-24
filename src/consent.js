@@ -79,6 +79,23 @@ export function getConsentPolicyInfo(element, policyId) {
 }
 
 /**
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} policyId
+ * @return {!Promise<?string>}
+ */
+export function getConsentTypeInfo(element, policyId) {
+  // Return the stored consent type.
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentTypeInfo(/** @type {string} */ (policyId));
+    }
+  );
+}
+
+/**
  * Determine if an element needs to be blocked by consent based on meta tags.
  * @param {*} element
  * @return {boolean}

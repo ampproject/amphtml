@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  CONSENT_TYPE,
   composeStoreValue,
   constructConsentInfo,
   getStoredConsentInfo,
@@ -31,6 +32,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.UNKNOWN,
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': undefined,
         })
       );
@@ -41,6 +43,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.ACCEPTED,
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': undefined,
         })
       );
@@ -48,6 +51,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': undefined,
         })
       );
@@ -62,6 +66,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.ACCEPTED,
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': undefined,
         })
       );
@@ -74,6 +79,21 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': 'test',
+          'consentType': undefined,
+          'isDirty': undefined,
+        })
+      );
+      expect(
+        getStoredConsentInfo({
+          's': 0,
+          'r': 'test',
+          'ct': 2,
+        })
+      ).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.REJECTED,
+          'consentString': 'test',
+          'consentType': CONSENT_TYPE.TCF_V2,
           'isDirty': undefined,
         })
       );
@@ -81,12 +101,14 @@ describes.fakeWin('ConsentInfo', {}, () => {
         getStoredConsentInfo({
           's': -1,
           'r': 'test',
+          'ct': 2,
           'd': 1,
         })
       ).to.deep.equal(
         dict({
           'consentState': CONSENT_ITEM_STATE.UNKNOWN,
           'consentString': 'test',
+          'consentType': CONSENT_TYPE.TCF_V2,
           'isDirty': true,
         })
       );
@@ -113,6 +135,16 @@ describes.fakeWin('ConsentInfo', {}, () => {
     consentInfo = constructConsentInfo(
       CONSENT_ITEM_STATE.ACCEPTED,
       'test',
+      CONSENT_TYPE.US_PRIVACY_STRING
+    );
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
+
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      CONSENT_TYPE.US_PRIVACY_STRING,
       true
     );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
@@ -143,14 +175,17 @@ describes.fakeWin('ConsentInfo', {}, () => {
       });
       consentInfo['idDirty'] = false;
       consentInfo['consentString'] = 'test';
+      consentInfo['consentType'] = CONSENT_TYPE.TCF_V1;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
         'r': 'test',
+        'ct': 1,
       });
       consentInfo['isDirty'] = true;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
         'r': 'test',
+        'ct': 1,
         'd': 1,
       });
     });
@@ -226,6 +261,10 @@ describes.fakeWin('ConsentInfo', {}, () => {
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoA['consentString'] = 'test';
+    infoB['consentType'] = 1;
+    expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
+
+    infoA['consentType'] = 1;
     infoB['isDirty'] = true;
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
   });

@@ -15,7 +15,12 @@
  */
 
 import * as lolex from 'lolex';
-import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  CONSENT_TYPE,
+  constructConsentInfo,
+  getConsentTypeValue,
+} from '../consent-info';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
@@ -77,7 +82,11 @@ describes.realWin(
       let manager;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          CONSENT_TYPE.TCF_V1
+        );
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -86,6 +95,9 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
+        expect(manager.consentType_).to.equal(
+          getConsentTypeValue(CONSENT_TYPE.TCF_V1)
+        );
       });
 
       describe('Register policy instance', () => {

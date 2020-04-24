@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  ConsentInfoDef,
+  getConsentTypeValue,
+} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
@@ -76,6 +80,9 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
+
+    /** @private {?string|undefined} */
+    this.consentType_ = null;
   }
 
   /**
@@ -179,8 +186,15 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const prevConsentStr = this.consentString_;
+    // Want to pass along the string to vendors not enum
+    const consentType = getConsentTypeValue(info['consentType']);
+    const {
+      consentString_: prevConsentStr,
+      consentType_: prevConsentType,
+    } = this;
+
     this.consentString_ = consentStr;
+    this.consentType_ = consentType;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -199,8 +213,9 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString doesn't change with dismiss action
+      // consentString and consentType doesn't change with dismiss action
       this.consentString_ = prevConsentStr;
+      this.consentType_ = prevConsentType;
     } else {
       this.consentState_ = state;
     }
@@ -277,6 +292,18 @@ export class ConsentPolicyManager {
   getConsentStringInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
       return this.consentString_;
+    });
+  }
+
+  /**
+   * Get the consent type string of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?string>}
+   */
+  getConsentTypeInfo(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.consentType_;
     });
   }
 

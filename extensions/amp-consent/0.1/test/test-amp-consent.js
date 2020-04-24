@@ -197,6 +197,7 @@ describes.realWin(
           'consentInstanceId': 'ABC',
           'consentStateValue': 'unknown',
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': false,
           'matchedGeoGroup': null,
         });
@@ -209,6 +210,7 @@ describes.realWin(
           'consentInstanceId': 'ABC',
           'consentStateValue': 'unknown',
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': false,
           'matchedGeoGroup': null,
         });
@@ -328,6 +330,7 @@ describes.realWin(
           'consentInstanceId': 'abc',
           'consentStateValue': 'unknown',
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': false,
           'matchedGeoGroup': 'nafta',
         });
@@ -357,6 +360,7 @@ describes.realWin(
           'consentInstanceId': 'abc',
           'consentStateValue': 'unknown',
           'consentString': undefined,
+          'consentType': undefined,
           'isDirty': false,
           'matchedGeoGroup': 'na',
         });
@@ -379,9 +383,9 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-1/':
-              '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
+              '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello", "consentType": "tcf-v2"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring"}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentType": "tcf-v2"}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -410,6 +414,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 4,
             'consentString': undefined,
+            'consentType': undefined,
             'isDirty': undefined,
           });
         });
@@ -434,6 +439,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 5,
             'consentString': undefined,
+            'consentType': undefined,
             'isDirty': undefined,
           });
           expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
@@ -460,6 +466,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
+            'consentType': 2,
             'isDirty': undefined,
           });
         });
@@ -484,6 +491,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 5,
             'consentString': undefined,
+            'consentType': undefined,
             'isDirty': undefined,
           });
         });
@@ -493,7 +501,7 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentType": "us-privacy-string"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -509,6 +517,7 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'oldstring',
+              [STORAGE_KEY.CONSENT_TYPE]: 2,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -525,6 +534,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 1,
             'consentString': 'newstring',
+            'consentType': 3,
             'isDirty': undefined,
           });
         });
@@ -540,6 +550,7 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'mystring',
+              [STORAGE_KEY.CONSENT_TYPE]: 2,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -556,6 +567,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
+            'consentType': 2,
             'isDirty': undefined,
           });
         });
@@ -582,6 +594,7 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'mystring',
+              [STORAGE_KEY.CONSENT_TYPE]: 2,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -598,6 +611,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
+            'consentType': 2,
             'isDirty': true,
           });
         });
@@ -613,6 +627,7 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'mystring',
+              [STORAGE_KEY.CONSENT_TYPE]: 2,
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -629,6 +644,7 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
+            'consentType': 2,
             'isDirty': true,
           });
         });
