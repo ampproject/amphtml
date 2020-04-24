@@ -7,11 +7,12 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/filesize@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-4.0.1.tgz#a969318ec06b440e66f3b16df0f25cb826c2cd30"
-  integrity sha512-YDaHU5d4RL6xuJV4W+1Eh3QxXtU0Y8i4hdrtRY7OLyG93wfYOLiabkSFbg5HQmxFWqj+NYko/3pjpBiXnEuhdw==
+"@ampproject/filesize@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-4.1.0.tgz#8d0642b39dbdf8bdacfe5151fadaa28068b35456"
+  integrity sha512-H206vnnu2mb26yI3OdABKsaD/pvcW2jH3TefoG7Q0mZrsO2unq8mKQTGNvooG8qfHJBiwzsiSxN4bLMDkNUtsQ==
   dependencies:
+    "@kristoferbaxter/async" "0.0.7"
     bytes "3.1.0"
     fast-glob "3.2.2"
     kleur "3.0.3"
@@ -2452,6 +2453,11 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-1.0.0.tgz#3fdf5798f0b49e90155896f6291df186eac06c83"
   integrity sha512-9oLAnygRMi8Q5QkYEU4XWK04B+nuoXoxjRvRxgjuChkLZFBja0YPSgdZ7dZtwhncLBcQe/I/E+fLuk5qxcYVJA==
+
+"@kristoferbaxter/async@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@kristoferbaxter/async/-/async-0.0.7.tgz#2fe5877588fc7102445ca7918a5bcc59d3c69061"
+  integrity sha512-3cKFLZEnqJ5yILVbyyYD4Xld8aZ5vUQbkLxTlPz1blpUtCd5PIhf4uKTM9+SIr/q2JK+OSmmU4rdx1kgAPBPCQ==
 
 "@nodelib/fs.scandir@2.1.2":
   version "2.1.2"
