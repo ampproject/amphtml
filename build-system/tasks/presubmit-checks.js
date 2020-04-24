@@ -448,6 +448,7 @@ const forbiddenTerms = {
       'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-interface.js',
       'src/service/viewer-cid-api.js',
