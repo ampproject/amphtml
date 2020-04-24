@@ -134,6 +134,7 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp e2e --engine=ENGINE`                                | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.                                                                                                                                        |
 | `gulp e2e --headless`                                     | Runs end-to-end tests in a headless browser instance.                                                                                                                                                                                         |
 | `gulp e2e --watch`                                        | Watches for changes in test files, runs tests.                                                                                                                                                                                                |
+| `gulp check-sourcemaps`                                   | Checks sourcemaps generated during minified compilation for correctness.                                                                                                                                                                      |
 
 ## Manual testing
 
