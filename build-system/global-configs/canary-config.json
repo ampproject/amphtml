@@ -37,5 +37,6 @@
   "random-subdomain-for-safeframe": 0.02,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1
+  "version-locking": 1,
+  "amp-ad-no-center-css": 1
 }
