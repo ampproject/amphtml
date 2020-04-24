@@ -50,14 +50,11 @@ export const _default = () => {
   } else {
     type = 'system';
   }
-  return (
-    <div>
-      <p>
-        Click the button below to share this page using the configured provider.
-        Update the provider using storybook knobs. Choose Provider Type: 'custom
-        endpoint' to specify your own share endpoint.
-      </p>
-      <SocialShare type={type} href={href} />
-    </div>
-  );
+  /*
+   * Outputs a single Social Share component.  Use the storybook knobs to
+   * configure.  The Provider Type knob will determine the share endpoint.
+   * To configure your own endpoint choose 'custom endpoint' and enter your
+   * endpoint into the Cusotm Share Endpoint knob.
+   */
+  return <SocialShare type={type} href={href} />;
 };
