@@ -19,6 +19,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
+  childElement,
   childElementByTag,
   childElementsByTag,
   fullscreenEnter,
@@ -28,7 +29,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -365,6 +366,55 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * Gracefully handle media errors if possible.
+   * @param {!Event} event
+   */
+  handleMediaError_(event) {
+    if (
+      !this.video_.error ||
+      this.video_.error.code != MediaError.MEDIA_ERR_DECODE
+    ) {
+      return;
+    }
+    // HTMLMediaElements automatically fallback to the next source if a load fails
+    // but they don't try the next source upon a decode error.
+    // This code does this fallback manually.
+    user().error(
+      TAG,
+      `Decode error in ${this.video_.currentSrc}`,
+      this.element
+    );
+    // No fallback available for bare src.
+    if (this.video_.src) {
+      return;
+    }
+    // Find the source element that caused the decode error.
+    let sourceCount = 0;
+    const currentSource = childElement(this.video_, (source) => {
+      if (source.tagName != 'SOURCE') {
+        return false;
+      }
+      sourceCount++;
+      return source.src == this.video_.currentSrc;
+    });
+    if (sourceCount == 0) {
+      return;
+    }
+    dev().assertElement(
+      currentSource,
+      `Can't find source element for currentSrc ${this.video_.currentSrc}`
+    );
+    removeElement(currentSource);
+    // Resets the loading and will catch the new source if any.
+    event.stopImmediatePropagation();
+    this.video_.load();
+    // Unfortunately we don't know exactly what operation caused the decode to
+    // fail. But to help, we need to retry. Since play is most common, we're
+    // doing that.
+    this.play(false);
+  }
+
+  /**
    * @private
    * Propagate sources that are cached by the CDN.
    */
@@ -498,6 +548,7 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
+    video.addEventListener('error', (e) => this.handleMediaError_(e));
 
     const forwardEventsUnlisten = this.forwardEvents(
       [
