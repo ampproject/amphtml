@@ -50,18 +50,23 @@ Refer to the [Developing in AMP](https://github.com/ampproject/amphtml/blob/mast
 
 #### Update URLs config
 
-Modify [`src/config.js`](https://github.com/ampproject/amphtml/blob/master/src/config.js):
+When AMP is built, several scripts are prepended with an `AMP_CONFIG` environment variable (object) containing basic information like: runtime version, config type, experiment enable/disable status, etc. This object can be customized at build time to inform the runtime where the framework is hosted. See [build-system/global-configs/README.md](https://github.com/ampproject/amphtml/tree/master/build-system/global-configs#custom-configjson) for information about the `custom-config.json` overlay.
 
-- Update the default host in `urls.cdn`. For example, replace  
-  `cdn: env['cdnUrl'] || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org'`  
-  with  
-  `cdn: env['cdnUrl'] || getMetaUrl('runtime-host') || 'https://example.com/amp-runtime'`
-- (Optional) Specify an amp-geo fallback API URL in `urls.geoApi`. This API is described in section [amp-geo hotpatching](#amp-geo-hotpatching). For example, replace  
-  `geoApi: env['geoApiUrl'] || getMetaUrl('amp-geo-api')`  
-  with  
-  `geoApi: env['geoApiUrl'] || getMetaUrl('amp-geo-api') || 'https://example.com/geo'`
+Create JSON file `build-system/global-configs/custom-config.json` with the following contents:
 
-It is not necessary to modify `cdnProxyRegex`, which helps AMP pages identify when they are served from an [AMP Cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/).
+```
+{
+  "cdnUrl": "https://example.com/amp-framework",
+  "geoApiUrl": "https://example.com/geo-api"
+}
+```
+
+where
+
+- `cdnUrl` is the base URL to your AMP framework. Defaults to `https://cdn.ampproject.org`.
+- `geoApiUrl` (optional) is your amp-geo fallback API URL. This API is described in section [amp-geo hotpatching](#amp-geo-hotpatching). Defaults to `null`.
+
+Important: `build-system/global-configs/custom-config.json` is not part of checked-in source. If it exists, it _always_ applies at build time, overlaying the active config. Don't forget about it! You can verify the overlay applies by looking for log line `Overlaid config with custom-config.json` during the build process.
 
 #### Build the framework
 
