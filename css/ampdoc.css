@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS specifically for non-AMP4ADS formats.
+ */
+
+/**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
  *
@@ -274,6 +278,20 @@ amp-list[load-more] [load-more-button],
 amp-list[load-more] [load-more-end]
 {
   display: none;
+}
+
+/**
+ * amp-list error messaging container should be hidden at first.
+ */
+ amp-list [fetch-error] {
+  display: none;
+}
+
+/**
+ * amp-list initial content should be displayed (similar to placeholder).
+ */
+amp-list[diffable] div[role="list"] {
+  display: block;
 }
 
 /**
