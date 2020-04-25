@@ -23,7 +23,8 @@ const {
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitMasterBaseline,
+  gitUpstreamMaster,
   shortSha,
 } = require('../common/git');
 const {
@@ -62,12 +63,13 @@ const GIT_BRANCH_URL =
  */
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+  const master = gitUpstreamMaster();
   let commitSha;
 
   if (isTravisBuild()) {
     console.log(
-      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+      `${fileLogPrefix} Latest commit from ${colors.cyan(master)} included ` +
+        `in this build: ${colors.cyan(shortSha(gitMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
@@ -86,7 +88,7 @@ function printChangeSummary(fileName) {
     console.log(
       `${fileLogPrefix} Commit log since branch`,
       `${colors.cyan(gitBranchName())} was forked from`,
-      `${colors.cyan('master')} at`,
+      `${colors.cyan(master)} at`,
       `${colors.cyan(shortSha(branchCreationPoint))}:`
     );
     console.log(gitDiffCommitLog() + '\n');
@@ -97,13 +99,13 @@ function printChangeSummary(fileName) {
       'Could not find a common ancestor for',
       colors.cyan(gitBranchName()),
       'and',
-      colors.cyan('master') + '. (This can happen with older PR branches.)'
+      colors.cyan(master) + '. (This can happen with older PR branches.)'
     );
     console.error(
       fileLogPrefix,
       colors.yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      colors.cyan('master') + '.'
+      colors.cyan(master) + '.'
     );
     console.error(
       fileLogPrefix,
