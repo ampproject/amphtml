@@ -537,7 +537,7 @@ export class NextPageService {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
 
     const container = dev().assertElement(page.container);
@@ -596,7 +596,7 @@ export class NextPageService {
       return separatorPromise.then(() => amp);
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
   }
 
