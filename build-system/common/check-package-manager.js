@@ -33,7 +33,7 @@ const gulpHelpUrl =
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
-const pythonExecutable = 'python';
+const pythonExecutable = 'python2.7';
 
 const wrongGulpPaths = [
   '/bin/',
