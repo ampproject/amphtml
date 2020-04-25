@@ -980,7 +980,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Preloads the given media.
    * @param {!./media-pool.MediaPool} mediaPool
    * @param {!Element} mediaEl
-   * @return {!Promise<!Element>} Promise that resolves with the preloading element.
+   * @return {!Promise<!Element|undefined>} Promise that resolves with the preloading element.
    * @private
    */
   preloadMedia_(mediaPool, mediaEl) {
