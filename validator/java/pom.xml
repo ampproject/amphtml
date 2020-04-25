@@ -20,14 +20,14 @@
 
     <!-- library versions -->
     <build-helper-maven-plugin.version>3.1.0</build-helper-maven-plugin.version>
-    <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+    <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
     <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
     <maven-shade-plugin.version>2.4.2</maven-shade-plugin.version>
     <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
 
     <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
-    <protobuf.version>3.8.0</protobuf.version>
+    <protobuf.version>3.11.4</protobuf.version>
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <jdk.version>1.8</jdk.version>
     <main.basedir>${project.basedir}</main.basedir>
@@ -253,7 +253,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <!--<version>3.0.0</version>-->
         <version>3.1.1</version>
         <dependencies>
           <dependency>
@@ -266,7 +265,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>3.1.12.2</version>
+        <version>4.0.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -332,12 +331,12 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>3.1.12</version>
+            <version>4.0.2</version>
           </dependency>
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>3.1.12</version>
+            <version>4.0.2</version>
           </dependency>
           <dependency>
             <groupId>org.dom4j</groupId>
@@ -530,7 +529,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.14.3</version>
+      <version>7.2.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -546,7 +545,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <version>4.13</version>
       <scope>test</scope>
     </dependency>
     <dependency>
