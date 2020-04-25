@@ -195,8 +195,9 @@
       "url": "examples/visual-tests/amp-list/amp-list.amp.html",
       "name": "AMP List and Mustache",
       "loading_complete_selectors": [
-        ".list1",
-        ".list2"
+        "#list1 > div[role='list']",
+        "#list2 > div[role='list']",
+        "#list3 > div[role='list']",
       ],
       "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
