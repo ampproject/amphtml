@@ -20,7 +20,6 @@
  */
 
 const {
-  isTravisBuild,
   isTravisPullRequestBuild,
   travisPullRequestBranch,
   travisPullRequestSha,
