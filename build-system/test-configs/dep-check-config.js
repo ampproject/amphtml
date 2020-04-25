@@ -384,6 +384,7 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
       'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
+      'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
   },
   {
@@ -391,6 +392,7 @@ exports.rules = [
     mustNotDependOn: '**/*.js',
     allowlist: [
       'src/polyfillstub/intersection-observer-stub.js->src/services.js',
+      'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
     ],
   },
   {
