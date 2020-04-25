@@ -32,6 +32,7 @@
     "@ampproject/filesize": "4.1.0",
     "@ampproject/remapping": "0.2.0",
     "@babel/core": "7.9.0",
+    "@babel/helper-module-imports": "7.8.3",
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-transform-react-constant-elements": "7.9.0",
