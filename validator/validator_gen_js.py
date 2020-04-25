@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
