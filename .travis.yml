@@ -125,4 +125,5 @@ cache:
     - validator/nodejs/node_modules
     - validator/webui/node_modules
     - validator/java/bazel-installer
+    - $HOME/.m2
   yarn: true
