@@ -22,6 +22,7 @@
 # Polymer project, and unlike for the parent directory there's no
 # particular benefit to using Python.
 
+from __future__ import print_function
 import logging
 import os
 import platform
