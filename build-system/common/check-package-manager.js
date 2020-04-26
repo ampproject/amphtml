@@ -345,9 +345,8 @@ function checkPythonVersion() {
   } else {
     console.log(
       yellow(
-        'WARNING: ' +
-          'Could not determine the local version of python. ' +
-          'AMP development requires python 2.7.'
+        'WARNING: Could not determine the local version of python.\n' +
+          'Make sure "python" is in your PATH and is version 2.7 or 3.5+.'
       )
     );
   }
