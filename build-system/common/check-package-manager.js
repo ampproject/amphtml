@@ -310,13 +310,19 @@ function runGulpChecks() {
 }
 
 function checkPythonVersion() {
-  // Python prints its version to stderr: https://bugs.python.org/issue18338
-  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  // Python2 prints its version to stderr (fixed in Python 3.4)
+  // See: https://bugs.python.org/issue18338
+  const pythonVersionResult =
+    getStderr(`${pythonExecutable} --version`).trim() ||
+    getStdout(`${pythonExecutable} --version`).trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
-    const recommendedVersion = '2.7';
+    // Python 2.7 is EOL but still supported
+    // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+    // https://devguide.python.org/#status-of-python-branches
+    const recommendedVersion = /^2\.7|^3\.[5-9]/;
     const versionNumber = pythonVersion[1];
-    if (versionNumber.startsWith(recommendedVersion)) {
+    if (recommendedVersion.test(versionNumber)) {
       console.log(
         green('Detected'),
         cyan('python'),
