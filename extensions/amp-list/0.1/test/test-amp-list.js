@@ -273,149 +273,92 @@ describes.repeated(
               });
             });
 
-            describe('with experiment on', () => {
-              let itemElement;
+            describes.repeated(
+              'enabled type',
+              {
+                'with experiment on': {type: 'experiment'},
+                'in an AMP4Email document': {type: 'email'},
+              },
+              (name, variant) => {
+                let itemElement;
 
-              beforeEach(() => {
-                toggleExperiment(win, 'amp-list-layout-container', true);
-                itemElement = doc.createElement('div');
-                const placeholder = doc.createElement('div');
-                placeholder.style.height = '1337px';
-                element.appendChild(placeholder);
-                element.getPlaceholder = () => placeholder;
-              });
-
-              afterEach(() => {
-                toggleExperiment(win, 'amp-list-layout-container', false);
-              });
-
-              it('should require placeholder', () => {
-                list.getPlaceholder = () => null;
-                allowConsoleError(() => {
-                  expect(() => list.isLayoutSupported('container')).to.throw(
-                    /amp-list with layout=container relies on a placeholder/
-                  );
+                beforeEach(() => {
+                  if (variant.type === 'experiment') {
+                    toggleExperiment(win, 'amp-list-layout-container', true);
+                  } else if (variant.type === 'email') {
+                    doc.documentElement.setAttribute('amp4email', '');
+                  }
+                  itemElement = doc.createElement('div');
+                  const placeholder = doc.createElement('div');
+                  placeholder.style.height = '1337px';
+                  element.appendChild(placeholder);
+                  element.getPlaceholder = () => placeholder;
                 });
-              });
 
-              it('should unlock height for layout=container with successful attemptChangeHeight', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.resolve());
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(true));
-                listMock.expects('unlockHeightInsideMutate_').once();
-                return list.layoutCallback();
-              });
-
-              it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.reject(false));
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(false));
-                listMock.expects('unlockHeightInsideMutate_').never();
-                return list.layoutCallback();
-              });
-
-              it('should not unlock height for layout=container for null return', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.resolve());
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(null));
-                listMock.expects('unlockHeightInsideMutate_').never();
-                return list.layoutCallback();
-              });
-            });
-
-            describe('in an AMP4Email document', () => {
-              let itemElement;
-
-              beforeEach(() => {
-                doc.documentElement.setAttribute('amp4email', '');
-                itemElement = doc.createElement('div');
-                const placeholder = doc.createElement('div');
-                placeholder.style.height = '1337px';
-                element.appendChild(placeholder);
-                element.getPlaceholder = () => placeholder;
-              });
-
-              it('should require placeholder', () => {
-                list.getPlaceholder = () => null;
-                allowConsoleError(() => {
-                  expect(() => list.isLayoutSupported('container')).to.throw(
-                    /amp-list with layout=container relies on a placeholder/
-                  );
+                afterEach(() => {
+                  if (variant.type === 'experiment') {
+                    toggleExperiment(win, 'amp-list-layout-container', false);
+                  }
                 });
-              });
 
-              it('should unlock height for layout=container with successful attemptChangeHeight', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.resolve());
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(true));
-                listMock.expects('unlockHeightInsideMutate_').once();
-                return list.layoutCallback();
-              });
+                it('should require placeholder', () => {
+                  list.getPlaceholder = () => null;
+                  allowConsoleError(() => {
+                    expect(() => list.isLayoutSupported('container')).to.throw(
+                      /amp-list with layout=container relies on a placeholder/
+                    );
+                  });
+                });
 
-              it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.reject(false));
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(false));
-                listMock.expects('unlockHeightInsideMutate_').never();
-                return list.layoutCallback();
-              });
+                it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.resolve());
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(true));
+                  listMock.expects('unlockHeightInsideMutate_').once();
+                  return list.layoutCallback();
+                });
 
-              it('should not unlock height for layout=container for null return', () => {
-                expect(list.isLayoutSupported('container')).to.be.true;
-                expect(list.enableManagedResizing_).to.be.true;
-                expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
-                expectLockedRender();
-                listMock
-                  .expects('attemptChangeHeight')
-                  .withExactArgs(1337)
-                  .returns(Promise.resolve());
-                listMock
-                  .expects('maybeResizeListToFitItems_')
-                  .returns(Promise.resolve(null));
-                listMock.expects('unlockHeightInsideMutate_').never();
-                return list.layoutCallback();
-              });
-            });
+                it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.reject(false));
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(false));
+                  listMock.expects('unlockHeightInsideMutate_').never();
+                  return list.layoutCallback();
+                });
+
+                it('should not unlock height for layout=container for null return', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.resolve());
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(null));
+                  listMock.expects('unlockHeightInsideMutate_').never();
+                  return list.layoutCallback();
+                });
+              }
+            );
           });
 
           it('should attemptChangeHeight rendered contents', () => {
