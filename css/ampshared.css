@@ -62,7 +62,7 @@
 
 .i-amphtml-layout-responsive,
 [layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive)
+[width][height][sizes]:not([layout]):not(.i-amphtml-layout-responsive)
 {
   display: block;
   position: relative;
