@@ -169,6 +169,9 @@ exports.rules = [
   {
     filesMatching: '{src,extensions}/**/*.js',
     mustNotDependOn: '3p/**/*.js',
+    allowlist: [
+      'src/inabox/inabox-iframe-messaging-client.js->3p/iframe-messaging-client.js',
+    ],
   },
 
   // Rules for extensions.

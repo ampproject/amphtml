@@ -15,6 +15,7 @@
  */
 
 import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
+import {maybeSetupCrossOriginObserver} from './cross-origin-observer';
 import {registerServiceBuilder} from '../../../src/service';
 import {upgradePolyfill} from '../../../src/polyfillstub/intersection-observer-stub';
 
@@ -27,7 +28,7 @@ const TAG = 'amp-intersection-observer-polyfill';
 function upgrade(win) {
   upgradePolyfill(win, () => {
     installIntersectionObserver();
-    // TODO(dvoytenko): hookup 3p host updater for inabox.
+    maybeSetupCrossOriginObserver(win);
   });
   return {};
 }
