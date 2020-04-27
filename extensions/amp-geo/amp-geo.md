@@ -139,6 +139,10 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.**
 
 In addition to user specifed country groups `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
 
+##### U.S. California Detection
+
+The `amp-geo` component provides the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it determines a request is from California. The `preset-us-ca` value from the preset list supports this feature.
+
 Additional countries may be included with the preset list as in the `myList` example below.
 
 ```html
@@ -147,7 +151,8 @@ Additional countries may be included with the preset list as in the `myList` exa
     {
       "ISOCountryGroups": {
         "eea": ["preset-eea"],
-        "myList": ["preset-eea", "ca", "au", "nz"]
+        "usca": ["preset-us-ca"],
+        "myList": ["preset-eea", "preset-us-ca", "ca", "au", "nz"]
       }
     }
   </script>
