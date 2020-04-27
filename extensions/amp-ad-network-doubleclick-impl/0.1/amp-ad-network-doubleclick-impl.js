@@ -332,51 +332,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.inZIndexHoldBack_ = false;
   }
 
-  /**
-   * @return {number|boolean} render on idle configuration with false
-   *    indicating disabled.
-   * @private
-   */
-  getIdleRenderEnabled_() {
-    if (this.isIdleRender_) {
-      return this.isIdleRender_;
-    }
-    // Disable if publisher has indicated a non-default loading strategy.
-    if (this.element.getAttribute('data-loading-strategy')) {
-      return false;
-    }
-    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
-    const vpRange = parseInt(expVal, 10);
-    if (expVal && isNaN(vpRange)) {
-      // holdback branch sends non-numeric value.
-      return false;
-    }
-    return vpRange || 12;
-  }
-
-  /** @override */
-  idleRenderOutsideViewport() {
-    const vpRange = this.getIdleRenderEnabled_();
-    if (vpRange === false) {
-      return vpRange;
-    }
-    const renderOutsideViewport = this.renderOutsideViewport();
-    // False will occur when throttle in effect.
-    if (typeof renderOutsideViewport === 'boolean') {
-      return renderOutsideViewport;
-    }
-    this.isIdleRender_ = true;
-    // NOTE(keithwrightbos): handle race condition where previous
-    // idleRenderOutsideViewport marked slot as idle render despite never
-    // being schedule due to being beyond viewport max offset.  If slot
-    // comes within standard outside viewport range, then ensure throttling
-    // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
-    return vpRange;
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     this.isFluidPrimaryRequest_ = layout == Layout.FLUID;

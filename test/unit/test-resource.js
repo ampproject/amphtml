@@ -990,59 +990,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 });
 
-describe('Resource idleRenderOutsideViewport', () => {
-  let element;
-  let resources;
-  let resource;
-  let idleRenderOutsideViewport;
-  let isWithinViewportRatio;
-
-  beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
-    element = {
-      idleRenderOutsideViewport,
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      hasAttribute: () => false,
-      isBuilt: () => false,
-      isBuilding: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      applySize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
-    };
-    resources = new ResourcesImpl(new AmpDocSingle(window));
-    resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
-  });
-
-  it('should return true if isWithinViewportRatio', () => {
-    idleRenderOutsideViewport.returns(5);
-    isWithinViewportRatio.withArgs(5).returns(true);
-    expect(resource.idleRenderOutsideViewport()).to.equal(true);
-  });
-
-  it('should return false for false element idleRenderOutsideViewport', () => {
-    idleRenderOutsideViewport.returns(false);
-    isWithinViewportRatio.withArgs(false).returns(false);
-    expect(resource.idleRenderOutsideViewport()).to.equal(false);
-  });
-});
-
 describes.realWin('Resource renderOutsideViewport', {amp: true}, (env) => {
   let element;
   let resources;
