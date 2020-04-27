@@ -352,7 +352,7 @@ function checkPythonVersion() {
       cyan(pythonExecutable),
       yellow('is in your'),
       cyan('PATH'),
-      yello('and is version'),
+      yellow('and is version'),
       cyan(recommendedVersion) + yellow('.')
     );
   }
