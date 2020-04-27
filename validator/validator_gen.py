@@ -60,7 +60,7 @@ def FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name):
     msg_desc_by_name: A map of message descriptors, keyed by full_name.
     enum_desc_by_name: A map of enum descriptors, keyed by full name.
   """
-  for msg_type in validator_pb2.DESCRIPTOR.message_types_by_name.values():
+  for msg_type in list(validator_pb2.DESCRIPTOR.message_types_by_name.values()):
     msg_desc_by_name[msg_type.full_name] = msg_type
     for enum_type in msg_type.enum_types:
       enum_desc_by_name[enum_type.full_name] = enum_type
@@ -107,7 +107,7 @@ def NonRepeatedValueToString(descriptor, field_desc, value):
   """
   if field_desc.type == descriptor.FieldDescriptor.TYPE_STRING:
     escaped = ('' + value).encode('unicode-escape')
-    return "'%s'" % escaped.replace("'", "\\'")
+    return "'%s'" % escaped.decode().replace("'", "\\'")
   if field_desc.type == descriptor.FieldDescriptor.TYPE_BOOL:
     if value:
       return 'true'
@@ -255,7 +255,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name)
 
   rules_obj = '%s.RULES' % validator_pb2.DESCRIPTOR.package
-  all_names = [rules_obj] + msg_desc_by_name.keys() + enum_desc_by_name.keys()
+  all_names = [rules_obj] + list(msg_desc_by_name.keys()) + list(enum_desc_by_name.keys())
   all_names.sort()
 
   out.append('//')

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 #
@@ -22,6 +22,7 @@
 # Polymer project, and unlike for the parent directory there's no
 # particular benefit to using Python.
 
+from __future__ import print_function
 import logging
 import os
 import platform
@@ -38,7 +39,7 @@ def Die(msg):
   Args:
     msg: The error message to emit
   """
-  print >> sys.stderr, msg
+  print(msg, file=sys.stderr)
   sys.exit(1)
 
 
@@ -49,7 +50,7 @@ def GetNodeJsCmd():
   for cmd in ['node', 'nodejs']:
     try:
       output = subprocess.check_output([cmd, '--eval', 'console.log("42")'])
-      if output.strip() == '42':
+      if output.strip() == b'42':
         logging.info('... done')
         return cmd
     except (subprocess.CalledProcessError, OSError):
@@ -146,7 +147,7 @@ def CreateWebuiAppengineDist(out_dir):
     shutil.rmtree(tempdir)
   webui_out = os.path.join(out_dir, 'webui_appengine')
   shutil.copytree('.', webui_out, ignore=shutil.ignore_patterns('dist'))
-  f = open(os.path.join(webui_out, 'index.html'), 'w')
+  f = open(os.path.join(webui_out, 'index.html'), 'wb')
   f.write(vulcanized_index_html)
   f.close()
   logging.info('... success')
