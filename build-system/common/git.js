@@ -28,6 +28,48 @@ const {
 const {getStdout} = require('./exec');
 
 /**
+ * Returns the upstream master branch, falling back to local master if upstream
+ * could not be determined.
+ * @return {string}
+ */
+function gitFindMaster() {
+  const upstreamRegex = /[:/]ampproject\/amphtml\.git$/i;
+
+  // Try obvious choices for upstream remote name first, hoping for a quick hit
+  // before iterating through remotes to find the correct one.
+
+  // Developer documentation recommends creation of 'upstream' remote
+  // https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#set-up-aliases-for-the-remote-git-repositories
+  const upstreamUrl = getStdout('git remote get-url upstream').trim();
+  if (upstreamRegex.test(upstreamUrl)) {
+    return 'upstream/master';
+  }
+  // Next, check the remote branch that local master is tracking
+  const trackingName = getStdout('git config branch.master.remote').trim();
+  if (trackingName) {
+    const trackingUrl = getStdout(`git remote get-url ${trackingName}`).trim();
+    if (upstreamRegex.test(trackingUrl)) {
+      return trackingName + '/master';
+    }
+  }
+  // Finally, iterate through remote names, checking URLs
+  const remoteNames = getStdout('git remote show')
+    .split(/\r?\n/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+  while (remoteNames.length) {
+    const remoteName = remoteNames.pop();
+    const remoteUrl = getStdout(`git remote get-url ${remoteName}`).trim();
+    if (upstreamRegex.test(remoteUrl)) {
+      return remoteName + '/master';
+    }
+  }
+
+  // Fall back to local master
+  return 'master';
+}
+
+/**
  * Returns the commit at which the current branch was forked off of master.
  * On Travis, there is an additional merge commit, so we must pick the first of
  * the boundary commits (prefixed with a -) returned by git rev-list.
@@ -41,7 +83,7 @@ function gitBranchCreationPoint() {
       `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
-  return gitMergeBaseLocalMaster();
+  return gitMergeBaseMaster();
 }
 
 /**
@@ -115,7 +157,7 @@ function gitDiffCommitLog() {
  * @return {!Array<string>}
  */
 function gitDiffAddedNameOnlyMaster() {
-  const branchPoint = gitMergeBaseLocalMaster();
+  const branchPoint = gitMergeBaseMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
     .trim()
     .split('\n');
@@ -180,7 +222,7 @@ function gitCommitterEmail() {
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
-  return getStdout('git cherry master')
+  return getStdout(`git cherry ${gitFindMaster()}`)
     .trim()
     .split('\n')
     .map((line) => ({
@@ -207,8 +249,8 @@ function gitCommitFormattedTime(ref = 'HEAD') {
  * a local workspace.
  * @return {string}
  */
-function gitMergeBaseLocalMaster() {
-  return getStdout('git merge-base master HEAD').trim();
+function gitMergeBaseMaster() {
+  return getStdout(`git merge-base ${gitFindMaster()} HEAD`).trim();
 }
 
 /**
@@ -219,7 +261,7 @@ function gitMasterBaseline() {
   if (isTravisBuild()) {
     return gitTravisMasterBaseline();
   }
-  return gitMergeBaseLocalMaster();
+  return gitMergeBaseMaster();
 }
 
 /**
