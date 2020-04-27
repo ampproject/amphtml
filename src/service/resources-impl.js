@@ -1348,27 +1348,8 @@ export class ResourcesImpl {
       this.queue_.getSize() == 0 &&
       now > this.exec_.getLastDequeueTime() + 5000
     ) {
-      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
-      // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
-      for (
-        let i = 0;
-        i < this.resources_.length && idleScheduledCount < 4;
-        i++
-      ) {
-        const r = this.resources_[i];
-        if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
-          !r.hasOwner() &&
-          r.isDisplayed() &&
-          r.idleRenderOutsideViewport()
-        ) {
-          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
-          this.scheduleLayoutOrPreload(r, /* layout */ false);
-          idleScheduledCount++;
-        }
-      }
-      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // Phase 5: Idle layout: layout more if we are otherwise not doing much.
       // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
       for (
         let i = 0;
@@ -1646,8 +1627,7 @@ export class ResourcesImpl {
     if (
       !forceOutsideViewport &&
       !resource.isInViewport() &&
-      !resource.renderOutsideViewport() &&
-      !resource.idleRenderOutsideViewport()
+      !resource.renderOutsideViewport()
     ) {
       return false;
     }
