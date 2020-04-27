@@ -340,7 +340,7 @@ function checkPythonVersion() {
       );
       console.log(
         yellow('⤷ To fix this, install a supported version from'),
-        cyan('https://www.python.org/downloads') + yellow('.')
+        cyan('https://www.python.org/downloads/') + yellow('.')
       );
     }
   } else {
