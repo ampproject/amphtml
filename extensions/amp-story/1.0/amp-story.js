@@ -236,6 +236,7 @@ const SIDEBAR_OBSERVER_OPTIONS = {
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
+    //test
     super(element);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
