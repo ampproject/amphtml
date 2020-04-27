@@ -5,8 +5,7 @@
     "client_params": "p=${p}&m=${m}",
     "event_params": "ut=${ut}&pr=${pr}&rn=${rn}&c=${c}&vt=${vt}",
     "audio-play": "${base}&${event_params}&ty=PL&sn=COUNTER(play_${pr})",
-    "audio-stop": "${base}&${event_params}&ty=ST&sn=COUNTER(stop_${pr})",
-    "heartbeat": "${base}${event_params}&ty=HB"
+    "audio-stop": "${base}&${event_params}&ty=ST&sn=COUNTER(stop_${pr})"
   },
   "vars": {
     "ty": "HB",

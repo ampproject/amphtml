@@ -131,10 +131,8 @@
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
   },
   "gfksensic": {
-    "base": "<ignore for test>",
-    "audio-play": "<ignore for test>",
-    "audio-stop": "<ignore for test>",
-    "heartbeat": "<ignore for test>"
+    "audio-play": "https://!p-config.sensic.net/tp?r=pageTitle&ua=UserAgent&v=0.0.1&l=en&m=!m&p=!p&ut=1587999892044&pr=1234player&rn=1&c=!c&vt=1&ty=PL&sn=1",
+    "audio-stop": "https://!p-config.sensic.net/tp?r=pageTitle&ua=UserAgent&v=0.0.1&l=en&m=!m&p=!p&ut=1587999892044&pr=1234player&rn=1&c=!c&vt=1&ty=ST&sn=1"
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
