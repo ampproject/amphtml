@@ -310,13 +310,21 @@ function runGulpChecks() {
 }
 
 function checkPythonVersion() {
-  // Python prints its version to stderr: https://bugs.python.org/issue18338
-  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  // Python 2.7 is EOL but still supported
+  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // https://devguide.python.org/#status-of-python-branches
+  const recommendedVersion = '2.7 or 3.5+';
+  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+
+  // Python2 prints its version to stderr (fixed in Python 3.4)
+  // See: https://bugs.python.org/issue18338
+  const pythonVersionResult =
+    getStderr(`${pythonExecutable} --version`).trim() ||
+    getStdout(`${pythonExecutable} --version`).trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
-    const recommendedVersion = '2.7';
     const versionNumber = pythonVersion[1];
-    if (versionNumber.startsWith(recommendedVersion)) {
+    if (recommendedVersionRegex.test(versionNumber)) {
       console.log(
         green('Detected'),
         cyan('python'),
@@ -331,18 +339,21 @@ function checkPythonVersion() {
         cyan(recommendedVersion) + yellow('.')
       );
       console.log(
-        yellow('⤷ To fix this, install the correct version from'),
-        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
-          yellow('.')
+        yellow('⤷ To fix this, install a supported version from'),
+        cyan('https://www.python.org/downloads/') + yellow('.')
       );
     }
   } else {
     console.log(
-      yellow(
-        'WARNING: ' +
-          'Could not determine the local version of python. ' +
-          'AMP development requires python 2.7.'
-      )
+      yellow('WARNING: Could not determine the local version of python.')
+    );
+    console.log(
+      yellow('⤷ To fix this, make sure'),
+      cyan(pythonExecutable),
+      yellow('is in your'),
+      cyan('PATH'),
+      yellow('and is version'),
+      cyan(recommendedVersion) + yellow('.')
     );
   }
 }
