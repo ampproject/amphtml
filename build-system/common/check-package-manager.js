@@ -310,6 +310,12 @@ function runGulpChecks() {
 }
 
 function checkPythonVersion() {
+  // Python 2.7 is EOL but still supported
+  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // https://devguide.python.org/#status-of-python-branches
+  const recommendedVersion = '2.7 or 3.5+';
+  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+
   // Python2 prints its version to stderr (fixed in Python 3.4)
   // See: https://bugs.python.org/issue18338
   const pythonVersionResult =
@@ -317,12 +323,8 @@ function checkPythonVersion() {
     getStdout(`${pythonExecutable} --version`).trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
-    // Python 2.7 is EOL but still supported
-    // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
-    // https://devguide.python.org/#status-of-python-branches
-    const recommendedVersion = /^2\.7|^3\.[5-9]/;
     const versionNumber = pythonVersion[1];
-    if (recommendedVersion.test(versionNumber)) {
+    if (recommendedVersionRegex.test(versionNumber)) {
       console.log(
         green('Detected'),
         cyan('python'),
@@ -338,16 +340,18 @@ function checkPythonVersion() {
       );
       console.log(
         yellow('⤷ To fix this, install the correct version from'),
-        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
-          yellow('.')
+        cyan('https://www.python.org/downloads') + yellow('.')
       );
     }
   } else {
     console.log(
-      yellow(
-        'WARNING: Could not determine the local version of python.\n' +
-          'Make sure "python" is in your PATH and is version 2.7 or 3.5+.'
-      )
+      yellow('WARNING: Could not determine the local version of python.')
+    );
+    console.log(
+      yellow('⤷ To fix this, make sure'),
+      cyan(pythonExecutable),
+      yellow('is in your PATH and is version'),
+      cyan(recommendedVersion) + yellow('.')
     );
   }
 }
