@@ -115,7 +115,7 @@ class AmpSocialShare extends AMP.BaseElement {
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
-      bindingVars.forEach((name) => {
+      /** @type {!Array} */ (bindingVars).forEach((name) => {
         const bindingName = name.toUpperCase();
         bindings[bindingName] = this.params_[name];
       });

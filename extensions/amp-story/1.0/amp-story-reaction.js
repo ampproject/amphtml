@@ -387,11 +387,13 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
       if (this.responseData_) {
         this.responseData_['totalResponseCount']++;
-        this.responseData_['responses'].forEach((response) => {
-          if (Number(response['reactionValue']) === optionEl.optionIndex_) {
-            response['totalCount']++;
+        /** @type {!Array} */ (this.responseData_['responses']).forEach(
+          (response) => {
+            if (Number(response['reactionValue']) === optionEl.optionIndex_) {
+              response['totalCount']++;
+            }
           }
-        });
+        );
       }
 
       this.mutateElement(() => {
@@ -523,11 +525,13 @@ export class AmpStoryReaction extends AMP.BaseElement {
    */
   updateReactionOnDataRetrieval_() {
     let selectedOptionKey;
-    this.responseData_['responses'].forEach((response) => {
-      if (response.selectedByUser) {
-        selectedOptionKey = response.reactionValue;
+    /** @type {!Array} */ (this.responseData_['responses']).forEach(
+      (response) => {
+        if (response.selectedByUser) {
+          selectedOptionKey = response.reactionValue;
+        }
       }
-    });
+    );
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);

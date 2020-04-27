@@ -137,7 +137,9 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
   }
 
   /** @inheritDoc */
-  leaveAtRule(atRule) { this.inKeyframes = null; }
+  leaveAtRule(atRule) {
+    this.inKeyframes = null;
+  }
 }
 
 /**
