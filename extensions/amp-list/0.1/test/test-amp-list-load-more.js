@@ -22,6 +22,7 @@ import {
   measureMutateElementStub,
   mutateElementStub,
 } from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
   'items': ['1', '2'],
@@ -63,6 +64,9 @@ describes.realWin(
     });
 
     afterEach(() => {
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
+    });
 
     it('should not init if layout="container"', async () => {
       toggleExperiment(win, 'amp-list-layout-container', true);

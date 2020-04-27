@@ -79,8 +79,8 @@ describes.realWin(
     });
 
     afterEach(() => {
-      expect(lockHeightSpy.notCalled).to.be.true;
-      expect(unlockHeightSpy.notCalled).to.be.true;
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
     });
 
     it('should change to layout container', async () => {
