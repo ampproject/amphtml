@@ -37,6 +37,25 @@ function gitUpstreamMaster() {
 }
 
 /**
+ * Returns the commit at which the current branch was forked off of master.
+ * On Travis, there is an additional merge commit, so we must pick the first of
+ * the boundary commits (prefixed with a -) returned by git rev-list.
+ * On local branches, this is merge base of the current branch off of
+ * upstream/master.
+ * @return {string}
+ */
+function gitBranchCreationPoint() {
+  if (isTravisBuild()) {
+    const traviPrSha = travisPullRequestSha();
+    const upstreamMaster = gitUpstreamMaster();
+    return getStdout(
+      `git rev-list --boundary ${traviPrSha}...${upstreamMaster} | grep "^-" | head -n 1 | cut -c2-`
+    ).trim();
+  }
+  return gitMasterBaseline();
+}
+
+/**
  * Shortens a commit SHA to 7 characters for human readability.
  * @param {string} sha 40 characters SHA.
  * @return {string} 7 characters SHA.
@@ -82,7 +101,7 @@ function gitDiffStatMaster() {
  * @return {string}
  */
 function gitDiffCommitLog() {
-  const branchCreationPoint = gitMasterBaseline();
+  const branchCreationPoint = gitBranchCreationPoint();
   const commitLog = getStdout(`git -c color.ui=always log --graph \
 --pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
 -%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
@@ -184,8 +203,7 @@ function gitCommitFormattedTime(ref = 'HEAD') {
 }
 
 /**
- * Returns the master baseline commit, or in other words, the commit at which
- * the current branch was forked off of upstream master.
+ * Returns the master baseline commit, regardless of running environment.
  * @return {string}
  */
 function gitMasterBaseline() {
@@ -203,6 +221,7 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
+  gitBranchCreationPoint,
   gitBranchName,
   gitCherryMaster,
   gitCommitFormattedTime,

@@ -18,6 +18,7 @@
 const colors = require('ansi-colors');
 const requestPromise = require('request-promise');
 const {
+  gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
@@ -63,13 +64,12 @@ const GIT_BRANCH_URL =
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   const master = gitUpstreamMaster();
-  const branchCreationPoint = gitMasterBaseline();
   let commitSha;
 
   if (isTravisBuild()) {
     console.log(
       `${fileLogPrefix} Latest commit from ${colors.cyan(master)} included ` +
-        `in this build: ${colors.cyan(shortSha(branchCreationPoint))}`
+        `in this build: ${colors.cyan(shortSha(gitMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
@@ -83,6 +83,7 @@ function printChangeSummary(fileName) {
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
 
+  const branchCreationPoint = gitBranchCreationPoint();
   if (branchCreationPoint) {
     console.log(
       `${fileLogPrefix} Commit log since branch`,
