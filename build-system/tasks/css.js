@@ -61,13 +61,13 @@ const cssEntryPoints = [
     outCss: 'video-autoplay-out.css',
   },
   {
-    // Publisher imported CSS for `src/amp-story-player.js`.
+    // Publisher imported CSS for `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
     outCss: 'amp-story-player-v0.css',
   },
   {
-    // Internal CSS used for the iframes inside `src/amp-story-player.js`.
+    // Internal CSS used for the iframes inside `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player-iframe.css',
     outJs: 'amp-story-player-iframe.css.js',
     outCss: 'amp-story-player-iframe-v0.css',

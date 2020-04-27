@@ -163,6 +163,9 @@ export class ConsentUI {
     /** @private {boolean} */
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
+    /** @private {boolean} */
+    this.isActionPromptTrigger_ = false;
+
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
@@ -225,7 +228,10 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      this.loadIframe_(isActionPromptTrigger).then(() => {
+      // show() can be called multiple times, but notificationsUiManager
+      // ensures that only 1 is shown at a time, so no race condition here
+      this.isActionPromptTrigger_ = isActionPromptTrigger;
+      this.loadIframe_().then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
         // before resetIframe_. Because the iframe needs to be shown first
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
@@ -465,10 +471,9 @@ export class ConsentUI {
 
   /**
    * Get the client information that needs to be passed to cmp iframe
-   * @param {boolean} isActionPromptTrigger
    * @return {!Promise<JsonObject>}
    */
-  getClientInfoPromise_(isActionPromptTrigger) {
+  getClientInfoPromise_() {
     const consentStatePromise = getServicePromiseForDoc(
       this.ampdoc_,
       CONSENT_STATE_MANAGER
@@ -485,7 +490,7 @@ export class ConsentUI {
               consentInfo['consentState']
             ),
             'consentString': consentInfo['consentString'],
-            'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
+            'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
           });
         });
@@ -495,10 +500,9 @@ export class ConsentUI {
   /**
    * Apply placeholder
    * Set up event listener to handle UI related messages.
-   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  loadIframe_(isActionPromptTrigger) {
+  loadIframe_() {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -507,9 +511,7 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.getClientInfoPromise_(
-      isActionPromptTrigger
-    ).then((clientInfo) => {
+    const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
       insertAtStart(this.parent_, dev().assertElement(this.ui_));
@@ -765,11 +767,14 @@ export class ConsentUI {
     }
 
     if (requestAction === 'enter-fullscreen') {
-      // Do nothing if iframe not visible or it's not the active element.
+      // Do nothing iff:
+      // - iframe not visible or
+      // - iframe not active element && not called via actionPromptTrigger
       if (
         !this.isIframeVisible_ ||
         (this.restrictFullscreenOn_ &&
-          this.document_.activeElement !== this.ui_)
+          this.document_.activeElement !== this.ui_ &&
+          !this.isActionPromptTrigger_)
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);
         this.sendEnterFullscreenResponse_(requestType, requestAction, true);

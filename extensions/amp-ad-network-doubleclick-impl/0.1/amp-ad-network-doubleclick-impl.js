@@ -23,12 +23,7 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -48,6 +43,12 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {
@@ -87,6 +88,12 @@ import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -98,17 +105,12 @@ import {
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isCancellation} from '../../../src/error';
 import {
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -137,6 +139,19 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
+};
+
+/** @const {string} */
+const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
+
+/**
+ * Branches of the random subdomain for SafeFrame experiment.
+ * @const @enum{string}
+ * @visibleForTesting
+ */
+export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
+  CONTROL: '21065817',
+  EXPERIMENT: '21065818',
 };
 
 /**
@@ -276,6 +291,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
+    /**
+     * The random subdomain to load SafeFrame from, if SafeFrame is
+     * being loaded from a random subdomain and if the subdomain
+     * has been generated.
+     * @private {?string}
+     */
+    this.safeFrameRandomSubdomain_ = null;
+
     /** @protected {?CONSENT_POLICY_STATE} */
     this.consentState = null;
 
@@ -307,51 +330,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
-  }
-
-  /**
-   * @return {number|boolean} render on idle configuration with false
-   *    indicating disabled.
-   * @private
-   */
-  getIdleRenderEnabled_() {
-    if (this.isIdleRender_) {
-      return this.isIdleRender_;
-    }
-    // Disable if publisher has indicated a non-default loading strategy.
-    if (this.element.getAttribute('data-loading-strategy')) {
-      return false;
-    }
-    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
-    const vpRange = parseInt(expVal, 10);
-    if (expVal && isNaN(vpRange)) {
-      // holdback branch sends non-numeric value.
-      return false;
-    }
-    return vpRange || 12;
-  }
-
-  /** @override */
-  idleRenderOutsideViewport() {
-    const vpRange = this.getIdleRenderEnabled_();
-    if (vpRange === false) {
-      return vpRange;
-    }
-    const renderOutsideViewport = this.renderOutsideViewport();
-    // False will occur when throttle in effect.
-    if (typeof renderOutsideViewport === 'boolean') {
-      return renderOutsideViewport;
-    }
-    this.isIdleRender_ = true;
-    // NOTE(keithwrightbos): handle race condition where previous
-    // idleRenderOutsideViewport marked slot as idle render despite never
-    // being schedule due to being beyond viewport max offset.  If slot
-    // comes within standard outside viewport range, then ensure throttling
-    // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
-    return vpRange;
   }
 
   /** @override */
@@ -401,6 +379,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [ZINDEX_EXP]: {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
+      },
+      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+        ifTrafficEligible: () => true,
+        branches: [
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
+        ],
+      },
+      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [AMP_AD_NO_CENTER_CSS_EXP.control],
+          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
+        ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
@@ -710,12 +702,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              this.jsonTargeting['categoryExclusions'].forEach((exclusion) => {
+              /** @type {!Array} */ (this.jsonTargeting[
+                'categoryExclusions'
+              ]).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          rtcResponse.response['categoryExclusions'].forEach((exclusion) => {
+          /** @type {!Array} */ (rtcResponse.response[
+            'categoryExclusions'
+          ]).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }
@@ -1019,6 +1015,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.unlayoutCallback();
   }
 
+  /** @override */
+  getSafeframePath() {
+    const randomSubdomainExperimentBranch =
+      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
+    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
+      return super.getSafeframePath();
+    }
+    this.safeFrameRandomSubdomain_ =
+      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+
+    return (
+      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `${this.safeframeVersion}/html/container.html`
+    );
+  }
+
   /** @visibleForTesting */
   cleanupAfterTest() {
     this.destroySafeFrameApi_();
@@ -1096,6 +1108,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+
+    // Set the centering CSS if the experiment is off
+    if (
+      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
+      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
+        AMP_AD_NO_CENTER_CSS_EXP.control
+    ) {
+      setStyles(this.iframe, {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
+
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
@@ -1572,6 +1598,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   warnOnError(message, error) {
     dev().warn(TAG, message, error);
+  }
+
+  /**
+   * Generate a 32-byte random string.
+   * Uses the win.crypto when available.
+   * @return {string} The random string
+   * @private
+   */
+  getRandomString_() {
+    // 16 hex characters * 2 bytes per character = 32 bytes
+    const length = 16;
+
+    const randomValues = getCryptoRandomBytesArray(this.win, length);
+
+    let randomSubdomain = '';
+    for (let i = 0; i < length; i++) {
+      // If crypto isn't available, just use Math.random.
+      const randomValue = randomValues
+        ? randomValues[i]
+        : Math.floor(Math.random() * 255);
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
   }
 
   /** @override */

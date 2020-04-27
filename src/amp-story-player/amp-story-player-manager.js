@@ -15,8 +15,8 @@
  */
 
 import {AmpStoryPlayer} from './amp-story-player-impl';
-import {initLogConstructor} from './log';
-import {throttle} from './utils/rate-limit';
+import {initLogConstructor} from '../log';
+import {throttle} from '../utils/rate-limit';
 
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;

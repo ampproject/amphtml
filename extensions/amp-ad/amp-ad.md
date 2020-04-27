@@ -375,6 +375,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [recomAD](../../ads/recomad.md)
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
+- [RelapPro](../../ads/relappro.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)
