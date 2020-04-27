@@ -339,7 +339,7 @@ function checkPythonVersion() {
         cyan(recommendedVersion) + yellow('.')
       );
       console.log(
-        yellow('⤷ To fix this, install the correct version from'),
+        yellow('⤷ To fix this, install a supported version from'),
         cyan('https://www.python.org/downloads') + yellow('.')
       );
     }
@@ -350,7 +350,9 @@ function checkPythonVersion() {
     console.log(
       yellow('⤷ To fix this, make sure'),
       cyan(pythonExecutable),
-      yellow('is in your PATH and is version'),
+      yellow('is in your'),
+      cyan('PATH'),
+      yello('and is version'),
       cyan(recommendedVersion) + yellow('.')
     );
   }
