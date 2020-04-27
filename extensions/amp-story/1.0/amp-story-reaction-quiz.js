@@ -107,7 +107,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
         TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
-      this.quizEl_.removeChild(promptContainer);
+      this.rootEl_.removeChild(promptContainer);
     } else {
       const prompt = document.createElement(promptInput.tagName);
 
@@ -201,9 +201,11 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     this.responseData_['responses'].forEach((response) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      options[response['reactionValue']].querySelector(
-        '.i-amphtml-story-reaction-quiz-percentage-text'
-      ).textContent = `${percentages[response['reactionValue']]}%`;
+      if (options[response['reactionValue']]) {
+        options[response['reactionValue']].querySelector(
+          '.i-amphtml-story-reaction-quiz-percentage-text'
+        ).textContent = `${percentages[response['reactionValue']]}%`;
+      }
     });
 
     this.rootEl_.setAttribute(

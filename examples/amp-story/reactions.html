@@ -44,7 +44,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-quiz
+            <amp-story-reaction-quiz
                 animate-in="fly-in-bottom"
                 endpoint="http://localhost:3000/reactions"
                 theme="dark"
@@ -55,7 +55,7 @@
               <option>Paris</option>
               <option correct>Montevideo</option>
               <option>Mexico City</option>
-            </amp-story-quiz>
+            </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-2">
@@ -70,11 +70,8 @@
           <amp-story-grid-layer template="center">
             <amp-story-reaction-quiz
                 endpoint="http://localhost:3000/reactions"
-                theme="dark"
                 chip-corner="sharp">
               <h1>What is the best city ever?</h1>
-              <option>Tokyo</option>
-              <option>Paris</option>
               <option correct>Montevideo</option>
               <option>Mexico City</option>
             </amp-story-reaction-quiz>

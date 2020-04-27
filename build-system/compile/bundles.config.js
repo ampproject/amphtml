@@ -878,7 +878,6 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-quiz',
         'amp-story-reaction',
         'amp-story-reaction-quiz',
         'amp-story-share',

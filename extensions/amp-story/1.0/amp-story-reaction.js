@@ -550,18 +550,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return;
     }
 
-    if (this.responseData_['responses'].length > options.length) {
-      dev().error(
-        TAG,
-        `Reaction #${this.element.getAttribute('id')} has ${
-          options.length
-        } options, but response returned ${
-          this.responseData_['responses'].length
-        } options`
-      );
-      return;
-    }
-
     this.mutateElement(() => {
       this.updateOptionPercentages_();
       this.updateToPostSelectionState_(options[selectedOptionKey]);
