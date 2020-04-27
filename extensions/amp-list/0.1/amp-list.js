@@ -1233,7 +1233,7 @@ export class AmpList extends AMP.BaseElement {
       this.element.getAttribute('layout') == Layout.CONTAINER &&
       !this.enableManagedResizing_
     ) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
     return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
