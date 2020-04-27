@@ -63,8 +63,32 @@ describes.realWin(
     });
 
     afterEach(() => {
-      expect(lockHeightSpy.notCalled).to.be.true;
-      expect(unlockHeightSpy.notCalled).to.be.true;
+
+    it('should not init if layout="container"', async () => {
+      toggleExperiment(win, 'amp-list-layout-container', true);
+      const placeholder = doc.createElement('div');
+      placeholder.style.height = '1337px';
+      element.appendChild(placeholder);
+      element.getPlaceholder = () => placeholder;
+
+      element.setAttribute('load-more', 'manual');
+      doc.body.appendChild(element);
+
+      element.setAttribute('layout', 'container');
+
+      list = new AmpList(element);
+      list.isLayoutSupported('container');
+      list.element.applySize = () => {};
+
+      env.sandbox.stub(list, 'getOverflowElement').returns(null);
+      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+
+      allowConsoleError(() => {
+        expect(() => list.buildCallback()).to.throw(
+          'amp-list initialized with layout=container does not support infinite scrolling with [load-more]. amp-list​​​'
+        );
+      });
+      toggleExperiment(win, 'amp-list-layout-container', false);
     });
 
     describe('manual', () => {
