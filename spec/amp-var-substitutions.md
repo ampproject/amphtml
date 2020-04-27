@@ -211,10 +211,10 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Screen Width](#screen-width)                       | `SCREEN_WIDTH`            | `${screenWidth}`           |
 | [Scroll Height](#scroll-height)                     | `SCROLL_HEIGHT`           | `${scrollHeight}`          |
 | [Scroll Width](#scroll-width)                       | `SCROLL_WIDTH`            | `${scrollWidth}`           |
-| [Scroll Left](#scroll-left)                         | `SCROLL_LEFT`             | `${scrollLeft}`            |
-| [Scroll Top](#scroll-top)                           | `SCROLL_TOP`              | `${scrollTop}`             |
+| [Scroll Left](#scroll-left)                         | N/A                       | `${scrollLeft}`            |
+| [Scroll Top](#scroll-top)                           | N/A                       | `${scrollTop}`             |
 | [Timezone](#timezone)                               | `TIMEZONE`                | `${timezone}`              |
-| [Timezone Code](#timezone-code)                     | `TIMEZONE_CODE`           | `${timezoneCode}`          |
+| [Timezone Code](#timezone-code)                     | N/A                       | `${timezoneCode}`          |
 | [User Agent](#user-agent)                           | `USER_AGENT`              | `${userAgent}`             |
 | [Viewport Height](#viewport-height)                 | `VIEWPORT_HEIGHT`         | `${viewportHeight}`        |
 | [Viewport Width](#viewport-width)                   | `VIEWPORT_WIDTH`          | `${viewportWidth}`         |
@@ -1035,11 +1035,7 @@ Provides the total height of the page in pixels.
 
 Provides the number of pixels that the user has scrolled from left.
 
-- **platform variable**: `SCROLL_LEFT`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?scrollLeft=SCROLL_LEFT"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${scrollLeft}`
   - Example value: `100`
 
@@ -1047,11 +1043,7 @@ Provides the number of pixels that the user has scrolled from left.
 
 Provides the number of pixels that the user has scrolled from top.
 
-- **platform variable**: `SCROLL_TOP`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?st=SCROLL_TOP"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${scrollTop}`
   - Example value: `0`
 
@@ -1190,11 +1182,7 @@ Provides the user's time-zone offset from UTC, in minutes.
 
 Provides the user's IANA time-zone code (if available).
 
-- **platform variable**: `TIMEZONE_CODE`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?tz_code=TIMEZONE_CODE"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${timezoneCode}`
   - Example value: `Europe/Rome`.
 
