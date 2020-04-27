@@ -73,28 +73,31 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const keyframeOptions = {foo: 'bar'};
 
-      const animationDef = {
-        duration: 0,
-        delay: 0,
-        target,
-        preset: {
-          keyframes: env.sandbox.spy(() => [{}]),
-        },
+      const preset = {
+        keyframes: env.sandbox.spy(() => [{}]),
       };
 
       const runner = new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          preset,
+          keyframeOptions,
+          spec: {
+            duration: 0,
+            delay: 0,
+            target,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
-        sequence,
-        keyframeOptions
+        sequence
       );
 
       await runner.applyFirstFrame();
 
       expect(
-        animationDef.preset.keyframes.withArgs(
+        preset.keyframes.withArgs(
           env.sandbox.match.any,
           env.sandbox.match(keyframeOptions)
         )
@@ -122,18 +125,21 @@ describes.realWin('amp-story animations', {}, (env) => {
         .stub(target, 'getBoundingClientRect')
         .returns(targetDimensions);
 
-      const animationDef = {
-        duration: 0,
-        delay: 0,
-        target,
-        preset: {
-          keyframes: env.sandbox.spy(() => [{}]),
-        },
+      const preset = {
+        keyframes: env.sandbox.spy(() => [{}]),
       };
 
       const runner = new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          preset,
+          spec: {
+            duration: 0,
+            delay: 0,
+            target,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -142,7 +148,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       await runner.applyFirstFrame();
 
       expect(
-        animationDef.preset.keyframes.withArgs(
+        preset.keyframes.withArgs(
           env.sandbox.match({
             pageWidth: pageDimensions.width,
             pageHeight: pageDimensions.height,
@@ -166,18 +172,19 @@ describes.realWin('amp-story animations', {}, (env) => {
         const page = html`<div></div>`;
         const target = html`<div></div>`;
 
-        const animationDef = {
-          duration: 0,
-          delay: 0,
-          target,
-          preset: {
-            keyframes: keyframeDefTypes[keyframeDefType],
-          },
-        };
-
         const runner = new AnimationRunner(
           page,
-          animationDef,
+          {
+            source: target,
+            preset: {
+              keyframes: keyframeDefTypes[keyframeDefType],
+            },
+            spec: {
+              duration: 0,
+              delay: 0,
+              target,
+            },
+          },
           webAnimationBuilderPromise,
           vsync,
           sequence
@@ -208,19 +215,20 @@ describes.realWin('amp-story animations', {}, (env) => {
       const duration = 123;
       const delay = 456;
 
-      const animationDef = {
-        target,
-        easing,
-        duration,
-        delay,
-        preset: {
-          keyframes: () => keyframes,
-        },
-      };
-
       new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          preset: {
+            keyframes: () => keyframes,
+          },
+          spec: {
+            target,
+            easing,
+            duration,
+            delay,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -253,7 +261,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         () => webAnimationRunner
       );
 
-      const animationDef = {
+      const spec = {
         selector: '.foo',
         easing: 'test-easing',
         duration: 123,
@@ -261,9 +269,11 @@ describes.realWin('amp-story animations', {}, (env) => {
         keyframes: [{}],
       };
 
+      const source = html`<amp-story-animation></amp-story-animation>`;
+
       new AnimationRunner(
         page,
-        animationDef,
+        {source, spec},
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -271,8 +281,8 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       await nextTick();
 
-      expect(webAnimationBuilder.createRunner.withArgs(animationDef)).to.have
-        .been.calledOnce;
+      expect(webAnimationBuilder.createRunner.withArgs(spec)).to.have.been
+        .calledOnce;
     });
 
     it('starts', async () => {
@@ -287,18 +297,19 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       webAnimationBuilder.createRunner = () => webAnimationRunner;
 
-      const animationDef = {
-        duration: 0,
-        delay: 0,
-        target,
-        preset: {
-          keyframes: [{}],
-        },
-      };
-
       const runner = new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          preset: {
+            keyframes: [{}],
+          },
+          spec: {
+            duration: 0,
+            delay: 0,
+            target,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -327,19 +338,20 @@ describes.realWin('amp-story animations', {}, (env) => {
       const {resolve: resolveWaitFor, promise} = new Deferred();
       sequence.waitFor = env.sandbox.spy(() => promise);
 
-      const animationDef = {
-        duration: 0,
-        delay: 0,
-        target,
-        startAfterId,
-        preset: {
-          keyframes: [{}],
-        },
-      };
-
       const runner = new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          startAfterId,
+          preset: {
+            keyframes: [{}],
+          },
+          spec: {
+            duration: 0,
+            delay: 0,
+            target,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -377,18 +389,19 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       sequence.notifyFinish = env.sandbox.spy();
 
-      const animationDef = {
-        duration: 0,
-        delay: 0,
-        target,
-        preset: {
-          keyframes: [{}],
-        },
-      };
-
       new AnimationRunner(
         page,
-        animationDef,
+        {
+          source: target,
+          preset: {
+            keyframes: [{}],
+          },
+          spec: {
+            duration: 0,
+            delay: 0,
+            target,
+          },
+        },
         webAnimationBuilderPromise,
         vsync,
         sequence
@@ -467,9 +480,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         expect(
           createAnimationRunner.withArgs(
             page,
-            env.sandbox.match({target, preset}),
+            env.sandbox.match({source: target, preset, spec: {target}}),
             webAnimationBuilderPromise,
-            env.sandbox.match.any,
             env.sandbox.match.any,
             env.sandbox.match.any
           )
@@ -483,18 +495,18 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const page = html`
         <div>
-          <amp-story-animation>
-            <script type="application/json" ref="spec1holder"></script>
+          <amp-story-animation ref="spec1source">
+            <script type="application/json"></script>
           </amp-story-animation>
-          <amp-story-animation>
-            <script type="application/json" ref="spec2holder"></script>
+          <amp-story-animation ref="spec2source">
+            <script type="application/json"></script>
           </amp-story-animation>
         </div>
       `;
 
-      const {spec1holder, spec2holder} = htmlRefs(page);
-      spec1holder.textContent = JSON.stringify(spec1);
-      spec2holder.textContent = JSON.stringify(spec2);
+      const {spec1source, spec2source} = htmlRefs(page);
+      spec1source.firstElementChild.textContent = JSON.stringify(spec1);
+      spec2source.firstElementChild.textContent = JSON.stringify(spec2);
 
       const animationManager = new AnimationManager(page, ampdoc);
       await animationManager.applyFirstFrame();
@@ -502,9 +514,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       expect(
         createAnimationRunner.withArgs(
           page,
-          env.sandbox.match(spec1),
+          env.sandbox.match({source: spec1source, spec: spec1}),
           webAnimationBuilderPromise,
-          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -513,9 +524,8 @@ describes.realWin('amp-story animations', {}, (env) => {
       expect(
         createAnimationRunner.withArgs(
           page,
-          env.sandbox.match(spec2),
+          env.sandbox.match({source: spec2source, spec: spec2}),
           webAnimationBuilderPromise,
-          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -573,11 +583,14 @@ describes.realWin('amp-story animations', {}, (env) => {
         expect(
           createAnimationRunner.withArgs(
             page,
-            env.sandbox.match({target}),
+            env.sandbox.match({
+              source: target,
+              keyframeOptions: expectedOptions,
+              spec: {target},
+            }),
             env.sandbox.match.any,
             env.sandbox.match.any,
-            env.sandbox.match.any,
-            env.sandbox.match(expectedOptions)
+            env.sandbox.match.any
           )
         ).to.have.been.calledOnce;
       });
@@ -629,9 +642,23 @@ describes.realWin('amp-story animations', {}, (env) => {
             animate-in-after="animated-second"
             animate-in="fly-in-right"
           ></div>
+          <amp-story-animation
+            id="animated-fourth"
+            ref="animatedFourth"
+            animate-in-after="animated-third"
+          >
+            <script type="application/json">
+              {}
+            </script>
+          </amp-story-animation>
         </div>
       `;
-      const {animatedFirst, animatedSecond, animatedThird} = htmlRefs(page);
+      const {
+        animatedFirst,
+        animatedSecond,
+        animatedThird,
+        animatedFourth,
+      } = htmlRefs(page);
 
       env.win.document.body.appendChild(page);
 
@@ -641,8 +668,11 @@ describes.realWin('amp-story animations', {}, (env) => {
       expect(
         createAnimationRunner.withArgs(
           env.sandbox.match.any,
-          env.sandbox.match({target: animatedFirst, startAfterId: undefined}),
-          env.sandbox.match.any,
+          env.sandbox.match({
+            source: animatedFirst,
+            startAfterId: null,
+            spec: {target: animatedFirst},
+          }),
           env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
@@ -653,10 +683,10 @@ describes.realWin('amp-story animations', {}, (env) => {
         createAnimationRunner.withArgs(
           env.sandbox.match.any,
           env.sandbox.match({
-            target: animatedSecond,
+            source: animatedSecond,
             startAfterId: 'animated-first',
+            spec: {target: animatedSecond},
           }),
-          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
@@ -667,10 +697,24 @@ describes.realWin('amp-story animations', {}, (env) => {
         createAnimationRunner.withArgs(
           env.sandbox.match.any,
           env.sandbox.match({
-            target: animatedThird,
+            source: animatedThird,
             startAfterId: 'animated-second',
+            spec: {target: animatedThird},
           }),
           env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
+
+      expect(
+        createAnimationRunner.withArgs(
+          env.sandbox.match.any,
+          env.sandbox.match({
+            source: animatedFourth,
+            startAfterId: 'animated-third',
+            spec: {},
+          }),
           env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
