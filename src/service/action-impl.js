@@ -583,9 +583,17 @@ export class ActionService {
    * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
    */
   setWhitelist(whitelist) {
-    this.whitelist_ = whitelist.filter(
-      (value) => value.tagOrTarget && value.method
-    );
+    this.whitelist_ = whitelist.filter((value) => {
+      const hasValidProperties = value.tagOrTarget && value.method;
+      if (!hasValidProperties) {
+        user().warn(
+          value.tagOrTarget && value.method,
+          'Unexpected entry missing properties `tagOrTarget` and `method` was not whitelisted: %s',
+          value
+        );
+      }
+      return hasValidProperties;
+    });
   }
 
   /**
