@@ -23,52 +23,52 @@
     <p>Play/Pause to send event</p>
     <amp-audio id="my-player2" layout="" src="av/audio.mp3"> </amp-audio>
 
-    <amp-analytics type="gfk">
+    <amp-analytics type="gfksensic">
         <script type="application/json">
-        {
-            "vars": {
-                "p": "demo",
-                "m": "demomedia"
-            },
-            "triggers": {
-                "audioPlay": {
-                    "on": "audio-play",
-                    "request": "audio-play",
-                    "selector": "#my-player",
-                    "vars": {
-                        "c": "myCategory",
-                        "selector": "my-player"
-                    }
+            {
+                "vars": {
+                    "p": "demo",
+                    "m": "demomedia"
                 },
-                "audioPause": {
-                    "on": "audio-pause",
-                    "request": "audio-stop",
-                    "selector": "#my-player",
-                    "vars": {
-                        "c": "myCategory",
-                        "selector": "my-player"
-                    }
-                },
-                "audioPlay2": {
-                    "on": "audio-play",
-                    "request": "audio-play",
-                    "selector": "#my-player2",
-                    "vars": {
-                        "c": "myCategory",
-                        "selector": "my-player2",
-                    }
-                },
-                "audioPause2": {
-                    "on": "audio-pause",
-                    "request": "audio-stop",
-                    "selector": "#my-player2",
-                    "vars": {
-                        "c": "myCategory",
-                        "selector": "my-player2"
+                "triggers": {
+                    "audioPlay": {
+                        "on": "audio-play",
+                        "request": "audio-play",
+                        "selector": "#my-player",
+                        "vars": {
+                            "c": "myCategory",
+                            "name": "my-player"
+                        }
+                    },
+                    "audioPause": {
+                        "on": "audio-pause",
+                        "request": "audio-stop",
+                        "selector": "#my-player",
+                        "vars": {
+                            "c": "myCategory",
+                            "name": "my-player"
+                        }
+                    },
+                    "audioPlay2": {
+                        "on": "audio-play",
+                        "request": "audio-play",
+                        "selector": "#my-player2",
+                        "vars": {
+                            "c": "myCategory",
+                            "name": "my-player2"
+                        }
+                    },
+                    "audioPause2": {
+                        "on": "audio-pause",
+                        "request": "audio-stop",
+                        "selector": "#my-player2",
+                        "vars": {
+                            "c": "myCategory",
+                            "name": "my-player2"
+                        }
                     }
                 }
             }
-        }
         </script>
     </amp-analytics>
       <a href="another.html">Change page</a>
