@@ -122,15 +122,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Generates the template and fills up with options.
-   *
-   * Option elements require class i-amphtml-story-reaction-option to
-   * handle tap properly.
-   * Set this.rootEl_ to the root node.
-   *
-   * @protected @abstract
+   * Generates the template in rootEl_ and fills up with options.
    * @param {!Element} unusedElement
    * @return {!Element}
+   * @protected @abstract
    */
   buildComponent(unusedElement) {
     // Subclass must override.
@@ -163,9 +158,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Reacts to RTL state updates and triggers the UI for RTL.
-   *
    * @param {boolean} rtlState
-   * @protected
+   * @private
    */
   onRtlStateUpdate_(rtlState) {
     this.mutateElement(() => {
@@ -204,7 +198,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Attaches functions to each option to handle state transition.
-   *
    * @private
    */
   initializeListeners_() {
@@ -223,7 +216,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Handles a tap event on the quiz element.
-   *
    * @param {Event} e
    * @private
    */
@@ -382,7 +374,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Triggers changes to component state on response interaction.
    *
    * @param {!Element} optionEl
-   * @protected
+   * @private
    */
   handleOptionSelection_(optionEl) {
     this.responseDataPromise_.then(() => {
@@ -521,16 +513,15 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     this.hasUserSelection_ = this.responseData_.hasUserResponded;
     if (this.hasUserSelection_) {
-      this.updateQuizOnDataRetrieval_();
+      this.updateReactionOnDataRetrieval_();
     }
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
-   *
    * @private
    */
-  updateQuizOnDataRetrieval_() {
+  updateReactionOnDataRetrieval_() {
     let selectedOptionKey;
     this.responseData_['responses'].forEach((response) => {
       if (response.selectedByUser) {
@@ -580,6 +571,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Updates the selected classes on option selected.
    * @param selectedOption
+   * @private
    */
   updateToPostSelectionState_(selectedOption) {
     this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');

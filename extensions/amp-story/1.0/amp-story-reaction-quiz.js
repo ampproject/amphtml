@@ -178,6 +178,14 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   }
 
   /**
+   * Get the quiz element
+   * @return {Element}
+   */
+  getQuizElement() {
+    return this.rootEl_;
+  }
+
+  /**
    * @override
    */
   updateOptionPercentages_() {
