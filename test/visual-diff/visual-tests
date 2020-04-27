@@ -195,8 +195,9 @@
       "url": "examples/visual-tests/amp-list/amp-list.amp.html",
       "name": "AMP List and Mustache",
       "loading_complete_selectors": [
-        ".list1",
-        ".list2"
+        "#list1 > div[role='list']",
+        "#list2 > div[role='list']",
+        "#list3 > div[role='list']",
       ],
       "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
@@ -657,8 +658,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
-      // TODO(#27452, @ampproject/wg-stories): font size is unstable, e.g., https://percy.io/ampproject/amphtml/builds/4680570
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
       "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},

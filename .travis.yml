@@ -66,6 +66,10 @@ jobs:
       name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: build
+      name: 'Module Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
       name: 'Single Pass Tests'
       script:
@@ -121,4 +125,5 @@ cache:
     - validator/nodejs/node_modules
     - validator/webui/node_modules
     - validator/java/bazel-installer
+    - $HOME/.m2
   yarn: true

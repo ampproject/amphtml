@@ -28,12 +28,29 @@ const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 
 /**
- * Checks if the given file is an OWNERS file
+ * Checks if the given file is an OWNERS file.
+ *
  * @param {string} file
  * @return {boolean}
  */
 function isOwnersFile(file) {
   return file.endsWith('OWNERS');
+}
+
+/**
+ * Checks if the given file is of the form validator-.*\.(html|out|protoascii)
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isValidatorFile(file) {
+  const name = path.basename(file);
+  return (
+    name.startsWith('validator-') &&
+    (name.endsWith('.out') ||
+      name.endsWith('.html') ||
+      name.endsWith('.protoascii'))
+  );
 }
 
 /**
@@ -61,7 +78,9 @@ const targetMatchers = {
       file == 'build-system/compile/internal-version.js' ||
       file == 'build-system/compile/log-messages.js' ||
       file == 'build-system/tasks/babel-plugin-tests.js' ||
-      file.startsWith('build-system/babel-plugins/')
+      file == 'babel.config.js' ||
+      file.startsWith('build-system/babel-plugins/') ||
+      file.startsWith('build-system/babel-config/')
     );
   },
   'CACHES_JSON': (file) => {
@@ -151,34 +170,17 @@ const targetMatchers = {
     );
   },
   'VALIDATOR': (file) => {
-    if (isOwnersFile(file)) {
+    if (
+      isOwnersFile(file) ||
+      file.startsWith('validator/webui/') ||
+      file.startsWith('validator/java/')
+    ) {
       return false;
     }
-    if (file.startsWith('validator/webui/')) {
-      return false;
-    }
-    if (file.startsWith('validator/')) {
-      return true;
-    }
-    if (file === 'build-system/tasks/validator.js') {
-      return true;
-    }
-    // validator files for each extension
-    if (!file.startsWith('extensions/')) {
-      return false;
-    }
-    const pathArray = path.dirname(file).split(path.sep);
-    if (pathArray.length < 2) {
-      // At least 2 with ['extensions', '{$name}']
-      return false;
-    }
-    // Validator files take the form of validator-.*\.(html|out|protoascii)
-    const name = path.basename(file);
     return (
-      name.startsWith('validator-') &&
-      (name.endsWith('.out') ||
-        name.endsWith('.html') ||
-        name.endsWith('.protoascii'))
+      file.startsWith('validator/') ||
+      file === 'build-system/tasks/validator.js' ||
+      isValidatorFile(file)
     );
   },
   'VALIDATOR_JAVA': (file) => {
@@ -243,10 +245,12 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets on Travis during package upgrades.
+  // Test all targets except VALIDATOR_JAVA on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
-    allTargets.forEach((target) => buildTargets.add(target));
+    allTargets
+      .filter((target) => target != 'VALIDATOR_JAVA')
+      .forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }

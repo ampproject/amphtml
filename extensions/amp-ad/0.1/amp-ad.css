@@ -50,13 +50,6 @@ amp-embed iframe {
   border: 1px, solid, #696969;
 }
 
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-amp-ad[type="adsense"] > iframe {
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%);
-}
-
 amp-ad[type="adsense"], amp-ad[type="doubleclick"] {
   direction: ltr;
 }

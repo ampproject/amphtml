@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {Direction} from '../service';
 import {PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
-import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
@@ -480,7 +479,7 @@ describes.realWin(
           .be.ok;
 
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
           0 /** index */,
@@ -517,7 +516,7 @@ describes.realWin(
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
           0 /** pausePageCountForTesting */
@@ -527,7 +526,7 @@ describes.realWin(
           VisibilityState.HIDDEN
         );
 
-        service.scrollDirection_ = Direction.DOWN;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
         await service.resumePausedPages_(
           1 /** index */,
           0 /** pausePageCountForTesting */
@@ -742,7 +741,7 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('should only register pages up to the given limit', async () => {
+      it('should only fetch pages up to the given limit', async () => {
         const element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           maxPages: 1,
@@ -751,7 +750,13 @@ describes.realWin(
         const service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
-        expect(service.pages_.length).to.equal(2);
+        // Try to fetch more pages than necessary to make sure
+        // pages above the maximum are not fetched
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 3);
+
+        expect(
+          service.pages_.filter((page) => !page.isLoaded()).length
+        ).to.equal(1);
         element.parentNode.removeChild(element);
       });
     });

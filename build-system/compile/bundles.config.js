@@ -130,7 +130,6 @@ exports.jsBundles = {
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-      compilationLevel: 'WHITESPACE_ONLY',
       skipUnknownDepsCheck: true,
     },
   },
@@ -145,7 +144,7 @@ exports.jsBundles = {
     },
   },
   'amp-story-player.js': {
-    srcDir: './src/',
+    srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',
@@ -643,6 +642,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-install-serviceworker',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-intersection-observer-polyfill',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
