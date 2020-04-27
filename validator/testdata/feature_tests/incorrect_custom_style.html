@@ -41,7 +41,6 @@
     foo { background-image: url('invalid://invalid.com/1.jpg') }
     foo { background-image: url('https://valid.com/1.jpg') }
     foo { background-image: url('http://valid.com/1.jpg') }
-    foo { background-image: url('absolute://disallow.com/soon.jpg') }
     foo { background-image: url('://valid.jpg') }
     foo { background-image: url('valid.jpg') }
 
@@ -50,7 +49,6 @@
     @font-face { src: url('invalid://invalid.com/1.ttf') }
     @font-face { src: url('https://valid.com/1.ttf') }
     @font-face { src: url('http://valid.com/1.ttf') }
-    @font-face { src: url('absolute://invalid.com/1.ttf') }
     @font-face { src: url('://valid.ttf') }
     @font-face { src: url('valid.ttf') }
   </style>
@@ -58,5 +56,7 @@
   <script src="https://cdn.ampproject.org/v0.js" async></script>
 </head>
 <body>
+  <!-- Invalid due to !important -->
+  <b style="color: red !important"></div>
 </body>
 </html>

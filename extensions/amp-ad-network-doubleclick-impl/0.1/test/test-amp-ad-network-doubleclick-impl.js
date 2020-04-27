@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as bytesUtils from '../../../../src/utils/bytes';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -32,6 +33,7 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -46,7 +48,6 @@ import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -1187,7 +1188,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       return {
         arrayBuffer: () =>
           Promise.resolve(
-            utf8Encode('<html><body>Hello, World!</body></html>')
+            bytesUtils.utf8Encode('<html><body>Hello, World!</body></html>')
           ),
         headers: {
           get(prop) {
@@ -1471,6 +1472,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       ).to.equal(XORIGIN_MODE.SAFEFRAME);
     });
   });
+
+  describe('#RandomSubdomainSafeFrame', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    it('should use random subdomain when experiment is enabled', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('uses random subdomain if experiment is on without win.crypto', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('should use constant subdomain when experiment is disabled', () => {
+      const expectedPath =
+        '^https://tpc.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+  });
 });
 
 describes.realWin(
@@ -1520,17 +1563,13 @@ describes.realWin(
       function verifyCss(iframe, expectedSize) {
         expect(iframe).to.be.ok;
         const style = env.win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         expect(style.width).to.equal(expectedSize.width);
         expect(style.height).to.equal(expectedSize.height);
         // We don't know the exact values by which the frame will be
         // translated, as this can vary depending on whether we use the
         // height/width attributes, or the actual size of the frame. To make
         // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       afterEach(() => env.win.document.body.removeChild(impl.element));
@@ -1909,7 +1948,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.equal('foo');
@@ -1930,10 +1969,13 @@ describes.realWin(
           },
         };
         return AmpAdNetworkDoubleclickImpl.prototype
-          .maybeValidateAmpCreative(utf8Encode(creative), mockHeaders)
+          .maybeValidateAmpCreative(
+            bytesUtils.utf8Encode(creative),
+            mockHeaders
+          )
           .then((result) => {
             expect(result).to.be.ok;
-            expect(utf8Decode(result)).to.equal(creative);
+            expect(bytesUtils.utf8Decode(result)).to.equal(creative);
           });
       });
 
@@ -1953,7 +1995,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.not.be.ok;

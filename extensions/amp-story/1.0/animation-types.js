@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-/** @typedef {!Array<!Object<string, *>>} */
-export let KeyframesDef;
+import {
+  WebAnimationBuilderOptionsDef,
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+} from '../../amp-animation/0.1/web-animation-types';
 
-/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!KeyframesDef} */
-export let KeyframesFilterFnDef;
+export {
+  WebAnimationBuilderOptionsDef,
+  WebAnimationDef,
+  WebAnimationPlayState,
+  WebKeyframesDef,
+};
 
-/** @typedef {!KeyframesDef|!KeyframesFilterFnDef} */
-export let KeyframesOrFilterFnDef;
+/** @typedef {function(StoryAnimationDimsDef, Object<string, *>):!WebKeyframesDef} */
+export let WebKeyframesCreateFnDef;
 
 /**
  * @typedef {{
@@ -39,7 +47,7 @@ export let StoryAnimationDimsDef;
  * @typedef {{
  *   duration: number,
  *   easing: (string|undefined),
- *   keyframes: !KeyframesOrFilterFnDef,
+ *   keyframes: (!WebKeyframesCreateFnDef|!WebKeyframesDef),
  * }}
  */
 export let StoryAnimationPresetDef;
@@ -51,6 +59,7 @@ export let StoryAnimationPresetDef;
  *  preset: !StoryAnimationPresetDef,
  *  duration: (number|undefined),
  *  delay: (number|undefined),
+ *  easing: (string|undefined),
  * }}
  */
 export let StoryAnimationDef;

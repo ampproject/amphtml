@@ -810,7 +810,7 @@ export class AmpA4A extends AMP.BaseElement {
           };
         });
       })
-      /** @return {!Promise<?ArrayBuffer>} */
+      /** @return {?Promise<?ArrayBuffer>} */
       .then((responseParts) => {
         checkStillCurrent();
         // Keep a handle to the creative body so that we can render into
@@ -821,7 +821,7 @@ export class AmpA4A extends AMP.BaseElement {
         // we should restructure the promise chain to pass this info along
         // more cleanly, without use of an object variable outside the chain.
         if (!responseParts) {
-          return Promise.resolve();
+          return null;
         }
         const {bytes, headers} = responseParts;
         const size = this.extractSize(responseParts.headers);
@@ -1797,16 +1797,18 @@ export class AmpA4A extends AMP.BaseElement {
         }
 
         const urls = Services.urlForDoc(this.element);
-        metaData.customStylesheets.forEach((stylesheet) => {
-          if (
-            !isObject(stylesheet) ||
-            !stylesheet['href'] ||
-            typeof stylesheet['href'] !== 'string' ||
-            !urls.isSecure(stylesheet['href'])
-          ) {
-            throw new Error(errorMsg);
+        /** @type {!Array} */ (metaData.customStylesheets).forEach(
+          (stylesheet) => {
+            if (
+              !isObject(stylesheet) ||
+              !stylesheet['href'] ||
+              typeof stylesheet['href'] !== 'string' ||
+              !urls.isSecure(stylesheet['href'])
+            ) {
+              throw new Error(errorMsg);
+            }
           }
-        });
+        );
       }
       if (isArray(metaDataObj['images'])) {
         // Load maximum of 5 images.

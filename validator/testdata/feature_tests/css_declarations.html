@@ -301,6 +301,9 @@
       barometric-pressure: foo;
       degrees-celsius: foo;
     }
+    vendorprefix {
+      -webkit-user-select: foo;
+    }
   </style>
 </head>
 <body>
@@ -572,6 +575,8 @@
 <b style='amplitude: foo'></b>
 <b style='barometric-pressure: foo'></b>
 <b style='degrees-celsius: foo'></b>
+<!-- Vendor Prefix -->
+<b style="-webkit-user-select: foo;"></b>
 
 <!-- SVG supports additional declarations not supported in HTML -->
 <svg>
@@ -842,6 +847,8 @@
   <path style='amplitude: foo'></path>
   <path style='barometric-pressure: foo'></path>
   <path style='degrees-celsius: foo'></path>
+  <!-- Vendor Prefix -->
+  <path style="-webkit-user-select: foo;"></b>
 </svg>
 
 </body>

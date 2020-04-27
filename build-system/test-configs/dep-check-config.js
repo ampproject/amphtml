@@ -235,7 +235,7 @@ exports.rules = [
 
       // AMP Story
       'extensions/amp-story/0.1/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
-      'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
+      'extensions/amp-story/1.0/animation-types.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -374,6 +374,28 @@ exports.rules = [
     mustNotDependOn: 'src/base-element.js',
   },
   {
+    filesMatching: 'src/polyfills/**/*.js',
+    mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfills/fetch.js->src/log.js',
+      'src/polyfills/fetch.js->src/types.js',
+      'src/polyfills/fetch.js->src/json.js',
+      'src/polyfills/fetch.js->src/utils/object.js',
+      'src/polyfills/fetch.js->src/utils/bytes.js',
+      'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
+      'src/polyfills/custom-elements.js->src/resolved-promise.js',
+    ],
+  },
+  {
+    filesMatching: 'src/polyfillstub/**/*.js',
+    mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfillstub/intersection-observer-stub.js->src/services.js',
+      'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
+    ],
+  },
+  {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
     allowlist: [
@@ -390,9 +412,11 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
+      'src/polyfills.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
+      'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
     ],
   },
   {
