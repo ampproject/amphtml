@@ -104,8 +104,16 @@ export function nativeIntersectionObserverSupported(win) {
   if (!('IntersectionObserver' in win)) {
     return false;
   }
-  // eslint-disable-next-line no-undef
-  if (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) {
+  if (
+    // The polyfill experiment is launched on inabox separately. This class
+    // is not used anywhere except inabox and thus only one experiment
+    // constant is used to avoid an accidental launch when we ramp it up
+    // in AMP-mode.
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
+    getMode().localDev ||
+    getMode().test
+  ) {
     // For the new stub polyfill it's enough to have a stub to be functional.
     return true;
   }
