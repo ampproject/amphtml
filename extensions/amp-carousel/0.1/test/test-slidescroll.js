@@ -15,14 +15,23 @@
  */
 
 import '../amp-carousel';
+import {
+  ActionInvocation,
+  ActionService,
+} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 
 describes.realWin(
   'SlideScroll',
   {
     amp: {
       extensions: ['amp-carousel'],
+      runtimeOn: true,
     },
   },
   (env) => {
@@ -1468,6 +1477,58 @@ describes.realWin(
           expect(getNextTitle(el)).to.equal('Next item in carousel (1 of 3)');
         });
       });
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-carousel',
+        {
+          'type': 'slides',
+          'width': '400',
+          'height': '300',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      const spy = env.sandbox.spy();
+      element.enqueAction = spy;
+      element.getDefaultActionAlias = env.sandbox.stub();
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      let i = new ActionInvocation(
+        element,
+        'goToSlide',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        element.tagName
+      );
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+
+      i = new ActionInvocation(
+        element,
+        'toggleAutoplay',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        element.tagName
+      );
+      env.sandbox.stub(action, 'error_');
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWithMatch(
+        /"AMP.CAROUSEL.toggleAutoplay" is not whitelisted/
+      );
     });
   }
 );

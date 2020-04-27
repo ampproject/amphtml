@@ -17,6 +17,10 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
+import {
+  ActionInvocation,
+  ActionService,
+} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
@@ -2985,6 +2989,49 @@ describes.repeated(
               });
             });
           });
+        });
+
+        it('should allow default actions in email documents', async () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          const action = new ActionService(env.ampdoc, env.win.document);
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+          const element = getForm();
+          document.body.appendChild(element);
+          const spy = env.sandbox.spy();
+          element.enqueAction = spy;
+          element.getDefaultActionAlias = env.sandbox.stub();
+          const form = new AmpForm(element, 'test-id');
+          const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
+          let i = new ActionInvocation(
+            element,
+            'clear',
+            /* args */ null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH,
+            'tap',
+            element.tagName
+          );
+          action.invoke_(i);
+          expect(clearSpy).to.be.called;
+
+          env.sandbox.stub(form, 'submit_');
+          const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
+          i = new ActionInvocation(
+            element,
+            'submit',
+            /* args */ null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH,
+            'tap',
+            element.tagName
+          );
+          action.invoke_(i);
+          await whenCalled(submitSpy);
+          expect(submitSpy).to.be.calledWithExactly(i);
         });
 
         describe('Async Inputs', () => {

@@ -16,11 +16,19 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
+import {
+  ActionInvocation,
+  ActionService,
+} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import {clearModalStack, getModalStackLength} from '../../../../src/modal';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -723,6 +731,50 @@ describes.realWin(
           });
         }
       );
+    });
+  }
+);
+
+describes.realWin(
+  'amp-sidebar component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-sidebar:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-sidebar',
+        {'layout': 'nodisplay'}
+      );
+      env.win.document.body.appendChild(element);
+      const spy = env.sandbox.spy();
+      element.enqueAction = spy;
+      element.getDefaultActionAlias = env.sandbox.stub().returns({'items': []});
+      await whenUpgradedToCustomElement(element);
+
+      ['open', 'close', 'toggle'].forEach((method) => {
+        const i = new ActionInvocation(
+          element,
+          method,
+          /* args */ null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH,
+          'tap',
+          element.tagName
+        );
+        action.invoke_(i);
+        expect(spy).to.be.calledWithExactly(i);
+      });
     });
   }
 );
