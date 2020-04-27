@@ -1228,7 +1228,12 @@ describe('amp-a4a', () => {
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
-      expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
+      expect(
+        getAdUrlSpy.calledWith(
+          {consentState: null, consentString: null},
+          rtcResponse
+        )
+      ).to.be.true;
       expect(fetchMock.called('ad')).to.be.true;
       expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
       expect(
@@ -2320,8 +2325,12 @@ describe('amp-a4a', () => {
         expect(getAdUrlSpy).to.not.be.called;
         inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2367,8 +2376,12 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2404,7 +2417,12 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN)).calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.UNKNOWN,
+            consentString: null,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.UNKNOWN,

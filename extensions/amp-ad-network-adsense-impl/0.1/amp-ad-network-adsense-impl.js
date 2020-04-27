@@ -245,7 +245,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(consentTuple) {
-    const {consentState, consentString} = consentTuple || {};
+    let consentState = undefined;
+    let consentString = undefined;
+    if (consentTuple) {
+      consentState = consentTuple.consentState;
+      consentString = consentTuple.consentString;
+    }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
