@@ -28,31 +28,31 @@ const {
 const {getStdout} = require('./exec');
 
 /**
- * Returns the remote tracking branch associated with the local master branch.
- * @return {string}
- */
-function gitUpstreamMaster() {
-  const upstreamName = getStdout('git config branch.master.remote').trim();
-  return (upstreamName || 'origin') + '/master';
-}
-
-/**
  * Returns the commit at which the current branch was forked off of master.
  * On Travis, there is an additional merge commit, so we must pick the first of
  * the boundary commits (prefixed with a -) returned by git rev-list.
- * On local branches, this is merge base of the current branch off of
- * upstream/master.
+ * On local branches, this is merge base of the current branch off of master.
  * @return {string}
  */
 function gitBranchCreationPoint() {
   if (isTravisBuild()) {
     const traviPrSha = travisPullRequestSha();
-    const upstreamMaster = gitUpstreamMaster();
     return getStdout(
-      `git rev-list --boundary ${traviPrSha}...${upstreamMaster} | grep "^-" | head -n 1 | cut -c2-`
+      `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
   }
-  return gitMasterBaseline();
+  return gitMergeBaseLocalMaster();
+}
+
+/**
+ * Returns the `master` parent of the merge commit (current HEAD) on Travis.
+ * Note: This is not the same as origin/master (a moving target), since new
+ * commits can be merged while a Travis build is in progress.
+ * See https://travis-ci.community/t/origin-master-moving-forward-between-build-stages/4189/6
+ * @return {string}
+ */
+function gitTravisMasterBaseline() {
+  return getStdout('git merge-base origin/master HEAD').trim();
 }
 
 /**
@@ -115,7 +115,7 @@ function gitDiffCommitLog() {
  * @return {!Array<string>}
  */
 function gitDiffAddedNameOnlyMaster() {
-  const branchPoint = gitMasterBaseline();
+  const branchPoint = gitMergeBaseLocalMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
     .trim()
     .split('\n');
@@ -180,7 +180,7 @@ function gitCommitterEmail() {
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
-  return getStdout(`git cherry ${gitUpstreamMaster()}`)
+  return getStdout('git cherry master')
     .trim()
     .split('\n')
     .map((line) => ({
@@ -203,11 +203,23 @@ function gitCommitFormattedTime(ref = 'HEAD') {
 }
 
 /**
+ * Returns the merge base of the current branch off of master when running on
+ * a local workspace.
+ * @return {string}
+ */
+function gitMergeBaseLocalMaster() {
+  return getStdout('git merge-base master HEAD').trim();
+}
+
+/**
  * Returns the master baseline commit, regardless of running environment.
  * @return {string}
  */
 function gitMasterBaseline() {
-  return getStdout(`git merge-base ${gitUpstreamMaster()} HEAD`).trim();
+  if (isTravisBuild()) {
+    return gitTravisMasterBaseline();
+  }
+  return gitMergeBaseLocalMaster();
 }
 
 /**
@@ -235,7 +247,6 @@ module.exports = {
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,
-  gitMasterBaseline,
-  gitUpstreamMaster,
+  gitTravisMasterBaseline,
   shortSha,
 };

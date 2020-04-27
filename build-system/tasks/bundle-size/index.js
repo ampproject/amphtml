@@ -24,7 +24,7 @@ const url = require('url');
 const util = require('util');
 const {
   gitCommitHash,
-  gitMasterBaseline,
+  gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
 const {
@@ -168,7 +168,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
-    const baseSha = gitMasterBaseline();
+    const baseSha = gitTravisMasterBaseline();
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
