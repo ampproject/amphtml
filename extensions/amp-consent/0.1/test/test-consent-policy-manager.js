@@ -576,7 +576,7 @@ describes.realWin(
       });
     });
 
-    describe('getGdprAppliesInfo', () => {
+    describe('getGdprApplies', () => {
       let manager;
 
       beforeEach(() => {
@@ -584,7 +584,7 @@ describes.realWin(
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it.only('should return gdprApplies data', async () => {
+      it('should return gdprApplies value', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
@@ -592,7 +592,7 @@ describes.realWin(
         });
         await macroTask();
         // Set above in getConsentInstanceGdprApplies mock
-        await expect(manager.getGdprAppliesInfo()).to.eventually.be.false;
+        await expect(manager.getGdprApplies()).to.eventually.be.false;
       });
     });
   }

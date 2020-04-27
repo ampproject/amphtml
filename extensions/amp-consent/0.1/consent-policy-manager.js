@@ -275,7 +275,7 @@ export class ConsentPolicyManager {
    * @param {string} policyId
    * @return {!Promise<Object>}
    */
-  getGdprAppliesInfo(policyId) {
+  getGdprApplies(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
       .then((manager) => {

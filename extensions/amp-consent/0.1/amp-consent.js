@@ -485,21 +485,23 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Create and set gdprApplies promise form consent manager.
-   * Default value to `consentRequired`, if no `gdprApplies`
-   * value is provided.
+   * Default value to remote `consentRequired`, if no
+   * `gdprApplies` value is provided.
    *
+   * TODO(micajuinho) remove this method (and subsequent methods
+   * in consent-state-manager) in favor of consolidation with
+   * consentString
    */
   setGdprApplies() {
     const responsePromise = this.getConsentRemote_();
     const gdprAppliesPromise = responsePromise.then((response) => {
-      if (
-        !response ||
-        response['gdprApplies'] === undefined ||
-        typeof response['gdprApplies'] !== 'boolean'
-      ) {
-        return this.getConsentRequiredPromise_();
+      if (!response) {
+        return null;
       }
-      return response['gdprApplies'];
+      const gdprApplies = response['gdprApplies'];
+      return gdprApplies === undefined || typeof gdprApplies !== 'boolean'
+        ? response['consentRequired']
+        : gdprApplies;
     });
 
     this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
@@ -520,6 +522,8 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
 
+      // TODO(micajuineho) When we consolidate, add gdprApplies field
+      // to be set with consentString.
       // Decision from promptUI takes precedence over consent decision from response
       if (
         !!response['consentRequired'] &&

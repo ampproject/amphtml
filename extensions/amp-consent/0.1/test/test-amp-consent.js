@@ -422,7 +422,7 @@ describes.realWin(
             ).to.eventually.be.true;
           });
 
-          it('defaults to inline config when checkConsentHref is not defined', async () => {
+          it('never defaults to inline config when checkConsentHref is not defined', async () => {
             const inlineConfig = {
               'consentInstanceId': 'abc',
               'consentRequired': true,
@@ -434,7 +434,7 @@ describes.realWin(
               ampConsent
                 .getConsentStateManagerForTesting()
                 .getConsentInstanceGdprApplies()
-            ).to.eventually.be.true;
+            ).to.eventually.be.null;
           });
         });
 
