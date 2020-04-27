@@ -1206,6 +1206,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   unlockHeightInsideMutate_() {
+    devAssert(
+      this.enableManagedResizing_ && !this.loadMoreEnabled_,
+      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+      TAG,
+      this.element
+    );
     setImportantStyles(this.element, {
       'height': '',
       'overflow': '',
