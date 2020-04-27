@@ -736,6 +736,7 @@ descendant_tag_list: {
   tag: "TABLE"
   tag: "TBODY"
   tag: "TD"
+  tag: "TEMPLATE"
   tag: "TEXT"
   tag: "TEXTPATH"
   tag: "TFOOT"
