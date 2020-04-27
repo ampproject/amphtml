@@ -587,6 +587,7 @@ export class ActionService {
       const hasValidProperties = value.tagOrTarget && value.method;
       if (!hasValidProperties) {
         user().warn(
+          TAG_,
           value.tagOrTarget && value.method,
           'Unexpected entry missing properties `tagOrTarget` and `method` was not whitelisted: %s',
           value
