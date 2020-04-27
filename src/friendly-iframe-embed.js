@@ -852,8 +852,12 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(childWin, class {});
-  // eslint-disable-next-line no-undef
-  if (INTERSECTION_OBSERVER_POLYFILL || getMode().localDev || getMode().test) {
+  if (
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL ||
+    getMode().localDev ||
+    getMode().test
+  ) {
     installIntersectionObserver(parentWin, childWin);
   }
 }

@@ -22,6 +22,7 @@ import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {dict} from './object';
+import {getMode} from '../mode';
 import {isArray, isFiniteNumber} from '../types';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
@@ -100,8 +101,23 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
  * @return {boolean}
  */
 export function nativeIntersectionObserverSupported(win) {
+  if (!('IntersectionObserver' in win)) {
+    return false;
+  }
+  if (
+    // The polyfill experiment is launched on inabox separately. This class
+    // is not used anywhere except inabox and thus only one experiment
+    // constant is used to avoid an accidental launch when we ramp it up
+    // in AMP-mode.
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
+    getMode().localDev ||
+    getMode().test
+  ) {
+    // For the new stub polyfill it's enough to have a stub to be functional.
+    return true;
+  }
   return (
-    'IntersectionObserver' in win &&
     'IntersectionObserverEntry' in win &&
     'intersectionRatio' in win.IntersectionObserverEntry.prototype
   );

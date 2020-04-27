@@ -273,6 +273,8 @@ function adoptShared(global, callback) {
   if (
     // eslint-disable-next-line no-undef
     INTERSECTION_OBSERVER_POLYFILL ||
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
     getMode().localDev ||
     getMode().test
   ) {
