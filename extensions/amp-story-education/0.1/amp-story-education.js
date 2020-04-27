@@ -75,7 +75,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_ = this.win.document.createElement('div');
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win);
+    this.localizationService_ = Services.localizationServiceForDoc(
+      this.getAmpDoc()
+    );
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;

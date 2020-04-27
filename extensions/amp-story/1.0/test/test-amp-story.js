@@ -29,7 +29,6 @@ import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
@@ -137,7 +136,9 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win);
+      const localizationService = Services.localizationServiceForDoc(
+        env.ampdoc
+      );
       registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });

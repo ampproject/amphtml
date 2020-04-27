@@ -20,7 +20,6 @@ import {
   StateProperty,
 } from '../amp-story-store-service';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -61,7 +60,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       },
     });
 
-    const localizationService = new LocalizationService(win);
+    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
     registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });

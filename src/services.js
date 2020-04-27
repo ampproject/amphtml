@@ -555,11 +555,11 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/localization.LocalizationService}
    */
-  static localizationService(win) {
-    return getService(win, 'localization');
+  static localizationServiceForDoc(elementOrAmpDoc) {
+    return getServiceForDoc(elementOrAmpDoc, 'localization');
   }
 
   /**

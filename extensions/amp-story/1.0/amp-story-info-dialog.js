@@ -64,7 +64,9 @@ export class InfoDialog {
     this.isBuilt_ = false;
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win_);
+    this.localizationService_ = Services.localizationServiceForDoc(
+      getAmpdoc(this.win_.document)
+    );
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);

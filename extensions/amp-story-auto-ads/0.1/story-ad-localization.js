@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
+import {getAmpdoc} from '../../../src/service';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsEn from './_locales/en';
@@ -95,7 +96,9 @@ export class StoryAdLocalization {
    * Create localization service and register all bundles.
    */
   init_() {
-    this.localizationService_ = new LocalizationService(this.win_);
+    this.localizationService_ = Services.localizationServiceForDoc(
+      getAmpdoc(this.win_.document)
+    );
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,

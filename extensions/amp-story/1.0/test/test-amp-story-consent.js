@@ -16,7 +16,6 @@
 
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -59,7 +58,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
       .stub(win, 'getComputedStyle')
       .returns(styles);
 
-    const localizationService = new LocalizationService(win);
+    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
     registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });

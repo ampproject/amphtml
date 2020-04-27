@@ -15,15 +15,19 @@
  */
 
 import {
-  LocalizationService,
-  getLanguageCodesFromString,
-} from '../../src/service/localization';
-import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../src/localized-strings';
+import {Services} from '../../src/services';
+import {getLanguageCodesFromString} from '../../src/service/localization';
 
 describes.fakeWin('localization', {}, (env) => {
+  let localizationService;
+
+  beforeEach(() => {
+    localizationService = Services.localizationServiceForDoc(env.ampdoc);
+  });
+
   describe('localized string IDs', () => {
     it('should have unique values', () => {
       // Transform string IDs from a map of keys to values to a multimap of
@@ -61,7 +65,6 @@ describes.fakeWin('localization', {}, (env) => {
 
   describe('localization service', () => {
     it('should get string text', () => {
-      const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
@@ -75,7 +78,6 @@ describes.fakeWin('localization', {}, (env) => {
 
     it('should handle registration of uppercase locales', () => {
       env.win.document.documentElement.setAttribute('lang', 'zh-CN');
-      const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('zh-CN', {
         '123': {
           string: '买票',
@@ -86,7 +88,6 @@ describes.fakeWin('localization', {}, (env) => {
     });
 
     it('should utilize fallback if string is missing', () => {
-      const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           fallback: 'test fallback content',
@@ -99,7 +100,6 @@ describes.fakeWin('localization', {}, (env) => {
     });
 
     it('should not utilize fallback if string is present', () => {
-      const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',

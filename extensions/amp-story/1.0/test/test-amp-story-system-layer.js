@@ -18,7 +18,6 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
@@ -41,7 +40,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
       return storeService;
     });
 
-    const localizationService = new LocalizationService(win);
+    const localizationService = Services.localizationServiceForDoc(env.ampdoc);
     registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });

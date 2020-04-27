@@ -262,6 +262,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationServiceForDoc(
+      getAmpdoc(this.win.document)
+    );
+
     const deferred = new Deferred();
 
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
@@ -1638,13 +1643,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    const localizationService = Services.localizationService(this.win);
-
     this.playMessageEl_ = buildPlayMessageElement(this.element);
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
-    labelEl.textContent = localizationService.getLocalizedString(
+    labelEl.textContent = this.localizationService_.getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
     );
 
@@ -1687,13 +1690,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendErrorMessage_() {
-    const localizationService = Services.localizationService(this.win);
-
     this.errorMessageEl_ = buildErrorMessageElement(this.element);
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = localizationService.getLocalizedString(
+    labelEl.textContent = this.localizationService_.getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
     );
 
@@ -1748,7 +1749,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
         (openLabelAttr && openLabelAttr.trim()) ||
-        Services.localizationService(this.win).getLocalizedString(
+        this.localizationService_.getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 

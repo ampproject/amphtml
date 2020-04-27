@@ -18,7 +18,9 @@
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
+import {Services} from '../services';
 import {closest} from '../dom';
+import {registerServiceBuilderForDoc} from '../service';
 
 /**
  * Language code used if there is no language code specified by the document.
@@ -89,10 +91,10 @@ export function getLanguageCodesFromString(languageCode) {
  */
 export class LocalizationService {
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    const rootEl = win.document.documentElement;
+  constructor(ampdoc) {
+    const rootEl = ampdoc.win.document.documentElement;
 
     /**
      * @private @const {!Array<string>}
@@ -156,4 +158,16 @@ export class LocalizationService {
       localizedStringId
     );
   }
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installLocalizationServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'localization',
+    LocalizationService,
+    /* opt_instantiate */ true
+  );
 }
