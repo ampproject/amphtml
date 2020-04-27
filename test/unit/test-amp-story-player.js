@@ -22,18 +22,30 @@ import {toArray} from '../../src/types';
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
-  let url;
   let manager;
+
   const fireHandler = [];
+  const DEFAULT_CACHE_URL =
+    'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
+  const DEFAULT_ORIGIN_URL =
+    'https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
   let messagingMock;
 
-  function buildStoryPlayer(numStories = 1) {
+  const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
+
+  function buildStoryPlayer(
+    numStories = 1,
+    url = DEFAULT_CACHE_URL,
+    cache = null
+  ) {
     playerEl = win.document.createElement('amp-story-player');
+
+    if (cache) {
+      playerEl.setAttribute('amp-cache', cache);
+    }
     for (let i = 0; i < numStories; i++) {
       const storyAnchor = win.document.createElement('a');
-      url =
-        'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
       storyAnchor.setAttribute('href', url);
       playerEl.appendChild(storyAnchor);
     }
@@ -84,41 +96,44 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.verify();
   });
 
-  it('should build an iframe for each story', () => {
+  it('should build an iframe for each story', async () => {
     buildStoryPlayer();
-    manager.loadPlayers();
+    await manager.loadPlayers();
 
     expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
-  it('should correctly append params at the end of the story url', () => {
+  it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
-    manager.loadPlayers();
+    await manager.loadPlayers();
+
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_CACHE_URL +
+        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
-  it('should correctly append params at the end of a story url with existing params', () => {
-    buildStoryPlayer();
-    url += '?testParam=true#myhash=hashValue';
-    playerEl.firstElementChild.setAttribute('href', url);
+  it('should correctly append params at the end of a story url with existing params', async () => {
+    const existingParams = '?testParam=true#myhash=hashValue';
+    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
+    await manager.loadPlayers();
 
-    manager.loadPlayers();
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
-      url +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      DEFAULT_CACHE_URL +
+        existingParams +
+        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
-  it('should set first story as visible', () => {
+  it('should set first story as visible', async () => {
     buildStoryPlayer(3);
-    manager.loadPlayers();
+    await manager.loadPlayers();
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -126,9 +141,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', () => {
+  it('should prerender next stories', async () => {
     buildStoryPlayer(3);
-    manager.loadPlayers();
+    await manager.loadPlayers();
 
     const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
@@ -141,9 +156,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       'and give it to a new story that is distance <= 1 when navigating',
     async () => {
       buildStoryPlayer(4);
-      const stories = toArray(playerEl.querySelectorAll('a'));
-
       await manager.loadPlayers();
+      await nextTick();
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
 
       swipeLeft();
       expect(stories[0][IFRAME_IDX]).to.eql(0);
@@ -160,9 +176,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       'and give it to a new story that is distance <= 1 when navigating backwards',
     async () => {
       buildStoryPlayer(4);
-      const stories = toArray(playerEl.querySelectorAll('a'));
-
       await manager.loadPlayers();
+      await nextTick();
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
 
       swipeLeft();
       swipeLeft();
@@ -225,6 +242,46 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
       expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
       expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    });
+  });
+
+  describe('Cache URLs', () => {
+    it('should transform origin to cache url when specified by the publisher', async () => {
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'cdn.ampproject.org');
+      await manager.loadPlayers();
+
+      await nextTick();
+
+      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+
+      expect(storyIframe.getAttribute('src')).to.equals(
+        DEFAULT_CACHE_URL +
+          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      );
+    });
+
+    it('should respect original url when there is no amp-cache value', async () => {
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL);
+      await manager.loadPlayers();
+
+      await nextTick();
+
+      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+
+      expect(storyIframe.getAttribute('src')).to.equals(
+        DEFAULT_ORIGIN_URL +
+          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
+      );
+    });
+
+    it('should throw error when invalid url is provided', async () => {
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org');
+
+      return expect(() => manager.loadPlayers()).to.throw(
+        /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
+      );
     });
   });
 });
