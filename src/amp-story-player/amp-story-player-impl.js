@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import * as ampCaches from '../../build-system/global-configs/caches.json';
+import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
 import {
   addParamsToUrl,
   getFragment,
+  isProxyOrigin,
   parseUrlWithA,
   removeFragment,
 } from '../url';
@@ -43,6 +46,9 @@ const IframePosition = {
   CURRENT: 0,
   NEXT: 1,
 };
+
+/** @const @type {!Array<string>} */
+const SUPPORTED_CACHES = ampCaches.caches.map((cache) => cache.cacheDomain);
 
 /**
  * @enum {number}
@@ -231,13 +237,13 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeHandshake_(story, iframeEl) {
-    const frameOrigin = this.getEncodedLocation_(story.href).origin;
-
-    return Messaging.waitForHandshakeFromDocument(
-      this.win_,
-      iframeEl.contentWindow,
-      frameOrigin
-    );
+    return this.maybeGetCacheUrl_(story.href).then((url) => {
+      return Messaging.waitForHandshakeFromDocument(
+        this.win_,
+        iframeEl.contentWindow,
+        this.getEncodedLocation_(url).origin
+      );
+    });
   }
 
   /**
@@ -410,9 +416,36 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
-    const {href} = this.getEncodedLocation_(story.href, visibilityState);
+    this.maybeGetCacheUrl_(story.href).then((url) => {
+      const {href} = this.getEncodedLocation_(url, visibilityState);
+      iframe.setAttribute('src', href);
+    });
+  }
 
-    iframe.setAttribute('src', href);
+  /**
+   * Gets cache url, unless amp-cache is not defined.
+   * @param {string} url
+   * @return {!Promise<string>}
+   * @private
+   */
+  maybeGetCacheUrl_(url) {
+    const ampCache = this.element_.getAttribute('amp-cache');
+
+    if (!ampCache || isProxyOrigin(url)) {
+      return Promise.resolve(url);
+    }
+
+    if (!SUPPORTED_CACHES.includes(ampCache)) {
+      throw new Error(
+        `Unsupported cache, use one of following: ${SUPPORTED_CACHES}`
+      );
+    }
+
+    return ampToolboxCacheUrl
+      .createCacheUrl(ampCache, url, 'viewer' /** servingType */)
+      .then((cacheUrl) => {
+        return cacheUrl;
+      });
   }
 
   /**
