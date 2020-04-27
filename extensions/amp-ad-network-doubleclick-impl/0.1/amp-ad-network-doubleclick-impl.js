@@ -23,13 +23,6 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
   AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
@@ -52,6 +45,7 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {
   AmpA4A,
+  ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
