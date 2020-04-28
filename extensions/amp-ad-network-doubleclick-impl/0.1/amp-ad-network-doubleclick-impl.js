@@ -492,6 +492,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
+    const {consentString, gdprApplies} = consentTuple;
+
     return {
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -503,7 +505,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
-      'gdpr_consent': consentTuple.consentString,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
     };
   }
 
