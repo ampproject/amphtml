@@ -45,6 +45,7 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {
   AmpA4A,
+  ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
@@ -291,6 +292,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
+    /** @protected {ConsentTupleDef} */
+    this.consentTuple = {};
+
     /**
      * The random subdomain to load SafeFrame from, if SafeFrame is
      * being loaded from a random subdomain and if the subdomain
@@ -298,9 +302,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {?string}
      */
     this.safeFrameRandomSubdomain_ = null;
-
-    /** @protected {?CONSENT_POLICY_STATE} */
-    this.consentState = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -483,18 +484,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?ConsentTupleDef} consentTuple
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState, instances) {
+  getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa':
-        consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
           ? 1
           : null,
       'gdfp_req': '1',
@@ -502,6 +503,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
+      'gdpr_consent': consentTuple.consentString,
     };
   }
 
@@ -566,11 +568,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {ConsentTupleDef} consentTuple
    * @visibleForTesting
    */
-  populateAdUrlState(consentState) {
-    this.consentState = consentState;
+  populateAdUrlState(consentTuple) {
+    this.consentTuple = consentTuple;
     // Allow for pub to override height/width via override attribute.
     const width =
       Number(this.element.getAttribute('data-override-width')) ||
@@ -599,12 +601,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    const consentTuple = opt_consentTuple || {};
     if (
-      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -620,7 +623,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
-    this.populateAdUrlState(consentState);
+    this.populateAdUrlState(consentTuple);
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -642,7 +645,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentState),
+          this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
         this.experimentIds
@@ -966,7 +969,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraDeferred = null;
     this.qqid_ = null;
     this.shouldSandbox_ = false;
-    this.consentState = null;
+    this.consentTuple = {};
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();
   }
@@ -1816,7 +1819,7 @@ function constructSRARequest_(a4a, instances) {
         Object.assign(
           blockParameters,
           googPageLevelParameters,
-          instances[0].getPageParameters(instances[0].consentState, instances)
+          instances[0].getPageParameters(instances[0].consentTuple, instances)
         ),
         startTime
       );
