@@ -566,6 +566,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
+     * Should only be called by Resources.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
      * @param {boolean} sizeChanged
      */
@@ -580,6 +581,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
      * on the BaseElement implementation.
+     * Should only be called by Resources.
      * @param {boolean} sizeChanged
      */
     onMeasure(sizeChanged = false) {
