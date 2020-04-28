@@ -524,7 +524,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const audioEl = upgradeBackgroundAudio(this.element);
+    // Do not loop if the audio is used to auto-advance.
+    const loop =
+      this.element.getAttribute('id') !==
+      this.element.getAttribute('auto-advance-after');
+    const audioEl = upgradeBackgroundAudio(this.element, loop);
     if (audioEl) {
       this.mediaPoolPromise_.then((mediaPool) => {
         this.registerMedia_(mediaPool, dev().assertElement(audioEl));
