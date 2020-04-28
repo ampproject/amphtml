@@ -1,8 +1,10 @@
 /**
- * Copyright 2020 The AMP Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -25,7 +27,7 @@ describe('humanReadableRtv', () => {
     ['032004172112280', '04-17 Beta (2112+280)'],
     ['042004210608300', '04-21 Nightly (0608+300)'],
     ['internalRuntimeVersion', 'internalRuntimeVersion'],
-  ].forEach(([rtv, str]) => {
+  ].forEach(({0: rtv, 1: str}) => {
     it(`converts "${rtv}" to "${str}"`, () => {
       expect(humanReadableRtv(rtv)).to.equal(str);
     });

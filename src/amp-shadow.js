@@ -26,6 +26,7 @@ import {adoptShadowMode} from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
+import {getMode} from './mode';
 import {humanReadableRtv} from './utils/human-readable-rtv';
 import {
   installBuiltinElements,
@@ -64,7 +65,7 @@ if (self.console) {
   const versionString = humanReadableRtv(getMode(self).rtvVersion);
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()} – ${versionString}`,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()} – ${versionString}`
   );
 }
 self.document.documentElement.setAttribute(
