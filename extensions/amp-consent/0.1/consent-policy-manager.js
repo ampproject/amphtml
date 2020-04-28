@@ -179,7 +179,8 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const prevConsentStr = this.consentString_;
+    const {consentString_: prevConsentStr} = this;
+
     this.consentString_ = consentStr;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
@@ -265,6 +266,20 @@ export class ConsentPolicyManager {
       .then(() => this.ConsentStateManagerPromise_)
       .then((manager) => {
         return manager.getConsentInstanceSharedData();
+      });
+  }
+
+  /**
+   * Get gdprApplies value of a policy.
+   *
+   * @param {string} policyId
+   * @return {!Promise<Object>}
+   */
+  getGdprApplies(policyId) {
+    return this.whenPolicyResolved(policyId)
+      .then(() => this.ConsentStateManagerPromise_)
+      .then((manager) => {
+        return manager.getConsentInstanceGdprApplies();
       });
   }
 
