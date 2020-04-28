@@ -621,7 +621,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
-  tag: "A"
+  tag: "A" # `show-tooltip` attribute is whitelisted in validator-main.protoascii.
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
