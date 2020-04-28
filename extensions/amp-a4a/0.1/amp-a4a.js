@@ -137,6 +137,12 @@ export let SizeInfoDef;
     }} */
 export let CreativeMetaDataDef;
 
+/** @typedef {{
+      consentState: (?CONSENT_POLICY_STATE|undefined),
+      consentString: (?string|undefined),
+    }} */
+export let ConsentTupleDef;
+
 /**
  * Name of A4A lifecycle triggers.
  * @enum {string}
@@ -695,7 +701,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentString = consentResponse[1];
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          consentState,
+          {consentState, consentString},
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
       })
@@ -1238,11 +1244,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {?CONSENT_POLICY_STATE} unusedConsentState
+   * @param {!ConsentTupleDef=} opt_ununsedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
+  getAdUrl(opt_ununsedConsentTuple, opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 

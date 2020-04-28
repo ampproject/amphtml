@@ -836,31 +836,45 @@ describes.realWin(
       });
 
       it('should return empty string if unknown consentState', () =>
-        expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(
-          ''
-        ));
+        expect(
+          impl.getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        ).to.eventually.equal(''));
 
       it('should include npa=1 if unknown consent & explicit npa', () => {
         impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-        return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then((url) => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        });
+        return impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          });
       });
 
       it('should include npa=1 if insufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then((url) => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should not include not npa, if sufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then((url) => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
 
       it('should not include npa, if not required consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then((url) => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
+
+      it('should include gdpr_consent, if TC String is provided', () =>
+        impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
         }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
