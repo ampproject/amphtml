@@ -213,6 +213,7 @@ tags: {  # <amp-list>
     value: "always"
     value: "no"
     value: "refresh"
+    value: "refresh-evaluate" # Experimental.
   }
   attrs: {
     name: "diffable"
