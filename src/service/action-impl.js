@@ -583,17 +583,11 @@ export class ActionService {
    * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
    */
   setWhitelist(whitelist) {
-    this.whitelist_ = whitelist.filter((value) => {
-      const hasValidProperties = value.tagOrTarget && value.method;
-      if (!hasValidProperties) {
-        user().warn(
-          TAG_,
-          'Unexpected entry missing properties `tagOrTarget` and `method` was not whitelisted: %s',
-          value
-        );
-      }
-      return hasValidProperties;
-    });
+    devAssert(
+      whitelist.every((v) => v.tagOrTarget && v.method),
+      'Action whitelist entries should be of shape { tagOrTarget: string, method: string }'
+    );
+    this.whitelist_ = whitelist;
   }
 
   /**
@@ -601,16 +595,13 @@ export class ActionService {
    * @param {string} tagOrTarget The tag or target to whitelist, e.g.
    *     'AMP-LIST', '*'.
    * @param {string|Array<string>} methods The method(s) to whitelist, e.g. 'show', 'hide'.
-   * @param {Array<string>=} opt_allowedFormats
+   * @param {Array<string>=} opt_forFormat
    */
-  addToWhitelist(tagOrTarget, methods, opt_allowedFormats) {
+  addToWhitelist(tagOrTarget, methods, opt_forFormat) {
     // TODO: When it becomes possible to getFormat(),
     // we can store `format_` instead of `isEmail_` and check
-    // (opt_allowedFormats && !opt_allowedFormats.includes(this.format_))
-    if (
-      opt_allowedFormats &&
-      opt_allowedFormats.includes('email') !== this.isEmail_
-    ) {
+    // (opt_forFormat && !opt_forFormat.includes(this.format_))
+    if (opt_forFormat && opt_forFormat.includes('email') !== this.isEmail_) {
       return;
     }
     if (!this.whitelist_) {

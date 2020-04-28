@@ -1651,10 +1651,10 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
 });
 
 describes.realWin(
-  'Action whitelist on components',
+  'Action whitelisting',
   {
     amp: {
-      runtimeOn: true,
+      ampdoc: 'single',
     },
   },
   (env) => {
@@ -1762,25 +1762,22 @@ describes.realWin(
       );
     });
 
-    it('should ignore unparseable whitelist entries', () => {
+    it('should throw error with unparseable whitelist entries', () => {
       action = new ActionService(env.ampdoc, env.win.document);
-      action.setWhitelist([
-        {tagOrTarget: 'AMP', method: 'pushState'},
-        {invalidEntry: 'invalid'},
-        {},
-        {tagOrTarget: 'AMP', method: 'setState'},
-        {tagOrTarget: '*', method: 'show'},
-        {tagOrTarget: '*'},
-        {method: 'show'},
-      ]);
-      expect(action.whitelist_).to.deep.equal([
-        {tagOrTarget: 'AMP', method: 'pushState'},
-        {tagOrTarget: 'AMP', method: 'setState'},
-        {tagOrTarget: '*', method: 'show'},
-      ]);
-      const i = getActionInvocation(target, 'setState', 'AMP');
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
+      expect(() =>
+        action.setWhitelist([
+          {tagOrTarget: 'AMP', method: 'pushState'},
+          {invalidEntry: 'invalid'},
+          {},
+          {tagOrTarget: 'AMP', method: 'setState'},
+          {tagOrTarget: '*', method: 'show'},
+          {tagOrTarget: '*'},
+          {method: 'show'},
+        ])
+      ).to.throw(
+        'Action whitelist entries should be of shape { tagOrTarget: string, method: string }'
+      );
+      expect(action.whitelist_).to.be.null;
     });
 
     describe('email documents', () => {
