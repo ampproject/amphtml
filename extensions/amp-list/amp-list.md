@@ -220,13 +220,6 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
-[filter formats="websites, stories"]
-The following feature is available with the `amp-list-layout-container` [experiment](https://amp.dev/documentation/guides-and-tutorials/learn/experimental/) enabled.
-[/filter]<!-- formats="websites, stories" -->
-`<amp-list>` can also be initialized with `layout="CONTAINER"` with two caveats: (1) A list with changing contents must have a determinable initial height from a fixed-height placeholder, and (2) once content changes inside the list, resize will occur _only_ if it does not cause content jumping. This is enforced by locking the height of the list prior to rendering contents and conditionally unlocking it accordingly.
-
-When an `<amp-list>` is initialized with `layout="CONTAINER"`, the publisher is opting into the managed resizing behavior described above. This means that other dynamic resizing mechanisms such as a mutation to `[is-layout-container]` and the `changeToLayoutContainer` action will be ineffective.
-
 ### Initialization from amp-state
 
 In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
