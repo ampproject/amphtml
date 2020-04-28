@@ -655,7 +655,5 @@ amp4email_feature_tests/css_declarations.html:573:0 The property 'barometric-pre
 amp4email_feature_tests/css_declarations.html:574:0 The property 'degrees-celsius' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
 |  <!-- Vendor Prefix -->
 |  <b style="-webkit-user-select: foo;"></b>
->> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:576:0 The property '-webkit-user-select' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
 |  </body>
 |  </html>
