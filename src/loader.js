@@ -46,7 +46,7 @@ export function createLoaderElement(
   element,
   elementWidth,
   elementHeight,
-  startTime = Date.now()
+  startTime = ampDoc.win.Date.now()
 ) {
   // We create the loader root element up front, since it is needed
   // synchronously. We create the actual element with animations when the
@@ -54,9 +54,8 @@ export function createLoaderElement(
   const loaderRoot = element.ownerDocument.createElement('div');
 
   getLoaderServicePromise(ampDoc, element).then((loaderService) => {
-    const endTime = Date.now();
+    const endTime = ampDoc.win.Date.now();
     const initDelay = endTime - startTime;
-
     loaderService.initializeLoader(
       element,
       loaderRoot,

@@ -1,3 +1,3 @@
 {
-  "plugins": ["../../../../../babel-plugin-transform-prune-namespace"]
+  "plugins": ["../../../.."]
 }

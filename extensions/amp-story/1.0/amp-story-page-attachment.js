@@ -97,6 +97,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     });
 
     toggle(this.element, true);
+    this.element.setAttribute('aria-live', 'assertive');
   }
 
   /**
@@ -106,7 +107,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildInline_() {
     this.headerEl_.appendChild(
       htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button"
+          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
               role="button">
           </span>`
     );
@@ -149,19 +150,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Use an anchor element to make this a real link in vertical rendering.
     const link = htmlFor(this.element)`
     <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-      <span class="i-amphtml-story-page-attachment-remote-domain"></span>
+      <span class="i-amphtml-story-page-attachment-remote-title"></span>
       <span class="i-amphtml-story-page-attachment-remote-icon"></span>
     </a>`;
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    const urlService = Services.urlForDoc(this.element);
-    const domain = urlService.getSourceOrigin(
-      this.element.getAttribute('href')
-    );
     this.contentEl_.querySelector(
-      '.i-amphtml-story-page-attachment-remote-domain'
-    ).textContent = domain;
+      '.i-amphtml-story-page-attachment-remote-title'
+    ).textContent =
+      this.element.getAttribute('data-title') ||
+      Services.urlForDoc(this.element).getSourceOrigin(
+        this.element.getAttribute('href')
+      );
   }
 
   /**
@@ -205,6 +206,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       },
       true /** useCapture */
     );
+
+    // Closes the remote attachment drawer when navigation deeplinked to an app.
+    if (this.type_ === AttachmentType.REMOTE) {
+      const ampdoc = this.getAmpDoc();
+      ampdoc.onVisibilityChanged(() => {
+        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+    }
   }
 
   /**

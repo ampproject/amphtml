@@ -430,17 +430,6 @@ export class BaseElement {
   }
 
   /**
-   * Allows for rendering outside of the constraint set by renderOutsideViewport
-   * so long task scheduler is idle.  Integer values less than those returned
-   * by renderOutsideViewport have no effect.  Subclasses can override (default
-   * is disabled).
-   * @return {boolean|number}
-   */
-  idleRenderOutsideViewport() {
-    return false;
-  }
-
-  /**
    * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
@@ -722,14 +711,12 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the loading indicator. This function must only
-   * be called inside a mutate context.
+   * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} opt_force
    * @public @final
    */
-  toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, {force: !!opt_force});
+  toggleLoading(state) {
+    this.element.toggleLoading(state);
   }
 
   /**
@@ -948,6 +935,21 @@ export class BaseElement {
       opt_element || this.element,
       measurer,
       mutator
+    );
+  }
+
+  /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
     );
   }
 

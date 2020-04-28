@@ -53,7 +53,7 @@ export class CtaLinkComponent {
    * @override
    * */
   assertValidity(ctaLinksJson, element) {
-    const links = ctaLinksJson['links'];
+    const links = /** @type {!Array} */ (ctaLinksJson['links']);
     userAssert(
       links && isArray(links) && links.length > 0,
       'CTA link component must be an array and contain at least one link ' +
@@ -100,7 +100,7 @@ export class CtaLinkComponent {
         <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText"></div>
       </a>
     `;
-    ctaLinksData['links'].forEach((currentLink) => {
+    /** @type {!Array} */ (ctaLinksData['links']).forEach((currentLink) => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(
         el,

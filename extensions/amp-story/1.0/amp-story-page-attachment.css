@@ -37,19 +37,25 @@
   font-size: 15px !important;
   justify-content: space-between !important;
   line-height: 48px !important;
+  text-decoration: none !important;
 }
 
-.i-amphtml-story-page-attachment-remote-domain {
+.i-amphtml-story-page-attachment-remote-title {
   max-width: calc(100% - 30px /* 24px icon + 6px margin */) !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-remote-title {
+  color: #9AA0A6 !important;
 }
 
 .i-amphtml-story-page-attachment-remote-icon {
   display: block !important;
   height: 24px !important;
   width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#9F9F9F"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+  padding: 0px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#9AA0A6"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
 }
 
 /** amp-story-page open attachment message. */

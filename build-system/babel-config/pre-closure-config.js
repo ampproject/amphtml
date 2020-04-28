@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getDevDependencies} = require('./dev-dependencies');
 const {getReplacePlugin} = require('./replace-plugin');
 
 /**
@@ -58,6 +57,7 @@ function getPreClosureConfig() {
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
@@ -80,9 +80,9 @@ function getPreClosureConfig() {
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
       : null,
-    isCheckTypes
-      ? './build-system/babel-plugins/babel-plugin-transform-simple-object-destructure'
-      : './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    !isCheckTypes
+      ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
+      : null,
     argv.esm
       ? [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
@@ -93,7 +93,6 @@ function getPreClosureConfig() {
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
-  const devDependencies = getDevDependencies();
   const presetEnv = [
     '@babel/preset-env',
     {
@@ -105,7 +104,6 @@ function getPreClosureConfig() {
   const preClosurePresets = argv.esm ? [presetEnv] : [];
   const preClosureConfig = {
     compact: false,
-    ignore: devDependencies,
     plugins: preClosurePlugins,
     presets: preClosurePresets,
     retainLines: true,

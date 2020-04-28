@@ -804,6 +804,8 @@ function polyfill(win) {
   // And because `HTMLElementPolyfill` extends from `HTMLElement`, it doesn't
   // have a `.call`! So we need to manually install it.
   if (!HTMLElementPolyfill.call) {
+    HTMLElementPolyfill.apply = win.Function.apply;
+    HTMLElementPolyfill.bind = win.Function.bind;
     HTMLElementPolyfill.call = win.Function.call;
   }
 }
