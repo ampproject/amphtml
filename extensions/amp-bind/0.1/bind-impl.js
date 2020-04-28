@@ -443,7 +443,8 @@ export class Bind {
    * `addedElements`.
    *
    * If `options.update` is true, evaluates and applies changes to
-   * `addedElements` after adding new bindings.
+   * `addedElements` after adding new bindings. If "evaluate",
+   * it skips the actual DOM update but caches the expression results.
    *
    * If `options.fast` is true, uses a faster scan method that requires
    * (1) elements with bindings to have the attribute `i-amphtml-binding` and
@@ -451,7 +452,7 @@ export class Bind {
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {BindRescanOptionsDef=} options
+   * @param {!BindRescanOptionsDef=} options
    * @return {!Promise} Resolved when all operations complete. If they don't
    * complete within `options.timeout` (default=2000), promise is rejected.
    */
@@ -490,7 +491,10 @@ export class Bind {
     return rescanPromise.then(() => {
       if (options.update) {
         return this.evaluate_().then((results) =>
-          this.apply_(results, {constrain: addedElements})
+          this.apply_(results, {
+            constrain: addedElements,
+            evaluateOnly: options.update === 'evaluate',
+          })
         );
       }
     });
@@ -1225,9 +1229,12 @@ export class Bind {
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {Object} opts options bag
-   * @param {boolean=} opts.skipAmpState
-   * @param {Array<!Element>=} opts.constrain restricts the application to children of specified elements.
+   * @param {!Object} opts
+   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
+   * @param {Array<!Element>=} opts.constrain If provided, restricts application
+   *   to children of the provided elements.
+   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
+   *   result on each bound element and skips the actual DOM updates.
    * @return {!Promise}
    * @private
    */
@@ -1250,7 +1257,13 @@ export class Bind {
         return;
       }
 
-      promises.push(this.applyBoundElement_(results, boundElement));
+      const {element, boundProperties} = boundElement;
+      const updates = this.calculateUpdates_(boundProperties, results);
+      // If this is a "evaluate only" application, skip the DOM mutations.
+      if (opts.evaluateOnly) {
+        return;
+      }
+      promises.push(this.applyUpdatesToElement_(element, updates));
     });
 
     return Promise.all(promises);
@@ -1258,13 +1271,11 @@ export class Bind {
 
   /**
    * Applies expression results to a single BoundElementDef.
-   * @param {Object<string, BindExpressionResultDef>} results
-   * @param {BoundElementDef} boundElement
+   * @param {!Element} element
+   * @param {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>} updates
    * @return {!Promise}
    */
-  applyBoundElement_(results, boundElement) {
-    const {element, boundProperties} = boundElement;
-    const updates = this.calculateUpdates_(boundProperties, results);
+  applyUpdatesToElement_(element, updates) {
     if (updates.length === 0) {
       return Promise.resolve();
     }
