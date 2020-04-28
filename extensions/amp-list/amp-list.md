@@ -425,8 +425,6 @@ For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.htm
 **Important** When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the hight changes caused by `<amp-list>`. Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead
 [/tip]
 
-This feature is treated as distinct from the experimental feature allowing `<amp-list>` to be initialized with `layout="CONTAINER"`, since these engage in conflicting forms of manual size management on the `amp-list`.
-
 ### Attributes
 
 #### load-more (mandatory)
