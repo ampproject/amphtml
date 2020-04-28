@@ -642,6 +642,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: (callback) => callback(),
+      measure: (callback) => callback(),
       measurePromise: (callback) => Promise.resolve(callback()),
     };
   });
