@@ -137,7 +137,7 @@ export class AmpList extends AMP.BaseElement {
      * (1) requiring a placeholder to detect initial sizing and
      * (2) fixing height on content change to prevent content jumping
      *
-     * TODO: This configuration should eventually allow resizing to
+     * TODO(#26873): This configuration should eventually allow resizing to
      * contents on user interaction with an AMP action that mimics the
      * spirit of "changeToLayoutContainer" but more aptly named.
      * @private {boolean}
