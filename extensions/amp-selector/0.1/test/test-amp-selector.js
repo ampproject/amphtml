@@ -15,10 +15,7 @@
  */
 
 import '../amp-selector';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Keys} from '../../../../src/utils/key-codes';
@@ -1468,19 +1465,27 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
 
       ['clear', 'selectDown', 'selectUp', 'toggle'].forEach((method) => {
-        const i = new ActionInvocation(
+        action.execute(
           element,
           method,
-          /* args */ null,
+          null,
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH,
-          'tap',
-          element.tagName
+          ActionTrust.HIGH
         );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
+        expect(spy).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
       });
     });
   }

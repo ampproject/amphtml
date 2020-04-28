@@ -15,10 +15,7 @@
  */
 
 import '../amp-lightbox';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 import {
@@ -62,33 +59,29 @@ describes.realWin(
       element.getDefaultActionAlias = env.sandbox.stub();
       await whenUpgradedToCustomElement(element);
 
-      let i = new ActionInvocation(
-        element,
-        'open',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
-      );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
-
-      i = new ActionInvocation(
-        element,
-        'close',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
-      );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
+      ['open', 'close'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(spy).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
+      });
     });
   }
 );

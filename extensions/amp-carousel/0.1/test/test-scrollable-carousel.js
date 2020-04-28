@@ -15,10 +15,7 @@
  */
 
 import '../amp-carousel';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 import {
@@ -526,33 +523,38 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       await element.whenBuilt();
 
-      let i = new ActionInvocation(
+      action.execute(
         element,
         'goToSlide',
-        /* args */ null,
+        null,
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
+        ActionTrust.HIGH
       );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
+      expect(spy).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'goToSlide',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
 
-      i = new ActionInvocation(
+      env.sandbox.stub(action, 'error_');
+      action.execute(
         element,
         'toggleAutoplay',
-        /* args */ null,
+        null,
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
+        ActionTrust.HIGH
       );
-      env.sandbox.stub(action, 'error_');
-      expect(action.invoke_(i)).to.be.null;
       expect(action.error_).to.be.calledWithMatch(
         /"AMP.CAROUSEL.toggleAutoplay" is not whitelisted/
       );

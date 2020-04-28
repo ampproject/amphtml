@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
@@ -1295,33 +1292,29 @@ describes.realWin(
       await whenUpgradedToCustomElement(element);
       env.sandbox.stub(element.implementation_, 'fetchList_');
 
-      let i = new ActionInvocation(
-        element,
-        'changeToLayoutContainer',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
-      );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
-
-      i = new ActionInvocation(
-        element,
-        'refresh',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
-      );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
+      ['changeToLayoutContainer', 'refresh'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(spy).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
+      });
     });
   }
 );

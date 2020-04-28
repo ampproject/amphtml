@@ -16,10 +16,7 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
@@ -757,23 +754,32 @@ describes.realWin(
       env.win.document.body.appendChild(element);
       const spy = env.sandbox.spy();
       element.enqueAction = spy;
-      element.getDefaultActionAlias = env.sandbox.stub().returns({'items': []});
+      element.getDefaultActionAlias = env.sandbox.stub();
       await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
 
       ['open', 'close', 'toggle'].forEach((method) => {
-        const i = new ActionInvocation(
+        action.execute(
           element,
           method,
-          /* args */ null,
+          null,
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH,
-          'tap',
-          element.tagName
+          ActionTrust.HIGH
         );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
+        expect(spy).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
       });
     });
   }

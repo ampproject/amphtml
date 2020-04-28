@@ -17,10 +17,7 @@
 import '../amp-image-lightbox';
 import * as dom from '../../../../src/dom';
 import * as lolex from 'lolex';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/utils/key-codes';
@@ -270,19 +267,27 @@ describes.realWin(
       await dom.whenUpgradedToCustomElement(element);
 
       element.implementation_.buildLightbox_();
-      const i = new ActionInvocation(
+      action.execute(
         element,
         'open',
-        /* args */ null,
+        null,
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH,
-        'tap',
-        element.tagName
+        ActionTrust.HIGH
       );
-      action.invoke_(i);
-      expect(spy).to.be.calledWithExactly(i);
+      expect(spy).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'open',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
     });
   }
 );

@@ -17,10 +17,7 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {
-  ActionInvocation,
-  ActionService,
-} from '../../../../src/service/action-impl';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
@@ -3002,36 +2999,41 @@ describes.repeated(
           element.getDefaultActionAlias = env.sandbox.stub();
           const form = new AmpForm(element, 'test-id');
           const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
-          let i = new ActionInvocation(
+          action.execute(
             element,
             'clear',
-            /* args */ null,
+            null,
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH,
-            'tap',
-            element.tagName
+            ActionTrust.HIGH
           );
-          action.invoke_(i);
           expect(clearSpy).to.be.called;
 
           env.sandbox.stub(form, 'submit_');
           const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
-          i = new ActionInvocation(
+          action.execute(
             element,
             'submit',
-            /* args */ null,
+            null,
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH,
-            'tap',
-            element.tagName
+            ActionTrust.HIGH
           );
-          action.invoke_(i);
           await whenCalled(submitSpy);
-          expect(submitSpy).to.be.calledWithExactly(i);
+          expect(submitSpy).to.be.calledWith(
+            env.sandbox.match({
+              actionEventType: '?',
+              args: null,
+              caller: 'caller',
+              event: 'event',
+              method: 'submit',
+              node: element,
+              source: 'source',
+              trust: ActionTrust.HIGH,
+            })
+          );
         });
 
         describe('Async Inputs', () => {
