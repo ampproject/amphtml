@@ -38,12 +38,12 @@
     </script>
   </amp-state>
 
-  <h3>Remote src (URL)</h3>
+  <h3>setState() for amp-list[src]: Remote (URL)</h3>
   <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
   <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
   <button on="tap:AMP.setState({src: otherFoods})">Show Other Foods</button>
 
-  <h3>Local src (JSON)</h3>
+  <h3>setState() for amp-list[src]: Local (JSON)</h3>
   <button on="tap:AMP.setState({
     src: [{
       name: 'pizza',
@@ -70,7 +70,7 @@
 
   <button on="tap:AMP.setState({src: (src || []).concat([{name: 'burger', quantity: 1, unitPrice: random()}])})">Add burger</button>
 
-  <h3>Other</h3>
+  <h3>setState() for children of amp-list</h3>
   <button on="tap:AMP.setState({foo: foo+1})">Increment foo</button>
 
   <hr>
@@ -84,22 +84,32 @@
   </template>
 
   <h3>amp-list:not([binding])</h3>
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
+  <h4>Expected: The same behavior as [binding=always].</h4>
+  <amp-list src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>amp-list[binding=always]</h3>
-  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
+  <h4>Expected: The "1+1" and "foo" items should be "2" and "bar" on page load, respectively.</h4>
+  <amp-list binding="always" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>amp-list[binding=refresh]</h3>
-  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
+  <h4>Expected: The "1+1" and "foo" items should be "?" on page load.</h4>
+  <amp-list binding="refresh" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
+    <div placeholder>(Placeholder)</div>
+  </amp-list>
+
+  <h3>amp-list[binding=refresh-evaluate]</h3>
+  <h4>Expected: Tapping "Increment foo" should update "foo" items but _not_ the "1+1" items.</h4>
+  <amp-list binding="refresh-evaluate" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>amp-list[binding=no]</h3>
-  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="600" height="100" template="my-template">
+  <h4>Expected: Tapping "Increment foo" should have no effect.</h4>
+  <amp-list binding="no" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" width="360" height="60" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 
@@ -112,7 +122,7 @@
   </ol>
   <p>Expected: The amp-list's children should update their "Foo:" values.</p>
   <h3>amp-list vs. amp-bind race condition test</h3>
-  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" width="600" height="100" template="my-template">
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" width="360" height="60" template="my-template">
     <div placeholder>(Placeholder)</div>
   </amp-list>
 </body>

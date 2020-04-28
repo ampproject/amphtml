@@ -1153,6 +1153,43 @@ describes.repeated(
             });
           });
 
+          describe('binding="refresh-evaluate"', () => {
+            beforeEach(() => {
+              element.setAttribute('binding', 'refresh-evaluate');
+            });
+
+            it('should rescan() with {update: "evaluate"} before FIRST_MUTATE', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly([child], [], {
+                update: 'evaluate',
+                fast: true,
+              });
+            });
+
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
+              bind.signals = () => {
+                return {get: (name) => name === 'FIRST_MUTATE'};
+              };
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
+            });
+          });
+
           describe('binding="no"', () => {
             beforeEach(() => {
               element.setAttribute('binding', 'no');

@@ -1363,6 +1363,31 @@ describe
             // The `toRemove` element's bindings should have been removed.
             expect(toRemove.textContent).to.not.equal('bar');
           });
+
+          it('{update: "evaluate"}', async () => {
+            toAdd = createElement(env, /* container */ null, '[text]="x"');
+            const options = {update: 'evaluate', fast: false};
+
+            // `toRemove` is updated normally before removal.
+            await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // `toAdd` should be scanned but not updated. With {update: 'evaluate'},
+            // its expression "x" is now cached on the element.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar', x: '1'});
+            // `toAdd` should _not_ update since the value of its expression "x"
+            // hasn't changed (due to caching).
+            expect(toAdd.textContent).to.equal('');
+            // `toRemove`'s bindings have been removed and remains unchanged.
+            expect(toRemove.textContent).to.equal('foo');
+
+            await onBindReadyAndSetState(env, bind, {x: '2'});
+            // toAdd changes now that its expression "x"'s value has changed.
+            expect(toAdd.textContent).to.equal('2');
+          });
         });
 
         describe('AmpEvents.FORM_VALUE_CHANGE', () => {
