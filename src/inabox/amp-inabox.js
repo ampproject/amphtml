@@ -28,6 +28,7 @@ import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {humanReadableRtv} from '../utils/human-readable-rtv';
 import {installAmpdocServicesForInabox} from './inabox-services';
 import {
   installBuiltinElements,
@@ -132,7 +133,7 @@ startupChunk(self.document, function initial() {
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  const versionString = humanRtv(getMode(self).rtvVersion);
+  const versionString = humanReadableRtv(getMode(self).rtvVersion);
   (console.info || console.log).call(
     console,
     `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()} – ${versionString}`,

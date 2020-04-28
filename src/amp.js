@@ -27,6 +27,7 @@ import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {getMode} from './mode';
+import {humanReadableRtv} from './utils/human-readable-rtv';
 import {
   installAmpdocServices,
   installBuiltinElements,
@@ -169,7 +170,7 @@ if (shouldMainBootstrapRun) {
   // tag to give some information that can be used in error reports.
   // (At least by sophisticated users).
   if (self.console) {
-    const versionString = humanRtv(getMode(self).rtvVersion);
+    const versionString = humanReadableRtv(getMode(self).rtvVersion);
     (console.info || console.log).call(
       console,
       `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()} – ${versionString}`,
