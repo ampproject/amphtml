@@ -191,14 +191,5 @@
     "vinyl-source-stream": "2.0.0",
     "vinyl-sourcemaps-apply": "0.2.1",
     "watchify": "3.11.1"
-  },
-  "filesize": {
-    "track": [
-      "dist/*.js",
-      "dist/v0/*-?.?.js",
-      "dist/*.mjs",
-      "dist/v0/*-?.?.mjs"
-    ],
-    "trackFormat": ["brotli"]
   }
 }
