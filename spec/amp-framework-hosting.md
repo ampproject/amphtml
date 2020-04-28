@@ -19,13 +19,15 @@ When the AMP framework is built (either by you or by the AMP Project), a 13-digi
 
 A more complete picture of the conventions adopted by the AMP Project for the version and runtime version is below. This is more than you need to get started with hosting the AMP framework, but serves as a good reference in case you want to expand your hosting capabilities.
 
-- Version ([#16631](https://github.com/ampproject/amphtml/pull/16631)): the commit time of the last commit in the active branch
+- Version ([#16631](https://github.com/ampproject/amphtml/pull/16631) and [#27848](https://github.com/ampproject/amphtml/pull/27848)): the commit time of the last commit in the active branch
 
   ```
-  TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S
+  TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M
   ```
 
-  with a trailing single-digit build code (defaults to `0`, but can be arbitrarily changed). This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
+  with three trailing digits indicating the number of cherry-picks included in the release. This version corresponds to the release versions found on [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases).
+
+  Note: Prior to 2020-04-25, the version was based on date/time format `%y%m%d%H%M%S` with a single trailing digit – typically `0`, but could be change arbitrarily.
 
 - Runtime version (rtv): the version prefixed by a 2-digit config code:
 
