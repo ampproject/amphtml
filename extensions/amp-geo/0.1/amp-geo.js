@@ -240,9 +240,15 @@ export class AmpGeo extends AMP.BaseElement {
 
     return this.mode_ !== mode.GEO_API
       ? Promise.resolve()
-      : this.fetchCountry_().then((country) => {
-          if (country) {
+      : this.fetchCountry_().then((data) => {
+          if (data) {
+            const {country, subdivision} = data;
+            // Country is required and guaranteed to exist if data is available.
             this.country_ = country;
+            // Subdivision is optional and only us-ca is currently supported.
+            if (subdivision && `${country}-${subdivision}` === US_CA_CODE) {
+              this.subdivision_ = US_CA_CODE;
+            }
           } else {
             // if API request fails, leave the country at the default 'unknown'
             this.error_ = true;
@@ -277,7 +283,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Fetch country from API defined in config.urls
    *
-   * JSON schema of Geo API response - version 0.1:
+   * JSON schema of Geo API response - version 0.2:
    * {
    *   "$schema": "http://json-schema.org/draft-07/schema#",
    *   "type": "object",
@@ -287,6 +293,12 @@ export class AmpGeo extends AMP.BaseElement {
    *       "title": "ISO 3166-1 alpha-2 (case insensitive) country code of client request",
    *       "default": "",
    *       "pattern": "^[a-zA-Z]{2}$"
+   *     },
+   *     "subdivision": {
+   *       "type": "string",
+   *       "title": "Subdivision part of ISO 3166-2 (case insensitive) country-subdivision code of client request",
+   *       "default": "",
+   *       "pattern": "^[a-zA-Z0-9]{1,3}$"
    *     }
    *   },
    *   "required": [
@@ -294,12 +306,18 @@ export class AmpGeo extends AMP.BaseElement {
    *   ]
    * }
    *
-   * Sample response:
+   * Sample response - country only:
    * {
    *   "country": "de"
    * }
    *
-   * @return {Promise<?string>}
+   * Sample response - country and subdivision:
+   * {
+   *   "country": "us",
+   *   "subdivision": "ca"
+   * }
+   *
+   * @return {Promise<?Object.<string, ?string>>}
    * @private
    */
   fetchCountry_() {
@@ -331,7 +349,12 @@ export class AmpGeo extends AMP.BaseElement {
               );
               return null;
             }
-            return json['country'].toLowerCase();
+            return {
+              country: json['country'].toLowerCase(),
+              subdivision: /^[a-z0-9]{1,3}$/i.test(json['subdivision'])
+                ? json['subdivision'].toLowerCase()
+                : null,
+            };
           })
           .catch((reason) => {
             user().error(TAG, 'XHR country request failed', reason);
