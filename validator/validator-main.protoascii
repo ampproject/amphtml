@@ -1421,6 +1421,11 @@ tags: {
     value_casei: "text/html"
     value_casei: "application/rss+xml"
   }
+  attrs: {
+    name: "show-tooltip"
+    value: "auto"
+    value: "true"
+  }
   attr_lists: "name-attr"
   # <amp-bind>
   attrs: { name: "[href]" }
