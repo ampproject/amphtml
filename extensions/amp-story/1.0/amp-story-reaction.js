@@ -578,7 +578,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Updates the selected classes on option selected.
-   * @param selectedOption
+   * @param {!Element} selectedOption
    * @private
    */
   updateToPostSelectionState_(selectedOption) {
