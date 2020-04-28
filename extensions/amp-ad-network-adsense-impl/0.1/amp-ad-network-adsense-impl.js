@@ -253,7 +253,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState) {
+  getAdUrl(consentTuple) {
+    let consentState = undefined;
+    let consentString = undefined;
+    if (consentTuple) {
+      consentState = consentTuple.consentState;
+      consentString = consentTuple.consentString;
+    }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
@@ -339,6 +345,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()
           : null,
+      'gdpr_consent': consentString,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
