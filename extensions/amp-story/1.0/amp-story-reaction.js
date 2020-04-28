@@ -107,8 +107,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {?Element} */
-    this.rootEl_ = null;
+    /** @protected {!Element} */
+    this.rootEl_;
 
     /** @protected {?string} */
     this.reactionId_ = null;
@@ -135,7 +135,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
-    createShadowRootWithStyle(this.element, !!this.rootEl_, CSS);
+    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
   }
 
   /**
@@ -284,7 +284,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Called when user has responded (in this session or before).
    *
    * @protected @abstract
-   * @param {ReactionResponseType} unusedResponseData
+   * @param {!ReactionResponseType} unusedResponseData
    */
   updateOptionPercentages_(unusedResponseData) {
     // Subclass must implement
@@ -413,7 +413,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
       this.mutateElement(() => {
         if (this.responseData_) {
-          this.updateOptionPercentages_(!!this.responseData_);
+          this.updateOptionPercentages_(this.responseData_);
         }
         this.updateToPostSelectionState_(optionEl);
       });
@@ -532,23 +532,22 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     this.hasUserSelection_ = this.responseData_.hasUserResponded;
     if (this.hasUserSelection_) {
-      this.updateReactionOnDataRetrieval_();
+      this.updateReactionOnDataRetrieval_(response.data);
     }
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
+   * @param {!ReactionResponseType} data
    * @private
    */
-  updateReactionOnDataRetrieval_() {
+  updateReactionOnDataRetrieval_(data) {
     let selectedOptionKey;
-    /** @type {!Array} */ (this.responseData_['responses']).forEach(
-      (response) => {
-        if (response.selectedByUser) {
-          selectedOptionKey = response.reactionValue;
-        }
+    /** @type {!Array} */ (data['responses']).forEach((response) => {
+      if (response.selectedByUser) {
+        selectedOptionKey = response.reactionValue;
       }
-    );
+    });
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);
@@ -560,7 +559,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     );
 
     this.mutateElement(() => {
-      this.updateOptionPercentages_(!!this.responseData_);
+      this.updateOptionPercentages_(data);
       this.updateToPostSelectionState_(options[selectedOptionKey]);
     });
   }
