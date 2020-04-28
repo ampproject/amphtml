@@ -36,7 +36,7 @@ const RTV_REGEX = /^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d\d)$/;
  * @param {string} rtv
  * @return {string}
  */
-export function humanRtv(rtv) {
+export function humanReadableRtv(rtv) {
   try {
     const [
       unusedRtv,

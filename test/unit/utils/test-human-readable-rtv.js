@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-import {humanRtv} from '../../../src/utils/human-rtv';
+import {humanReadableRtv} from '../../../src/utils/human-readable-rtv';
 
-describe('humanRtv', () => {
+describe('humanReadableRtv', () => {
   [
     ['052004030010070', '04-03 Nightly-Control (0010+70)'],
     ['012004030010000', '04-03 Stable (0010)'],
@@ -27,7 +27,7 @@ describe('humanRtv', () => {
     ['internalRuntimeVersion', 'internalRuntimeVersion'],
   ].forEach(([rtv, str]) => {
     it(`converts "${rtv}" to "${str}"`, () => {
-      expect(humanRtv(rtv)).to.equal(str);
+      expect(humanReadableRtv(rtv)).to.equal(str);
     });
   });
 });
