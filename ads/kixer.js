@@ -78,7 +78,7 @@ export function kixer(global, data) {
   };
 
   global.context.observeIntersection(function (changes) {
-    changes.forEach(function (c) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       kxviewCheck(c);
     });
   });

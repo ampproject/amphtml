@@ -948,7 +948,7 @@ export class AmpList extends AMP.BaseElement {
     };
 
     // binding=refresh: Only do render-blocking update after initial render.
-    if (binding === 'refresh') {
+    if (binding && startsWith(binding, 'refresh')) {
       // Bind service must be available after first mutation, so don't
       // wait on the async service getter.
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
@@ -957,7 +957,11 @@ export class AmpList extends AMP.BaseElement {
         // On initial render, do a non-blocking scan and don't update.
         Services.bindForDocOrNull(this.element).then((bind) => {
           if (bind) {
-            bind.rescan(elements, [], {'fast': true, 'update': false});
+            const evaluate = binding == 'refresh-evaluate';
+            bind.rescan(elements, [], {
+              'fast': true,
+              'update': evaluate ? 'evaluate' : false,
+            });
           }
         });
         return Promise.resolve(elements);
@@ -1060,7 +1064,7 @@ export class AmpList extends AMP.BaseElement {
     // (1) AMP elements and (2) elements with bindings need diff marking.
     // But, we only need to do (1) here because bindings in initial content
     // are inert by design (as are bindings in placeholder content).
-    const elements = container.querySelectorAll('.i-amphtml-element');
+    const elements = toArray(container.querySelectorAll('.i-amphtml-element'));
     elements.forEach((element) => {
       markElementForDiffing(element, () => String(key--));
     });

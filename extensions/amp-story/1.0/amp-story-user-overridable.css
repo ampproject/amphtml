@@ -18,6 +18,10 @@ amp-story {
   font-display: optional;
 }
 
+amp-story-grid-layer {
+  overflow: hidden;
+}
+
 amp-story-grid-layer * {
   box-sizing: border-box;
   margin: 0;

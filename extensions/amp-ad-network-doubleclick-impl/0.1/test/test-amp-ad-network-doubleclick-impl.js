@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as bytesUtils from '../../../../src/utils/bytes';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -32,6 +33,7 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -46,7 +48,6 @@ import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -1170,7 +1171,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       return {
         arrayBuffer: () =>
           Promise.resolve(
-            utf8Encode('<html><body>Hello, World!</body></html>')
+            bytesUtils.utf8Encode('<html><body>Hello, World!</body></html>')
           ),
         headers: {
           get(prop) {
@@ -1454,6 +1455,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       ).to.equal(XORIGIN_MODE.SAFEFRAME);
     });
   });
+
+  describe('#RandomSubdomainSafeFrame', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    it('should use random subdomain when experiment is enabled', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('uses random subdomain if experiment is on without win.crypto', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('should use constant subdomain when experiment is disabled', () => {
+      const expectedPath =
+        '^https://tpc.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+  });
 });
 
 describes.realWin(
@@ -1503,17 +1546,13 @@ describes.realWin(
       function verifyCss(iframe, expectedSize) {
         expect(iframe).to.be.ok;
         const style = env.win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         expect(style.width).to.equal(expectedSize.width);
         expect(style.height).to.equal(expectedSize.height);
         // We don't know the exact values by which the frame will be
         // translated, as this can vary depending on whether we use the
         // height/width attributes, or the actual size of the frame. To make
         // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       afterEach(() => env.win.document.body.removeChild(impl.element));
@@ -1651,100 +1690,6 @@ describes.realWin(
               )
             ).to.be.ok
         );
-      });
-    });
-
-    describe('#idleRenderOutsideViewport', () => {
-      beforeEach(() => {
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        env.sandbox
-          .stub(impl, 'getResource')
-          .returns({whenWithinViewport: () => Promise.resolve()});
-      });
-
-      it('should use experiment value', () => {
-        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
-        expect(impl.idleRenderOutsideViewport()).to.equal(4);
-        expect(impl.isIdleRender_).to.be.true;
-      });
-
-      it('should return false if using loading strategy', () => {
-        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
-        impl.element.setAttribute(
-          'data-loading-strategy',
-          'prefer-viewability-over-views'
-        );
-        expect(impl.idleRenderOutsideViewport()).to.be.false;
-        expect(impl.isIdleRender_).to.be.false;
-      });
-
-      it('should return false if invalid experiment value', () => {
-        impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
-        expect(impl.idleRenderOutsideViewport()).to.be.false;
-      });
-
-      it('should return 12 if no experiment header', () => {
-        expect(impl.idleRenderOutsideViewport()).to.equal(12);
-      });
-
-      it('should return renderOutsideViewport boolean', () => {
-        env.sandbox.stub(impl, 'renderOutsideViewport').returns(false);
-        expect(impl.idleRenderOutsideViewport()).to.be.false;
-      });
-    });
-
-    describe('idle renderNonAmpCreative', () => {
-      beforeEach(() => {
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-        });
-        impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
-        impl.postAdResponseExperimentFeatures['render-idle-throttle'] = 'true';
-        env.sandbox
-          .stub(AmpA4A.prototype, 'renderNonAmpCreative')
-          .returns(Promise.resolve());
-      });
-
-      // TODO(jeffkaufman, #13422): this test was silently failing
-      it.skip('should throttle if idle render and non-AMP creative', () => {
-        impl.win['3pla'] = 1;
-        const startTime = Date.now();
-        return impl.renderNonAmpCreative().then(() => {
-          expect(Date.now() - startTime).to.be.at.least(1000);
-        });
-      });
-
-      it('should NOT throttle if idle experiment not enabled', () => {
-        impl.win['3pla'] = 1;
-        delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
-        const startTime = Date.now();
-        return impl.renderNonAmpCreative().then(() => {
-          expect(Date.now() - startTime).to.be.at.most(50);
-        });
-      });
-
-      it('should NOT throttle if experiment throttle not enabled', () => {
-        impl.win['3pla'] = 1;
-        const startTime = Date.now();
-        return impl.renderNonAmpCreative().then(() => {
-          expect(Date.now() - startTime).to.be.at.most(50);
-        });
-      });
-
-      it('should NOT throttle if idle render and no previous', () => {
-        impl.win['3pla'] = 0;
-        const startTime = Date.now();
-        return impl.renderNonAmpCreative().then(() => {
-          expect(Date.now() - startTime).to.be.at.most(50);
-        });
       });
     });
 
@@ -1892,7 +1837,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.equal('foo');
@@ -1913,10 +1858,13 @@ describes.realWin(
           },
         };
         return AmpAdNetworkDoubleclickImpl.prototype
-          .maybeValidateAmpCreative(utf8Encode(creative), mockHeaders)
+          .maybeValidateAmpCreative(
+            bytesUtils.utf8Encode(creative),
+            mockHeaders
+          )
           .then((result) => {
             expect(result).to.be.ok;
-            expect(utf8Decode(result)).to.equal(creative);
+            expect(bytesUtils.utf8Decode(result)).to.equal(creative);
           });
       });
 
@@ -1936,7 +1884,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.not.be.ok;

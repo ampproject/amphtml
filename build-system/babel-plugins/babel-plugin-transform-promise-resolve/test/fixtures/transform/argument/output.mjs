@@ -13,21 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
-
-const packageJson = require('../../package.json');
-
-/**
- * Gets relative paths to all the devDependencies defined in package.json.
- *
- * @return {!Array<string>}
- */
-function getDevDependencies() {
-  return Object.keys(packageJson.devDependencies).map(
-    (dependency) => `./node_modules/${dependency}`
-  );
-}
-
-module.exports = {
-  getDevDependencies,
-};
+Promise.resolve(1);
+Promise.resolve(undefined);

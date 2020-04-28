@@ -463,8 +463,9 @@ dist.flags = {
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
   version_override: '  Override the version written to AMP_CONFIG',
-  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-compiles when detected',
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
   debug: '  Outputs the file contents during compilation lifecycles',
+  define_experiment_constant:
+    '  Builds runtime with the EXPERIMENT constant set to true',
 };
