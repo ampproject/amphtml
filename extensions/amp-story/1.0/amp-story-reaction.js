@@ -38,7 +38,7 @@ const TAG = 'amp-story-reaction';
  */
 export const ReactionType = {
   QUIZ: 0,
-  BINARY_POLL: 1,
+  POLL: 1,
 };
 
 /** @const {string} */
@@ -64,13 +64,30 @@ export let ReactionOptionType;
 export let ReactionResponseType;
 
 /**
- * Reaction abstract class with shared functionality.
+ * Reaction abstract class with shared functionality for interactive components.
+ *
+ * Lifecycle:
+ * 1) When created, the abstract class will call the buildComponent() method implemented by each concrete class.
+ *   NOTE: When created, the component will receive a .i-amphtml-story-reaction, inheriting useful CSS variables.
+ *
+ * 2) If an endpoint is specified, it will retrieve aggregate results from the backend and process them. If the clientId
+ *   has responded in a previous session, the component will change to a post-selection state. Otherwise it will wait
+ *   for user selection.
+ *   NOTE: Click listeners will be attached to all options, which require .i-amphtml-story-reaction-option.
+ *
+ * 3) On user selection, it will process the backend results (if endpoint specified) and display the selected option.
+ *   Analytic events will be sent, percentages updated (implemented by the concrete class), and backend posted with the
+ *   user response. Classes will be added to the component and options accordingly.
+ *   NOTE: On option selected, the selection will receive a .i-amphtml-story-reaction-option-selected, and the root element
+ *   will receive a .i-amphtml-story-reaction-post-selection. Optionally, if the endpoint returned aggregate results,
+ *   the root element will also receive a .i-amphtml-story-reaction-has-data.
+ *
  * @abstract
  */
 export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
-   * @param {ReactionType} type
+   * @param {!ReactionType} type
    */
   constructor(element, type) {
     super(element);
@@ -140,7 +157,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Gets a Promise to return the unique AMP clientId
-   *
    * @private
    * @return {Promise<string>}
    */
