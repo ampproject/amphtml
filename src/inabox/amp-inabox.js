@@ -132,9 +132,10 @@ startupChunk(self.document, function initial() {
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
+  const versionString = humanRtv(getMode(self).rtvVersion);
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()} – ${versionString}`,
     self.location.href
   );
 }
