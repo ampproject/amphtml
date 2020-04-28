@@ -684,7 +684,7 @@ function installPatches(win, registry) {
       'innerHTML'
     );
   }
-  if (innerHTMLDesc.configurable) {
+  if (innerHTMLDesc && innerHTMLDesc.configurable) {
     const innerHTMLSetter = innerHTMLDesc.set;
     innerHTMLDesc.set = function (html) {
       innerHTMLSetter.call(this, html);
