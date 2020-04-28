@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-module.exports = function (context) {
-  return {
-    [':function > ObjectPattern']: function (node) {
-      context.report({
-        node,
-        message:
-          'Do not use Object Destructuring Assignment in parameters. ' +
-          'We will allow it once https://github.com/google/' +
-          'closure-compiler/issues/3500 is resolved.',
-      });
-    },
-  };
-};
+Promise.resolve(1);
+Promise.resolve(undefined);
