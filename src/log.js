@@ -151,7 +151,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(number):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -162,7 +162,7 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(number):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -220,7 +220,7 @@ export class Log {
     }
 
     // Delegate to the specific resolver.
-    return this.levelFunc_(parseInt(getMode().log, 10));
+    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
   }
 
   /**
@@ -813,8 +813,8 @@ function getUserLogger(suffix) {
   }
   return new logConstructor(
     self,
-    (logNum) => {
-      if (mode.development || logNum >= 1) {
+    (logNum, development) => {
+      if (development || logNum >= 1) {
         return LogLevel.FINE;
       }
       return LogLevel.WARN;

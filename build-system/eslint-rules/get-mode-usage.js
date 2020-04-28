@@ -15,6 +15,17 @@
  */
 'use strict';
 
+// This rule asserts that we only grab properties from getMode(), and never
+// store a reference to the return value.
+//
+// Good:
+// getMode().foo;
+// const x = getMode().test;
+//
+// Bad:
+// const mode = getMode();
+// isTest(getMode());
+// obj[getMode()];
 module.exports = function (context) {
   return {
     'CallExpression[callee.name=getMode]': function (node) {
