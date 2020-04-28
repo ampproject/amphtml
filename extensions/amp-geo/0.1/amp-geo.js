@@ -242,14 +242,12 @@ export class AmpGeo extends AMP.BaseElement {
       ? Promise.resolve()
       : this.fetchCountry_().then((data) => {
           if (data) {
+            const {country, subdivision} = data;
             // Country is required and guaranteed to exist if data is available.
-            this.country_ = data.country;
+            this.country_ = country;
             // Subdivision is optional and only us-ca is currently supported.
-            if (
-              data.subdivision &&
-              `${data.country}-${data.subdivision}` === US_CA_CODE
-            ) {
-              this.subdivision_ = `${data.country}-${data.subdivision}`;
+            if (subdivision && `${country}-${subdivision}` === US_CA_CODE) {
+              this.subdivision_ = US_CA_CODE;
             }
           } else {
             // if API request fails, leave the country at the default 'unknown'
