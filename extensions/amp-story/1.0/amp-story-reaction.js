@@ -135,13 +135,12 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(this.element, !!this.rootEl_, CSS);
   }
 
   /**
    * Generates the template in rootEl_ and fills up with options.
    * @param {!Element} unusedElement
-   * @return {!Element}
    * @protected @abstract
    */
   buildComponent(unusedElement) {
@@ -413,7 +412,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
       }
 
       this.mutateElement(() => {
-        this.updateOptionPercentages_(this.responseData_);
+        if (this.responseData_) {
+          this.updateOptionPercentages_(!!this.responseData_);
+        }
         this.updateToPostSelectionState_(optionEl);
       });
 
@@ -558,20 +559,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
       '.i-amphtml-story-reaction-option'
     );
 
-    if (selectedOptionKey >= options.length) {
-      dev().error(
-        TAG,
-        `Reaction #${this.element.getAttribute('id')} does not have option ${
-          this.answerChoiceOptions_[selectedOptionKey]
-        }, but user selected option ${
-          this.answerChoiceOptions_[selectedOptionKey]
-        }`
-      );
-      return;
-    }
-
     this.mutateElement(() => {
-      this.updateOptionPercentages_();
+      this.updateOptionPercentages_(!!this.responseData_);
       this.updateToPostSelectionState_(options[selectedOptionKey]);
     });
   }

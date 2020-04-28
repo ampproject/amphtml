@@ -78,7 +78,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(this.element, !!this.rootEl_, CSS);
   }
 
   /** @override */
@@ -188,18 +188,18 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /**
    * @override
    */
-  updateOptionPercentages_() {
-    if (!this.responseData_) {
+  updateOptionPercentages_(responseData) {
+    if (!responseData) {
       return;
     }
 
     const options = toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-quiz-option')
+      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
     );
 
-    const percentages = this.preprocessPercentages_(this.responseData_);
+    const percentages = this.preprocessPercentages_(responseData);
 
-    this.responseData_['responses'].forEach((response) => {
+    toArray(responseData['responses']).forEach((response) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       if (options[response['reactionValue']]) {
         options[response['reactionValue']].querySelector(
