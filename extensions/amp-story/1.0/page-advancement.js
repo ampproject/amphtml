@@ -32,6 +32,7 @@ import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listen, listenOnce} from '../../../src/event-helper';
+import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 
 /** @private @const {number} */
@@ -440,7 +441,7 @@ export class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          tagName === 'amp-story-quiz' &&
+          startsWith(tagName, 'amp-story-reaction-') &&
           !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;

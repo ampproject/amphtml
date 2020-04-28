@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>amp-story-quiz example</title>
+  <title>amp-story-reaction-quiz example</title>
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -38,7 +38,7 @@
           "triggers": {
             "trackQuizResponse": {
               "on": "story-reaction",
-              "tagname": "amp-story-quiz",
+              "tagname": "amp-story-reaction-quiz",
               "request": "click"
             }
           }
@@ -68,7 +68,7 @@
             --accent-color: cadetblue;
           }
         </style>
-        <amp-story-quiz
+        <amp-story-reaction-quiz
           id='cat-question-appear'
           endpoint="http://localhost:3000/reactions"
           chip-corner="sharp"
@@ -78,7 +78,7 @@
           <option correct>500,000 years ago</option>
           <option>2 million years ago</option>
           <option>34 million years ago</option>
-        </amp-story-quiz>
+        </amp-story-reaction-quiz>
       </amp-story-grid-layer>
     </amp-story-page>
     <amp-story-page id="quiz-question-2">
@@ -88,14 +88,14 @@
             layout="responsive">
         </amp-story-grid-layer>
         <amp-story-grid-layer>
-          <amp-story-quiz
+          <amp-story-reaction-quiz
             id='cat-question-handedness'
             chip-style="shadow">
             <h2>True or False: Cats can be right-pawed or left-pawed.</h2>
             <option correct>True</option>
             <option>False</option>
             <option>The quick brown fox jumped over the lazy dog lorem ipsum dolor sit amet as d f ghjkl</option>
-          </amp-story-quiz>
+          </amp-story-reaction-quiz>
         </amp-story-grid-layer>
       </amp-story-page>
       <amp-story-page id="quiz-question-3">
@@ -111,12 +111,12 @@
           }
         </style>
         <amp-story-grid-layer id="cat-question-cute">
-          <amp-story-quiz
+          <amp-story-reaction-quiz
             id="cats-cute-quiz">
             <h2>Are cats cute?</h2>
             <option correct>Yes</option>
             <option>No</option>
-          </amp-story-quiz>
+          </amp-story-reaction-quiz>
         </amp-story-grid-layer>
         <amp-story-page-attachment layout="nodisplay" theme="dark">
           <h1>Amazing title</h1>

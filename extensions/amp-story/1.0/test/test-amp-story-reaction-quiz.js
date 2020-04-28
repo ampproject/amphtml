@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryQuiz} from '../amp-story-quiz';
+import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {LocalizationService} from '../../../../src/service/localization';
@@ -27,7 +27,7 @@ import {registerServiceBuilder} from '../../../../src/service';
  * Populates the quiz with some number of prompts and some number of options.
  *
  * @param {Window} win
- * @param {AmpStoryQuiz} quiz
+ * @param {AmpStoryReactionQuiz} quiz
  * @param {number} numPrompts
  * @param {number} numOptions
  */
@@ -117,7 +117,7 @@ const generateResponseDataFor = (responseCounts) => {
 };
 
 describes.realWin(
-  'amp-story-quiz',
+  'amp-story-reaction-quiz',
   {
     amp: true,
   },
@@ -136,7 +136,9 @@ describes.realWin(
         .stub(Services, 'cidForDoc')
         .resolves({get: () => Promise.resolve('cid')});
 
-      const ampStoryQuizEl = win.document.createElement('amp-story-quiz');
+      const ampStoryQuizEl = win.document.createElement(
+        'amp-story-reaction-quiz'
+      );
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
       analyticsVars = getVariableService(win);
@@ -161,7 +163,7 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
+      ampStoryQuiz = new AmpStoryReactionQuiz(ampStoryQuizEl);
 
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
@@ -178,22 +180,22 @@ describes.realWin(
 
       const quizContent = ampStoryQuiz.getQuizElement().children;
       expect(quizContent[0]).to.have.class(
-        'i-amphtml-story-quiz-prompt-container'
+        'i-amphtml-story-reaction-quiz-prompt-container'
       );
       expect(quizContent[1]).to.have.class(
-        'i-amphtml-story-quiz-option-container'
+        'i-amphtml-story-reaction-quiz-option-container'
       );
 
       // Check prompt container structure.
       expect(quizContent[0].children.length).to.equal(1);
       expect(
-        quizContent[0].querySelectorAll('.i-amphtml-story-quiz-prompt')
+        quizContent[0].querySelectorAll('.i-amphtml-story-reaction-quiz-prompt')
       ).to.have.length(1);
 
       // Check option container structure.
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
-        quizContent[1].querySelectorAll('.i-amphtml-story-quiz-option')
+        quizContent[1].querySelectorAll('.i-amphtml-story-reaction-quiz-option')
       ).to.have.length(4);
     });
 
@@ -224,7 +226,7 @@ describes.realWin(
 
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOption = quizElement.querySelector(
-        '.i-amphtml-story-quiz-option'
+        '.i-amphtml-story-reaction-quiz-option'
       );
 
       quizOption.click();
@@ -232,8 +234,12 @@ describes.realWin(
       // Microtask tick
       await Promise.resolve();
 
-      expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
-      expect(quizOption).to.have.class('i-amphtml-story-quiz-option-selected');
+      expect(quizElement).to.have.class(
+        'i-amphtml-story-reaction-post-selection'
+      );
+      expect(quizOption).to.have.class(
+        'i-amphtml-story-reaction-option-selected'
+      );
     });
 
     it('should only record the first option response', async () => {
@@ -243,7 +249,7 @@ describes.realWin(
 
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOptions = quizElement.querySelectorAll(
-        '.i-amphtml-story-quiz-option'
+        '.i-amphtml-story-reaction-option'
       );
 
       quizOptions[0].click();
@@ -253,10 +259,10 @@ describes.realWin(
       await Promise.resolve();
 
       expect(quizOptions[0]).to.have.class(
-        'i-amphtml-story-quiz-option-selected'
+        'i-amphtml-story-reaction-option-selected'
       );
       expect(quizOptions[1]).to.not.have.class(
-        'i-amphtml-story-quiz-option-selected'
+        'i-amphtml-story-reaction-option-selected'
       );
     });
 
@@ -268,7 +274,7 @@ describes.realWin(
 
       const option = ampStoryQuiz
         .getQuizElement()
-        .querySelector('.i-amphtml-story-quiz-option');
+        .querySelector('.i-amphtml-story-reaction-quiz-option');
 
       option.click();
 
@@ -299,12 +305,14 @@ describes.realWin(
 
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOptions = quizElement.querySelectorAll(
-        '.i-amphtml-story-quiz-option'
+        '.i-amphtml-story-reaction-quiz-option'
       );
 
-      expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
+      expect(quizElement).to.have.class(
+        'i-amphtml-story-reaction-post-selection'
+      );
       expect(quizOptions[0]).to.have.class(
-        'i-amphtml-story-quiz-option-selected'
+        'i-amphtml-story-reaction-option-selected'
       );
     });
 
@@ -321,17 +329,17 @@ describes.realWin(
 
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOptions = quizElement.querySelectorAll(
-        '.i-amphtml-story-quiz-option'
+        '.i-amphtml-story-reaction-quiz-option'
       );
 
       const percentageOption0 = quizOptions[0].querySelector(
-        '.i-amphtml-story-quiz-percentage-text'
+        '.i-amphtml-story-reaction-quiz-percentage-text'
       );
 
       expect(percentageOption0.textContent).to.equal('30%');
 
       const percentageOption3 = quizOptions[3].querySelector(
-        '.i-amphtml-story-quiz-percentage-text'
+        '.i-amphtml-story-reaction-quiz-percentage-text'
       );
 
       expect(percentageOption3.textContent).to.equal('10%');

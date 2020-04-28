@@ -20,8 +20,7 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {CSS} from '../../../build/amp-story-quiz-1.0.css';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {CSS} from '../../../build/amp-story-reaction-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -30,16 +29,17 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
-import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
 
 /** @const {string} */
-const TAG = 'amp-story-quiz';
+const TAG = 'amp-story-reaction';
 
-// TODO(jackbsteinberg): Refactor quiz to extend a general interactive element class
-// and make this an enum on that class.
-/** @const {number} */
-const STORY_REACTION_TYPE_QUIZ = 0;
+/**
+ * @const @enum {number}
+ */
+export const ReactionType = {
+  QUIZ: 0,
+  POLL: 1,
+};
 
 /** @const {string} */
 const ENDPOINT_INVALID_ERROR =
@@ -52,102 +52,99 @@ const ENDPOINT_INVALID_ERROR =
  *    selectedByUser: boolean,
  * }}
  */
-export let ReactionType;
+export let ReactionOptionType;
 
 /**
  * @typedef {{
  *    totalResponseCount: number,
  *    hasUserResponded: boolean,
- *    responses: !Array<ReactionType>,
+ *    responses: !Array<ReactionOptionType>,
  * }}
  */
 export let ReactionResponseType;
 
 /**
- * Generates the template for the quiz.
+ * Reaction abstract class with shared functionality for interactive components.
  *
- * @param {!Element} element
- * @return {!Element}
- */
-const buildQuizTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-story-quiz-container">
-      <div class="i-amphtml-story-quiz-prompt-container"></div>
-      <div class="i-amphtml-story-quiz-option-container"></div>
-    </div>
-  `;
-};
-
-/**
- * Generates the template for each option.
+ * Lifecycle:
+ * 1) When created, the abstract class will call the buildComponent() method implemented by each concrete class.
+ *   NOTE: When created, the component will receive a .i-amphtml-story-reaction, inheriting useful CSS variables.
  *
- * @param {!Element} option
- * @return {!Element}
+ * 2) If an endpoint is specified, it will retrieve aggregate results from the backend and process them. If the clientId
+ *   has responded in a previous session, the component will change to a post-selection state. Otherwise it will wait
+ *   for user selection.
+ *   NOTE: Click listeners will be attached to all options, which require .i-amphtml-story-reaction-option.
+ *
+ * 3) On user selection, it will process the backend results (if endpoint specified) and display the selected option.
+ *   Analytic events will be sent, percentages updated (implemented by the concrete class), and backend posted with the
+ *   user response. Classes will be added to the component and options accordingly.
+ *   NOTE: On option selected, the selection will receive a .i-amphtml-story-reaction-option-selected, and the root element
+ *   will receive a .i-amphtml-story-reaction-post-selection. Optionally, if the endpoint returned aggregate results,
+ *   the root element will also receive a .i-amphtml-story-reaction-has-data.
+ *
+ * @abstract
  */
-const buildOptionTemplate = (option) => {
-  const html = htmlFor(option);
-  return html`
-    <span class="i-amphtml-story-quiz-option">
-      <span class="i-amphtml-story-quiz-answer-choice"></span>
-    </span>
-  `;
-};
-
-export class AmpStoryQuiz extends AMP.BaseElement {
+export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
+   * @param {!ReactionType} type
    */
-  constructor(element) {
+  constructor(element, type) {
     super(element);
 
-    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    /** @protected @const {ReactionType} */
+    this.reactionType_ = type;
+
+    /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @private {!Array<string>} */
-    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
-
-    /** @private {?Promise<!../../../src/service/cid-impl.CidDef>} */
+    /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
-    /** @private {?Promise<JsonObject>} */
+    /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
-    /** @private {boolean} */
+    /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @private {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win);
+    /** @protected {!Element} */
+    this.rootEl_;
 
-    /** @private {?Element} */
-    this.quizEl_ = null;
-
-    /** @private {?string} */
+    /** @protected {?string} */
     this.reactionId_ = null;
 
-    /** @private {!./amp-story-request-service.AmpStoryRequestService} */
+    /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
-    /** @private {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
     this.responseDataPromise_ = null;
 
-    /** @private {?ReactionResponseType} */
+    /** @protected {?ReactionResponseType} */
     this.responseData_ = null;
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
-    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
   }
 
   /** @override */
   buildCallback() {
-    this.quizEl_ = buildQuizTemplate(this.element);
+    this.buildComponent(this.element);
+    this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
-    this.attachContent_();
     this.initializeListeners_();
-    createShadowRootWithStyle(this.element, this.quizEl_, CSS);
+    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+  }
+
+  /**
+   * Generates the template in rootEl_ and fills up with options.
+   * @param {!Element} unusedElement
+   * @protected @abstract
+   */
+  buildComponent(unusedElement) {
+    // Subclass must override.
   }
 
   /** @override */
@@ -159,7 +156,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Gets a Promise to return the unique AMP clientId
-   *
    * @private
    * @return {Promise<string>}
    */
@@ -177,15 +173,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Reacts to RTL state updates and triggers the UI for RTL.
-   *
    * @param {boolean} rtlState
    * @private
    */
   onRtlStateUpdate_(rtlState) {
     this.mutateElement(() => {
       rtlState
-        ? this.quizEl_.setAttribute('dir', 'rtl')
-        : this.quizEl_.removeAttribute('dir');
+        ? this.rootEl_.setAttribute('dir', 'rtl')
+        : this.rootEl_.removeAttribute('dir');
     });
   }
 
@@ -195,15 +190,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * @return {?Element}
-   */
-  getQuizElement() {
-    return this.quizEl_;
-  }
-
-  /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the quiz.
+   * to prevent overlap with the component.
    *
    * @private
    */
@@ -212,7 +200,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
 
-    gridLayer.classList.add('i-amphtml-story-has-quiz');
+    gridLayer.classList.add('i-amphtml-story-has-reaction');
 
     if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
       gridLayer.classList.add('i-amphtml-story-has-CTA-layer');
@@ -224,95 +212,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Finds the prompt and options content
-   * and adds it to the quiz element.
-   *
-   * @private
-   */
-  attachContent_() {
-    // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
-    const promptInput = this.element.children[0];
-    const promptContainer = this.quizEl_.querySelector(
-      '.i-amphtml-story-quiz-prompt-container'
-    );
-
-    // First child must be heading h1-h3
-    if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
-      dev().error(
-        TAG,
-        'The first child must be a heading element <h1>, <h2>, or <h3>'
-      );
-      this.quizEl_.removeChild(promptContainer);
-    } else {
-      const prompt = document.createElement(promptInput.tagName);
-
-      prompt.textContent = promptInput.textContent;
-      prompt.classList.add('i-amphtml-story-quiz-prompt');
-
-      this.element.removeChild(promptInput);
-      promptContainer.appendChild(prompt);
-    }
-
-    const options = toArray(this.element.querySelectorAll('option'));
-    if (options.length < 2 || options.length > 4) {
-      dev().error(TAG, 'Improper number of options');
-    }
-
-    // Localize the answer choice options
-    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return this.localizationService_.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-      );
-    });
-    options.forEach((option, index) => this.configureOption_(option, index));
-
-    if (this.element.children.length !== 0) {
-      dev().error(TAG, 'Too many children');
-    }
-  }
-
-  /**
-   * Creates an option container with option content,
-   * adds styling and answer choices,
-   * and adds it to the quiz element.
-   *
-   * @param {Element} option
-   * @param {number} index
-   * @private
-   */
-  configureOption_(option, index) {
-    const convertedOption = buildOptionTemplate(dev().assertElement(option));
-
-    // Fill in the answer choice and set the option ID
-    convertedOption.querySelector(
-      '.i-amphtml-story-quiz-answer-choice'
-    ).textContent = this.answerChoiceOptions_[index];
-    convertedOption.optionIndex_ = index;
-
-    // Extract and structure the option information
-    const optionText = document.createElement('span');
-    optionText.classList.add('i-amphtml-story-quiz-option-text');
-    optionText.textContent = option.textContent;
-    convertedOption.appendChild(optionText);
-
-    // Add text container for percentage display
-    const percentageText = document.createElement('span');
-    percentageText.classList.add('i-amphtml-story-quiz-percentage-text');
-    convertedOption.appendChild(percentageText);
-
-    if (option.hasAttribute('correct')) {
-      convertedOption.setAttribute('correct', 'correct');
-    }
-    this.element.removeChild(option);
-
-    this.quizEl_
-      .querySelector('.i-amphtml-story-quiz-option-container')
-      .appendChild(convertedOption);
-  }
-
-  /**
    * Attaches functions to each option to handle state transition.
-   *
    * @private
    */
   initializeListeners_() {
@@ -326,12 +226,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     // Add a click listener to the element to trigger the class change
-    this.quizEl_.addEventListener('click', (e) => this.handleTap_(e));
+    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
   }
 
   /**
    * Handles a tap event on the quiz element.
-   *
    * @param {Event} e
    * @private
    */
@@ -343,9 +242,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const optionEl = closest(
       dev().assertElement(e.target),
       (element) => {
-        return element.classList.contains('i-amphtml-story-quiz-option');
+        return element.classList.contains('i-amphtml-story-reaction-option');
       },
-      this.quizEl_
+      this.rootEl_
     );
 
     if (optionEl) {
@@ -370,10 +269,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_REACTION_TYPE,
-      STORY_REACTION_TYPE_QUIZ
+      this.reactionType_
     );
 
-    this.element[ANALYTICS_TAG_NAME] = 'amp-story-quiz';
+    this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.REACTION,
       this.element
@@ -381,50 +280,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * @param {Element} selectedOption
-   * @private
+   * Update component to reflect values in the data obtained.
+   * Called when user has responded (in this session or before).
+   *
+   * @protected @abstract
+   * @param {!ReactionResponseType} unusedResponseData
    */
-  updateQuizToPostSelectionState_(selectedOption) {
-    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
-    selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
-
-    if (this.responseData_) {
-      this.quizEl_.classList.add('i-amphtml-story-quiz-has-data');
-    }
-  }
-
-  /**
-   * @private
-   */
-  updateOptionPercentages_() {
-    if (!this.responseData_) {
-      return;
-    }
-
-    const options = toArray(
-      this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
-    );
-
-    const percentages = this.preprocessPercentages_(this.responseData_);
-
-    /** @type {!Array} */ (this.responseData_['responses']).forEach(
-      (response) => {
-        // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-        options[response['reactionValue']].querySelector(
-          '.i-amphtml-story-quiz-percentage-text'
-        ).textContent = `${percentages[response['reactionValue']]}%`;
-      }
-    );
-
-    this.quizEl_.setAttribute(
-      'style',
-      `
-      --option-1-percentage: ${percentages[0]}%;
-      --option-2-percentage: ${percentages[1]}%;
-      --option-3-percentage: ${percentages[2]}%;
-      --option-4-percentage: ${percentages[3]}%;
-    `
-    );
+  updateOptionPercentages_(unusedResponseData) {
+    // Subclass must implement
   }
 
   /**
@@ -432,7 +295,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    *
    * @param {ReactionResponseType} responseData
    * @return {Array<number>}
-   * @private
+   * @protected
    */
   preprocessPercentages_(responseData) {
     let percentages = [];
@@ -523,7 +386,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Triggers changes to quiz state on response interaction.
+   * Triggers changes to component state on response interaction.
    *
    * @param {!Element} optionEl
    * @private
@@ -549,8 +412,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       }
 
       this.mutateElement(() => {
-        this.updateOptionPercentages_();
-        this.updateQuizToPostSelectionState_(optionEl);
+        if (this.responseData_) {
+          this.updateOptionPercentages_(this.responseData_);
+        }
+        this.updateToPostSelectionState_(optionEl);
       });
 
       if (this.element.hasAttribute('endpoint')) {
@@ -605,35 +470,32 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   executeReactionRequest_(requestOptions, reactionValue) {
-    // TODO(jackbsteinberg): Add a default reactions endpoint.
     if (!assertAbsoluteHttpOrHttpsUrl(this.element.getAttribute('endpoint'))) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
     if (this.reactionId_ === null) {
-      const quizPageId = closest(dev().assertElement(this.element), (el) => {
+      const pageId = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
 
-      this.reactionId_ = `CANONICAL_URL#page=${quizPageId}`;
+      this.reactionId_ = `CANONICAL_URL#page=${pageId}`;
     }
 
     const requestVars = dict({
-      'reactionType': STORY_REACTION_TYPE_QUIZ,
+      'reactionType': this.reactionType_,
       'reactionId': this.reactionId_,
     });
 
     let url = this.element.getAttribute('endpoint');
 
-    if (requestOptions['method'] === 'POST') {
-      requestVars['reactionValue'] = reactionValue;
-      requestOptions['body'] = requestVars;
-    } else if (requestOptions['method'] === 'GET') {
-      url = addParamsToUrl(url, requestVars);
-    }
-
     return this.getClientId_().then((clientId) => {
       requestVars['clientId'] = clientId;
+      if (requestOptions['method'] === 'POST') {
+        requestVars['reactionValue'] = reactionValue;
+        requestOptions['body'] = requestVars;
+      }
+      url = addParamsToUrl(url, requestVars);
       return this.requestService_.executeRequest(url, requestOptions);
     });
   }
@@ -670,61 +532,49 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     this.hasUserSelection_ = this.responseData_.hasUserResponded;
     if (this.hasUserSelection_) {
-      this.updateQuizOnDataRetrieval_();
+      this.updateReactionOnDataRetrieval_(response.data);
     }
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
-   *
+   * @param {!ReactionResponseType} data
    * @private
    */
-  updateQuizOnDataRetrieval_() {
+  updateReactionOnDataRetrieval_(data) {
     let selectedOptionKey;
-    /** @type {!Array} */ (this.responseData_['responses']).forEach(
-      (response) => {
-        if (response.selectedByUser) {
-          selectedOptionKey = response.reactionValue;
-        }
+    /** @type {!Array} */ (data['responses']).forEach((response) => {
+      if (response.selectedByUser) {
+        selectedOptionKey = response.reactionValue;
       }
-    );
+    });
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);
       return;
     }
 
-    const options = this.quizEl_.querySelectorAll(
-      '.i-amphtml-story-quiz-option'
+    const options = this.rootEl_.querySelectorAll(
+      '.i-amphtml-story-reaction-option'
     );
 
-    if (selectedOptionKey >= options.length) {
-      dev().error(
-        TAG,
-        `Quiz #${this.element.getAttribute('id')} does not have option ${
-          this.answerChoiceOptions_[selectedOptionKey]
-        }, but user selected option ${
-          this.answerChoiceOptions_[selectedOptionKey]
-        }`
-      );
-      return;
-    }
-
-    if (this.responseData_['responses'].length > options.length) {
-      dev().error(
-        TAG,
-        `Quiz #${this.element.getAttribute('id')} has ${
-          options.length
-        } options, but response returned ${
-          this.responseData_['responses'].length
-        } options`
-      );
-      return;
-    }
-
     this.mutateElement(() => {
-      this.updateOptionPercentages_();
-      this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
+      this.updateOptionPercentages_(data);
+      this.updateToPostSelectionState_(options[selectedOptionKey]);
     });
+  }
+
+  /**
+   * Updates the selected classes on option selected.
+   * @param {!Element} selectedOption
+   * @private
+   */
+  updateToPostSelectionState_(selectedOption) {
+    this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
+    selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
+
+    if (this.responseData_) {
+      this.rootEl_.classList.add('i-amphtml-story-reaction-has-data');
+    }
   }
 }
