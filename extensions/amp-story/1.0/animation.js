@@ -378,7 +378,9 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      devAssert(this.runner_).pause();
+      // Init or no-op if the runner was already running.
+      this.runner_.start();
+      this.runner_.pause();
     }
   }
 
