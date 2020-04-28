@@ -63,7 +63,7 @@ if (self.console) {
   const versionString = humanRtv(getMode(self).rtvVersion);
   (console.info || console.log).call(
     console,
-    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()} – ${versionString}`,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()} – ${versionString}`,
   );
 }
 self.document.documentElement.setAttribute(
