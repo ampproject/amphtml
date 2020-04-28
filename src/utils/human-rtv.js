@@ -53,7 +53,7 @@ export function humanRtv(rtv) {
     const fingerprint = `${hour}${minute}${cpCount ? `+${cpCount}` : ''}`;
 
     return `${month}-${day} ${channelName} (${fingerprint})`;
-  } catch {
+  } catch (e) {
     return rtv;
   }
 };
