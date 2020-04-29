@@ -24,6 +24,7 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
+import {getStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
@@ -163,7 +164,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_).to.have.display('none');
+    expect(getStyle(shareMenu.element_, 'visibility')).to.equal('hidden');
   });
 
   it('should load the amp-social-share extension if system share', () => {
