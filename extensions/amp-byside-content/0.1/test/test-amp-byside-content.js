@@ -86,9 +86,11 @@ describes.realWin(
 
     it('requires data-label', () => {
       return allowConsoleError(() => {
-        return getElement({
-          'data-webcare-id': 'D6604AE5D0',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getElement({
+            'data-webcare-id': 'D6604AE5D0',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-label attribute is required for/
         );
       });
@@ -96,9 +98,11 @@ describes.realWin(
 
     it('requires data-webcare-id', () => {
       return allowConsoleError(() => {
-        return getElement({
-          'data-label': 'placeholder-label',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getElement({
+            'data-label': 'placeholder-label',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-webcare-id attribute is required for/
         );
       });

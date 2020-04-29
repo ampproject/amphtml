@@ -73,7 +73,7 @@ describes.realWin(
       const params = {...POST_PARAMS};
       delete params['embedtype'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-embedtype attribute is required for/
         );
       });
@@ -96,7 +96,7 @@ describes.realWin(
       const params = {...POST_PARAMS};
       delete params['hash'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-hash attribute is required for/
         );
       });
@@ -106,7 +106,7 @@ describes.realWin(
       const params = {...POST_PARAMS};
       delete params['owner-id'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-owner-id attribute is required for/
         );
       });
@@ -116,7 +116,7 @@ describes.realWin(
       const params = {...POST_PARAMS};
       delete params['post-id'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-post-id attribute is required for/
         );
       });
@@ -158,7 +158,7 @@ describes.realWin(
       const params = {...POLL_PARAMS};
       delete params['api-id'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-api-id attribute is required for/
         );
       });
@@ -168,7 +168,7 @@ describes.realWin(
       const params = {...POLL_PARAMS};
       delete params['poll-id'];
       return allowConsoleError(() => {
-        return createAmpVkElement(params).should.eventually.be.rejectedWith(
+        return expect(createAmpVkElement(params)).to.eventually.be.rejectedWith(
           /The data-poll-id attribute is required for/
         );
       });

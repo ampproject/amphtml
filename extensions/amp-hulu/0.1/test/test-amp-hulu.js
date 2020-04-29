@@ -67,7 +67,7 @@ describes.realWin(
 
     it('requires data-eid', () => {
       return allowConsoleError(() => {
-        return getHulu('').should.eventually.be.rejectedWith(
+        return expect(getHulu('')).to.eventually.be.rejectedWith(
           /The data-eid attribute is required for/
         );
       });

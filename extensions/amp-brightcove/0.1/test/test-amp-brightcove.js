@@ -90,7 +90,7 @@ describes.realWin(
 
     it('requires data-account', () => {
       expectAsyncConsoleError(/The data-account attribute is required for/, 1);
-      return getBrightcove({}).should.eventually.be.rejectedWith(
+      return expect(getBrightcove({})).to.eventually.be.rejectedWith(
         /The data-account attribute is required for/
       );
     });

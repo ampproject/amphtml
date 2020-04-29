@@ -69,7 +69,7 @@ describes.realWin(
 
     it('requires data-videoid', () => {
       return allowConsoleError(() => {
-        return getIzlesene('').should.eventually.be.rejectedWith(
+        return expect(getIzlesene('')).to.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/
         );
       });

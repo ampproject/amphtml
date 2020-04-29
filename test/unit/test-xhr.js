@@ -337,17 +337,19 @@ describe
 
           it('should resolve if success', () => {
             mockXhr.status = 200;
-            return assertSuccess(createResponseInstance('', mockXhr)).then(
-              (response) => {
-                expect(response.status).to.equal(200);
-              }
-            ).should.not.be.rejected;
+            return expect(
+              assertSuccess(createResponseInstance('', mockXhr)).then(
+                (response) => {
+                  expect(response.status).to.equal(200);
+                }
+              )
+            ).to.not.be.rejected;
           });
 
           it('should reject if error', () => {
             mockXhr.status = 500;
-            return assertSuccess(createResponseInstance('', mockXhr)).should.be
-              .rejected;
+            return expect(assertSuccess(createResponseInstance('', mockXhr))).to
+              .be.rejected;
           });
 
           it('should include response in error', () => {
@@ -365,8 +367,9 @@ describe
             mockXhr.responseText = '{"a": "hello"}';
             mockXhr.headers['Content-Type'] = 'application/json';
             mockXhr.getResponseHeader = () => 'application/json';
-            return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .should.not.be.fulfilled;
+            return expect(
+              assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+            ).to.not.be.fulfilled;
           });
         });
 

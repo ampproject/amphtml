@@ -66,7 +66,7 @@ describes.realWin(
     });
 
     it('requires data-vineid', () => {
-      return getVine('').should.eventually.be.rejectedWith(
+      return expect(getVine('')).to.eventually.be.rejectedWith(
         /The data-vineid attribute is required for/
       );
     });

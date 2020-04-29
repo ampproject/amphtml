@@ -78,7 +78,7 @@ describes.realWin(
 
     it('requires data-videoid', () => {
       return allowConsoleError(() => {
-        return getDailymotion('').should.eventually.be.rejectedWith(
+        return expect(getDailymotion('')).to.eventually.be.rejectedWith(
           /The data-videoid attribute is required for/
         );
       });

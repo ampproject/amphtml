@@ -90,7 +90,7 @@ describes.realWin(
 
     it('requires src', () => {
       return allowConsoleError(() => {
-        return getVrImage({}).should.eventually.be.rejectedWith(
+        return expect(getVrImage({})).to.eventually.be.rejectedWith(
           /must be available/
         );
       });
@@ -98,9 +98,11 @@ describes.realWin(
 
     it('requires https src', () => {
       return allowConsoleError(() => {
-        return getVrImage({
-          'src': 'http://example.com/image1',
-        }).should.eventually.be.rejectedWith(/https/);
+        return expect(
+          getVrImage({
+            'src': 'http://example.com/image1',
+          })
+        ).to.eventually.be.rejectedWith(/https/);
       });
     });
   }

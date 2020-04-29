@@ -55,7 +55,7 @@ describes.realWin(
     });
 
     it('requires data-media-hashed-id', () => {
-      return getWistiaEmbed('').should.eventually.be.rejectedWith(
+      return expect(getWistiaEmbed('')).to.eventually.be.rejectedWith(
         /The data-media-hashed-id attribute is required for/
       );
     });

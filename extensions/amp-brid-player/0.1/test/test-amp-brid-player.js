@@ -99,10 +99,12 @@ describes.realWin(
 
     it('requires data-partner', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
-          'data-player': '4144',
-          'data-video': '13663',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getBridPlayer({
+            'data-player': '4144',
+            'data-video': '13663',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-partner attribute is required for/
         );
       });
@@ -110,10 +112,12 @@ describes.realWin(
 
     it('requires data-player', () => {
       return allowConsoleError(() => {
-        return getBridPlayer({
-          'data-partner': '264',
-          'data-video': '13663',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getBridPlayer({
+            'data-partner': '264',
+            'data-video': '13663',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-player attribute is required for/
         );
       });

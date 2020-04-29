@@ -95,16 +95,18 @@ describes.realWin(
 
     it('requires data-account', () => {
       expectAsyncConsoleError(/The data-account attribute is required for/, 1);
-      return getPowrPlayer({}).should.eventually.be.rejectedWith(
+      return expect(getPowrPlayer({})).to.eventually.be.rejectedWith(
         /The data-account attribute is required for/
       );
     });
 
     it('requires data-player', () => {
       expectAsyncConsoleError(/The data-player attribute is required for/, 1);
-      return getPowrPlayer({
-        'data-account': '945',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getPowrPlayer({
+          'data-account': '945',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-player attribute is required for/
       );
     });

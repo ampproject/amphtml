@@ -105,33 +105,37 @@ describes.realWin(
     });
 
     it('fails without an embed code', () => {
-      return getOoyalaElement(
-        null,
-        '6440813504804d76ba35c8c787a4b33c',
-        '5zb2wxOlZcNCe_HVT3a6cawW298X'
-      ).should.eventually.be.rejectedWith(
+      return expect(
+        getOoyalaElement(
+          null,
+          '6440813504804d76ba35c8c787a4b33c',
+          '5zb2wxOlZcNCe_HVT3a6cawW298X'
+        )
+      ).to.eventually.be.rejectedWith(
         /The data-embedcode attribute is required/
       );
     });
 
     it('fails without a player ID', () => {
-      return getOoyalaElement(
-        'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-        null,
-        '5zb2wxOlZcNCe_HVT3a6cawW298X'
-      ).should.eventually.be.rejectedWith(
+      return expect(
+        getOoyalaElement(
+          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
+          null,
+          '5zb2wxOlZcNCe_HVT3a6cawW298X'
+        )
+      ).to.eventually.be.rejectedWith(
         /The data-playerid attribute is required/
       );
     });
 
     it('fails without a p-code', () => {
-      return getOoyalaElement(
-        'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-        '6440813504804d76ba35c8c787a4b33c',
-        null
-      ).should.eventually.be.rejectedWith(
-        /The data-pcode attribute is required/
-      );
+      return expect(
+        getOoyalaElement(
+          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
+          '6440813504804d76ba35c8c787a4b33c',
+          null
+        )
+      ).to.eventually.be.rejectedWith(/The data-pcode attribute is required/);
     });
   }
 );

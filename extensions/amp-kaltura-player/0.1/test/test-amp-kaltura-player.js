@@ -82,13 +82,13 @@ describes.realWin(
 
     it('requires data-account', () => {
       return allowConsoleError(() => {
-        return getKaltura({})
-          .then((kp) => {
+        return expect(
+          getKaltura({}).then((kp) => {
             kp.build();
           })
-          .should.eventually.be.rejectedWith(
-            /The data-partner attribute is required for/
-          );
+        ).to.eventually.be.rejectedWith(
+          /The data-partner attribute is required for/
+        );
       });
     });
 

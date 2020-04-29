@@ -57,7 +57,7 @@ describes.realWin(
       it('requires data-videoid', () => {
         const error = /The data-videoid attribute is required for/;
         expectAsyncConsoleError(error);
-        return getViqeo({viqeoId: null}).should.eventually.be.rejectedWith(
+        return expect(getViqeo({viqeoId: null})).to.eventually.be.rejectedWith(
           error
         );
       });
@@ -65,9 +65,11 @@ describes.realWin(
       it('requires data-profileid', () => {
         const error = /The data-profileid attribute is required for/;
         expectAsyncConsoleError(error);
-        return getViqeo({
-          viqeoProfileId: null,
-        }).should.eventually.be.rejectedWith(error);
+        return expect(
+          getViqeo({
+            viqeoProfileId: null,
+          })
+        ).to.eventually.be.rejectedWith(error);
       });
     });
 

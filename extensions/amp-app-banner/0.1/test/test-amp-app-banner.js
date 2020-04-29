@@ -137,13 +137,13 @@ describes.realWin(
 
     function testButtonMissing() {
       return allowConsoleError(() => {
-        return getAppBanner({
-          iosMeta,
-          androidManifest,
-          noOpenButton: true,
-        }).should.eventually.be.rejectedWith(
-          /<button open-button> is required/
-        );
+        return expect(
+          getAppBanner({
+            iosMeta,
+            androidManifest,
+            noOpenButton: true,
+          })
+        ).to.eventually.be.rejectedWith(/<button open-button> is required/);
       });
     }
 
@@ -229,12 +229,14 @@ describes.realWin(
 
       it('should parse meta content and validate app-argument url', () => {
         return allowConsoleError(() => {
-          return getAppBanner({
-            iosMeta: {
-              content:
-                'app-id=828256236, app-argument=javascript:alert("foo");',
-            },
-          }).should.eventually.be.rejectedWith(
+          return expect(
+            getAppBanner({
+              iosMeta: {
+                content:
+                  'app-id=828256236, app-argument=javascript:alert("foo");',
+              },
+            })
+          ).to.eventually.be.rejectedWith(
             /The url in app-argument has invalid protocol/
           );
         });

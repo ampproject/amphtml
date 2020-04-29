@@ -61,7 +61,7 @@ describes.realWin(
     });
 
     it('requires data-videoid', () => {
-      return getVimeo('').should.eventually.be.rejectedWith(
+      return expect(getVimeo('')).to.eventually.be.rejectedWith(
         /The data-videoid attribute is required for/
       );
     });

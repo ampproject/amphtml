@@ -69,7 +69,7 @@ describe('impression', () => {
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
     maybeTrackImpression(window);
-    return getTrackImpressionPromise().should.be.fulfilled;
+    return expect(getTrackImpressionPromise()).to.be.fulfilled;
   });
 
   it('should resolve if no click no replaceUrl', () => {
@@ -122,7 +122,7 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns('');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.be.fulfilled;
     });
 
     it('should do nothing if there is the click arg is http', () => {
@@ -130,7 +130,7 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns('http://www.example.com');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.be.fulfilled;
     });
 
     it('should invoke click URL with experiment on', function* () {
@@ -289,7 +289,7 @@ describe('impression', () => {
       maybeTrackImpression(window);
       yield macroTask();
       expect(viewer.replaceUrl).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.be.fulfilled;
     });
 
     it('should use init replaceUrl parm if viewer has no capability', () => {

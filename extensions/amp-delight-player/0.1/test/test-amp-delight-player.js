@@ -73,9 +73,11 @@ describes.realWin(
 
     it('fails if no content is specified', () => {
       return allowConsoleError(() => {
-        return getDelightPlayer({
-          'data-content-id': '',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getDelightPlayer({
+            'data-content-id': '',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-content-id attribute is required/
         );
       });

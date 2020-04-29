@@ -252,7 +252,7 @@ describes.realWin(
           'amp-next-page should contain a <script> child, a URL specified in ' +
           '[src], or a [type]';
         expectAsyncConsoleError(error);
-        return nextPage.buildCallback().should.be.rejectedWith(error);
+        return expect(nextPage.buildCallback()).to.be.rejectedWith(error);
       });
 
       it('fetches remote config when specified in src', function* () {
@@ -298,7 +298,7 @@ describes.realWin(
         expectAsyncConsoleError(error);
         element.setAttribute('type', 'adsense');
         element.setAttribute('data-slot', '12345');
-        return nextPage.buildCallback().should.be.rejectedWith(error);
+        return expect(nextPage.buildCallback()).to.be.rejectedWith(error);
       });
 
       it('errors without slot', () => {
@@ -306,7 +306,7 @@ describes.realWin(
         expectAsyncConsoleError(error);
         element.setAttribute('type', 'adsense');
         element.setAttribute('data-client', 'ca-pub-12345');
-        return nextPage.buildCallback().should.be.rejectedWith(error);
+        return expect(nextPage.buildCallback()).to.be.rejectedWith(error);
       });
 
       it('errors for invalid client format', () => {
@@ -317,7 +317,7 @@ describes.realWin(
         element.setAttribute('type', 'adsense');
         element.setAttribute('data-client', 'doggos');
         element.setAttribute('data-slot', '12345');
-        return nextPage.buildCallback().should.be.rejectedWith(error);
+        return expect(nextPage.buildCallback()).to.be.rejectedWith(error);
       });
 
       it('errors for invalid slot format', () => {
@@ -326,7 +326,7 @@ describes.realWin(
         element.setAttribute('type', 'adsense');
         element.setAttribute('data-client', 'ca-pub-12345');
         element.setAttribute('data-slot', 'doggos');
-        return nextPage.buildCallback().should.be.rejectedWith(error);
+        return expect(nextPage.buildCallback()).to.be.rejectedWith(error);
       });
     });
 

@@ -107,9 +107,11 @@ describes.realWin(
     });
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {
-        return getjwplayer({
-          'data-player-id': 'sDZEo0ea',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getjwplayer({
+            'data-player-id': 'sDZEo0ea',
+          })
+        ).to.eventually.be.rejectedWith(
           /Either the data-media-id or the data-playlist-id attributes must be/
         );
       });
@@ -117,9 +119,11 @@ describes.realWin(
 
     it('fails if no player is specified', () => {
       return allowConsoleError(() => {
-        return getjwplayer({
-          'data-media-id': 'Wferorsv',
-        }).should.eventually.be.rejectedWith(
+        return expect(
+          getjwplayer({
+            'data-media-id': 'Wferorsv',
+          })
+        ).to.eventually.be.rejectedWith(
           /The data-player-id attribute is required for/
         );
       });

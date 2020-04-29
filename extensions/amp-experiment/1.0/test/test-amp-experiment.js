@@ -110,9 +110,9 @@ describes.realWin(
       expectAsyncConsoleError(/Experiment/);
       addConfigElement('script');
       doc.body.appendChild(el);
-      return experiment
-        .buildCallback()
-        .should.eventually.be.rejectedWith(/Experiment/);
+      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
+        /Experiment/
+      );
     });
 
     it('should not throw on valid config', () => {

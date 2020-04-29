@@ -97,7 +97,7 @@ describes.realWin(
 
       it('requires data-mediaid', () =>
         allowConsoleError(() =>
-          getMowPlayer({}).should.eventually.be.rejectedWith(
+          expect(getMowPlayer({})).to.eventually.be.rejectedWith(
             /The data-mediaid attribute is required for/
           )
         ));

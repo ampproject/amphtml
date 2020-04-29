@@ -219,7 +219,7 @@ describes.realWin(
       win.document.body.appendChild(el);
       let promise;
       allowConsoleError(() => (promise = el.build()));
-      return promise.should.be.rejectedWith(/application\/json/);
+      return expect(promise).to.be.rejectedWith(/application\/json/);
     });
 
     it('should do nothing for missing targets', () => {

@@ -80,7 +80,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach((index) => {
       systemLayer.setActivePageId(index);
-      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
+      expect(progressBarStub.setActiveSegmentId).to.have.been.calledWith(index);
     });
   });
 });

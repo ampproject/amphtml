@@ -83,61 +83,71 @@ describes.realWin(
     });
 
     it('requires data-site-id', () => {
-      return getSpringboardPlayer({
-        'data-mode': 'video',
-        'data-content-id': '1578473',
-        'data-player-id': 'test401',
-        'data-domain': 'test.com',
-        'data-items': '10',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getSpringboardPlayer({
+          'data-mode': 'video',
+          'data-content-id': '1578473',
+          'data-player-id': 'test401',
+          'data-domain': 'test.com',
+          'data-items': '10',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-site-id attribute is required for/
       );
     });
 
     it('requires data-mode', () => {
-      return getSpringboardPlayer({
-        'data-site-id': '261',
-        'data-content-id': '1578473',
-        'data-player-id': 'test401',
-        'data-domain': 'test.com',
-        'data-items': '10',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getSpringboardPlayer({
+          'data-site-id': '261',
+          'data-content-id': '1578473',
+          'data-player-id': 'test401',
+          'data-domain': 'test.com',
+          'data-items': '10',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-mode attribute is required for/
       );
     });
 
     it('requires data-content-id', () => {
-      return getSpringboardPlayer({
-        'data-mode': 'video',
-        'data-site-id': '261',
-        'data-player-id': 'test401',
-        'data-domain': 'test.com',
-        'data-items': '10',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getSpringboardPlayer({
+          'data-mode': 'video',
+          'data-site-id': '261',
+          'data-player-id': 'test401',
+          'data-domain': 'test.com',
+          'data-items': '10',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-content-id attribute is required for/
       );
     });
 
     it('requires data-player-id', () => {
-      return getSpringboardPlayer({
-        'data-mode': 'video',
-        'data-site-id': '261',
-        'data-content-id': '1578473',
-        'data-domain': 'test.com',
-        'data-items': '10',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getSpringboardPlayer({
+          'data-mode': 'video',
+          'data-site-id': '261',
+          'data-content-id': '1578473',
+          'data-domain': 'test.com',
+          'data-items': '10',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-player-id attribute is required for/
       );
     });
 
     it('requires data-domain', () => {
-      return getSpringboardPlayer({
-        'data-mode': 'video',
-        'data-site-id': '261',
-        'data-content-id': '1578473',
-        'data-player-id': 'test401',
-        'data-items': '10',
-      }).should.eventually.be.rejectedWith(
+      return expect(
+        getSpringboardPlayer({
+          'data-mode': 'video',
+          'data-site-id': '261',
+          'data-content-id': '1578473',
+          'data-player-id': 'test401',
+          'data-items': '10',
+        })
+      ).to.eventually.be.rejectedWith(
         /The data-domain attribute is required for/
       );
     });

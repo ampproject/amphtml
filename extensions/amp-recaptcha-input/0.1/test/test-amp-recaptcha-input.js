@@ -66,11 +66,9 @@ describes.realWin(
         delete ampRecaptchaInputConfig['name'];
 
         return allowConsoleError(() => {
-          return getRecaptchaInput(
-            ampRecaptchaInputConfig
-          ).should.eventually.be.rejectedWith(
-            /The name attribute is required for/
-          );
+          return expect(
+            getRecaptchaInput(ampRecaptchaInputConfig)
+          ).to.eventually.be.rejectedWith(/The name attribute is required for/);
         });
       });
 
@@ -79,9 +77,9 @@ describes.realWin(
         delete ampRecaptchaInputConfig['data-sitekey'];
 
         return allowConsoleError(() => {
-          return getRecaptchaInput(
-            ampRecaptchaInputConfig
-          ).should.eventually.be.rejectedWith(
+          return expect(
+            getRecaptchaInput(ampRecaptchaInputConfig)
+          ).to.eventually.be.rejectedWith(
             /The data-sitekey attribute is required for/
           );
         });
@@ -92,9 +90,9 @@ describes.realWin(
         delete ampRecaptchaInputConfig['data-action'];
 
         return allowConsoleError(() => {
-          return getRecaptchaInput(
-            ampRecaptchaInputConfig
-          ).should.eventually.be.rejectedWith(
+          return expect(
+            getRecaptchaInput(ampRecaptchaInputConfig)
+          ).to.eventually.be.rejectedWith(
             /The data-action attribute is required for/
           );
         });

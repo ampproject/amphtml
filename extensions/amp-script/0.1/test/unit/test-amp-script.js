@@ -81,7 +81,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     expectAsyncConsoleError(/Same-origin "src" requires/);
-    return script.layoutCallback().should.be.rejected;
+    return expect(script.layoutCallback()).to.be.rejected;
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -95,7 +95,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     expectAsyncConsoleError(/should require JS content-type/);
-    return script.layoutCallback().should.be.fulfilled;
+    return expect(script.layoutCallback()).to.be.fulfilled;
   });
 
   it('should check sha384(author_js) for cross-origin src', async () => {
@@ -155,7 +155,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return expect(script.layoutCallback()).to.be.rejected;
   });
 
   it('should check response URL to handle redirects', () => {
@@ -170,7 +170,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     );
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return expect(script.layoutCallback()).to.be.rejected;
   });
 
   it('should check sha384(author_js) for local scripts', async () => {
@@ -199,7 +199,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     env.ampdoc.getBody().appendChild(local);
 
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
-    return script.layoutCallback().should.be.rejected;
+    return expect(script.layoutCallback()).to.be.rejected;
   });
 
   describe('development mode', () => {
@@ -279,7 +279,7 @@ describes.repeated(
             crypto.sha384Base64.resolves('my_fake_hash');
 
             const promise = service.checkSha384('alert(1)', 'foo');
-            return promise.should.be.fulfilled;
+            return expect(promise).to.be.fulfilled;
           });
 
           it('should reject if hash does not exist in meta tag', () => {
@@ -291,7 +291,7 @@ describes.repeated(
             crypto.sha384Base64.resolves('my_fake_hash');
 
             const promise = service.checkSha384('alert(1)', 'foo');
-            return promise.should.be.rejected;
+            return expect(promise).to.be.rejected;
           });
         });
       }

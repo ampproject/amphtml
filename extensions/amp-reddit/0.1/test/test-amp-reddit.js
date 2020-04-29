@@ -106,16 +106,18 @@ describes.realWin(
     });
 
     it('requires data-src', () => {
-      return getReddit('', 'post').should.eventually.be.rejectedWith(
+      return expect(getReddit('', 'post')).to.eventually.be.rejectedWith(
         /The data-src attribute is required for/
       );
     });
 
     it('requires data-embedtype', () => {
-      return getReddit(
-        'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
-        ''
-      ).should.eventually.be.rejectedWith(
+      return expect(
+        getReddit(
+          'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
+          ''
+        )
+      ).to.eventually.be.rejectedWith(
         /The data-embedtype attribute is required for/
       );
     });

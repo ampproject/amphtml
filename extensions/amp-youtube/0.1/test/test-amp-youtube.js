@@ -232,7 +232,7 @@ describes.realWin(
 
     it('requires data-videoid or data-live-channelid', () => {
       return allowConsoleError(() => {
-        return getYt({}).should.eventually.be.rejectedWith(
+        return expect(getYt({})).to.eventually.be.rejectedWith(
           /Exactly one of data-videoid or data-live-channelid should/
         );
       });

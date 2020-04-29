@@ -68,7 +68,7 @@ describes.realWin(
 
     it('requires data-id', () => {
       return allowConsoleError(() => {
-        return get3QElement('').should.eventually.be.rejectedWith(
+        return expect(get3QElement('')).to.eventually.be.rejectedWith(
           /The data-id attribute is required/
         );
       });

@@ -76,9 +76,9 @@ describes.realWin(
         value: undefined,
       });
       // Should not error out
-      return webPush
-        .start()
-        .should.eventually.be.rejectedWith(/Web push is not supported/);
+      return expect(webPush.start()).to.eventually.be.rejectedWith(
+        /Web push is not supported/
+      );
     });
   }
 );

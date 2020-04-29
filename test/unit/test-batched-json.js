@@ -89,9 +89,11 @@ describe('batchFetchJsonFor', () => {
 
         const optIn = UrlReplacementPolicy.OPT_IN;
         const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
-        return batchFetchJsonFor(ampdoc, el, {
-          urlReplacement: optIn,
-        }).should.eventually.be.rejectedWith(rejectError);
+        return expect(
+          batchFetchJsonFor(ampdoc, el, {
+            urlReplacement: optIn,
+          })
+        ).to.eventually.be.rejectedWith(rejectError);
       }
     );
 
