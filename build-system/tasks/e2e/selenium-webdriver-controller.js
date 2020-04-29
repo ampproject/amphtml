@@ -38,7 +38,6 @@ const KeyToSeleniumMap = {
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
-  [Key.CtrlV]: SeleniumKey.chord(SeleniumKey.CONTROL, 'v'),
 };
 
 /**
@@ -297,12 +296,32 @@ class SeleniumWebDriverController {
       ? handle.getElement()
       : await this.driver.switchTo().activeElement();
 
+    if (keys === Key.CtrlV) {
+      return await this.pasteFromClipboard();
+    }
+
     const key = KeyToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }
 
     return await targetElement.sendKeys(keys);
+  }
+
+  /**
+   * Pastes from the clipboard by perfoming the keyboard shortcut.
+   * https://stackoverflow.com/a/41046276
+   * @return {!Promise}
+   * @override
+   */
+  pasteFromClipboard() {
+    return this.driver
+      .actions()
+      .keyDown(SeleniumKey.SHIFT)
+      .keyDown(SeleniumKey.INSERT)
+      .keyUp(SeleniumKey.SHIFT)
+      .keyUp(SeleniumKey.INSERT)
+      .perform();
   }
 
   /**
