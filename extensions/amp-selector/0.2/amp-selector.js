@@ -208,7 +208,8 @@ function SelectorShim(props) {
     domElement.setAttribute('role', role);
   }, [domElement, role]);
 
-  return Selector(omit(props, ['domElement']));
+  const rest = omit(props, ['domElement']);
+  return <Selector {...rest}></Selector>;
 }
 
 /** @override */
