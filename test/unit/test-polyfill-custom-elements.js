@@ -22,16 +22,27 @@ describes.realWin(
   (env) => {
     let win;
     let innerHTMLProto;
-    beforeEach(function () {
-      win = env.win;
 
-      innerHTMLProto = win.Element.prototype;
+    function getInnerHtmlProto(win) {
+      let innerHTMLProto = win.Element.prototype;
       if (!Object.getOwnPropertyDescriptor(innerHTMLProto, 'innerHTML')) {
         innerHTMLProto = win.HTMLElement.prototype;
         if (!Object.getOwnPropertyDescriptor(innerHTMLProto, 'innerHTML')) {
-          return this.skip();
+          return null;
         }
       }
+      return innerHTMLProto;
+    }
+
+    before(function () {
+      if (!getInnerHtmlProto(window)) {
+        this.skipTest();
+      }
+    });
+
+    beforeEach(function () {
+      win = env.win;
+      innerHTMLProto = getInnerHtmlProto(win);
 
       // We want to test the full polyfill.
       delete win.Reflect;
