@@ -90,7 +90,6 @@
     "local/closure-type-primitives": 2,
     "local/dict-string-keys": 2,
     "local/html-template": 2,
-    "local/i-really-really-really-dislike-chai": 2,
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
@@ -233,6 +232,7 @@
       ],
       "rules": {
         "require-jsdoc": 0,
+        "local/i-really-really-really-dislike-chai": 2,
         "local/no-bigint": 0,
         "local/no-dynamic-import": 0,
         "local/no-function-async": 0,

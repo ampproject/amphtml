@@ -62,6 +62,10 @@ describes.realWin(
         player.setAttribute('data-placeholder', opt_placeholder);
       }
 
+      player.setAttribute('layout', 'fixed');
+      player.setAttribute('width', '100');
+      player.setAttribute('height', '100');
+
       doc.body.appendChild(player);
       return player.build().then(() => {
         player.layoutCallback();
