@@ -242,6 +242,7 @@ tags: {  # <amp-list>
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
+    supported_layouts: CONTAINER # Experimental, email-only.
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

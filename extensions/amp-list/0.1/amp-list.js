@@ -59,9 +59,10 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setStyles, toggle} from '../../../src/style';
+import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
 
@@ -131,6 +132,19 @@ export class AmpList extends AMP.BaseElement {
     this.layoutCompleted_ = false;
 
     /**
+     * Whether the amp-list has an initial `layout` value of `container`.
+     * If so, allow it to manage its own resizing in accordance to
+     * (1) requiring a placeholder to detect initial sizing and
+     * (2) fixing height on content change to prevent content jumping
+     *
+     * TODO(#26873): This configuration should eventually allow resizing to
+     * contents on user interaction with an AMP action that mimics the
+     * spirit of "changeToLayoutContainer" but more aptly named.
+     * @private {boolean}
+     */
+    this.enableManagedResizing_ = false;
+
+    /**
      * The `src` attribute's initial value.
      * @private {?string}
      */
@@ -177,6 +191,23 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    if (layout === Layout.CONTAINER) {
+      const doc = this.element.ownerDocument;
+      userAssert(
+        (doc && isAmp4Email(doc)) ||
+          isExperimentOn(this.win, 'amp-list-layout-container'),
+        'Experiment "amp-list-layout-container" is not turned on.'
+      );
+      userAssert(
+        this.getPlaceholder(),
+        '%s with layout=container relies on a placeholder to determine an initial height. ' +
+          'For more info on adding a placeholder see: ' +
+          'https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+        TAG,
+        this.element
+      );
+      return (this.enableManagedResizing_ = true);
+    }
     return isLayoutSizeDefined(layout);
   }
 
@@ -191,6 +222,12 @@ export class AmpList extends AMP.BaseElement {
     );
 
     this.loadMoreEnabled_ = this.element.hasAttribute('load-more');
+    userAssert(
+      !(this.loadMoreEnabled_ && this.enableManagedResizing_),
+      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+      TAG,
+      this.element
+    );
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -298,12 +335,13 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {?Promise<boolean>}
    */
   maybeResizeListToFitItems_() {
     if (this.loadMoreEnabled_) {
       this.attemptToFitLoadMore_(dev().assertElement(this.container_));
     } else {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      return this.attemptToFit_(dev().assertElement(this.container_));
     }
   }
 
@@ -463,7 +501,10 @@ export class AmpList extends AMP.BaseElement {
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
-    if (!this.loadMoreEnabled_) {
+    // In the layout=container case, we allow the container
+    // to take the height of its children instead,
+    // whereas fill-content forces height:0
+    if (!this.loadMoreEnabled_ && !this.enableManagedResizing_) {
       this.applyFillContent(container, true);
     }
     return container;
@@ -537,10 +578,9 @@ export class AmpList extends AMP.BaseElement {
       (isFetch && this.element.hasAttribute('reset-on-refresh')) ||
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
-      // Placeholder and loading don't need a mutate context.
-      this.togglePlaceholder(true);
-      this.toggleLoading(true);
-      this.mutateElement(() => {
+      const reset = () => {
+        this.togglePlaceholder(true);
+        this.toggleLoading(true);
         this.toggleFallback_(false);
         // Clean up bindings in children before removing them from DOM.
         if (this.bind_) {
@@ -551,6 +591,15 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+      };
+
+      // amp-list[layout=container] can manage resizing.
+      if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
+        this.lockHeightAndMutate_(reset);
+        return;
+      }
+      this.mutateElement(() => {
+        reset();
         if (this.loadMoreEnabled_) {
           this.getLoadMoreService_().hideAllLoadMoreElements();
         }
@@ -988,7 +1037,7 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
-    return this.mutateElement(() => {
+    const renderAndResize = () => {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
@@ -1015,8 +1064,20 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      this.maybeResizeListToFitItems_();
-    });
+      return this.maybeResizeListToFitItems_();
+    };
+
+    // amp-list[layout=container] can manage resizing.
+    if (!this.loadMoreEnabled_ && this.enableManagedResizing_) {
+      return this.lockHeightAndMutate_(() => {
+        const promise = renderAndResize() || Promise.resolve(true);
+        promise.then((resized) =>
+          resized ? this.unlockHeightInsideMutate_() : null
+        );
+      });
+    }
+
+    return this.mutateElement(renderAndResize);
   }
 
   /**
@@ -1114,6 +1175,54 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Measure and lock height before performing given mutate fn.
+   * Applicable for amp-list initialized with layout=container.
+   * @private
+   * @param {function():(Promise|undefined)} mutate
+   * @return {!Promise}
+   */
+  lockHeightAndMutate_(mutate) {
+    if (!this.enableManagedResizing_ || this.loadMoreEnabled_) {
+      dev().error(
+        TAG,
+        '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+        this.element
+      );
+      return Promise.resolve();
+    }
+    let currentHeight;
+    return this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+      },
+      () => {
+        setImportantStyles(this.element, {
+          'height': `${currentHeight}px`,
+          'overflow': 'hidden',
+        });
+        return mutate();
+      }
+    );
+  }
+
+  /**
+   * Applicable for amp-list initialized with layout=container.
+   * @private
+   */
+  unlockHeightInsideMutate_() {
+    devAssert(
+      this.enableManagedResizing_ && !this.loadMoreEnabled_,
+      '%s initialized with layout=container does not support infinite scrolling with [load-more]. %s',
+      TAG,
+      this.element
+    );
+    setImportantStyles(this.element, {
+      'height': '',
+      'overflow': '',
+    });
+  }
+
+  /**
    * Attempts to change the height of the amp-list to fit a target child.
    *
    * If the target's height is greater than the amp-list's height, attempt
@@ -1121,17 +1230,25 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
+   * @return {!Promise<boolean>}
    */
   attemptToFit_(target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
-      return;
+    if (
+      this.element.getAttribute('layout') == Layout.CONTAINER &&
+      !this.enableManagedResizing_
+    ) {
+      return Promise.resolve(true);
     }
-    this.measureElement(() => {
+    return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
-        this.attemptChangeHeight(targetHeight).catch(() => {});
+        return this.attemptChangeHeight(targetHeight).then(
+          () => true,
+          () => false
+        );
       }
+      return true;
     });
   }
 
@@ -1218,6 +1335,16 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
+    if (this.enableManagedResizing_) {
+      // TODO: Link to amp.dev documentation in warning message.
+      user().warn(
+        TAG,
+        '[is-layout-container] and changeToLayoutContainer are ineffective ' +
+          'when an amp-list initially sets layout=container',
+        this.element
+      );
+      return Promise.resolve();
+    }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
