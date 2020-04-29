@@ -219,6 +219,14 @@ export class Log {
       return LogLevel.INFO;
     }
 
+    return this.defaultLevelWithFunc_();
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
     return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
   }
