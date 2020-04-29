@@ -47,11 +47,7 @@ class AmpBeOpinion extends AMP.BaseElement {
     );
     preconnect.url(this.getAmpDoc(), 'https://s.beop.io', opt_onLayout);
     preconnect.url(this.getAmpDoc(), 'https://t.beop.io', opt_onLayout);
-    preconnect.url(
-      this.getAmpDoc(),
-      'https://data.beop.io',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://data.beop.io', opt_onLayout);
   }
 
   /** @override */
