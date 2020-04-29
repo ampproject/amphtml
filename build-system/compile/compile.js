@@ -46,7 +46,7 @@ let inProgress = 0;
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
-  ? 4
+  ? 2
   : parseInt(argv.closure_concurrency, 10) || 1;
 
 // Compiles AMP with the closure compiler. This is intended only for
