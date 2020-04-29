@@ -15,7 +15,6 @@
  */
 
 import {getMode} from './mode';
-import {getModeObject} from './mode-object';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
@@ -152,7 +151,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -163,7 +162,7 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(!./mode.ModeDef):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -220,8 +219,16 @@ export class Log {
       return LogLevel.INFO;
     }
 
+    return this.defaultLevelWithFunc_();
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
-    return this.levelFunc_(getModeObject());
+    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
   }
 
   /**
@@ -814,9 +821,8 @@ function getUserLogger(suffix) {
   }
   return new logConstructor(
     self,
-    (mode) => {
-      const logNum = parseInt(mode.log, 10);
-      if (mode.development || logNum >= 1) {
+    (logNum, development) => {
+      if (development || logNum >= 1) {
         return LogLevel.FINE;
       }
       return LogLevel.WARN;
@@ -844,8 +850,7 @@ export function dev() {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return (logs.dev = new logConstructor(self, (mode) => {
-    const logNum = parseInt(mode.log, 10);
+  return (logs.dev = new logConstructor(self, (logNum) => {
     if (logNum >= 3) {
       return LogLevel.FINE;
     }
