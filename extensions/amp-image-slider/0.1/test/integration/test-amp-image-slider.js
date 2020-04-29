@@ -116,6 +116,7 @@ t.run('amp-image-slider', function () {
         expect(win.getComputedStyle(s1.leftLabel)['padding']).to.equal('16px');
       });
 
+      // TODO(#28116): fix timeout issue and unskip this `describe` and the two below
       describe.skip('using mouse', () => {
         it('should move slider bar to position on mousedown', () => {
           // Perform a mousedown
