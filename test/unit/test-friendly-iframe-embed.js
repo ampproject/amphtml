@@ -813,7 +813,15 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         ready = true;
       });
       return Promise.race([
-        Promise.resolve().then().then().then().then().then().then(),
+        Promise.resolve()
+          .then()
+          .then()
+          .then()
+          .then()
+          .then()
+          .then()
+          .then()
+          .then(),
         embedPromise,
       ]).then(() => {
         expect(ready).to.be.true;
