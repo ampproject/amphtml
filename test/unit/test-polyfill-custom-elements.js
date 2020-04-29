@@ -14,7 +14,89 @@
  * limitations under the License.
  */
 
-import {copyProperties} from '../../src/polyfills/custom-elements';
+import {copyProperties, install} from '../../src/polyfills/custom-elements';
+
+describes.realWin(
+  'install patches',
+  {skipCustomElementsPolyfill: true},
+  (env) => {
+    let win;
+    let innerHTMLProto;
+
+    function getInnerHtmlProto(win) {
+      let innerHTMLProto = win.Element.prototype;
+      if (!Object.getOwnPropertyDescriptor(innerHTMLProto, 'innerHTML')) {
+        innerHTMLProto = win.HTMLElement.prototype;
+        if (!Object.getOwnPropertyDescriptor(innerHTMLProto, 'innerHTML')) {
+          return null;
+        }
+      }
+      return innerHTMLProto;
+    }
+
+    before(function () {
+      if (!getInnerHtmlProto(window)) {
+        this.skipTest();
+      }
+    });
+
+    beforeEach(function () {
+      win = env.win;
+      innerHTMLProto = getInnerHtmlProto(win);
+
+      // We want to test the full polyfill.
+      delete win.Reflect;
+      delete win.customElements;
+    });
+
+    it('handles non-configurable innerHTML accessor (Safari 9)', () => {
+      // Use strict is important, as strict mode code will throw an error when
+      // trying to redefine a non-configurable property.
+      'use strict';
+
+      Object.defineProperty(innerHTMLProto, 'innerHTML', {configurable: false});
+      install(win, function () {});
+
+      class Test extends win.HTMLElement {}
+
+      expect(() => {
+        win.customElements.define('x-test', Test);
+      }).not.to.throw();
+    });
+
+    it('handles missing innerHTML descriptor (Yandex)', () => {
+      // Use strict is important, as strict mode code will throw an error when
+      // trying to redefine a non-configurable property.
+      'use strict';
+
+      delete innerHTMLProto.innerHTML;
+      install(win, function () {});
+
+      class Test extends win.HTMLElement {}
+
+      expect(() => {
+        win.customElements.define('x-test', Test);
+      }).not.to.throw();
+    });
+
+    it('handles innerHTML descriptor on HTMLElement (IE11)', () => {
+      // Use strict is important, as strict mode code will throw an error when
+      // trying to redefine a non-configurable property.
+      'use strict';
+
+      const desc = Object.getOwnPropertyDescriptor(innerHTMLProto, 'innerHTML');
+      delete innerHTMLProto.innerHTML;
+      Object.defineProperty(win.HTMLElement.prototype, 'innerHTML', desc);
+      install(win, function () {});
+
+      class Test extends win.HTMLElement {}
+
+      expect(() => {
+        win.customElements.define('x-test', Test);
+      }).not.to.throw();
+    });
+  }
+);
 
 describes.fakeWin('copyProperties', {}, () => {
   it('copies own properties from proto object', () => {
