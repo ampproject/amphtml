@@ -156,6 +156,7 @@ export class ShareMenu {
    */
   buildForFallbackSharing_() {
     const root = this.win_.document.createElement('div');
+    root.classList.add('i-amphtml-story-share-menu-host');
 
     this.element_ = getTemplate(this.parentEl_);
     createShadowRootWithStyle(root, this.element_, CSS);
