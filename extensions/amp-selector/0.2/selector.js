@@ -84,7 +84,6 @@ export function Option(props) {
   const {
     'as': Comp = 'div',
     'disabled': disabled,
-    'getOption': getOption,
     'onClick': onClick,
     'option': option,
     'role': role,
@@ -92,9 +91,9 @@ export function Option(props) {
   } = props;
   const selectorContext = useContext(SelectorContext);
   const {'selected': selected, 'selectOption': selectOption} = selectorContext;
-  const clickHandler = (e) => {
+  const clickHandler = () => {
     onClick ? onClick() : null;
-    selectOption(getOption ? getOption(e) : option);
+    selectOption(option);
   };
   const isSelected = /** @type {!Array} */ (selected).includes(option);
   const statusStyle = disabled

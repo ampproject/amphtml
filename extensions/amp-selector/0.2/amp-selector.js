@@ -16,18 +16,21 @@
 
 import * as Preact from '../../../src/preact';
 import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-selector-0.2.css';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
+  toggleAttribute,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
+import {useEffect} from '../../../src/preact';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -35,9 +38,6 @@ const TAG = 'amp-selector';
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
-    // TODO: Remove and replace with <template> approach.
-    this.container_ = this.element.attachShadow({mode: 'open'});
-
     const {/** @type {!Element} */ element} = this;
     const action = Services.actionServiceForDoc(this.element);
 
@@ -59,33 +59,28 @@ class AmpSelector extends PreactBaseElement {
       const value = [];
       optionChildren
         // Skip options that are themselves within an option
-        .filter((child) => !getOptionElement(child.parentElement))
+        .filter(
+          (child) =>
+            !closestAncestorElementBySelector(child.parentNode, '[option]')
+        )
         .forEach((child) => {
           const option = child.getAttribute('option');
-          if (!child.hasAttribute('role')) {
-            child.setAttribute('role', 'option');
-          }
-          const isDisabled = child.hasAttribute('disabled');
-          if (isDisabled) {
-            child.setAttribute('aria-disabled', 'true');
-          }
+          const selected = child.hasAttribute('selected');
           const props = {
-            // TODO: Remove and replace with <template> approach.
-            as: 'Slot',
+            as: OptionShim,
             option,
-            disabled: isDisabled,
-            type: 'Slot',
-            retarget: true,
-            assignedElements: [child],
+            isDisabled: child.hasAttribute('disabled'),
+            role: child.getAttribute('role') || 'option',
+            domElement: child,
             // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
             // See https://github.com/ampproject/amp-react-prototype/issues/40.
             postRender: () => {
               // Skip mutations to avoid cycles.
               mu.takeRecords();
             },
-            getOption: (e) => getOptionValue(dev().assertElement(e.target)),
+            selected,
           };
-          if (child.hasAttribute('selected') && option) {
+          if (selected && option) {
             value.push(option);
           }
           const optionChild = <Option {...props} />;
@@ -138,29 +133,6 @@ class AmpSelector extends PreactBaseElement {
 }
 
 /**
- * @param {Element=} element
- * @return {Element|undefined}
- */
-function getOptionElement(element) {
-  if (!element) {
-    return;
-  }
-  return closestAncestorElementBySelector(element, '[option]');
-}
-
-/**
- * @param {!Element} element
- * @return {string|undefined}
- */
-function getOptionValue(element) {
-  const optionElement = getOptionElement(element);
-  if (!optionElement || optionElement.hasAttribute('disabled')) {
-    return;
-  }
-  return optionElement.getAttribute('option');
-}
-
-/**
  * Appends the 'selected' attribute on the child of the given element with the given 'option' value.
  * @param {!Element} element
  * @param {string} option
@@ -181,9 +153,9 @@ function selectOption(element, option) {
  * @param {string} option
  */
 function selectUniqueOption(element, option) {
-  element
-    .querySelectorAll('[selected]')
-    .forEach((selected) => selected.removeAttribute('selected'));
+  toArray(element.querySelectorAll('[selected]')).forEach((selected) =>
+    selected.removeAttribute('selected')
+  );
   selectOption(element, option);
 }
 
@@ -208,6 +180,43 @@ function fireSelectEvent(win, action, el, option, value, trust) {
     dict({'targetOption': option, 'selectedOptions': value})
   );
   action.trigger(el, name, selectEvent, trust);
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {PreactDef.Renderable}
+ */
+function OptionShim(props) {
+  const {
+    'domElement': domElement,
+    'onClick': onClick,
+    'selected': selected,
+    'isDisabled': isDisabled,
+    'role': role,
+  } = props;
+  useEffect(() => {
+    if (onClick) {
+      domElement.addEventListener('click', onClick);
+    }
+    return () => {
+      if (onClick) {
+        domElement.removeEventListener('click', onClick);
+      }
+    };
+  }, [domElement, onClick]);
+
+  useEffect(() => {
+    toggleAttribute(domElement, 'selected', selected);
+  }, [domElement, selected]);
+
+  useEffect(() => {
+    toggleAttribute(domElement, 'disabled', isDisabled);
+    toggleAttribute(domElement, 'aria-disabled', isDisabled);
+  }, [domElement, isDisabled]);
+
+  useEffect(() => {
+    toggleAttribute(domElement, 'role', role);
+  }, [domElement, role]);
 }
 
 /** @override */
