@@ -336,6 +336,12 @@ class AmpAccordion extends AMP.BaseElement {
             }
           });
         }
+        setTimeout(() => {
+          Services.ownersForDoc(this.element).scheduleLayout(
+            this.element,
+            content
+          );
+        }, 0);
       } else {
         header.setAttribute('aria-expanded', 'false');
         this.setRenderSubtreeIfEnabled_(
@@ -369,6 +375,12 @@ class AmpAccordion extends AMP.BaseElement {
               }
             });
           }
+          setTimeout(() => {
+            Services.ownersForDoc(this.element).scheduleLayout(
+              this.element,
+              content
+            );
+          }, 0);
         } else {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
