@@ -42,16 +42,12 @@ class AmpBeOpinion extends AMP.BaseElement {
     // Hosts the script that renders widgets.
     preconnect.preload(
       this.getAmpDoc(),
-      'https://widget.beopinion.com/sdk.js',
+      'https://widget.beop.io/sdk.js',
       'script'
     );
-    preconnect.url(this.getAmpDoc(), 'https://s.beopinion.com', opt_onLayout);
-    preconnect.url(this.getAmpDoc(), 'https://t.beopinion.com', opt_onLayout);
-    preconnect.url(
-      this.getAmpDoc(),
-      'https://data.beopinion.com',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://s.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://t.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://data.beop.io', opt_onLayout);
   }
 
   /** @override */

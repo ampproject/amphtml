@@ -26,7 +26,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-beopinion` component allows you to embed [BeOpinion](https://beopinion.com/) content in your AMP page for a given BeOpinion account. BeOpinion is a tool for content creators to add interactive blocks such as polls and quizzes to their pages. BeOpinion mostly works with journalists of major media groups in Europe.
+The `amp-beopinion` component allows you to embed [BeOpinion](https://beop.io/) content in your AMP page for a given BeOpinion account. BeOpinion is a tool for content creators to add interactive blocks such as polls and quizzes to their pages. BeOpinion mostly works with journalists of major media groups in Europe.
 
 ### Integration examples
 
