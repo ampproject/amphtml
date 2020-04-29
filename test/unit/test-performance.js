@@ -956,6 +956,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         .stub(env.win, 'PerformanceObserver')
         .callsFake(PerformanceObserverStub);
 
+      env.sandbox.stub(env.ampdoc, 'getFirstVisibleTime').callsFake(() => null);
+
       installPerformanceService(env.win);
 
       const perf = Services.performanceFor(env.win);
@@ -1291,19 +1293,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
     it('returns a promise that resolves to the value', async () => {
       const perf = getPerformance();
+      perf.tick('mbv', 1);
       const value = await perf.getMetric('mbv');
       expect(value).to.eq(1);
     });
 
-    describe('offset for visible', () => {
-      it('returns offset value', async () => {
-        const perf = getPerformance();
-        const value = await perf.getMetric('mbv');
-        expect(value).to.eq(1);
-      });
-    });
-
-    describe('when not supported', () => {
+    describe('when API not supported', () => {
       it('returns null', async () => {
         const perf = getPerformance();
         const value = await perf.getMetric('lcp-v');
