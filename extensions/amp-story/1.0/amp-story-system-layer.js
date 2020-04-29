@@ -303,6 +303,7 @@ export class SystemLayer {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
+    this.root_.classList.add('i-amphtml-system-layer-host');
     this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
