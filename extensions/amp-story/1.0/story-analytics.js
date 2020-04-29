@@ -44,7 +44,7 @@ export const StoryAnalyticsEvent = {
 
 /**
  * @enum {string}
- * Note: auto advance advancement should always be prefixed with "autoAdvance".
+ * Note: auto advance advancements should always be prefixed with "autoAdvance".
  */
 export const AdvancementMode = {
   GO_TO_PAGE: 'goToPageAction',
