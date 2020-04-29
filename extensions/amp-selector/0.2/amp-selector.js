@@ -25,11 +25,11 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dev, userAssert} from '../../../src/log';
+import {dict, omit} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 import {useEffect} from '../../../src/preact';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -39,18 +39,6 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {/** @type {!Element} */ element} = this;
     const action = Services.actionServiceForDoc(this.element);
-
-    if (!element.hasAttribute('role')) {
-      element.setAttribute('role', 'listbox');
-    }
-
-    const isMultiple = element.hasAttribute('multiple');
-    if (isMultiple) {
-      element.setAttribute('aria-multiselectable', 'true');
-    }
-    if (element.hasAttribute('disabled')) {
-      element.setAttribute('aria-disabled', 'true');
-    }
     const getOptionState = () => {
       const children = [];
       const optionChildren = toArray(element.querySelectorAll('[option]'));
@@ -61,7 +49,7 @@ class AmpSelector extends PreactBaseElement {
         .filter(
           (el) =>
             !closestAncestorElementBySelector(
-              /** @type {!Element} */ (el.parentElement),
+              dev().assertElement(el.parentElement),
               '[option]'
             )
         )
@@ -103,6 +91,7 @@ class AmpSelector extends PreactBaseElement {
 
     const {value, children} = getOptionState();
     return dict({
+      'domElement': element,
       'children': children,
       'value': value,
       'onChange': (e) => {
@@ -163,7 +152,7 @@ function OptionShim(props) {
     'onClick': onClick,
     'selected': selected,
     'isDisabled': isDisabled,
-    'role': role,
+    'role': role = 'option',
   } = props;
   useEffect(() => {
     if (onClick) {
@@ -186,17 +175,46 @@ function OptionShim(props) {
   }, [domElement, isDisabled]);
 
   useEffect(() => {
-    toggleAttribute(domElement, 'role', role);
+    domElement.setAttribute('role', role);
   }, [domElement, role]);
 }
 
+/**
+ * @param {!JsonObject} props
+ * @return {PreactDef.Renderable}
+ */
+function SelectorShim(props) {
+  const {
+    'domElement': domElement,
+    'role': role = 'listbox',
+    'multiple': multiple,
+    'disabled': disabled,
+  } = props;
+
+  useEffect(() => {
+    toggleAttribute(domElement, 'multiple', multiple);
+    toggleAttribute(domElement, 'aria-multiselectable', multiple);
+  }, [domElement, multiple]);
+
+  useEffect(() => {
+    toggleAttribute(domElement, 'disabled', disabled);
+    toggleAttribute(domElement, 'aria-disabled', disabled);
+  }, [domElement, disabled]);
+
+  useEffect(() => {
+    domElement.setAttribute('role', role);
+  }, [domElement, role]);
+
+  return Selector(omit(props, ['domElement']));
+}
+
 /** @override */
-AmpSelector.Component = Selector;
+AmpSelector.Component = SelectorShim;
 
 /** @override */
 AmpSelector.props = {
   // TODO: Add 'forms' attribute when form integrations are supported.
-  'disabled': {attr: 'disabled'},
+  'disabled': {attr: 'disabled', type: 'boolean'},
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
