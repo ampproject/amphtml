@@ -34,7 +34,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {toggle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -145,7 +145,11 @@ export class ShareMenu {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      toggle(dev().assertElement(this.element_), false);
+      setStyles(dev().assertElement(this.element_), {
+        'visibility': 'hidden',
+        'pointer-events': 'none',
+        'z-index': -1,
+      });
       this.parentEl_.appendChild(this.element_);
     });
   }
