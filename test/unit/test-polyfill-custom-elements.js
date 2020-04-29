@@ -38,7 +38,7 @@ describes.realWin(
       delete win.customElements;
     });
 
-    it('handles non-configurable innerHTML accessor', () => {
+    it('handles non-configurable innerHTML accessor (Safari 9)', () => {
       // Use strict is important, as strict mode code will throw an error when
       // trying to redefine a non-configurable property.
       'use strict';
@@ -53,7 +53,7 @@ describes.realWin(
       }).not.to.throw();
     });
 
-    it('handles missing innerHTML descriptor', () => {
+    it('handles missing innerHTML descriptor (Yandex)', () => {
       // Use strict is important, as strict mode code will throw an error when
       // trying to redefine a non-configurable property.
       'use strict';
@@ -68,7 +68,7 @@ describes.realWin(
       }).not.to.throw();
     });
 
-    it('handles innerHTML descriptor on HTMLElement', () => {
+    it('handles innerHTML descriptor on HTMLElement (IE11)', () => {
       // Use strict is important, as strict mode code will throw an error when
       // trying to redefine a non-configurable property.
       'use strict';
