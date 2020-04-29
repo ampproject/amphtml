@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
-const colors = require('ansi-colors');
 const debounce = require('debounce');
 const del = require('del');
 const file = require('gulp-file');
@@ -41,12 +41,10 @@ const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {EventEmitter} = require('events');
+const {green, red, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
-
-const {green, red, cyan} = colors;
-const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -160,14 +158,7 @@ async function bootstrapThirdPartyFrames(watch, minify) {
  * @return {!Promise}
  */
 async function compileCoreRuntime(watch, minify) {
-  await doBuildJs(jsBundles, 'amp.js', {
-    watch,
-    minify,
-    wrapper: wrappers.mainBinary,
-    singlePassCompilation: argv.single_pass,
-    esmPassCompilation: argv.esm,
-    includeOnlyESMLevelPolyfills: argv.esm,
-  });
+  await doBuildJs(jsBundles, 'amp.js', {watch, minify});
 }
 
 /**
