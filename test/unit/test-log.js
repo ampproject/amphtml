@@ -223,28 +223,28 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
     it('should be WARN by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {
       mode.development = true;
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log=1', () => {
       mode.log = '1';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be enabled with log>1', () => {
       mode.log = '2';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '3';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
 
       mode.log = '4';
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -254,27 +254,27 @@ describe('Logging', () => {
 
   describe('DevLog', () => {
     it('should be disabled by default', () => {
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled in development mode', () => {
       mode.development = true;
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should NOT be enabled with log=1', () => {
       mode.log = '1';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
       mode.log = '2';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.INFO);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
       mode.log = '3';
-      expect(dev().levelFunc_(mode)).to.equal(LogLevel.FINE);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
     });
 
     it('should be configured with no suffix', () => {
