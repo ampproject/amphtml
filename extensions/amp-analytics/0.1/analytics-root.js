@@ -293,7 +293,7 @@ export class AnalyticsRoot {
       let elements = [];
       for (let i = 0; i < selectors.length; i++) {
         let nodeList;
-        const elementArray = [];
+        let elementArray = [];
         const selector = selectors[i];
         try {
           nodeList = this.getRoot().querySelectorAll(selector);
@@ -302,9 +302,10 @@ export class AnalyticsRoot {
         }
         for (let j = 0; j < nodeList.length; j++) {
           if (this.contains(nodeList[j])) {
-            this.checkElementDataVars(nodeList[j], elementArray, selector);
+            elementArray.push(nodeList[j]);
           }
         }
+        elementArray = this.getDataVarsElements_(elementArray, selector);
         userAssert(elementArray.length, `Element "${selector}" not found`);
         this.verifyAmpElements_(elementArray, selector);
         elements = elements.concat(elementArray);
@@ -317,30 +318,38 @@ export class AnalyticsRoot {
   }
 
   /**
-   * Check if the given element has a data-vars attribute.
-   * Warn if not the case.
-   * @param {!Element} element
+   * Return all elements that have a data-vars attribute.
    * @param {!Array<!Element>} elementArray
    * @param {string} selector
+   * @return {!Array<!Element>}
    */
-  checkElementDataVars(element, elementArray, selector) {
-    const dataVarKeys = Object.keys(
-      getDataParamsFromAttributes(
-        element,
-        /* computeParamNameFunc */ undefined,
-        VARIABLE_DATA_ATTRIBUTE_KEY
-      )
-    );
-    if (dataVarKeys.length) {
-      elementArray.push(element);
-    } else {
+  getDataVarsElements_(elementArray, selector) {
+    let removedCount = 0;
+    const dataVarsArray = [];
+    for (let i = 0; i < elementArray.length; i++) {
+      const dataVarKeys = Object.keys(
+        getDataParamsFromAttributes(
+          elementArray[i],
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      );
+      if (dataVarKeys.length) {
+        dataVarsArray.push(elementArray[i]);
+      } else {
+        removedCount++;
+      }
+    }
+    if (removedCount) {
       user().warn(
         TAG,
-        'An element was ommited from selector "%s"' +
+        '%s element(s) ommited from selector "%s"' +
           ' because no data-vars-* attribute was found.',
+        removedCount,
         selector
       );
     }
+    return dataVarsArray;
   }
 
   /**
