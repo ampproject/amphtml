@@ -87,7 +87,7 @@
 }
 
 .i-amphtml-layout-fixed-height,
-[layout=fixed-height][height]:not(i-amphtml-layout-fixed-height)
+[layout=fixed-height][height]:not(.i-amphtml-layout-fixed-height)
 {
   display: block;
   position: relative;
