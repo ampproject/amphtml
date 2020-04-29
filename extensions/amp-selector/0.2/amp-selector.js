@@ -59,8 +59,11 @@ class AmpSelector extends PreactBaseElement {
       optionChildren
         // Skip options that are themselves within an option
         .filter(
-          (child) =>
-            !closestAncestorElementBySelector(child.parentNode, '[option]')
+          (el) =>
+            !closestAncestorElementBySelector(
+              /** @type {!Element} */ (el.parentElement),
+              '[option]'
+            )
         )
         .forEach((child) => {
           const option = child.getAttribute('option');
