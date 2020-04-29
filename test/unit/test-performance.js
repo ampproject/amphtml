@@ -921,7 +921,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -929,6 +929,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcp-v',
           delta: 15,
         }
       );
@@ -977,7 +981,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -985,6 +989,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcp-v',
           delta: 15,
         }
       );
@@ -1094,7 +1102,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'fid',
         delta: 3,
@@ -1299,7 +1307,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       it('returns null', async () => {
         const perf = getPerformance();
         const value = await perf.getMetric('lcp-v');
-        expect(value).to.eq(1);
+        expect(value).to.eq(null);
       });
     });
   });

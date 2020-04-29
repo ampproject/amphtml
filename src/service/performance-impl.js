@@ -113,7 +113,8 @@ export class Performance {
 
     // If Paint Timing API is not supported, cannot determine first contentful paint
     if (!supportedEntryTypes.includes('paint')) {
-      this.metrics_['fcp-v'] = Promise.resolve(null);
+      this.metrics_['fcp-v'] = new Deferred();
+      this.metrics_['fcp-v'].resolve(null);
     }
 
     /**
@@ -125,7 +126,8 @@ export class Performance {
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
 
     if (!this.supportsLayoutShift_) {
-      this.metrics_['cls'] = Promise.resolve(null);
+      this.metrics_['cls'] = new Deferred();
+      this.metrics_['cls'].resolve(null);
     }
 
     /**
@@ -137,7 +139,8 @@ export class Performance {
     this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
     if (!this.supportsEventTiming_) {
-      this.metrics_['fid-v'] = Promise.resolve(null);
+      this.metrics_['fid-v'] = new Deferred();
+      this.metrics_['fid-v'].resolve(null);
     }
 
     /**
@@ -150,7 +153,8 @@ export class Performance {
     );
 
     if (!this.supportsLargestContentfulPaint_) {
-      this.metrics_['lcp-v'] = Promise.resolve(null);
+      this.metrics_['lcp-v'] = new Deferred();
+      this.metrics_['lcp-v'].resolve(null);
     }
 
     /**
@@ -784,7 +788,7 @@ export class Performance {
    * @return {!Promise<number>}
    */
   getMetric(label) {
-    if (!this.metrics_[label]) {
+    if (!(label in this.metrics_)) {
       this.metrics_[label] = new Deferred();
     }
     return this.metrics_[label].promise;
