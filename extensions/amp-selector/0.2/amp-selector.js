@@ -194,7 +194,7 @@ AmpSelector.Component = Selector;
 AmpSelector.props = {
   // TODO: Add 'forms' attribute when form integrations are supported.
   'disabled': {attr: 'disabled'},
-  'multiple': {attr: 'multiple'},
+  'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
   'keyboardSelectMode': {attr: 'keyboard-select-mode'},

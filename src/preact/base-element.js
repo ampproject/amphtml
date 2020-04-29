@@ -263,7 +263,10 @@ function collectProps(Ctor, element, defaultProps) {
   // Props.
   for (const name in propDefs) {
     const def = propDefs[name];
-    const value = element.getAttribute(def.attr);
+    const value =
+      def.type == 'boolean'
+        ? element.hasAttribute(def.attr)
+        : element.getAttribute(def.attr);
     if (value == null) {
       props[name] = def.default;
     } else {

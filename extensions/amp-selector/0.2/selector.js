@@ -32,8 +32,8 @@ export function Selector(props) {
     'defaultValue': defaultValue,
     'disabled': disabled,
     'value': value,
+    'multiple': multiple,
   } = props;
-  const isMultiple = props['multiple'] !== undefined;
   const [selectedState, setSelectedState] = useState(
     value ? [].concat(value) : defaultValue ? [].concat(defaultValue) : []
   );
@@ -47,7 +47,7 @@ export function Selector(props) {
     }
     const {'onChange': onChange} = props;
     let newValue = null;
-    if (isMultiple) {
+    if (multiple) {
       newValue = selected.includes(option)
         ? selected.filter((v) => v != option)
         : selected.concat(option);
@@ -63,7 +63,7 @@ export function Selector(props) {
   };
 
   return (
-    <Comp {...props} aria-disabled={disabled} aria-multiselectable={isMultiple}>
+    <Comp {...props} aria-disabled={disabled} aria-multiselectable={multiple}>
       <SelectorContext.Provider
         value={{
           selected,
