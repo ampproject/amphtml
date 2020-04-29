@@ -342,3 +342,21 @@ export function getConsentTypeValue(enumType) {
       return undefined;
   }
 }
+
+/**
+ * Handle consent metadata by returning and object with
+ * fields based off consentString.
+ * @param {string|undefined} consentString
+ * @param {string|undefined} consentType
+ * @return {!Object}
+ */
+export function getConsentMetadata(consentString, consentType) {
+  const metadata = {};
+  // TODO(micajuineho) treat gdprApplies the same way
+  if (consentString) {
+    metadata['consentString'] = consentString;
+    metadata['consentType'] =
+      convertEnumValueToConsentType(consentType) || undefined;
+  }
+  return metadata;
+}

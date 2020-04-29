@@ -19,6 +19,7 @@ import {
   CONSENT_TYPE,
   composeStoreValue,
   constructConsentInfo,
+  getConsentMetadata,
   getStoredConsentInfo,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
@@ -188,6 +189,19 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'ct': 1,
         'd': 1,
       });
+    });
+  });
+
+  describe('getConsentMetadata', () => {
+    it('converts metadata to an object', () => {
+      expect(getConsentMetadata('abc123', 'tcf-v2')).to.deep.equal({
+        'consentString': 'abc123',
+        'consentType': 2,
+      });
+    });
+
+    it('converts other fields to undefined based on consent string', () => {
+      expect(getConsentMetadata(undefined, 'tcf-v2')).to.deep.equal({});
     });
   });
 

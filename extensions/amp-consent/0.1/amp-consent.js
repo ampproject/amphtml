@@ -16,8 +16,8 @@
 
 import {
   CONSENT_ITEM_STATE,
-  convertEnumValueToConsentType,
   convertEnumValueToState,
+  getConsentMetadata,
   getConsentStateValue,
   getConsentTypeValue,
   hasStoredValue,
@@ -557,10 +557,14 @@ export class AmpConsent extends AMP.BaseElement {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
+      const metadata = getConsentMetadata(
+        responseConsentString,
+        responseConsentType
+      );
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        responseConsentString,
-        convertEnumValueToConsentType(responseConsentType) || undefined
+        metadata.consentString,
+        metadata.consentType
       );
     }
   }
