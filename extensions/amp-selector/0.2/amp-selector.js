@@ -22,7 +22,6 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
-  scopedQuerySelector,
   toggleAttribute,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -100,25 +99,21 @@ class AmpSelector extends PreactBaseElement {
     });
 
     const {value, children} = getOptionState();
-    const onChange = (e) => {
-      const {value, option} = e;
-      isMultiple
-        ? selectOption(element, option)
-        : selectUniqueOption(element, option);
-      fireSelectEvent(
-        this.win,
-        action,
-        element,
-        option,
-        value,
-        ActionTrust.HIGH
-      );
-      this.mutateProps(dict({'value': value}));
-    };
     return dict({
       'children': children,
       'value': value,
-      'onChange': onChange,
+      'onChange': (e) => {
+        const {value, option} = e;
+        fireSelectEvent(
+          this.win,
+          action,
+          element,
+          option,
+          value,
+          ActionTrust.HIGH
+        );
+        this.mutateProps(dict({'value': value}));
+      },
     });
   }
 
@@ -130,33 +125,6 @@ class AmpSelector extends PreactBaseElement {
     );
     return true;
   }
-}
-
-/**
- * Appends the 'selected' attribute on the child of the given element with the given 'option' value.
- * @param {!Element} element
- * @param {string} option
- */
-function selectOption(element, option) {
-  const selector = `[option="${option}"]`;
-  const optionElement = scopedQuerySelector(element, selector);
-  if (optionElement.hasAttribute('selected')) {
-    optionElement.removeAttribute('selected');
-    return;
-  }
-  optionElement.setAttribute('selected', '');
-}
-
-/**
- * Removes all 'selected' attributes on children before selecting the given option.
- * @param {!Element} element
- * @param {string} option
- */
-function selectUniqueOption(element, option) {
-  toArray(element.querySelectorAll('[selected]')).forEach((selected) =>
-    selected.removeAttribute('selected')
-  );
-  selectOption(element, option);
 }
 
 /**
