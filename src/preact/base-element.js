@@ -181,11 +181,14 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const props = collectProps(Ctor, this.element, this.defaultProps_);
 
+    // QQQQ: do on-the-fly math for context.
+    const context = {...this.context_, ...this.element['i-amphtml-context']};
+
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
     const v = (
-      <WithAmpContext {...this.context_}>
+      <WithAmpContext {...context}>
         {Preact.createElement(Ctor['Component'], props)}
       </WithAmpContext>
     );
