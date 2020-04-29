@@ -63,6 +63,68 @@ describe
     );
   });
 
+describe
+  .configure()
+  .skipEdge()
+  .run('amp-lightbox > amp-accordion > amp-img', function () {
+    this.timeout(10000);
+    const extensions = ['amp-lightbox', 'amp-accordion'];
+    const section = `
+      <section>
+          <h1 id="open-section">Title</h1>
+          <div>
+              <amp-img
+                id="image"
+                src="/examples/img/cats-anim.gif"
+                width="400px"
+                height="225px"
+              />
+          </div>
+      </section>
+    `;
+    const sections = Array(5)
+      .fill('')
+      .map(() => section);
+    const body = `
+      <button id="open-lightbox" on="tap:lightbox">
+          Open
+      </button>
+      <amp-lightbox id="lightbox" layout="nodisplay" scrollable="">
+          <amp-accordion id="accordion" animate="">
+            ${sections.join('')}
+          </amp-accordion>
+          <button on="tap:lightbox.close">Hide</button>
+      </amp-lightbox>
+    `;
+    describes.integration(
+      'amp-lightbox > amp-accordion > amp-img',
+      {
+        body,
+        extensions,
+      },
+      (env) => {
+        let win, doc;
+        beforeEach(() => {
+          win = env.win;
+          doc = win.document;
+        });
+
+        it('should load amp-img', () => {
+          const button = doc.getElementById('open-lightbox');
+          button.click();
+          return timeout(300).then(() => {
+            const section = doc.getElementById('open-section');
+            section.click();
+            return timeout(300).then(() => {
+              const img = doc.getElementById('image');
+              expect(img.childElementCount).to.equal(1);
+            });
+          });
+        });
+      }
+    );
+  });
+
 /**
  * @param {number} ms
  * @return {!Promise}
