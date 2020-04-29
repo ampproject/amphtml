@@ -47,7 +47,7 @@
     </amp-selector>
 
     <h2>Single Select</h2>
-    <amp-selector
+    <amp-selector disabled
       class="sample-selector"
       layout="container"
       on="select:AMP.setState({singleTarget: event.targetOption, singleSelections: event.selectedOptions})"
@@ -55,7 +55,7 @@
     <ul>
         <li option="1">Option 1</li>
         <li option="2">Option 2</li>
-        <li option="3">Option 3</li>
+        <li option="3" selected>Option 3</li>
         <li option="4">Option 4</li>
     </ul>
     </amp-selector>

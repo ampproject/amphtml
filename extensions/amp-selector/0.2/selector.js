@@ -63,6 +63,7 @@ export function Selector(props) {
         value={{
           selected,
           selectOption,
+          disabled,
         }}
       >
         {children}
@@ -85,8 +86,15 @@ export function Option(props) {
     'style': style,
   } = props;
   const selectorContext = useContext(SelectorContext);
-  const {'selected': selected, 'selectOption': selectOption} = selectorContext;
+  const {
+    'selected': selected,
+    'selectOption': selectOption,
+    'disabled': selectorDisabled,
+  } = selectorContext;
   const clickHandler = () => {
+    if (selectorDisabled || disabled) {
+      return;
+    }
     onClick ? onClick() : null;
     selectOption(option);
   };

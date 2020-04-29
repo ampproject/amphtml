@@ -56,10 +56,13 @@ class AmpSelector extends PreactBaseElement {
         .forEach((child) => {
           const option = child.getAttribute('option');
           const selected = child.hasAttribute('selected');
+          const disabled = child.hasAttribute('disabled');
           const props = {
             as: OptionShim,
             option,
-            isDisabled: child.hasAttribute('disabled'),
+            // TODO: `disabled` is always undefined for OptionShim
+            isDisabled: disabled,
+            disabled,
             role: child.getAttribute('role') || 'option',
             domElement: child,
             // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
