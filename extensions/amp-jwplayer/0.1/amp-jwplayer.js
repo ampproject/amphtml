@@ -53,72 +53,6 @@ const JWPLAYER_EVENTS = {
   'adPause': VideoEvents.PAUSE,
 };
 
-const eventHandlers = {
-  /**
-   * @param {{fullscreen:boolean}} detail Message detail from JW Player event.
-   * @param {Object} ctx
-   */
-  fullscreen: (detail, ctx) => {
-    const {fullscreen} = detail;
-    if (fullscreen == ctx.isFullscreen()) {
-      return;
-    }
-
-    fullscreen ? ctx.fullscreenEnter() : ctx.fullscreenExit();
-  },
-  /**
-   * @param {{metadataType:string}} detail Message detail from JW Player event.
-   * @param {Object} ctx
-   */
-  meta: (detail, ctx) => {
-    const {metadataType, duration} = detail;
-    if (metadataType === 'media') {
-      ctx.duration_ = duration;
-    }
-  },
-  /**
-   * @param {{mute:boolean}} detail Message details from JW Player event.
-   * @param {Object} ctx
-   */
-  mute: (detail, ctx) => {
-    const {mute} = detail;
-    const {element} = ctx;
-    ctx.muted_ = mute;
-    element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
-  },
-  /**
-   * @param {{ranges:Array<(Array<number>|null)>}} detail Message details from JW Player event.
-   * @param {Object} ctx
-   */
-  playedRanges: (detail, ctx) => {
-    const {ranges} = detail;
-    ctx.playedRanges_ = ranges;
-  },
-  /**
-   * @param {Object} playlistItem New current JW Player playlist item.
-   * @param {Object} ctx
-   */
-  playlistItem: (playlistItem, ctx) => {
-    ctx.playlistItem_ = {...playlistItem};
-    ctx.sendCommand_('getPlayedRanges');
-  },
-  /**
-   * @param {{currentTime:number}} time Message details being passed from JW Player.
-   * @param {Object} ctx
-   */
-  time: (time, ctx) => {
-    ctx.currentTime_ = time.currentTime;
-    ctx.sendCommand_('getPlayedRanges');
-  },
-  /**
-   * @param {{position:number}} adTime Message details being passed from JW Player.
-   * @param {Object} ctx
-   */
-  adTime: (adTime, ctx) => {
-    ctx.currentTime_ = adTime.position;
-  },
-};
-
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -137,9 +71,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.contentSearch_ = '';
 
     /** @private {string} */
-    this.contentContextual_ = '';
-
-    /** @private {string} */
     this.contentRecency_ = '';
 
     /** @private {string} */
@@ -155,7 +86,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     /** @private {function(Object)} */
-    this.onReadyOnce_ = once((readyEvent) => this.onReady_(readyEvent));
+    this.onReadyOnce_ = once((detail) => this.onReady_(detail));
 
     this.muteOnAutoOnce_ = once(() => this.muteOnAuto_());
 
@@ -261,13 +192,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    if (
-      'mediaSession' in navigator &&
-      window.MediaMetadata &&
-      this.playlistItem_['meta']
-    ) {
+    const {win, playlistItem_} = this;
+    if (win.MediaMetadata && playlistItem_['meta']) {
       try {
-        return new window.MediaMetadata(this.playlistItem_['meta']);
+        return new win.MediaMetadata(playlistItem_['meta']);
       } catch (error) {
         // catch error that occurs when mediaSession fails to setup
       }
@@ -369,8 +297,6 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
-    this.contentContextual_ =
-      element.getAttribute('data-content-contextual') || '';
     this.contentRecency_ = element.getAttribute('data-content-recency') || '';
 
     installVideoManagerForDoc(this.element);
@@ -381,7 +307,6 @@ class AmpJWPlayer extends AMP.BaseElement {
   layoutCallback() {
     const queryParams = dict({
       'search': this.getContextualVal_() || undefined,
-      'contextual': this.contentContextual_ || undefined,
       'recency': this.contentRecency_ || undefined,
       'backfill': this.contentBackfill_ || undefined,
       'isAMP': true,
@@ -451,14 +376,14 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} data
+   * @param {{playlistItem: Object, muted: boolean}} detail
    * @private
    */
-  onReady_(data) {
+  onReady_(detail) {
     const {element} = this;
 
-    this.playlistItem_ = {...data.playlistItem};
-    this.muted_ = !!data.muted;
+    this.playlistItem_ = {...detail.playlistItem};
+    this.muted_ = !!detail.muted;
     this.playerReadyResolver_(this.iframe_);
     element.dispatchCustomEvent(VideoEvents.LOAD);
   }
@@ -500,8 +425,46 @@ class AmpJWPlayer extends AMP.BaseElement {
       return;
     }
 
-    if (detail && event && eventHandlers[event]) {
-      eventHandlers[event](detail, this);
+    if (detail && event) {
+      switch (event) {
+        case 'fullscreen':
+          const {fullscreen} = detail;
+          if (fullscreen !== this.isFullscreen()) {
+            fullscreen ? this.fullscreenEnter() : this.fullscreenExit();
+          }
+          break;
+        case 'meta':
+          const {metadataType, duration} = detail;
+          if (metadataType === 'media') {
+            this.duration_ = duration;
+          }
+          break;
+        case 'mute':
+          const {mute} = detail;
+          const {element} = this;
+          this.muted_ = mute;
+          element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
+          break;
+        case 'playedRanges':
+          const {ranges} = detail;
+          this.playedRanges_ = ranges;
+          break;
+        case 'playlistItem':
+          const playlistItem = {...detail};
+          this.playlistItem_ = playlistItem;
+          this.sendCommand_('getPlayedRanges');
+          break;
+        case 'time':
+          const {currentTime} = detail;
+          this.currentTime_ = currentTime;
+          this.sendCommand_('getPlayedRanges');
+          break;
+        case 'adTime':
+          const {position} = detail;
+          this.currentTime_ = position;
+        default:
+          break;
+      }
     }
   }
 
@@ -563,7 +526,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string|null}
+   * @return {?string}
    */
   getContextualVal_() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
