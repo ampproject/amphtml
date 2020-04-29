@@ -15,32 +15,65 @@
  */
 
 import {getMode} from './mode';
+import {loadPromise} from './event-helper';
+import {parseQueryString} from './url';
+import {startsWith} from './string';
 import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the
- * page that has a "development" attribute.
+ * page that has a "development" attribute and the bypass validation via
+ * #validate=0 is absent.
  *
  * @param {!Window} win Destination window for the new element.
  */
 export function maybeValidate(win) {
-  if (!getMode().development) {
+  const filename = win.location.href;
+  if (startsWith(filename, 'about:')) {
+    // Should only happen in tests.
     return;
   }
-  const filename = win.location.href;
-  if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
-    return;
+  let validator = false;
+  if (getMode().development) {
+    const hash = parseQueryString(
+      win.location.originalHash || win.location.hash
+    );
+    validator = hash['validate'] !== '0';
   }
 
-  /** @const {!Element} */
-  const s = win.document.createElement('script');
-  // TODO(@cramforce): Introduce a switch to locally built version for local
-  // development.
-  s.src = `${urls.cdn}/v0/validator.js`;
-  s.onload = () => {
-    win.document.head.removeChild(s);
-    /* global amp: false */
-    amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
-  };
-  win.document.head.appendChild(s);
+  if (validator) {
+    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+      /* global amp: false */
+      amp.validator.validateUrlAndLog(filename, win.document);
+    });
+  } else if (getMode().examiner) {
+    loadScript(win.document, `${urls.cdn}/examiner.js`);
+  }
+}
+
+/**
+ * Loads script
+ *
+ * @param {Document} doc
+ * @param {string} url
+ * @return {!Promise}
+ */
+export function loadScript(doc, url) {
+  const script = doc.createElement('script');
+  script.src = url;
+
+  // Propagate nonce to all generated script tags.
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+  }
+
+  const promise = loadPromise(script).then(
+    () => {
+      doc.head.removeChild(script);
+    },
+    () => {}
+  );
+  doc.head.appendChild(script);
+  return promise;
 }

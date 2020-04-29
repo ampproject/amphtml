@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,288 +14,171 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
-import {getCookie, setCookie} from '../../src/cookies';
+import '../../src/service/timer-impl';
+import {Deferred} from '../../src/utils/promise';
+import {EXPERIMENTS} from './experiments-config';
+import {SameSite, getCookie, setCookie} from '../../src/cookies';
+import {devAssert, initLogConstructor, setReportError} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
+const RTV_COOKIE_MAX_AGE_MS = MS_PER_DAY / 2;
+
+const RTV_PATTERN = /^\d{15}$/;
 
 /**
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
 
 /**
- * This experiment is special because it uses a different mechanism that is
+ * These experiments are special because they use a different mechanism that is
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
-const CANARY_EXPERIMENT_ID = 'dev-channel';
+const EXPERIMENTAL_CHANNEL_ID = 'experimental-channel';
+const BETA_CHANNEL_ID = 'beta-channel';
+const NIGHTLY_CHANNEL_ID = 'nightly-channel';
+const RTV_CHANNEL_ID = 'rtv-channel';
 
+/**
+ * The different states of the __Host-AMP_OPT_IN cookie.
+ */
+const AMP_OPT_IN_COOKIE = {
+  DISABLED: '0',
+  EXPERIMENTAL: 'experimental',
+  BETA: 'beta',
+  NIGHTLY: 'nightly',
+};
 
 /** @const {!Array<!ExperimentDef>} */
-const EXPERIMENTS = [
-  // Canary (Dev Channel)
+const CHANNELS = [
   {
-    id: CANARY_EXPERIMENT_ID,
-    name: 'AMP Dev Channel (more info)',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+    id: EXPERIMENTAL_CHANNEL_ID,
+    name: 'AMP Experimental Channel (more info)',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
-    id: 'ad-type-custom',
-    name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    id: BETA_CHANNEL_ID,
+    name: 'AMP Beta Channel (more info)',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
   {
-    id: 'alp',
-    name: 'Activates support for measuring incoming clicks.',
-    spec: 'https://github.com/ampproject/amphtml/issues/2934',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
-  },
-  {
-    id: 'amp-access-server',
-    name: 'AMP Access server side prototype',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
-  },
-  {
-    id: 'amp-access-jwt',
-    name: 'AMP Access JWT prototype',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
-  },
-  {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
-    id: 'amp-auto-ads',
-    name: 'AMP Auto Ads',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
-    id: 'amp-inabox',
-    name: 'AMP inabox',
-    spec: 'https://github.com/ampproject/amphtml/issues/5700',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
-  },
-  {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs for POST/GET submits',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
-    id: 'amp-form-var-sub-for-post',
-    name: 'Variable Substitutions in AMP Form inputs for POST submits only',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
-  },
-  {
-    id: 'amp-google-vrview-image',
-    name: 'AMP VR Viewer for images via Google VRView',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-google-vrview-image/amp-google-vrview-image.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
-  },
-  {
-    id: 'no-auth-in-prerender',
-    name: 'Delay amp-access auth request until doc becomes visible.',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
-  },
-  {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
-  },
-  {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'cache-service-worker',
-    name: 'AMP Cache Service Worker',
-    spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
-    id: 'amp-lightbox-viewer',
-    name: 'Enables a new lightbox experience via the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'make-body-block',
-    name: 'Sets the body to display:block.',
-    spec: 'https://github.com/ampproject/amphtml/issues/5310',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
-  },
-  {
-    id: 'make-body-relative',
-    name: 'Sets the body to position:relative (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/5667',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
-  },
-  {
-    id: 'link-url-replace',
-    name: 'Enables replacing variables in URLs of outgoing links.',
-    spec: 'https://github.com/ampproject/amphtml/issues/4078',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
-  },
-  {
-    id: 'ios-embed-wrapper',
-    name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
-  },
-  {
-    id: 'chunked-amp',
-    name: 'Split AMP\'s loading phase into chunks',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
-  },
-  {
-    id: 'visibility-v2',
-    name: 'New visibility tracking using native IntersectionObserver',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
-  },
-  {
-    id: 'amp-accordion-session-state-optout',
-    name: 'AMP Accordion attribute to opt out of preserved state.',
-    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
-  },
-  {
-    id: 'sentinel-name-change',
-    name: 'Changed sentinel name from amp3pSentinel to sentinel',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6990',
-    Spec: '',
-  },
-  {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
-    id: 'version-locking',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
-    cleanupIssue: 'DO_NOT_SUBMIT',
-  },
-  {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
-  },
-  {
-    id: 'web-worker',
-    name: 'Web worker for background processing',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-  },
-  {
-    id: 'jank-meter',
-    name: 'Display jank meter',
-  },
-  {
-    id: 'amp-selector',
-    name: 'Amp selector extension- [LAUNCHED]',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-         'amp-selector/amp-selector.md',
-  },
-  {
-    id: 'sticky-ad-early-load',
-    name: 'Load sticky-ad early after user first scroll' +
-        'Only apply to 1.0 version',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7479',
+    id: NIGHTLY_CHANNEL_ID,
+    name: 'AMP Nightly Channel (more info)',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 
 if (getMode().localDev) {
-  EXPERIMENTS.forEach(experiment => {
-    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
-        ' have a `cleanupIssue` field.');
+  EXPERIMENTS.forEach((experiment) => {
+    devAssert(
+      experiment.cleanupIssue,
+      `experiment ${experiment.name} must have a \`cleanupIssue\` field.`
+    );
   });
 }
 
-
 /**
- * Builds the expriments tbale.
+ * Builds the expriments table.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+  const {host} = window.location;
+
+  const subdomain = document.getElementById('subdomain');
+  subdomain.textContent = host;
+
+  // #redirect contains UI that generates a subdomain experiments page link
+  // given a "google.com/amp/..." viewer URL.
+  const redirect = document.getElementById('redirect');
+  const input = redirect.querySelector('input');
+  const button = redirect.querySelector('button');
+  const anchor = redirect.querySelector('a');
+  button.addEventListener('click', function () {
+    let urlString = input.value.trim();
+    // Avoid protocol-less urlString from being parsed as a relative URL.
+    const hasProtocol = /^https?:\/\//.test(urlString);
+    if (!hasProtocol) {
+      urlString = 'https://' + urlString;
+    }
+    const url = parseUrlDeprecated(urlString);
+    if (url) {
+      const subdomain = url.hostname.replace(/\./g, '-');
+      const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
+      anchor.href = href;
+      anchor.textContent = href;
+    }
   });
+
+  const channelsTable = document.getElementById('channels-table');
+  CHANNELS.forEach(function (experiment) {
+    channelsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  const experimentsTable = document.getElementById('experiments-table');
+  EXPERIMENTS.forEach(function (experiment) {
+    experimentsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  if (host === 'cdn.ampproject.org') {
+    const experimentsDesc = document.getElementById('experiments-desc');
+    experimentsDesc.setAttribute('hidden', '');
+    experimentsTable.setAttribute('hidden', '');
+  } else {
+    redirect.setAttribute('hidden', '');
+  }
+
+  const rtvInput = document.getElementById('rtv');
+  const rtvButton = document.getElementById('rtv-submit');
+  rtvInput.addEventListener('input', () => {
+    rtvButton.disabled = rtvInput.value && !RTV_PATTERN.test(rtvInput.value);
+    rtvButton.textContent = rtvInput.value ? 'opt-in' : 'opt-out';
+  });
+  rtvButton.addEventListener('click', () => {
+    if (!rtvInput.value) {
+      showConfirmation_(
+        'Do you really want to opt out of RTV?',
+        setAmpOptInCookie_.bind(null, AMP_OPT_IN_COOKIE.DISABLED)
+      );
+    } else if (RTV_PATTERN.test(rtvInput.value)) {
+      showConfirmation_(
+        `Do you really want to opt in to RTV ${rtvInput.value}?`,
+        setAmpOptInCookie_.bind(null, rtvInput.value)
+      );
+    }
+  });
+
+  if (isExperimentOn_(RTV_CHANNEL_ID)) {
+    rtvInput.value = getCookie(window, '__Host-AMP_OPT_IN');
+    rtvInput.dispatchEvent(new Event('input'));
+    document.getElementById('rtv-details').open = true;
+  }
 }
 
-
 /**
- * Builds one row of the experiments table.
+ * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -321,17 +204,23 @@ function buildExperimentRow(experiment) {
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
 
+  const buttonDefault = document.createElement('div');
+  buttonDefault.classList.add('default');
+  buttonDefault.textContent = 'Default on';
+  button.appendChild(buttonDefault);
+
   const buttonOff = document.createElement('div');
   buttonOff.classList.add('off');
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
 
-  button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
-      experiment.name, undefined));
+  button.addEventListener(
+    'click',
+    toggleExperiment_.bind(null, experiment.id, experiment.name, undefined)
+  );
 
   return tr;
 }
-
 
 /**
  * If link is available, builds the anchor. Otherwise, it'd return a basic span.
@@ -352,16 +241,14 @@ function buildLinkMaybe(text, link) {
   return element;
 }
 
-
 /**
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function (experiment) {
     updateExperimentRow(experiment);
   });
 }
-
 
 /**
  * Updates the state of a single experiment.
@@ -372,9 +259,12 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+  let state = isExperimentOn_(experiment.id) ? 1 : 0;
+  if (self.AMP_CONFIG[experiment.id]) {
+    state = 'default';
+  }
+  tr.setAttribute('data-on', state);
 }
-
 
 /**
  * Returns whether the experiment is on or off.
@@ -382,42 +272,90 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
-  if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '1';
+  const optInCookieValue = getCookie(window, '__Host-AMP_OPT_IN');
+  switch (id) {
+    case EXPERIMENTAL_CHANNEL_ID:
+      return optInCookieValue == AMP_OPT_IN_COOKIE.EXPERIMENTAL;
+    case BETA_CHANNEL_ID:
+      return optInCookieValue == AMP_OPT_IN_COOKIE.BETA;
+    case NIGHTLY_CHANNEL_ID:
+      return optInCookieValue == AMP_OPT_IN_COOKIE.NIGHTLY;
+    case RTV_CHANNEL_ID:
+      return RTV_PATTERN.test(optInCookieValue);
+    default:
+      return isExperimentOn(window, /*OK*/ id);
   }
-  return isExperimentOn(window, id);
 }
 
+/**
+ * Opts in to / out of the pre-release channels or a specific RTV by setting the
+ * __Host-AMP_OPT_IN cookie.
+ * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
+ *   15-digit RTV.
+ */
+function setAmpOptInCookie_(cookieState) {
+  let validUntil = 0;
+  if (RTV_PATTERN.test(cookieState)) {
+    validUntil = Date.now() + RTV_COOKIE_MAX_AGE_MS;
+  } else if (cookieState != AMP_OPT_IN_COOKIE.DISABLED) {
+    validUntil = Date.now() + COOKIE_MAX_AGE_MS;
+  }
+  const cookieOptions = {
+    allowOnProxyOrigin: true,
+    // Make sure the cookie is available for the script loads coming from
+    // other domains. Chrome's default of LAX would otherwise prevent it
+    // from being sent.
+    sameSite: SameSite.NONE,
+    secure: true,
+  };
+  setCookie(
+    window,
+    '__Host-AMP_OPT_IN',
+    cookieState,
+    validUntil,
+    cookieOptions
+  );
+  // Reflect default experiment state.
+  self.location.reload();
+}
 
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
   const currentlyOn = isExperimentOn_(id);
   const on = opt_on === undefined ? !currentlyOn : opt_on;
-  // Protect against click jacking.
-  const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+  // Protect against accidental choice.
+  const confirmMessage = on
+    ? 'Do you really want to activate the AMP experiment?'
+    : 'Do you really want to deactivate the AMP experiment?';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
-    if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = Date.now() +
-          COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY',
-          (on ? '1' : '0'), (on ? validUntil : 0), {
-            // Set explicit domain, so the cookie gets send to sub domains.
-            domain: location.hostname,
-          });
-    } else {
-      toggleExperiment(window, id, on);
+    switch (id) {
+      case EXPERIMENTAL_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      case BETA_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      case NIGHTLY_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.NIGHTLY : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      default:
+        toggleExperiment(window, id, on);
     }
     update();
   });
 }
-
 
 /**
  * Shows confirmation and calls callback if it's approved.
@@ -425,32 +363,66 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
-  const confirmButton = dev().assert(
-      document.getElementById('popup-button-ok'));
-  const cancelButton = dev().assert(
-      document.getElementById('popup-button-cancel'));
+  const container = devAssert(document.getElementById('popup-container'));
+  const messageElement = devAssert(document.getElementById('popup-message'));
+  const confirmButton = devAssert(document.getElementById('popup-button-ok'));
+  const cancelButton = devAssert(
+    document.getElementById('popup-button-cancel')
+  );
   const unlistenSet = [];
-  const closePopup = affirmative => {
+  const closePopup = (affirmative) => {
     container.classList.remove('show');
-    unlistenSet.forEach(unlisten => unlisten());
+    unlistenSet.forEach((unlisten) => unlisten());
     if (affirmative) {
       callback();
     }
   };
 
   messageElement.textContent = message;
-  unlistenSet.push(listenOnce(confirmButton, 'click',
-      () => closePopup(true)));
-  unlistenSet.push(listenOnce(cancelButton, 'click',
-      () => closePopup(false)));
+  unlistenSet.push(listenOnce(confirmButton, 'click', () => closePopup(true)));
+  unlistenSet.push(listenOnce(cancelButton, 'click', () => closePopup(false)));
   container.classList.add('show');
 }
 
+/**
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
+ * (depends on whether they opted into one of the pre-release channels or into a
+ * specific RTV) so that experiment state can reflect the default activated
+ * experiments.
+ * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
+ */
+function getAmpConfig() {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+  return promise
+    .then((text) => {
+      const match = text.match(/self\.AMP_CONFIG=(\{.+?\})/);
+      if (!match) {
+        throw new Error("Can't find AMP_CONFIG in: " + text);
+      }
+      // Setting global var to make standard experiment code just work.
+      return (self.AMP_CONFIG = JSON.parse(match[1]));
+    })
+    .catch((error) => {
+      console./*OK*/ error('Error fetching AMP_CONFIG', error);
+      return {};
+    });
+}
 
 // Start up.
-onDocumentReady(document, () => {
-  build();
-  update();
+getAmpConfig().then(() => {
+  onDocumentReady(document, () => {
+    build();
+    update();
+  });
 });

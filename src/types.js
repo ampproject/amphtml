@@ -42,14 +42,7 @@ export function isArray(value) {
  * @template T
  */
 export function toArray(arrayLike) {
-  if (!arrayLike) {
-    return [];
-  }
-  const array = new Array(arrayLike.length);
-  for (let i = 0; i < arrayLike.length; i++) {
-    array[i] = arrayLike[i];
-  }
-  return array;
+  return arrayLike ? Array.prototype.slice.call(arrayLike) : [];
 }
 
 /**
@@ -69,16 +62,7 @@ export function isObject(value) {
  * @return {boolean}
  */
 export function isFiniteNumber(value) {
-  return (typeof value === 'number' && isFinite(value));
-}
-
-/**
- * Determines if value is of FormData type.
- * @param {*} value
- * @return {boolean}
- */
-export function isFormData(value) {
-  return toString(value) === '[object FormData]';
+  return typeof value === 'number' && isFinite(value);
 }
 
 /**
@@ -96,4 +80,18 @@ export function isEnumValue(enumObj, s) {
     }
   }
   return false;
+}
+
+/**
+ * Externs declare that access `defaultView` from `document` or
+ * `ownerDocument` is of type `(Window|null)` but most of our parameter types
+ * assume that it is never null. This is OK in practice as we ever only get
+ * null on disconnected documents or old IE.
+ * This helper function casts it into just a simple Window return type.
+ *
+ * @param {!Window|null} winOrNull
+ * @return {!Window}
+ */
+export function toWin(winOrNull) {
+  return /** @type {!Window} */ (winOrNull);
 }

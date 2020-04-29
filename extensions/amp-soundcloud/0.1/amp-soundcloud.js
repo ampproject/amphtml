@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Embeds a Soundcloud clip
  *
@@ -28,12 +27,13 @@
  * </amp-soundcloud>
  */
 
-import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
-
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
+import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -42,17 +42,26 @@ class AmpSoundcloud extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://api.soundcloud.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
   }
 
   /**@override*/
@@ -60,11 +69,16 @@ class AmpSoundcloud extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const color = this.element.getAttribute('data-color');
     const visual = this.element.getAttribute('data-visual');
-    const url = 'https://api.soundcloud.com/tracks/';
-    const trackid = user().assert(
-        (this.element.getAttribute('data-trackid')),
-        'The data-trackid attribute is required for <amp-soundcloud> %s',
-        this.element);
+    const url =
+      'https://api.soundcloud.com/' +
+      (this.element.hasAttribute('data-trackid') ? 'tracks' : 'playlists') +
+      '/';
+    const mediaid = userAssert(
+      this.element.getAttribute('data-trackid') ||
+        this.element.getAttribute('data-playlistid'),
+      'data-trackid or data-playlistid is required for <amp-soundcloud> %s',
+      this.element
+    );
     const secret = this.element.getAttribute('data-secret-token');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -72,8 +86,10 @@ class AmpSoundcloud extends AMP.BaseElement {
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
 
-    let src = 'https://w.soundcloud.com/player/?' +
-      'url=' + encodeURIComponent(url + trackid);
+    let src =
+      'https://w.soundcloud.com/player/?' +
+      'url=' +
+      encodeURIComponent(url + mediaid);
     if (secret) {
       // It's very important the entire thing is encoded, since it's part of
       // the `url` query param added above.
@@ -99,11 +115,14 @@ class AmpSoundcloud extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify({method: 'pause'}),
-        'https://w.soundcloud.com');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        JSON.stringify(dict({'method': 'pause'})),
+        'https://w.soundcloud.com'
+      );
     }
   }
-};
+}
 
-AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+AMP.extension('amp-soundcloud', '0.1', (AMP) => {
+  AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+});

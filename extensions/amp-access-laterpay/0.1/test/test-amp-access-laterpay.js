@@ -15,224 +15,293 @@
  */
 
 import {LaterpayVendor} from '../laterpay-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
-describe('LaterpayVendor', () => {
-  let accessService;
-  let accessServiceMock;
-  let xhrMock;
-  let articleTitle;
-  let laterpayConfig;
-  let sandbox;
-  let vendor;
-  let win;
+const TAG = 'amp-access-laterpay';
 
-  beforeEach(() => {
-    win = window;
-    laterpayConfig = {
-      articleTitleSelector: '#laterpay-test-title',
-    };
-    accessService = {
-      win,
-      getAdapterConfig: () => { return laterpayConfig; },
-      buildUrl: () => {},
-      loginWithUrl: () => {},
-    };
-    sandbox = sinon.sandbox.create();
-    accessServiceMock = sandbox.mock(accessService);
+describes.fakeWin(
+  'LaterpayVendor',
+  {
+    amp: true,
+    location: 'https://pub.com/doc1',
+  },
+  (env) => {
+    let win, document, ampdoc;
+    let accessSource;
+    let accessService;
+    let accessSourceMock;
+    let xhrMock;
+    let articleTitle;
+    let laterpayConfig;
+    let vendor;
 
-    articleTitle = document.createElement('h1');
-    articleTitle.id = 'laterpay-test-title';
-    articleTitle.textContent = 'test title';
-    document.body.appendChild(articleTitle);
-
-    vendor = new LaterpayVendor(accessService);
-    xhrMock = sandbox.mock(vendor.xhr_);
-    toggleExperiment(win, 'amp-access-laterpay', true);
-  });
-
-  afterEach(() => {
-    articleTitle.parentNode.removeChild(articleTitle);
-    toggleExperiment(win, 'amp-access-laterpay', false);
-    accessServiceMock.verify();
-    xhrMock.verify();
-    sandbox.restore();
-  });
-
-  it('should fail without experiment', () => {
-    toggleExperiment(win, 'amp-access-laterpay', false);
-    expect(() => {
-      vendor.authorize();
-    }).to.throw(/experiment/);
-  });
-
-  describe('authorize', () => {
-    let emptyContainerStub;
     beforeEach(() => {
-      emptyContainerStub = sandbox.stub(vendor, 'emptyContainer_');
-      sandbox.stub(vendor, 'renderPurchaseOverlay_');
-    });
+      win = env.win;
+      ampdoc = env.ampdoc;
+      document = win.document;
 
-    it('successful authorization', () => {
-      vendor.purchaseConfigBaseUrl_ = 'https://baseurl?param';
-      accessServiceMock.expects('buildUrl')
-        .withExactArgs('https://baseurl?param&article_title=test%20title', false)
-        .returns(Promise.resolve('https://builturl'))
-        .once();
-      xhrMock.expects('fetchJson')
-        .withExactArgs('https://builturl', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
-        })
-        .returns(Promise.resolve({access: true}))
-        .once();
-      return vendor.authorize().then(resp => {
-        expect(resp.access).to.be.true;
-        expect(emptyContainerStub.called).to.be.true;
-      });
-    });
-
-    it('authorization fails due to lack of server config', done => {
-      accessServiceMock.expects('buildUrl')
-        .returns(Promise.resolve('https://builturl'))
-        .once();
-      xhrMock.expects('fetchJson')
-        .withExactArgs('https://builturl', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
-        })
-        .returns(Promise.resolve({status: 204}))
-        .once();
-      return vendor.authorize().catch(err => {
-        expect(err.message).to.exist;
-        done();
-      });
-    });
-
-    it('authorization response from server fails', done => {
-      accessServiceMock.expects('buildUrl')
-        .returns(Promise.resolve('https://builturl'))
-        .once();
-      xhrMock.expects('fetchJson')
-        .withExactArgs('https://builturl', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
-        })
-        .returns(Promise.reject({
-          response: {status: 402},
-          responseJson: {access: false},
-        }))
-        .once();
-      emptyContainerStub.returns(Promise.resolve());
-      return vendor.authorize().then(err => {
-        expect(err.access).to.be.false;
-        done();
-      });
-    });
-
-  });
-
-  describe('create purchase overlay', () => {
-    let container;
-    beforeEach(() => {
-      container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
-      document.body.appendChild(container);
-      vendor.i18n_ = {};
-      vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        timepasses: [
-          {price: {}},
-        ],
+      laterpayConfig = {
+        articleTitleSelector: '#laterpay-test-title',
+        region: 'us',
       };
-      vendor.renderPurchaseOverlay_();
+
+      accessSource = {
+        getAdapterConfig: () => {
+          return laterpayConfig;
+        },
+        buildUrl: () => {},
+        loginWithUrl: () => {},
+        getLoginUrl: () => {},
+      };
+
+      accessService = {
+        ampdoc,
+        getSource: () => accessSource,
+      };
+
+      accessSourceMock = env.sandbox.mock(accessSource);
+
+      articleTitle = document.createElement('h1');
+      articleTitle.id = 'laterpay-test-title';
+      articleTitle.textContent = 'test title';
+      document.body.appendChild(articleTitle);
+
+      vendor = new LaterpayVendor(accessService, accessSource);
+      xhrMock = env.sandbox.mock(vendor.xhr_);
     });
 
     afterEach(() => {
-      container.parentNode.removeChild(container);
+      articleTitle.parentNode.removeChild(articleTitle);
+      accessSourceMock.verify();
+      xhrMock.verify();
     });
 
-    it('renders list', () => {
-      expect(container.querySelector('ul')).to.not.be.null;
+    describe('authorize', () => {
+      let emptyContainerStub;
+      beforeEach(() => {
+        emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
+        env.sandbox.stub(vendor, 'renderPurchaseOverlay_');
+      });
+
+      it('uses a non default region', () => {
+        const buildUrl = accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve(''))
+          .once();
+        xhrMock
+          .expects('fetchJson')
+          .returns(
+            Promise.resolve({
+              json() {
+                return Promise.resolve({access: true});
+              },
+            })
+          )
+          .once();
+        return vendor.authorize().then(() => {
+          expect(
+            /connector\.uselaterpay\.com/g.test(buildUrl.firstCall.args[0])
+          ).to.be.true;
+        });
+      });
+
+      it('successful authorization', () => {
+        vendor.purchaseConfigBaseUrl_ = 'https://baseurl?param';
+        accessSourceMock
+          .expects('buildUrl')
+          .withExactArgs(
+            'https://baseurl?param&article_title=test%20title',
+            false
+          )
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        accessSourceMock
+          .expects('getLoginUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        xhrMock
+          .expects('fetchJson')
+          .withExactArgs('https://builturl', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.resolve({
+              json() {
+                return Promise.resolve({access: true});
+              },
+            })
+          )
+          .once();
+        return vendor.authorize().then((resp) => {
+          expect(resp.access).to.be.true;
+          expect(emptyContainerStub.called).to.be.true;
+        });
+      });
+
+      it('authorization fails due to lack of server config', () => {
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        accessSourceMock
+          .expects('getLoginUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        xhrMock
+          .expects('fetchJson')
+          .withExactArgs('https://builturl', {
+            credentials: 'include',
+          })
+          .returns(Promise.resolve({status: 204}))
+          .once();
+        return vendor.authorize().catch((err) => {
+          expect(err.message).to.exist;
+        });
+      });
+
+      it('authorization response from server fails', () => {
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        accessSourceMock
+          .expects('getLoginUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        xhrMock
+          .expects('fetchJson')
+          .withExactArgs('https://builturl', {
+            credentials: 'include',
+          })
+          .returns(
+            Promise.reject({
+              response: {
+                status: 402,
+                json() {
+                  return Promise.resolve({access: false});
+                },
+              },
+            })
+          )
+          .once();
+        emptyContainerStub.returns(Promise.resolve());
+        return vendor.authorize().then((err) => {
+          expect(err.access).to.be.false;
+        });
+      });
     });
 
-    it('renders 2 purchase options', () => {
-      expect(container.querySelector('ul').childNodes.length).to.equal(2);
+    describe('create purchase overlay', () => {
+      let container;
+      beforeEach(() => {
+        container = document.createElement('div');
+        container.id = TAG + '-dialog';
+        document.body.appendChild(container);
+        vendor.i18n_ = {};
+        vendor.purchaseConfig_ = {
+          premiumcontent: {
+            price: {},
+          },
+          subscriptions: [{price: {}}],
+          timepasses: [{price: {}}],
+        };
+        vendor.renderPurchaseOverlay_();
+      });
+
+      afterEach(() => {
+        container.parentNode.removeChild(container);
+      });
+
+      it('renders list', () => {
+        expect(container.querySelector('ul')).to.not.be.null;
+      });
+
+      it('renders 3 purchase options', () => {
+        expect(container.querySelector('ul').childNodes.length).to.equal(3);
+      });
     });
 
-  });
+    describe('purchase option selection', () => {
+      let container;
+      beforeEach(() => {
+        container = document.createElement('div');
+        container.id = TAG + '-dialog';
+        document.body.appendChild(container);
+        vendor.i18n_ = {};
+        vendor.purchaseConfig_ = {
+          premiumcontent: {
+            price: {},
+          },
+          subscriptions: [{price: {}}],
+          timepasses: [{price: {}}],
+        };
+        vendor.renderPurchaseOverlay_();
+        const ev = new Event('change');
+        container.querySelector('input').dispatchEvent(ev);
+      });
 
-  describe('purchase option selection', () => {
-    let container;
-    beforeEach(() => {
-      container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
-      document.body.appendChild(container);
-      vendor.i18n_ = {};
-      vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        timepasses: [
-          {price: {}},
-        ],
-      };
-      vendor.renderPurchaseOverlay_();
-      const ev = new Event('change');
-      container.querySelector('input').dispatchEvent(ev);
+      afterEach(() => {
+        container.parentNode.removeChild(container);
+      });
+
+      it('purchase option is selected', () => {
+        expect(vendor.selectedPurchaseOption_).to.not.be.null;
+        expect(
+          vendor.selectedPurchaseOption_.classList.contains(TAG + '-selected')
+        ).to.be.true;
+      });
     });
 
-    afterEach(() => {
-      container.parentNode.removeChild(container);
+    describe('purchase', () => {
+      let container;
+      beforeEach(() => {
+        container = document.createElement('div');
+        container.id = TAG + '-dialog';
+        document.body.appendChild(container);
+        vendor.i18n_ = {};
+        vendor.purchaseConfig_ = {
+          premiumcontent: {
+            price: {},
+          },
+          subscriptions: [{price: {}}],
+          timepasses: [{price: {}}],
+          apl: 'http://apllink',
+        };
+        vendor.renderPurchaseOverlay_();
+      });
+
+      afterEach(() => {
+        container.parentNode.removeChild(container);
+      });
+
+      it('sends request for purchase', (done) => {
+        const changeEv = new Event('change');
+        container.querySelector('input').dispatchEvent(changeEv);
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+        accessSourceMock.expects('loginWithUrl').once();
+        const clickEv = new Event('click');
+        container.querySelector('button').dispatchEvent(clickEv);
+        setTimeout(() => {
+          done();
+        }, 500);
+      });
+
+      it('sends request for already purchased', (done) => {
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://apllink'))
+          .once();
+        accessSourceMock.expects('loginWithUrl').once();
+        const clickEv = new Event('click');
+        container
+          .querySelector('.' + TAG + '-already-purchased-link-container > a')
+          .dispatchEvent(clickEv);
+        setTimeout(() => {
+          done();
+        }, 500);
+      });
     });
-
-    it('purchase option is selected', () => {
-      expect(vendor.selectedPurchaseOption_).to.not.be.null;
-      expect(vendor.selectedPurchaseOption_.classList
-        .contains('amp-access-laterpay-selected')).to.be.true;
-    });
-
-  });
-
-  describe('purchase', () => {
-    let container;
-    beforeEach(() => {
-      container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
-      document.body.appendChild(container);
-      vendor.i18n_ = {};
-      vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        timepasses: [
-          {price: {}},
-        ],
-      };
-      vendor.renderPurchaseOverlay_();
-      const changeEv = new Event('change');
-      container.querySelector('input').dispatchEvent(changeEv);
-    });
-
-    afterEach(() => {
-      container.parentNode.removeChild(container);
-    });
-
-    it('sends request for purchase', done => {
-      accessServiceMock.expects('buildUrl')
-        .returns(Promise.resolve('https://builturl'))
-        .once();
-      accessServiceMock.expects('loginWithUrl')
-        .once();
-      const clickEv = new Event('click');
-      container.querySelector('button').dispatchEvent(clickEv);
-      setTimeout(() => {done();}, 500);
-    });
-
-  });
-
-
-});
+  }
+);

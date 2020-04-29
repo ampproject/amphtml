@@ -46,7 +46,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		//
 		// Handle '/'.
 		//
-		if r.RequestURI == "/" {
+		if r.URL.Path == "/" {
 			bytes, err := ioutil.ReadFile("index.html")
 			if err != nil {
 				http.Error(w, "File not found.", http.StatusNotFound)
@@ -138,7 +138,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		req.Header.Add("User-Agent",
 			"Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19V) "+
 				"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.81 Mobile "+
-				"Safari/537.36 (compatible; validator.ampproject.org)")
+				"Safari/537.36 (compatible; validator.amp.dev)")
 		resp, err := netClient.Do(req)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),

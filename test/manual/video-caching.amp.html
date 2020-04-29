@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>Hello, amp-story</title>
+    <link rel="canonical" href="https://ssl.gstatic.com/amphtml/stamp/helloworld/index.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  </head>
+  <body>
+    <h1> ALL VIDEOS ON THIS PAGE SHOULD PLAY! </h1>
+    <h2>src - properly cached </h2>
+    <amp-video
+      amp-orig-src=https://videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4
+      src=https://videos-posttv-com.cdn.ampproject.org/m/s/videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4?rs=ALfLXtd-AyDula2i1R4rNIRR0jPVw8i4AQ?
+      width="720" height="720" layout="responsive"
+      controls autoplay loop>
+    </amp-video>
+
+    <h2>src - 404 cached </h2>
+    <amp-video
+      amp-orig-src=https://videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4
+      src=https://videos-posttv-com.cdn.ampproject.org/m/s/404.mp4
+      width="720" height="720" layout="responsive"
+      controls autoplay loop>
+    </amp-video>
+
+    <h2>source - properly cached</h2>
+    <amp-video width="720" height="720" layout="responsive"
+      controls autoplay loop>
+      <source amp-orig-src=https://videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4
+        src=https://videos-posttv-com.cdn.ampproject.org/m/s/videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4?rs=ALfLXtd-AyDula2i1R4rNIRR0jPVw8i4AQ?
+        type="video/mp4">
+      </source>
+    </amp-video>
+
+    <h2>source - 404 cached</h2>
+    <amp-video width="720" height="720" layout="responsive"
+      controls autoplay loop>
+      <source amp-orig-src=https://videos.posttv.com/washpost-production/TWP/20171019/59e8d9b7e4b0183579543d0a/59e8d9c9e4b0f22e0e9f2ea9_1439413992898-s8hydx_t_1508432335552_720_1280_2000.mp4
+        src=https://videos-posttv-com.cdn.ampproject.org/m/s/404.mp4
+        type="video/mp4">
+      </source>
+    </amp-video>
+
+  </body>
+</html>

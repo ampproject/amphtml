@@ -14,95 +14,75 @@
  * limitations under the License.
  */
 
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {installVsyncService} from '../../../../src/service/vsync-impl';
-import {installDynamicClassesForTesting} from '../amp-dynamic-css-classes';
+import '../amp-dynamic-css-classes';
+import {Services} from '../../../../src/services';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
-const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
+const PinterestUA =
+  'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
   ' Build/LMY47X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0' +
   ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
 
-describe('dynamic classes are inserted at runtime', () => {
-  let body;
-  let mockWin;
-  let viewer;
+describes.fakeWin(
+  'dynamic classes are inserted at runtime',
+  {
+    amp: true, // Extension will be installed manually in tests.
+    location: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+  },
+  (env) => {
+    let win, doc, ampdoc;
+    let body;
+    let viewer;
 
-  beforeEach(() => {
-    const classList = [];
-    classList.add = classList.push;
-    classList.contains = function(c) {
-      return this.indexOf(c) > -1;
-    };
-    body = {
-      nodeType: /* ELEMENT */ 1,
-      tagName: 'BODY',
-      classList,
-    };
-    mockWin = {
-      document: {
-        nodeType: /* DOCUMENT */ 9,
-        referrer: 'http://localhost/',
-        body,
-      },
-      navigator: {
-        userAgent: '',
-      },
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      location: {
-        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
-      },
-    };
-    mockWin.document.defaultView = mockWin;
-  });
-
-  function setup(embeded, userAgent, referrer) {
-    const ampdocService = installDocService(mockWin, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
-    installPlatformService(mockWin);
-
-    const vsync = installVsyncService(mockWin);
-    vsync.schedule_ = () => {
-      vsync.runScheduledTasks_();
-    };
-
-    viewer = installViewerServiceForDoc(ampdoc);
-    viewer.isEmbedded = () => !!embeded;
-
-    if (userAgent !== undefined) {
-      mockWin.navigator.userAgent = userAgent;
-    }
-    if (referrer !== undefined) {
-      viewer.getUnconfirmedReferrerUrl = () => referrer;
-    }
-    installDynamicClassesForTesting(ampdoc);
-  }
-
-  describe('when embedded', () => {
     beforeEach(() => {
-      setup(true);
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
+      body = doc.body;
     });
 
-    it('should include viewer class', () => {
-      expect(body).to.have.class('amp-viewer');
-    });
-  });
+    function setup(embeded, userAgent, referrer) {
+      const vsync = vsyncForTesting(win);
+      vsync.schedule_ = () => {
+        vsync.runScheduledTasks_();
+      };
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => !!embeded;
+      if (userAgent !== undefined) {
+        win.navigator.userAgent = userAgent;
+      }
+      if (referrer !== undefined) {
+        env.sandbox
+          .stub(viewer, 'getUnconfirmedReferrerUrl')
+          .callsFake(() => referrer);
+      }
+      env.installExtension('amp-dynamic-css-classes');
+    }
 
-  describe('Normalizing Referrers', () => {
-    it('should normalize twitter shortlinks to twitter', () => {
-      setup(false, '', tcoReferrer);
-      expect(body).to.have.class('amp-referrer-com');
-      expect(body).to.have.class('amp-referrer-twitter-com');
+    describe('when embedded', () => {
+      beforeEach(() => {
+        setup(true);
+      });
+
+      it('should include viewer class', () => {
+        expect(body).to.have.class('amp-viewer');
+      });
     });
 
-    it('should normalize pinterest on android', () => {
-      setup(false, PinterestUA, '');
-      expect(body).to.have.class('amp-referrer-com');
-      expect(body).to.have.class('amp-referrer-pinterest-com');
-      expect(body).to.have.class('amp-referrer-www-pinterest-com');
+    describe('Normalizing Referrers', () => {
+      it('should normalize twitter shortlinks to twitter', () => {
+        setup(false, '', tcoReferrer);
+        expect(body).to.have.class('amp-referrer-com');
+        expect(body).to.have.class('amp-referrer-twitter-com');
+      });
+
+      it('should normalize pinterest on android', () => {
+        setup(false, PinterestUA, '');
+        expect(body).to.have.class('amp-referrer-com');
+        expect(body).to.have.class('amp-referrer-pinterest-com');
+        expect(body).to.have.class('amp-referrer-www-pinterest-com');
+      });
     });
-  });
-});
+  }
+);

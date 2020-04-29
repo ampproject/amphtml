@@ -32,11 +32,25 @@ export const ShadowDomVersion = {
 let shadowDomSupportedVersion;
 
 /**
+ * @type {boolean|undefined}
+ * @visibleForTesting
+ */
+let shadowCssSupported;
+
+/**
  * @param {ShadowDomVersion|undefined} val
  * @visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
   shadowDomSupportedVersion = val;
+}
+
+/**
+ * @param {boolean|undefined} val
+ * @visibleForTesting
+ */
+export function setShadowCssSupportedForTesting(val) {
+  shadowCssSupported = val;
 }
 
 /**
@@ -48,49 +62,55 @@ export function isShadowDomSupported() {
 }
 
 /**
+ * Returns `true` if Shadow CSS encapsulation is supported.
+ * @return {boolean}
+ */
+export function isShadowCssSupported() {
+  if (shadowCssSupported === undefined) {
+    shadowCssSupported =
+      isShadowDomSupported() &&
+      (isNative(Element.prototype.attachShadow) ||
+        isNative(Element.prototype.createShadowRoot));
+  }
+  return shadowCssSupported;
+}
+
+/**
+ * Returns `true` if the passed function is native to the browser, and is not
+ * polyfilled
+ * @param {Function|undefined} func A function that is attatched to a JS
+ * object.
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
+}
+
+/**
  * Returns the supported version of Shadow DOM spec.
- * @param {Function=} opt_elementClass optional for testing
+ * @param {?typeof Element=} opt_elementClass optional for testing
  * @return {ShadowDomVersion}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
-
-    //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
-    if (!areNativeCustomElementsSupported()) {
-      shadowDomSupportedVersion = ShadowDomVersion.NONE;
-    } else {
-      shadowDomSupportedVersion =
-          getShadowDomVersion(opt_elementClass || Element);
-    }
+    shadowDomSupportedVersion = getShadowDomVersion(
+      opt_elementClass || Element
+    );
   }
-
   return shadowDomSupportedVersion;
 }
 
+/**
+ * Returns shadow dom version.
+ *
+ * @param {?typeof Element=} element
+ * @return {ShadowDomVersion}
+ */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
     return ShadowDomVersion.V1;
   } else if (!!element.prototype.createShadowRoot) {
     return ShadowDomVersion.V0;
   }
-
   return ShadowDomVersion.NONE;
-}
-
-function areNativeCustomElementsSupported() {
-  return isNative(self.document.registerElement) ||
-         isNative(self
-             .Object
-             .getOwnPropertyDescriptor(self, 'customElements')
-             .get);
-}
-
-/**
- * Returns `true` if the method is natively implemented by the browser
- * @visibleForTesting
- * @param {Function=} method
- * @return {boolean}
- */
-export function isNative(method) {
-  return !!method && method.toString().indexOf('[native code]') !== -1;
 }

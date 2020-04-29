@@ -82,4 +82,11 @@ export function reddit(global, data) {
   global.document.getElementById('c').appendChild(container);
 
   getContainerScript(global, scriptSource);
+
+  global.addEventListener('resize', (event) => {
+    global.context.updateDimensions(
+      event.target.outerWidth,
+      event.target.outerHeight
+    );
+  });
 }

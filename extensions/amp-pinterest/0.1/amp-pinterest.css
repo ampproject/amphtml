@@ -17,17 +17,17 @@
 /* round buttons */
 
 .-amp-pinterest-round {
+  background-image: url(data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="30px" width="30px" viewBox="-1 -1 31 31"><g><path d="M29.449,14.662 C29.449,22.722 22.868,29.256 14.75,29.256 C6.632,29.256 0.051,22.722 0.051,14.662 C0.051,6.601 6.632,0.067 14.75,0.067 C22.868,0.067 29.449,6.601 29.449,14.662" fill="#fff" stroke="#fff" stroke-width="1"></path><path d="M14.733,1.686 C7.516,1.686 1.665,7.495 1.665,14.662 C1.665,20.159 5.109,24.854 9.97,26.744 C9.856,25.718 9.753,24.143 10.016,23.022 C10.253,22.01 11.548,16.572 11.548,16.572 C11.548,16.572 11.157,15.795 11.157,14.646 C11.157,12.842 12.211,11.495 13.522,11.495 C14.637,11.495 15.175,12.326 15.175,13.323 C15.175,14.436 14.462,16.1 14.093,17.643 C13.785,18.935 14.745,19.988 16.028,19.988 C18.351,19.988 20.136,17.556 20.136,14.046 C20.136,10.939 17.888,8.767 14.678,8.767 C10.959,8.767 8.777,11.536 8.777,14.398 C8.777,15.513 9.21,16.709 9.749,17.359 C9.856,17.488 9.872,17.6 9.84,17.731 C9.741,18.141 9.52,19.023 9.477,19.203 C9.42,19.44 9.288,19.491 9.04,19.376 C7.408,18.622 6.387,16.252 6.387,14.349 C6.387,10.256 9.383,6.497 15.022,6.497 C19.555,6.497 23.078,9.705 23.078,13.991 C23.078,18.463 20.239,22.062 16.297,22.062 C14.973,22.062 13.728,21.379 13.302,20.572 C13.302,20.572 12.647,23.05 12.488,23.657 C12.193,24.784 11.396,26.196 10.863,27.058 C12.086,27.434 13.386,27.637 14.733,27.637 C21.95,27.637 27.801,21.828 27.801,14.662 C27.801,7.495 21.95,1.686 14.733,1.686" fill="#e60023"></path></g></svg>);
+  background-size: 16px 16px;
   height: 16px;
   width: 16px;
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_round_red_16_2.png);
-  background-size: 16px 16px;
 }
 
 .-amp-pinterest-round-tall {
+  background-image: url(data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="30px" width="30px" viewBox="-1 -1 31 31"><g><path d="M29.449,14.662 C29.449,22.722 22.868,29.256 14.75,29.256 C6.632,29.256 0.051,22.722 0.051,14.662 C0.051,6.601 6.632,0.067 14.75,0.067 C22.868,0.067 29.449,6.601 29.449,14.662" fill="#fff" stroke="#fff" stroke-width="1"></path><path d="M14.733,1.686 C7.516,1.686 1.665,7.495 1.665,14.662 C1.665,20.159 5.109,24.854 9.97,26.744 C9.856,25.718 9.753,24.143 10.016,23.022 C10.253,22.01 11.548,16.572 11.548,16.572 C11.548,16.572 11.157,15.795 11.157,14.646 C11.157,12.842 12.211,11.495 13.522,11.495 C14.637,11.495 15.175,12.326 15.175,13.323 C15.175,14.436 14.462,16.1 14.093,17.643 C13.785,18.935 14.745,19.988 16.028,19.988 C18.351,19.988 20.136,17.556 20.136,14.046 C20.136,10.939 17.888,8.767 14.678,8.767 C10.959,8.767 8.777,11.536 8.777,14.398 C8.777,15.513 9.21,16.709 9.749,17.359 C9.856,17.488 9.872,17.6 9.84,17.731 C9.741,18.141 9.52,19.023 9.477,19.203 C9.42,19.44 9.288,19.491 9.04,19.376 C7.408,18.622 6.387,16.252 6.387,14.349 C6.387,10.256 9.383,6.497 15.022,6.497 C19.555,6.497 23.078,9.705 23.078,13.991 C23.078,18.463 20.239,22.062 16.297,22.062 C14.973,22.062 13.728,21.379 13.302,20.572 C13.302,20.572 12.647,23.05 12.488,23.657 C12.193,24.784 11.396,26.196 10.863,27.058 C12.086,27.434 13.386,27.637 14.733,27.637 C21.95,27.637 27.801,21.828 27.801,14.662 C27.801,7.495 21.95,1.686 14.733,1.686" fill="#e60023"></path></g></svg>);
+  background-size: 32px 32px;
   height: 32px;
   width: 32px;
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_round_red_32_2.png);
-  background-size: 32px 32px;
 }
 
 /* rectangular buttons */
@@ -41,38 +41,58 @@
   background-size: 40px 60px;
 }
 
-.-amp-pinterest-rect:hover{
-  background-position: 0 0;
-}
-
 .-amp-pinterest-rect:active{
   background-position: 0 -40px;
 }
 
 /* small background images */
 
-.-amp-pinterest-en-gray {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_20_2.png);
+.-amp-pinterest-save-button {
+  background: url(data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="30px" width="30px" viewBox="-1 -1 31 31"><g><path d="M29.449,14.662 C29.449,22.722 22.868,29.256 14.75,29.256 C6.632,29.256 0.051,22.722 0.051,14.662 C0.051,6.601 6.632,0.067 14.75,0.067 C22.868,0.067 29.449,6.601 29.449,14.662" fill="#fff" stroke="#fff" stroke-width="1"></path><path d="M14.733,1.686 C7.516,1.686 1.665,7.495 1.665,14.662 C1.665,20.159 5.109,24.854 9.97,26.744 C9.856,25.718 9.753,24.143 10.016,23.022 C10.253,22.01 11.548,16.572 11.548,16.572 C11.548,16.572 11.157,15.795 11.157,14.646 C11.157,12.842 12.211,11.495 13.522,11.495 C14.637,11.495 15.175,12.326 15.175,13.323 C15.175,14.436 14.462,16.1 14.093,17.643 C13.785,18.935 14.745,19.988 16.028,19.988 C18.351,19.988 20.136,17.556 20.136,14.046 C20.136,10.939 17.888,8.767 14.678,8.767 C10.959,8.767 8.777,11.536 8.777,14.398 C8.777,15.513 9.21,16.709 9.749,17.359 C9.856,17.488 9.872,17.6 9.84,17.731 C9.741,18.141 9.52,19.023 9.477,19.203 C9.42,19.44 9.288,19.491 9.04,19.376 C7.408,18.622 6.387,16.252 6.387,14.349 C6.387,10.256 9.383,6.497 15.022,6.497 C19.555,6.497 23.078,9.705 23.078,13.991 C23.078,18.463 20.239,22.062 16.297,22.062 C14.973,22.062 13.728,21.379 13.302,20.572 C13.302,20.572 12.647,23.05 12.488,23.657 C12.193,24.784 11.396,26.196 10.863,27.058 C12.086,27.434 13.386,27.637 14.733,27.637 C21.95,27.637 27.801,21.828 27.801,14.662 C27.801,7.495 21.95,1.686 14.733,1.686" fill="#e60023"></path></g></svg>) 3px 5px no-repeat;
+  background-size: 10px 10px;
+  border-radius: 2px;
+  font: 9px/20px "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: bold;
+  max-height: 20px;
+  max-width: 40px;
+  min-height: 20px;
+  min-width: 40px;
+  text-indent: 16px;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
 }
 
-.-amp-pinterest-en-red {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_20_2.png);
+.-amp-pinterest-save-button-tall {
+  background: #e60023 url(data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="30px" width="30px" viewBox="-1 -1 31 31"><g><path d="M29.449,14.662 C29.449,22.722 22.868,29.256 14.75,29.256 C6.632,29.256 0.051,22.722 0.051,14.662 C0.051,6.601 6.632,0.067 14.75,0.067 C22.868,0.067 29.449,6.601 29.449,14.662" fill="#fff" stroke="#fff" stroke-width="1"></path><path d="M14.733,1.686 C7.516,1.686 1.665,7.495 1.665,14.662 C1.665,20.159 5.109,24.854 9.97,26.744 C9.856,25.718 9.753,24.143 10.016,23.022 C10.253,22.01 11.548,16.572 11.548,16.572 C11.548,16.572 11.157,15.795 11.157,14.646 C11.157,12.842 12.211,11.495 13.522,11.495 C14.637,11.495 15.175,12.326 15.175,13.323 C15.175,14.436 14.462,16.1 14.093,17.643 C13.785,18.935 14.745,19.988 16.028,19.988 C18.351,19.988 20.136,17.556 20.136,14.046 C20.136,10.939 17.888,8.767 14.678,8.767 C10.959,8.767 8.777,11.536 8.777,14.398 C8.777,15.513 9.21,16.709 9.749,17.359 C9.856,17.488 9.872,17.6 9.84,17.731 C9.741,18.141 9.52,19.023 9.477,19.203 C9.42,19.44 9.288,19.491 9.04,19.376 C7.408,18.622 6.387,16.252 6.387,14.349 C6.387,10.256 9.383,6.497 15.022,6.497 C19.555,6.497 23.078,9.705 23.078,13.991 C23.078,18.463 20.239,22.062 16.297,22.062 C14.973,22.062 13.728,21.379 13.302,20.572 C13.302,20.572 12.647,23.05 12.488,23.657 C12.193,24.784 11.396,26.196 10.863,27.058 C12.086,27.434 13.386,27.637 14.733,27.637 C21.95,27.637 27.801,21.828 27.801,14.662 C27.801,7.495 21.95,1.686 14.733,1.686" fill="#e60023"></path></g></svg>) 3px 6px no-repeat;
+  background-position-x: 4px;
+  background-size: 15px 15px;
+  border-radius: 4px;
+  max-height: 28px;
+  max-width: 56px;
+  min-height: 28px;
+  min-width: 56px;
+  text-indent: 23px;
+  text-decoration: none;
+  font: 12px/28px "Helvetica Neue", Helvetica, Arial, "sans-serif";
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
 }
 
-.-amp-pinterest-en-white {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_20_2.png);
+.-amp-pinterest-en-gray, .-amp-pinterest-en-gray-tall, .-amp-pinterest-ja-gray, .-amp-pinterest-ja-gray-tall {
+  color: #555;
+  background-color: #efefef;
 }
 
-.-amp-pinterest-ja-gray {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_20_2.png);
+.-amp-pinterest-en-red, .-amp-pinterest-en-red-tall, .-amp-pinterest-ja-red, .-amp-pinterest-ja-red-tall {
+  color: #fff;
+  background-color: #e60023;
 }
 
-.-amp-pinterest-ja-red {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_20_2.png);
-}
-
-.-amp-pinterest-ja-white {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_20_2.png);
+.-amp-pinterest-en-white, .-amp-pinterest-en-white-tall, .-amp-pinterest-ja-white, .-amp-pinterest-ja-white-tall {
+  color: #e60023;
+  background-color: #fff;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 1px #e60023;
 }
 
 /* large buttons */
@@ -84,48 +104,18 @@
   background-size: 56px 84px;
 }
 
-.-amp-pinterest-rect-tall:hover{
-  background-position: 0 0;
-}
-
 .-amp-pinterest-rect-tall:active{
   background-position: 0 -56px;
-}
-
-/* large background images */
-
-.-amp-pinterest-en-gray-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png);
-}
-
-.-amp-pinterest-en-red-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_28_2.png);
-}
-
-.-amp-pinterest-en-white-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_28_2.png);
-}
-
-.-amp-pinterest-ja-gray-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_28_2.png);
-}
-
-.-amp-pinterest-ja-red-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_28_2.png);
-}
-
-.-amp-pinterest-ja-white-tall {
-  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_28_2.png);
 }
 
 /* count bubble above */
 
 .-amp-pinterest-count-pad-above {
-  margin-top: 30px;
+  margin-top: 26px;
 }
 
 .-amp-pinterest-count-pad-above-tall {
-  margin-top: 38px;
+  margin-top: 40px;
 }
 
 .-amp-pinterest-bubble-above {
@@ -133,14 +123,25 @@
   left: 0;
   text-align: center;
   text-decoration: none;
-  color: #777;
-  bottom: 21px;
-  height: 29px;
+  text-indent: 0;
+  color: #555;
+  top: -26px;
+  height: 20px;
   width: 40px;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_north_white_rect_20_2.png) 0 0 no-repeat;
-  background-size: 40px 29px;
-  font: 12px Arial, Helvetica, sans-serif;
-  line-height: 24px;
+  background: #efefef;
+  background-size: 40px 20px;
+  border-radius: 4px;
+  line-height: 20px;
+}
+
+.-amp-pinterest-bubble-above::after {
+  border-top: 7px solid #efefef;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  bottom: -4px;
+  left: 4px;
+  content: "";
+  position: absolute;
 }
 
 .-amp-pinterest-bubble-above-tall {
@@ -148,80 +149,110 @@
   left: 0;
   text-align: center;
   text-decoration: none;
-  color: #777;
+  color: #555;
+  top: -40px;
   bottom: 29px;
-  height: 37px;
+  height: 34px;
   width: 56px;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_north_white_rect_28_2.png) 0 0 no-repeat;
-  background-size: 56px 37px;
-  font: 15px Arial, Helvetica, sans-serif;
-  line-height: 28px;
+  background: #efefef;
+  border-radius: 4px;
+  text-indent: 0;
+  line-height: 34px;
+}
+
+.-amp-pinterest-bubble-above-tall::after {
+  border-top: 7px solid #efefef;
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  bottom: -4px;
+  left: 7px;
+  content: "";
+  position: absolute;
 }
 
 /* count bubble beside */
 
 .-amp-pinterest-count-pad-beside {
+  margin-left: 0;
   width: 86px;
 }
 
 .-amp-pinterest-count-pad-beside-tall {
+  margin-left: 0;
   width: 120px;
 }
 
 .-amp-pinterest-bubble-beside {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -46px;
   height: 20px;
-  width: 45px;
+  width: 40px;
   text-align: center;
-  text-indent: 5px;
+  text-indent: 0;
   text-decoration: none;
-  color: #777;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_20_2.png) 0 0 no-repeat;
-  background-size: 45px 20px;
-  font: 12px Arial, Helvetica, sans-serif;
+  color: #555;
+  background: #efefef;
+  background-size: 40px 20px;
+  border-radius: 4px;
   line-height: 20px;
+}
+
+.-amp-pinterest-bubble-beside::before {
+  top: 3px;
+  left: -4px;
+  border-right: 7px solid #efefef;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  content: "";
+  position: absolute;
 }
 
 .-amp-pinterest-bubble-beside-tall {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -62px;
   height: 28px;
-  width: 63px;
+  width: 56px;
   text-align: center;
-  text-indent: 7px;
+  text-indent: 0;
   text-decoration: none;
-  color: #777;
-  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_28_2.png) 0 0 no-repeat;
-  background-size: 63px 28px;
-  font: 15px Arial, Helvetica, sans-serif;
+  color: #555;
+  background: #efefef;
+  background-size: 56px 28px;
+  border-radius: 4px;
   line-height: 28px;
 }
 
+.-amp-pinterest-bubble-beside-tall::before{
+  top: 7px;
+  left: -4px;
+  border-right: 7px solid #efefef;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  content: "";
+  position: absolute;
+}
+
 .-amp-pinterest-follow-button {
-    background: transparent url(https://s-passets.pinimg.com/images/pidgets/bfs2.png) 0 0 no-repeat;
+    background-color: #efefef;
     background-size: 200px 60px;
-    border-right: 1px solid #D0D0D0;
-    border-radius: 4px;
-    color: #444;
+    border-radius: 3px;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 1px #888;
+    color: #363636;
     cursor: pointer;
     display: inline-block;
     font: bold normal normal 11px/20px "Helvetica Neue",helvetica,arial,san-serif;
-    padding-right: 3px;
+    height: 20px;
+    padding: 0 4px 0 20px;
     position: relative;
     text-decoration: none;
-    text-indent: 20px;
-}
-
-.-amp-pinterest-follow-button:hover {
-    background-position: 0 -20px;
-    border-right-color: #919191;
+    vertical-align: baseline;
 }
 
 .-amp-pinterest-follow-button i {
-    background-image: url(https://s-passets.pinimg.com/images/pidgets/log2.png);
+    background-image: url(data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="30px" width="30px" viewBox="-1 -1 31 31"><g><path d="M29.449,14.662 C29.449,22.722 22.868,29.256 14.75,29.256 C6.632,29.256 0.051,22.722 0.051,14.662 C0.051,6.601 6.632,0.067 14.75,0.067 C22.868,0.067 29.449,6.601 29.449,14.662" fill="#fff" stroke="#fff" stroke-width="1"></path><path d="M14.733,1.686 C7.516,1.686 1.665,7.495 1.665,14.662 C1.665,20.159 5.109,24.854 9.97,26.744 C9.856,25.718 9.753,24.143 10.016,23.022 C10.253,22.01 11.548,16.572 11.548,16.572 C11.548,16.572 11.157,15.795 11.157,14.646 C11.157,12.842 12.211,11.495 13.522,11.495 C14.637,11.495 15.175,12.326 15.175,13.323 C15.175,14.436 14.462,16.1 14.093,17.643 C13.785,18.935 14.745,19.988 16.028,19.988 C18.351,19.988 20.136,17.556 20.136,14.046 C20.136,10.939 17.888,8.767 14.678,8.767 C10.959,8.767 8.777,11.536 8.777,14.398 C8.777,15.513 9.21,16.709 9.749,17.359 C9.856,17.488 9.872,17.6 9.84,17.731 C9.741,18.141 9.52,19.023 9.477,19.203 C9.42,19.44 9.288,19.491 9.04,19.376 C7.408,18.622 6.387,16.252 6.387,14.349 C6.387,10.256 9.383,6.497 15.022,6.497 C19.555,6.497 23.078,9.705 23.078,13.991 C23.078,18.463 20.239,22.062 16.297,22.062 C14.973,22.062 13.728,21.379 13.302,20.572 C13.302,20.572 12.647,23.05 12.488,23.657 C12.193,24.784 11.396,26.196 10.863,27.058 C12.086,27.434 13.386,27.637 14.733,27.637 C21.95,27.637 27.801,21.828 27.801,14.662 C27.801,7.495 21.95,1.686 14.733,1.686" fill="#e60023"></path></g></svg>);
     background-size: 14px 14px;
     height: 14px;
     left: 3px;
@@ -341,6 +372,7 @@
 
 /* repin button */
 .-amp-pinterest-embed-pin-repin {
+  border-radius: 4px;
   position: absolute;
   top: 12px;
   left: 12px;

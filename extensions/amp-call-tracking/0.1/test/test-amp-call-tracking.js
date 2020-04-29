@@ -15,120 +15,136 @@
  */
 
 import '../amp-call-tracking';
-import {clearResponseCache} from '../amp-call-tracking';
-import {createIframePromise} from '../../../../testing/iframe';
-import {xhrFor} from '../../../../src/xhr';
-import * as sinon from 'sinon';
+import {Services} from '../../../../src/services';
+import {clearResponseCacheForTesting} from '../amp-call-tracking';
 
+describes.realWin(
+  'amp-call-tracking',
+  {
+    amp: {
+      extensions: ['amp-call-tracking'],
+    },
+  },
+  (env) => {
+    let win, doc;
+    let xhrMock;
 
-describe('amp-call-tracking', () => {
-  let sandbox;
-  let xhrMock = null;
-
-  function getTestIframe() {
-    return createIframePromise().then(iframe => {
-      xhrMock = sandbox.mock(xhrFor(iframe.win));
-      return iframe;
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      xhrMock = env.sandbox.mock(Services.xhrFor(win));
     });
-  }
 
-  function getCallTrackingEl(iframe, config = {}) {
-    const hyperlink = document.createElement('a');
-    const callTrackingEl = iframe.doc.createElement('amp-call-tracking');
+    afterEach(() => {
+      clearResponseCacheForTesting();
+      xhrMock.verify();
+    });
 
-    callTrackingEl.setAttribute('config', config.url);
+    function getCallTrackingEl(config = {}) {
+      const hyperlink = doc.createElement('a');
+      const callTrackingEl = doc.createElement('amp-call-tracking');
 
-    hyperlink.setAttribute('href', `tel:${config.defaultNumber}`);
-    hyperlink.textContent = config.defaultContent || config.defaultNumber;
+      callTrackingEl.setAttribute('config', config.url);
 
-    callTrackingEl.appendChild(hyperlink);
+      hyperlink.setAttribute('href', `tel:${config.defaultNumber}`);
+      hyperlink.textContent = config.defaultContent || config.defaultNumber;
 
-    return iframe.addElement(callTrackingEl);
-  }
+      callTrackingEl.appendChild(hyperlink);
 
-  function mockXhrResponse(iframe, url, response) {
-    xhrMock
+      doc.body.appendChild(callTrackingEl);
+      return callTrackingEl
+        .build()
+        .then(() => {
+          return callTrackingEl.layoutCallback();
+        })
+        .then(() => callTrackingEl);
+    }
+
+    function mockXhrResponse(url, response) {
+      xhrMock
         .expects('fetchJson')
-        .withArgs(url)
-        .returns(Promise.resolve(response));
-  }
+        .withArgs(
+          url,
+          env.sandbox.match((init) => init.credentials == 'include')
+        )
+        .returns(
+          Promise.resolve({
+            json() {
+              return Promise.resolve(response);
+            },
+          })
+        );
+    }
 
-  function expectHyperlinkToBe(callTrackingEl, href, textContent) {
-    const hyperlink = callTrackingEl.getRealChildren()[0];
+    function expectHyperlinkToBe(callTrackingEl, href, textContent) {
+      const hyperlink = callTrackingEl.getRealChildren()[0];
 
-    expect(hyperlink.getAttribute('href')).to.equal(href);
-    expect(hyperlink.textContent).to.equal(textContent);
-  }
+      expect(hyperlink.getAttribute('href')).to.equal(href);
+      expect(hyperlink.textContent).to.equal(textContent);
+    }
 
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
+    it('should render with required response fields', () => {
+      const url = 'https://example.com/test.json';
 
-  afterEach(() => {
-    clearResponseCache();
+      const defaultNumber = '123456';
+      const defaultContent = '+1 (23) 456';
 
-    xhrMock.verify();
-    sandbox.restore();
-  });
+      const phoneNumber = '981234';
 
-  it('should render with required response fields', () => {
-    const url = 'https://example.com/test.json';
+      mockXhrResponse(url, {phoneNumber});
 
-    const defaultNumber = '123456';
-    const defaultContent = '+1 (23) 456';
-
-    const phoneNumber = '981234';
-
-    return getTestIframe().then(iframe => {
-      mockXhrResponse(iframe, url, {phoneNumber});
-
-      return getCallTrackingEl(iframe, {
+      return getCallTrackingEl({
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(callTrackingEl, `tel:${phoneNumber}`, phoneNumber);
       });
     });
-  });
 
-  it('should use all response fields to compose hyperlink', () => {
-    const url = 'https://example.com/test.json';
+    it('should use all response fields to compose hyperlink', () => {
+      const url = 'https://example.com/test.json';
 
-    const defaultNumber = '123456';
-    const defaultContent = '+1 (23) 456';
+      const defaultNumber = '123456';
+      const defaultContent = '+1 (23) 456';
 
-    const phoneNumber = '187654321';
-    const formattedPhoneNumber = '+1 (87) 654-321';
+      const phoneNumber = '187654321';
+      const formattedPhoneNumber = '+1 (87) 654-321';
 
-    return getTestIframe().then(iframe => {
-      mockXhrResponse(iframe, url, {phoneNumber, formattedPhoneNumber});
+      mockXhrResponse(url, {phoneNumber, formattedPhoneNumber});
 
-      return getCallTrackingEl(iframe, {
+      return getCallTrackingEl({
         url,
         defaultNumber,
         defaultContent,
-      }).then(callTrackingEl => {
+      }).then((callTrackingEl) => {
         expectHyperlinkToBe(
-          callTrackingEl, `tel:${phoneNumber}`, formattedPhoneNumber);
+          callTrackingEl,
+          `tel:${phoneNumber}`,
+          formattedPhoneNumber
+        );
       });
     });
-  });
 
-  it('should fail when response does not contain a phoneNumber field', () => {
-    const url = 'https://example.com/test.json';
+    it('should warn when response does not contain a phoneNumber field', () => {
+      const url = 'https://example.com/test.json';
 
-    const defaultNumber = '123456';
-    const defaultContent = '+1 (23) 456';
+      const defaultNumber = '123456';
+      const defaultContent = '+1 (23) 456';
 
-    return getTestIframe().then(iframe => {
-      mockXhrResponse(iframe, url, {});
+      mockXhrResponse(url, {});
 
-      return expect(getCallTrackingEl(iframe, {
+      return getCallTrackingEl({
         url,
         defaultNumber,
         defaultContent,
-      })).rejectedWith(/Response must contain a non-empty phoneNumber field/);
+      }).then((callTrackingEl) => {
+        expectHyperlinkToBe(
+          callTrackingEl,
+          `tel:${defaultNumber}`,
+          defaultContent
+        );
+      });
     });
-  });
-});
+  }
+);

@@ -1,0 +1,118 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="blink-link.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: black;
+      }
+      h1 {
+        color: white;
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+      p {
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone>
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <h1>Hello World</h1>
+          <p>This is the cover page of this story.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1">
+        <amp-story-grid-layer template="vertical">            
+          <h1>First Page</h1>
+          <p>This is the first page of this story.</p>          
+        </amp-story-grid-layer>        
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+          <amp-story-grid-layer template="vertical">            
+              <h1>Second Page</h1>
+              <p>This is the second page of this story.</p>          
+            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal" style="padding-top: 260px">
+              <amp-img
+                src="./img/merch1.jpg"
+                width="120"
+                height="160"
+                max-width="210"
+                layout="fixed">
+              </amp-img>
+              <a id="blink-1" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="shopping-cart">
+                amp.devamp.devamp.devamp.devamp.devamp.dev
+              </a>              
+            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal" style="padding-top: 450px">
+              <a id="blink-2" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="flight">
+                amp.devamp.devamp.devamp.devamp.devamp.dev
+              </a>  
+            </amp-story-grid-layer>
+        </amp-story-page>
+
+        <amp-story-page id="page-3">
+          <amp-story-grid-layer template="vertical">            
+            <h1>Third Page</h1>
+            <a id="blink-3" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="shopping-cart">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-4" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="offer">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-5" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="flight">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-6" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="hotel">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-7" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="movie">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-8" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="activity">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-9" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="more-to-read">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+          </amp-story-grid-layer>        
+        </amp-story-page>
+    </amp-story>
+    <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "click": "?eventId=123"
+        },
+        "triggers": {
+          "trackLinkClicks": {
+            "on": "click",
+            "selector": "[affiliate-link-icon]",
+            "request": "click"
+          }
+        }
+      }
+      </script>
+    </amp-analytics>
+  </body>
+</html>

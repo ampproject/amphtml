@@ -21,7 +21,7 @@ import {loadScript, validateSrcPrefix} from '../3p/3p';
  * @param {!Object} data
  */
 export function triplelift(global, data) {
-  const src = data.src;
+  const {src} = data;
   validateSrcPrefix('https://ib.3lift.com/', src);
   loadScript(global, src);
 }

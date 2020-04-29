@@ -1,0 +1,8 @@
+URL: https://github.com/google/wicked-good-xpath/blob/829cd0d8/dist/wgxpath.install.js
+License: MIT
+License File: https://github.com/google/wicked-good-xpath/blob/829cd0d8/LICENSE
+
+Description:
+Copy of wgxpath from master (commit 829cd0d8)
+This is intended to be used only for end-to-end testing and not as a runtime dependency.
+https://github.com/google/wicked-good-xpath/tree/829cd0d8

@@ -15,18 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {Layout} from '../../../src/layout';
-import {dev,user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
-import {toggle} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
+import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {
-  setStyle,
+  computedStyle,
   removeAlphaFromColor,
+  setStyle,
+  toggle,
 } from '../../../src/style';
-
-/** @const */
-const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
+import {dev, user, userAssert} from '../../../src/log';
+import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -39,7 +37,7 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private {?Element} */
     this.ad_ = null;
 
-    /** @private {?../../../src/service/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -47,32 +45,49 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.scrollUnlisten_ = null;
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    /** @private {boolean} */
+    this.collapsed_ = false;
+
+    /** @private {?Promise} */
+    this.adReadyPromise_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
-
-    toggle(this.element, true);
-    this.element.classList.add('-amp-sticky-ad-layout');
+    this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
-    user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
-        'amp-sticky-ad must have a single amp-ad child');
+    userAssert(
+      children.length == 1 && children[0].tagName == 'AMP-AD',
+      'amp-sticky-ad must have a single amp-ad child'
+    );
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
+    Services.ownersForDoc(this.element).setOwner(this.ad_, this.element);
+
+    this.adReadyPromise_ = whenUpgradedToCustomElement(
+      dev().assertElement(this.ad_)
+    )
+      .then((ad) => {
+        return ad.whenBuilt();
+      })
+      .then(() => {
+        return this.mutateElement(() => {
+          toggle(this.element, true);
+        });
+      });
+
     const paddingBar = this.win.document.createElement(
-         'amp-sticky-ad-top-padding');
+      'amp-sticky-ad-top-padding'
+    );
+    paddingBar.classList.add('amp-sticky-ad-top-padding');
     this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
-    this.scrollUnlisten_ =
-        this.viewport_.onScroll(() => this.onScroll_());
+    this.win.setTimeout(() => {
+      this.scrollUnlisten_ = this.viewport_.onScroll(() => this.onScroll_());
+    });
   }
 
   /** @override */
@@ -80,10 +95,15 @@ class AmpStickyAd extends AMP.BaseElement {
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
       toggle(this.element, true);
-      const borderBottom = this.element./*OK*/offsetHeight;
+      const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(dev().assertElement(this.ad_), true);
-      this.scheduleLayout(dev().assertElement(this.ad_));
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(
+        this.element,
+        dev().assertElement(this.ad_),
+        true
+      );
+      owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -106,6 +126,8 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback() {
+    this.collapsed_ = true;
+    this.visible_ = false;
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
@@ -129,15 +151,9 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onScroll_() {
-    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
-      this.display_();
-      return;
-    }
-
     const scrollTop = this.viewport_.getScrollTop();
-    const viewportHeight = this.viewport_.getSize().height;
-    // Check user has scrolled at least one viewport from init position.
-    if (scrollTop > viewportHeight) {
+    if (scrollTop > 1) {
+      // Check greater than 1 because AMP set scrollTop to 1 in iOS.
       this.display_();
     }
   }
@@ -148,25 +164,31 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   display_() {
     this.removeOnScrollListener_();
-    this.deferMutate(() => {
-      this.visible_ = true;
-      this.viewport_.addToFixedLayer(this.element);
-      this.addCloseButton_();
-      this.scheduleLayoutForAd_();
+    this.adReadyPromise_.then(() => {
+      // Wait for ad build ready. For example user dismiss user notification.
+      this.mutateElement(() => {
+        if (this.collapsed_) {
+          // It's possible that if an AMP ad collapse before its layoutCallback.
+          return;
+        }
+        this.visible_ = true;
+        this.addCloseButton_();
+        this.viewport_
+          .addToFixedLayer(this.element, /* forceTransfer */ true)
+          .then(() => this.scheduleLayoutForAd_());
+      });
     });
   }
 
   /**
-   * Function that check if ad has been built.  If not, wait for the 'built'
+   * Function that check if ad has been built.  If not, wait for the "built"
    * signal. Otherwise schedule layout for ad.
    * @private
    */
   scheduleLayoutForAd_() {
-    if (this.ad_.isBuilt()) {
-      this.layoutAd_();
-    } else {
-      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
-    }
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
+      ad.whenBuilt().then(this.layoutAd_.bind(this));
+    });
   }
 
   /**
@@ -176,24 +198,29 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    this.updateInViewport(ad, true);
-    this.scheduleLayout(ad);
+    const owners = Services.ownersForDoc(this.element);
+    owners.updateInViewport(this.element, ad, true);
+    owners.scheduleLayout(this.element, ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
     const signals = ad.signals();
-    return Promise.race([
-      signals.whenSignal('render-start'),
-      signals.whenSignal('load-end'),
-    ]).then(() => {
-      return this.vsync_.mutatePromise(() => {
-        // Set sticky-ad to visible and change container style
-        this.element.setAttribute('visible', '');
-        // Add border-bottom to the body to compensate space that was taken
-        // by sticky ad, so no content would be blocked by sticky ad unit.
-        const borderBottom = this.element./*OK*/offsetHeight;
-        this.viewport_.updatePaddingBottom(borderBottom);
-        this.forceOpacity_();
+    return signals.whenSignal(CommonSignals.RENDER_START).then(() => {
+      let backgroundColor;
+      return this.measureElement(() => {
+        backgroundColor = computedStyle(this.win, this.element)[
+          'backgroundColor'
+        ];
+      }).then(() => {
+        return this.vsync_.mutatePromise(() => {
+          // Set sticky-ad to visible and change container style
+          this.element.setAttribute('visible', '');
+          // Add border-bottom to the body to compensate space that was taken
+          // by sticky ad, so no content would be blocked by sticky ad unit.
+          const borderBottom = this.element./*OK*/ offsetHeight;
+          this.viewport_.updatePaddingBottom(borderBottom);
+          this.forceOpacity_(backgroundColor);
+        });
       });
     });
   }
@@ -205,9 +232,11 @@ class AmpStickyAd extends AMP.BaseElement {
   addCloseButton_() {
     const closeButton = this.win.document.createElement('button');
     closeButton.classList.add('amp-sticky-ad-close-button');
-    closeButton.setAttribute('aria-label',
-        this.element.getAttribute('data-close-button-aria-label')
-            || 'Close this ad');
+    closeButton.setAttribute(
+      'aria-label',
+      this.element.getAttribute('data-close-button-aria-label') ||
+        'Close this ad'
+    );
     const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
     closeButton.addEventListener('click', boundOnCloseButtonClick);
     this.element.appendChild(closeButton);
@@ -220,7 +249,10 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/scheduleUnlayout(dev().assertElement(this.ad_));
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        dev().assertElement(this.ad_)
+      );
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
@@ -230,21 +262,22 @@ class AmpStickyAd extends AMP.BaseElement {
   /**
    * To check for background-color alpha and force it to be 1.
    * Whoever calls this needs to make sure it's in a vsync.
+   * @param {string} backgroundColor
    * @private
    */
-  forceOpacity_() {
-    const backgroundColor = this.win./*OK*/getComputedStyle(this.element)
-        .getPropertyValue('background-color');
+  forceOpacity_(backgroundColor) {
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;
     }
-    user().warn('AMP-STICKY-AD',
-        'Do not allow container to be semitransparent');
+    user().warn(
+      'AMP-STICKY-AD',
+      'Do not allow container to be semitransparent'
+    );
     setStyle(this.element, 'background-color', newBackgroundColor);
   }
 }
 
-AMP.extension('amp-sticky-ad', '1.0', AMP => {
+AMP.extension('amp-sticky-ad', '1.0', (AMP) => {
   AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
 });

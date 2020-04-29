@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {isObject} from '../types';
+
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;
 
@@ -34,6 +36,23 @@ export function map(opt_initial) {
 }
 
 /**
+ * Return an empty JsonObject or makes the passed in object literal
+ * an JsonObject.
+ * The JsonObject type is just a simple object that is at-dict.
+ * See
+ * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
+ * for what a dict is type-wise.
+ * The linter enforces that the argument is, in fact, at-dict like.
+ * @param {!Object=} opt_initial
+ * @return {!JsonObject}
+ */
+export function dict(opt_initial) {
+  // We do not copy. The linter enforces that the passed in object is a literal
+  // and thus the caller cannot have a reference to it.
+  return /** @type {!JsonObject} */ (opt_initial || {});
+}
+
+/**
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.
@@ -43,4 +62,109 @@ export function map(opt_initial) {
  */
 export function hasOwn(obj, key) {
   return hasOwn_.call(obj, key);
+}
+
+/**
+ * Returns obj[key] iff key is obj's own property (is not inherited).
+ * Otherwise, returns undefined.
+ *
+ * @param {Object} obj
+ * @param {string} key
+ * @return {*}
+ */
+export function ownProperty(obj, key) {
+  if (hasOwn(obj, key)) {
+    return obj[key];
+  } else {
+    return undefined;
+  }
+}
+
+/**
+ * Deep merges source into target.
+ *
+ * @param {!Object} target
+ * @param {!Object} source
+ * @param {number} depth The maximum merge depth. If exceeded, Object.assign
+ *                       will be used instead.
+ * @return {!Object}
+ * @throws {Error} If source contains a circular reference.
+ * Note: Only nested objects are deep-merged, primitives and arrays are not.
+ */
+export function deepMerge(target, source, depth = 10) {
+  // Keep track of seen objects to detect recursive references.
+  const seen = [];
+
+  /** @type {!Array<{t: !Object, s: !Object, d: number}>} */
+  const queue = [];
+  queue.push({t: target, s: source, d: 0});
+
+  // BFS to ensure objects don't have recursive references at shallower depths.
+  while (queue.length > 0) {
+    const {t, s, d} = queue.shift();
+    if (seen.includes(s)) {
+      throw new Error('Source object has a circular reference.');
+    }
+    seen.push(s);
+    if (t === s) {
+      continue;
+    }
+    if (d > depth) {
+      Object.assign(t, s);
+      continue;
+    }
+    Object.keys(s).forEach((key) => {
+      const newValue = s[key];
+      // Perform a deep merge IFF both target and source have the same key
+      // whose corresponding values are objects.
+      if (hasOwn(t, key)) {
+        const oldValue = t[key];
+        if (isObject(newValue) && isObject(oldValue)) {
+          queue.push({t: oldValue, s: newValue, d: d + 1});
+          return;
+        }
+      }
+      t[key] = newValue;
+    });
+  }
+  return target;
+}
+
+/**
+ * @param {!Object} o An object to remove properties from
+ * @param {!Array<string>} props A list of properties to remove from the Object
+ * @return {!Object} An object with the given properties removed
+ */
+export function omit(o, props) {
+  return Object.keys(o).reduce((acc, key) => {
+    if (!props.includes(key)) {
+      acc[key] = o[key];
+    }
+    return acc;
+  }, {});
+}
+
+/**
+ * @param {!Object|null|undefined} o1
+ * @param {!Object|null|undefined} o2
+ * @return {boolean}
+ */
+export function objectsEqualShallow(o1, o2) {
+  if (o1 == null || o2 == null) {
+    // Null is only equal to null, and undefined to undefined.
+    return o1 === o2;
+  }
+
+  for (const k in o1) {
+    if (o1[k] !== o2[k]) {
+      return false;
+    }
+  }
+  for (const k in o2) {
+    if (o2[k] !== o1[k]) {
+      return false;
+    }
+  }
+
+  return true;
 }

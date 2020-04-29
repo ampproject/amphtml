@@ -1,0 +1,111 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Article with parallax title</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
+  <style amp-custom>
+    .spacer {
+      margin-top: 10px;
+      height: 70vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      background-size: 100% 3em;
+    }
+
+    header {
+      position: relative;
+    }
+
+    h1 {
+      margin: 0px 10px;
+    }
+
+    header h1 {
+      position: absolute;
+      top: 20vh;
+      padding: 5px;
+      z-index: 1;
+    }
+
+    header h1 span, .title {
+      background-color: black;
+      color: white;
+      line-height: 1.2em;
+    }
+
+    amp-img img {
+      object-fit: cover;
+    }
+
+    .overlay-top {
+      position: absolute;
+      top: 0;
+    }
+
+    .overlay-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    a, a:visited, a:active {
+      color: #2196F3;
+      text-decoration: none;
+      display: block;
+      padding: 5px;
+    }
+
+    .overflow-window {
+      overflow: hidden;
+    }
+
+    .overflow-window amp-img {
+      margin-bottom: -80%;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1 amp-fx="parallax" data-parallax-factor="1.5">
+          <span class="title">Lorem Ipsum Dolor Sit Lorem Ipsum<span>
+      </h1>
+      <amp-img height="50vh" layout="fixed-height" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+    </header>
+
+    <article>
+      <p>
+        <a href="#scrollToMe" on="tap:scrollToMe.scrollTo(duration=3000)">Tap to auto scroll slowly</a>
+        <a href="#scrollToMe">Tap to auto scroll fast</a>
+      </p>
+
+      <div class="spacer"></div>
+      <div class="overlay-container">
+          <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+          <h1 class="overlay-top" amp-fx="parallax" data-parallax-factor="0.8">
+              <span class="title">Slow Lorem Ipsum Dolor Sit Lorem Ipsum<span>
+          </h1>
+      </div>
+      <div class="spacer"></div>
+      <div class="overflow-window" id="scrollToMe">
+          <amp-img amp-fx="parallax" data-parallax-factor="1.2" layout=responsive width=900 height=1600 src="https://picsum.photos/900/1600?image=736"></amp-img>
+      </div>
+      <div class="spacer"></div>
+      <div class="spacer"></div>
+    </article>
+  </main>
+</body>
+
+</html>

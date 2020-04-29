@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {AmpContext} from './ampcontext.js';
 import {initLogConstructor, setReportError} from '../src/log';
-import {reportError} from '../src/error';
-initLogConstructor();
-setReportError(reportError);
 
+initLogConstructor();
+
+// TODO(alanorozco): Refactor src/error.reportError so it does not contain big
+// transitive dependencies and can be included here.
+setReportError(() => {});
 
 /**
  *  If window.context does not exist, we must instantiate a replacement and
@@ -28,7 +34,8 @@ setReportError(reportError);
 try {
   const windowContextCreated = new Event('amp-windowContextCreated');
   window.context = new AmpContext(window);
-  // Allows for pre-existence, consider validating correct window.context lib instance?
+  // Allows for pre-existence, consider validating correct window.context lib
+  // instance?
   window.dispatchEvent(windowContextCreated);
 } catch (err) {
   // do nothing with error

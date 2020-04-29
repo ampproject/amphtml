@@ -14,29 +14,38 @@
  * limitations under the License.
  */
 
-import {validateData, loadScript} from '../3p/3p';
-import {doubleclick} from '../ads/google/doubleclick';
-import {rethrowAsync} from '../src/log';
+import {getMultiSizeDimensions} from '../ads/google/utils';
+import {loadScript, validateData} from '../3p/3p';
+import {rethrowAsync, user} from '../src/log';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function yieldbot(global, data) {
-  validateData(data, ['psn', 'ybSlot', 'slot'], [
-    'targeting', 'categoryExclusions', 'tagForChildDirectedTreatment',
-    'cookieOptions','overrideWidth', 'overrideHeight',
-  ]);
+  validateData(data, ['psn', 'ybSlot', 'slot']);
 
   global.ybotq = global.ybotq || [];
 
   loadScript(global, 'https://cdn.yldbt.com/js/yieldbot.intent.amp.js', () => {
     global.ybotq.push(() => {
       try {
-        const dimensions = [[
-          parseInt(data.overrideWidth || data.width, 10),
-          parseInt(data.overrideHeight || data.height, 10),
-        ]];
+        const multiSizeDataStr = data.multiSize || null;
+        const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
+        const primaryHeight = parseInt(data.overrideHeight || data.height, 10);
+        let dimensions;
+
+        if (multiSizeDataStr) {
+          dimensions = getMultiSizeDimensions(
+            multiSizeDataStr,
+            primaryWidth,
+            primaryHeight,
+            false
+          );
+          dimensions.unshift([primaryWidth, primaryHeight]);
+        } else {
+          dimensions = [[primaryWidth, primaryHeight]];
+        }
 
         global.yieldbot.psn(data.psn);
         global.yieldbot.enableAsync();
@@ -63,10 +72,16 @@ export function yieldbot(global, data) {
       } catch (e) {
         rethrowAsync(e);
       }
-      delete data['ybSlot'];
-      delete data['psn'];
-      doubleclick(global, data);
+      user().warn(
+        'AMP-AD',
+        'type="yieldbot" will no longer ' +
+          'be supported starting on March 29, 2018.' +
+          ' Please use your amp-ad-network and RTC to configure a' +
+          ' Yieldbot callout vendor. Refer to' +
+          ' https://github.com/ampproject/amphtml/blob/master/' +
+          'extensions/amp-a4a/rtc-publisher-implementation-guide.md' +
+          '#setting-up-rtc-config for more information.'
+      );
     });
   });
 }
-

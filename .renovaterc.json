@@ -1,0 +1,12 @@
+{
+  "extends": ["config:base"],
+  "node": {
+    "supportPolicy": ["lts_active"]
+  },
+  "statusCheckVerify": true,
+  "commitMessagePrefix": "📦",
+  "dependencies": {
+    "enabled": false
+  },
+  "ignorePaths": []
+}

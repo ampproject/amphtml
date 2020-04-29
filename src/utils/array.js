@@ -15,25 +15,52 @@
  */
 
 /**
- * A bit like Array#filter, but removes elements that filter false from the
- * array. Returns the filtered items.
+ * Compares if two arrays contains exactly same elements of same number
+ * of same order. Note that it does NOT handle NaN case as expected.
+ *
+ * @param {!Array<T>} arr1
+ * @param {!Array<T>} arr2
+ * @return {boolean}
+ * @template T
+ */
+export function areEqualOrdered(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Removes elements that shouldRemove returns true for from the array.
  *
  * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} filter
+ * @param {function(T, number, !Array<T>):boolean} shouldRemove
  * @return {!Array<T>}
  * @template T
  */
-export function filterSplice(array, filter) {
-  const splice = [];
+export function remove(array, shouldRemove) {
+  const removed = [];
+  let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (!filter(item, i, array)) {
-      splice.push(item);
-      array.splice(i, 1);
-      i--;
+    if (shouldRemove(item, i, array)) {
+      removed.push(item);
+    } else {
+      if (index < i) {
+        array[index] = item;
+      }
+      index++;
     }
   }
-  return splice;
+  if (index < array.length) {
+    array.length = index;
+  }
+  return removed;
 }
 
 /**
@@ -52,4 +79,43 @@ export function findIndex(array, predicate) {
     }
   }
   return -1;
+}
+
+/**
+ * Converts the given iterator to an array.
+ *
+ * @param {!Iterator<T>} iterator
+ * @return {Array<T>}
+ * @template T
+ */
+export function fromIterator(iterator) {
+  const array = [];
+  for (let e = iterator.next(); !e.done; e = iterator.next()) {
+    array.push(e.value);
+  }
+  return array;
+}
+
+/**
+ * Adds item to array if it is not already present.
+ *
+ * @param {Array<T>} array
+ * @param {T} item
+ * @template T
+ */
+export function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
+}
+
+/**
+ * Returns the last item in an array.
+ *
+ * @param {Array<T>} array
+ * @template T
+ * @return {?T}
+ */
+export function lastItem(array) {
+  return array[array.length - 1];
 }

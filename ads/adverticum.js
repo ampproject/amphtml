@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../3p/3p';
-import {validateData} from '../3p/3p';
 import {setStyle} from '../src/style';
+import {validateData, writeScript} from '../3p/3p';
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -40,5 +39,4 @@ export function adverticum(global, data) {
     document.getElementById(zoneid).appendChild(v);
   }
   writeScript(global, '//ad.adverticum.net/g3.js');
-
 }

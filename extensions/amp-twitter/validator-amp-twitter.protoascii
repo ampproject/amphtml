@@ -1,0 +1,121 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-twitter
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-twitter"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-twitter>
+  html_format: AMP
+  tag_name: "AMP-TWITTER"
+  requires_extension: "amp-twitter"
+  attrs: {
+    name: "data-cards"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-conversation"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-limit"
+    trigger: {
+      also_requires_attr: "data-momentid"
+    }
+  }
+  attrs: {
+    name: "data-momentid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-timeline-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-timeline-owner-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+  attrs: {
+    name: "data-timeline-slug"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+  attrs: {
+    name: "data-timeline-source-type"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  attrs: {
+    name: "data-timeline-screen-name"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+  }
+    attrs: {
+    name: "data-timeline-url"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "data-timeline-user-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[data-tweetid]"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

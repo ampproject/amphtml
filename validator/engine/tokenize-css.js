@@ -20,46 +20,9 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
-goog.provide('parse_css.AtKeywordToken');
-goog.provide('parse_css.CDCToken');
-goog.provide('parse_css.CDOToken');
-goog.provide('parse_css.CloseCurlyToken');
-goog.provide('parse_css.CloseParenToken');
-goog.provide('parse_css.CloseSquareToken');
-goog.provide('parse_css.ColonToken');
-goog.provide('parse_css.ColumnToken');
-goog.provide('parse_css.CommaToken');
-goog.provide('parse_css.DashMatchToken');
-goog.provide('parse_css.DelimToken');
-goog.provide('parse_css.DimensionToken');
-goog.provide('parse_css.EOFToken');
-goog.provide('parse_css.ErrorToken');
-goog.provide('parse_css.ErrorType');
-goog.provide('parse_css.FunctionToken');
-goog.provide('parse_css.GroupingToken');
-goog.provide('parse_css.HashToken');
-goog.provide('parse_css.IdentToken');
-goog.provide('parse_css.IncludeMatchToken');
-goog.provide('parse_css.NumberToken');
-goog.provide('parse_css.OpenCurlyToken');
-goog.provide('parse_css.OpenParenToken');
-goog.provide('parse_css.OpenSquareToken');
-goog.provide('parse_css.PercentageToken');
-goog.provide('parse_css.PrefixMatchToken');
-goog.provide('parse_css.SemicolonToken');
-goog.provide('parse_css.StringToken');
-goog.provide('parse_css.StringValuedToken');
-goog.provide('parse_css.SubstringMatchToken');
-goog.provide('parse_css.SuffixMatchToken');
-goog.provide('parse_css.TRIVIAL_EOF_TOKEN');
-goog.provide('parse_css.TRIVIAL_ERROR_TOKEN');
-goog.provide('parse_css.Token');
-goog.provide('parse_css.TokenType');
-goog.provide('parse_css.URLToken');
-goog.provide('parse_css.WhitespaceToken');
-goog.provide('parse_css.tokenize');
-goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
-goog.require('amp.validator.ValidationError');
+goog.module('tokenize_css');
+const asserts = goog.require('goog.asserts');
+const {ValidationError} = goog.require('amp.validator.protogenerated');
 
 /**
  * Returns an array of Tokens.
@@ -102,13 +65,14 @@ goog.require('amp.validator.ValidationError');
  * @param {string} strIn
  * @param {number|undefined} line
  * @param {number|undefined} col
- * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
- * @return {!Array<!parse_css.Token>}
+ * @param {!Array<!ErrorToken>} errors output array for the errors.
+ * @return {!Array<!Token>}
  */
-parse_css.tokenize = function(strIn, line, col, errors) {
+const tokenize = function(strIn, line, col, errors) {
   const tokenizer = new Tokenizer(strIn, line, col, errors);
   return tokenizer.getTokens();
 };
+exports.tokenize = tokenize;
 
 /**
  * @param {number} num
@@ -227,7 +191,9 @@ function preprocess(str) {
       code = /* '\n' */ 0xa;
       i++;
     }
-    if (code === /* '\r' */ 0xd || code === 0xc) code = /* '\n' */ 0xa;
+    if (code === /* '\r' */ 0xd || code === 0xc) {
+      code = /* '\n' */ 0xa;
+    }
     if (code === 0x0) {
       code = 0xfffd;
     }
@@ -268,13 +234,14 @@ class Tokenizer {
    * @param {string} strIn
    * @param {number|undefined} line
    * @param {number|undefined} col
-   * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
+   * @param {!Array<!ErrorToken>} errors output array for the
+   *     errors.
    */
   constructor(strIn, line, col, errors) {
     this.tokens_ = [];
     /**
      * @private
-     * @type {!Array<!parse_css.ErrorToken>}
+     * @type {!Array<!ErrorToken>}
      */
     this.errors_ = errors;
     /**
@@ -295,46 +262,36 @@ class Tokenizer {
 
     // Line number information.
     let eofToken;
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** @private @type {!Array<number>} */
-      this.lineByPos_ = [];
-      /** @private @type {!Array<number>} */
-      this.colByPos_ = [];
-      let currentLine = line || 1;
-      let currentCol = col || 0;
-      for (let i = 0; i < this.codepoints_.length; ++i) {
-        this.lineByPos_[i] = currentLine;
-        this.colByPos_[i] = currentCol;
-        if (newline(this.codepoints_[i])) {
-          ++currentLine;
-          currentCol = 0;
-        } else {
-          ++currentCol;
-        }
+    /** @private @type {!Array<number>} */
+    this.lineByPos_ = [];
+    /** @private @type {!Array<number>} */
+    this.colByPos_ = [];
+    let currentLine = line || 1;
+    let currentCol = col || 0;
+    for (let i = 0; i < this.codepoints_.length; ++i) {
+      this.lineByPos_[i] = currentLine;
+      this.colByPos_[i] = currentCol;
+      if (newline(this.codepoints_[i])) {
+        ++currentLine;
+        currentCol = 0;
+      } else {
+        ++currentCol;
       }
-      eofToken = new parse_css.EOFToken();
-      eofToken.line = currentLine;
-      eofToken.col = currentCol;
-    } else {
-      eofToken = parse_css.TRIVIAL_EOF_TOKEN;
     }
+    eofToken = new EOFToken();
+    eofToken.line = currentLine;
+    eofToken.col = currentCol;
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
-      if (token.tokenType === parse_css.TokenType.ERROR) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
-        } else {
-          this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          this.tokens_ = [];
-          return;
-        }
+      if (token.tokenType === TokenType.ERROR) {
+        this.errors_.push(/** @type {!ErrorToken} */ (token));
       } else {
         this.tokens_.push(token);
       }
       iterationCount++;
-      goog.asserts.assert(
+      asserts.assert(
           iterationCount <= this.codepoints_.length * 2,
           'Internal Error: infinite-looping');
     }
@@ -358,9 +315,11 @@ class Tokenizer {
   }
 
   /**
-   * @return {!Array<!parse_css.Token>}
+   * @return {!Array<!Token>}
    */
-  getTokens() { return this.tokens_; }
+  getTokens() {
+    return this.tokens_;
+  }
 
   /**
    * Returns the codepoint at the given position.
@@ -381,7 +340,7 @@ class Tokenizer {
    */
   next(opt_num) {
     const num = opt_num || 1;
-    goog.asserts.assert(
+    asserts.assert(
         num <= 3, 'Spec Error: no more than three codepoints of lookahead.');
     return this.codepoint(this.pos_ + num);
   }
@@ -416,24 +375,19 @@ class Tokenizer {
     return codepoint === -1;
   }
 
-  /** @return {!parse_css.Token} */
+  /** @return {!Token} */
   consumeAToken() {
     this.consumeComments();
     this.consume();
-    const mark = new parse_css.Token();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      mark.line = this.getLine();
-      mark.col = this.getCol();
-    }
+    const mark = new Token();
+    mark.line = this.getLine();
+    mark.col = this.getCol();
     if (whitespace(this.code_)) {
       // Merge consecutive whitespace into one token.
       while (whitespace(this.next())) {
         this.consume();
       }
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.WhitespaceToken());
-      }
-      return TRIVIAL_WHITESPACE_TOKEN;
+      return mark.copyPosTo(new WhitespaceToken());
     } else if (this.code_ === /* '"' */ 0x22) {
       return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '#' */ 0x23) {
@@ -444,71 +398,44 @@ class Tokenizer {
                 this.next(1), this.next(2), this.next(3))) {
           type = 'id';
         }
-        const token = new parse_css.HashToken();
+        const token = new HashToken();
         token.value = this.consumeAName();
         if (type !== null) {
           token.type = type;
         }
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_23;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '$' */ 0x24) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          mark.copyPosTo(new parse_css.SuffixMatchToken());
-        }
-        return TRIVIAL_SUFFIX_MATCH_TOKEN;
+        return mark.copyPosTo(new SuffixMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_24;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* ''' */ 0x27) {
       return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '(' */ 0x28) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenParenToken());
-      }
-      return TRIVIAL_OPEN_PAREN_TOKEN;
+      return mark.copyPosTo(new OpenParenToken());
     } else if (this.code_ === /* ')' */ 0x29) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseParenToken());
-      }
-      return TRIVIAL_CLOSE_PAREN_TOKEN;
+      return mark.copyPosTo(new CloseParenToken());
     } else if (this.code_ === /* '*' */ 0x2a) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.SubstringMatchToken());
-        }
-        return TRIVIAL_SUBSTRING_MATCH_TOKEN;
+        return mark.copyPosTo(new SubstringMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_2A;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '+' */ 0x2b) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_2B;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* ',' */ 0x2c) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CommaToken());
-      }
-      return TRIVIAL_COMMA_TOKEN;
+      return mark.copyPosTo(new CommaToken());
     } else if (this.code_ === /* '-' */ 0x2d) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
@@ -516,145 +443,84 @@ class Tokenizer {
       } else if (
           this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.CDCToken());
-        }
-        return TRIVIAL_CDC_TOKEN;
+        return mark.copyPosTo(new CDCToken());
       } else if (this./*OK*/ startsWithAnIdentifier()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_2D;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '.' */ 0x2e) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_2E;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* ':' */ 0x3a) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.ColonToken());
-      }
-      return TRIVIAL_COLON_TOKEN;
+      return mark.copyPosTo(new ColonToken());
     } else if (this.code_ === /* ';' */ 0x3b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.SemicolonToken());
-      }
-      return TRIVIAL_SEMICOLON_TOKEN;
+      return mark.copyPosTo(new SemicolonToken());
     } else if (this.code_ === /* '<' */ 0x3c) {
       if (this.next(1) === /* '!' */ 0x21 && this.next(2) === /* '-' */ 0x2d &&
           this.next(3) === /* '-' */ 0x2d) {
         this.consume(3);
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.CDOToken());
-        }
-        return TRIVIAL_CDO_TOKEN;
+        return mark.copyPosTo(new CDOToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_3C;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '@' */ 0x40) {
       if (this.wouldStartAnIdentifier(
               this.next(1), this.next(2), this.next(3))) {
-        const token = new parse_css.AtKeywordToken();
+        const token = new AtKeywordToken();
         token.value = this.consumeAName();
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_40;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '[' */ 0x5b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenSquareToken());
-      }
-      return TRIVIAL_OPEN_SQUARE_TOKEN;
+      return mark.copyPosTo(new OpenSquareToken());
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this./*OK*/ startsWithAValidEscape()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          // This condition happens if we are in consumeAToken (this method),
-          // the current codepoint is 0x5c (\) and the next codepoint is a
-          // newline (\n).
-          return mark.copyPosTo(new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code
-                  .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
-              ['style']));
-        }
-        return parse_css.TRIVIAL_ERROR_TOKEN;
+        // This condition happens if we are in consumeAToken (this method),
+        // the current codepoint is 0x5c (\) and the next codepoint is a
+        // newline (\n).
+        return mark.copyPosTo(new ErrorToken(
+            ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+            ['style']));
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseSquareToken());
-      }
-      return TRIVIAL_CLOSE_SQUARE_TOKEN;
+      return mark.copyPosTo(new CloseSquareToken());
     } else if (this.code_ === /* '^' */ 0x5e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.PrefixMatchToken());
-        }
-        return TRIVIAL_PREFIX_MATCH_TOKEN;
+        return mark.copyPosTo(new PrefixMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_5E;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '{' */ 0x7b) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.OpenCurlyToken());
-      }
-      return TRIVIAL_OPEN_CURLY_TOKEN;
+      return mark.copyPosTo(new OpenCurlyToken());
     } else if (this.code_ === /* '|' */ 0x7c) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DashMatchToken());
-        }
-        return TRIVIAL_DASH_MATCH_TOKEN;
+        return mark.copyPosTo(new DashMatchToken());
       } else if (this.next() === /* '|' */ 0x7c) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.ColumnToken());
-        }
-        return TRIVIAL_COLUMN_TOKEN;
+        return mark.copyPosTo(new ColumnToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_7C;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (this.code_ === /* '}' */ 0x7d) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.CloseCurlyToken());
-      }
-      return TRIVIAL_CLOSE_CURLY_TOKEN;
+      return mark.copyPosTo(new CloseCurlyToken());
     } else if (this.code_ === /* '~' */ 0x7e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.IncludeMatchToken());
-        }
-        return TRIVIAL_CLOSE_CURLY_TOKEN;
+        return mark.copyPosTo(new IncludeMatchToken());
       } else {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
-        }
-        return TRIVIAL_DELIM_TOKEN_7E;
+        return mark.copyPosTo(new DelimToken(this.code_));
       }
     } else if (digit(this.code_)) {
       this.reconsume();
@@ -663,12 +529,9 @@ class Tokenizer {
       this.reconsume();
       return mark.copyPosTo(this.consumeAnIdentlikeToken());
     } else if (this.eof()) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return mark.copyPosTo(new parse_css.EOFToken());
-      }
-      return parse_css.TRIVIAL_EOF_TOKEN;
+      return mark.copyPosTo(new EOFToken());
     } else {
-      const token = new parse_css.DelimToken(this.code_);
+      const token = new DelimToken(this.code_);
       return mark.copyPosTo(token);
     }
   }
@@ -678,11 +541,9 @@ class Tokenizer {
    * emitting a parse error if we hit the end of the file. Returns nothing.
    */
   consumeComments() {
-    const mark = new parse_css.Token();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      mark.line = this.getLine();
-      mark.col = this.getCol();
-    }
+    const mark = new Token();
+    mark.line = this.getLine();
+    mark.col = this.getCol();
     while (this.next(1) === /* '/' */ 0x2f && this.next(2) === /* '*' */ 0x2a) {
       this.consume(2);
       while (true) {
@@ -691,16 +552,11 @@ class Tokenizer {
           this.consume();
           break;
         } else if (this.eof()) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            // For example "h1 { color: red; } \* " would emit this parse error
-            // at the end of the string.
-            this.errors_.push(mark.copyPosTo(new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code
-                    .CSS_SYNTAX_UNTERMINATED_COMMENT,
-                ['style'])));
-          } else {
-            this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          }
+          // For example "h1 { color: red; } \* " would emit this parse error
+          // at the end of the string.
+          this.errors_.push(mark.copyPosTo(new ErrorToken(
+              ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT,
+              ['style'])));
           return;
         }
       }
@@ -711,15 +567,16 @@ class Tokenizer {
    * Consumes a token that starts with a number.
    * The specific type is one of:
    *   NumberToken, DimensionToken, PercentageToken
-   * @return {!parse_css.Token} */
+   * @return {!Token}
+   */
   consumeANumericToken() {
-    goog.asserts.assert(
+    asserts.assert(
         this.wouldStartANumber(this.next(1), this.next(2), this.next(3)),
         'Internal Error: consumeANumericToken precondition not met');
-    /** @type {!parse_css.NumberToken} */
+    /** @type {!NumberToken} */
     const num = this.consumeANumber();
     if (this.wouldStartAnIdentifier(this.next(1), this.next(2), this.next(3))) {
-      const token = new parse_css.DimensionToken();
+      const token = new DimensionToken();
       token.value = num.value;
       token.repr = num.repr;
       token.type = num.type;
@@ -727,7 +584,7 @@ class Tokenizer {
       return token;
     } else if (this.next() === /* '%' */ 0x25) {
       this.consume();
-      const token = new parse_css.PercentageToken();
+      const token = new PercentageToken();
       token.value = num.value;
       token.repr = num.repr;
       return token;
@@ -739,7 +596,7 @@ class Tokenizer {
    * Consume an identifier-like token.
    * The specific type is one of:
    *   FunctionToken, URLToken, ErrorToken, IdentToken
-   * @return {!parse_css.Token}
+   * @return {!Token}
    */
   consumeAnIdentlikeToken() {
     const name = this.consumeAName();
@@ -749,13 +606,14 @@ class Tokenizer {
         this.consume();
       }
       if (this.next() === /* '"' */ 0x22 || this.next() === /* ''' */ 0x27) {
-        const token = new parse_css.FunctionToken();
+        const token = new FunctionToken();
         token.value = name;
         return token;
       } else if (
-          whitespace(this.next()) && (this.next(2) === /* '"' */ 0x22 ||
-                                      this.next(2) === /* ''' */ 0x27)) {
-        const token = new parse_css.FunctionToken();
+          whitespace(this.next()) &&
+          (this.next(2) === /* '"' */ 0x22 ||
+           this.next(2) === /* ''' */ 0x27)) {
+        const token = new FunctionToken();
         token.value = name;
         return token;
       } else {
@@ -763,11 +621,11 @@ class Tokenizer {
       }
     } else if (this.next() === /* '(' */ 0x28) {
       this.consume();
-      const token = new parse_css.FunctionToken();
+      const token = new FunctionToken();
       token.value = name;
       return token;
     } else {
-      const token = new parse_css.IdentToken();
+      const token = new IdentToken();
       token.value = name;
       return token;
     }
@@ -777,10 +635,10 @@ class Tokenizer {
    * Consume a string token.
    * The specific type is one of:
    *   StringToken, ErrorToken
-   * @return {!parse_css.Token}
+   * @return {!Token}
    */
   consumeAStringToken() {
-    goog.asserts.assert(
+    asserts.assert(
         (this.code_ === /* '"' */ 0x22) || (this.code_ === /* ''' */ 0x27),
         'Internal Error: consumeAStringToken precondition not met');
     const endingCodePoint = this.code_;
@@ -788,18 +646,13 @@ class Tokenizer {
     while (true) {
       this.consume();
       if (this.code_ === endingCodePoint || this.eof()) {
-        const token = new parse_css.StringToken();
+        const token = new StringToken();
         token.value = string;
         return token;
       } else if (newline(this.code_)) {
         this.reconsume();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
-              ['style']);
-        } else {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
-        }
+        return new ErrorToken(
+            ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING, ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this.eof(this.next())) {
           continue;
@@ -818,10 +671,10 @@ class Tokenizer {
    * Consume an URL token.
    * The specific type is one of:
    *   URLToken, ErrorToken
-   * @return {!parse_css.Token}
+   * @return {!Token}
    */
   consumeAURLToken() {
-    const token = new parse_css.URLToken();
+    const token = new URLToken();
     while (whitespace(this.next())) {
       this.consume();
     }
@@ -841,36 +694,22 @@ class Tokenizer {
           return token;
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            return new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-                ['style']);
-          } else {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
+          return new ErrorToken(
+              ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else if (
           this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
-        } else {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
-        }
+        return new ErrorToken(
+            ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this./*OK*/ startsWithAValidEscape()) {
           token.value += stringFromCode(this.consumeEscape());
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            return new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-                ['style']);
-          } else {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
+          return new ErrorToken(
+              ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
       } else {
         token.value += stringFromCode(this.code_);
@@ -903,7 +742,11 @@ class Tokenizer {
         this.consume();
       }
       let value = parseInt(
-          digits.map(function(x) { return String.fromCharCode(x); }).join(''),
+          digits
+              .map(function(x) {
+                return String.fromCharCode(x);
+              })
+              .join(''),
           16);
       if (value > maxAllowedCodepoint) {
         value = 0xfffd;
@@ -935,7 +778,8 @@ class Tokenizer {
 
   /**
    * Returns true if the next two codepoints are the start of an escape token.
-   * @return {boolean} */
+   * @return {boolean}
+   */
   /*OK*/ startsWithAValidEscape() {
     return this.areAValidEscape(this.code_, this.next());
   }
@@ -1026,10 +870,10 @@ class Tokenizer {
    * Consumes a number, returning it as a string representation. Numbers
    * may include +/- prefixes, ./e/E delimiters, etc. The type string will
    * be either 'integer' or 'number'. A number may be an integer.
-   * @return {!parse_css.NumberToken}
+   * @return {!NumberToken}
    */
   consumeANumber() {
-    goog.asserts.assert(
+    asserts.assert(
         this.wouldStartANumber(this.next(1), this.next(2), this.next(3)),
         'Internal Error: consumeANumber precondition not met');
     /** @type {string} */
@@ -1077,7 +921,7 @@ class Tokenizer {
         repr += stringFromCode(this.code_);  // 0-9
       }
     }
-    const numberToken = new parse_css.NumberToken();
+    const numberToken = new NumberToken();
     numberToken.type = type;
     numberToken.value = this.convertAStringToANumber(repr);
     numberToken.repr = repr;
@@ -1091,7 +935,7 @@ class Tokenizer {
    */
   convertAStringToANumber(string) {
     // CSS's number rules are identical to JS, afaik.
-    return +string;
+    return Number(string);
   }
 
   /**
@@ -1114,7 +958,7 @@ class Tokenizer {
  * NOTE: When adding to this enum, you must update TokenType_NamesById below.
  * @enum {number}
  */
-parse_css.TokenType = {
+const TokenType = {
   UNKNOWN: 0,
   AT_KEYWORD: 1,
   CDC: 2,  // -->
@@ -1166,8 +1010,9 @@ parse_css.TokenType = {
   CLASS_SELECTOR: 42,
   SIMPLE_SELECTOR_SEQUENCE: 43,
   COMBINATOR: 44,
-  SELECTORS_GROUP: 45
+  SELECTORS_GROUP: 45,
 };
+exports.TokenType = TokenType;
 
 /** @type {!Array<string>} */
 const TokenType_NamesById = [
@@ -1222,14 +1067,12 @@ const TokenType_NamesById = [
 /**
  * The abstract superclass for all tokens.
  */
-parse_css.Token = class {
+const Token = class {
   constructor() {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** @type {number} */
-      this.line = 1;
-      /** @type {number} */
-      this.col = 0;
-    }
+    /** @type {number} */
+    this.line = 1;
+    /** @type {number} */
+    this.col = 0;
   }
 
   /**
@@ -1239,199 +1082,183 @@ parse_css.Token = class {
    * @template T
    */
   copyPosTo(other) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      other.line = this.line;
-      other.col = this.col;
-    }
+    other.line = this.line;
+    other.col = this.col;
     return other;
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.Token.prototype.tokenType = parse_css.TokenType.UNKNOWN;
+exports.Token = Token;
+/** @type {!TokenType} */
+Token.prototype.tokenType = TokenType.UNKNOWN;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @return {!Object} */
-  parse_css.Token.prototype.toJSON = function() {
-    return {
-      'tokenType': TokenType_NamesById[this.tokenType],
-      'line': this.line,
-      'col': this.col
-    };
+/** @return {!Object} */
+Token.prototype.toJSON = function() {
+  return {
+    'tokenType': TokenType_NamesById[this.tokenType],
+    'line': this.line,
+    'col': this.col,
   };
-}
+};
 
 /**
  * Error tokens carry an error code and parameters, which can be
  * formatted into an error message via the format strings in
  * validator.protoascii.
  */
-parse_css.ErrorToken = class extends parse_css.Token {
+const ErrorToken = class extends Token {
   /**
-   * @param {!amp.validator.ValidationError.Code} code
-   * @param {!Array<string>} params
+   * @param {!ValidationError.Code=} opt_code
+   * @param {!Array<string>=} opt_params
    */
-  constructor(code, params) {
+  constructor(opt_code, opt_params) {
     super();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** @type {!amp.validator.ValidationError.Code} */
-      this.code = code;
-      /** @type {!Array<string>} */
-      this.params = params;
-    }
+    asserts.assert(opt_code !== undefined);
+    asserts.assert(opt_params !== undefined);
+    /** @type {!ValidationError.Code} */
+    this.code = opt_code;
+    /** @type {!Array<string>} */
+    this.params = opt_params;
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
+/** @type {!TokenType} */
+ErrorToken.prototype.tokenType = TokenType.ERROR;
+exports.ErrorToken = ErrorToken;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.ErrorToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['code'] = this.code;
-    json['params'] = this.params;
-    return json;
-  };
-}
+/** @inheritDoc */
+ErrorToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['code'] = this.code;
+  json['params'] = this.params;
+  return json;
+};
 
-/**
- * @type {!parse_css.ErrorToken}
- */
-parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken(
-    amp.validator.ValidationError.Code.UNKNOWN_CODE, []);
+const WhitespaceToken = class extends Token {};
+exports.WhitespaceToken = WhitespaceToken;
+/** @type {!TokenType} */
+WhitespaceToken.prototype.tokenType = TokenType.WHITESPACE;
 
-parse_css.WhitespaceToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.WhitespaceToken.prototype.tokenType = parse_css.TokenType.WHITESPACE;
-const TRIVIAL_WHITESPACE_TOKEN = new parse_css.WhitespaceToken();
+const CDOToken = class extends Token {};
+exports.CDOToken = CDOToken;
+/** @type {!TokenType} */
+CDOToken.prototype.tokenType = TokenType.CDO;
 
-parse_css.CDOToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.CDOToken.prototype.tokenType = parse_css.TokenType.CDO;
-const TRIVIAL_CDO_TOKEN = new parse_css.CDOToken();
+const CDCToken = class extends Token {};
+exports.CDCToken = CDCToken;
+/** @type {!TokenType} */
+CDCToken.prototype.tokenType = TokenType.CDC;
 
-parse_css.CDCToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.CDCToken.prototype.tokenType = parse_css.TokenType.CDC;
-const TRIVIAL_CDC_TOKEN = new parse_css.CDCToken();
+const ColonToken = class extends Token {};
+exports.ColonToken = ColonToken;
+/** @type {!TokenType} */
+ColonToken.prototype.tokenType = TokenType.COLON;
 
-parse_css.ColonToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.ColonToken.prototype.tokenType = parse_css.TokenType.COLON;
-const TRIVIAL_COLON_TOKEN = new parse_css.ColonToken();
+const SemicolonToken = class extends Token {};
+exports.SemicolonToken = SemicolonToken;
+/** @type {!TokenType} */
+SemicolonToken.prototype.tokenType = TokenType.SEMICOLON;
 
-parse_css.SemicolonToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.SemicolonToken.prototype.tokenType = parse_css.TokenType.SEMICOLON;
-const TRIVIAL_SEMICOLON_TOKEN = new parse_css.SemicolonToken();
+const CommaToken = class extends Token {};
+exports.CommaToken = CommaToken;
+/** @type {!TokenType} */
+CommaToken.prototype.tokenType = TokenType.COMMA;
 
-parse_css.CommaToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.CommaToken.prototype.tokenType = parse_css.TokenType.COMMA;
-const TRIVIAL_COMMA_TOKEN = new parse_css.CommaToken();
-
-parse_css.GroupingToken = class extends parse_css.Token {};
+const GroupingToken = class extends Token {};
+exports.GroupingToken = GroupingToken;
 /** @type {string} */
-parse_css.GroupingToken.prototype.value = 'abstract';
+GroupingToken.prototype.value = 'abstract';
 /** @type {string} */
-parse_css.GroupingToken.prototype.mirror = 'abstract';
+GroupingToken.prototype.mirror = 'abstract';
 
-parse_css.OpenCurlyToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.OpenCurlyToken.prototype.tokenType = parse_css.TokenType.OPEN_CURLY;
+const OpenCurlyToken = class extends GroupingToken {};
+exports.OpenCurlyToken = OpenCurlyToken;
+/** @type {!TokenType} */
+OpenCurlyToken.prototype.tokenType = TokenType.OPEN_CURLY;
 /** @type {string} */
-parse_css.OpenCurlyToken.prototype.value = '{';
+OpenCurlyToken.prototype.value = '{';
 /** @type {string} */
-parse_css.OpenCurlyToken.prototype.mirror = '}';
-const TRIVIAL_OPEN_CURLY_TOKEN = new parse_css.OpenCurlyToken();
+OpenCurlyToken.prototype.mirror = '}';
 
-parse_css.CloseCurlyToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.CloseCurlyToken.prototype.tokenType = parse_css.TokenType.CLOSE_CURLY;
+const CloseCurlyToken = class extends GroupingToken {};
+exports.CloseCurlyToken = CloseCurlyToken;
+/** @type {!TokenType} */
+CloseCurlyToken.prototype.tokenType = TokenType.CLOSE_CURLY;
 /** @type {string} */
-parse_css.CloseCurlyToken.prototype.value = '}';
+CloseCurlyToken.prototype.value = '}';
 /** @type {string} */
-parse_css.CloseCurlyToken.prototype.mirror = '{';
-const TRIVIAL_CLOSE_CURLY_TOKEN = new parse_css.CloseCurlyToken();
+CloseCurlyToken.prototype.mirror = '{';
 
-parse_css.OpenSquareToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.OpenSquareToken.prototype.tokenType = parse_css.TokenType.OPEN_SQUARE;
+const OpenSquareToken = class extends GroupingToken {};
+exports.OpenSquareToken = OpenSquareToken;
+/** @type {!TokenType} */
+OpenSquareToken.prototype.tokenType = TokenType.OPEN_SQUARE;
 /** @type {string} */
-parse_css.OpenSquareToken.prototype.value = '[';
+OpenSquareToken.prototype.value = '[';
 /** @type {string} */
-parse_css.OpenSquareToken.prototype.mirror = ']';
-const TRIVIAL_OPEN_SQUARE_TOKEN = new parse_css.OpenSquareToken();
+OpenSquareToken.prototype.mirror = ']';
 
-parse_css.CloseSquareToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.CloseSquareToken.prototype.tokenType =
-    parse_css.TokenType.CLOSE_SQUARE;
+const CloseSquareToken = class extends GroupingToken {};
+exports.CloseSquareToken = CloseSquareToken;
+/** @type {!TokenType} */
+CloseSquareToken.prototype.tokenType = TokenType.CLOSE_SQUARE;
 /** @type {string} */
-parse_css.CloseSquareToken.prototype.value = ']';
+CloseSquareToken.prototype.value = ']';
 /** @type {string} */
-parse_css.CloseSquareToken.prototype.mirror = '[';
-const TRIVIAL_CLOSE_SQUARE_TOKEN = new parse_css.CloseSquareToken();
+CloseSquareToken.prototype.mirror = '[';
 
-parse_css.OpenParenToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.OpenParenToken.prototype.tokenType = parse_css.TokenType.OPEN_PAREN;
+const OpenParenToken = class extends GroupingToken {};
+exports.OpenParenToken = OpenParenToken;
+/** @type {!TokenType} */
+OpenParenToken.prototype.tokenType = TokenType.OPEN_PAREN;
 /** @type {string} */
-parse_css.OpenParenToken.prototype.value = '(';
+OpenParenToken.prototype.value = '(';
 /** @type {string} */
-parse_css.OpenParenToken.prototype.mirror = ')';
-const TRIVIAL_OPEN_PAREN_TOKEN = new parse_css.OpenParenToken();
+OpenParenToken.prototype.mirror = ')';
 
-parse_css.CloseParenToken = class extends parse_css.GroupingToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.CloseParenToken.prototype.tokenType = parse_css.TokenType.CLOSE_PAREN;
+const CloseParenToken = class extends GroupingToken {};
+exports.CloseParenToken = CloseParenToken;
+/** @type {!TokenType} */
+CloseParenToken.prototype.tokenType = TokenType.CLOSE_PAREN;
 /** @type {string} */
-parse_css.CloseParenToken.prototype.value = ')';
+CloseParenToken.prototype.value = ')';
 /** @type {string} */
-parse_css.CloseParenToken.prototype.mirror = '(';
-const TRIVIAL_CLOSE_PAREN_TOKEN = new parse_css.CloseParenToken();
+CloseParenToken.prototype.mirror = '(';
 
-parse_css.IncludeMatchToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.IncludeMatchToken.prototype.tokenType =
-    parse_css.TokenType.INCLUDE_MATCH;
-const TRIVIAL_INCLUDE_MATCH_TOKEN = new parse_css.IncludeMatchToken();
+const IncludeMatchToken = class extends Token {};
+exports.IncludeMatchToken = IncludeMatchToken;
+/** @type {!TokenType} */
+IncludeMatchToken.prototype.tokenType = TokenType.INCLUDE_MATCH;
 
-parse_css.DashMatchToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.DashMatchToken.prototype.tokenType = parse_css.TokenType.DASH_MATCH;
-const TRIVIAL_DASH_MATCH_TOKEN = new parse_css.DashMatchToken();
+const DashMatchToken = class extends Token {};
+exports.DashMatchToken = DashMatchToken;
+/** @type {!TokenType} */
+DashMatchToken.prototype.tokenType = TokenType.DASH_MATCH;
 
-parse_css.PrefixMatchToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.PrefixMatchToken.prototype.tokenType =
-    parse_css.TokenType.PREFIX_MATCH;
-const TRIVIAL_PREFIX_MATCH_TOKEN = new parse_css.PrefixMatchToken();
+const PrefixMatchToken = class extends Token {};
+exports.PrefixMatchToken = PrefixMatchToken;
+/** @type {!TokenType} */
+PrefixMatchToken.prototype.tokenType = TokenType.PREFIX_MATCH;
 
-parse_css.SuffixMatchToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.SuffixMatchToken.prototype.tokenType =
-    parse_css.TokenType.SUFFIX_MATCH;
-const TRIVIAL_SUFFIX_MATCH_TOKEN = new parse_css.SuffixMatchToken();
+const SuffixMatchToken = class extends Token {};
+exports.SuffixMatchToken = SuffixMatchToken;
+/** @type {!TokenType} */
+SuffixMatchToken.prototype.tokenType = TokenType.SUFFIX_MATCH;
 
-parse_css.SubstringMatchToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.SubstringMatchToken.prototype.tokenType =
-    parse_css.TokenType.SUBSTRING_MATCH;
-const TRIVIAL_SUBSTRING_MATCH_TOKEN = new parse_css.SubstringMatchToken();
+const SubstringMatchToken = class extends Token {};
+exports.SubstringMatchToken = SubstringMatchToken;
+/** @type {!TokenType} */
+SubstringMatchToken.prototype.tokenType = TokenType.SUBSTRING_MATCH;
 
-parse_css.ColumnToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.ColumnToken.prototype.tokenType = parse_css.TokenType.COLUMN;
-const TRIVIAL_COLUMN_TOKEN = new parse_css.ColumnToken();
+const ColumnToken = class extends Token {};
+exports.ColumnToken = ColumnToken;
+/** @type {!TokenType} */
+ColumnToken.prototype.tokenType = TokenType.COLUMN;
 
-parse_css.EOFToken = class extends parse_css.Token {};
-/** @type {!parse_css.TokenType} */
-parse_css.EOFToken.prototype.tokenType = parse_css.TokenType.EOF_TOKEN;
+const EOFToken = class extends Token {};
+exports.EOFToken = EOFToken;
+/** @type {!TokenType} */
+EOFToken.prototype.tokenType = TokenType.EOF_TOKEN;
 
-/** @type {!parse_css.EOFToken} */
-parse_css.TRIVIAL_EOF_TOKEN = new parse_css.EOFToken();
-
-parse_css.DelimToken = class extends parse_css.Token {
+const DelimToken = class extends Token {
   /**
    * @param {number} code
    */
@@ -1441,31 +1268,18 @@ parse_css.DelimToken = class extends parse_css.Token {
     this.value = stringFromCode(code);
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.DelimToken.prototype.tokenType = parse_css.TokenType.DELIM;
+exports.DelimToken = DelimToken;
+/** @type {!TokenType} */
+DelimToken.prototype.tokenType = TokenType.DELIM;
 
-const TRIVIAL_DELIM_TOKEN_23 = new parse_css.DelimToken(0x23);
-const TRIVIAL_DELIM_TOKEN_24 = new parse_css.DelimToken(0x24);
-const TRIVIAL_DELIM_TOKEN_2A = new parse_css.DelimToken(0x2a);
-const TRIVIAL_DELIM_TOKEN_2B = new parse_css.DelimToken(0x2b);
-const TRIVIAL_DELIM_TOKEN_2D = new parse_css.DelimToken(0x2d);
-const TRIVIAL_DELIM_TOKEN_2E = new parse_css.DelimToken(0x2e);
-const TRIVIAL_DELIM_TOKEN_3C = new parse_css.DelimToken(0x3c);
-const TRIVIAL_DELIM_TOKEN_40 = new parse_css.DelimToken(0x40);
-const TRIVIAL_DELIM_TOKEN_5E = new parse_css.DelimToken(0x5E);
-const TRIVIAL_DELIM_TOKEN_7C = new parse_css.DelimToken(0x7C);
-const TRIVIAL_DELIM_TOKEN_7E = new parse_css.DelimToken(0x7E);
+/** @inheritDoc */
+DelimToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.DelimToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
-
-parse_css.StringValuedToken = class extends parse_css.Token {
+const StringValuedToken = class extends Token {
   constructor() {
     super();
     /** @type {string} */
@@ -1476,60 +1290,64 @@ parse_css.StringValuedToken = class extends parse_css.Token {
    * @param {string} str
    * @return {boolean}
    */
-  ASCIIMatch(str) { return this.value.toLowerCase() === str.toLowerCase(); }
+  ASCIIMatch(str) {
+    return this.value.toLowerCase() === str.toLowerCase();
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.StringValuedToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+StringValuedToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
+exports.StringValuedToken = StringValuedToken;
 
-parse_css.IdentToken = class extends parse_css.StringValuedToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.IdentToken.prototype.tokenType = parse_css.TokenType.IDENT;
+const IdentToken = class extends StringValuedToken {};
+/** @type {!TokenType} */
+IdentToken.prototype.tokenType = TokenType.IDENT;
+exports.IdentToken = IdentToken;
 
-parse_css.FunctionToken = class extends parse_css.StringValuedToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.FunctionToken.prototype.tokenType =
-    parse_css.TokenType.FUNCTION_TOKEN;
+const FunctionToken = class extends StringValuedToken {};
+/** @type {!TokenType} */
+FunctionToken.prototype.tokenType = TokenType.FUNCTION_TOKEN;
 /** @type {string} */
-parse_css.FunctionToken.prototype.mirror = ')';
+FunctionToken.prototype.mirror = ')';
+exports.FunctionToken = FunctionToken;
 
-parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.AtKeywordToken.prototype.tokenType = parse_css.TokenType.AT_KEYWORD;
+const AtKeywordToken = class extends StringValuedToken {};
+/** @type {!TokenType} */
+AtKeywordToken.prototype.tokenType = TokenType.AT_KEYWORD;
+exports.AtKeywordToken = AtKeywordToken;
 
-parse_css.HashToken = class extends parse_css.StringValuedToken {
+const HashToken = class extends StringValuedToken {
   constructor() {
     super();
     /** @type {string} */
     this.type = 'unrestricted';
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
+/** @type {!TokenType} */
+HashToken.prototype.tokenType = TokenType.HASH;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.HashToken.prototype.toJSON = function() {
-    const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
-    json['type'] = this.type;
-    return json;
-  };
-}
+/** @inheritDoc */
+HashToken.prototype.toJSON = function() {
+  const json = StringValuedToken.prototype.toJSON.call(this);
+  json['type'] = this.type;
+  return json;
+};
+exports.HashToken = HashToken;
 
-parse_css.StringToken = class extends parse_css.StringValuedToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.StringToken.prototype.tokenType = parse_css.TokenType.STRING;
+const StringToken = class extends StringValuedToken {};
+/** @type {!TokenType} */
+StringToken.prototype.tokenType = TokenType.STRING;
+exports.StringToken = StringToken;
 
-parse_css.URLToken = class extends parse_css.StringValuedToken {};
-/** @type {!parse_css.TokenType} */
-parse_css.URLToken.prototype.tokenType = parse_css.TokenType.URL;
+const URLToken = class extends StringValuedToken {};
+/** @type {!TokenType} */
+URLToken.prototype.tokenType = TokenType.URL;
+exports.URLToken = URLToken;
 
-parse_css.NumberToken = class extends parse_css.Token {
+const NumberToken = class extends Token {
   constructor() {
     super();
     /** @type {?number} */
@@ -1540,21 +1358,20 @@ parse_css.NumberToken = class extends parse_css.Token {
     this.repr = '';
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
+/** @type {!TokenType} */
+NumberToken.prototype.tokenType = TokenType.NUMBER;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.NumberToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['type'] = this.type;
-    json['repr'] = this.repr;
-    return json;
-  };
-}
+/** @inheritDoc */
+NumberToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['type'] = this.type;
+  json['repr'] = this.repr;
+  return json;
+};
+exports.NumberToken = NumberToken;
 
-parse_css.PercentageToken = class extends parse_css.Token {
+const PercentageToken = class extends Token {
   constructor() {
     super();
     /** @type {?number} */
@@ -1563,20 +1380,19 @@ parse_css.PercentageToken = class extends parse_css.Token {
     this.repr = '';
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
+/** @type {!TokenType} */
+PercentageToken.prototype.tokenType = TokenType.PERCENTAGE;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.PercentageToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['repr'] = this.repr;
-    return json;
-  };
-}
+/** @inheritDoc */
+PercentageToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['repr'] = this.repr;
+  return json;
+};
+exports.PercentageToken = PercentageToken;
 
-parse_css.DimensionToken = class extends parse_css.Token {
+const DimensionToken = class extends Token {
   constructor() {
     super();
     /** @type {?number} */
@@ -1589,17 +1405,16 @@ parse_css.DimensionToken = class extends parse_css.Token {
     this.unit = '';
   }
 };
-/** @type {!parse_css.TokenType} */
-parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
+/** @type {!TokenType} */
+DimensionToken.prototype.tokenType = TokenType.DIMENSION;
 
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.DimensionToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['type'] = this.type;
-    json['repr'] = this.repr;
-    json['unit'] = this.unit;
-    return json;
-  };
-}
+/** @inheritDoc */
+DimensionToken.prototype.toJSON = function() {
+  const json = Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['type'] = this.type;
+  json['repr'] = this.repr;
+  json['unit'] = this.unit;
+  return json;
+};
+exports.DimensionToken = DimensionToken;

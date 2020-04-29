@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
-
+import {Services} from './services';
 
 /**
  * Pass class helps to manage single-pass process. A pass is scheduled using
@@ -23,7 +22,6 @@ import {timerFor} from './timer';
  * the process is considered to be "idle".
  */
 export class Pass {
-
   /**
    * Creates a new Pass instance.
    * @param {!Window} win
@@ -32,7 +30,7 @@ export class Pass {
    *   is called without one.
    */
   constructor(win, handler, opt_defaultDelay) {
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {function()} */
     this.handler_ = handler;
@@ -49,8 +47,13 @@ export class Pass {
     /** @private {boolean} */
     this.running_ = false;
 
-    /** @private @const {!Function} */
-    this.boundPass_ = () => this.pass_();
+    /**
+     * @private
+     * @const {function()}
+     */
+    this.boundPass_ = () => {
+      this.pass_();
+    };
   }
 
   /**
@@ -96,6 +99,9 @@ export class Pass {
     return false;
   }
 
+  /**
+   *
+   */
   pass_() {
     this.scheduled_ = -1;
     this.nextTime_ = 0;

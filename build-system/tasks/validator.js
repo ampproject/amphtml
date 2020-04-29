@@ -13,16 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var execSync = require('child_process').execSync;
+const argv = require('minimist')(process.argv.slice(2));
+const {execOrDie} = require('../common/exec');
 
+let validatorArgs = '';
+if (argv.update_tests) {
+  validatorArgs += ' --update_tests';
+}
 
 /**
  * Simple wrapper around the python based validator build.
  */
-function validator() {
-  execSync('cd validator && python build.py')
+async function validator() {
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator',
+    stdio: 'inherit',
+  });
 }
 
-gulp.task('validator', 'Builds and tests the AMP validator.', validator);
+/**
+ * Simple wrapper around the Java validator test suite.
+ */
+async function validatorJava() {
+  execOrDie('./install_bazel.sh && ./build_and_test.sh', {
+    cwd: 'validator/java',
+    stdio: 'inherit',
+  });
+}
+
+/**
+ * Simple wrapper around the python based validator webui build.
+ */
+async function validatorWebui() {
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator/webui',
+    stdio: 'inherit',
+  });
+}
+
+module.exports = {
+  validator,
+  validatorJava,
+  validatorWebui,
+};
+
+validator.description = 'Builds and tests the AMP validator.';
+validator.flags = {
+  'update_tests': '  Updates validation test output files',
+};
+
+validatorJava.description =
+  'Builds and tests the AMP validator Java implementation.';
+
+validatorWebui.description = 'Builds and tests the AMP validator web UI.';
+validatorWebui.flags = {
+  'update_tests': '  Updates validation test output files',
+};

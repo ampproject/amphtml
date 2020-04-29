@@ -21,7 +21,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function caajainfeed(global, data) {
-
   validateData(
     data,
     [],
@@ -50,6 +49,5 @@ export function caajainfeed(global, data) {
   );
 
   global.caAjaInfeedConfig = data;
-  loadScript(global, 'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js');
-
+  loadScript(global, 'https://cdn.amanad.adtdp.com/sdk/ajaamp.js');
 }

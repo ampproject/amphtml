@@ -15,78 +15,89 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {resolveRelativeUrl} from '../../../src/url';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
+import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
+import {startsWith} from '../../../src/string';
+import {user, userAssert} from '../../../src/log';
 
+const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
-
   /**
    * @param {!Element} element
    */
   constructor(element) {
     super(element);
-    user().assert(element.hasAttribute('src'),
-        'Attribute src required for <amp-ad type="fake">: %s', element);
-    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
-        + ' support for TextEncoder() function.');
+
+    /** @private {!./external-reorder-head-transformer.ExternalReorderHeadTransformer} */
+    this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
+    /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
+    this.metadataTransformer_ = new AmpAdMetadataTransformer();
+  }
+
+  /** @override */
+  buildCallback() {
+    userAssert(
+      this.element.hasAttribute('src'),
+      'Attribute src required for <amp-ad type="fake">: %s',
+      this.element
+    );
+    super.buildCallback();
   }
 
   /** @override */
   isValidElement() {
-    // Note: true is the default, so this method is not strictly needed here.
-    // But a network implementation might choose to implement a real check
-    // in this method.
+    // To send out ad request, ad type='fake' requires the id set to an invalid
+    // value start with `i-amphtml-demo-`. So that fake ad can only be used in
+    // invalid AMP pages.
+    const id = this.element.getAttribute('id');
+    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+      user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
+      return false;
+    }
     return true;
   }
 
   /** @override */
   getAdUrl() {
-    return resolveRelativeUrl(
-        this.element.getAttribute('src'),
-        '/extensions/amp-ad-network-fake-impl/0.1/data/');
+    return this.element.getAttribute('src');
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    return utf8Decode(responseText).then(deserialized => {
-      if (getMode().localDev) {
-        if (this.element.getAttribute('fakesig') == 'true') {
-          // In the fake signature mode the content is the plain AMP HTML
-          // and the signature is "FAKESIG". This mode is only allowed in
-          // `localDev` and primarily used for A4A Envelope for testing.
-          // See DEVELOPING.md for more info.
-          const creative = this.transformCreativeLocalDev_(deserialized);
-          const encoder = new TextEncoder('utf-8');
-          return {
-            creative: encoder.encode(creative).buffer,
-            signature: 'FAKESIG',
-          };
-        }
+  sendXhrRequest(adUrl) {
+    return super.sendXhrRequest(adUrl).then((response) => {
+      if (!response) {
+        return null;
+      }
+      const {
+        status,
+        headers,
+      } = /** @type {{status: number, headers: !Headers}} */ (response);
+
+      // In the convert creative mode the content is the plain AMP HTML.
+      // This mode is primarily used for A4A Envelop for testing.
+      // See DEVELOPING.md for more info.
+      if (this.element.getAttribute('a4a-conversion') == 'true') {
+        return response.text().then(
+          (responseText) =>
+            new Response(this.transformCreative_(responseText), {
+              status,
+              headers,
+            })
+        );
       }
 
-      // Normal mode: the content is a JSON structure with two fieleds:
-      // `creative` and `signature`.
-      const decoded = JSON.parse(deserialized);
-      dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
-      dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
-      const encoder = new TextEncoder('utf-8');
-      return {
-        creative: encoder.encode(decoded['creative']).buffer,
-        signature: base64DecodeToBytes(decoded['signature']),
-      };
+      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      return response;
     });
   }
 
   /**
-   * Converts a general AMP doc to a AMP4ADS doc. Only used in localDev.
+   * Converts a general AMP doc to a AMP4ADS doc.
    * @param {string} source
    * @return {string}
    */
-  transformCreativeLocalDev_(source) {
+  transformCreative_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
     const root = doc.documentElement;
 
@@ -102,46 +113,27 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       root.setAttribute('amp4ads', '');
     }
 
-    // Remove all AMP scripts.
-    const extensions = [];
-    const scripts = doc.head.querySelectorAll('script[src]');
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.hasAttribute('custom-element')) {
-        extensions.push(script.getAttribute('custom-element'));
-      } else if (script.hasAttribute('custom-template')) {
-        extensions.push(script.getAttribute('custom-template'));
-      }
-      doc.head.removeChild(script);
+    this.reorderHeadTransformer_.reorderHead(doc.head);
+    const metadata = this.metadataTransformer_.generateMetadata(doc);
+
+    //Removes <amp-ad-metadata> tag if it exists
+    const oldMetadata = doc.querySelector('script[amp-ad-metadata]');
+    if (oldMetadata) {
+      oldMetadata.parentNode.removeChild(oldMetadata);
     }
 
-    // Remove boilerplate styles.
-    const styles = doc.head.querySelectorAll('style[amp-boilerplate]');
-    for (let i = 0; i < styles.length; i++) {
-      const style = styles[i];
-      style.parentNode.removeChild(style);
-    }
-
-    let creative = root./*OK*/outerHTML;
-
-    // Metadata
-    creative += '<script type="application/json" amp-ad-metadata>';
-    creative += '{';
-    creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
-    creative += '"customElementExtensions": [';
-    for (let i = 0; i < extensions.length; i++) {
-      if (i > 0) {
-        creative += ',';
-      }
-      creative += `"${extensions[i]}"`;
-    }
-    creative += ']';
-    creative += '}';
-    creative += '</script>';
-
-    return creative;
+    const creative = root./*OK*/ outerHTML;
+    const creativeSplit = creative.split('</body>');
+    const docWithMetadata =
+      creativeSplit[0] +
+      `<script type="application/json" amp-ad-metadata>` +
+      metadata +
+      '</script></body>' +
+      creativeSplit[1];
+    return docWithMetadata;
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+AMP.extension('amp-ad-network-fake-impl', '0.1', (AMP) => {
+  AMP.registerElement('amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+});

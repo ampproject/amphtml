@@ -1,158 +1,72 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+_**Do you build things with AMP? Make sure to fill out the [AMP DevX Survey](https://go.amp.dev/devx-survey)!**_
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+# AMP ⚡
 
-      http://www.apache.org/licenses/LICENSE-2.0
+[![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square 'Build Status')](https://travis-ci.org/ampproject/amphtml/builds)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'GitHub Release')](https://github.com/ampproject/amphtml/releases/latest)
+[![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'Commits')](https://github.com/ampproject/amphtml/pulse/monthly)
+[![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
+<details>
+<summary>
+Metrics
+  
+</summary>
 
-[![Build Status](https://travis-ci.org/ampproject/amphtml.svg?branch=master)](https://travis-ci.org/ampproject/amphtml)
+[![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric 'Test coverage for the repository as computed by CodeCov')](https://codecov.io/gh/ampproject/amphtml/)
+[![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric 'Average Travis build time over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)
+[![Cherrypick Issue Count](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FCherrypickIssueCountMetric 'Number of cherry-pick issues in the last 90 days')](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aissue+title%3A+%22Cherry-pick%22)
+[![Release Granularity](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FReleaseGranularityMetric 'Average commits per release over the last 90 days')](https://github.com/ampproject/amphtml/releases)
+[![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric 'Percentage of green Travis builds over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)
+[![Travis Flakiness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisFlakinessMetric 'Percentage of flaky Travis builds over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)
 
-# AMP HTML ⚡
+</details>
 
-[AMP HTML](https://www.ampproject.org/docs/get_started/about-amp.html) is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
+<details>
+<summary>
+Tooling
 
-AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML. Learn more about [how AMP speeds up performance](https://www.ampproject.org/docs/get_started/technical_overview.html).
+</summary>
 
-# How does AMP HTML work?
+[![Percy](https://img.shields.io/badge/%F0%9F%A6%94%20visual%20testing-Percy-violet.svg?style=flat-square 'Percy')](https://percy.io/ampproject/amphtml)
+[![Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square 'Prettier')](https://github.com/prettier/prettier)
+[![Codecov](https://img.shields.io/badge/test_coverage-CodeCov-f01f7a.svg?logo=Codecov&logoColor=white&style=flat-square 'Codecov')](https://codecov.io/gh/ampproject/amphtml/)
+[![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square 'LGTM')](https://lgtm.com/projects/g/ampproject/amphtml/)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square 'Renovate')](https://renovateapp.com/)
 
-AMP HTML works by including the AMP JS library and adding a bit of boilerplate to a web page, so that it meets the AMP HTML Specification. The simplest AMP HTML file looks like this:
+</details>
 
-```html
-<!doctype html>
-<html ⚡>
-  <head>
-    <meta charset="utf-8">
-    <link rel="canonical" href="hello-world.html" >
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-  </head>
-  <body>Hello World!</body>
-</html>
-```
+[AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
 
-This allows the AMP library to include:
-* The AMP JS library, that manages the loading of external resources to ensure a
-  fast rendering of the page.
-* An AMP validator that provides a way for web developers to easily validate
-  that their code meets the AMP HTML specification.
-* Some custom elements, called AMP HTML components, which make common patterns
-  easy to implement in a performant way.
+AMP is an open source project, and we'd love your help making it better!
 
-Get started [creating your first AMP page](https://www.ampproject.org/docs/get_started/create_page.html).
+## Want to know more about AMP?
 
-[Full docs and reference.](https://www.ampproject.org/docs/get_started/about-amp.html)
+- [amp.dev](https://amp.dev) is the best place to learn more about AMP--and of course the site is made using AMP!
+- For developers using AMP, amp.dev includes
+  - [guides and tutorials](https://amp.dev/documentation/guides-and-tutorials/)
+  - [examples](https://amp.dev/documentation/examples/)
+  - [reference docs](https://amp.dev/documentation/components/?format=websites)
+  - [example templates](https://amp.dev/documentation/templates/)
+  - [tools to make using AMP easier](https://amp.dev/documentation/tools)
 
-## The AMP JS library
+## Having a problem using AMP?
 
-The AMP JS library provides [builtin](builtins/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
+- The [amp.dev Support page](https://amp.dev/support/) has resources for getting help.
+- Use [Stack Overflow](http://stackoverflow.com/questions/tagged/amp-html) to ask questions about using AMP and find answers to questions others have asked.
+- [Let us know about bugs](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#report-a-bug), and [file feature requests](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#make-a-suggestion) to suggest improvements.
+- AMP accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
 
-## The AMP Validator
+## Want to help make AMP better?
 
-[The AMP Validator](validator/README.md) allows a web developer to easily
-identify if the web page doesn't meet the
-[AMP HTML specification](https://www.ampproject.org/docs/reference/spec.html).
+- [CONTRIBUTING.md](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md) has information on how you can help improve AMP, including [ongoing participation](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#ongoing-participation) through Slack, weekly design reviews, etc.
+- We strongly encourage [code contributions](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md)!
+- **We enthusiastically welcome new contributors to AMP _even if you have no experience being part of an open source project_**. We've made it easy to [get started contributing](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#get-started-with-open-source).
+- Consider joining one of AMP's [Working Groups](https://github.com/ampproject/meta/tree/master/working-groups), where most of the day-to-day work in AMP gets done.
 
-Adding "#development=1" to the URL of the page instructs the AMP Runtime to run
-a series of assertions confirming the page's markup meets the AMP HTML
-Specification.  Validation errors are logged to the browser's console when the
-page is rendered, allowing web developers to easily see how complex changes in
-web code might impact performance and user experience.
+## Other useful information
 
-It also allows apps that integrate web content to validate the web page against
-the specification.  This allows an app to make sure the page is fast and
-mobile-friendly, as pages adhering to the AMP HTML specification are reliably
-fast.
-
-Learn more about
-[validating your AMP pages](https://www.ampproject.org/docs/guides/validate.html).
-Also see [additional choices to invoke the validator](validator/README.md).
-
-## AMP HTML Components
-
-AMP HTML Components are a series of extended custom elements that supplement
-or replace functionality of core HTML5 elements to allow the runtime to ensure
-it is solely responsible for loading external assets and to provide for shared
-best practices in implementation.
-
-See our [docs and reference](https://www.ampproject.org/docs/get_started/about-amp.html) for more info.
-
-# Releases
-
-We push a new release of AMP to all AMP pages every week on Thursday. The more detailed schedule is as follows:
-
-- Every Thursday we cut a green release from our `master` branch.
-- This is then pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel).
-- On Monday we check error rates for opt-in users and bug reports and if everything looks fine, we push this new release to 1% of AMP pages.
-- We then continue to monitor error rates and bug reports throughout the week.
-- On Thursday the "Dev Channel" release from last Thursday is then pushed to all users.
-
-You can always follow the current release state of AMP on our [releases page](https://github.com/ampproject/amphtml/releases). The release used by most users is marked as `Latest release` and the current Dev Channel release is marked as `Pre-release`.
-
-## AMP Dev Channel
-
-AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
-
-This release **may be less stable** and it may contain features not available to all users. Opt into this option if you'd like to help test new versions of AMP, report bugs or build documents that require a new feature that is not yet available to everyone.
-
-Opting into Dev Channel is great to:
-
-- test and play with new features not yet available to all users.
-- use in Q&A to ensure that your site is compatible with the next version of AMP.
-
-If you find an issue that appears to only occur in the Dev Channel version of AMP, please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem. Please always include a URL to a page that reproduces the issue.
-
-To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
-
-# Further Reading
-
-If you are creating AMP pages,
-check out the docs on [ampproject.org](https://www.ampproject.org/) and samples on [ampbyexample.com](https://ampbyexample.com/).
-
-These docs are public and open-source: [https://github.com/ampproject/docs/](https://github.com/ampproject/docs/).
-See something that's missing from the docs, or that could be worded better?
-[Create an issue](https://github.com/ampproject/docs/issues) and
-we will do our best to respond quickly.
-
-Resources:
-* [AMP HTML samples](examples/)
-* [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
-
-<!--
-Not yet done.
-* [Integrating your AMP HTML page](docs/integrating.md)
-* [Extending AMP HTML with new elements](docs/extending.md)
-* [Embedding AMP HTML content in your app](docs/embedding.md)
--->
-
-Reference:
-* [AMP HTML core built-in elements](builtins/README.md)
-* [AMP HTML optional extended elements](extensions/README.md)
-
-Technical Specifications:
-* [AMP HTML format specification](spec/amp-html-format.md)
-* [AMP HTML custom element specification](spec/amp-html-components.md)
-
-# Who makes AMP HTML?
-
-AMP HTML is made by the [AMP Project](https://www.ampproject.org/), and is licensed
-under the [Apache License, Version 2.0](LICENSE).
-
-## Contributing
-
-Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals and [hints how to get started](DEVELOPING.md#starter-issues).
-
-### Security disclosures
-
-The AMP Project accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
-
-### [Code of conduct](CODE_OF_CONDUCT.md)
+- [AMP's release documentation](contributing/release-schedule.md) provides details on how and when AMP releases new versions, including [how to know when a change is live in a release](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#determining-if-your-change-is-in-a-release).
+- [AMP's roadmap](https://amp.dev/community/roadmap) provides details on some of the significant projects we are working on.
+- The [AMP meta repository](https://github.com/ampproject/meta) has information _about_ the AMP open source project, including AMP's [governance](https://github.com/ampproject/meta/blob/master/GOVERNANCE.md).
+- [AMP's code of conduct](https://github.com/ampproject/meta/blob/master/CODE_OF_CONDUCT.md) documents how all members, committers and volunteers in the community are required to act. AMP strives for a positive and growing project community that provides a safe environment for everyone.

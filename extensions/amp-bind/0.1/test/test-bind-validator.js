@@ -16,30 +16,28 @@
 
 import {BindValidator} from '../bind-validator';
 
-describe('BindValidator', () => {
+describe('BindValidator (allowUrlProperties=true)', () => {
   let val;
 
   beforeEach(() => {
-    val = new BindValidator();
+    const allowUrlProperties = true;
+    val = new BindValidator(allowUrlProperties);
   });
 
   describe('canBind()', () => {
     it('should allow binding to "class" for any element', () => {
       expect(val.canBind('DIV', 'class')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'class')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'class')).to.be.true;
     });
 
-    it('should allow binding to "text" for whitelisted elements', () => {
-      expect(val.canBind('H1', 'text')).to.be.true;
+    it('should allow binding to "text" for any elements', () => {
       expect(val.canBind('P', 'text')).to.be.true;
-      expect(val.canBind('SPAN', 'text')).to.be.true;
-      expect(val.canBind('A', 'text')).to.be.true;
-      expect(val.canBind('BUTTON', 'text')).to.be.true;
-      expect(val.canBind('CAPTION', 'text')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'text')).to.be.true;
+    });
 
-      expect(val.canBind('HEAD', 'text')).to.be.false;
-      expect(val.canBind('FORM', 'text')).to.be.false;
-      expect(val.canBind('AMP-IMG', 'text')).to.be.false;
+    it('should allow binding to ARIA attributes for any element', () => {
+      expect(val.canBind('P', 'aria-foo')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'aria-foo')).to.be.true;
     });
 
     it('should NOT allow binding to "style"', () => {
@@ -128,89 +126,152 @@ describe('BindValidator', () => {
     it('should NOT allow invalid "class" attribute values', () => {
       expect(val.isResultValid('DIV', 'class', 'foo')).to.be.true;
 
-      expect(val.isResultValid(
-          'DIV', 'class', 'i-amphtml-foo')).to.be.false;
-      expect(val.isResultValid(
-          'DIV', 'class', 'foo i-amphtml-bar')).to.be.false;
+      expect(val.isResultValid('DIV', 'class', 'i-amphtml-foo')).to.be.false;
+      expect(val.isResultValid('DIV', 'class', 'foo i-amphtml-bar')).to.be
+        .false;
     });
 
     it('should NOT sanitize "text" attribute values', () => {
       expect(val.isResultValid('P', 'text', 'Hello World')).to.be.true;
       expect(val.isResultValid('P', 'text', '')).to.be.true;
       expect(val.isResultValid('P', 'text', null)).to.be.true;
-      expect(val.isResultValid(
-          'P', 'text', '<script>alert(1);</script>')).to.be.true;
+      expect(val.isResultValid('P', 'text', '<script>alert(1);</script>')).to.be
+        .true;
     });
 
     it('should block dangerous attribute URLs in standard elements', () => {
-      expect(val.isResultValid('A', 'href',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('A', 'href',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('A', 'href',
-        '__amp_source_origin')).to.be.false;
+      expect(
+        val.isResultValid(
+          'A',
+          'href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'A',
+          'href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
 
-      expect(val.isResultValid('SOURCE', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('SOURCE', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('SOURCE', 'src',
-          '__amp_source_origin')).to.be.false;
+      expect(
+        val.isResultValid(
+          'SOURCE',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'SOURCE',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
 
-      expect(val.isResultValid('TRACK', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('TRACK', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid('TRACK', 'src',
-          '__amp_source_origin')).to.be.false;
+      expect(
+        val.isResultValid(
+          'TRACK',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'TRACK',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
     });
 
     it('should NOT allow unsupported <input> "type" values', () => {
       expect(val.isResultValid('INPUT', 'type', 'checkbox')).to.be.true;
       expect(val.isResultValid('INPUT', 'type', 'email')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.true;
 
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.false;
     });
   });
 
   describe('AMP extensions', () => {
+    it('should support width/height for all AMP elements', () => {
+      expect(val.canBind('AMP-IMG', 'width')).to.be.true;
+      expect(val.canBind('AMP-IMG', 'height')).to.be.true;
+
+      expect(val.canBind('AMP-FOO', 'width')).to.be.true;
+      expect(val.canBind('AMP-FOO', 'height')).to.be.true;
+    });
+
     it('should support <amp-carousel>', () => {
       expect(val.canBind('AMP-CAROUSEL', 'slide')).to.be.true;
     });
 
     it('should support <amp-img>', () => {
       expect(val.canBind('AMP-IMG', 'src')).to.be.true;
-      expect(val.canBind('AMP-IMG', 'width')).to.be.true;
-      expect(val.canBind('AMP-IMG', 'height')).to.be.true;
 
-      // src
-      expect(val.isResultValid(
-          'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
-      expect(val.isResultValid('AMP-IMG', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-IMG', 'src', '__amp_source_origin')).to.be.false;
+      expect(val.isResultValid('AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to
+        .be.true;
+      expect(
+        val.isResultValid(
+          'AMP-IMG',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
+      expect(val.isResultValid('AMP-IMG', 'src', '?__amp_source_origin=foo')).to
+        .be.false;
 
-      // srcset
-      expect(val.isResultValid(
+      expect(
+        val.isResultValid(
           'AMP-IMG',
           'srcset',
-          'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.true;
-      expect(val.isResultValid(
+          'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x'
+        )
+      ).to.be.true;
+      expect(
+        val.isResultValid(
           'AMP-IMG',
           'srcset',
-          'http://a.com/b.jpg 1x, __amp_source_origin 2x')).to.be.false;
-      expect(val.isResultValid(
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
           'AMP-IMG',
-          'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+          'src',
+          'http://a.com/b.jpg 1x, ?__amp_source_origin=foo 2x'
+        )
+      ).to.be.false;
+    });
+
+    it('should support <amp-carousel>', () => {
+      expect(val.canBind('AMP-LIGHTBOX', 'open')).to.be.true;
+    });
+
+    it('should support <amp-list>', () => {
+      expect(val.canBind('AMP-LIST', 'src')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'state')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {
+      expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
+    });
+
+    it('should support <amp-state>', () => {
+      expect(val.canBind('AMP-STATE', 'src')).to.be.true;
+
+      expect(val.isResultValid('AMP-STATE', 'src', 'https://foo.com/bar.json'))
+        .to.be.true;
+      expect(val.isResultValid('AMP-STATE', 'src', 'http://foo.com/bar.json'))
+        .to.be.false;
+      expect(val.isResultValid('AMP-STATE', 'src', 'data://foo.com/bar.json'))
+        .to.be.false;
     });
 
     it('should support <amp-video>', () => {
@@ -218,15 +279,59 @@ describe('BindValidator', () => {
       expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
       expect(val.canBind('AMP-VIDEO', 'src')).to.be.true;
 
-      // src
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', 'https://foo.com/bar.mp4')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to.be.false;
-      expect(val.isResultValid('AMP-VIDEO', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', '__amp_source_origin')).to.be.false;
+      expect(val.isResultValid('AMP-VIDEO', 'src', 'https://foo.com/bar.mp4'))
+        .to.be.true;
+      expect(val.isResultValid('AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to
+        .be.false;
+      expect(
+        val.isResultValid(
+          'AMP-VIDEO',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
     });
+
+    it('should support (svg) image', () => {
+      expect(val.canBind('IMAGE', 'xlink:href')).to.be.true;
+      expect(
+        val.isResultValid(
+          'IMAGE',
+          'xlink:href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
+    });
+  });
+});
+
+describe('BindValidator (allowUrlProperties=false)', () => {
+  let val;
+
+  beforeEach(() => {
+    const allowUrlProperties = false;
+    val = new BindValidator(allowUrlProperties);
+  });
+
+  it('should disallow URL bindings', () => {
+    expect(val.canBind('A', 'href')).to.be.false;
+    expect(val.canBind('AMP-IMG', 'src')).to.be.false;
+    expect(val.canBind('AMP-IMG', 'srcset')).to.be.false;
+    expect(val.canBind('IMAGE', 'xlink:href')).to.be.false;
+  });
+
+  it('should not validate results of URL properties', () => {
+    expect(val.isResultValid('A', 'href', 'https://google.com')).to.be.false;
+    expect(val.isResultValid('AMP-IMG', 'src', 'https://foo.com/bar.jpg')).to.be
+      .false;
+    expect(
+      val.isResultValid(
+        'AMP-IMG',
+        'srcset',
+        'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x'
+      )
+    ).to.be.false;
+    expect(val.isResultValid('IMAGE', 'xlink:href', 'https://foo.com/bar.jpg'))
+      .to.be.false;
   });
 });

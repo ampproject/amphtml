@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+import {Deferred, tryResolve} from '../utils/promise';
+import {Layout} from '../layout';
+import {Services} from '../services';
+import {computedStyle, toggle} from '../style';
+import {dev, devAssert} from '../log';
+import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
-  layoutRectsOverlap,
+  layoutRectSizeEquals,
   moveLayoutRect,
+  rectsOverlap,
 } from '../layout-rect';
-import {dev} from '../log';
-import {toggle} from '../style';
+import {startsWith} from '../string';
+import {toWin} from '../types';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
 const OWNER_PROP_ = '__AMP__OWNER';
-
 
 /**
  * Resource state.
@@ -66,29 +72,35 @@ export const ResourceState = {
   LAYOUT_FAILED: 5,
 };
 
+/** @typedef {{
+  distance: (boolean|number),
+    viewportHeight: (number|undefined),
+    scrollPenalty: (number|undefined),
+  }} */
+let ViewportRatioDef;
 
 /**
  * A Resource binding for an AmpElement.
- * @package
  */
 export class Resource {
-
   /**
    * @param {!Element} element
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (
-        dev().assert(Resource.forElementOptional(element),
-            'Missing resource prop on %s', element));
+    return /** @type {!Resource} */ (devAssert(
+      Resource.forElementOptional(element),
+      'Missing resource prop on %s',
+      element
+    ));
   }
 
   /**
    * @param {!Element} element
-   * @return {?Resource}
+   * @return {Resource}
    */
   static forElementOptional(element) {
-    return /** @type {!Resource} */ (element[RESOURCE_PROP_]);
+    return /** @type {Resource} */ (element[RESOURCE_PROP_]);
   }
 
   /**
@@ -98,7 +110,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev().assert(owner.contains(element), 'Owner must contain the element');
+    devAssert(owner.contains(element), 'Owner must contain the element');
     if (Resource.forElementOptional(element)) {
       Resource.forElementOptional(element).updateOwner(owner);
     }
@@ -117,7 +129,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!./resources-impl.Resources} resources
+   * @param {!./resources-interface.ResourcesInterface} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -132,20 +144,31 @@ export class Resource {
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
-    this.hostWin = element.ownerDocument.defaultView;
+    this.hostWin = toWin(element.ownerDocument.defaultView);
 
-    /** @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-interface.ResourcesInterface} */
     this.resources_ = resources;
 
+    /** @const @private {boolean} */
+    this.isPlaceholder_ = element.hasAttribute('placeholder');
+
     /** @private {boolean} */
-    this.blacklisted_ = false;
+    this.isBuilding_ = false;
 
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */
-    this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
-        ResourceState.NOT_BUILT;
+    this.state_ = element.isBuilt()
+      ? ResourceState.NOT_LAID_OUT
+      : ResourceState.NOT_BUILT;
+
+    // Race condition: if an element is reparented while building, it'll
+    // receive a newly constructed Resource. Make sure this Resource's
+    // internal state is also "building".
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      this.build();
+    }
 
     /** @private {number} */
     this.priorityOverride_ = -1;
@@ -168,31 +191,41 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {boolean} */
-    this.isInViewport_ = false;
+    /**
+     * Really, this is a <number, !Deferred> map,
+     * but CC's type system can't handle it.
+     * @private {?Object<string, !Deferred>}
+     */
+    this.withViewportDeferreds_ = null;
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
-   /**
-    * Pending change size that was requested but could not be satisfied.
-    * @private {!./resources-impl.SizeDef|undefined}
-    */
+    /**
+     * Pending change size that was requested but could not be satisfied.
+     * @private {!./resources-impl.SizeDef|undefined}
+     */
     this.pendingChangeSize_ = undefined;
 
     /** @private {boolean} */
     this.loadedOnce_ = false;
 
-    /** @private {?Function} */
-    this.loadPromiseResolve_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.loadPromise_ = new Promise(resolve => {
-      this.loadPromiseResolve_ = resolve;
-    });
+    this.loadPromise_ = deferred.promise;
 
-    /** @private {boolean} */
-    this.paused_ = false;
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = deferred.resolve;
+
+    /** @const @private {boolean} */
+    this.intersect_ = resources.isIntersectionExperimentOn();
+
+    /**
+     * A client rect that was "premeasured" by an IntersectionObserver.
+     * @private {?ClientRect}
+     */
+    this.premeasuredRect_ = null;
   }
 
   /**
@@ -242,18 +275,18 @@ export class Resource {
    * Returns the resource's element priority.
    * @return {number}
    */
-  getPriority() {
+  getLayoutPriority() {
     if (this.priorityOverride_ != -1) {
       return this.priorityOverride_;
     }
-    return this.element.getPriority();
+    return this.element.getLayoutPriority();
   }
 
   /**
    * Overrides the element's priority.
    * @param {number} newPriority
    */
-  updatePriority(newPriority) {
+  updateLayoutPriority(newPriority) {
     this.priorityOverride_ = newPriority;
   }
 
@@ -266,37 +299,71 @@ export class Resource {
   }
 
   /**
-   * Returns whether the resource has been blacklisted.
+   * Returns whether the resource has been fully built.
    * @return {boolean}
    */
-  isBlacklisted() {
-    return this.blacklisted_;
+  isBuilt() {
+    return this.element.isBuilt();
+  }
+
+  /**
+   * Returns whether the resource is currently being built.
+   * @return {boolean}
+   */
+  isBuilding() {
+    return this.isBuilding_;
+  }
+
+  /**
+   * Returns promise that resolves when the element has been built.
+   * @return {!Promise}
+   */
+  whenBuilt() {
+    // TODO(dvoytenko): merge with the standard BUILT signal.
+    return this.element.signals().whenSignal('res-built');
   }
 
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @return {?Promise}
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()) {
-      return;
+    if (this.isBuilding_ || !this.element.isUpgraded()) {
+      return null;
     }
-    try {
-      this.element.build();
-    } catch (e) {
-      dev().error(TAG, 'failed to build:', this.debugid, e);
-      this.blacklisted_ = true;
-      return;
-    }
+    this.isBuilding_ = true;
+    return this.element.build().then(
+      () => {
+        this.isBuilding_ = false;
+        // With IntersectionObserver, measure can happen before build
+        // so check if we're "ready for layout" (measured and built) here.
+        if (this.intersect_ && this.hasBeenMeasured()) {
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.element.onMeasure(/* sizeChanged */ true);
+        } else {
+          this.state_ = ResourceState.NOT_LAID_OUT;
+        }
+        // TODO(dvoytenko): merge with the standard BUILT signal.
+        this.element.signals().signal('res-built');
+      },
+      (reason) => {
+        this.maybeReportErrorOnBuildFailure(reason);
+        this.isBuilding_ = false;
+        this.element.signals().rejectSignal('res-built', reason);
+        throw reason;
+      }
+    );
+  }
 
-    if (this.hasBeenMeasured()) {
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-    } else {
-      this.state_ = ResourceState.NOT_LAID_OUT;
+  /**
+   * @param {*} reason
+   * @visibleForTesting
+   */
+  maybeReportErrorOnBuildFailure(reason) {
+    if (!isBlockedByConsent(reason)) {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
     }
-    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-    // in PROD.
-    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
@@ -314,12 +381,10 @@ export class Resource {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
-    this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+    this.element./*OK*/ applySize(newHeight, newWidth, opt_newMargins);
 
-    // Schedule for re-layout.
-    if (this.state_ != ResourceState.NOT_BUILT) {
-      this.state_ = ResourceState.NOT_LAID_OUT;
-    }
+    // Schedule for re-measure and possible re-layout.
+    this.requestMeasure();
   }
 
   /**
@@ -327,11 +392,14 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
-   *     requestedMargins
+   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
-  overflowCallback(overflown, requestedHeight, requestedWidth,
-      requestedMargins) {
+  overflowCallback(
+    overflown,
+    requestedHeight,
+    requestedWidth,
+    requestedMargins
+  ) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
@@ -339,10 +407,15 @@ export class Resource {
         margins: requestedMargins,
       };
     }
-    this.element.overflowCallback(overflown, requestedHeight, requestedWidth,
-        requestedMargins);
+    this.element.overflowCallback(
+      overflown,
+      requestedHeight,
+      requestedWidth,
+      requestedMargins
+    );
   }
 
+  /** reset pending change sizes */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -355,29 +428,116 @@ export class Resource {
   }
 
   /**
+   * Time delay imposed by baseElement upgradeCallback.  If no
+   * upgradeCallback specified or not yet executed, delay is 0.
+   * @return {number}
+   */
+  getUpgradeDelayMs() {
+    return this.element.getUpgradeDelayMs();
+  }
+
+  /**
+   * Stores a client rect that was "premeasured" by an IntersectionObserver.
+   * Should only be used in IntersectionObserver mode.
+   * @param {!ClientRect} clientRect
+   */
+  premeasure(clientRect) {
+    devAssert(this.intersect_);
+    this.premeasuredRect_ = clientRect;
+  }
+
+  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
+   * @param {boolean} usePremeasuredRect If true, consumes the previously
+   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
-  measure() {
+  measure(usePremeasuredRect = false) {
+    // Check if the element is ready to be measured.
+    // Placeholders are special. They are technically "owned" by parent AMP
+    // elements, sized by parents, but laid out independently. This means
+    // that placeholders need to at least wait until the parent element
+    // has been stubbed. We can tell whether the parent has been stubbed
+    // by whether a resource has been attached to it.
+    if (
+      this.isPlaceholder_ &&
+      this.element.parentElement &&
+      // Use prefix to recognize AMP element. This is necessary because stub
+      // may not be attached yet.
+      startsWith(this.element.parentElement.tagName, 'AMP-') &&
+      !(RESOURCE_PROP_ in this.element.parentElement)
+    ) {
+      return;
+    }
+    if (
+      !this.element.ownerDocument ||
+      !this.element.ownerDocument.defaultView
+    ) {
+      // Most likely this is an element who's window has just been destroyed.
+      // This is an issue with FIE embeds destruction. Such elements will be
+      // considered "not displayable" until they are GC'ed.
+      this.state_ = ResourceState.NOT_LAID_OUT;
+      return;
+    }
+
     this.isMeasureRequested_ = false;
 
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
     const oldBox = this.layoutBox_;
-    const viewport = this.resources_.getViewport();
-    this.layoutBox_ = box;
+    if (usePremeasuredRect) {
+      this.computeMeasurements_(devAssert(this.premeasuredRect_));
+      this.premeasuredRect_ = null;
+    } else {
+      this.computeMeasurements_();
+    }
+    const newBox = this.layoutBox_;
+
+    // Note that "left" doesn't affect readiness for the layout.
+    const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
+    if (
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      oldBox.top != newBox.top ||
+      sizeChanges
+    ) {
+      if (
+        this.element.isUpgraded() &&
+        this.state_ != ResourceState.NOT_BUILT &&
+        (this.state_ == ResourceState.NOT_LAID_OUT ||
+          this.element.isRelayoutNeeded())
+      ) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      }
+    }
+
+    if (!this.hasBeenMeasured()) {
+      this.initialLayoutBox_ = newBox;
+    }
+
+    this.element.updateLayoutBox(newBox, sizeChanges);
+  }
+
+  /**
+   * Computes the current layout box and position-fixed state of the element.
+   * @param {!ClientRect=} opt_premeasuredRect
+   * @private
+   */
+  computeMeasurements_(opt_premeasuredRect) {
+    const viewport = Services.viewportForDoc(this.element);
+    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
-    if (this.isDisplayed()) {
-      const win = this.resources_.win;
-      const body = win.document.body;
-      for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
+    if (viewport.supportsPositionFixed() && this.isDisplayed()) {
+      const {win} = this.resources_.getAmpdoc();
+      const {body} = win.document;
+      for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
+        if (
+          viewport.isDeclaredFixed(n) &&
+          computedStyle(win, n).position == 'fixed'
+        ) {
           isFixed = true;
           break;
         }
@@ -389,29 +549,12 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
-          -viewport.getScrollTop());
+      this.layoutBox_ = moveLayoutRect(
+        this.layoutBox_,
+        -viewport.getScrollLeft(),
+        -viewport.getScrollTop()
+      );
     }
-
-    // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
-      if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
-      }
-    }
-
-    if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
-    }
-
-    this.element.updateLayoutBox(box);
   }
 
   /**
@@ -421,15 +564,26 @@ export class Resource {
   completeCollapse() {
     toggle(this.element, false);
     this.layoutBox_ = layoutRectLtwh(
-        this.layoutBox_.left,
-        this.layoutBox_.top,
-        0, 0);
+      this.layoutBox_.left,
+      this.layoutBox_.top,
+      0,
+      0
+    );
     this.isFixed_ = false;
-    this.element.updateLayoutBox(this.layoutBox_);
+    this.element.updateLayoutBox(this.getLayoutBox());
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);
     }
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.requestMeasure();
   }
 
   /**
@@ -448,27 +602,61 @@ export class Resource {
   }
 
   /**
+   * @return {boolean}
+   */
+  hasBeenPremeasured() {
+    devAssert(this.intersect_);
+    return !!this.premeasuredRect_;
+  }
+
+  /**
    * Requests the element to be remeasured on the next pass.
    */
   requestMeasure() {
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      // Can't measure unbuilt element.
-      return;
-    }
     this.isMeasureRequested_ = true;
   }
 
   /**
-   * Returns a previously measured layout box.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
-    const viewport = this.resources_.getViewport();
-    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
-        viewport.getScrollTop());
+    const viewport = Services.viewportForDoc(this.element);
+    return moveLayoutRect(
+      this.layoutBox_,
+      viewport.getScrollLeft(),
+      viewport.getScrollTop()
+    );
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!../layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.layoutBox_;
+  }
+
+  /**
+   * Returns the resource's layout box relative to the page. It will be
+   * measured if the resource hasn't ever be measured.
+   *
+   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   */
+  getPageLayoutBoxAsync() {
+    if (this.hasBeenMeasured()) {
+      return tryResolve(() => this.getPageLayoutBox());
+    }
+    return Services.vsyncFor(this.hostWin).measurePromise(() => {
+      this.measure();
+      return this.getPageLayoutBox();
+    });
   }
 
   /**
@@ -484,10 +672,22 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
+   * @param {boolean} usePremeasuredRect If true and a premeasured rect is
+   *     available, use it. Otherwise, use the cached layout box.
    * @return {boolean}
    */
-  isDisplayed() {
-    return this.layoutBox_.height > 0 && this.layoutBox_.width > 0;
+  isDisplayed(usePremeasuredRect = false) {
+    devAssert(!usePremeasuredRect || this.intersect_);
+    const isFluid = this.element.getLayout() == Layout.FLUID;
+    const box = usePremeasuredRect
+      ? devAssert(this.premeasuredRect_)
+      : this.getLayoutBox();
+    const hasNonZeroSize = box.height > 0 && box.width > 0;
+    return (
+      (isFluid || hasNonZeroSize) &&
+      !!this.element.ownerDocument &&
+      !!this.element.ownerDocument.defaultView
+    );
   }
 
   /**
@@ -504,7 +704,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return rectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**
@@ -516,39 +716,74 @@ export class Resource {
   }
 
   /**
-   * Whether this is allowed to render when not in viewport.
+   * Whether this element has render-blocking service.
    * @return {boolean}
    */
-  renderOutsideViewport() {
-    // The exception is for owned resources, since they only attempt to
-    // render outside viewport when the owner has explicitly allowed it.
-    // TODO(jridgewell, #5803): Resources should be asking owner if it can
-    // prerender this resource, so that it can avoid expensive elements wayyy
-    // outside of viewport. For now, blindly trust that owner knows what it's
-    // doing.
-    if (this.hasOwner()) {
-      return true;
-    }
+  isBuildRenderBlocking() {
+    return this.element.isBuildRenderBlocking();
+  }
 
-    const renders = this.element.renderOutsideViewport();
-    // Boolean interface, element is either always allowed or never allowed to
-    // render outside viewport.
-    if (renders === true || renders === false) {
-      return renders;
+  /**
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
+   * @return {!Promise} resolves when underlying element is built and within the
+   *    viewport range given.
+   */
+  whenWithinViewport(viewport) {
+    devAssert(viewport !== false);
+    // Resolve is already laid out or viewport is true.
+    if (!this.isLayoutPending() || viewport === true) {
+      return Promise.resolve();
     }
+    // See if pre-existing promise.
+    const viewportNum = dev().assertNumber(viewport);
+    const key = String(viewportNum);
+    if (this.withViewportDeferreds_ && this.withViewportDeferreds_[key]) {
+      return this.withViewportDeferreds_[key].promise;
+    }
+    // See if already within viewport multiplier.
+    if (this.isWithinViewportRatio(viewportNum)) {
+      return Promise.resolve();
+    }
+    // return promise that will trigger when within viewport multiple.
+    this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
+    this.withViewportDeferreds_[key] = new Deferred();
+    return this.withViewportDeferreds_[key].promise;
+  }
+
+  /** @private resolves promises populated via whenWithinViewport. */
+  resolveDeferredsWhenWithinViewports_() {
+    if (!this.withViewportDeferreds_) {
+      return;
+    }
+    const viewportRatio = this.getDistanceViewportRatio();
+    for (const key in this.withViewportDeferreds_) {
+      if (this.isWithinViewportRatio(parseFloat(key), viewportRatio)) {
+        this.withViewportDeferreds_[key].resolve();
+        delete this.withViewportDeferreds_[key];
+      }
+    }
+  }
+
+  /** @return {!ViewportRatioDef} */
+  getDistanceViewportRatio() {
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
-    const viewportBox = this.resources_.getViewport().getRect();
+    const viewport = Services.viewportForDoc(this.element);
+    const viewportBox = viewport.getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
-    const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
-    let distance;
-    if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right) {
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+    let distance = 0;
+
+    if (
+      viewportBox.right < layoutBox.left ||
+      viewportBox.left > layoutBox.right
+    ) {
+      // If outside of viewport's x-axis, element is not in viewport so return
+      // false.
+      return {distance: false};
     }
+
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
@@ -566,27 +801,73 @@ export class Resource {
         scrollPenalty = 2;
       }
     } else {
-      // Element is in viewport
-      return true;
+      // Element is in viewport so return true for all but boolean false.
+      return {distance: true};
     }
-    return distance < viewportBox.height * multipler / scrollPenalty;
+    return {distance, scrollPenalty, viewportHeight: viewportBox.height};
+  }
+
+  /**
+   * @param {number|boolean} multiplier
+   * @param {ViewportRatioDef=} opt_viewportRatio
+   * @return {boolean} whether multiplier given is within viewport ratio
+   * @visibleForTesting
+   */
+  isWithinViewportRatio(multiplier, opt_viewportRatio) {
+    if (typeof multiplier === 'boolean') {
+      return multiplier;
+    }
+    const {distance, scrollPenalty, viewportHeight} =
+      opt_viewportRatio || this.getDistanceViewportRatio();
+    if (typeof distance == 'boolean') {
+      return distance;
+    }
+    return distance < (viewportHeight * multiplier) / scrollPenalty;
+  }
+
+  /**
+   * Whether this is allowed to render when not in viewport.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    // The exception is for owned resources, since they only attempt to
+    // render outside viewport when the owner has explicitly allowed it.
+    // TODO(jridgewell, #5803): Resources should be asking owner if it can
+    // prerender this resource, so that it can avoid expensive elements wayyy
+    // outside of viewport. For now, blindly trust that owner knows what it's
+    // doing.
+    this.resolveDeferredsWhenWithinViewports_();
+    return (
+      this.hasOwner() ||
+      this.isWithinViewportRatio(this.element.renderOutsideViewport())
+    );
   }
 
   /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
+   * @param {number} scheduleTime The time at which layout was scheduled.
    */
-  layoutScheduled() {
+  layoutScheduled(scheduleTime) {
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.element.layoutScheduleTime = scheduleTime;
+  }
+
+  /**
+   * Undoes `layoutScheduled`.
+   */
+  layoutCanceled() {
+    this.state_ = this.hasBeenMeasured()
+      ? ResourceState.READY_FOR_LAYOUT
+      : ResourceState.NOT_LAID_OUT;
   }
 
   /**
    * Starts the layout of the resource. Returns the promise that will yield
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
-   * @param {boolean} isDocumentVisible
    * @return {!Promise}
    */
-  startLayout(isDocumentVisible) {
+  startLayout() {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -597,35 +878,22 @@ export class Resource {
       return Promise.reject(this.lastLayoutError_);
     }
 
-    dev().assert(this.state_ != ResourceState.NOT_BUILT,
-        'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+    devAssert(
+      this.state_ != ResourceState.NOT_BUILT,
+      'Not ready to start layout: %s (%s)',
+      this.debugid,
+      this.state_
+    );
+    devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
-    if (!isDocumentVisible && !this.prerenderAllowed()) {
-      dev().fine(TAG, 'layout canceled due to non pre-renderable element:',
-          this.debugid, this.state_);
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      return Promise.resolve();
-    }
-
-    if (!this.isInViewport() && !this.renderOutsideViewport()) {
-      dev().fine(TAG, 'layout canceled due to element not being in viewport:',
-          this.debugid, this.state_);
-      this.state_ = ResourceState.READY_FOR_LAYOUT;
-      return Promise.resolve();
-    }
-
-    // Double check that the element has not disappeared since scheduling
-    this.measure();
-    if (!this.isDisplayed()) {
-      dev().fine(TAG, 'layout canceled due to element loosing display:',
-          this.debugid, this.state_);
-      return Promise.resolve();
-    }
-
-    // Not-wanted re-layouts are ignored.
+    // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
-          this.debugid, this.state_);
+      dev().fine(
+        TAG,
+        "layout canceled since it wasn't requested:",
+        this.debugid,
+        this.state_
+      );
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
@@ -634,15 +902,20 @@ export class Resource {
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
 
-    let promise;
-    try {
-      promise = this.element.layoutCallback();
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    const promise = new Promise((resolve, reject) => {
+      Services.vsyncFor(this.hostWin).mutate(() => {
+        try {
+          resolve(this.element.layoutCallback());
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
 
-    this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
-        reason => this.layoutComplete_(false, reason));
+    this.layoutPromise_ = promise.then(
+      () => this.layoutComplete_(true),
+      (reason) => this.layoutComplete_(false, reason)
+    );
     return this.layoutPromise_;
   }
 
@@ -658,8 +931,9 @@ export class Resource {
     }
     this.layoutPromise_ = null;
     this.loadedOnce_ = true;
-    this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
-        ResourceState.LAYOUT_FAILED;
+    this.state_ = success
+      ? ResourceState.LAYOUT_COMPLETE
+      : ResourceState.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
@@ -674,8 +948,10 @@ export class Resource {
    * @return {boolean}
    * */
   isLayoutPending() {
-    return this.state_ != ResourceState.LAYOUT_COMPLETE &&
-        this.state_ != ResourceState.LAYOUT_FAILED;
+    return (
+      this.state_ != ResourceState.LAYOUT_COMPLETE &&
+      this.state_ != ResourceState.LAYOUT_FAILED
+    );
   }
 
   /**
@@ -701,7 +977,11 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.isInViewport_;
+    const isInViewport = this.element.isInViewport();
+    if (isInViewport) {
+      this.resolveDeferredsWhenWithinViewports_();
+    }
+    return isInViewport;
   }
 
   /**
@@ -709,11 +989,6 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    if (inViewport == this.isInViewport_) {
-      return;
-    }
-    dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
-    this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }
 
@@ -722,8 +997,10 @@ export class Resource {
    * relayout in case document becomes active again.
    */
   unlayout() {
-    if (this.state_ == ResourceState.NOT_BUILT ||
-        this.state_ == ResourceState.NOT_LAID_OUT) {
+    if (
+      this.state_ == ResourceState.NOT_BUILT ||
+      this.state_ == ResourceState.NOT_LAID_OUT
+    ) {
       return;
     }
     this.setInViewport(false);
@@ -737,8 +1014,8 @@ export class Resource {
 
   /**
    * Returns the task ID for this resource.
-   * @param localId
-   * @returns {string}
+   * @param {string} localId
+   * @return {string}
    */
   getTaskId(localId) {
     return this.debugid + '#' + localId;
@@ -748,11 +1025,6 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
-      return;
-    }
-    this.paused_ = true;
-    this.setInViewport(false);
     this.element.pauseCallback();
     if (this.element.unlayoutOnPause()) {
       this.unlayout();
@@ -763,14 +1035,6 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pauseOnRemove() {
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      return;
-    }
-    this.setInViewport(false);
-    if (this.paused_) {
-      return;
-    }
-    this.paused_ = true;
     this.element.pauseCallback();
   }
 
@@ -778,10 +1042,6 @@ export class Resource {
    * Calls element's resumeCallback callback.
    */
   resume() {
-    if (this.state_ == ResourceState.NOT_BUILT || !this.paused_) {
-      return;
-    }
-    this.paused_ = false;
     this.element.resumeCallback();
   }
 
@@ -799,6 +1059,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

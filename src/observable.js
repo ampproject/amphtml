@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-
-
 /**
  * This class helps to manage observers. Observers can be added, removed or
  * fired through and instance of this class.
  * @template TYPE
  */
 export class Observable {
-
+  /**
+   * Creates an instance of Observable.
+   */
   constructor() {
     /** @type {?Array<function(TYPE)>} */
     this.handlers_ = null;

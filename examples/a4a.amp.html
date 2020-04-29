@@ -46,31 +46,25 @@
   <h2>Fake ad network</h2>
   <amp-ad width="300" height="400"
       type="fake"
-      data-use-a4a="true"
+      id='i-amphtml-demo-id'
       data-vars-analytics-var="bar"
-      src="fake_amp.json">
+      src="/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.html">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
-  <h2>TripleLift ad network</h2>
-  <amp-ad width="297" height="410"
-      type="triplelift"
-      data-use-a4a="true"
-      src="https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed">
-    <div placeholder></div>
-    <div fallback></div>
+  <h2>Regular ad</h2>
+  <amp-ad data-slot="/30497360/a4a/non_a4a_native"
+    height="250"
+    type="doubleclick"
+    width="300">
   </amp-ad>
 
-  <h2>Fake cloudflare as ad network ad</h2>
-  <amp-ad width="300" height="150"
-      type="cloudflare"
-      data-cf-network="cloudflare"
-      data-cf-a4a="true"
-      src="/fake_a4a.json.html">
-    <div placeholder></div>
-    <div fallback></div>
+  <h2>A4A ad</h2>
+  <amp-ad data-slot="/30497360/a4a/a4a_native"
+    height="250"
+    type="doubleclick"
+    width="300">
   </amp-ad>
-
 </body>
 </html>

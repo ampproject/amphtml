@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
-
+import {Services} from '../../../src/services';
 
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {string}
+ * @return {string}
  */
 function referrerDomain(ampdoc) {
-  const referrer = viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
-  if (referrer) {
-    return parseUrl(referrer).hostname;
+  const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
+  if (!referrer) {
+    return '';
   }
-  return '';
+  const {hostname} = Services.urlForDoc(ampdoc.getHeadNode()).parse(referrer);
+  return hostname;
 }
 
 /**
  * Grabs the User Agent string.
  * @param {!Window} win
- * @returns {string}
+ * @return {string}
  */
 function userAgent(win) {
   return win.navigator.userAgent;
@@ -65,7 +63,7 @@ export function referrers_(referrer) {
 /**
  * Normalizes certain referrers across devices.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @returns {!Array<string>}
+ * @return {!Array<string>}
  */
 function normalizedReferrers(ampdoc) {
   const referrer = referrerDomain(ampdoc);
@@ -84,7 +82,6 @@ function normalizedReferrers(ampdoc) {
   return referrers_(referrer);
 }
 
-
 /**
  * Adds CSS classes onto the HTML element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -94,23 +91,20 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.whenBodyAvailable().then(
-        body => addCssClassesToBody(body, classes));
+    ampdoc.waitForBodyOpen().then((body) => addCssClassesToBody(body, classes));
   }
 }
-
 
 /**
  * @param {!Element} body
  * @param {!Array<string>} classes
  */
 function addCssClassesToBody(body, classes) {
-  const classList = body.classList;
+  const {classList} = body;
   for (let i = 0; i < classes.length; i++) {
     classList.add(classes[i]);
   }
 }
-
 
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
@@ -119,29 +113,27 @@ function addCssClassesToBody(body, classes) {
  */
 function addReferrerClasses(ampdoc) {
   const referrers = normalizedReferrers(ampdoc);
-  const classes = referrers.map(referrer => {
+  const classes = referrers.map((referrer) => {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
-  vsyncFor(ampdoc.win).mutate(() => {
+  Services.vsyncFor(ampdoc.win).mutate(() => {
     addDynamicCssClasses(ampdoc, classes);
   });
 }
-
 
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 function addViewerClass(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   if (viewer.isEmbedded()) {
-    vsyncFor(ampdoc.win).mutate(() => {
+    Services.vsyncFor(ampdoc.win).mutate(() => {
       addDynamicCssClasses(ampdoc, ['amp-viewer']);
     });
   }
 }
-
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -151,21 +143,27 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpDynamicCssClasses {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    addRuntimeClasses(ampdoc);
+  }
 
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @visibleForTesting
- */
-export function installDynamicClassesForTesting(ampdoc) {
-  addRuntimeClasses(ampdoc);
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return Promise.resolve();
+  }
 }
 
-
 // Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-dynamic-css-classes',
-    /* ctor */ undefined,
-    ampdoc => {
-      addRuntimeClasses(ampdoc);
-      return {};
-    });
+AMP.extension('amp-dynamic-css-classes', '0.1', (AMP) => {
+  AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
+});

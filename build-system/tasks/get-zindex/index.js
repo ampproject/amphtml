@@ -13,38 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
+const fs = require('fs');
+const gulp = require('gulp');
+const PluginError = require('plugin-error');
+const postcss = require('postcss');
+const table = require('text-table');
+const through = require('through2');
 
-var fs = require('fs');
-var gulp = require('gulp-help')(require('gulp'));
-var postcss = require('postcss');
-var table = require('text-table');
-var through = require('through2');
-var util = require('gulp-util');
-
-var tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+const tableHeaders = [
+  ['selector', 'z-index', 'file'],
+  ['---', '---', '---'],
 ];
 
-var tableOptions = {
+const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
-
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
  * @param {!Rules} css post css rules object
  */
 function zIndexCollector(acc, css) {
-  css.walkRules(rule => {
-    rule.walkDecls(decl => {
+  css.walkRules((rule) => {
+    rule.walkDecls((decl) => {
       // Split out multi selector rules
-      var selectorNames = rule.selector.replace('\n', '');
+      let selectorNames = rule.selector.replace('\n', '');
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach(selector => {
+        selectorNames.forEach((selector) => {
           // If multiple redeclaration of a selector and z index
           // are done in a single file, this will get overridden.
           acc[selector] = decl.value;
@@ -66,73 +65,80 @@ function onFileThrough(file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
-  var selectors = Object.create(null);
+  const selectors = Object.create(null);
 
   postcss([zIndexCollector.bind(null, selectors)])
-      .process(file.contents.toString(), {
-        from: file.relative
-      }).then(res => {
-        cb(null, { name: file.relative, selectors: selectors });
-      });
+    .process(file.contents.toString(), {
+      from: file.relative,
+    })
+    .then(() => {
+      cb(null, {name: file.relative, selectors});
+    });
 }
 
 /**
  * @param {!Object<string, !Object<string, !Array<number>} filesData
  *    accumulation of files and the rules and z index values.
- * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
-function createTable(filesData, cb) {
-  var rows = [];
-  Object.keys(filesData).sort().forEach((fileName, fileIdx) => {
-    var selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach((selectorName, selectorIdx) => {
-      var zIndex = selectors[selectorName];
-      var row = [selectorName, zIndex, fileName];
-      rows.push(row);
+function createTable(filesData) {
+  const rows = [];
+  Object.keys(filesData)
+    .sort()
+    .forEach((fileName) => {
+      const selectors = filesData[fileName];
+      Object.keys(selectors)
+        .sort()
+        .forEach((selectorName) => {
+          const zIndex = selectors[selectorName];
+          const row = [selectorName, zIndex, fileName];
+          rows.push(row);
+        });
     });
-  });
   rows.sort((a, b) => {
-    var aZIndex = parseInt(a[1], 10);
-    var bZIndex = parseInt(b[1], 10);
+    const aZIndex = parseInt(a[1], 10);
+    const bZIndex = parseInt(b[1], 10);
     return aZIndex - bZIndex;
   });
   return rows;
 }
 
-
 /**
+ * @param {string} glob
  * @return {!Stream}
  */
-function getZindex(glob) {
+function getZindexStream(glob) {
   return gulp.src(glob).pipe(through.obj(onFileThrough));
 }
 
 /**
  * @param {function()} cb
  */
-function getZindexForAmp(cb) {
-  var filesData = Object.create(null);
+function getZindex(cb) {
+  const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
-  getZindex('{css,src,extensions}/**/*.css')
-      .on('data', (chunk) => {
-        filesData[chunk.name] = chunk.selectors;
-      })
-      .on('end', () => {
-        var rows = createTable(filesData);
-        rows.unshift.apply(rows, tableHeaders);
-        var tbl = table(rows, tableOptions);
-        fs.writeFileSync('css/Z_INDEX.md', tbl);
-        cb();
-      });
+  getZindexStream('{css,src,extensions}/**/*.css')
+    .on('data', (chunk) => {
+      filesData[chunk.name] = chunk.selectors;
+    })
+    .on('end', () => {
+      const rows = createTable(filesData);
+      rows.unshift.apply(rows, tableHeaders);
+      const tbl = table(rows, tableOptions);
+      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      cb();
+    });
 }
 
-gulp.task('get-zindex', 'Runs through all css files of project to gather ' +
-    'z-index values', getZindexForAmp);
+module.exports = {
+  createTable,
+  getZindex,
+  getZindexStream,
+};
 
-exports.getZindex = getZindex;
-exports.createTable = createTable;
+getZindex.description =
+  'Runs through all css files of project to gather z-index values';

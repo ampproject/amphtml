@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import * as lib from '../../../third_party/closure-library/sha384-generated';
-import {getService} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
+import {sha384} from '../../../third_party/closure-library/sha384-generated';
 
+/**
+ * Registers crypto polyfill.
+ * @param {!Window} win
+ */
 export function installCryptoPolyfill(win) {
-  getService(win, 'crypto-polyfill', () => lib);
+  registerServiceBuilder(win, 'crypto-polyfill', function () {
+    return sha384;
+  });
 }
 
 installCryptoPolyfill(window);

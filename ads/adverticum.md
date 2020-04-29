@@ -14,31 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-#Adverticum
+# Adverticum
 
-##Example
+## Example
 
 ```html
-<amp-ad width=300 height=250
-    type="adverticum"
-    data-goa3zone="123456789"
-    data-costumetargetstring="bXVzdGJlYmVhc2U2NGVuY29kZWQ=" >
+<amp-ad
+  width="300"
+  height="250"
+  type="adverticum"
+  data-goa3zone="123456789"
+  data-costumetargetstring="bXVzdGJlYmVhc2U2NGVuY29kZWQ="
+>
 </amp-ad>
 ```
 
-##Configuration
+## Configuration
 
-The only supported costume parameters are: 
+For details on the configuration semantics, please contact the Adverticum support team via e-mail: support@adverticum.com.
 
-Required parameter:
+### Required parameters
 
- - ```data-goa3zone:``` It's value is the zoneID wich can be found at the Adverticum AdServer.
+- `data-goa3zone`: The zoneID, which can be found at the Adverticum AdServer.
 
-Optional parameter:
+### Optional parameters
 
- - ```data-costumetargetstring:``` It's value must be Base64Encoded!
+- `data-costumetargetstring:`: The value must be Base64Encoded.
 
-##Support and contact
+## Support and contact
 
-For further information and specific configuration please contact our support team via e-mail:
-support@adverticum.com
+For further information and specific configuration please contact the Adverticum support team via e-mail: support@adverticum.com

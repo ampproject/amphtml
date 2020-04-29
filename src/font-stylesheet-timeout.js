@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {isDocumentReady} from './document-ready';
-import {timerFor} from './timer';
+import {escapeCssSelectorIdent} from './css';
+import {onDocumentReady} from './document-ready';
+import {urls} from './config';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -26,18 +27,20 @@ import {timerFor} from './timer';
  * even though all they do is reference fonts.
  *
  * For that reasons this function identifies (or rather infers) font
- * stylesheets that have not downloaded within 1 second of the page
+ * stylesheets that have not downloaded within timeout period of the page
  * response starting and reinserts equivalent link tags  dynamically. This
  * removes their page-render-blocking nature and lets the doc render.
- *
- * 1 second was picked, because the font-stylesheets are typically
- * tiny. If a connection wasn't able to deliver them within 1s
- * of page load start, then it is unlikely that it will be able
- * to download the font itself within 3s.
  *
  * @param {!Window} win
  */
 export function fontStylesheetTimeout(win) {
+  onDocumentReady(win.document, () => maybeTimeoutFonts(win));
+}
+
+/**
+ * @param {!Window} win
+ */
+function maybeTimeoutFonts(win) {
   let timeSinceResponseStart = 0;
   // If available, we start counting from the time the HTTP response
   // for the page started. The preload scanner should then quickly
@@ -46,42 +49,95 @@ export function fontStylesheetTimeout(win) {
   if (perf && perf.timing && perf.timing.responseStart) {
     timeSinceResponseStart = Date.now() - perf.timing.responseStart;
   }
-  const timeout = Math.max(1, 1000 - timeSinceResponseStart);
+  const timeout = Math.max(1, 250 - timeSinceResponseStart);
 
-  timerFor(win).delay(() => {
-    // We waited for the timeout period. There is no way to check whether
-    // the stylesheets actually loaded. For that reason we check whether
-    // the document is ready instead. The link tags block the readiness
-    // and they are the only external resource that does, so if the doc
-    // isn't ready yet it is probably the stylesheet's fault.
-    if (isDocumentReady(win.document)) {
+  // Avoid timer dependency since this runs very early in execution.
+  win.setTimeout(() => {
+    // Try again, more fonts might have loaded.
+    timeoutFontFaces(win);
+    const {styleSheets} = win.document;
+    if (!styleSheets) {
       return;
     }
-    // Alright we timed out.
-    // Find all stylesheets.
+    // Find all stylesheets that aren't loaded from the AMP CDN (those are
+    // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-        'link[rel~="stylesheet"]');
+      `link[rel~="stylesheet"]:not([href^="${escapeCssSelectorIdent(
+        urls.cdn
+      )}"])`
+    );
+    // Compare external sheets against elements of document.styleSheets.
+    // They do not appear in this list until they have been loaded.
+    const timedoutStyleSheets = [];
     for (let i = 0; i < styleLinkElements.length; i++) {
-      const existingLink = styleLinkElements[i];
-      const newLink = existingLink.cloneNode(/* not deep */ false);
+      const link = styleLinkElements[i];
+      let found = false;
+      for (let n = 0; n < styleSheets.length; n++) {
+        if (styleSheets[n].ownerNode == link) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        timedoutStyleSheets.push(link);
+      }
+    }
+
+    for (let i = 0; i < timedoutStyleSheets.length; i++) {
+      const link = timedoutStyleSheets[i];
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…
-      const media = existingLink.media || 'all';
-      newLink.media = 'not-matching';
+      const media = link.media || 'all';
+      link.media = 'print';
       // And then switch it back to the original after the stylesheet
       // loaded.
-      newLink.onload = () => {
-        newLink.media = media;
+      link.onload = () => {
+        link.media = media;
+        timeoutFontFaces(win);
       };
-      newLink.setAttribute('i-amp-timeout', timeout);
-      const parent = existingLink.parentElement;
-      // Insert the stylesheet. We do it right before the existing one,
-      // so that
-      // - we pick up its HTTP request.
-      // - CSS evaluation order doen't change.
-      parent.insertBefore(newLink, existingLink);
-      // And remove the blocking stylsheet.
-      parent.removeChild(existingLink);
+      link.setAttribute('i-amphtml-timeout', timeout);
+      // Pop/insert the same link. This causes Chrome to unblock, and doesn't
+      // blank out Safari. #12521
+      link.parentNode.insertBefore(link, link.nextSibling);
     }
   }, timeout);
+}
+
+/**
+ * Sets font faces that haven't been loaded by the time this was called to
+ * `font-display: swap` in supported browsers.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display
+ * for details on behavior.
+ * Swap effectively leads to immediate display of the fallback font with
+ * the custom font being displayed when possible.
+ * While this is not the most desirable setting, it is compatible with the
+ * default (which does that but only waiting for 3 seconds).
+ * Ideally websites would opt into `font-display: optional` which provides
+ * nicer UX for non-icon fonts.
+ * If fonts set a non default display mode, this does nothing.
+ * @param {!Window} win
+ */
+function timeoutFontFaces(win) {
+  const doc = win.document;
+  // TODO(@cramforce) Switch to .values when FontFaceSet extern supports it.
+  if (!doc.fonts || !doc.fonts['values']) {
+    return;
+  }
+  const it = doc.fonts['values']();
+  let entry;
+  while ((entry = it.next())) {
+    const fontFace = entry.value;
+    if (!fontFace) {
+      return;
+    }
+    if (fontFace.status != 'loading') {
+      continue;
+    }
+    // Not supported or non-default value.
+    // If the publisher specified a non-default, we respect that, of course.
+    if (!('display' in fontFace) || fontFace.display != 'auto') {
+      continue;
+    }
+    fontFace.display = 'swap';
+  }
 }

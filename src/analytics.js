@@ -14,45 +14,20 @@
  * limitations under the License.
  */
 
-import {
-  getElementServiceForDoc,
-  getElementServiceIfAvailableForDoc,
-} from './element-service';
-
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
- */
-export function analyticsForDoc(nodeOrDoc) {
-  return (/** @type {!Promise<
-            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
- */
-export function analyticsForDocOrNull(nodeOrDoc) {
-  return (/** @type {!Promise<
-            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceIfAvailableForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
+import {Services} from './services';
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * TODO: Do not expose this function
+ * @param {!Element} target
  * @param {string} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!JsonObject=} opt_vars A map of vars and their values.
  */
-export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
-  analyticsForDocOrNull(nodeOrDoc).then(analytics => {
+export function triggerAnalyticsEvent(target, eventType, opt_vars) {
+  Services.analyticsForDocOrNull(target).then((analytics) => {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(eventType, opt_vars);
+    analytics.triggerEventForTarget(target, eventType, opt_vars);
   });
 }

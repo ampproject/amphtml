@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
+const childProcess = require('child_process');
+const colors = require('ansi-colors');
+const fs = require('fs');
+const log = require('fancy-log');
+const util = require('util');
 
-var BBPromise = require('bluebird');
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const exec = util.promisify(childProcess.exec);
 
-
-var prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
 /**
- * @typedef {!Array<Fields>}
+ * @typedef {!Array<FieldsDef>}
  */
-var Tables;
+let TablesDef;
 
 /**
  * @typedef {{
@@ -37,39 +37,38 @@ var Tables;
  *   size: string
  * }}
  */
-var Fields;
+let FieldsDef;
 
-var filePath = 'test/size.txt';
+const filePath = 'test/size.txt';
 
-var fileSizes = Object.create(null);
+const tableHeaders = [['"datetime"']];
 
-var tableHeaders = [
-  ['"datetime"']
-];
-
-var dateTimes = [];
+const dateTimes = [];
 
 /**
  * @param {string} format
  * @return {!Array<string>}
  */
 function getLog(format) {
-  return exec(`git log --format="${format}" ${filePath}`)
-      .then(logs => logs.trim().split('\n'));
+  return exec(`git log --format="${format}" ${filePath}`).then((logs) =>
+    logs.trim().split('\n')
+  );
 }
 
 /**
  * @param {string} file
- * @return {!Tables}
+ * @return {!TablesDef}
  */
 function parseSizeFile(file) {
-  var lines = file.trim().split('\n');
-  var minSizePos = 0;
-  var headers = lines[0].trim().split('|').map(x => x.trim());
-  var minPos = -1;
+  const lines = file.trim().split('\n');
+  const headers = lines[0]
+    .trim()
+    .split('|')
+    .map((x) => x.trim());
+  let minPos = -1;
   // Find the "min" column which is the closure compiled or the "size" column
   // which was previously babelify compiled file.
-  for (var i = 0; i < headers.length; i++) {
+  for (let i = 0; i < headers.length; i++) {
     if (headers[i] == 'min' || headers[i] == 'size') {
       minPos = i;
       break;
@@ -81,65 +80,75 @@ function parseSizeFile(file) {
   // Remove separator
   lines.shift();
 
-  return lines.map(line => {
-    var columns = line.split('|').map(x => x.trim());
-    var name = columns[columns.length - 1];
+  return lines
+    .map((line) => {
+      const columns = line.split('|').map((x) => x.trim());
+      let name = columns[columns.length - 1];
 
-    // Older size.txt files contained duplicate entries of the same "entity",
-    // for example a file had an entry for its .min and its .max file.
-    var shouldSkip = (name.endsWith('max.js') &&
-        !name.endsWith('alp.max.js') && !/\s\/\s/.test(name))
-        || name == 'current/integration.js' || name == 'amp.js' ||
-        name == 'cc.js' || name.endsWith('-latest.js');
+      // Older size.txt files contained duplicate entries of the same "entity",
+      // for example a file had an entry for its .min and its .max file.
+      const shouldSkip =
+        (name.endsWith('max.js') &&
+          !name.endsWith('alp.max.js') &&
+          !/\s\/\s/.test(name)) ||
+        name == 'current/integration.js' ||
+        name == 'amp.js' ||
+        name == 'cc.js' ||
+        name.endsWith('-latest.js');
 
+      if (shouldSkip) {
+        return null;
+      }
 
-    if (shouldSkip) {
-      return null;
-    }
+      // Normalize names. We made mistakes at some point with duplicate entries
+      // or renamed entries so we make sure to identify these entities
+      // and put then into the same column.
+      if (name == 'v0.js / amp.js' || name == 'current-min/v0.js') {
+        name = 'v0.js';
+      } else if (
+        name == 'current-min/f.js / current/integration.js' ||
+        name == 'current-min/f.js'
+      ) {
+        name = 'f.js';
+      } else if (
+        name == 'alp.max.js' ||
+        name == 'alp.js / install-alp.js' ||
+        name == 'alp.js / alp.max.js'
+      ) {
+        name = 'alp.js';
+      } else if (name == 'sw.js / sw.max.js') {
+        name = 'sw.js';
+      } else if (name == 'sw-kill.js / sw-kill.max.js') {
+        name = 'sw-kill.js';
+      } else if (name == 'a4a-host-v0.js / amp-inabox-host.js') {
+        name = 'amp4ads-host-v0.js / amp-inabox-host.js';
+      } else if (name == 'a4a-v0.js / amp-inabox.js') {
+        name = 'amp4ads-v0.js / amp-inabox.js';
+      }
 
-    // Normalize names. We made mistakes at some point with duplicate entries
-    // or renamed entries so we make sure to identify these entities
-    // and put then into the same column.
-    if (name == 'v0.js / amp.js' || name == 'current-min/v0.js') {
-      name = 'v0.js';
-    } else if (name == 'current-min/f.js / current/integration.js' ||
-      name == 'current-min/f.js') {
-      name = 'f.js';
-    } else if (name == 'alp.max.js' || name == 'alp.js / install-alp.js' ||
-        name == 'alp.js / alp.max.js') {
-      name = 'alp.js';
-    } else if (name == 'sw.js / sw.max.js') {
-      name = 'sw.js';
-    } else if (name == 'sw-kill.js / sw-kill.max.js') {
-      name = 'sw-kill.js';
-    } else if (name == 'a4a-host-v0.js / amp-inabox-host.js') {
-      name = 'amp4ads-host-v0.js / amp-inabox-host.js';
-    } else if (name == 'a4a-v0.js / amp-inabox.js') {
-      name = 'amp4ads-v0.js / amp-inabox.js';
-    }
-
-    return {
-      name: `"${name}"`,
-      size: `"${reversePrettyBytes(columns[minPos])}"`,
-    };
-  }).filter(x => !!x);
+      return {
+        name: `"${name}"`,
+        size: `"${reversePrettyBytes(columns[minPos])}"`,
+      };
+    })
+    .filter((x) => !!x);
 }
 
 /**
  * @param {!Array<string>} dateTimes
- * @param {!Tables} tables
+ * @param {!TablesDef} tables
  * @return {!Array<!Array<string>>}
  */
 function mergeTables(dateTimes, tables) {
   // Where key is filename
   /** @typedef {!Object<string, !Array<{size: string, date: string}>>} */
-  var obj = Object.create(null);
-  var rows = [];
+  const obj = Object.create(null);
+  const rows = [];
 
   // Aggregate all fields with same file name into an array
-  tables.forEach(table => {
-    table.forEach(field => {
-      var name = field.name;
+  tables.forEach((table) => {
+    table.forEach((field) => {
+      const {name} = field;
       if (!obj[name]) {
         obj[name] = [];
       }
@@ -151,26 +160,30 @@ function mergeTables(dateTimes, tables) {
   });
 
   // Populate the headers array with unique file names for row 1
-  Object.keys(obj).sort().forEach(fileName => {
-    // TODO(erwinm): figure out where this is occurring.
-    if (fileName.trim() == '""') {
-      return;
-    }
-    tableHeaders[0].push(fileName);
-  });
+  Object.keys(obj)
+    .sort()
+    .forEach((fileName) => {
+      // TODO(erwinm): figure out where this is occurring.
+      if (fileName.trim() == '""') {
+        return;
+      }
+      tableHeaders[0].push(fileName);
+    });
 
   // Populate column A with all the dates we've seen and then
   // populate all other columns with their respective file size if any.
-  dateTimes.forEach(dateTime => {
+  dateTimes.forEach((dateTime) => {
     // Seed array with empty string values
-    var row = Array.apply(null, Array(tableHeaders[0].length)).map(x => '""');
+    const row = Array.apply(null, Array(tableHeaders[0].length)).map(
+      () => '""'
+    );
     rows.push(row);
     row[0] = dateTime;
     // Exclude the datetime column
     tableHeaders[0].slice(1).forEach((fileName, colIdx) => {
-      var colIdx = colIdx + 1;
-      var curField = null;
-      for (var i = 0; i < obj[fileName].length; i++) {
+      colIdx = colIdx + 1;
+      let curField = null;
+      for (let i = 0; i < obj[fileName].length; i++) {
         curField = obj[fileName][i];
         if (curField.dateTime == dateTime) {
           row[colIdx] = curField.size;
@@ -187,18 +200,19 @@ function mergeTables(dateTimes, tables) {
  * @return {number}
  */
 function reversePrettyBytes(prettyBytes) {
-  var triple = prettyBytes.match(
-      /(\d+(?:\.\d+)?)\s+(B|kB|MB|GB|TB|PB|EB|ZB|YB)/);
+  const triple = prettyBytes.match(
+    /(\d+(?:\.\d+)?)\s+(B|kB|MB|GB|TB|PB|EB|ZB|YB)/
+  );
   if (!triple) {
     throw new Error('No matching bytes data found');
   }
-  var value = triple[1];
-  var unit = triple[2];
+  const value = triple[1];
+  const unit = triple[2];
 
   if (!(value && unit)) {
     return 0;
   }
-  var exponent = prettyBytesUnits.indexOf(unit);
+  const exponent = prettyBytesUnits.indexOf(unit);
   return (Number(value) * Math.pow(1000, exponent)).toFixed(3);
 }
 
@@ -208,55 +222,60 @@ function reversePrettyBytes(prettyBytes) {
  * @return {!Promise}
  */
 function serializeCheckout(logs) {
-  var tables = [];
-  var promise = logs.reduce((acc, cur, i) => {
-    var parts = logs[i].split(' ');
-    var sha = parts.shift();
-    var dateTime = parts.join(' ');
+  const tables = [];
+  const promise = logs.reduce((acc, cur, i) => {
+    const parts = logs[i].split(' ');
+    const sha = parts.shift();
+    const dateTime = parts.join(' ');
 
-    return acc.then(tables => {
+    return acc.then((tables) => {
       // We checkout all the known commits for the file and accumulate
       // all the tables.
-      return exec(`git checkout ${sha} ${filePath}`).then(() => {
-        return fs.readFileAsync(`${filePath}`);
-      }).then(file => {
-        var quotedDateTime = `"${dateTime}"`;
-        dateTimes.push(quotedDateTime);
-        // We convert the read file string into an Table objects
-        var fields = parseSizeFile(file.toString()).map(field => {
-          field.dateTime = quotedDateTime;
-          return field;
-        });
-        tables.push(fields);
-        return tables;
-      }).catch(e => {
-        // Ignore if pathspec error. This can happen if the file was
-        // deleted in git.
-        if (/error: pathspec/.test(e.message)) {
-          tables.push([]);
+      return exec(`git checkout ${sha} ${filePath}`)
+        .then(() => {
+          return fs.promises.readFile(`${filePath}`);
+        })
+        .then((file) => {
+          const quotedDateTime = `"${dateTime}"`;
+          dateTimes.push(quotedDateTime);
+          // We convert the read file string into an Table objects
+          const fields = parseSizeFile(file.toString()).map((field) => {
+            field.dateTime = quotedDateTime;
+            return field;
+          });
+          tables.push(fields);
           return tables;
-        }
-        util.log(util.colors.red(e.message));
-      });
+        })
+        .catch((e) => {
+          // Ignore if pathspec error. This can happen if the file was
+          // deleted in git.
+          if (/error: pathspec/.test(e.message)) {
+            tables.push([]);
+            return tables;
+          }
+          log(colors.red(e.message));
+        });
     });
   }, Promise.resolve(tables));
   return promise.then(mergeTables.bind(null, dateTimes));
 }
 
-function csvify() {
-  var shaAndDate = "%H %ai";
-  return getLog(shaAndDate)
-      .then(logs => {
-        // Reverse it from oldest to newest
-        return serializeCheckout(logs.reverse()).then(rows => {
-          rows.unshift.apply(rows, tableHeaders);
-          var tbl = rows.map(row => row.join(',')).join('\n');
-          return fs.writeFileAsync('test/size.csv', `${tbl}\n`);
-        });
-      });
+async function csvifySize() {
+  const shaAndDate = '%H %ai';
+  return getLog(shaAndDate).then((logs) => {
+    // Reverse it from oldest to newest
+    return serializeCheckout(logs.reverse()).then((rows) => {
+      rows.unshift.apply(rows, tableHeaders);
+      const tbl = rows.map((row) => row.join(',')).join('\n');
+      return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
+    });
+  });
 }
 
-gulp.task('csvify-size', 'create a CSV file out of the size.txt file', csvify);
+module.exports = {
+  csvifySize,
+  parseSizeFile,
+  mergeTables,
+};
 
-exports.parseSizeFile = parseSizeFile;
-exports.mergeTables = mergeTables;
+csvifySize.description = 'Creates a CSV file out of the size.txt file';

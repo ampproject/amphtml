@@ -5,6 +5,7 @@
   <title>Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script src="/dist/v0/examples/amp-viewer-host.max.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -145,6 +146,59 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="6"] #container6 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="6"] #show-container6-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="7"] #container7 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="7"] #show-container7-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="8"] #container8 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+    viewer[data-show-container="8"] #show-container8-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="9"] #container9 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+    viewer[data-show-container="9"] #show-container9-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="dynamic"] #container-dynamic {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="dynamic"] #show-container-dynamic-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -161,33 +215,32 @@
     }
   </style>
 
-  <script src="./viewer-integr-messaging.js"></script>
-
   <script>
     var allViewers = [];
     var currentContainerId = null;
 
-    function Viewer(containerId, id, url, visible) {
+    function Viewer(containerId, id, url, visible, opt_caps) {
       this.id = id;
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
-
-      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+      this.startResolve_ = null;
+      this.startPromise_ = null;
+      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
       this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
-      // TODO(dvoytenko): Set to the final value when crbug/577330 is fixed:
-      // this.iframe.setAttribute('sandbox',
-      //     'allow-popups allow-scripts allow-forms allow-pointer-lock' +
-      //     ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('sandbox',
+          'allow-popups allow-scripts allow-forms allow-pointer-lock' +
+          ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'yes');
+      this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -196,13 +249,6 @@
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
       }.bind(this));
-      this.viewer.classList.add(this.viewportType_);
-
-      if (this.viewportType_ == 'natural' && !this.isIos_) {
-        this.iframe.setAttribute('scrolling', 'yes');
-      } else {
-        this.iframe.setAttribute('scrolling', 'no');
-      }
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -214,15 +260,14 @@
 
       var params = {
         history: 1,
-        viewportType: this.viewportType_,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        origin: parseUrl(window.location.href).origin,
+        origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a',
+        cap: this.caps_,
       };
       log('Params:' + JSON.stringify(params));
 
@@ -230,75 +275,41 @@
       if (window.location.hash && window.location.hash.length > 1) {
         inputUrl += '&' + window.location.hash.substring(1);
       }
-      var parsedUrl = parseUrl(inputUrl);
+      var parsedUrl = parseUrlDeprecated(inputUrl);
       var url = parsedUrl.href;
       this.frameOrigin_ = parsedUrl.origin;
       log('AMP URL = ', url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      this.awaitHandshake_();
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
+        this.frameOrigin_, this.processRequest_.bind(this),
+        /* logs id */ this.id);
 
-      this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
         this.iframe.style.display = '';
         this.iframe.setAttribute('src', url);
       }.bind(this));
+
+      return this.startPromise_ = new Promise(resolve => {
+        this.startResolve_ = resolve;
+      });
     };
-
-
-    Viewer.prototype.awaitHandshake_ = function() {
-      log('Viewer.prototype.awaitHandshake_');
-      var targetId = this.iframe.id;
-      var target = this.iframe.contentWindow;
-      var targetOrigin = this.frameOrigin_;
-      var listener = function(event) {
-        if (event.origin == targetOrigin &&
-                this.isChannelOpen_(event.data) &&
-                (!event.source || event.source == target)) {
-          log('event: ',event);
-          log('Viewer ' + this.id + ' messaging established with ',
-              targetOrigin);
-          window.removeEventListener('message', listener, false);
-
-          const message = {
-            app: APP,
-            requestid: event.data.requestid,
-            data: {},
-            type: MessageType.RESPONSE,
-          };
-          target./*OK*/postMessage(message, targetOrigin);
-
-          this.messaging_ = new ViewerMessaging(target, targetOrigin,
-              this.processRequest_.bind(this), targetId);
-          this.sendRequest_('visibilitychange', {
-            state: this.visibilityState_,
-            prerenderSize: this.prerenderSize
-          }, true);
-        }
-      }.bind(this);
-      window.addEventListener('message', listener, false);
-    };
-
-    Viewer.prototype.isChannelOpen_ = function(eventData) {
-      return eventData.app == APP &&
-        eventData.name == 'channelOpen';
-    };
-
 
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
-      this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.sendRequest_('visibilitychange', {
-        state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
-      }, true);
-      if (updateToggle) {
-        this.updateVisibilityToggle_();
-      }
+      this.startPromise_.then(() => {
+        this.visibilityState_ = visible ? 'visible' : 'hidden';
+        this.ampViewerHost_.sendRequest('visibilitychange', {
+          state: this.visibilityState_,
+          prerenderSize: this.prerenderSize
+        }, true);
+        if (updateToggle) {
+          this.updateVisibilityToggle_();
+        }
+      });
     };
-
 
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
@@ -306,20 +317,19 @@
       }
       log('AMP Loaded');
       this.alreadyLoaded_ = true;
-
       var waiter = this.container.querySelector('.wait');
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
-
+      this.iframe.dataset['loaded'] = '';
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
-
       this.iframe.contentWindow.onbeforeunload = (function() {
         this.container.style.paddingTop = '120px';
         this.container.textContent =
             'Unload of the AMP iframe is not allowed!';
       }).bind(this);
+      this.startResolve_();
     };
 
 
@@ -332,7 +342,7 @@
 
     Viewer.prototype.onScroll_ = function() {
       log('Viewer.prototype.onScroll_');
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
@@ -343,7 +353,7 @@
           this.container./*OK*/offsetHeight,
           this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
@@ -394,7 +404,7 @@
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendRequest_('historyPopped', {
+      this.ampViewerHost_.sendRequest('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);
       log('history popped to ', this.stackIndex_);
@@ -406,6 +416,7 @@
           'Visible' : 'Prerendering';
     };
 
+
     Viewer.prototype.broadcast_ = function(message) {
       log('broadcast: ', message);
       var self = this;
@@ -416,57 +427,147 @@
       });
     };
 
+
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
-      this.sendRequest_('scroll', {scrollTop}, true);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop: scrollTop}, true);
     };
 
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_');
-      if (type == 'documentLoaded') {
-        return this.documentReady_();
+
+    Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
+      log(this.id + ': Viewer.prototype.processRequest_', name);
+      switch(name) {
+        case 'bindReady':
+          return Promise.resolve();
+        case 'documentLoaded':
+          return this.documentReady_();
+        case 'focusin':
+          log('Focusin event', data);
+          return Promise.resolve();
+        case 'requestFullOverlay':
+          return this.requestFullOverlay_();
+        case 'cancelFullOverlay':
+          return this.cancelFullOverlay_();
+        case 'pushHistory':
+          return this.pushHistory_(data.stackIndex);
+        case 'popHistory':
+          return this.popHistory_(data.stackIndex);
+        case 'broadcast':
+          return this.broadcast_(data);
+        case 'unloaded':
+          log('unloaded');
+          return this.handleUnload_();
+        case 'tick':
+          log('[CSI] tick. label:', data.label);
+          return Promise.resolve();
+        case 'a2aNavigate':
+          log('a2a navigation', data);
+          return Promise.resolve();
+        case 'sendCsi':
+          log('[CSI] sendCsi.');
+          return Promise.resolve();
+        case 'touchstart':
+        case 'touchmove':
+        case 'touchend':
+          log('touch event!', name);
+          return Promise.resolve();
+        case 'viewerRenderTemplate':
+        const ampComponentType = data.ampComponent.type
+        if (ampComponentType === 'amp-list') {
+          return this.ssrRenderAmpListTemplate_(data);
+        } else if (ampComponentType == 'amp-form') {
+          return this.ssrRenderAmpFormTemplate_(data);
+        } else if (ampComponentType == 'amp-autocomplete') {
+          return this.ssrRenderAmpAutocompleteTemplate_(data);
+        } else {
+          return Promise.reject({error: 'source amp component is not valid'})
+        }
+        case 'documentHeight':
+        case 'setFlushParams':
+        case 'prerenderComplete':
+        case 'scroll':
+        case 'replaceHistory':
+        case 'visibilitychange':
+          return Promise.resolve();
+        case 'xhr':
+          return this.handleXhrIntercept_();
+        default:
+          return Promise.reject('request not supported: ', name);
       }
-      if (type == 'requestFullOverlay') {
-        return this.requestFullOverlay_();
-      }
-      if (type == 'cancelFullOverlay') {
-        return this.cancelFullOverlay_();
-      }
-      if (type == 'pushHistory') {
-        return this.pushHistory_(data.stackIndex);
-      }
-      if (type == 'popHistory') {
-        return this.popHistory_(data.stackIndex);
-      }
-      if (type == 'broadcast') {
-        return this.broadcast_(data);
-      }
-      if (type == 'setFlushParams') {
-        return;
-      }
-      if (type == 'prerenderComplete') {
-        return;
-      }
-      if (type == 'tick') {
-        log('[CSI] tick. label:', data.label);
-        return;
-      }
-      if (type == 'sendCsi') {
-        log('[CSI] sendCsi.');
-        return;
-      }
-      if (type == 'scroll') {
-        return;
-      }
-      if (type == 'a2a') {
-        log('a2a navigation', data);
-        return;
-      }
-      if (type == 'unloaded') {
-        log('unloaded');
-        return this.handleUnload_();
-      }
-      return Promise.reject('request not supported: ' + type);
+    };
+
+    Viewer.prototype.handleXhrIntercept_ = function(data) {
+    // Mocked response.
+    return Promise.resolve({
+        "body" : '{"items": [{"title": "Intercepted response", "url": "http://ampdev.org"}]}',
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          },
+          "type": 'application/json',
+        },
+      });
+    };
+
+    // TODO: We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
+    Viewer.prototype.ssrRenderAmpAutocompleteTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html":
+          "<div class='product' role='option' data-value='Apple'>Apple</div>"
+            + "<div class='product' role='option' data-value='Orange'>Orange</div>"
+            + "<div class='product' role='option' data-value='Pear'>Pear</div>"
+            + "<div class='product' role='option' data-value='Banana'>Banana</div>"
+            + "<div class='product' role='option' data-value='Watermelon'>Watermelon</div>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
+      });
+    };
+
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
+    Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html":
+          "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
+            + "<div [text]='data.fruit' role='listitem''></div>"
+            + "<div class='product' role='listitem'>Apple</div>"
+            + "<div class='product' role='listitem'>Orange</div>"
+            + "<div class='product' role='listitem'>Pear</div>"
+            + "<div class='product' role='listitem'>Banana</div>"
+            + "<div class='product' role='listitem'>Watermelon</div>"
+          + "</div>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
+      });
+    };
+
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
+    Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html": "<h1>SSR response<h1>",
+        "body": "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        }
+      });
     };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
@@ -474,15 +575,7 @@
       if (this.messaging_) {
         this.messaging_ = null;
       }
-      return goog.Promise.resolve();
-    };
-
-    Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.sendRequest_');
-      if (!this.messaging_) {
-        return;
-      }
-      return this.messaging_.sendRequest(type, data, awaitResponse);
+      return Promise.resolve();
     };
 
 
@@ -492,8 +585,7 @@
       console/*OK*/.log.apply(console, var_args);
     }
 
-
-    function parseUrl(urlString) {
+    function parseUrlDeprecated(urlString) {
       var a = document.createElement('a');
       a.href = urlString;
       return {
@@ -525,44 +617,144 @@
       return s;
     }
 
+    /**
+     * Parses the query string of an URL. This method returns a simple key/value
+     * map. If there are duplicate keys the latest value is returned.
+     * @param {string} queryString
+     * @return {!Object<string>}
+     */
+    function parseQueryString(queryString) {
+      const params = Object.create(null);
+      if (!queryString) {
+        return params;
+      }
+      if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+        queryString = queryString.substr(1);
+      }
+      const pairs = queryString.split('&');
+      for (let i = 0; i < pairs.length; i++) {
+        const pair = pairs[i];
+        const eqIndex = pair.indexOf('=');
+        let name;
+        let value;
+        if (eqIndex != -1) {
+          name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+          value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+        } else {
+          name = decodeURIComponent(pair).trim();
+          value = '';
+        }
+        if (name) {
+          params[name] = value;
+        }
+      }
+      return params;
+    }
+
+    function startsWith(string, prefix) {
+      return string.lastIndexOf(prefix, 0) == 0;
+    }
+
+    /**
+     * @param {string} url
+     * @param {string} param
+     * @param {*} value
+     * @return {string}
+     */
+    function addQueryParam(url, param, value) {
+      const paramValue =
+          encodeURIComponent(param) + '=' + encodeURIComponent(value);
+      if (!url.includes('?')) {
+        url += '?' + paramValue;
+      } else {
+        url += '&' + paramValue;
+      }
+      return url;
+    }
 
     function loadAmpDoc() {
+      const hash = window.location.hash;
+      const hashParams = parseQueryString(hash);
+      const href = hashParams['href'];
+      const caps = hashParams['caps'];
+
       new Viewer(
           'container1',
           '1',
-          './everything.amp.max.html',
-          true).start();
+          './everything.amp.html?amp_js_v=0.1',
+          !href).start();
       addShowContainer('1');
 
       new Viewer(
           'container2',
           '2',
-          './article.amp.max.html',
+          './article.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('2');
 
       new Viewer(
           'container3',
           '3',
-          './article-access.amp.max.html',
+          './article-access.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('3');
 
       new Viewer(
           'container4',
           '4',
-          './alp.amp.max.html',
+          './alp.amp.html',
           false).start();
       addShowContainer('4');
 
       new Viewer(
           'container5',
           '5',
-          './article-fixed-header.amp.max.html',
+          './article-fixed-header.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('5');
 
-      showContainer('1');
+      new Viewer(
+          'container6',
+          '6',
+          './amp-list.ssr.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('6');
+
+      new Viewer(
+          'container7',
+          '7',
+          './amp-form.ssr.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('7');
+
+      new Viewer(
+          'container8',
+          '8',
+          './xhr-intercept.html?amp_js_v=0.1',
+          false,
+          'xhrInterceptor').start();
+      addShowContainer('8');
+
+      new Viewer(
+          'container9',
+          '9',
+          './amp-autocomplete.ssr.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('9');
+
+      if (href) {
+        new Viewer(
+            'container-dynamic',
+            'dynamic',
+            addQueryParam(href, 'amp_js_v', '0.1'),
+            true,
+            caps).start();
+        document.getElementById('show-containerdynamic-anchor').hidden = false;
+        addShowContainer('dynamic');
+        showContainer('dynamic');
+      } else {
+        showContainer('1');
+      }
     }
 
     function addShowContainer(id) {
@@ -604,6 +796,11 @@
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
+      <a class="show-container-anchor" id="show-container6-anchor">Six</a>
+      <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
+      <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
+      <a class="show-container-anchor" id="show-container9-anchor">Nine</a>
+      <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -628,6 +825,31 @@
       </div>
     </container>
     <container id="container5">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container6">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container7">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container-dynamic">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container8">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container9">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

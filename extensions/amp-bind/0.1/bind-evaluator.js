@@ -15,67 +15,52 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
-import {filterSplice} from '../../../src/utils/array';
-
-/**
- * @typedef {{
- *   tagName: string,
- *   property: string,
- *   expressionString: string,
- * }}
- */
-export let BindingDef;
-
-/**
- * @typedef {{
- *   tagName: string,
- *   property: string,
- *   expression: !BindExpression,
- * }}
- */
-let ParsedBindingDef;
+import {remove} from '../../../src/utils/array';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
-  constructor() {
-    /** @const @private {!Array<ParsedBindingDef>} */
-    this.parsedBindings_ = [];
+  /**
+   * Creates an instance of BindEvaluator.
+   * @param {boolean} allowUrlProperties
+   */
+  constructor(allowUrlProperties) {
+    /** @const @private {!Array<!BindBindingDef>} */
+    this.bindings_ = [];
 
-    /** @const {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    /**
+     * Maps `id` to parsed BindMacro objects for all <amp-bind-macro> on page.
+     * @private @const {!Object<string, !./bind-macro.BindMacro>}
+     */
+    this.macros_ = Object.create(null);
+
+    /** @const @private {!./bind-validator.BindValidator} */
+    this.validator_ = new BindValidator(allowUrlProperties);
+
+    /** @const @private {!Object<string, !BindExpression>} */
+    this.expressions_ = Object.create(null);
   }
 
   /**
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
-   * @param {!Array<BindingDef>} bindings
-   * @return {!Object<string,!Error>}
+   * @param {!Array<!BindBindingDef>} bindings
+   * @return {!Object<string, !BindEvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
-    // TODO(choumx): Chunk creation of BindExpression or change to web worker.
-    for (let i = 0; i < bindings.length; i++) {
-      const e = bindings[i];
-      const string = e.expressionString;
-
-      let expression;
-      try {
-        expression = new BindExpression(e.expressionString);
-      } catch (error) {
-        errors[string] = error;
-        continue;
+    bindings.forEach((binding) => {
+      const parsed = this.parse_(binding.expressionString);
+      if (parsed.error) {
+        errors[binding.expressionString] = parsed.error;
+      } else {
+        this.bindings_.push(binding);
       }
-
-      this.parsedBindings_.push({
-        tagName: e.tagName,
-        property: e.property,
-        expression,
-      });
-    }
+    });
     return errors;
   }
 
@@ -85,70 +70,197 @@ export class BindEvaluator {
    */
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
-    for (let i = 0; i < expressionStrings.length; i++) {
-      expressionsToRemove[expressionStrings[i]] = true;
-    }
 
-    filterSplice(this.parsedBindings_, binding => {
-      const expressionString = binding.expression.expressionString;
-      return !expressionsToRemove[expressionString];
+    expressionStrings.forEach((expressionString) => {
+      delete this.expressions_[expressionString];
+      expressionsToRemove[expressionString] = true;
     });
+
+    remove(
+      this.bindings_,
+      (binding) => !!expressionsToRemove[binding.expressionString]
+    );
+  }
+
+  /**
+   * Parses and stores the given macros and returns map of macro `id` to
+   * parse errors.
+   * @param {!Array<!BindMacroDef>} macros
+   * @return {!Object<string, !BindEvaluatorErrorDef>}
+   */
+  addMacros(macros) {
+    const errors = [];
+    // Create BindMacro objects from BindMacroDef.
+    macros.forEach((macro, index) => {
+      // Only allow a macro to reference macros defined before it to prevent
+      // cycles and recursion.
+      // TODO(willchou): Would be better if cycle/recursion errors are thrown
+      // at creation instead of evaluation.
+      const referableMacros = Object.assign(Object.create(null), this.macros_);
+      try {
+        this.macros_[macro.id] = new BindMacro(macro, referableMacros);
+      } catch (e) {
+        errors[index] = {message: e.message, stack: e.stack};
+      }
+    });
+    return errors;
   }
 
   /**
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
-   * @param {!Object} scope
-   * @return {{
-   *   results: !Object<string, ./bind-expression.BindExpressionResultDef>,
-   *   errors: !Object<string, !Error>,
-   * }}
+   * @param {!JsonObject} scope
+   * @return {!BindEvaluateBindingsResultDef}
    */
-  evaluate(scope) {
-    /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
-    const cache = {};
-    /** @type {!Object<string, !Error>} */
-    const errors = {};
+  evaluateBindings(scope) {
+    /** @type {!Object<string, BindExpressionResultDef>} */
+    const cache = Object.create(null);
+    /** @type {!Object<string, !BindEvaluatorErrorDef>} */
+    const errors = Object.create(null);
 
-    this.parsedBindings_.forEach(binding => {
-      const {tagName, property, expression} = binding;
-      const expr = expression.expressionString;
+    this.setGlobals_(scope);
 
+    // First, evaluate all of the expression strings in the bindings.
+    this.bindings_.forEach((binding) => {
+      const {expressionString} = binding;
       // Skip if we've already evaluated this expression string.
-      if (cache[expr] !== undefined || errors[expr]) {
+      if (cache[expressionString] !== undefined || errors[expressionString]) {
         return;
       }
-
-      let result;
-      try {
-        result = binding.expression.evaluate(scope);
-      } catch (error) {
-        errors[expr] = error;
+      const expression = this.expressions_[expressionString];
+      if (!expression) {
+        const error = new Error(
+          `Expression "${expressionString}"" is not cached.`
+        );
+        errors[expressionString] = {message: error.message, stack: error.stack};
         return;
       }
+      const {result, error} = this.evaluate_(expression, scope);
+      if (error) {
+        errors[expressionString] = error;
+        return;
+      }
+      cache[expressionString] = result;
+    });
 
+    // Then, validate each binding and delete invalid expression results.
+    this.bindings_.forEach((binding) => {
+      const {tagName, property, expressionString} = binding;
+      const result = cache[expressionString];
+      if (result === undefined) {
+        return;
+      }
+      // Don't validate non-primitive expression results e.g. arrays, objects.
+      if (result !== null && typeof result === 'object') {
+        return;
+      }
+      // IMPORTANT: We need to validate expression results on each binding
+      // since validity depends on the `tagName` and `property` rather than
+      // just the `result`.
       const resultString = this.stringValueOf_(property, result);
-      if (this.validator_.isResultValid(tagName, property, resultString)) {
-        cache[expr] = result;
-      } else {
-        errors[expr] = new Error(
-            `"${result}" is not a valid result for [${property}].`);
+      if (!this.validator_.isResultValid(tagName, property, resultString)) {
+        // TODO(choumx): If this expression string is used in another
+        // tagName/property which is valid, we ought to allow it.
+        delete cache[expressionString];
+        const error = new Error(
+          `"${result}" is not a valid result for [${property}].`
+        );
+        errors[expressionString] = {message: error.message, stack: error.stack};
       }
     });
+
     return {results: cache, errors};
   }
 
   /**
-   * Return parsed bindings for testing.
-   * @visibleForTesting {!Array<ParsedBindingDef>}
+   * Evaluates and returns a single expression string.
+   * @param {string} expressionString
+   * @param {!JsonObject} scope
+   * @return {!BindEvaluateExpressionResultDef}
    */
-  parsedBindingsForTesting() {
-    return this.parsedBindings_;
+  evaluateExpression(expressionString, scope) {
+    const parsed = this.parse_(expressionString);
+    if (!parsed.expression) {
+      return {result: null, error: parsed.error};
+    }
+    this.setGlobals_(scope);
+    const evaluated = this.evaluate_(parsed.expression, scope);
+    if (!evaluated.result) {
+      return {result: null, error: evaluated.error};
+    }
+    return {result: evaluated.result, error: null};
+  }
+
+  /**
+   * Sets global references in scope if they're not already set or overriden.
+   * @param {!JsonObject} scope
+   */
+  setGlobals_(scope) {
+    if (!('global' in scope)) {
+      scope['global'] = scope;
+    }
+  }
+
+  /**
+   * Parses a single expression string, caches and returns it.
+   * @param {string} expressionString
+   * @return {{expression: ?BindExpression, error: ?BindEvaluatorErrorDef}}
+   * @private
+   */
+  parse_(expressionString) {
+    let expression = this.expressions_[expressionString];
+    let error = null;
+    if (!expression) {
+      try {
+        expression = new BindExpression(expressionString, this.macros_);
+        this.expressions_[expressionString] = expression;
+      } catch (e) {
+        error = {message: e.message, stack: e.stack};
+      }
+    }
+    return {expression, error};
+  }
+
+  /**
+   * Evaluate a single expression with the given scope.
+   * @param {!BindExpression} expression
+   * @param {!JsonObject} scope
+   * @return {{result: ?BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
+   * @private
+   */
+  evaluate_(expression, scope) {
+    let result = null;
+    let error = null;
+    try {
+      result = expression.evaluate(scope);
+    } catch (e) {
+      error = {message: e.message, stack: e.stack};
+    }
+    return {result, error};
+  }
+
+  /**
+   * Return parsed bindings for testing.
+   * @return {!Array<!BindBindingDef>}
+   * @visibleForTesting
+   */
+  bindingsForTesting() {
+    return this.bindings_;
+  }
+
+  /**
+   * Returns the expression cache for testing.
+   * @return {!Object<string, !BindExpression>}
+   * @visibleForTesting
+   */
+  expressionsForTesting() {
+    return this.expressions_;
   }
 
   /**
    * Returns the expression result string for a binding to `property`.
-   * @param {./bind-expression.BindExpressionResultDef} result
+   * @param {string} property
+   * @param {BindExpressionResultDef} result
    * @return {?string}
    * @private
    */

@@ -13,8 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var app = require('../server').app;
+const {gitCommitterEmail} = require('../common/git');
+const {isTravisBuild, travisJobNumber} = require('../common/travis');
+
+const TEST_SERVER_PORT = 8081;
+
+const COMMON_CHROME_FLAGS = [
+  // Dramatically speeds up iframe creation time.
+  '--disable-extensions',
+  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
+// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+const SAUCE_TIMEOUT_CONFIG = {
+  maxDuration: 30 * 60,
+  commandTimeout: 10 * 60,
+  idleTimeout: 30 * 60,
+};
 
 /**
  * @param {!Object} config
@@ -24,28 +43,71 @@ module.exports = {
     'fixture',
     'browserify',
     'mocha',
-    'chai-as-promised',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'src/**/*.js': ['browserify'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    './test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
+
+  // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
+  // 'localhost' addresses. See #14848 for more info.
+  // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
+  hostname: 'localhost',
 
   browserify: {
     watch: true,
     debug: true,
-    transform: ['babelify'],
-    bundleDelay: 900,
+    fast: true,
+    basedir: __dirname + '/../../',
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: isTravisBuild() ? 5000 : 1200,
   },
 
-  reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
+  reporters: ['super-dots', 'karmaSimpleReporter'],
+
+  superDotsReporter: {
+    nbDotsPerLine: 100000,
+    color: {
+      success: 'green',
+      failure: 'red',
+      ignore: 'yellow',
+    },
+    icon: {
+      success: '●',
+      failure: '●',
+      ignore: '○',
+    },
+  },
+
+  specReporter: {
+    suppressPassed: true,
+    suppressSkipped: true,
+    suppressFailed: false,
+    suppressErrorSummary: true,
+    maxLogLines: 20,
+  },
+
+  mochaReporter: {
+    output: 'full',
+    colors: {
+      success: 'green',
+      error: 'red',
+      info: 'yellow',
+    },
+    symbols: {
+      success: '●',
+      error: '●',
+      info: '○',
+    },
+  },
 
   port: 9876,
 
@@ -61,125 +123,187 @@ module.exports = {
     '/test/': '/base/test/',
   },
 
-  // Can't import Karma constants config.LOG_ERROR & config.LOG_WARN,
-  // so we hard code the strings here. Hopefully they'll never change.
-  logLevel: process.env.TRAVIS ? 'ERROR' : 'WARN',
+  // Can't import the Karma constant config.LOG_ERROR, so we hard code it here.
+  // Hopefully it'll never change.
+  logLevel: 'ERROR',
 
   autoWatch: true,
 
-  browsers: [
-    process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
-  ],
+  browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
 
   customLaunchers: {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     Chrome_no_extensions: {
       base: 'Chrome',
-      // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: COMMON_CHROME_FLAGS,
+    },
+    Chrome_no_extensions_headless: {
+      base: 'ChromeHeadless',
+      flags: [
+        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+        '--no-sandbox',
+        '--remote-debugging-port=9222',
+        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
+        "--proxy-server='direct://'",
+        '--proxy-bypass-list=*',
+      ].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_android: {
-      base: 'SauceLabs',
-      browserName: 'android',
-    },
-    SL_Chrome_latest: {
+    SL_Chrome: {
       base: 'SauceLabs',
       browserName: 'chrome',
+      platform: 'Windows 10',
+      version: 'latest',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_Chrome_45: {
+    SL_Chrome_Beta: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '45',
+      platform: 'Windows 10',
+      version: 'beta',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_iOS_8_4: {
+    SL_Chrome_Android_7: {
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '8.4',
+      appiumVersion: '1.8.1',
+      deviceName: 'Android GoogleAPI Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '7.1',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_iOS_9_1: {
+    SL_iOS_12: {
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '12.0',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_iOS_10_0: {
+    SL_iOS_11: {
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '10.0',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '11.3',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_Firefox_latest: {
+    SL_Firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'latest',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_IE_11: {
+    SL_Firefox_Beta: {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'beta',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Safari_12: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '12.1',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Safari_11: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '11.1',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Edge: {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_IE: {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      version: 11,
-    },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-    },
-    SL_Safari_9: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 9,
-    },
-    SL_Safari_8: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 8,
+      platform: 'Windows 10',
+      ...SAUCE_TIMEOUT_CONFIG,
     },
   },
 
   sauceLabs: {
     testName: 'AMP HTML on Sauce',
-    tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+    // Identifier used in build-system/sauce_connect/start_sauce_connect.sh.
+    tunnelIdentifier: isTravisBuild() ? travisJobNumber() : gitCommitterEmail(),
     startConnect: false,
     connectOptions: {
-      port: 5757,
-      logfile: 'sauce_connect.log',
+      noSslBumpDomains: 'all',
     },
   },
 
   client: {
     mocha: {
       reporter: 'html',
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000,
+      // Longer timeout on Travis; fail quickly during local runs.
+      timeout: isTravisBuild() ? 10000 : 2000,
+      // Run tests up to 3 times before failing them on Travis.
+      retries: isTravisBuild() ? 2 : 0,
     },
     captureConsole: false,
+    verboseLogging: false,
+    testServerPort: TEST_SERVER_PORT,
   },
 
   singleRun: true,
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
+  failOnEmptyTestSuite: false,
+
+  // Give a disconnected browser 2 minutes to reconnect with Karma.
+  // This allows a browser to retry 2 times per `browserDisconnectTolerance`
+  // on Travis before stalling out after 10 minutes.
+  browserDisconnectTimeout: 2 * 60 * 1000,
+
+  // If there's no message from the browser, make Karma wait 2 minutes
+  // until it disconnects.
+  browserNoActivityTimeout: 2 * 60 * 1000,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
-  middleware: ['custom'],
+  beforeMiddleware: ['custom'],
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
+    'karma-ie-launcher',
     'karma-mocha',
+    'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
+    'karma-simple-reporter',
     'karma-sinon-chai',
+    'karma-source-map-support',
+    'karma-super-dots-reporter',
     {
-      'middleware:custom': ['factory', function() {return app;}],
+      'middleware:custom': [
+        'factory',
+        function () {
+          return require(require.resolve('../server/app.js'));
+        },
+      ],
     },
   ],
 };

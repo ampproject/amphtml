@@ -5,7 +5,6 @@
   <title>Released AMP components</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-ad" src="/dist/v0/amp-ad-0.1.max.js"></script>
   <script async custom-element="amp-video" src="/dist/v0/amp-video-0.1.max.js"></script>
   <script async custom-element="amp-audio" src="/dist/v0/amp-audio-0.1.max.js"></script>
@@ -41,11 +40,14 @@
   <p>
     <amp-img id="img1" src="/examples/img/sample.jpg" width=264 height=96></amp-img>
   </p>
-  <h2>Hidden image</h2>
+  <h2>Hidden image using nodisplay layout</h2>
   <p>
     <amp-img id="img2" src="/examples/img/sample.jpg" width=527 height=193 layout="nodisplay"></amp-img>
   </p>
-
+  <h2>Hidden image using hidden attribute</h2>
+  <p>
+    <amp-img hidden id="img2" src="/examples/img/sample.jpg" width=527 height=193 layout="responsive"></amp-img>
+  </p>
 
   <section>
     <h2>Media query selection<h2>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpSlideScroll} from './slidescroll';
 import {AmpScrollableCarousel} from './scrollable-carousel';
+import {AmpSlideScroll} from './slidescroll';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
 
 class CarouselSelector extends AMP.BaseElement {
@@ -28,4 +28,6 @@ class CarouselSelector extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+AMP.extension('amp-carousel', '0.1', (AMP) => {
+  AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+});

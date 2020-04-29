@@ -16,13 +16,14 @@
 
 package org.ampproject;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.javascript.jscomp.ClosureCodingConvention.AssertFunctionByTypeName;
+import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
-import com.google.javascript.jscomp.ClosureCodingConvention;
-import com.google.javascript.jscomp.newtypes.JSType;
+import com.google.javascript.rhino.jstype.JSType;
+import com.google.javascript.rhino.jstype.JSTypeNative;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import java.util.Collection;
  * A coding convention for AMP.
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
+
   /** By default, decorate the ClosureCodingConvention. */
   public AmpCodingConvention() {
     this(new ClosureCodingConvention());
@@ -42,17 +44,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     super(convention);
   }
 
-  @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
-    return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
-    );
-  }
-
   /**
    * {@inheritDoc}
    * Because AMP objects can travel between compilation units, we consider
@@ -61,13 +52,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
-    // This stops compiler from inlining functions (local or not) that end with
-    // NoInline in their name. Mostly used for externing try-catch to avoid v8
-    // de-optimization (https://goo.gl/gvzlDp)
-    if (name.endsWith("NoInline")) {
-      return true;
-    }
-
     if (local) {
       return false;
     }

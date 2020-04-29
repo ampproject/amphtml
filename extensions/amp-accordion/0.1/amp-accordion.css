@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,37 @@
  * limitations under the License.
  */
 
-/* Non-overridable properties */
-amp-accordion {
-  display: block !important;
-}
-
-/* Make sections non-floatable */
-amp-accordion > section {
-  float: none !important;
-}
-
-/* Hide all children and make them non-floatable */
-amp-accordion > section > *:nth-child(n) {
-  display: none !important;
-  float: none !important;
-}
-
-/*  Display the first 2 elements (heading and content) */
-amp-accordion > section > .-amp-accordion-header,
-amp-accordion > section > .-amp-accordion-content {
-  display: block !important;
-  overflow: hidden !important; /* clearfix */
-  position: relative !important;
-}
-
-amp-accordion,
-amp-accordion > section,
-.-amp-accordion-header,
-.-amp-accordion-content {
+/* heading/clontent */
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
   margin: 0;
 }
 
-
-
-/* heading element*/
-.-amp-accordion-header {
+/* heading
+ * TODO(dvoytenko): remove most of these styles, except maybe for `cursor`.
+ */
+.i-amphtml-accordion-header {
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
   border: solid 1px #dfdfdf;
 }
 
-/* Collapse content by default. */
-amp-accordion > section > .-amp-accordion-content {
-  display: none !important;
-}
-
-/* Expand content when needed. */
-amp-accordion > section[expanded] > .-amp-accordion-content {
+amp-accordion > section:not([expanded]) > :last-child[rendersubtree] {
+  border: none !important;
   display: block !important;
+  height: 0px !important;
+  margin: 0px !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  position: absolute !important;
+  top: -999999px !important;
+  width: 100% !important;
 }
 
+/* Media should never play when a section is collapsed */
+amp-accordion > section:not([expanded]) .i-amphtml-media-component,
+amp-accordion > section:not([expanded]) .i-amphtml-media-component * {
+  display: none !important;
+  visibility: hidden !important;
+}

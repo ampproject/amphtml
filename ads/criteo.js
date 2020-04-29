@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript} from '../3p/3p';
-import {doubleclick} from '../ads/google/doubleclick';
+import {dev} from '../src/log';
+import {loadScript} from '../3p/3p';
 
 /* global Criteo: false */
+
+/** @const {string} */
+const TAG = 'CRITEO';
 
 /**
  * @param {!Window} global
@@ -25,47 +28,24 @@ import {doubleclick} from '../ads/google/doubleclick';
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
-    if (data.tagtype === 'rta') {
-      // Make sure RTA is called only once
-      computeInMasterFrame(window, 'call-rta', resultCallback => {
-        const params = {
-          networkid: data.networkid,
-          cookiename:
-            data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-          varname:
-            data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName,
-        };
-        Criteo.CallRTA(params);
-        resultCallback(null);
-      }, () => {});
-      setTargeting(global, data);
-    } else if (!data.tagtype || data.tagtype === 'passback') {
+    if (!data.tagtype || data.tagtype === 'passback') {
       Criteo.DisplayAd({
         zoneid: data.zone,
         containerid: 'c',
         integrationmode: 'amp',
       });
+    } else if (data.tagtype === 'rta' || data.tagtype === 'standalone') {
+      dev().error(
+        TAG,
+        'You are using a deprecated Criteo integration',
+        data.tagtype
+      );
+    } else {
+      dev().error(
+        TAG,
+        'You are using an unknown Criteo integration',
+        data.tagtype
+      );
     }
   });
 }
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-function setTargeting(global, data) {
-  if (data.adserver === 'DFP') {
-    const dblParams = {
-      slot: data.slot,
-      targeting: Criteo.ComputeDFPTargetingForAMP(
-        data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-        data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName),
-      width: data.width,
-      height: data.height,
-      type: 'criteo',
-    };
-    doubleclick(global, dblParams);
-  }
-}
-
-

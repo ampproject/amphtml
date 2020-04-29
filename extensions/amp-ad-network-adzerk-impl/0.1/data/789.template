@@ -1,0 +1,84 @@
+<!doctype html>
+<html ⚡4ads>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <style amp-custom>
+      amp-img img {
+        object-fit: cover;
+      }
+
+      .container {
+        position: relative;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .clock-hand {
+        position: absolute;
+        width: 2vw;
+        height: 20vw;
+        top: 50%;
+        left: 50%;
+        z-index: 2;
+        background: #FAFAFA;
+        transform-origin: 50% 0%;
+        border-radius: 10px;
+        transform: rotate(-180deg)
+      }
+    </style>
+  </head>
+  <body>
+    <template type="amp-mustache">
+      <amp-animation id="clockAnim" layout="nodisplay">
+        <script type="application/json">
+        {
+          "duration": "6s",
+          "fill": "both",
+          "direction": "alternate",
+          "animations": [
+            {
+              "target": "clockHand",
+              "keyframes": [
+                { "transform": "rotate(-180deg)" },
+                { "transform": "rotate(0deg)" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </amp-animation>
+      <div class="container">
+        <amp-position-observer
+          intersection-ratios="1"
+          viewport-margins="5vh"
+          on="scroll:clockAnim.seekTo(percent=event.percent)"
+          layout="nodisplay"></amp-position-observer>
+        <amp-img id="clock-bg" layout="fill" src="{{CLOCK_IMG}}">
+        </amp-img>
+        <div id="clockHand" class="clock-hand"></div>
+      </div>
+    </template>
+    <script amp-ad-metadata type=application/json>
+    {
+      "ampRuntimeUtf16CharOffsets" : [ 0, 0 ],
+      "customElementExtensions": [
+        "amp-animation",
+        "amp-position-observer"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-animation",
+          "src": "https://cdn.ampproject.org/v0/amp-animation-0.1.js"
+        },
+        {
+          "custom-element": "amp-position-observer",
+          "src": "https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"
+        }
+      ]
+    }
+    </script>
+
+  </body>
+</html>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-
-import {getExistingServiceForDoc} from './service';
-
-
 /**
- * Returns service implemented in service/history-impl.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!./service/history-impl.History}
+ * Gets state from History.
+ * But IE11 throws if there is no state.
+ *
+ * @param {!History} history
+ * @return {*}
  */
-export function historyForDoc(nodeOrDoc) {
-  return /** @type {!./service/history-impl.History} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'history'));
+export function getState(history) {
+  try {
+    return history.state;
+  } catch (e) {
+    return null;
+  }
 }

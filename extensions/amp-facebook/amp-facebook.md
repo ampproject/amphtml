@@ -1,3 +1,11 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a Facebook post, video or comment.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,71 +22,82 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-facebook"></a> `amp-facebook`
+# amp-facebook
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Facebook post or video. </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook</a></td>
-  </tr>
-</table>
-## Overview 
+## Overview
 
-You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
+You can use the `amp-facebook` component to embed a Facebook post, a Facebook video or a comment on a Facebook post.
 
-**Example: Embedding a post**
+#### Example: Embedding a post
 
-```html
-<amp-facebook width=486 height=657
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
+<amp-facebook width="552" height="310"
     layout="responsive"
-    data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
 </amp-facebook>
-```
+[/sourcecode][/example]
 
-**Example: Embedding a video**
+#### Example: Embedding a video
 
-```html
-<amp-facebook width=552 height=574
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
+<amp-facebook width="476" height="316"
     layout="responsive"
     data-embed-as="video"
-    data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
-```
+[/sourcecode][/example]
+
+#### Example: Embedding a comment on a post
+
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
+<amp-facebook width="552" height="500"
+    layout="responsive"
+    data-embed-type="comment"
+    data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
+</amp-facebook>
+[/sourcecode][/example]
 
 ## Attributes
 
-**data-href** (required)
-
-The URL of the Facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
-
-**data-embed-as** (optional)
-
-The value is either `post` or `video`.  The default is `post`.
-
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
-
-Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
-
-**common attributes**
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-href (required)</strong></td>
+    <td>The URL of the Facebook post/video/comment. For example, a post or video will look like <code>https://www.facebook.com/zuck/posts/10102593740125791</code>. A comment or comment reply will look like <code>https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185</code>. For comments, see the Facebook documentation on <a href="https://developers.facebook.com/docs/plugins/embedded-comments#how-to-get-a-comments-url">how to get a comment's URL</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-embed-as</strong></td>
+    <td>The value is either <code>post</code>, <code>video</code> or <code>comment</code>. The default is <code>post</code>.
+<br><br>
+Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
+<br><br>
+The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments</a>.
+<br><br>
+Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-include-comment-parent</strong></td>
+    <td>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
+<br><br>
+When you are embedding a comment reply, you can optionally also include the parent comment of the reply.</td>
+  </tr>
+  <tr>
+     <td width="40%"><strong>data-align-center</strong></td>
+     <td>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
+<br><br>
+For posts and videos, having this attribute set to true would align the post/video container to center.</td>
+   </tr>
+   <tr>
+      <td width="40%"><strong>data-locale (optional)</strong></td>
+      <td>By default, the locale is set to user's system language; however, you can specify a locale as well.
+<br><br>
+For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></td>
+    </tr>
+    <tr>
+       <td width="40%"><strong>common attributes</strong></td>
+       <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+     </tr>
+</table>
 
 ## Validation
 
-See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii) in the AMP validator specification.
+See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/validator-amp-facebook.protoascii) in the AMP validator specification.

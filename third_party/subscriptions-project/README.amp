@@ -1,0 +1,10 @@
+URL: https://github.com/subscriptions-project
+License: Apache License
+License File: https://github.com/subscriptions-project/subscriptions-apis/blob/master/LICENSE
+
+Description:
+Subscriptions Project and its exports.
+
+Local Modifications:
+- Use `gulp export-to-es-all` in the subscriptions-project repos to create exports usable in AMP.
+- Use regex `(!|\?)\.[^>)}]*` to replace missing type paths with `*`.

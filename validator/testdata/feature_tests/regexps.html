@@ -22,7 +22,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html" />
+  <link rel="canonical" href="./regular-html-version.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style>invalid body</style>
   <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -30,22 +30,44 @@
 
   <!--
   src value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
-  The first example is valid. The latter two examples are invalid.
+  The first example is valid. The latter three examples are invalid.
   -->
-  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"></script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
   <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
   <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+  <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 
   <!--
-  href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
-  The first two examples are valid, the third example is invalid.
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+
+  <!--
+  href value_regex: "https://fonts\\.googleapis\\.com/css2?\\?.*|https://fast\\.fonts\\.net/.*"
+  The first three examples are valid, the third example is invalid.
   -->
   <link rel="stylesheet" type="text/css"
         href="https://fonts.googleapis.com/css?foobar">
   <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css2?foobar">
+  <link rel="stylesheet" type="text/css"
         href="https://cloud.typography.com/6256354/724768/css/fonts.css">
   <link rel="stylesheet" type="text/css"
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
+
+  <!--
+    Regexp to allow typekit fonts.
+    href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+    The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/oeg4hgb.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/css/oeg4hgb.css">
 
   <!--
     Regexp to allow font-awesome css, but not path traversal.
@@ -55,6 +77,23 @@
         href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css"
         href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+  <!--
+    New Font Awesome url format the first five are valid the last two are not.
+  -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css"
+  rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.11.1/css/v4-shims.css"
+  rel="stylesheet">
+  <!-- invalid -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
+  <!--
+    Old Font Awesome url format. Valid.
+  -->
+  <link href="https://use.fontawesome.com/abcdefghij.css" rel="stylesheet">
 
   <!--
   rel value_regex: lengthy, see protoascii

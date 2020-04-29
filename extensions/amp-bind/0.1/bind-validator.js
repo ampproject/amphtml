@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
+import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bind';
@@ -23,7 +25,6 @@ const TAG = 'amp-bind';
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
  *   alternativeName: (string|undefined),
- *   blockedURLs: (Array<string>|undefined),
  * }}
  */
 let PropertyRulesDef;
@@ -36,10 +37,17 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-  // ARIA accessibility attributes.
-  'aria-describedby': null,
-  'aria-label': null,
-  'aria-labelledby': null,
+  'hidden': null,
+  'text': null,
+};
+
+/**
+ * Property rules that apply to all AMP elements.
+ * @private {Object<string, ?PropertyRulesDef>}
+ */
+const AMP_PROPERTY_RULES = {
+  'width': null,
+  'height': null,
 };
 
 /**
@@ -58,6 +66,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
+  'xlink:href': true,
 };
 
 /**
@@ -68,45 +77,49 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
+   * @param {boolean} allowUrlBindings
+   */
+  constructor(allowUrlBindings) {
+    /** @const @private {boolean} */
+    this.allowUrlBindings_ = allowUrlBindings;
+  }
+
+  /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
-   * @param {!string} tag
-   * @param {!string} property
+   * NOTE: `tag` and `property` are case-sensitive.
+   * @param {string} tag
+   * @param {string} property
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @param {?string} value
    * @return {boolean}
    */
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
-
     // `alternativeName` is a reference to another property's rules.
     if (rules && rules.alternativeName) {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
-
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
     }
-
     // If binding is allowed but have no specific rules, return true.
     if (rules === null) {
       return true;
     }
-
     // Validate URL(s) if applicable.
-    if (value && URL_PROPERTIES.hasOwnProperty(property)) {
+    if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
       if (property === 'srcset') {
         let srcset;
@@ -116,21 +129,18 @@ export class BindValidator {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
         }
-        const sources = srcset.getSources();
-        urls = sources.map(source => source.url);
+        urls = srcset.getUrls();
       } else {
         urls = [value];
       }
-
       for (let i = 0; i < urls.length; i++) {
         if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
-
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -149,36 +159,24 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
-    if (allowedProtocols && url) {
-      const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(url);
-
-      if (match !== null) {
-        const protocol = match[1].toLowerCase().trimLeft();
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
-          return false;
+    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    if (url) {
+      if (/__amp_source_origin/.test(url)) {
+        return false;
+      }
+      const {allowedProtocols} = rules;
+      if (allowedProtocols) {
+        const re = /^([^:\/?#.]+):[\s\S]*$/;
+        const match = re.exec(url);
+        if (match !== null) {
+          const protocol = match[1].toLowerCase().trim();
+          // hasOwn() needed since nested objects are not prototype-less.
+          if (!hasOwn(allowedProtocols, protocol)) {
+            return false;
+          }
         }
       }
     }
-
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = rules.blockedURLs;
-    if (blockedURLs && url) {
-      for (let i = 0; i < blockedURLs.length; i++) {
-        let decodedURL;
-        try {
-          decodedURL = decodeURIComponent(url);
-        } catch (e) {
-          decodedURL = unescape(url);
-        }
-        if (decodedURL.trim() === blockedURLs[i]) {
-          return false;
-        }
-      }
-    }
-
     return true;
   }
 
@@ -186,22 +184,32 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    if (GLOBAL_PROPERTY_RULES.hasOwnProperty(property)) {
-      return GLOBAL_PROPERTY_RULES[property];
+    // Allow binding to all ARIA attributes.
+    if (startsWith(property, 'aria-')) {
+      return null;
     }
-
-    let tagRules;
-    if (ELEMENT_RULES.hasOwnProperty(tag)) {
-      tagRules = ELEMENT_RULES[tag];
+    // Disallow URL property bindings if configured as such.
+    if (ownProperty(URL_PROPERTIES, property) && !this.allowUrlBindings_) {
+      return undefined;
     }
-    if (tagRules && tagRules.hasOwnProperty(property)) {
+    const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
+    if (globalRules !== undefined) {
+      return /** @type {PropertyRulesDef} */ (globalRules);
+    }
+    const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
+    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+      return /** @type {PropertyRulesDef} */ (ampPropertyRules);
+    }
+    const tagRules = ownProperty(ELEMENT_RULES, tag);
+    if (tagRules) {
       return tagRules[property];
     }
-
     return undefined;
   }
 }
@@ -213,198 +221,274 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
+    },
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-BASE-CAROUSEL': {
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance-loops': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'slide': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
+    },
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
     'AMP-CAROUSEL': {
-      slide: null,
+      'slide': null,
+    },
+    'AMP-DATE-PICKER': {
+      'max': null,
+      'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
+    },
+    'AMP-IFRAME': {
+      'src': null,
+      'title': null,
     },
     'AMP-IMG': {
-      alt: null,
-      referrerpolicy: null,
-      src: {
-        allowedProtocols: {
-          data: true,
-          http: true,
-          https: true,
+      'alt': null,
+      'attribution': null,
+      'src': {
+        'allowedProtocols': {
+          'data': true,
+          'http': true,
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      srcset: {
-        alternativeName: 'src',
+      'srcset': {
+        'alternativeName': 'src',
       },
+    },
+    'AMP-LIGHTBOX': {
+      'open': null,
+    },
+    'AMP-LIST': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'state': null,
+      'is-layout-container': null,
     },
     'AMP-SELECTOR': {
-      selected: null,
+      'disabled': null,
+      'selected': null,
+    },
+    'AMP-STATE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+      'title': null,
+    },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
     },
     'AMP-VIDEO': {
-      alt: null,
-      attribution: null,
-      autoplay: null,
-      controls: null,
-      loop: null,
-      muted: null,
-      placeholder: null,
-      poster: null,
-      preload: null,
-      src: {
-        allowedProtocols: {
-          https: true,
+      'album': null,
+      'alt': null,
+      'artist': null,
+      'artwork': null,
+      'attribution': null,
+      'controls': null,
+      'controlslist': null,
+      'loop': null,
+      'poster': null,
+      'preload': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
+      'title': null,
     },
-    A: {
-      href: {
-        allowedProtocols: {
-          ftp: true,
-          http: true,
-          https: true,
-          mailto: true,
+    'AMP-YOUTUBE': {
+      'data-videoid': null,
+    },
+    'A': {
+      'href': {
+        // This should be kept in sync with validator-main.protoascii.
+        'allowedProtocols': {
+          'ftp': true,
+          'geo': true,
+          'http': true,
+          'https': true,
+          'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
-          intent: true,
-          skype: true,
-          sms: true,
-          snapchat: true,
-          tel: true,
-          tg: true,
-          threema: true,
-          twitter: true,
-          viber: true,
-          whatsapp: true,
+          'intent': true,
+          'line': true,
+          'skype': true,
+          'sms': true,
+          'snapchat': true,
+          'tel': true,
+          'tg': true,
+          'threema': true,
+          'twitter': true,
+          'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
+          'whatsapp': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
-    BUTTON: {
-      disabled: null,
-      type: null,
-      value: null,
+    'BUTTON': {
+      'disabled': null,
+      'type': null,
+      'value': null,
     },
-    FIELDSET: {
-      disabled: null,
+    'DETAILS': {
+      'open': null,
     },
-    INPUT: {
-      accept: null,
-      accesskey: null,
-      autocomplete: null,
-      checked: null,
-      disabled: null,
-      height: null,
-      inputmode: null,
-      max: null,
-      maxlength: null,
-      min: null,
-      minlength: null,
-      multiple: null,
-      name: {
-        blockedURLs: ['__amp_source_origin'],
-      },
-      pattern: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      selectiondirection: null,
-      size: null,
-      spellcheck: null,
-      step: null,
-      type: {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
-      },
-      value: null,
-      width: null,
+    'FIELDSET': {
+      'disabled': null,
     },
-    OPTION: {
-      disabled: null,
-      label: null,
-      selected: null,
-      value: null,
-    },
-    OPTGROUP: {
-      disabled: null,
-      label: null,
-    },
-    SELECT: {
-      disabled: null,
-      multiple: null,
-      name: null,
-      required: null,
-      size: null,
-    },
-    SOURCE: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'IMAGE': {
+      'xlink:href': {
+        'allowedProtocols': {
+          'http': true,
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      type: null,
     },
-    TRACK: {
-      label: null,
-      src: {
-        allowedProtocols: {
-          https: true,
+    'INPUT': {
+      'accept': null,
+      'accesskey': null,
+      'autocomplete': null,
+      'checked': null,
+      'disabled': null,
+      'height': null,
+      'inputmode': null,
+      'max': null,
+      'maxlength': null,
+      'min': null,
+      'minlength': null,
+      'multiple': null,
+      'pattern': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'selectiondirection': null,
+      'size': null,
+      'spellcheck': null,
+      'step': null,
+      'type': {
+        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
+      },
+      'value': null,
+      'width': null,
+    },
+    'OPTION': {
+      'disabled': null,
+      'label': null,
+      'selected': null,
+      'value': null,
+    },
+    'OPTGROUP': {
+      'disabled': null,
+      'label': null,
+    },
+    'SECTION': {
+      'data-expand': null,
+    },
+    'SELECT': {
+      'autofocus': null,
+      'disabled': null,
+      'multiple': null,
+      'required': null,
+      'size': null,
+    },
+    'SOURCE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      srclang: null,
+      'type': null,
     },
-    TEXTAREA: {
-      autocomplete: null,
-      cols: null,
-      disabled: null,
-      maxlength: null,
-      minlength: null,
-      name: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      rows: null,
-      selectiondirection: null,
-      selectionend: null,
-      selectionstart: null,
-      spellcheck: null,
-      wrap: null,
+    'TRACK': {
+      'label': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'srclang': null,
+    },
+    'TEXTAREA': {
+      'autocomplete': null,
+      'autofocus': null,
+      'cols': null,
+      'disabled': null,
+      'maxlength': null,
+      'minlength': null,
+      'pattern': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'rows': null,
+      'selectiondirection': null,
+      'selectionend': null,
+      'selectionstart': null,
+      'spellcheck': null,
+      'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
-
-  // Collate all standard elements that should support [text] binding
-  // and add them to `rules` object.
-  // 4.3 Sections
-  const sectionTags = ['ASIDE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-      'HEADER', 'FOOTER', 'ADDRESS'];
-  // 4.4 Grouping content
-  const groupingTags = ['P', 'PRE', 'BLOCKQUOTE', 'LI', 'DT', 'DD',
-      'FIGCAPTION', 'DIV'];
-  // 4.5 Text-level semantics
-  const textTags = ['A', 'EM', 'STRONG', 'SMALL', 'S', 'CITE', 'Q',
-      'DFN', 'ABBR', 'DATA', 'TIME', 'CODE', 'VAR', 'SAMP', 'KBD',
-      'SUB', 'SUP', 'I', 'B', 'U', 'MARK', 'RUBY', 'RB', 'RT', 'RTC',
-      'RP', 'BDI', 'BDO', 'SPAN'];
-  // 4.6 Edits
-  const editTags = ['INS', 'DEL'];
-  // 4.9 Tabular data
-  const tabularTags = ['CAPTION', 'THEAD', 'TFOOT', 'TD'];
-  // 4.10 Forms
-  const formTags = ['BUTTON', 'LABEL', 'LEGEND', 'OPTION',
-      'OUTPUT', 'PROGRESS', 'TEXTAREA'];
-  const allTextTags = sectionTags.concat(groupingTags).concat(textTags)
-      .concat(editTags).concat(tabularTags).concat(formTags);
-  allTextTags.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    rules[tag]['text'] = null;
-  });
-
-  // AMP extensions support additional properties.
-  const ampExtensions = ['AMP-IMG'];
-  ampExtensions.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    const tagRule = rules[tag];
-    tagRule['width'] = null;
-    tagRule['height'] = null;
-  });
-
   return rules;
 }

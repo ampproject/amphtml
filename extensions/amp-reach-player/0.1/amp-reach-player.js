@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpReachPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -26,12 +27,16 @@ class AmpReachPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player-cdn.beachfrontmedia.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player-cdn.beachfrontmedia.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -40,13 +45,21 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
+  }
+
+  /** @override */
   layoutCallback() {
-    const embedId = (this.element.getAttribute('data-embed-id') || 'default');
+    const embedId = this.element.getAttribute('data-embed-id') || 'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
-    iframe.src = 'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' + encodeURIComponent(embedId);
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src =
+      'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' +
+      encodeURIComponent(embedId);
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -56,14 +69,14 @@ class AmpReachPlayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(
+      this.iframe_.contentWindow./*OK*/ postMessage(
         'pause',
         'https://player-cdn.beachfrontmedia.com'
       );
     }
   }
+}
 
-};
-
-AMP.registerElement('amp-reach-player', AmpReachPlayer);
-
+AMP.extension('amp-reach-player', '0.1', (AMP) => {
+  AMP.registerElement('amp-reach-player', AmpReachPlayer);
+});

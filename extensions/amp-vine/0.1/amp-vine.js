@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,17 +14,35 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // the Vine iframe
-    this.preconnect.url('https://vine.co', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://vine.co',
+      onLayout
+    );
     // Vine assets loaded in the iframe
-    this.preconnect.url('https://v.cdn.vine.co', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://v.cdn.vine.co',
+      onLayout
+    );
   }
 
   /** @override */
@@ -35,19 +52,20 @@ class AmpVine extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const vineid = user().assert(this.element.getAttribute('data-vineid'),
+    const vineid = userAssert(
+      this.element.getAttribute('data-vineid'),
       'The data-vineid attribute is required for <amp-vine> %s',
-      this.element);
+      this.element
+    );
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
-    iframe.src = 'https://vine.co/v/' +
-      encodeURIComponent(vineid) + '/embed/simple';
+    iframe.src =
+      'https://vine.co/v/' + encodeURIComponent(vineid) + '/embed/simple';
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    /** @private {?Element} */
     this.iframe_ = iframe;
 
     return this.loadPromise(iframe);
@@ -56,9 +74,11 @@ class AmpVine extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
+      this.iframe_.contentWindow./*OK*/ postMessage('pause', '*');
     }
   }
 }
 
-AMP.registerElement('amp-vine', AmpVine);
+AMP.extension('amp-vine', '0.1', (AMP) => {
+  AMP.registerElement('amp-vine', AmpVine);
+});

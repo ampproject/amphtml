@@ -24,7 +24,7 @@
 /**
  * @fileoverview A Html SAX parser.
  *
- * Examples of usage of the {@code goog.string.html.HtmlParser}:
+ * Examples of usage of the `goog.string.html.HtmlParser`:
  * <pre>
  *   const handler = new MyCustomHtmlVisitorHandlerThatExtendsHtmlSaxHandler();
  *   const parser = new goog.string.html.HtmlParser();
@@ -32,14 +32,8 @@
  * </pre>
  */
 
-goog.provide('amp.htmlparser.HtmlParser');
-goog.provide('amp.htmlparser.HtmlParser.EFlags');
-goog.provide('amp.htmlparser.HtmlParser.Elements');
-goog.provide('amp.htmlparser.HtmlParser.Entities');
-goog.require('amp.htmlparser.DocLocator');
-goog.require('amp.htmlparser.HtmlSaxHandler');
-goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
-
+goog.module('amp.htmlparser');
+const parserInterface = goog.require('amp.htmlparser.interface');
 
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
@@ -137,10 +131,13 @@ const ElementsWhichClosePTag = {
  * @enum {number}
  */
 const TagRegion = {
-  PRE_HEAD: 0,
-  IN_HEAD: 1,
-  PRE_BODY: 2,  // After closing head tag, but before open body tag.
-  IN_BODY: 3,
+  PRE_DOCTYPE: 0,
+  PRE_HTML: 1,
+  PRE_HEAD: 2,
+  IN_HEAD: 3,
+  PRE_BODY: 4,  // After closing head tag, but before open body tag.
+  IN_BODY: 5,
+  IN_SVG: 6,
   // We don't track the region after the closing body tag.
 };
 
@@ -158,9 +155,10 @@ const TagRegion = {
  * @private
  */
 class TagNameStack {
-  /** Creates an empty instance.
-   * @param {amp.htmlparser.HtmlSaxHandler|
-   *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+  /**
+   * Creates an empty instance.
+   * @param {!parserInterface.HtmlSaxHandler|
+   *     !parserInterface.HtmlSaxHandlerWithLocation} handler The
    *         HtmlSaxHandler that will receive the events.
    */
   constructor(handler) {
@@ -173,8 +171,8 @@ class TagNameStack {
 
     /**
      * The current tag name and its parents.
-     * @type {amp.htmlparser.HtmlSaxHandler|
-     *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+     * @type {!parserInterface.HtmlSaxHandler|
+     *     !parserInterface.HtmlSaxHandlerWithLocation} handler The
      *         HtmlSaxHandler that will receive the events.
      * @private
      */
@@ -184,7 +182,7 @@ class TagNameStack {
      * @type {number}
      * @private
      */
-    this.region_ = TagRegion.PRE_HEAD;
+    this.region_ = TagRegion.PRE_DOCTYPE;
 
     /**
      * Tracks when the start <head> tag has been encountered or manufactured.
@@ -199,59 +197,146 @@ class TagNameStack {
      * @private
      */
     this.isBodyStarted_ = false;
+
+    /**
+     * Keeps track of the attributes from all body tags encountered within the
+     * document.
+     * @type {!Array<!Object>}
+     * @private
+     */
+    this.effectiveBodyAttribs_ = [];
+  }
+
+  /**
+   * Returns the attributes from all body tags within the document.
+   * @return {!Array<!Object>}
+   */
+  effectiveBodyAttribs() {
+    return this.effectiveBodyAttribs_;
   }
 
   /**
    * Enter a tag, opening a scope for child tags. Entering a tag can close the
    * previous tag or enter other tags (such as opening a <body> tag when
    * encountering a tag not allowed outside the body.
-   * @param {!string} tagName
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   * @param {!parserInterface.ParsedHtmlTag} tag
    */
-  startTag(tagName, encounteredAttrs) {
+  startTag(tag) {
+    // We only report the first body for each document - either
+    // a manufactured one, or the first one encountered. However,
+    // we collect all attributes in this.effectiveBodyAttribs_.
+    if (tag.upperName() === 'BODY') {
+      this.effectiveBodyAttribs_ =
+          this.effectiveBodyAttribs_.concat(tag.attrs().slice());
+    }
+
     // This section deals with manufacturing <head>, </head>, and <body> tags
     // if the document has left them out or placed them in the wrong location.
     switch (this.region_) {
-      case TagRegion.PRE_HEAD:
-        if (tagName === 'HEAD') {
+      case TagRegion.PRE_DOCTYPE:
+        if (tag.upperName() === '!DOCTYPE') {
+          this.region_ = TagRegion.PRE_HTML;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
           this.region_ = TagRegion.IN_HEAD;
-        } else if (tagName === 'BODY') {
+        } else if (tag.upperName() === 'BODY') {
           this.region_ = TagRegion.IN_BODY;
-        } else if (!HtmlStructureElements.hasOwnProperty(tagName)) {
-          if (HeadElements.hasOwnProperty(tagName)) {
-            this.startTag('HEAD', []);
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new parserInterface.ParsedHtmlTag('HEAD'));
           } else {
-            if (this.handler_.markManufacturedBody)
+            if (this.handler_.markManufacturedBody) {
               this.handler_.markManufacturedBody();
-            this.startTag('BODY', []);
+            }
+            this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
+      case TagRegion.PRE_HTML:
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE') {
+          return;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new parserInterface.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
+      case TagRegion.PRE_HEAD:
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML') {
+          return;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new parserInterface.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
           }
         }
         break;
       case TagRegion.IN_HEAD:
-        if (!HeadElements.hasOwnProperty(tagName)) {
-          this.endTag('HEAD');
-          if (tagName !== 'BODY') {
-            if (this.handler_.markManufacturedBody)
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (!HeadElements.hasOwnProperty(tag.upperName())) {
+          this.endTag(new parserInterface.ParsedHtmlTag('HEAD'));
+          if (tag.upperName() !== 'BODY') {
+            if (this.handler_.markManufacturedBody) {
               this.handler_.markManufacturedBody();
-            this.startTag('BODY', []);
+            }
+            this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
           } else {
             this.region_ = TagRegion.IN_BODY;
           }
         }
         break;
       case TagRegion.PRE_BODY:
-        if (tagName !== 'BODY') {
-          if (this.handler_.markManufacturedBody)
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (tag.upperName() !== 'BODY') {
+          if (this.handler_.markManufacturedBody) {
             this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
+          }
+          this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
         } else {
           this.region_ = TagRegion.IN_BODY;
         }
         break;
       case TagRegion.IN_BODY:
-        if (tagName === 'BODY') {
-          // If we've manufactured a body, then ignore the later body.
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
           return;
+        } else if (tag.upperName() === 'BODY') {
+          // We only report the first body for each document - either
+          // a manufactured one, or the first one encountered.
+          return;
+        }
+        if (tag.upperName() === 'SVG') {
+          this.region_ = TagRegion.IN_SVG;
+          break;
         }
         // Check implicit tag closing due to opening tags.
         if (this.stack_.length > 0) {
@@ -259,33 +344,42 @@ class TagNameStack {
           // <p> tags can be implicitly closed by certain other start tags.
           // See https://www.w3.org/TR/html-markup/p.html
           if (parentTagName === 'P' &&
-              ElementsWhichClosePTag.hasOwnProperty(tagName)) {
-            this.endTag('P');
-          // <dd> and <dt> tags can be implicitly closed by other <dd> and <dt>
-          // tags. See https://www.w3.org/TR/html-markup/dd.html
-          } else if ((tagName == 'DD' || tagName == 'DT') &&
-                     (parentTagName == 'DD' || parentTagName == 'DT')) {
-            this.endTag(parentTagName);
-          // <li> tags can be implicitly closed by other <li> tags.
-          // See https://www.w3.org/TR/html-markup/li.html
-          } else if (tagName == 'LI' && parentTagName == 'LI') {
-            this.endTag('LI');
+              ElementsWhichClosePTag.hasOwnProperty(tag.upperName())) {
+            this.endTag(new parserInterface.ParsedHtmlTag('P'));
+            // <dd> and <dt> tags can be implicitly closed by other <dd> and
+            // <dt> tags. See https://www.w3.org/TR/html-markup/dd.html
+          } else if (
+              (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
+              (parentTagName == 'DD' || parentTagName == 'DT')) {
+            this.endTag(new parserInterface.ParsedHtmlTag(parentTagName));
+            // <li> tags can be implicitly closed by other <li> tags.
+            // See https://www.w3.org/TR/html-markup/li.html
+          } else if (tag.upperName() == 'LI' && parentTagName == 'LI') {
+            this.endTag(new parserInterface.ParsedHtmlTag('LI'));
           }
         }
         break;
+      case TagRegion.IN_SVG:
+        if (this.handler_.startTag) {
+          this.handler_.startTag(tag);
+        }
+        this.stack_.push(tag.upperName());
+        return;
       default:
         break;
     }
 
     if (this.handler_.startTag) {
-      this.handler_.startTag(tagName, encounteredAttrs);
+      this.handler_.startTag(tag);
     }
-    if (ElementsWithNoEndElements.hasOwnProperty(tagName)) {
+    if (ElementsWithNoEndElements.hasOwnProperty(tag.upperName())) {
       if (this.handler_.endTag) {
-        this.handler_.endTag(tagName);
+        // Ignore attributes in end tags.
+        this.handler_.endTag(
+            new parserInterface.ParsedHtmlTag(tag.upperName()));
       }
     } else {
-      this.stack_.push(tagName);
+      this.stack_.push(tag.upperName());
     }
   }
 
@@ -295,22 +389,42 @@ class TagNameStack {
    * @param {string} text
    */
   pcdata(text) {
-    if (!amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
+    if (SPACE_RE_.test(text)) {
+      // Only ASCII whitespace; this can be ignored for validator's purposes.
+    } else if (CPP_SPACE_RE_.test(text)) {
+      // Non-ASCII whitespace; if this occurs outside <body>, output a
+      // manufactured-body error. Do not create implicit tags, in order to match
+      // the behavior of the buggy C++ parser. (It just so happens this is also
+      // good UX, since the subsequent validation errors caused by the implicit
+      // tags are unhelpful.)
       switch (this.region_) {
+        // Fallthroughs intentional.
+        case TagRegion.PRE_DOCTYPE:
+        case TagRegion.PRE_HTML:
         case TagRegion.PRE_HEAD:
-        case TagRegion.PRE_BODY:
-          if (this.handler_.markManufacturedBody)
-            this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
-          break;
         case TagRegion.IN_HEAD:
-          this.endTag('HEAD');
-          if (this.handler_.markManufacturedBody)
+        case TagRegion.PRE_BODY:
+          if (this.handler_.markManufacturedBody) {
             this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
-          break;
-        default:
-          break;
+          }
+      }
+    } else {
+      // Non-whitespace text; if this occurs outside <body>, output a
+      // manufactured-body error and create the necessary implicit tags.
+      switch (this.region_) {
+        // Fallthroughs intentional.
+        case TagRegion.PRE_DOCTYPE:  // doctype is not manufactured
+        case TagRegion.PRE_HTML:
+          this.startTag(new parserInterface.ParsedHtmlTag('HTML'));
+        case TagRegion.PRE_HEAD:
+          this.startTag(new parserInterface.ParsedHtmlTag('HEAD'));
+        case TagRegion.IN_HEAD:
+          this.endTag(new parserInterface.ParsedHtmlTag('HEAD'));
+        case TagRegion.PRE_BODY:
+          if (this.handler_.markManufacturedBody) {
+            this.handler_.markManufacturedBody();
+          }
+          this.startTag(new parserInterface.ParsedHtmlTag('BODY'));
       }
     }
     this.handler_.pcdata(text);
@@ -319,29 +433,36 @@ class TagNameStack {
   /**
    * Upon exiting a tag, validation for the current matcher is triggered,
    * e.g. for checking that the tag had some specified number of children.
-   * @param {!string} tagName
+   * @param {!parserInterface.ParsedHtmlTag} tag
    */
-  endTag(tagName) {
-    if (this.region_ == TagRegion.IN_HEAD && tagName === 'HEAD')
+  endTag(tag) {
+    if (this.region_ == TagRegion.IN_HEAD && tag.upperName() === 'HEAD') {
       this.region_ = TagRegion.PRE_BODY;
+    }
 
     // We ignore close body tags (</body) and instead insert them when their
     // outer scope is closed (/html). This is closer to how a browser parser
     // works. The idea here is if other tags are found after the <body>,
     // (ex: <div>) which are only allowed in the <body>, we will effectively
     // move them into the body section.
-    if (tagName === 'BODY') return;
+    if (tag.upperName() === 'BODY') {
+      return;
+    }
 
-    // We look for tagName from the end. If we can find it, we pop
+    // We look for tag.upperName() from the end. If we can find it, we pop
     // everything from thereon off the stack. If we can't find it,
     // we don't bother with closing the tag, since it doesn't have
     // a matching open tag, though in practice the HtmlParser class
     // will have already manufactured a start tag.
     for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
-      if (this.stack_[idx] === tagName) {
+      if (this.stack_[idx] === tag.upperName()) {
         while (this.stack_.length > idx) {
+          if (this.stack_[this.stack_.length - 1] === 'SVG') {
+            this.region_ = TagRegion.IN_BODY;
+          }
           if (this.handler_.endTag) {
-            this.handler_.endTag(this.stack_.pop());
+            this.handler_.endTag(
+                new parserInterface.ParsedHtmlTag(this.stack_.pop()));
           }
         }
         return;
@@ -357,31 +478,33 @@ class TagNameStack {
   exitRemainingTags() {
     while (this.stack_.length > 0) {
       if (this.handler_.endTag) {
-        this.handler_.endTag(this.stack_.pop());
+        this.handler_.endTag(
+            new parserInterface.ParsedHtmlTag(this.stack_.pop()));
       }
     }
   }
 }
 
+
 /**
- * An Html parser: {@code parse} takes a string and calls methods on
- * {@code amp.htmlparser.HtmlSaxHandler} while it is visiting it.
+ * An Html parser: `parse` takes a string and calls methods on
+ * `HtmlSaxHandler` while it is visiting it.
  */
-amp.htmlparser.HtmlParser = class {
+const HtmlParser = class {
   constructor() {}
 
   /**
-   * Given a SAX-like {@code amp.htmlparser.HtmlSaxHandler} parses a
-   * {@code htmlText} and lets the {@code handler} know the structure while
+   * Given a SAX-like `HtmlSaxHandler` parses a
+   * `htmlText` and lets the `handler` know the structure while
    * visiting the nodes. If the provided handler is an implementation of
-   * {@code amp.htmlparser.HtmlSaxHandlerWithLocation}, then its
-   * {@code setDocLocator} method will get called prior to
-   * {@code startDoc}, and the {@code getLine} / {@code getCol} methods will
+   * `htmlparser.HtmlSaxHandlerWithLocation`, then its
+   * `setDocLocator` method will get called prior to
+   * `startDoc`, and the `getLine` / `getCol` methods will
    * reflect the current line / column while a SAX callback (e.g.,
-   * {@code startTag}) is active.
+   * `startTag`) is active.
    *
-   * @param {amp.htmlparser.HtmlSaxHandler|
-   *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+   * @param {!parserInterface.HtmlSaxHandler|
+   *     !parserInterface.HtmlSaxHandlerWithLocation} handler The
    *         HtmlSaxHandler that will receive the events.
    * @param {string} htmlText The html text.
    */
@@ -392,13 +515,13 @@ amp.htmlparser.HtmlParser = class {
     let tagName;         // The name of the tag currently being processed.
     let eflags;          // The element flags for the current tag.
     let openTag;         // True if the current tag is an open tag.
-    let tagStack = new TagNameStack(handler);
+    const tagStack = new TagNameStack(handler);
 
     // Only provide location information if the handler implements the
     // setDocLocator method.
     let locator = null;
-    if (handler instanceof amp.htmlparser.HtmlSaxHandlerWithLocation) {
-      locator = new amp.htmlparser.HtmlParser.DocLocatorImpl(htmlText);
+    if (handler instanceof parserInterface.HtmlSaxHandlerWithLocation) {
+      locator = new DocLocatorImpl(htmlText);
       handler.setDocLocator(locator);
     }
 
@@ -408,8 +531,7 @@ amp.htmlparser.HtmlParser = class {
     // Consumes tokens from the htmlText and stops once all tokens are
     // processed.
     while (htmlText) {
-      const regex = inTag ? amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
-                            amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
+      const regex = inTag ? INSIDE_TAG_TOKEN_ : OUTSIDE_TAG_TOKEN_;
       // Gets the next token
       const m = htmlText.match(regex);
       if (locator) {
@@ -422,7 +544,7 @@ amp.htmlparser.HtmlParser = class {
       if (inTag) {
         if (m[1]) {  // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
-          const attribName = amp.htmlparser.toLowerCase(m[1]);
+          const attribName = parserInterface.toLowerCase(m[1]);
           // Use empty string as value for valueless attribs, so
           //   <input type=checkbox checked>
           // gets attributes ['type', 'checkbox', 'checked', '']
@@ -443,16 +565,17 @@ amp.htmlparser.HtmlParser = class {
         } else if (m[4]) {
           if (eflags !== void 0) {  // False if not in whitelist.
             if (openTag) {
-              tagStack.startTag(/** @type {string} */ (tagName), attribs);
+              tagStack.startTag(new parserInterface.ParsedHtmlTag(
+                  /** @type {string} */ (tagName), attribs));
             } else {
-              tagStack.endTag(/** @type {string} */ (tagName));
+              tagStack.endTag(new parserInterface.ParsedHtmlTag(
+                  /** @type {string} */ (tagName)));
             }
           }
 
-          if (openTag && (eflags & (amp.htmlparser.HtmlParser.EFlags.CDATA |
-                                    amp.htmlparser.HtmlParser.EFlags.RCDATA))) {
+          if (openTag && (eflags & (EFlags.CDATA | EFlags.RCDATA))) {
             if (htmlUpper === null) {
-              htmlUpper = amp.htmlparser.toUpperCase(htmlText);
+              htmlUpper = parserInterface.toUpperCase(htmlText);
             } else {
               htmlUpper =
                   htmlUpper.substring(htmlUpper.length - htmlText.length);
@@ -461,7 +584,7 @@ amp.htmlparser.HtmlParser = class {
             if (dataEnd < 0) {
               dataEnd = htmlText.length;
             }
-            if (eflags & amp.htmlparser.HtmlParser.EFlags.CDATA) {
+            if (eflags & EFlags.CDATA) {
               if (handler.cdata) {
                 handler.cdata(htmlText.substring(0, dataEnd));
               }
@@ -477,7 +600,7 @@ amp.htmlparser.HtmlParser = class {
 
           tagName = eflags = openTag = void 0;
           attribs.length = 0;
-          if (inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = false;
@@ -487,15 +610,17 @@ amp.htmlparser.HtmlParser = class {
           tagStack.pcdata(m[0]);
         } else if (m[3]) {  // Tag.
           openTag = !m[2];
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = true;
-          tagName = amp.htmlparser.toUpperCase(m[3]);
-          eflags = amp.htmlparser.HtmlParser.Elements.hasOwnProperty(tagName) ?
-              amp.htmlparser.HtmlParser.Elements[tagName] :
-              amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
+          tagName = parserInterface.toUpperCase(m[3]);
+          eflags = Elements.hasOwnProperty(tagName) ? Elements[tagName] :
+                                                      EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
+          if (locator) {
+            locator.snapshotPos();
+          }
           tagStack.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
@@ -509,6 +634,7 @@ amp.htmlparser.HtmlParser = class {
               tagStack.pcdata('&amp;');
               break;
           }
+        } else {
         }
       }
     }
@@ -518,6 +644,7 @@ amp.htmlparser.HtmlParser = class {
     }
     // Lets the handler know that we are done parsing the document.
     tagStack.exitRemainingTags();
+    handler.effectiveBodyTag(tagStack.effectiveBodyAttribs());
     handler.endDoc();
   }
 
@@ -532,14 +659,14 @@ amp.htmlparser.HtmlParser = class {
     // TODO(goto): use {amp.htmlparserDecode} instead ?
     // TODO(goto): &pi; is different from &Pi;
     const name =
-        amp.htmlparser.toLowerCase(entity.substring(1, entity.length - 1));
-    if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
-      return amp.htmlparser.HtmlParser.Entities[name];
+        parserInterface.toLowerCase(entity.substring(1, entity.length - 1));
+    if (Entities.hasOwnProperty(name)) {
+      return Entities[name];
     }
-    let m = name.match(amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_);
+    let m = name.match(DECIMAL_ESCAPE_RE_);
     if (m) {
       return String.fromCharCode(parseInt(m[1], 10));
-    } else if (!!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
+    } else if (!!(m = name.match(HEX_ESCAPE_RE_))) {
       return String.fromCharCode(parseInt(m[1], 16));
     }
     // If unable to decode, return the name.
@@ -552,21 +679,21 @@ amp.htmlparser.HtmlParser = class {
    * @return {string} A string without null characters.
    * @private
    */
-  stripNULs_(s) { return s.replace(amp.htmlparser.HtmlParser.NULL_RE_, ''); }
+  stripNULs_(s) {
+    return s.replace(NULL_RE_, '');
+  }
 
   /**
    * The plain text of a chunk of HTML CDATA which possibly containing.
    *
-   * TODO(goto): use {@code goog.string.unescapeEntities} instead ?
+   * TODO(goto): use `goog.string.unescapeEntities` instead ?
    * @param {string} s A chunk of HTML CDATA.  It must not start or end inside
    *   an HTML entity.
    * @return {string} The unescaped entities.
    * @private
    */
   unescapeEntities_(s) {
-    return s.replace(
-        amp.htmlparser.HtmlParser.ENTITY_RE_,
-        goog.bind(this.lookupEntity_, this));
+    return s.replace(ENTITY_RE_, goog.bind(this.lookupEntity_, this));
   }
 
   /**
@@ -576,124 +703,111 @@ amp.htmlparser.HtmlParser = class {
    * @private
    */
   normalizeRCData_(rcdata) {
-    return rcdata.replace(amp.htmlparser.HtmlParser.LOOSE_AMP_RE_, '&amp;$1')
-        .replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;')
-        .replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
+    return rcdata.replace(LOOSE_AMP_RE_, '&amp;$1')
+        .replace(LT_RE, '&lt;')
+        .replace(GT_RE, '&gt;');
   }
-}
-
+};
+exports.HtmlParser = HtmlParser;
 
 /**
  * HTML entities that are encoded/decoded.
- * TODO(goto): use {@code goog.string.htmlEncode} instead.
+ * TODO(goto): use `goog.string.htmlEncode` instead.
  * @type {!Object<string, string>}
  */
-amp.htmlparser.HtmlParser.Entities = {
+const Entities = {
   'colon': ':',
   'lt': '<',
   'gt': '>',
   'amp': '&',
   'nbsp': '\u00a0',
   'quot': '"',
-  'apos': '\''
+  'apos': '\'',
 };
-
+exports.Entities = Entities;
 
 /**
  * The html eflags, used internally on the parser.
  * @enum {number}
  */
-amp.htmlparser.HtmlParser.EFlags = {
+const EFlags = {
   OPTIONAL_ENDTAG: 1,
   EMPTY: 2,
   CDATA: 4,
   RCDATA: 8,
   UNSAFE: 16,
   FOLDABLE: 32,
-  UNKNOWN_OR_CUSTOM: 64
+  UNKNOWN_OR_CUSTOM: 64,
 };
+exports.EFlags = EFlags;
 
 /**
  * A map of element to a bitmap of flags it has, used internally on the parser.
  * @type {Object<string,?>}
  */
-amp.htmlparser.HtmlParser.Elements = {
+const Elements = {
   'A': 0,
   'ABBR': 0,
   'ACRONYM': 0,
   'ADDRESS': 0,
-  'APPLET': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'AREA': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'APPLET': EFlags.UNSAFE,
+  'AREA': EFlags.EMPTY,
   'B': 0,
-  'BASE': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'BASEFONT': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'BASE': EFlags.EMPTY | EFlags.UNSAFE,
+  'BASEFONT': EFlags.EMPTY | EFlags.UNSAFE,
   'BDO': 0,
   'BIG': 0,
   'BLOCKQUOTE': 0,
-  'BODY': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
-  'BR': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'BODY': EFlags.OPTIONAL_ENDTAG | EFlags.UNSAFE | EFlags.FOLDABLE,
+  'BR': EFlags.EMPTY,
   'BUTTON': 0,
   'CANVAS': 0,
   'CAPTION': 0,
   'CENTER': 0,
   'CITE': 0,
   'CODE': 0,
-  'COL': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'COLGROUP': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'DD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'COL': EFlags.EMPTY,
+  'COLGROUP': EFlags.OPTIONAL_ENDTAG,
+  'DD': EFlags.OPTIONAL_ENDTAG,
   'DEL': 0,
   'DFN': 0,
   'DIR': 0,
   'DIV': 0,
   'DL': 0,
-  'DT': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'DT': EFlags.OPTIONAL_ENDTAG,
   'EM': 0,
   'FIELDSET': 0,
   'FONT': 0,
   'FORM': 0,
-  'FRAME': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'FRAMESET': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'FRAME': EFlags.EMPTY | EFlags.UNSAFE,
+  'FRAMESET': EFlags.UNSAFE,
   'H1': 0,
   'H2': 0,
   'H3': 0,
   'H4': 0,
   'H5': 0,
   'H6': 0,
-  'HEAD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
-  'HR': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'HTML': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
+  'HEAD': EFlags.OPTIONAL_ENDTAG | EFlags.UNSAFE | EFlags.FOLDABLE,
+  'HR': EFlags.EMPTY,
+  'HTML': EFlags.OPTIONAL_ENDTAG | EFlags.UNSAFE | EFlags.FOLDABLE,
   'I': 0,
-  'IFRAME': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.CDATA,
-  'IMG': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'INPUT': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'IFRAME': EFlags.UNSAFE | EFlags.CDATA,
+  'IMG': EFlags.EMPTY,
+  'INPUT': EFlags.EMPTY,
   'INS': 0,
-  'ISINDEX': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'ISINDEX': EFlags.EMPTY | EFlags.UNSAFE,
   'KBD': 0,
   'LABEL': 0,
   'LEGEND': 0,
-  'LI': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'LINK': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'LI': EFlags.OPTIONAL_ENDTAG,
+  'LINK': EFlags.EMPTY | EFlags.UNSAFE,
   'MAP': 0,
   'MENU': 0,
-  'META': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'NOFRAMES': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.CDATA,
+  'META': EFlags.EMPTY | EFlags.UNSAFE,
+  'NOFRAMES': EFlags.UNSAFE | EFlags.CDATA,
   // TODO(johannes): This used to read:
-  // 'NOSCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-  //  amp.htmlparser.HtmlParser.EFlags.CDATA,
+  // 'NOSCRIPT': EFlags.UNSAFE |
+  //  EFlags.CDATA,
   //
   // It appears that the effect of that is that anything inside is
   // then considered cdata, so <noscript><style>foo</noscript></noscript>
@@ -703,61 +817,48 @@ amp.htmlparser.HtmlParser.Elements = {
   // On a broader note this also means we may be missing other start/end
   // tag events inside elements marked as CDATA which our parser
   // should better reject. Yikes.
-  'NOSCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'OBJECT': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'NOSCRIPT': EFlags.UNSAFE,
+  'OBJECT': EFlags.UNSAFE,
   'OL': 0,
   'OPTGROUP': 0,
-  'OPTION': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'P': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'PARAM': amp.htmlparser.HtmlParser.EFlags.EMPTY |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'OPTION': EFlags.OPTIONAL_ENDTAG,
+  'P': EFlags.OPTIONAL_ENDTAG,
+  'PARAM': EFlags.EMPTY | EFlags.UNSAFE,
   'PRE': 0,
   'Q': 0,
   'S': 0,
   'SAMP': 0,
-  'SCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.CDATA,
+  'SCRIPT': EFlags.UNSAFE | EFlags.CDATA,
   'SELECT': 0,
   'SMALL': 0,
   'SPAN': 0,
   'STRIKE': 0,
   'STRONG': 0,
-  'STYLE': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
-      amp.htmlparser.HtmlParser.EFlags.CDATA,
+  'STYLE': EFlags.UNSAFE | EFlags.CDATA,
   'SUB': 0,
   'SUP': 0,
   'TABLE': 0,
-  'TBODY': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'TD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'TEXTAREA': amp.htmlparser.HtmlParser.EFlags.RCDATA,
-  'TFOOT': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'TH': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'THEAD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'TITLE': amp.htmlparser.HtmlParser.EFlags.RCDATA |
-      amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'TR': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TBODY': EFlags.OPTIONAL_ENDTAG,
+  'TD': EFlags.OPTIONAL_ENDTAG,
+  'TEXTAREA': EFlags.RCDATA,
+  'TFOOT': EFlags.OPTIONAL_ENDTAG,
+  'TH': EFlags.OPTIONAL_ENDTAG,
+  'THEAD': EFlags.OPTIONAL_ENDTAG,
+  'TITLE': EFlags.RCDATA | EFlags.UNSAFE,
+  'TR': EFlags.OPTIONAL_ENDTAG,
   'TT': 0,
   'U': 0,
   'UL': 0,
-  'VAR': 0
+  'VAR': 0,
 };
-
-
-/**
- * Regular expression that matches &s.
- * @type {RegExp}
- * @package
- */
-amp.htmlparser.HtmlParser.AMP_RE = /&/g;
-
+exports.Elements = Elements;
 
 /**
  * Regular expression that matches loose &s.
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.LOOSE_AMP_RE_ =
-    /&([^a-z#]|#(?:[^0-9x]|x(?:[^0-9a-f]|$)|$)|$)/gi;
+const LOOSE_AMP_RE_ = /&([^a-z#]|#(?:[^0-9x]|x(?:[^0-9a-f]|$)|$)|$)/gi;
 
 
 /**
@@ -765,7 +866,7 @@ amp.htmlparser.HtmlParser.LOOSE_AMP_RE_ =
  * @type {RegExp}
  * @package
  */
-amp.htmlparser.HtmlParser.LT_RE = /</g;
+const LT_RE = /</g;
 
 
 /**
@@ -773,23 +874,7 @@ amp.htmlparser.HtmlParser.LT_RE = /</g;
  * @type {RegExp}
  * @package
  */
-amp.htmlparser.HtmlParser.GT_RE = />/g;
-
-
-/**
- * Regular expression that matches ".
- * @type {RegExp}
- * @package
- */
-amp.htmlparser.HtmlParser.QUOTE_RE = /\"/g;
-
-
-/**
- * Regular expression that matches =.
- * @type {RegExp}
- * @package
- */
-amp.htmlparser.HtmlParser.EQUALS_RE = /=/g;
+const GT_RE = />/g;
 
 
 /**
@@ -797,7 +882,7 @@ amp.htmlparser.HtmlParser.EQUALS_RE = /=/g;
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.NULL_RE_ = /\0/g;
+const NULL_RE_ = /\0/g;
 
 
 /**
@@ -805,23 +890,37 @@ amp.htmlparser.HtmlParser.NULL_RE_ = /\0/g;
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
+const ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
 
 /**
- * Regular expression that matches strings composed of all space characters:
- * https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#space-character
- * @type {RegExp}
+ * Regular expression that matches strings composed of all space characters, as
+ * defined in https://infra.spec.whatwg.org/#ascii-whitespace,
+// and in the various HTML parsing rules at
+// https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml.
+ *
+ * Note: Do not USE \s to match whitespace as this includes many other
+ * characters that HTML parsing does not consider whitespace.
+ * @type {!RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.SPACE_RE_ = /^\s*$/;
+const SPACE_RE_ = /^[ \f\n\r\t]*$/;
 
+/**
+ * Regular expression that matches the characters considered whitespace by the
+ * C++ HTML parser.
+ *
+ * @type {!RegExp}
+ * @private
+ */
+const CPP_SPACE_RE_ =
+    /^[ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/;
 
 /**
  * Regular expression that matches decimal numbers.
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_ = /^#(\d+)$/;
+const DECIMAL_ESCAPE_RE_ = /^#(\d+)$/;
 
 
 /**
@@ -829,7 +928,7 @@ amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_ = /^#(\d+)$/;
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_ = /^#x([0-9A-Fa-f]+)$/;
+const HEX_ESCAPE_RE_ = /^#x([0-9A-Fa-f]+)$/;
 
 
 /**
@@ -837,7 +936,7 @@ amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_ = /^#x([0-9A-Fa-f]+)$/;
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
+const INSIDE_TAG_TOKEN_ = new RegExp(
     // Don't capture space. In this case, we don't use \s because it includes a
     // nonbreaking space which gets included as an attribute in our validation.
     '^[ \\t\\n\\f\\r\\v]*(?:' +
@@ -885,12 +984,12 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
+const OUTSIDE_TAG_TOKEN_ = new RegExp(
     '^(?:' +
         // Entity captured in group 1.
         '&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);' +
         // Comments not captured.
-        '|<[!]--[\\s\\S]*?(?:-->|$)' +
+        '|<[!]--[\\s\\S]*?(?:--[!]?>|$)' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
         // The first character of a tag (after possibly '/') can be A-Z, a-z,
         // '!' or '?'. The remaining characters are more easily expressed as a
@@ -905,12 +1004,12 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
 
 
 /**
- * An implementation of the {@code amp.htmlparser.DocLocator} interface
- * for use within the {@code amp.htmlparser.HtmlParser}.
+ * An implementation of the `parserInterface.DocLocator` parserInterface
+ * for use within the `HtmlParser`.
  */
-amp.htmlparser.HtmlParser.DocLocatorImpl =
-    class extends amp.htmlparser.DocLocator {
+const DocLocatorImpl = class extends parserInterface.DocLocator {
   /**
+   * @this {DocLocatorImpl}
    * @param {string} htmlText text of the entire HTML document to be processed.
    */
   constructor(htmlText) {
@@ -971,51 +1070,21 @@ amp.htmlparser.HtmlParser.DocLocatorImpl =
     }
   }
 
-  /** @inheritDoc */
-  getLine() { return this.line_; }
-
-  /** @inheritDoc */
-  getCol() { return this.col_; }
-};
-
-/**
- * @param {string} str The string to lower case.
- * @return {string} The str in lower case format.
- */
-amp.htmlparser.toLowerCase = function(str) {
-  // htmlparser.js heavily relies on the length of the strings, and
-  // unfortunately some characters change their length when
-  // lowercased; for instance, the Turkish İ has a length of 1, but
-  // when lower-cased, it has a length of 2. So, as a workaround we
-  // check that the length be the same as before lower-casing, and if
-  // not, we only lower-case the letters A-Z.
-  const lowerCased = str.toLowerCase();
-  if (lowerCased.length == str.length) {
-    return lowerCased;
+  /**
+   * @inheritDoc
+   * @this {DocLocatorImpl}
+   */
+  getLine() {
+    return this.line_;
   }
-  return str.replace(/[A-Z]/g, function(ch) {
-    return String.fromCharCode(ch.charCodeAt(0) | 32);
-  });
-};
 
-/**
- * @param {string} str The string to upper case.
- * @return {string} The str in upper case format.
- */
-amp.htmlparser.toUpperCase = function(str) {
-  // htmlparser.js heavily relies on the length of the strings, and
-  // unfortunately some characters change their length when
-  // lowercased; for instance, the Turkish İ has a length of 1, but
-  // when lower-cased, it has a length of 2. So, as a workaround we
-  // check that the length be the same as before upper-casing, and if
-  // not, we only upper-case the letters A-Z.
-  const upperCased = str.toUpperCase();
-  if (upperCased.length == str.length) {
-    return upperCased;
+  /**
+   * @inheritDoc
+   * @this {DocLocatorImpl}
+   */
+  getCol() {
+    return this.col_;
   }
-  return str.replace(/[a-z]/g, function(ch) {
-    return String.fromCharCode(ch.charCodeAt(0) & 223);
-  });
 };
 
 /**
@@ -1025,8 +1094,8 @@ amp.htmlparser.toUpperCase = function(str) {
  * to remain unchanged for these objects.
  */
 function unusedHtmlParser() {
-  console./*OK*/log(ElementsWithNoEndElements['']);
-  console./*OK*/log(HtmlStructureElements['']);
-  console./*OK*/log(HeadElements['']);
-  console./*OK*/log(ElementsWhichClosePTag['']);
+  console./*OK*/ log(ElementsWithNoEndElements['']);
+  console./*OK*/ log(HtmlStructureElements['']);
+  console./*OK*/ log(HeadElements['']);
+  console./*OK*/ log(ElementsWhichClosePTag['']);
 }

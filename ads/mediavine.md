@@ -16,30 +16,26 @@ limitations under the License.
 
 # Mediavine
 
-## Examples
+## Example
 
 ```html
-  <amp-ad width=300 height=250
-      type="mediavine"
-      data-site="amp-project">
-  </amp-ad>
-
-  <amp-ad width=300 height=250
-      type="mediavine"
-      data-sizes="300x250,320x50"
-      data-site="amp-project">
-  </amp-ad>
-
+<amp-ad width="300" height="250" type="mediavine" data-site="amp-project">
+</amp-ad>
 ```
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, please contact [Mediavine](http://www.mediavine.com). Each site must be approved and signed up with [Mediavine](http://www.mediavine.com) prior to launch. The site name will be the same as name in the Mediavine script wrapper. The site name `amp-project` can be used for testing and will serve placeholder ads.
 
-`data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
+### Required parameters
 
-__Optional:__
+- `data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
 
-`data-sizes` - Comma separated list of ad sizes this placement should support. Will cause iframe resize if different from hard-coded width and height.
+## User Consent Integration
 
-Each site must be approved and signed up with [Mediavine](http://www.mediavine.com) prior to launch. The site name will be the same as name in the Mediavine script wrapper. The site name `amp-project` can be used for testing and will serve placeholder ads.
+When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. Mediavine approaches user consent in the following ways:
+
+- `CONSENT_POLICY_STATE.SUFFICIENT`: Personalized Ads.
+- `CONSENT_POLICY_STATE.INSUFFICIENT`: Non-Personalized Ads.
+- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Personalized Ads.
+- `CONSENT_POLICY_STATE.UNKNOWN`: Non-Personalized Ads.

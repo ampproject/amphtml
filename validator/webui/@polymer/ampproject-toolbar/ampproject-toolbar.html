@@ -17,8 +17,6 @@
      lot of styling, so we isolate it to keep the source for other parts of
      the page easier to read. -->
 <link rel="import" href="../paper-toolbar/paper-toolbar.html">
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <dom-module id="ampproject-toolbar">
   <style scope="ampproject-toolbar">
     paper-toolbar {
@@ -64,7 +62,7 @@
                                 src="/logo-blue.svg"></a>
       </div>
       <div class="ampproject-right ampproject-link">
-        <a href="https://www.ampproject.org/docs/guides/validate.html"
+        <a href="https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp"
            target="_blank">HOWTO</a>
         &nbsp;&nbsp;&nbsp;
         <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
@@ -74,7 +72,10 @@
            target="_blank">PRIVACY</a>
         &nbsp;&nbsp;&nbsp;
         <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
-           id="install-extension" onclick="return false;" target="_blank">CHROME EXTENSION</a>
+           target="_blank">CHROME EXTENSION</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://marketplace.visualstudio.com/items?itemName=amphtml.amphtml-validator"
+           target="_blank">VSCODE EXTENSION</a>
         &nbsp;&nbsp;&nbsp;
         <a href="https://www.npmjs.com/package/amphtml-validator"
            target="_blank">NPM</a>
@@ -84,16 +85,6 @@
   <script>
     Polymer({
       is: 'ampproject-toolbar',
-      listeners: {
-        'install-extension.tap': 'installExtension'
-      },
-      installExtension: function(e) {
-        if (document.domain === 'validator.ampproject.org') {
-          chrome.webstore.install('https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc');
-        } else {
-          window.open('https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc', '_blank');
-        }
-      }
     });
   </script>
 </dom-module>

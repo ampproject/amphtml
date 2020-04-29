@@ -14,22 +14,52 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {Services} from './services';
+import {devAssert} from './log';
 import {getServicePromise} from './service';
-import {timerFor} from './timer';
 
 /**
  * A map of services that delay rendering. The key is the name of the service
  * and the value is a DOM query which is used to check if the service is needed
  * in the current document.
  * Do not add a service unless absolutely necessary.
+ *
+ * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
+ *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+ *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+ *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+ *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+ *
+ * The equivalent of this list is used for server-side rendering (SSR) and any
+ * changes made to it must be made in coordination with caches that implement
+ * SSR. For more information on SSR see bit.ly/amp-ssr.
+ *
  * @const {!Object<string, string>}
  */
 const SERVICES = {
-  'amp-accordion': '[custom-element=amp-accordion]',
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
+  'amp-story-render': 'amp-story[standalone]',
 };
+
+/**
+ * Base class for render delaying services.
+ * This should be extended to ensure the service
+ * is properly handled
+ *
+ * @interface
+ */
+export class RenderDelayingService {
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * NOTE: This should simply return Promise.resolve,
+   * if your service does not need to perform any logic
+   * after being registered.
+   * @return {!Promise}
+   */
+  whenReady() {}
+}
 
 /**
  * Maximum milliseconds to wait for all extensions to load before erroring.
@@ -38,35 +68,65 @@ const SERVICES = {
 const LOAD_TIMEOUT = 3000;
 
 /**
- * Detects any render delaying services that are required on the page,
- * and returns a promise with a timeout.
+ * Detects any render delaying services that are required on the page, and
+ * returns a promise with a timeout.
  * @param {!Window} win
- * @return {!Promise<!Array<*>>} resolves to an Array that has the same length as
- *     the detected render delaying services
+ * @return {!Promise<!Array<*>>} resolves to an Array that has the same length
+ *     as the detected render delaying services
  */
 export function waitForServices(win) {
-  const promises = includedServices(win).map(service => {
-    return timerFor(win).timeoutPromise(
+  const promises = includedServices(win).map((serviceId) => {
+    const serviceReadyPromise = getServicePromise(win, serviceId).then(
+      (service) => {
+        if (service && isRenderDelayingService(service)) {
+          return service.whenReady().then(() => {
+            return service;
+          });
+        }
+        return service;
+      }
+    );
+
+    return Services.timerFor(win).timeoutPromise(
       LOAD_TIMEOUT,
-      getServicePromise(win, service),
-      `Render timeout waiting for service ${service} to be ready.`
+      serviceReadyPromise,
+      `Render timeout waiting for service ${serviceId} to be ready.`
     );
   });
   return Promise.all(promises);
 }
 
 /**
+ * Returns true if the page has a render delaying service.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function hasRenderDelayingServices(win) {
+  return includedServices(win).length > 0;
+}
+
+/**
+ * Function to determine if the passed
+ * Object is a Render Delaying Service
+ * @param {!Object} service
+ * @return {boolean}
+ */
+export function isRenderDelayingService(service) {
+  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (service);
+  return typeof maybeRenderDelayingService.whenReady == 'function';
+}
+
+/**
  * Detects which, if any, render-delaying extensions are included on the page.
  * @param {!Window} win
  * @return {!Array<string>}
- * @private
  */
-function includedServices(win) {
+export function includedServices(win) {
   /** @const {!Document} */
   const doc = win.document;
-  dev().assert(doc.body);
+  devAssert(doc.body);
 
-  return Object.keys(SERVICES).filter(service => {
+  return Object.keys(SERVICES).filter((service) => {
     return doc.querySelector(SERVICES[service]);
   });
 }

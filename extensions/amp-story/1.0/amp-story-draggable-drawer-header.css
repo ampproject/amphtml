@@ -1,0 +1,72 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-shadow-reset.css';
+
+.i-amphtml-story-draggable-drawer-header {
+  display: flex !important;
+  position: relative !important;
+  height: 40px !important;
+  background: #fff !important;
+  border-radius: 8px 8px 0 0 !important;
+  box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.12) !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark {
+  background: rgba(32, 33, 37, 1) !important;
+}
+
+.i-amphtml-story-page-attachment-close-button {
+  display: block !important;
+  padding: 8px !important;
+  height: 24px !important;
+  width: 24px !important;
+  background-origin: content-box !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(0, 0, 0, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  cursor: pointer !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-page-attachment-title {
+  font-family: 'Roboto', sans-serif !important;
+  width: calc(100% - 80px) !important;
+  padding-right: 40px !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-size: 16px !important;
+  line-height: 40px !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/** Overrides. */
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title,
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
+  color: #9AA0A6 !important;
+}
+
+.i-amphtml-story-draggable-drawer-header-bookend,
+.i-amphtml-story-draggable-drawer-header-attachment-remote {
+  display: none !important;
+}

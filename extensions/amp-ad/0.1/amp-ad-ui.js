@@ -2,7 +2,7 @@
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -14,44 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../src/layout';
-
-const TAG = 'AmpAdUIHandler';
-
-/**
- * Ad display state.
- * @enum {number}
- */
-export const AdDisplayState = {
-  /**
-   * The ad has not been laid out, or the ad has already be unlaid out
-   */
-  NOT_LAID_OUT: 0,
-
-  /**
-   * The ad has been laid out, but runtime haven't received any response from
-   * the ad server.
-   */
-  LOADING: 1,
-
-  /**
-   * The ad has been laid out, and runtime has received render-start msg from
-   * ad server.
-   * Not used now.
-   */
-  LOADED_RENDER_START: 2,
-
-  /**
-   * The ad has been laid out, and runtime has received no-content msg from
-   * ad server.
-   */
-  LOADED_NO_CONTENT: 3,
-};
+import {Services} from '../../../src/services';
+import {ancestorElementsByTag} from '../../../src/dom';
+import {getAdContainer} from '../../../src/ad-helper';
 
 export class AmpAdUIHandler {
-
   /**
    * @param {!AMP.BaseElement} baseInstance
    */
@@ -59,153 +26,178 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private {!Element} */
+    this.element_ = baseInstance.element;
+
     /** @private @const {!Document} */
     this.doc_ = baseInstance.win.document;
 
-    /** {number} */
-    this.state = AdDisplayState.NOT_LAID_OUT;
+    this.containerElement_ = null;
 
-    /** {!boolean} */
-    this.hasPageProvidedFallback_ = !!baseInstance.getFallback();
-  }
-
-  /**
-   * TODO(@zhouyx): Add ad tag to the ad.
-   */
-  init() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return;
-    }
-
-    if (this.hasPageProvidedFallback_) {
-      return;
-    }
-
-    // Apply default fallback div when there's no default one
-    this.addDefaultUiComponent_('fallback');
-  }
-
-  /**
-   * Exposed function to ad that enable them to set UI to correct display state
-   * @param {number} state
-   */
-  setDisplayState(state) {
-    if (this.state == AdDisplayState.NOT_LAID_OUT) {
-      // Once unlayout UI applied, only another layout will change the UI again
-      if (state != AdDisplayState.LOADING) {
-        return;
+    if (this.element_.hasAttribute('data-ad-container-id')) {
+      const id = this.element_.getAttribute('data-ad-container-id');
+      const container = this.doc_.getElementById(id);
+      if (
+        container &&
+        container.tagName == 'AMP-LAYOUT' &&
+        container.contains(this.element_)
+      ) {
+        // Parent <amp-layout> component with reference id can serve as the
+        // ad container
+        this.containerElement_ = container;
       }
     }
-    switch (state) {
-      case AdDisplayState.LOADING:
-        this.displayLoadingUI_();
-        break;
-      case AdDisplayState.LOADED_RENDER_START:
-        this.displayRenderStartUI_();
-        break;
-      case AdDisplayState.LOADED_NO_CONTENT:
-        this.displayNoContentUI_();
-        break;
-      case AdDisplayState.NOT_LAID_OUT:
-        this.displayUnlayoutUI_();
-        break;
-      default:
-        dev().error(TAG, 'state is not supported');
+
+    if (!baseInstance.getFallback()) {
+      const fallback = this.addDefaultUiComponent_('fallback');
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
-  }
-
-  /**
-   * See BaseElement method.
-   */
-  createPlaceholderCallback() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return null;
-    }
-    return this.addDefaultUiComponent_('placeholder');
-  }
-
-  /**
-   * TODO(@zhouyx): apply placeholder, add ad loading indicator
-   * @private
-   */
-  displayLoadingUI_() {
-    this.state = AdDisplayState.LOADING;
-    this.baseInstance_.togglePlaceholder(true);
-  }
-
-  /**
-   * TODO(@zhouyx): remove ad loading indicator
-   * @private
-   */
-  displayRenderStartUI_() {
-    this.state = AdDisplayState.LOADED_RENDER_START;
-    this.baseInstance_.togglePlaceholder(false);
   }
 
   /**
    * Apply UI for laid out ad with no-content
-   * If fallback exist try to display provided fallback
-   * Else try to collapse the ad (Note: may not succeed)
-   * TODO(@zhouyx): apply fallback, remove ad loading indicator
-   * @private
+   * Order: try collapse -> apply provided fallback -> apply default fallback
    */
-  displayNoContentUI_() {
-    // The order here is user provided fallback > collapse > default fallback
-    if (this.hasPageProvidedFallback_) {
-      this.baseInstance_.deferMutate(() => {
-        if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If already unlaid out, do not replace current placeholder then.
-          return;
-        }
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      });
-    } else {
-      this.baseInstance_.attemptCollapse().then(() => {
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      }, () => {
-        // Apply default fallback when resize fail.
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      });
+  applyNoContentUI() {
+    if (getAdContainer(this.element_) === 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      this.baseInstance_./*OK*/ collapse();
+      return;
     }
+
+    if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
+      /**
+       * Special case: Force collapse the ad if it is the,
+       * only and direct child of a flying carpet.
+       * Also, this will not handle
+       * the amp-layout case for now, as it could be
+       * inefficient. And we have not seen an amp-layout
+       * used with flying carpet and ads yet.
+       */
+
+      const flyingCarpetElements = ancestorElementsByTag(
+        this.element_,
+        'amp-fx-flying-carpet'
+      );
+      const flyingCarpetElement = flyingCarpetElements[0];
+
+      flyingCarpetElement.getImpl().then((implementation) => {
+        const children = implementation.getChildren();
+
+        if (children.length === 1 && children[0] === this.element_) {
+          this.baseInstance_./*OK*/ collapse();
+        }
+      });
+      return;
+    }
+
+    let attemptCollapsePromise;
+    if (this.containerElement_) {
+      // Collapse the container element if there's one
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
+      attemptCollapsePromise.then(() => {});
+    } else {
+      attemptCollapsePromise = this.baseInstance_.attemptCollapse();
+    }
+
+    // The order here is collapse > user provided fallback > default fallback
+    attemptCollapsePromise.catch(() => {
+      this.baseInstance_.mutateElement(() => {
+        this.baseInstance_.togglePlaceholder(false);
+        this.baseInstance_.toggleFallback(true);
+      });
+    });
   }
 
   /**
-   * Apply UI for unlaid out ad
-   * Hide fallback and show placeholder if exists
-   * Once unlayout UI applied, only another layout will change the UI again
-   * TODO(@zhouyx): remove ad loading indicator
-   * @private
+   * Apply UI for unlaid out ad: Hide fallback.
+   * Note: No need to togglePlaceholder here, unlayout show it by default.
    */
-  displayUnlayoutUI_() {
-    this.state = AdDisplayState.NOT_LAID_OUT;
-    this.baseInstance_.deferMutate(() => {
-      if (this.state != AdDisplayState.NOT_LAID_OUT) {
-        return;
-      }
-      this.baseInstance_.togglePlaceholder(true);
+  applyUnlayoutUI() {
+    this.baseInstance_.mutateElement(() => {
       this.baseInstance_.toggleFallback(false);
     });
   }
 
   /**
    * @param {string} name
-   * @return {!Element}
+   * @return {?Element}
    * @private
    */
   addDefaultUiComponent_(name) {
+    if (this.element_.tagName == 'AMP-EMBED') {
+      // Do nothing for amp-embed element;
+      return null;
+    }
     const uiComponent = this.doc_.createElement('div');
     uiComponent.setAttribute(name, '');
 
     const content = this.doc_.createElement('div');
-    content.classList.add('-amp-ad-default-holder');
+    content.classList.add('i-amphtml-ad-default-holder');
+
+    // TODO(aghassemi, #4146) i18n
+    content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
-    this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
+  }
+
+  /**
+   * @param {number|string|undefined} height
+   * @param {number|string|undefined} width
+   * @param {number} iframeHeight
+   * @param {number} iframeWidth
+   * @param {!MessageEvent} event
+   * @return {!Promise<!Object>}
+   */
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
+      newHeight = Math.max(
+        this.element_./*OK*/ offsetHeight + height - iframeHeight,
+        height
+      );
+    }
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
+      newWidth = Math.max(
+        this.element_./*OK*/ offsetWidth + width - iframeWidth,
+        width
+      );
+    }
+
+    /** @type {!Object<boolean, number|undefined, number|undefined>} */
+    const resizeInfo = {
+      success: true,
+      newWidth,
+      newHeight,
+    };
+
+    if (!newHeight && !newWidth) {
+      return Promise.reject(new Error('undefined width and height'));
+    }
+
+    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      resizeInfo.success = false;
+      return Promise.resolve(resizeInfo);
+    }
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => resizeInfo,
+        () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        }
+      );
   }
 }
 

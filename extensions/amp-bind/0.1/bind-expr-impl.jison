@@ -1,54 +1,43 @@
-/** shared vars and functions */
-
-%{
-%}
-
-/* lexical grammar */
-
 %lex
 
 %%
 \s+                       /* skip whitespace */
+"null"                    return 'NULL'
+"true"                    return 'TRUE'
+"false"                   return 'FALSE'
+[0-9]+("."[0-9]+)?\b      return 'NUMBER'
+[a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
+\'([^\'\\]|\\.)*\'        return 'STRING'
+\"([^\"\\]|\\.)*\"        return 'STRING'
+'=>'                      return '=>'
 "+"                       return '+'
 "-"                       return '-'
 "*"                       return '*'
 "/"                       return '/'
-"%"                       return '%'
 "&&"                      return '&&'
 "||"                      return '||'
+"!="                      return '!='
+"=="                      return '=='
 "<="                      return '<='
 "<"                       return '<'
 ">="                      return '>='
 ">"                       return '>'
-"!="                      return '!='
-"=="                      return '=='
-"("                       return '('
-")"                       return ')'
+"!"                       return '!'
+"?"                       return '?'
+":"                       return ':'
+"%"                       return '%'
 "["                       return '['
 "]"                       return ']'
 "{"                       return '{'
 "}"                       return '}'
+"("                       return '('
+")"                       return ')'
 ","                       return ','
 \.                        return '.'
-":"                       return ':'
-"?"                       return '?'
-"!"                       return '!'
-"null"                    return 'NULL'
-"NULL"                    return 'NULL'
-"TRUE"                    return 'TRUE'
-"true"                    return 'TRUE'
-"FALSE"                   return 'FALSE'
-"false"                   return 'FALSE'
-[0-9]+("."[0-9]+)?\b      return 'NUMBER'
-[a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
-\'[^\']*\'                return 'STRING'
-\"[^\"]*\"                return 'STRING'
 .                         return 'INVALID'
 <<EOF>>                   return 'EOF'
 
 /lex
-
-/* token type names (no precedence) */
 
 %token NAME
 %token STRING
@@ -58,10 +47,12 @@
 %token EOF
 
 /*
- * operator precedence
+ * Operator precedence.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
  */
 
+%nonassoc '=>'
+%left ','
 %right '?' ':'
 %left '||'
 %left '&&'
@@ -70,12 +61,13 @@
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UMINUS UPLUS
-%left '(' ')'
 %left '.' '[' ']'
+%left '(' ')'
+
 
 %%
 
-/* language grammar */
+/* BNF grammar. */
 
 result:
     expr EOF
@@ -171,10 +163,65 @@ operation:
       %}
   ;
 
+/*
+ * Constrain the use of arrow functions to function invocations.
+ */
 invocation:
-    expr '.' NAME args
+    NAME args
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
+        $$ = new AstNode(AstNodeType.INVOCATION, [undefined, $args], $NAME);
+      %}
+  | expr '.' NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [$expr, $args], $NAME);
+      %}
+  | expr '.' NAME '(' arrow_function ')'
+      %{
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr, array], $NAME);
+        }
+      %}
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+      %{
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function, $expr2]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr1, array], $NAME);
+        }
+      %}
+  ;
+
+arrow_function:
+    '(' ')' '=>' expr
+      %{
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [undefined, $expr]);
+      %}
+  | NAME '=>' expr
+      %{
+        const param = new AstNode(AstNodeType.LITERAL, null, [$NAME]);
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [param, $expr]);
+      %}
+  | '(' params ')' '=>' expr
+      %{
+        $$ = new AstNode(AstNodeType.ARROW_FUNCTION, [$params, $expr]);
+      %}
+  ;
+
+/*
+ * Must be multiple parameters, unfortunately. A single parameter like '(x)'
+ * causes a reduce/reduce conflict with a parenthetical expr with one variable.
+ * This can be solved but requires a custom lexer, e.g.
+ * http://coffeescript.org/v1/annotated-source/lexer.html#section-32
+ */
+params:
+    NAME ',' NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, [$1, $3]);
+      %}
+  | params ',' NAME
+      %{
+        $$ = $params;
+        $$.value.push($NAME);
       %}
   ;
 
@@ -215,10 +262,33 @@ variable:
   ;
 
 literal:
+    primitive
+      %{
+        $$ = $1;
+      %}
+  | object_literal
+      %{
+        $$ = $1;
+      %}
+  | array_literal
+      %{
+        $$ = $1;
+      %}
+  ;
+
+primitive:
     STRING
       %{
-        const string = yytext.substr(1, yyleng - 2);
-        $$ = new AstNode(AstNodeType.LITERAL, null, string);
+        const raw = yytext.substr(1, yyleng - 2);
+        // Since we accept escaped quotation marks, unescape them here.
+        // Note: We can't use $1 directly because of https://github.com/zaach/jison/issues/380.
+        const unescaped = raw.replace(/\\('|")/g, "$" + "1");
+
+        // Use JSON.parse() to process special chars e.g. '\n'.
+        // JSON doesn't recognize single-quotes, so use double-quote in
+        // leading/trailing chars and escape double-quote in the string.
+        const parsed = tryParseJson(`"${unescaped.replace(/"/g, '\\"')}"`);
+        this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || unescaped);
       %}
   | NUMBER
       %{
@@ -236,14 +306,6 @@ literal:
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, null);
       %}
-  | object_literal
-      %{
-        $$ = $1;
-      %}
-  | array_literal
-      %{
-        $$ = $1;
-      %}
   ;
 
 array_literal:
@@ -252,6 +314,10 @@ array_literal:
         $$ = new AstNode(AstNodeType.ARRAY_LITERAL, []);
       %}
   | '[' array ']'
+      %{
+        $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
+      %}
+  | '[' array ',' ']'
       %{
         $$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$2]);
       %}
@@ -276,25 +342,44 @@ object_literal:
       %}
   | '{' object '}'
       %{
-        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$2]);
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$object]);
+      %}
+  | '{' object ',' '}'
+      %{
+        $$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$object]);
       %}
   ;
 
 object:
     key_value
       %{
-        $$ = new AstNode(AstNodeType.OBJECT, [$1]);
+        $$ = new AstNode(AstNodeType.OBJECT, [$key_value]);
       %}
   | object ',' key_value
       %{
-        $$ = $1;
-        $$.args.push($3);
+        $$ = $object;
+        $$.args.push($key_value);
       %}
   ;
 
 key_value:
-  expr ':' expr
+  key ':' expr
       %{
-        $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+        $$ = new AstNode(AstNodeType.KEY_VALUE, [$key, $expr]);
+      %}
+  ;
+
+key:
+    NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $NAME);
+      %}
+  | primitive
+      %{
+        $$ = $primitive;
+      %}
+  | '[' expr ']' /* Computed property name. */
+      %{
+        $$ = $expr;
       %}
   ;

@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
 
 class AmpGoogleVrviewImage extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.imageSrc_ = '';
+
+    /** @private {string} */
+    this.src_ = '';
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -31,20 +42,19 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      dev().warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
+    userAssert(
+      isExperimentOn(this.win, 'amp-google-vrview-image'),
+      'TAG amp-google-vrview-image disabled'
+    );
 
-    /** @private @const {string} */
-    this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
-        this.element);
+    this.imageSrc_ = assertHttpsUrl(
+      this.element.getAttribute('src'),
+      this.element
+    );
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
     // cdn.ampproject.org as an iframe viewer or even possibly compiling
     // it as an AMP element.
-    let src = 'https://storage.googleapis.com/vrview/index.html';
+    let src = 'https://storage.googleapis.com/vrview/2.0/index.html';
     src = addParamToUrl(src, 'image', this.imageSrc_);
     if (this.element.hasAttribute('stereo')) {
       src = addParamToUrl(src, 'is_stereo', 'true');
@@ -56,15 +66,17 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     if (this.element.hasAttribute('yaw-only')) {
       src = addParamToUrl(src, 'is_yaw_only', 'true');
     }
-    /** @private @const {string} */
     this.src_ = src;
   }
 
   /** @override */
   preconnectCallback() {
     if (this.src_) {
-      this.preconnect.preload(this.src_);
-      this.preconnect.preload(this.imageSrc_);
+      Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.src_);
+      Services.preconnectFor(this.win).preload(
+        this.getAmpDoc(),
+        this.imageSrc_
+      );
     }
   }
 
@@ -77,12 +89,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      dev().warn(TAG, `TAG ${TAG} disabled`);
-      return Promise.resolve();
-    }
-
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
@@ -93,12 +99,10 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
-
-    /** @private {!Element} */
-    this.iframe_ = iframe;
-
     return this.loadPromise(iframe);
   }
 }
 
-AMP.registerElement('amp-google-vrview-image', AmpGoogleVrviewImage);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpGoogleVrviewImage);
+});

@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import {fromClass} from '../service';
-
+import {registerServiceBuilder} from '../service';
 
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
  */
 export class Platform {
-
   /**
    * @param {!Window} win
    */
   constructor(win) {
     /** @const @private {!Navigator} */
     this.navigator_ = /** @type {!Navigator} */ (win.navigator);
+
+    /** @const @private */
+    this.win_ = win;
   }
 
   /**
@@ -52,8 +53,14 @@ export class Platform {
    * @return {boolean}
    */
   isSafari() {
-    return /Safari/i.test(this.navigator_.userAgent) && !this.isChrome() &&
-        !this.isEdge();
+    return (
+      /Safari/i.test(this.navigator_.userAgent) &&
+      !this.isChrome() &&
+      !this.isIe() &&
+      !this.isEdge() &&
+      !this.isFirefox() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -62,7 +69,11 @@ export class Platform {
    */
   isChrome() {
     // Also true for MS Edge :)
-    return /Chrome|CriOS/i.test(this.navigator_.userAgent) && !this.isEdge();
+    return (
+      /Chrome|CriOS/i.test(this.navigator_.userAgent) &&
+      !this.isEdge() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -70,7 +81,18 @@ export class Platform {
    * @return {boolean}
    */
   isFirefox() {
-    return /Firefox/i.test(this.navigator_.userAgent) && !this.isEdge();
+    return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
+  }
+
+  /**
+   * Whether the current browser is an Opera browser.
+   * @return {boolean}
+   */
+  isOpera() {
+    // Chrome UA on Android may include OPR<v> (build code referring to Oreo),
+    // however real Opera puts put a / after OPR and that's the only tell, so
+    // we check for OPR/ instead of OPR
+    return /OPR\/|Opera|OPiOS/i.test(this.navigator_.userAgent);
   }
 
   /**
@@ -78,6 +100,9 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
+    if (IS_ESM) {
+      return false;
+    }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
 
@@ -98,24 +123,57 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is running on Windows.
+   * @return {boolean}
+   */
+  isWindows() {
+    return /Windows/i.test(this.navigator_.userAgent);
+  }
+
+  /**
+   * Whether the current browser is isStandalone.
+   * @return {boolean}
+   */
+  isStandalone() {
+    return (
+      (this.isIos() && this.navigator_.standalone) ||
+      (this.isChrome() &&
+        this.win_.matchMedia('(display-mode: standalone)').matches)
+    );
+  }
+
+  /**
+   * Whether the current platform matches a bot user agent.
+   * @return {boolean}
+   */
+  isBot() {
+    return /bot/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */
   getMajorVersion() {
     if (this.isSafari()) {
-      return this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+      return this.isIos()
+        ? this.getIosMajorVersion() || 0
+        : this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
-      return this.evalMajorVersion_(/\Chrome\/(\d+)/, 1);
+      return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
     }
     if (this.isFirefox()) {
-      return this.evalMajorVersion_(/\Firefox\/(\d+)/, 1);
+      return this.evalMajorVersion_(/(Firefox|FxiOS)\/(\d+)/, 2);
+    }
+    if (this.isOpera()) {
+      return this.evalMajorVersion_(/(OPR|Opera|OPiOS)\/(\d+)/, 2);
     }
     if (this.isIe()) {
-      return this.evalMajorVersion_(/\MSIE\s(\d+)/, 1);
+      return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
     }
     if (this.isEdge()) {
-      return this.evalMajorVersion_(/\Edge\/(\d+)/, 1);
+      return this.evalMajorVersion_(/Edge\/(\d+)/, 1);
     }
     return 0;
   }
@@ -136,13 +194,46 @@ export class Platform {
     }
     return parseInt(res[index], 10);
   }
-};
 
+  /**
+   * Returns the minor ios version in string.
+   * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
+   * Direct string equality check is not suggested, use startWith instead.
+   * @return {string}
+   */
+  getIosVersionString() {
+    if (!this.navigator_.userAgent) {
+      return '';
+    }
+    if (!this.isIos()) {
+      return '';
+    }
+    let version = this.navigator_.userAgent.match(
+      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    );
+    if (!version) {
+      return '';
+    }
+    version = version[1].replace(/_/g, '.');
+    return version;
+  }
+
+  /**
+   * Returns the major ios version in number.
+   * @return {?number}
+   */
+  getIosMajorVersion() {
+    const currentIosVersion = this.getIosVersionString();
+    if (currentIosVersion == '') {
+      return null;
+    }
+    return Number(currentIosVersion.split('.')[0]);
+  }
+}
 
 /**
  * @param {!Window} window
- * @return {!Platform}
  */
 export function installPlatformService(window) {
-  return fromClass(window, 'platform', Platform);
-};
+  registerServiceBuilder(window, 'platform', Platform);
+}

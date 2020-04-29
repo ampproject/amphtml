@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-access-analytics"></a>AMP Access and Analytics
+# AMP Access and Analytics
 
 ## Access analytics triggers
 
 Access service issues events for major states in the access flow. These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Authorization received trigger (`"on": "access-authorization-received"`)
 
@@ -91,7 +91,7 @@ The `access-pingback-failed` event is issued when the Pingback endpoint has fail
 
 The `access-login[-type]-started` event is issued right before the Login dialog has been opened. Use these configurations to fire a request for this event.
 
-When only one Login URL is configured, the event is `access-login-started`. When multiple Login URLs are configured, the event is `access-login-type-started`, e.g. "access-login-signup-started". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
+When only one Login URL is configured, the event is `access-login-started`. When multiple Login URLs are configured, the event is `access-login-type-started`, e.g. "access-login-signup-started".
 
 ```javascript
 "triggers": {
@@ -106,7 +106,7 @@ When only one Login URL is configured, the event is `access-login-started`. When
 
 The `access-login[-type]-success` event is issued when Login dialog has succeeded. Use these configurations to fire a request for this event.
 
-When only one Login URL is configured, the event is `access-login-success`. When multiple Login URLs are configured, the event is `access-login-type-success`, e.g. "access-login-signup-success". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
+When only one Login URL is configured, the event is `access-login-success`. When multiple Login URLs are configured, the event is `access-login-type-success`, e.g. "access-login-signup-success".
 
 ```javascript
 "triggers": {
@@ -121,7 +121,7 @@ When only one Login URL is configured, the event is `access-login-success`. When
 
 The `access-login[-type]-rejected` event is issued when Login dialog has been rejected by the user. Use these configurations to fire a request for this event.
 
-When only one Login URL is configured, the event is `access-login-rejected`. When multiple Login URLs are configured, the event is `access-login-type-rejected`, e.g. "access-login-signup-rejected". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
+When only one Login URL is configured, the event is `access-login-rejected`. When multiple Login URLs are configured, the event is `access-login-type-rejected`, e.g. "access-login-signup-rejected".
 
 ```javascript
 "triggers": {
@@ -136,7 +136,7 @@ When only one Login URL is configured, the event is `access-login-rejected`. Whe
 
 The `access-login[-type]-failed` event is issued when Login dialog has failed due to an unknown reason. Use these configurations to fire a request for this event.
 
-When only one Login URL is configured, the event is `access-login[-type]-failed`. When multiple Login URLs are configured, the event is `access-login-type-failed`, e.g. "access-login-signup-failed". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
+When only one Login URL is configured, the event is `access-login[-type]-failed`. When multiple Login URLs are configured, the event is `access-login-type-failed`, e.g. "access-login-signup-failed".
 
 ```javascript
 "triggers": {
@@ -149,7 +149,7 @@ When only one Login URL is configured, the event is `access-login[-type]-failed`
 
 ## Access analytics variables
 
-Access contributes the following URL substitutions to the [amp-var-substitutions.md](/spec/amp-var-substitutions.md).
+Access contributes the following URL substitutions to the [amp-var-substitutions.md](../../spec/amp-var-substitutions.md).
 
 ### ACCESS_READER_ID
 

@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {srcsetFromElement} from '../../../src/srcset';
-import {user} from '../../../src/log';
 import * as st from '../../../src/style';
+import {dev} from '../../../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {propagateObjectFitStyles} from '../../../src/style';
+
+const TAG = 'amp-anim';
+const BUILD_ATTRIBUTES = [
+  'alt',
+  'aria-label',
+  'aria-describedby',
+  'aria-labelledby',
+];
+const LAYOUT_ATTRIBUTES = ['src', 'srcset'];
+/** @visibleForTesting */
+export const SRC_PLACEHOLDER =
+  'data:image/gif;base64,' +
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export class AmpAnim extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private @const {!Element} */
-    this.img_ = new Image();
-
-    /** @private {?../../../src/srcset.Srcset} */
-    this.srcset_ = null;
+    /** @private {?Element} */
+    this.img_ = null;
 
     /** @private {boolean} */
     this.hasLoaded_ = false;
@@ -42,26 +52,29 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.propagateAttributes(['alt', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.img_ = new Image();
+    this.img_.setAttribute('decoding', 'async');
+    this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
     this.applyFillContent(this.img_, true);
+    propagateObjectFitStyles(this.element, this.img_);
 
     // Remove role=img otherwise this breaks screen-readers focus and
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user().error('AMP-ANIM', 'Setting role=img on amp-anim elements ' +
+      this.user().error(
+        'AMP-ANIM',
+        'Setting role=img on amp-anim elements ' +
           'breaks screen readers. Please just set alt or ARIA attributes, ' +
           'they will be correctly propagated for the underlying <img> ' +
-          'element.');
+          'element.'
+      );
     }
 
     // The image is initially hidden if a placeholder is available.
-    st.toggle(this.img_, !this.getPlaceholder());
+    st.toggle(dev().assertElement(this.img_), !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -71,7 +84,16 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.updateImageSrc_();
+    const img = dev().assertElement(this.img_);
+    // Remove missing attributes to remove the placeholder srcset if none is
+    // specified on the element.
+    this.propagateAttributes(
+      LAYOUT_ATTRIBUTES,
+      img,
+      /* opt_removeMissingAttrs */ true
+    );
+    guaranteeSrcForSrcsetUnsupportedBrowsers(img);
+    return this.loadPromise(img);
   }
 
   /** @override */
@@ -93,7 +115,8 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
-    this.img_.src = '';
+    this.img_.src = SRC_PLACEHOLDER;
+    this.img_.srcset = SRC_PLACEHOLDER;
     this.hasLoaded_ = false;
     return true;
   }
@@ -102,31 +125,10 @@ export class AmpAnim extends AMP.BaseElement {
   updateInViewport_() {
     const inViewport = this.isInViewport();
     this.togglePlaceholder(!inViewport);
-    st.toggle(this.img_, inViewport);
+    st.toggle(dev().assertElement(this.img_), inViewport);
   }
+}
 
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  updateImageSrc_() {
-    if (this.getLayoutWidth() <= 0) {
-      return Promise.resolve();
-    }
-    const src = this.srcset_.select(this.getLayoutWidth(),
-        this.getDpr()).url;
-    if (src == this.img_.getAttribute('src')) {
-      return Promise.resolve();
-    }
-    this.img_.setAttribute('src', src);
-    return this.loadPromise(this.img_)
-        .catch(error => {
-          if (!this.img_.getAttribute('src')) {
-            return;
-          }
-          throw error;
-        });
-  }
-};
-
-AMP.registerElement('amp-anim', AmpAnim);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpAnim);
+});

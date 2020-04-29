@@ -26,6 +26,7 @@ export function getModeObject(opt_win) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
+    esm: IS_ESM,
     filter: getMode(opt_win).filter,
     minified: getMode(opt_win).minified,
     lite: getMode(opt_win).lite,
@@ -33,5 +34,6 @@ export function getModeObject(opt_win) {
     log: getMode(opt_win).log,
     version: getMode(opt_win).version,
     rtvVersion: getMode(opt_win).rtvVersion,
+    singlePassType: getMode(opt_win).singlePassType,
   };
 }

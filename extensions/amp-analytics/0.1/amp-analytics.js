@@ -14,49 +14,51 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {expandTemplate} from '../../../src/string';
-import {isArray, isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {userNotificationManagerFor} from '../../../src/user-notification';
-import {cryptoFor} from '../../../src/crypto';
-import {xhrFor} from '../../../src/xhr';
-import {toggle} from '../../../src/style';
 import {Activity} from './activity-impl';
-import {Cid} from './cid-impl';
+import {AnalyticsConfig, mergeObjects} from './config';
+import {AnalyticsEventType} from './events';
+import {ChunkPriority, chunk} from '../../../src/chunk';
+import {CookieWriter} from './cookie-writer';
+import {Deferred} from '../../../src/utils/promise';
 import {
-    InstrumentationService,
-    instrumentationServiceForDoc,
+  ExpansionOptions,
+  VariableService,
+  stringToBool,
+  variableServicePromiseForDoc,
+} from './variables';
+import {
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {ExpansionOptions, variableServiceFor} from './variables';
-import {ANALYTICS_CONFIG} from './vendors';
+import {LayoutPriority} from '../../../src/layout';
+import {LinkerManager} from './linker-manager';
+import {RequestHandler, expandPostMessage} from './requests';
+import {Services} from '../../../src/services';
+import {Transport} from './transport';
+import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
+import {endsWith, expandTemplate, startsWith} from '../../../src/string';
+import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
+import {isArray, isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {isIframed} from '../../../src/dom';
+import {isInFie} from '../../../src/iframe-helper';
+import {toggle} from '../../../src/style';
 
-// Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-analytics-instrumentation', InstrumentationService);
-AMP.registerServiceForDoc('activity', Activity);
-AMP.registerServiceForDoc('cid', Cid);
-
-variableServiceFor(AMP.win);
+const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-export class AmpAnalytics extends AMP.BaseElement {
+const WHITELIST_EVENT_IN_SANDBOX = [
+  AnalyticsEventType.VISIBLE,
+  AnalyticsEventType.HIDDEN,
+];
 
+export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /**
-     * @const {!JSONType} Copied here for tests.
-     * @private
-     */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
-
 
     /** @private {!Promise} */
     this.consentPromise_ = Promise.resolve();
@@ -67,50 +69,56 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.consentNotificationId_ = null;
 
-    /**
-     * @private {?string} Predefined type associated with the tag. If specified,
-     * the config from the predefined type is merged with the inline config
-     */
-    this.type_ = null;
+    /** @private {boolean} */
+    this.isSandbox_ = false;
 
     /**
-     * @private {Object<string, string>} A map of request names to the request
-     * format string used by the tag to send data
+     * @private {Object<string, RequestHandler>} A map of request handler with requests
      */
     this.requests_ = {};
 
     /**
-     * @private {JSONType}
+     * @private {!JsonObject}
      */
-    this.config_ = /** @type {JSONType} */ ({});
-
-    /**
-     * @private {JSONType}
-     */
-    this.remoteConfig_ = /** @type {JSONType} */ ({});
+    this.config_ = dict();
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
-    /** @private {?./instrumentation.AnalyticsGroup} */
+    /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
-    /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceFor(this.win);
+    /** @private {?./variables.VariableService} */
+    this.variableService_ = null;
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
-    this.cryptoService_ = cryptoFor(this.win);
+    this.cryptoService_ = Services.cryptoFor(this.win);
+
+    /** @private {?Promise} */
+    this.iniPromise_ = null;
+
+    /** @private {./transport.Transport} */
+    this.transport_ = null;
+
+    /** @private {boolean} */
+    this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /** @private {?./linker-manager.LinkerManager} */
+    this.linkerManager_ = null;
+
+    /** @private {?boolean} */
+    this.isInFie_ = null;
   }
 
   /** @override */
-  getPriority() {
-    // Loads after other content.
-    return 1;
+  getLayoutPriority() {
+    // Load immediately if inabox, otherwise after other content.
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
   isAlwaysFixed() {
-    return true;
+    return !isInFie(this.element);
   }
 
   /** @override */
@@ -120,14 +128,24 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.isSandbox_ = this.element.hasAttribute('sandbox');
+
     this.element.setAttribute('aria-hidden', 'true');
 
-    this.consentNotificationId_ = this.element
-        .getAttribute('data-consent-notification-id');
+    this.consentNotificationId_ = this.element.getAttribute(
+      'data-consent-notification-id'
+    );
 
     if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = userNotificationManagerFor(this.win)
-          .then(service => service.get(this.consentNotificationId_));
+      this.consentPromise_ = Services.userNotificationManagerForDoc(
+        this.element
+      ).then((service) =>
+        service.get(dev().assertString(this.consentNotificationId_))
+      );
+    }
+
+    if (this.element.getAttribute('trigger') == 'immediate') {
+      this.ensureInitialized_();
     }
   }
 
@@ -135,15 +153,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    toggle(this.element, false);
-
-    return this.consentPromise_
-        .then(this.fetchRemoteConfig_.bind(this))
-        .then(() => instrumentationServiceForDoc(this.getAmpDoc()))
-        .then(instrumentation => {
-          this.instrumentation_ = instrumentation;
-        })
-        .then(this.onFetchRemoteConfigSuccess_.bind(this));
+    return this.ensureInitialized_();
   }
 
   /** @override */
@@ -152,16 +162,121 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+
+    if (this.linkerManager_) {
+      this.linkerManager_.dispose();
+      this.linkerManager_ = null;
+    }
+
+    for (const request in this.requests_) {
+      this.requests_[request].dispose();
+      delete this.requests_[request];
+    }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        this.transport_.maybeInitIframeTransport(this.element);
+      });
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.getAmpDoc().isVisible()) {
+      // amp-analytics tag was just set to display:none. Page is still loaded.
+      return false;
+    }
+
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        // Page was unloaded - free up owned resources.
+        this.transport_.deleteIframeTransport();
+      });
+    }
+
+    return super.unlayoutCallback();
   }
 
   /**
-   * Handle successful fetching of (possibly) remote config.
+   * @return {!Promise}
+   * @private
+   */
+  ensureInitialized_() {
+    if (this.iniPromise_) {
+      return this.iniPromise_;
+    }
+    toggle(this.element, false);
+
+    this.iniPromise_ = this.getAmpDoc()
+      .whenFirstVisible()
+      // Rudimentary "idle" signal.
+      .then(() => Services.timerFor(this.win).promise(1))
+      .then(() => this.consentPromise_)
+      .then(() => Services.ampdocServiceFor(this.win))
+      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
+      .then((ampdoc) =>
+        Promise.all([
+          instrumentationServicePromiseForDoc(ampdoc),
+          variableServicePromiseForDoc(ampdoc),
+        ])
+      )
+      .then((services) => {
+        this.instrumentation_ = services[0];
+        this.variableService_ = services[1];
+        const loadConfigDeferred = new Deferred();
+        const loadConfigTask = () => {
+          const configPromise = new AnalyticsConfig(this.element).loadConfig();
+          loadConfigDeferred.resolve(configPromise);
+        };
+        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+        } else {
+          loadConfigTask();
+        }
+        return loadConfigDeferred.promise;
+      })
+      .then((config) => {
+        this.config_ = /** @type {!JsonObject} */ (config);
+        // CookieWriter not enabled on proxy origin, do not chunk
+        return new CookieWriter(this.win, this.element, this.config_).write();
+      })
+      .then(() => {
+        this.transport_ = new Transport(
+          this.win,
+          this.config_['transport'] || {}
+        );
+      })
+      .then(this.registerTriggers_.bind(this))
+      .then(this.initializeLinker_.bind(this));
+    return this.iniPromise_;
+  }
+
+  /**
+   * @return {boolean} whether parent post messages are allowed.
+   *
+   * <p>Parent post messages are only allowed for ads.
+   *
+   * @private
+   */
+  allowParentPostMessage_() {
+    if (this.isInabox_) {
+      return true;
+    }
+    if (this.isInFie_ == null) {
+      this.isInFie_ = isInFie(this.element);
+    }
+    return this.isInFie_;
+  }
+
+  /**
+   * Registers triggers.
    * @return {!Promise|undefined}
    * @private
    */
-  onFetchRemoteConfigSuccess_() {
-    this.config_ = this.mergeConfigs_();
-
+  registerTriggers_() {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
@@ -173,16 +288,24 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      user().error(TAG, 'No triggers were found in the ' +
-          'config. No analytics data will be sent.');
+      this.user().error(
+        TAG,
+        'No triggers were found in the ' +
+          'config. No analytics data will be sent.'
+      );
       return Promise.resolve();
     }
 
-    this.processExtraUrlParams_(this.config_['extraUrlParams'],
-        this.config_['extraUrlParamsReplaceMap']);
+    this.processExtraUrlParams_(
+      this.config_['extraUrlParams'],
+      this.config_['extraUrlParamsReplaceMap']
+    );
 
-    this.analyticsGroup_ =
-        this.instrumentation_.createAnalyticsGroup(this.element);
+    this.analyticsGroup_ = this.instrumentation_.createAnalyticsGroup(
+      this.element
+    );
+
+    this.transport_.maybeInitIframeTransport(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -190,56 +313,130 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (hasOwn(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
-            {}, trigger, undefined, true);
+          dict({}),
+          trigger,
+          undefined /* opt_iterations */,
+          true /* opt_noEncode */
+        );
         const TAG = this.getName_();
         if (!trigger) {
-          user().error(TAG, 'Trigger should be an object: ', k);
+          this.user().error(TAG, 'Trigger should be an object: ', k);
           continue;
         }
-        if (!trigger['on'] || !trigger['request']) {
-          user().error(TAG, '"on" and "request" ' +
-              'attributes are required for data to be collected.');
+        const hasRequestOrPostMessage =
+          trigger['request'] ||
+          (trigger['parentPostMessage'] && this.allowParentPostMessage_());
+        if (!trigger['on'] || !hasRequestOrPostMessage) {
+          const errorMsgSeg = this.allowParentPostMessage_()
+            ? '/"parentPostMessage"'
+            : '';
+          this.user().error(
+            TAG,
+            '"on" and "request"' +
+              errorMsgSeg +
+              ' attributes are required for data to be collected.'
+          );
           continue;
         }
-        this.processExtraUrlParams_(trigger['extraUrlParams'],
-            this.config_['extraUrlParamsReplaceMap']);
-        promises.push(this.isSampledIn_(trigger).then(result => {
-          if (!result) {
-            return;
+        // Check for not supported trigger for sandboxed analytics
+        if (this.isSandbox_) {
+          const eventType = trigger['on'];
+          if (
+            isEnumValue(AnalyticsEventType, eventType) &&
+            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+          ) {
+            this.user().error(
+              TAG,
+              eventType + ' is not supported for amp-analytics in scope'
+            );
+            continue;
           }
+        }
 
-          if (trigger['selector']) {
-            // Expand the selector using variable expansion.
-            return this.variableService_.expandTemplate(
-                trigger['selector'], expansionOptions)
-              .then(selector => {
-                trigger['selector'] = selector;
-                this.addTriggerNoInline_(trigger);
-              });
-          } else {
-            this.addTriggerNoInline_(trigger);
-          }
-        }));
+        this.processExtraUrlParams_(
+          trigger['extraUrlParams'],
+          this.config_['extraUrlParamsReplaceMap']
+        );
+        promises.push(
+          this.isSampledIn_(trigger).then((result) => {
+            if (!result) {
+              return;
+            }
+            // replace selector and selectionMethod
+            if (this.isSandbox_) {
+              // Only support selection of parent element for analytics in scope
+              if (!this.element.parentElement) {
+                // In case parent element has been removed from DOM, do nothing
+                return;
+              }
+              trigger['selector'] = this.element.parentElement.tagName;
+              trigger['selectionMethod'] = 'closest';
+              return this.addTrigger_(trigger);
+            } else if (
+              trigger['selector'] &&
+              startsWith(trigger['selector'], '${') &&
+              endsWith(trigger['selector'], '}')
+            ) {
+              // Expand the selector using variable expansion.
+              return this.variableService_
+                .expandTemplate(
+                  trigger['selector'],
+                  expansionOptions,
+                  this.element
+                )
+                .then((selector) => {
+                  trigger['selector'] = selector;
+                  return this.addTrigger_(trigger);
+                });
+            } else {
+              return this.addTrigger_(trigger);
+            }
+          })
+        );
       }
     }
     return Promise.all(promises);
   }
 
   /**
-   * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
-   * to avoid inlining this method so that `try/catch` does it veto
-   * optimizations.
-   * @param {!JSONType} config
-   * @private
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @visibleForTesting
    */
-  addTriggerNoInline_(config) {
+  preload(url, opt_preloadAs) {
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      url,
+      opt_preloadAs
+    );
+  }
+
+  /**
+   * Calls `AnalyticsGroup.addTrigger` and reports any errors.
+   * @param {!JsonObject} config
+   * @private
+   * @noinline
+   * @return {!Promise}
+   */
+  addTrigger_(config) {
+    if (!this.analyticsGroup_) {
+      // No need to handle trigger for component that has already been detached
+      // from DOM
+      return Promise.resolve();
+    }
     try {
-      this.analyticsGroup_.addTrigger(
-          config, this.handleEvent_.bind(this, config));
+      return this.analyticsGroup_.addTrigger(
+        config,
+        this.handleEvent_.bind(this, config)
+      );
     } catch (e) {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+      return Promise.resolve();
     }
   }
 
@@ -260,9 +457,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const replaceMapKey in replaceMap) {
         if (++count > MAX_REPLACES) {
           const TAG = this.getName_();
-          user().error(TAG,
-              'More than ' + MAX_REPLACES + ' extraUrlParamsReplaceMap rules ' +
-              'aren\'t allowed; Skipping the rest');
+          this.user().error(
+            TAG,
+            'More than ' +
+              MAX_REPLACES +
+              ' extraUrlParamsReplaceMap rules ' +
+              "aren't allowed; Skipping the rest"
+          );
           break;
         }
 
@@ -282,99 +483,14 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Returns a promise that resolves when remote config is ready (or
-   * immediately if no remote config is specified.)
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  fetchRemoteConfig_() {
-    let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl) {
-      return Promise.resolve();
-    }
-    assertHttpsUrl(remoteConfigUrl, this.element);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {};
-    if (this.element.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element.getAttribute('data-credentials');
-    }
-    const ampdoc = this.getAmpDoc();
-    return urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
-        .then(expandedUrl => {
-          remoteConfigUrl = expandedUrl;
-          return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
-        })
-        .then(jsonValue => {
-          this.remoteConfig_ = jsonValue;
-          dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
-        }, err => {
-          user().error(TAG, 'Error loading remote config: ', remoteConfigUrl,
-              err);
-        });
-  }
-
-  /**
-   * Merges various sources of configs and stores them in a member variable.
-   *
-   * Order of precedence for configs from highest to lowest:
-   * - Remote config: specified through an attribute of the tag.
-   * - Inline config: specified insize the tag.
-   * - Predefined config: Defined as part of the platform.
-   * - Default config: Built-in config shared by all amp-analytics tags.
-   *
-   * @private
-   * @return {!JSONType}
-   */
-  mergeConfigs_() {
-    const inlineConfig = this.getInlineConfigNoInline();
-    // Initialize config with analytics related vars.
-    const config = /** @type {!JSONType} */ ({
-      'vars': {
-        'requestCount': 0,
-      },
-    });
-    const defaultConfig = this.predefinedConfig_['default'] || {};
-    const typeConfig = this.predefinedConfig_[
-      this.element.getAttribute('type')] || {};
-
-    this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
-    this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(this.remoteConfig_, config);
-    return config;
-  }
-
-  /** @private */
-  getInlineConfigNoInline() {
-    let inlineConfig = {};
-    const TAG = this.getName_();
-    try {
-      const children = this.element.children;
-      if (children.length == 1) {
-        const child = children[0];
-        if (isJsonScriptTag(child)) {
-          inlineConfig = JSON.parse(children[0].textContent);
-        } else {
-          user().error(TAG, 'The analytics config should ' +
-              'be put in a <script> tag with type="application/json"');
-        }
-      } else if (children.length > 1) {
-        user().error(TAG, 'The tag should contain only one' +
-            ' <script> child.');
-      }
-    }
-    catch (er) {
-      user().error(TAG, 'Analytics config could not be ' +
-          'parsed. Is it in a valid JSON format?', er);
-    }
-    return inlineConfig;
-  }
-
-  /**
    * @return {boolean} true if the user has opted out.
    */
   hasOptedOut_() {
+    const elementId = this.config_['optoutElementId'];
+    if (elementId && this.win.document.getElementById(elementId)) {
+      return true;
+    }
+
     if (!this.config_['optout']) {
       return false;
     }
@@ -401,26 +517,80 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   generateRequests_() {
-    const requests = {};
-    if (!this.config_ || !this.config_['requests']) {
-      const TAG = this.getName_();
-      user().error(TAG, 'No request strings defined. Analytics ' +
-          'data will not be sent from this page.');
+    if (!this.config_['requests']) {
+      if (!this.allowParentPostMessage_()) {
+        const TAG = this.getName_();
+        this.user().error(
+          TAG,
+          'No request strings defined. Analytics ' +
+            'data will not be sent from this page.'
+        );
+      }
       return;
     }
-    for (const k in this.config_['requests']) {
-      if (hasOwn(this.config_['requests'], k)) {
-        requests[k] = this.config_['requests'][k];
-      }
-    }
-    this.requests_ = requests;
 
-    // Expand any placeholders. For requests, we expand each string up to 5
-    // times to support nested requests. Leave any unresolved placeholders.
-    for (const k in this.requests_) {
-      this.requests_[k] = expandTemplate(this.requests_[k], key => {
-        return this.requests_[key] || '${' + key + '}';
-      }, 5);
+    if (this.config_['requests']) {
+      for (const k in this.config_['requests']) {
+        if (hasOwn(this.config_['requests'], k)) {
+          const request = this.config_['requests'][k];
+          if (!request['baseUrl']) {
+            this.user().error(TAG, 'request must have a baseUrl');
+            delete this.config_['requests'][k];
+          }
+        }
+      }
+
+      // Expand any placeholders. For requests, we expand each string up to 5
+      // times to support nested requests. Leave any unresolved placeholders.
+      // Expand any requests placeholder.
+      for (const k in this.config_['requests']) {
+        this.config_['requests'][k]['baseUrl'] = expandTemplate(
+          this.config_['requests'][k]['baseUrl'],
+          (key) => {
+            const request = this.config_['requests'][key];
+            return (request && request['baseUrl']) || '${' + key + '}';
+          },
+          5
+        );
+      }
+
+      const requests = {};
+      for (const k in this.config_['requests']) {
+        if (hasOwn(this.config_['requests'], k)) {
+          const request = this.config_['requests'][k];
+          requests[k] = new RequestHandler(
+            this.element,
+            request,
+            Services.preconnectFor(this.win),
+            this.transport_,
+            this.isSandbox_
+          );
+        }
+      }
+      this.requests_ = requests;
+    }
+  }
+
+  /**
+   * Create the linker-manager that will append linker params as necessary.
+   * The initialization is asynchronous and non blocking
+   * @private
+   */
+  initializeLinker_() {
+    const type = this.element.getAttribute('type');
+    this.linkerManager_ = new LinkerManager(
+      this.getAmpDoc(),
+      this.config_,
+      type,
+      this.element
+    );
+    const linkerTask = () => {
+      this.linkerManager_.init();
+    };
+    if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+      chunk(this.element, linkerTask, ChunkPriority.LOW);
+    } else {
+      linkerTask();
     }
   }
 
@@ -428,157 +598,213 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Callback for events that are registered by the config's triggers. This
    * method generates requests and sends them out.
    *
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
-   * @return {!Promise} The request that was sent out.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
-        ? trigger['request'] : [trigger['request']];
-
-    const resultPromises = [];
+      ? trigger['request']
+      : [trigger['request']];
     for (let r = 0; r < requests.length; r++) {
-      const request = this.requests_[requests[r]];
-      resultPromises.push(this.handleRequestForEvent_(request, trigger, event));
+      const requestName = requests[r];
+      this.handleRequestForEvent_(requestName, trigger, event);
     }
-    return Promise.all(resultPromises);
   }
 
   /**
    * Processes a request for an event callback and sends it out.
    *
-   * @param {string} request The request to process.
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @param {string} requestName The requestName to process.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
-  handleRequestForEvent_(request, trigger, event) {
-    // TODO(avimehta, #6543): Remove this code or mark as "error" for the
-    // once destroyed embed release is implemented. See `detachedCallback`.
+  handleRequestForEvent_(requestName, trigger, event) {
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
       dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
-      return Promise.resolve();
     }
 
-    if (!request) {
+    const request = this.requests_[requestName];
+    const hasPostMessage =
+      this.allowParentPostMessage_() && trigger['parentPostMessage'];
+
+    if (requestName != undefined && !request) {
       const TAG = this.getName_();
-      user().error(TAG, 'Ignoring event. Request string ' +
-          'not found: ', trigger['request']);
-      return Promise.resolve();
-    }
-
-    const requestPromises = [];
-    const params = map();
-    // Add any given extraUrlParams as query string param
-    if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
-      const expansionOptions = this.expansionOptions_(event, trigger);
-      Object.assign(params, this.config_['extraUrlParams'],
-          trigger['extraUrlParams']);
-      for (const k in params) {
-        if (typeof params[k] == 'string') {
-          requestPromises.push(
-              this.variableService_.expandTemplate(params[k], expansionOptions)
-                .then(value => { params[k] = value; }));
-        }
+      this.user().error(
+        TAG,
+        'Ignoring request for event. Request string not found: ',
+        trigger['request']
+      );
+      if (!hasPostMessage) {
+        return;
       }
     }
-
-    return Promise.all(requestPromises)
-      .then(() => {
-        request = this.addParamsToUrl_(request, params);
-        this.config_['vars']['requestCount']++;
-        const expansionOptions = this.expansionOptions_(event, trigger);
-        return this.variableService_.expandTemplate(request, expansionOptions);
-      })
-      .then(request =>
-        // For consistency with amp-pixel we also expand any url replacements.
-        urlReplacementsForDoc(this.element).expandAsync(request))
-      .then(request => {
-        this.sendRequest_(request, trigger);
-        return request;
-      });
+    this.checkTriggerEnabled_(trigger, event).then((enabled) => {
+      if (!enabled) {
+        return;
+      }
+      this.expandAndSendRequest_(request, trigger, event);
+      this.expandAndPostMessage_(trigger, event);
+    });
   }
 
   /**
-   * @param {!JSONType} trigger The config to use to determine sampling.
+   * @param {RequestHandler} request The request to process.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
+   * @private
+   */
+  expandAndSendRequest_(request, trigger, event) {
+    if (!request) {
+      return;
+    }
+    this.config_['vars']['requestCount']++;
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
+  }
+
+  /**
+   * Expand and post message to parent window if applicable.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
+   * @private
+   */
+  expandAndPostMessage_(trigger, event) {
+    const msg = trigger['parentPostMessage'];
+    if (!msg || !this.allowParentPostMessage_()) {
+      // Only send message for AMP ad with parentPostMessage specified.
+      return;
+    }
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    expandPostMessage(
+      this.getAmpDoc(),
+      msg,
+      this.config_['extraUrlParams'],
+      trigger,
+      expansionOptions,
+      this.element
+    ).then((message) => {
+      if (isIframed(this.win)) {
+        // Only post message with explict `parentPostMessage`
+        this.win.parent./*OK*/ postMessage(message, '*');
+      }
+    });
+  }
+
+  /**
+   * @param {!JsonObject} trigger The config to use to determine sampling.
    * @return {!Promise<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
    */
   isSampledIn_(trigger) {
-    /** @const {!JSONType} */
+    /** @const {!JsonObject} */
     const spec = trigger['sampleSpec'];
-    const resolve = Promise.resolve(true);
     const TAG = this.getName_();
     if (!spec) {
-      return resolve;
+      return Promise.resolve(true);
     }
-    if (!spec['sampleOn']) {
-      user().error(TAG, 'Invalid sampleOn value.');
-      return resolve;
+    const sampleOn = spec['sampleOn'];
+    if (!sampleOn) {
+      this.user().error(TAG, 'Invalid sampleOn value.');
+      return Promise.resolve(true);
     }
-    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+    const threshold = parseFloat(spec['threshold']);
     if (threshold >= 0 && threshold <= 100) {
-      const keyPromise = this.variableService_.expandTemplate(
-          spec['sampleOn'], this.expansionOptions_({}, trigger))
-        .then(key => urlReplacementsForDoc(this.element).expandAsync(key));
-      return keyPromise
-          .then(key => this.cryptoService_.uniform(key))
-          .then(digest => digest * 100 < spec['threshold']);
-    }
-    user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
-    return resolve;
-  }
-
-  /**
-   * Adds parameters to URL. Similar to the function defined in url.js but with
-   * a different encoding method.
-   * @param {string} request
-   * @param {!Object<string, string>} params
-   * @return {string}
-   * @private
-   */
-  addParamsToUrl_(request, params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
+      const sampleDeferred = new Deferred();
+      const sampleInTask = () => {
+        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const samplePromise = this.expandTemplateWithUrlParams_(
+          sampleOn,
+          expansionOptions
+        )
+          .then((key) => this.cryptoService_.uniform(key))
+          .then((digest) => digest * 100 < threshold);
+        sampleDeferred.resolve(samplePromise);
+      };
+      if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+        chunk(this.element, sampleInTask, ChunkPriority.LOW);
       } else {
-        const sv = this.variableService_.encodeVars(v, k);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
+        sampleInTask();
       }
+      return sampleDeferred.promise;
     }
-
-    const paramString = s.join('&');
-    if (request.indexOf('${extraUrlParams}') >= 0) {
-      return request.replace('${extraUrlParams}', paramString);
-    } else {
-      return appendEncodedParamStringToUrl(request, paramString);
-    }
+    user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
+    return Promise.resolve(true);
   }
 
   /**
-   * @param {string} request The full request string to send.
-   * @param {!JSONType} trigger
+   * Checks if request for a trigger is enabled.
+   * @param {!JsonObject} trigger The config to use to determine if trigger is
+   * enabled.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
+   * @return {!Promise<boolean>} Whether trigger must be called.
    * @private
    */
-  sendRequest_(request, trigger) {
-    if (!request) {
-      const TAG = this.getName_();
-      user().error(TAG, 'Request not sent. Contents empty.');
-      return;
+  checkTriggerEnabled_(trigger, event) {
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    const enabledOnTagLevel = this.checkSpecEnabled_(
+      this.config_['enabled'],
+      expansionOptions
+    );
+    const enabledOnTriggerLevel = this.checkSpecEnabled_(
+      trigger['enabled'],
+      expansionOptions
+    );
+
+    return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel]).then(
+      (enabled) => {
+        devAssert(enabled.length === 2);
+        return enabled[0] && enabled[1];
+      }
+    );
+  }
+
+  /**
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is
+   * provided and value resolves to a falsey value (empty string, 0, false,
+   * null, NaN or undefined).
+   * @param {string|boolean} spec Expression that will be evaluated.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<boolean>} False only if spec is provided and value is
+   * falsey.
+   * @private
+   */
+  checkSpecEnabled_(spec, expansionOptions) {
+    // Spec absence always resolves to true.
+    if (spec === undefined) {
+      return Promise.resolve(true);
     }
-    if (trigger['iframePing']) {
-      user().assert(trigger['on'] == 'visible',
-          'iframePing is only available on page view requests.');
-      sendRequestUsingIframe(this.win, request);
-    } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
+
+    return this.expandTemplateWithUrlParams_(
+      spec,
+      expansionOptions
+    ).then((val) => stringToBool(val));
+  }
+
+  /**
+   * Expands spec using provided expansion options and applies url replacement
+   * if necessary.
+   * @param {string} spec Expression that needs to be expanded.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<string>} expanded spec.
+   * @private
+   */
+  expandTemplateWithUrlParams_(spec, expansionOptions) {
+    return this.variableService_
+      .expandTemplate(spec, expansionOptions, this.element)
+      .then((key) =>
+        Services.urlReplacementsForDoc(this.element).expandUrlAsync(
+          key,
+          this.variableService_.getMacros(this.element)
+        )
+      );
   }
 
   /**
@@ -587,70 +813,36 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return 'AmpAnalytics ' +
-        (this.element.getAttribute('id') || '<unknown id>');
+    return (
+      'AmpAnalytics ' + (this.element.getAttribute('id') || '<unknown id>')
+    );
   }
 
   /**
-   * Merges two objects. If the value is array or plain object, the values are
-   * merged otherwise the value is overwritten.
-   *
-   * @param {Object|Array} from Object or array to merge from
-   * @param {Object|Array} to Object or Array to merge into
-   * @param {boolean=} opt_predefinedConfig
-   * @private
-   */
-  mergeObjects_(from, to, opt_predefinedConfig) {
-    if (to === null || to === undefined) {
-      to = {};
-    }
-
-    // Assert that optouts are allowed only in predefined configs.
-    // The last expression adds an exception of known, safe optout function
-    // that is already being used in the wild.
-    user().assert(opt_predefinedConfig || !from || !from['optout'] ||
-        from['optout'] == '_gaUserPrefs.ioo',
-        'optout property is only available to vendor config.');
-
-    for (const property in from) {
-      user().assert(opt_predefinedConfig || property != 'iframePing',
-          'iframePing config is only available to vendor config.');
-      // Only deal with own properties.
-      if (hasOwn(from, property)) {
-        if (isArray(from[property])) {
-          if (!isArray(to[property])) {
-            to[property] = [];
-          }
-          to[property] = this.mergeObjects_(from[property], to[property],
-              opt_predefinedConfig);
-        } else if (isObject(from[property])) {
-          if (!isObject(to[property])) {
-            to[property] = {};
-          }
-          to[property] = this.mergeObjects_(from[property], to[property],
-              opt_predefinedConfig);
-        } else {
-          to[property] = from[property];
-        }
-      }
-    }
-    return to;
-  }
-
-  /**
-   * @param {!Object<string, Object<string, string|Array<string>>>} source1
-   * @param {!Object<string, Object<string, string|Array<string>>>} source2
+   * @param {!JsonObject|!./events.AnalyticsEvent} source1
+   * @param {!JsonObject} source2
    * @param {number=} opt_iterations
    * @param {boolean=} opt_noEncode
    * @return {!ExpansionOptions}
    */
   expansionOptions_(source1, source2, opt_iterations, opt_noEncode) {
-    const vars = map();
-    this.mergeObjects_(this.config_['vars'], vars);
-    this.mergeObjects_(source2['vars'], vars);
-    this.mergeObjects_(source1['vars'], vars);
+    const vars = dict();
+    mergeObjects(this.config_['vars'], vars);
+    mergeObjects(source2['vars'], vars);
+    mergeObjects(source1['vars'], vars);
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
 
-AMP.registerElement('amp-analytics', AmpAnalytics);
+AMP.extension(TAG, '0.1', (AMP) => {
+  // Register doc-service factory.
+  AMP.registerServiceForDoc(
+    'amp-analytics-instrumentation',
+    InstrumentationService
+  );
+  AMP.registerServiceForDoc('activity', Activity);
+  installLinkerReaderService(AMP.win);
+  AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
+  // Register the element.
+  AMP.registerElement(TAG, AmpAnalytics);
+});

@@ -14,37 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {devAssert} from '../log';
 
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
- * @return {!Promise<string>}
+ * @return {string}
  */
 export function utf8Decode(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
-}
-
-// TODO(aghassemi, #6139): Remove the async version of utf8 encoding and rename
-// the sync versions to the canonical utf8Decode/utf8Encode.
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
- * @return {!string}
- */
-export function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
@@ -55,32 +32,9 @@ export function utf8DecodeSync(bytes) {
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
- * @return {!Promise<!Uint8Array>}
- */
-export function utf8Encode(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return Promise.resolve(new TextEncoder('utf-8').encode(string));
-  }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      // Because we used readAsArrayBuffer, we know the result must be an
-      // ArrayBuffer.
-      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
-    };
-    reader.readAsArrayBuffer(new Blob([string]));
-  });
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
  * @return {!Uint8Array}
  */
-export function utf8EncodeSync(string) {
+export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
     return new TextEncoder('utf-8').encode(string);
   }
@@ -98,11 +52,11 @@ export function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
-    dev().assert(charCode <= 255, 'Characters must be in range [0,255]');
+    devAssert(charCode <= 255, 'Characters must be in range [0,255]');
     bytes[i] = charCode;
   }
   return bytes;
-};
+}
 
 /**
  * Converts a 8-bit bytes array into a string
@@ -110,23 +64,52 @@ export function stringToBytes(str) {
  * @return {string}
  */
 export function bytesToString(bytes) {
-  return String.fromCharCode.apply(String, bytes);
-};
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Converts a 4-item byte array to an unsigned integer.
+ * Assumes bytes are big endian.
+ * @param {!Uint8Array} bytes
+ * @return {number}
+ */
+export function bytesToUInt32(bytes) {
+  if (bytes.length != 4) {
+    throw new Error('Received byte array with length != 4');
+  }
+  const val =
+    ((bytes[0] & 0xff) << 24) |
+    ((bytes[1] & 0xff) << 16) |
+    ((bytes[2] & 0xff) << 8) |
+    (bytes[3] & 0xff);
+  // Convert to unsigned.
+  return val >>> 0;
+}
 
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
- * @param {!number} length
+ * @param {!Window} win
+ * @param {number} length
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {
-  if (!win.crypto || !win.crypto.getRandomValues) {
+  // Support IE 11
+  const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (win.crypto ||
+    win.msCrypto);
+  if (!cryptoLib || !cryptoLib.getRandomValues) {
     return null;
   }
 
   // Widely available in browsers we support:
   // http://caniuse.com/#search=getRandomValues
   const uint8array = new Uint8Array(length);
-  win.crypto.getRandomValues(uint8array);
+  cryptoLib.getRandomValues(uint8array);
   return uint8array;
 }

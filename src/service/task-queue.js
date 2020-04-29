@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-
+import {devAssert} from '../log';
 
 /**
  * The internal structure for the task.
@@ -23,7 +22,8 @@ import {dev} from '../log';
  *   id: string,
  *   resource: !./resource.Resource,
  *   priority: number,
- *   callback: function(boolean),
+ *   forceOutsideViewport: boolean,
+ *   callback: function(),
  *   scheduleTime: time,
  *   startTime: time,
  *   promise: (?Promise|undefined)
@@ -31,6 +31,10 @@ import {dev} from '../log';
  */
 export let TaskDef;
 
+/**
+ * @typedef {Object<string, *>}
+ */
+let PeekStateDef;
 
 /**
  * A scheduling queue for Resources.
@@ -38,7 +42,9 @@ export let TaskDef;
  * @package
  */
 export class TaskQueue {
-
+  /**
+   * Creates an instance of TaskQueue.
+   */
   constructor() {
     /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];
@@ -92,8 +98,7 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    dev().assert(
-        !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    devAssert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = Date.now();
@@ -118,15 +123,16 @@ export class TaskQueue {
   /**
    * Returns the task with the minimal score based on the provided scoring
    * callback.
-   * @param {function(!TaskDef):number} scorer
+   * @param {function(!TaskDef, !PeekStateDef):number} scorer
+   * @param {!PeekStateDef} state
    * @return {?TaskDef}
    */
-  peek(scorer) {
+  peek(scorer, state) {
     let minScore = 1e6;
     let minTask = null;
     for (let i = 0; i < this.tasks_.length; i++) {
       const task = this.tasks_[i];
-      const score = scorer(task);
+      const score = scorer(task, state);
       if (score < minScore) {
         minScore = score;
         minTask = task;

@@ -21,7 +21,7 @@ amp-fx-flying-carpet {
 }
 
 /* Clip the contents of the flying-carpet so it is only viewable "inside" */
-amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip {
+amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip {
   /* Absolutely so clipping works */
   position: absolute !important;
   top: 0 !important;
@@ -41,13 +41,25 @@ amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip {
 }
 
 /* Fixed position container that creates the scroll effect */
-amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip > .-amp-fx-flying-carpet-container {
+amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip > .i-amphtml-fx-flying-carpet-container {
   position: fixed !important;
   top: 0 !important;
   width: 100%;
+  height: 100%;
   /*
    * Included to force slow webkit browsers (Android) into rendering the
    * container using the GPU.
    */
   -webkit-transform: translateZ(0) !important;
+
+  /* Center contents in the container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.i-amphtml-fx-flying-carpet-container > .i-amphtml-layout-responsive,
+.i-amphtml-fx-flying-carpet-container > .i-amphtml-layout-fixed-height {
+  align-self: stretch;
 }

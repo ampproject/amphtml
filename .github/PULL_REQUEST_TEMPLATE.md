@@ -1,17 +1,37 @@
-Please pick a meaningful title for your pull request using sentence case.
+<!--
+# Instructions:
 
-Do not overuse punctuation in the title like `(chore):`. If it is helpful feel free to start with a project name, though, like `ProjectX: Implement some feature`.
+- Pick a meaningful title for your pull request. (Use sentence case.)
+  - Prefix the title with an emoji to identify what is being done. (Copy-paste the emoji from the list below.)
+  - Do not overuse punctuation in the title (like `(chore):`).
+  - If it is helpful, use a simple prefix (like `ProjectX: Implement some feature`).
+- Enter a succinct description that says why the PR is necessary, and what it does.
+  - Mention the GitHub issue that is being addressed by the pull request.
+  - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
-# Title instructions above.
+> NOTE: All non-trivial changes (like introducing new features or components) should have an associated issue or reference an I2I (intent-to-implement: go.amp.dev/i2i). Please read through the contribution process (go.amp.dev/contributing/code) for more information.
 
-Enter a succinct description of what is achieved by the PR. Ideally describe why the change is being made.
+# Example of a good description:
 
-Bullet points like
+- Implement aspect X
+- Leave out feature Y because of A
+- Improve performance by B
+- Improve accessibility by C
 
-- Implements aspect X
-- Leaves out feature Y because of A
-- Improves performance by B
+# Emojis for categorizing pull requests (copy-paste emoji into description):
 
-really help with making this more readable.
-
-Fixes/Implements/Related-to #1 (enter issue number, except in rare cases where none exists).
+✨ New feature
+🐛 Bug fix
+🔥 P0 fix
+✅ Tests
+❄️ Flaky tests
+🚀 Performance improvements
+🖍 CSS / Styling
+♿ Accessibility
+🌐 Internationalization
+📖 Documentation
+🏗 Infrastructure / Tooling / Builds / CI
+⏪ Reverting a previous change
+♻️ Refactoring
+🚮 Deleting code
+-->

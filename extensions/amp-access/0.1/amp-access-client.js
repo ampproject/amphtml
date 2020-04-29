@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {xhrFor} from '../../../src/xhr';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -26,25 +26,25 @@ const TAG = 'amp-access-client';
 /** @const {number} */
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
-
-/** @implements {AccessTypeAdapterDef} */
+/** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessClientAdapter {
-
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @const @private {string} */
-    this.authorizationUrl_ = user().assert(configJson['authorization'],
-        '"authorization" URL must be specified');
+    this.authorizationUrl_ = userAssert(
+      configJson['authorization'],
+      '"authorization" URL must be specified'
+    );
     assertHttpsUrl(this.authorizationUrl_, '"authorization"');
 
     /** @const @private {boolean} */
@@ -53,23 +53,24 @@ export class AccessClientAdapter {
     /** @const @private {string} */
     this.pingbackUrl_ = configJson['pingback'];
     if (this.isPingbackEnabled_) {
-      user().assert(this.pingbackUrl_, '"pingback" URL must be specified');
+      userAssert(this.pingbackUrl_, '"pingback" URL must be specified');
       assertHttpsUrl(this.pingbackUrl_, '"pingback"');
     }
 
     /** @const @private {number} */
     this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
-        configJson);
+      configJson
+    );
 
-    /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(win);
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(ampdoc.win);
 
-    /** @const @private {!Timer} */
-    this.timer_ = timerFor(win);
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {number}
    */
   buildConfigAuthorizationTimeout_(configJson) {
@@ -78,8 +79,10 @@ export class AccessClientAdapter {
     }
 
     let timeout = configJson['authorizationTimeout'];
-    user().assert(typeof timeout == 'number',
-        '"authorizationTimeout" must be a number');
+    userAssert(
+      typeof timeout == 'number',
+      '"authorizationTimeout" must be a number'
+    );
     if (!(getMode().localDev || getMode().development)) {
       timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
     }
@@ -118,15 +121,20 @@ export class AccessClientAdapter {
   /** @override */
   authorize() {
     dev().fine(TAG, 'Start authorization via ', this.authorizationUrl_);
-    const urlPromise = this.context_.buildUrl(this.authorizationUrl_,
-        /* useAuthData */ false);
-    return urlPromise.then(url => {
+    const urlPromise = this.context_.buildUrl(
+      this.authorizationUrl_,
+      /* useAuthData */ false
+    );
+    return urlPromise.then((url) => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      return this.timer_.timeoutPromise(
+      return this.timer_
+        .timeoutPromise(
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+          })
+        )
+        .then((res) => res.json());
     });
   }
 
@@ -137,18 +145,25 @@ export class AccessClientAdapter {
 
   /** @override */
   pingback() {
-    const promise = this.context_.buildUrl(dev().assert(this.pingbackUrl_),
-        /* useAuthData */ true);
-    return promise.then(url => {
+    const promise = this.context_.buildUrl(
+      devAssert(this.pingbackUrl_),
+      /* useAuthData */ true
+    );
+    return promise.then((url) => {
       dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        }),
         body: '',
       });
     });
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 }

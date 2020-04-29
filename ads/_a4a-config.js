@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  adsenseIsA4AEnabled,
-} from '../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
-import {
-  doubleclickIsA4AEnabled,
-} from
-'../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
-import {
-  fakeIsA4AEnabled,
-} from
-'../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
-import {
-  tripleliftIsA4AEnabled,
-} from
-'../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
-import {
-  cloudflareIsA4AEnabled,
-} from
-'../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
-import {getMode} from '../src/mode';
 import {map} from '../src/utils/object';
 
 /**
@@ -47,26 +27,30 @@ import {map} from '../src/utils/object';
  * Otherwise, it will attempt to render the ad via the existing "3p iframe"
  * pathway (delay load into a cross-domain iframe).
  *
- * @type {!Object<!string, !function(!Window, !Element): boolean>}
+ * @type {!Object<string, function(!Window, !Element): boolean>}
  */
-export const a4aRegistry = map({
-  'adsense': adsenseIsA4AEnabled,
-  'doubleclick': doubleclickIsA4AEnabled,
-  'triplelift': tripleliftIsA4AEnabled,
-  'cloudflare': cloudflareIsA4AEnabled,
-  // TODO: Add new ad network implementation "is enabled" functions here.  Note:
-  // if you add a function here that requires a new "import", above, you'll
-  // probably also need to add a whitelist exception to
-  // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
-});
+let a4aRegistry;
 
-// Note: the 'fake' ad network implementation is only for local testing.
-// Normally, ad networks should add their *IsA4AEnabled callback directly
-// to the a4aRegistry, above.  Ad network implementations should NOT use
-// getMode() in this file.  If they need to check getMode() state, they
-// should do so inside their *IsA4AEnabled callback.
-if (getMode().localDev || getMode().test) {
-  a4aRegistry['fake'] = fakeIsA4AEnabled;
+/**
+ * Returns the a4a registry map
+ * @return {Object}
+ */
+export function getA4ARegistry() {
+  if (!a4aRegistry) {
+    a4aRegistry = map({
+      'adsense': () => true,
+      'adzerk': () => true,
+      'doubleclick': () => true,
+      'fake': () => true,
+      // TODO: Add new ad network implementation "is enabled" functions here.
+      // Note: if you add a function here that requires a new "import", above,
+      // you'll probably also need to add a whitelist exception to
+      // build-system/test-configs/dep-check-config.js in the
+      // "filesMatching: 'ads/**/*.js'" rule.
+    });
+  }
+
+  return a4aRegistry;
 }
 
 /**
@@ -76,6 +60,4 @@ if (getMode().localDev || getMode().test) {
 export const signingServerURLs = {
   'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
-  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
-  'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };

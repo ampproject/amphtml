@@ -16,31 +16,35 @@
 
 import {
   createFixtureIframe,
-  pollForLayout,
   expectBodyToBecomeVisible,
+  pollForLayout,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('released components: ',
-    function() {
-      runTest.call(this, false);
-    });
+describe
+  .configure()
+  .retryOnSaucelabs()
+  .run('released components: ', function () {
+    runTest.call(this, false);
+  });
 
-describe.configure().retryOnSaucelabs().run(
-    'released components with polyfills: ', function() {
-      runTest.call(this, true);
-    });
+describe
+  .configure()
+  .retryOnSaucelabs()
+  .run('released components with polyfills: ', function () {
+    runTest.call(this, true);
+  });
 
 function runTest(shouldKillPolyfillableApis) {
-  describe('Rendering of released components', function() {
+  describe.configure().run('Rendering of released components', function () {
     this.timeout(5000);
     let fixture;
     beforeEach(() => {
       this.timeout(3100);
-      return createFixtureIframe('test/fixtures/released.html', 3000, win => {
+      return createFixtureIframe('test/fixtures/released.html', 3000, (win) => {
         if (shouldKillPolyfillableApis) {
           win.Promise = undefined;
         }
-      }).then(f => {
+      }).then((f) => {
         fixture = f;
       });
     });
@@ -49,24 +53,31 @@ function runTest(shouldKillPolyfillableApis) {
     // saucelabs.
     // It never renders the ad, even though it appears to work when looking
     // at the rendering. The test passes when running locally in FF.
-    // TODO(#3561): unmute the test.
-    it.configure().skipFirefox().skipChrome()
-    .run('all components should get loaded', function() {
-      this.timeout(15000);
-      return pollForLayout(fixture.win, 13, 10000).then(() => {
-        expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
-            .to.have.length(16);
-        expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
-            .to.have.length(13);
-        expect(fixture.doc.querySelectorAll('.i-amphtml-error'))
-            .to.have.length(0);
-        checkGlobalScope(fixture.win);
-      }).then(() => {
-        return expectBodyToBecomeVisible(fixture.win);
+    // TODO(lannka, #3561): unmute the test.
+    it.configure()
+      .skipFirefox()
+      .skipChrome()
+      .run('all components should get loaded', function () {
+        this.timeout(15000);
+        return pollForLayout(fixture.win, 12, 10000)
+          .then(() => {
+            expect(
+              fixture.doc.querySelectorAll('.i-amphtml-element')
+            ).to.have.length(16);
+            expect(
+              fixture.doc.querySelectorAll('.i-amphtml-layout')
+            ).to.have.length(12);
+            expect(
+              fixture.doc.querySelectorAll('.i-amphtml-error')
+            ).to.have.length(0);
+            checkGlobalScope(fixture.win);
+          })
+          .then(() => {
+            return expectBodyToBecomeVisible(fixture.win);
+          });
       });
-    });
 
-    it('sanity for Firefox while we skip above', function() {
+    it('sanity for Firefox while we skip above', function () {
       this.timeout(15000);
       // Test this only in firefox.
       if (!navigator.userAgent.match(/Firefox/)) {
@@ -83,9 +94,25 @@ function checkGlobalScope(win) {
   // Checks that we don't leak certain symbols to the global scope.
   // This could happen if we do not wrap all our code in a closure.
   const commonSymbols = [
-    '$', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'x', 'z', '_', 'log'];
+    '$',
+    'a',
+    'b',
+    'c',
+    'd',
+    'e',
+    'f',
+    'g',
+    'h',
+    'i',
+    'x',
+    'z',
+    '_',
+    'log',
+  ];
   expect(win).to.not.include.keys(commonSymbols);
-  expect(win).to.not.include.keys(commonSymbols.map(symbol => {
-    return symbol.toUpperCase();
-  }));
+  expect(win).to.not.include.keys(
+    commonSymbols.map((symbol) => {
+      return symbol.toUpperCase();
+    })
+  );
 }

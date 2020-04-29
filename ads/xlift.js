@@ -28,25 +28,29 @@ export function xlift(global, data) {
   d.id = '_XL_recommend';
   global.document.getElementById('c').appendChild(d);
 
-  d.addEventListener('SuccessLoadedXliftAd', function(e) {
+  d.addEventListener('SuccessLoadedXliftAd', function (e) {
     e.detail = e.detail || {adSizeInfo: {}};
     global.context.renderStart(e.detail.adSizeInfo);
   });
-  d.addEventListener('FailureLoadedXliftAd', function() {
+  d.addEventListener('FailureLoadedXliftAd', function () {
     global.context.noContentAvailable();
   });
 
   //assign XliftAmpHelper property to global(window)
   global.XliftAmpHelper = null;
 
-  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
-    if (!global.XliftAmpHelper) {
+  loadScript(
+    global,
+    'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    () => {
+      if (!global.XliftAmpHelper) {
+        global.context.noContentAvailable();
+      } else {
+        global.XliftAmpHelper.show();
+      }
+    },
+    () => {
       global.context.noContentAvailable();
     }
-    else {
-      global.XliftAmpHelper.show();
-    }
-  }, () => {
-    global.context.noContentAvailable();
-  });
+  );
 }

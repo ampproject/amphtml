@@ -14,112 +14,168 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-jwplayer';
-import {adopt} from '../../../../src/runtime';
+import {htmlFor} from '../../../../src/static-template';
 
-adopt(window);
+describes.realWin(
+  'amp-jwplayer',
+  {
+    amp: {
+      extensions: ['amp-jwplayer'],
+    },
+  },
+  (env) => {
+    let win, doc;
 
-describe('amp-jwplayer', () => {
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
-  function getjwplayer(attributes) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const jw = iframe.doc.createElement('amp-jwplayer');
+    function getjwplayer(attributes) {
+      const jw = doc.createElement('amp-jwplayer');
       for (const key in attributes) {
         jw.setAttribute(key, attributes[key]);
       }
       jw.setAttribute('width', '320');
       jw.setAttribute('height', '180');
       jw.setAttribute('layout', 'responsive');
-      return iframe.addElement(jw);
-    });
-  }
+      const html = htmlFor(env.win.document);
+      env.sandbox
+        .stub(env.ampdoc.getHeadNode(), 'querySelector')
+        .withArgs('meta[property="og:title"]')
+        .returns(html` <meta property="og:title" content="title_tag" /> `);
+      doc.body.appendChild(jw);
+      return jw.build().then(() => {
+        jw.layoutCallback();
+        return jw;
+      });
+    }
 
-  it('renders', () => {
-    return getjwplayer({
-      'data-media-id': 'Wferorsv',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
-  });
-
-  it('renders with a playlist', () => {
-    return getjwplayer({
-      'data-playlist-id': '482jsTAr',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html');
-    });
-  });
-
-  it('fails if no media is specified', () => {
-    return getjwplayer({
-      'data-player-id': 'sDZEo0ea',
-    }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be/
-    );
-  });
-
-  it('fails if no player is specified', () => {
-    return getjwplayer({
-      'data-media-id': 'Wferorsv',
-    }).should.eventually.be.rejectedWith(
-      /The data-player-id attribute is required for/
-    );
-  });
-
-  it('renders with a bad playlist', () => {
-    return getjwplayer({
-      'data-playlist-id': 'zzz',
-      'data-player-id': 'sDZEo0ea',
-    }).then(jw => {
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html');
-    });
-  });
-
-  describe('createPlaceholderCallback', () => {
-    it('should create a placeholder image', () => {
-      return getjwplayer({
+    it('renders', async () => {
+      const jw = await getjwplayer({
         'data-media-id': 'Wferorsv',
         'data-player-id': 'sDZEo0ea',
-      }).then(jwp => {
-        const img = jwp.querySelector('amp-img');
+      });
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html'
+      );
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+
+    it('renders with a playlist', async () => {
+      const jw = await getjwplayer({
+        'data-playlist-id': '482jsTAr',
+        'data-player-id': 'sDZEo0ea',
+      });
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html'
+      );
+    });
+    it('renders with a playlist and parses contextual parameter', async () => {
+      const jw = await getjwplayer({
+        'data-playlist-id': '482jsTAr',
+        'data-player-id': 'sDZEo0ea',
+        'data-content-search': '__CONTEXTUAL__',
+      });
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag'
+      );
+    });
+    it('renders with a playlist and all parameters', async () => {
+      const jw = await getjwplayer({
+        'data-playlist-id': '482jsTAr',
+        'data-player-id': 'sDZEo0ea',
+        'data-content-search': 'dog',
+        'data-content-backfill': true,
+      });
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
+      );
+    });
+    it('fails if no media is specified', () => {
+      return allowConsoleError(() => {
+        return getjwplayer({
+          'data-player-id': 'sDZEo0ea',
+        }).should.eventually.be.rejectedWith(
+          /Either the data-media-id or the data-playlist-id attributes must be/
+        );
+      });
+    });
+
+    it('fails if no player is specified', () => {
+      return allowConsoleError(() => {
+        return getjwplayer({
+          'data-media-id': 'Wferorsv',
+        }).should.eventually.be.rejectedWith(
+          /The data-player-id attribute is required for/
+        );
+      });
+    });
+
+    it('renders with a bad playlist', () => {
+      return getjwplayer({
+        'data-playlist-id': 'zzz',
+        'data-player-id': 'sDZEo0ea',
+      }).then((jw) => {
+        const iframe = jw.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html'
+        );
+      });
+    });
+
+    describe('createPlaceholderCallback', () => {
+      it('should create a placeholder image', async () => {
+        const jw = await getjwplayer({
+          'data-media-id': 'Wferorsv',
+          'data-player-id': 'sDZEo0ea',
+        });
+        const img = jw.querySelector('amp-img');
         expect(img).to.not.be.null;
         expect(img.getAttribute('src')).to.equal(
-            'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
+          'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg'
+        );
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
       });
-    });
-
-    it('should not create a placeholder for playlists', () => {
-      return getjwplayer({
-        'data-playlist-id': 'Wferorsv',
-        'data-player-id': 'sDZEo0ea',
-      }).then(jwp => {
-        const img = jwp.querySelector('amp-img');
+      it('should propagate aria-label to placeholder', async () => {
+        const jw = await getjwplayer({
+          'data-media-id': 'Wferorsv',
+          'data-player-id': 'sDZEo0ea',
+          'aria-label': 'interesting video',
+        });
+        const img = jw.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('aria-label')).to.equal('interesting video');
+        expect(img.getAttribute('alt')).to.equal(
+          'Loading video - interesting video'
+        );
+      });
+      it('should not create a placeholder for playlists', async () => {
+        const jw = await getjwplayer({
+          'data-playlist-id': 'Wferorsv',
+          'data-player-id': 'sDZEo0ea',
+        });
+        const img = jw.querySelector('amp-img');
         expect(img).to.be.null;
       });
     });
-  });
-
-});
+  }
+);

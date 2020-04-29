@@ -16,46 +16,31 @@
 
 import {getAdNetworkConfig} from '../ad-network-config';
 
-describe('ad-network-config', () => {
-
-  let ampAutoAdsElem;
-
-  beforeEach(() => {
-    ampAutoAdsElem = document.createElement('amp-auto-ads');
-    document.body.appendChild(ampAutoAdsElem);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(ampAutoAdsElem);
-  });
-
-  describe('AdSense', () => {
-
-    const AD_CLIENT = 'ca-pub-1234';
+describes.realWin(
+  'ad-network-config',
+  {
+    amp: {
+      canonicalUrl: 'https://foo.bar/baz',
+      runtimeOn: true,
+      ampdoc: 'single',
+    },
+  },
+  (env) => {
+    let ampAutoAdsElem;
+    let document;
 
     beforeEach(() => {
-      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      document = env.win.document;
+      ampAutoAdsElem = document.createElement('amp-auto-ads');
+      env.win.document.body.appendChild(ampAutoAdsElem);
     });
 
-    it('should generate the config fetch URL', () => {
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.getConfigUrl()).to.equal(
-          '//pagead2.googlesyndication.com/getconfig/ama?client=' +
-          AD_CLIENT + '&plah=foo.bar&ama_t=amp');
+    afterEach(() => {
+      env.win.document.body.removeChild(ampAutoAdsElem);
     });
 
-    it('should generate the data attributes', () => {
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.getDataAttributes()).to.deep.equal([
-        {
-          name: 'ad-client',
-          value: 'ca-pub-1234',
-        },
-      ]);
+    it('should return null for unknown type', () => {
+      expect(getAdNetworkConfig('unknowntype', ampAutoAdsElem)).to.be.null;
     });
-  });
-
-  it('should return null for unknown type', () => {
-    expect(getAdNetworkConfig('unknowntype', ampAutoAdsElem)).to.be.null;
-  });
-});
+  }
+);

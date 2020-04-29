@@ -20,39 +20,56 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
+  AMP_AD_NO_CENTER_CSS_EXP,
+  QQID_HEADER,
+  SANDBOX_HEADER,
+  ValidAdContainerTypes,
+  addCsiSignalsToAmpAnalyticsConfig,
+  additionalDimensions,
+  extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
+  getEnclosingContainerTypes,
+  getIdentityToken,
+  googleAdUrl,
+  isCdnProxy,
+  isReportingEnabled,
+  maybeAppendErrorParameter,
+} from '../../../ads/google/a4a/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
+import {ResponsiveState} from './responsive-state';
+import {Services} from '../../../src/services';
+import {
+  addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-// import {dev} from '../../../src/log';
-import {
-  extractGoogleAdCreativeAndSignature,
-  googleAdUrl,
-  isGoogleAdsA4AValidEnvironment,
-} from '../../../ads/google/a4a/utils';
-import {
-  googleLifecycleReporterFactory,
-  setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/crypto';
+import {computedStyle, setStyles} from '../../../src/style';
+import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {viewerForDoc} from '../../../src/viewer';
-import {AdsenseSharedState} from './adsense-shared-state';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
+import {getData} from '../../../src/event-helper';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {removeElement} from '../../../src/dom';
+import {stringHash32} from '../../../src/string';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
-/**
- * See `VisibilityState` enum.
- * @const {!Object<string, string>}
- */
-const visibilityStateCodes = {
-  'visible': '1',
-  'hidden': '2',
-  'prerender': '3',
-  'unloaded': '5',
-};
+/** @const {string} */
+const TAG = 'amp-ad-network-adsense-impl';
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -66,8 +83,11 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
-export class AmpAdNetworkAdsenseImpl extends AmpA4A {
+/** @type {string} */
+const FORMAT_EXP = 'as-use-attr-for-format';
 
+/** @final */
+export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * @param {!Element} element
    */
@@ -75,82 +95,326 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super(element);
 
     /**
-     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-     */
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
-
-    /**
      * A unique identifier for this slot.
      * Not initialized until getAdUrl() is called; updated upon each invocation
      * of getAdUrl().
      * @private {?string}
+
      */
     this.uniqueSlotId_ = null;
+
+    /**
+     * Config to generate amp-analytics element for active view reporting.
+     * @type {?JsonObject}
+     * @private
+     */
+    this.ampAnalyticsConfig_ = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = Services.extensionsFor(this.win);
+
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.size_ = null;
+
+    /**
+     * amp-analytics element generated based on this.ampAnalyticsConfig_
+     * @private {?Element}
+     */
+    this.ampAnalyticsElement_ = null;
+
+    /** @private {?string} */
+    this.qqid_ = null;
+
+    /** @private {?ResponsiveState}.  */
+    this.responsiveState_ = ResponsiveState.createIfResponsive(element);
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
+
+    /**
+     * @private {?boolean} whether preferential rendered AMP creative, null
+     * indicates no creative render.
+     */
+    this.isAmpCreative_ = null;
+
+    /** @private {number} slot index specific to google inventory */
+    this.ifi_ = 0;
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
   }
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by adsenseIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
+    if (
+      this.responsiveState_ != null &&
+      !this.responsiveState_.isValidElement()
+    ) {
+      return false;
+    }
+    if (!this.element.getAttribute('data-ad-client')) {
+      return false;
+    }
+    return this.isAmpAdElement();
   }
 
   /** @override */
-  getAdUrl() {
+  delayAdRequestEnabled() {
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
+  }
+
+  /** @override
+      @return {!Promise|undefined}.
+  */
+  buildCallback() {
+    super.buildCallback();
+    this.identityTokenPromise_ = this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() =>
+        getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
+      );
+
+    return ResponsiveState.maybeUpgradeToResponsive(
+      this.element,
+      this.getAdClientId_()
+    ).then((state) => {
+      if (state != null) {
+        this.responsiveState_ = state;
+      }
+      if (this.responsiveState_ != null) {
+        return this.responsiveState_.attemptToMatchResponsiveHeight();
+      }
+      // This should happen last, as some diversion criteria rely on some of the
+      // preceding logic (specifically responsive logic).
+      this.divertExperiments();
+      this.maybeAddSinglePassExperiment();
+    });
+  }
+
+  /** @override */
+  getConsentPolicy() {
+    // Ensure that build is not blocked by need for consent (delay will occur
+    // prior to ad URL construction).
+    return null;
+  }
+
+  /**
+   * Selects into experiments based on url fragment and/or page level diversion.
+   * @visibleForTesting
+   */
+  divertExperiments() {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [FORMAT_EXP]: {
+        isTrafficEligible: () =>
+          !this.responsiveState_ &&
+          Number(this.element.getAttribute('width')) > 0 &&
+          Number(this.element.getAttribute('height')) > 0,
+        branches: ['21062003', '21062004'],
+      },
+      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          AMP_AD_NO_CENTER_CSS_EXP.control,
+          AMP_AD_NO_CENTER_CSS_EXP.experiment,
+        ],
+      },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
+    });
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach((expName) =>
+      addExperimentIdToElement(setExps[expName], this.element)
+    );
+  }
+
+  /**
+   * @return {string} ad client ID for the current ad unit.
+   * @private
+   */
+  getAdClientId_() {
+    const adClientId = (
+      this.element.getAttribute('data-ad-client') || ''
+    ).toLowerCase();
+    if (!/^ca-/i.test(adClientId)) {
+      return `ca-${adClientId}`;
+    }
+    return adClientId;
+  }
+
+  /** @override */
+  getAdUrl(consentTuple) {
+    let consentState = undefined;
+    let consentString = undefined;
+    if (consentTuple) {
+      consentState = consentTuple.consentState;
+      consentString = consentTuple.consentString;
+    }
+    if (
+      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
+    ) {
+      user().info(TAG, 'Ad request suppressed due to unknown consent');
+      return Promise.resolve('');
+    }
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const adClientId = this.element.getAttribute('data-ad-client');
-    const slotRect = this.getIntersectionElementLayoutBox();
-    const visibilityState = viewerForDoc(this.getAmpDoc())
-        .getVisibilityState();
-    const adTestOn = this.element.getAttribute('data-adtest') ||
-        isInManualExperiment(this.element);
-    const format = `${slotRect.width}x${slotRect.height}`;
+    const adClientId = this.getAdClientId_();
+    const adTestOn =
+      this.element.getAttribute('data-adtest') ||
+      isInManualExperiment(this.element);
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+
+    this.size_ =
+      getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
+    const sizeToSend = this.isSinglePageStoryAd
+      ? {width: 1, height: 1}
+      : this.size_;
+    const format = `${sizeToSend.width}x${sizeToSend.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
     // TODO(bcassels): Uncomment the assertion, fixing the tests.
     // But not all tests arrange to call upgradeCallback.
-    // dev().assert(slotId != undefined);
+    // devAssert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
+    const slotname = this.element.getAttribute('data-ad-slot');
     const sharedStateParams = sharedState.addNewSlot(
-        format, this.uniqueSlotId_, adClientId);
-
-    const paramList = [
-      {name: 'client', value: adClientId},
-      {name: 'format', value: format},
-      {name: 'w', value: slotRect.width},
-      {name: 'h', value: slotRect.height},
-      {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: adk},
-      {
-        name: 'bc',
-        value: global.SVGElement && global.document.createElementNS ?
-            '1' : null,
-      },
-      {name: 'ctypes', value: this.getCtypes_()},
-      {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedStateParams.pv},
-      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
-      {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
-      {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-      {name: 'asnt', value: this.sentinel},
-    ];
-
-    if (sharedStateParams.prevFmts) {
-      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
+      format,
+      this.uniqueSlotId_,
+      adClientId,
+      slotname
+    );
+    const viewportSize = this.getViewport().getSize();
+    if (!this.ifi_) {
+      this.win['ampAdGoogleIfiCounter'] =
+        this.win['ampAdGoogleIfiCounter'] || 1;
+      this.ifi_ = this.win['ampAdGoogleIfiCounter']++;
     }
+    const enclosingContainers = getEnclosingContainerTypes(this.element);
+    const pfx =
+      enclosingContainers.includes(
+        ValidAdContainerTypes['AMP-FX-FLYING-CARPET']
+      ) || enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
+    const parameters = {
+      'client': adClientId,
+      'format': format,
+      'w': sizeToSend.width,
+      'h': sizeToSend.height,
+      'iu': slotname,
+      'npa':
+        consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+        consentState == CONSENT_POLICY_STATE.UNKNOWN
+          ? 1
+          : null,
+      'adtest': adTestOn ? 'on' : null,
+      'adk': adk,
+      'output': 'html',
+      'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
+      'ctypes': this.getCtypes_(),
+      'host': this.element.getAttribute('data-ad-host'),
+      'h_ch': this.element.getAttribute('data-ad-host-channel'),
+      'hl': this.element.getAttribute('data-language'),
+      'to': this.element.getAttribute('data-tag-origin'),
+      'pv': sharedStateParams.pv,
+      'channel': this.element.getAttribute('data-ad-channel'),
+      'wgl': global['WebGLRenderingContext'] ? '1' : '0',
+      'asnt': this.sentinel,
+      'dff': computedStyle(this.win, this.element)['font-family'],
+      'prev_fmts': sharedStateParams.prevFmts || null,
+      'prev_slotnames': sharedStateParams.prevSlotnames || null,
+      'brdim': additionalDimensions(this.win, viewportSize),
+      'ifi': this.ifi_,
+      'rc': this.fromResumeCallback ? 1 : null,
+      'rafmt':
+        this.responsiveState_ != null
+          ? this.responsiveState_.getRafmtParam()
+          : null,
+      'gdpr_consent': consentString,
+      'pfx': pfx ? '1' : '0',
+      'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
+        ? this.element.getAttribute('data-no-fill')
+        : null,
+      // Matched content specific fields.
+      'crui': this.element.getAttribute('data-matched-content-ui-type'),
+      'cr_row': this.element.getAttribute('data-matched-content-rows-num'),
+      'cr_col': this.element.getAttribute('data-matched-content-columns-num'),
+      // Package code (also known as URL group) that was used to
+      // create ad.
+      'pwprc': this.element.getAttribute('data-package'),
+      'spsa': this.isSinglePageStoryAd
+        ? `${viewportSize.width}x${viewportSize.height}`
+        : null,
+    };
 
-    return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, paramList, []);
+    const experimentIds = [];
+    const identityPromise = Services.timerFor(this.win)
+      .timeoutPromise(1000, this.identityTokenPromise_)
+      .catch((unusedErr) => {
+        // On error/timeout, proceed.
+        return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
+      });
+    return identityPromise.then((identity) => {
+      return googleAdUrl(
+        this,
+        ADSENSE_BASE_URL,
+        startTime,
+        {
+          'adsid': identity.token || null,
+          'jar': identity.jar || null,
+          'pucrd': identity.pucrd || null,
+          ...parameters,
+        },
+        experimentIds
+      );
+    });
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
-    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  onNetworkFailure(error, adUrl) {
+    dev().info(TAG, 'network error, attempt adding of error parameter', error);
+    return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+      checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null
+    );
+  }
+
+  /** @override */
+  extractSize(responseHeaders) {
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/ installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-analytics'
+      );
+    }
+    return this.size_;
   }
 
   /**
@@ -159,7 +423,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   adKey_(format) {
-    const element = this.element;
+    const {element} = this;
     const slot = element.getAttribute('data-ad-slot') || '';
     const string = `${slot}:${format}:${domFingerprintPlain(element)}`;
     return stringHash32(string);
@@ -174,7 +438,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return null;
     }
     const ctypesReMatch = /[?&]force_a4a_ctypes=([^&]+)/.exec(
-        this.win.location.search);
+      this.win.location.search
+    );
     // If the RE passes, then length is necessarily > 1.
     if (ctypesReMatch) {
       return ctypesReMatch[1];
@@ -183,31 +448,154 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_extraVariables) {
-    if (opt_extraVariables) {
-      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
+  isXhrAllowed() {
+    return isCdnProxy(this.win);
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
+  }
+
+  /** @override */
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (this.iframe != null) {
+      ResponsiveState.maybeAttachSettingsListener(
+        this.element,
+        this.iframe,
+        this.getAdClientId_()
+      );
     }
-    this.lifecycleReporter_.sendPing(eventName);
+    this.isAmpCreative_ = !!creativeMetaData;
+    if (
+      creativeMetaData &&
+      !creativeMetaData.customElementExtensions.includes('amp-ad-exit')
+    ) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      devAssert(this.iframe);
+      Navigation.installAnchorClickInterceptor(
+        this.getAmpDoc(),
+        devAssert(this.iframe.contentWindow)
+      );
+    }
+    if (this.ampAnalyticsConfig_) {
+      devAssert(!this.ampAnalyticsElement_);
+      if (isReportingEnabled(this)) {
+        addCsiSignalsToAmpAnalyticsConfig(
+          this.win,
+          this.element,
+          this.ampAnalyticsConfig_,
+          this.qqid_,
+          !!creativeMetaData
+        );
+      }
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+        this.element,
+        this.ampAnalyticsConfig_,
+        /*loadAnalytics*/ true,
+        !!this.postAdResponseExperimentFeatures['avr_disable_immediate']
+      );
+    }
+
+    setStyles(dev().assertElement(this.iframe), {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
+
+    // Set the centering CSS if the experiment is off
+    if (
+      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
+      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
+        AMP_AD_NO_CENTER_CSS_EXP.control
+    ) {
+      setStyles(this.iframe, {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
+    if (this.qqid_) {
+      this.element.setAttribute('data-google-query-id', this.qqid_);
+    }
+    dev().assertElement(this.iframe).id = `google_ads_iframe_${this.ifi_}`;
   }
 
   /** @override */
   unlayoutCallback() {
-    super.unlayoutCallback();
-    this.element.setAttribute('data-amp-slot-index',
-        this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.isAmpCreative_) {
+      // Allow AMP creatives to remain in case SERP viewer swipe back.
+      return false;
+    }
+    const superResult = super.unlayoutCallback();
+    this.element.setAttribute(
+      'data-amp-slot-index',
+      this.win.ampAdSlotIdCounter++
+    );
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
+    this.qqid_ = null;
+    this.isAmpCreative_ = null;
+    this.shouldSandbox_ = false;
+    return superResult;
   }
 
+  /** @override */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+    this.responsiveState_ && this.responsiveState_.alignToViewport();
+  }
 
-  /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-   */
-  initLifecycleReporter() {
-    return googleLifecycleReporterFactory(this);
+  /** @override */
+  getPreconnectUrls() {
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      getDefaultBootstrapBaseUrl(this.win, 'nameframe')
+    );
+    return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /** @override */
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
+  }
+
+  /** @override */
+  letCreativeTriggerRenderStart() {
+    if (
+      this.element &&
+      this.element.parentElement &&
+      this.element.parentElement.tagName == 'AMP-STICKY-AD'
+    ) {
+      const stickyMsgListener = (event) => {
+        if (
+          getData(event) == 'fill_sticky' &&
+          event['source'] == this.iframe.contentWindow
+        ) {
+          this.renderStarted();
+          setStyles(this.iframe, {'visibility': ''});
+          this.win.removeEventListener('message', stickyMsgListener);
+        }
+      };
+      this.win.addEventListener('message', stickyMsgListener);
+      return true;
+    }
+    return false;
   }
 }
 
-AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
+});

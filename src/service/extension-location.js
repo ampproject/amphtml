@@ -14,21 +14,33 @@
  * limitations under the License.
  */
 
-import {urls} from '../config';
 import {getMode} from '../mode';
+import {urls} from '../config';
+
+/**
+ * Internal structure that maintains the state of an extension through loading.
+ *
+ * @typedef {{
+ *   extensionId: (string|undefined),
+ *   extensionVersion: (string|undefined),
+ * }}
+ * @private
+ */
+let ExtensionInfoDef;
 
 /**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
+ * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function calculateScriptBaseUrl(location, isLocalDev, isTest) {
-  if (isLocalDev) {
-    if (isTest || isMax(location) || isMin(location)) {
-      return `${location.protocol}//${location.host}/dist`;
+export function calculateScriptBaseUrl(location, opt_isLocalDev) {
+  if (opt_isLocalDev) {
+    let prefix = `${location.protocol}//${location.host}`;
+    if (location.protocol == 'about:') {
+      prefix = '';
     }
+    return `${prefix}/dist`;
   }
   return urls.cdn;
 }
@@ -37,54 +49,66 @@ function calculateScriptBaseUrl(location, isLocalDev, isTest) {
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
- * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
- * @param {boolean=} isUsingCompiledJs
+ * @param {string=} opt_extensionVersion
+ * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-export function calculateExtensionScriptUrl(location, extensionId, isLocalDev,
-    isTest, isUsingCompiledJs) {
-  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  if (isLocalDev) {
-    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
-      return `${base}/v0/${extensionId}-0.1.max.js`;
-    }
-    return `${base}/v0/${extensionId}-0.1.js`;
+export function calculateExtensionScriptUrl(
+  location,
+  extensionId,
+  opt_extensionVersion,
+  opt_isLocalDev
+) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const rtv = getMode().rtvVersion;
+  if (opt_extensionVersion == null) {
+    opt_extensionVersion = '0.1';
   }
-  return `${base}/rtv/${getMode().rtvVersion}/v0/${extensionId}-0.1.js`;
+  const extensionVersion = opt_extensionVersion
+    ? '-' + opt_extensionVersion
+    : '';
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
  * Calculate script url for an entry point.
+ * If `opt_rtv` is true, returns the URL matching the current RTV.
  * @param {!Location} location The window's location
  * @param {string} entryPoint
  * @param {boolean=} isLocalDev
- * @param {boolean=} isTest
+ * @param {boolean=} opt_rtv
  * @return {string}
  */
-export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev,
-    isTest) {
-  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
-  const serveMax = isLocalDev && isMax(location);
-  return `${base}/${entryPoint}${serveMax ? '.max' : ''}.js`;
+export function calculateEntryPointScriptUrl(
+  location,
+  entryPoint,
+  isLocalDev,
+  opt_rtv
+) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
+  const base = calculateScriptBaseUrl(location, isLocalDev);
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${fileExtension}`;
+  }
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
+  }
+  return `${base}/${entryPoint}${fileExtension}`;
 }
 
 /**
- * Is this path to a max (unminified) version?
- * @param {!Location} location
- * @return {boolean}
+ * Parse the extension version from a given script URL.
+ * @param {string} scriptUrl
+ * @return {!ExtensionInfoDef}
  */
-function isMax(location) {
-  const path = location.pathname;
-  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
-}
-
-/**
- * Is this path to a minified version?
- * @param {!Location} location
- * @return {boolean}
- */
-function isMin(location) {
-  const path = location.pathname;
-  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
+export function parseExtensionUrl(scriptUrl) {
+  // Note that the "(\.max)?" group only applies to local dev.
+  const matches = scriptUrl.match(
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+  );
+  return {
+    extensionId: matches ? matches[2] : undefined,
+    extensionVersion: matches ? matches[3] : undefined,
+  };
 }

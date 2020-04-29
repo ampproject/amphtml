@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-
 /**
  * This interface is intended to be implemented by AMP Access vendors to
  * provide authorization and pingback.
  * @interface
  */
 export class AccessVendor {
-
   /**
    * Requests authorization from the vendor. Returns a promise that yields
    * a JSON authorization response.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {}
 

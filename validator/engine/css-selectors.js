@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ goog.provide('parse_css.parseAnAttrSelector');
 goog.provide('parse_css.parseAnIdSelector');
 goog.provide('parse_css.parseSelectors');
 goog.provide('parse_css.traverseSelectors');
-goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
+goog.require('amp.validator.ValidationError');
 goog.require('goog.asserts');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
@@ -46,7 +46,7 @@ goog.require('parse_css.extractAFunction');
  * class inherits from, has line, col, and tokenType fields.
  */
 parse_css.Selector = class extends parse_css.Token {
-  /** @param {!function(!parse_css.Selector)} lambda */
+  /** @param {function(!parse_css.Selector)} lambda */
   forEachChild(lambda) {}
 
   /** @param {!parse_css.SelectorVisitor} visitor */
@@ -99,7 +99,9 @@ parse_css.traverseSelectors = function(selectorNode, visitor) {
     /** @type {!parse_css.Selector} */
     const node = toVisit.shift();
     node.accept(visitor);
-    node.forEachChild(child => { toVisit.push(child); });
+    node.forEachChild(child => {
+      toVisit.push(child);
+    });
   }
 };
 
@@ -144,17 +146,17 @@ parse_css.TypeSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitTypeSelector(this); }
+  accept(visitor) {
+    visitor.visitTypeSelector(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.TypeSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['namespacePrefix'] = this.namespacePrefix;
-    json['elementName'] = this.elementName;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.TypeSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['elementName'] = this.elementName;
+  return json;
+};
 
 /**
  * Helper function for determining whether the provided token is a specific
@@ -165,7 +167,7 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
  */
 function isDelim(token, delimChar) {
   return token.tokenType === parse_css.TokenType.DELIM &&
-      /** @type {!parse_css.DelimToken} */ (token).value === delimChar;
+  /** @type {!parse_css.DelimToken} */ (token).value === delimChar;
 }
 
 /**
@@ -184,12 +186,12 @@ parse_css.parseATypeSelector = function(tokenStream) {
     namespacePrefix = '';
     tokenStream.consume();
   } else if (
-      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
     namespacePrefix = '*';
     tokenStream.consume();
     tokenStream.consume();
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+    tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
       isDelim(tokenStream.next(), '|')) {
     const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     namespacePrefix = ident.value;
@@ -226,19 +228,21 @@ parse_css.IdSelector = class extends parse_css.Selector {
   }
 
   /** @return {string} */
-  toString() { return '#' + this.value; }
+  toString() {
+    return '#' + this.value;
+  }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitIdSelector(this); }
+  accept(visitor) {
+    visitor.visitIdSelector(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.IdSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.IdSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * tokenStream.current() must be the hash token.
@@ -287,19 +291,19 @@ parse_css.AttrSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitAttrSelector(this); }
+  accept(visitor) {
+    visitor.visitAttrSelector(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.AttrSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['namespacePrefix'] = this.namespacePrefix;
-    json['attrName'] = this.attrName;
-    json['matchOperator'] = this.matchOperator;
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.AttrSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['attrName'] = this.attrName;
+  json['matchOperator'] = this.matchOperator;
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * Helper for parseAnAttrSelector.
@@ -323,7 +327,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE,
       'Precondition violated: must be an OpenSquareToken');
   const start = tokenStream.current();
-  tokenStream.consume();  // Consumes '['.
+  tokenStream.consume(); // Consumes '['.
   if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE) {
     tokenStream.consume();
   }
@@ -334,12 +338,12 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
     namespacePrefix = '';
     tokenStream.consume();
   } else if (
-      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
     namespacePrefix = '*';
     tokenStream.consume();
     tokenStream.consume();
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+    tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
       isDelim(tokenStream.next(), '|')) {
     const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     namespacePrefix = ident.value;
@@ -348,11 +352,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   // Now parse the attribute name. This part is mandatory.
   if (!(tokenStream.current().tokenType === parse_css.TokenType.IDENT)) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return newInvalidAttrSelectorError(start);
-    } else {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
+    return newInvalidAttrSelectorError(start);
   }
   const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
   const attrName = ident.value;
@@ -395,23 +395,17 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   /** @type {string} */
   let value = '';
-  if (matchOperator !== '') {  // If we saw an operator, parse the value.
+  if (matchOperator !== '') { // If we saw an operator, parse the value.
     const current = tokenStream.current().tokenType;
     if (current === parse_css.TokenType.IDENT) {
       const ident =
-          /** @type {!parse_css.IdentToken} */ (tokenStream.current());
+      /** @type {!parse_css.IdentToken} */ (tokenStream.current());
       value = ident.value;
       tokenStream.consume();
     } else if (current === parse_css.TokenType.STRING) {
       const str = /** @type {!parse_css.StringToken} */ (tokenStream.current());
       value = str.value;
       tokenStream.consume();
-    } else {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return newInvalidAttrSelectorError(start);
-      } else {
-        return parse_css.TRIVIAL_ERROR_TOKEN;
-      }
     }
   }
   if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE) {
@@ -420,11 +414,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   // The attribute selector must in any case terminate with a close square
   // token.
   if (tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_SQUARE) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return newInvalidAttrSelectorError(start);
-    } else {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
+    return newInvalidAttrSelectorError(start);
   }
   tokenStream.consume();
   const selector = new parse_css.AttrSelector(
@@ -465,20 +455,20 @@ parse_css.PseudoSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitPseudoSelector(this); }
+  accept(visitor) {
+    visitor.visitPseudoSelector(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.PseudoSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['isClass'] = this.isClass;
-    json['name'] = this.name;
-    if (this.func.length !== 0) {
-      json['func'] = recursiveArrayToJSON(this.func);
-    }
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.PseudoSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['isClass'] = this.isClass;
+  json['name'] = this.name;
+  if (this.func.length !== 0) {
+    json['func'] = recursiveArrayToJSON(this.func);
+  }
+  return json;
+};
 
 /**
  * tokenStream.current() must be the ColonToken. Returns an error if
@@ -498,29 +488,29 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     isClass = false;
     tokenStream.consume();
   }
-  let name = '';
-  /** @type {!Array<!parse_css.Token>} */
-  let func = [];
   if (tokenStream.current().tokenType === parse_css.TokenType.IDENT) {
     const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
-    name = ident.value;
+    const name = ident.value;
     tokenStream.consume();
+    return firstColon.copyPosTo(
+        new parse_css.PseudoSelector(isClass, name, []));
   } else if (
-      tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN) {
+    tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN) {
     const funcToken =
-        /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
-    name = funcToken.value;
-    func = parse_css.extractAFunction(tokenStream);
+    /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
+    /**  @type {!Array<!parse_css.ErrorToken>} */
+    const errors = [];
+    const func = parse_css.extractAFunction(tokenStream, errors);
+    if (errors.length > 0)
+    {return errors[0];}
     tokenStream.consume();
-  } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    return firstColon.copyPosTo(
+        new parse_css.PseudoSelector(isClass, funcToken.value, func));
+  } else {
     return firstColon.copyPosTo(new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         ['style']));
-  } else {
-    return parse_css.TRIVIAL_ERROR_TOKEN;
   }
-  return firstColon.copyPosTo(
-      new parse_css.PseudoSelector(isClass, name, func));
 };
 
 /**
@@ -540,19 +530,21 @@ parse_css.ClassSelector = class extends parse_css.Selector {
     this.tokenType = parse_css.TokenType.CLASS_SELECTOR;
   }
   /** @return {string} */
-  toString() { return '.' + this.value; }
+  toString() {
+    return '.' + this.value;
+  }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitClassSelector(this); }
+  accept(visitor) {
+    visitor.visitClassSelector(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.ClassSelector.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.ClassSelector.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
@@ -611,17 +603,17 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitSimpleSelectorSequence(this); }
+  accept(visitor) {
+    visitor.visitSimpleSelectorSequence(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.SimpleSelectorSequence.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['typeSelector'] = this.typeSelector.toJSON();
-    json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.SimpleSelectorSequence.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['typeSelector'] = this.typeSelector.toJSON();
+  json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
+  return json;
+};
 
 /**
  * tokenStream.current must be the first token of the sequence.
@@ -643,11 +635,11 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
     if (tokenStream.current().tokenType === parse_css.TokenType.HASH) {
       otherSelectors.push(parse_css.parseAnIdSelector(tokenStream));
     } else if (
-        isDelim(tokenStream.current(), '.') &&
+      isDelim(tokenStream.current(), '.') &&
         tokenStream.next().tokenType === parse_css.TokenType.IDENT) {
       otherSelectors.push(parse_css.parseAClassSelector(tokenStream));
     } else if (
-        tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE) {
+      tokenStream.current().tokenType === parse_css.TokenType.OPEN_SQUARE) {
       const maybeAttrSelector = parse_css.parseAnAttrSelector(tokenStream);
       if (maybeAttrSelector.tokenType === parse_css.TokenType.ERROR) {
         return /** @type {!parse_css.ErrorToken} */ (maybeAttrSelector);
@@ -665,13 +657,9 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
-                ['style']));
-          } else {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
+          return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
+              ['style']));
         }
         // If no type selector is given then the universal selector is implied.
         typeSelector = start.copyPosTo(new parse_css.TypeSelector(
@@ -690,7 +678,7 @@ parse_css.CombinatorType = {
   'DESCENDANT': 'DESCENDANT',
   'CHILD': 'CHILD',
   'ADJACENT_SIBLING': 'ADJACENT_SIBLING',
-  'GENERAL_SIBLING': 'GENERAL_SIBLING'
+  'GENERAL_SIBLING': 'GENERAL_SIBLING',
 };
 
 /**
@@ -722,18 +710,18 @@ parse_css.Combinator = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitCombinator(this); }
+  accept(visitor) {
+    visitor.visitCombinator(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.Combinator.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['combinatorType'] = this.combinatorType;
-    json['left'] = this.left.toJSON();
-    json['right'] = this.right.toJSON();
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.Combinator.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['combinatorType'] = this.combinatorType;
+  json['left'] = this.left.toJSON();
+  json['right'] = this.right.toJSON();
+  return json;
+};
 
 /**
  * The CombinatorType for a given token; helper function used when
@@ -797,13 +785,9 @@ function isSimpleSelectorSequenceStart(token) {
  */
 parse_css.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
-          amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-          ['style']));
-    } else {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
+    return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']));
   }
   const parsed = parse_css.parseASimpleSelectorSequence(tokenStream);
   if (parsed.tokenType === parse_css.TokenType.ERROR) {
@@ -834,7 +818,7 @@ parse_css.parseASelector = function(tokenStream) {
     }
     const right = parse_css.parseASimpleSelectorSequence(tokenStream);
     if (right.tokenType === parse_css.TokenType.ERROR) {
-      return right;  // TODO(johannes): more than one error / partial tree.
+      return right; // TODO(johannes): more than one error / partial tree.
     }
     left = combinatorToken.copyPosTo(new parse_css.Combinator(
         combinatorTypeForToken(combinatorToken), left,
@@ -868,16 +852,16 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
   }
 
   /** @param {!parse_css.SelectorVisitor} visitor */
-  accept(visitor) { visitor.visitSelectorsGroup(this); }
+  accept(visitor) {
+    visitor.visitSelectorsGroup(this);
+  }
 };
-if (amp.validator.GENERATE_DETAILED_ERRORS) {
-  /** @inheritDoc */
-  parse_css.SelectorsGroup.prototype.toJSON = function() {
-    const json = parse_css.Selector.prototype.toJSON.call(this);
-    json['elements'] = recursiveArrayToJSON(this.elements);
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.SelectorsGroup.prototype.toJSON = function() {
+  const json = parse_css.Selector.prototype.toJSON.call(this);
+  json['elements'] = recursiveArrayToJSON(this.elements);
+  return json;
+};
 
 /**
  * The selectors_group production from
@@ -891,13 +875,9 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
  */
 parse_css.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
-          amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-          ['style']));
-    } else {
-      return parse_css.TRIVIAL_ERROR_TOKEN;
-    }
+    return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']));
   }
   const start = tokenStream.current();
   const elements = [parse_css.parseASelector(tokenStream)];
@@ -923,14 +903,10 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     // We're about to claim success and return a selector,
     // but before we do, we check that no unparsed input remains.
     if (!(tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN)) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
-            amp.validator.ValidationError.Code
-                .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
-            ['style']));
-      } else {
-        return parse_css.TRIVIAL_ERROR_TOKEN;
-      }
+      return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+          ['style']));
     }
     if (elements.length == 1) {
       return elements[0];

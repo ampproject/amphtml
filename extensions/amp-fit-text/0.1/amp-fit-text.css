@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-/* TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-   form is in PROD for 1-2 weeks. */
-.-amp-fit-text-content,
-.-amp-fit-text-content.-amp-fill-content,
-.-amp-fit-text-content.i-amphtml-fill-content {
+.i-amphtml-fit-text-content,
+.i-amphtml-fit-text-content.i-amphtml-fill-content {
   display: block;
   /* @alternative */ display: flex;
   flex-direction: column;
@@ -28,7 +25,7 @@
 
 /* We have to use the old-style flex box with line clamping. It will only
    work in WebKit, but unfortunately there's no alternative. */
-.-amp-fit-text-content-overflown {
+.i-amphtml-fit-text-content-overflown {
   display: block;
   /* @alternative */ display: -webkit-box;
   -webkit-box-orient: vertical;

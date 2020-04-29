@@ -2,6 +2,8 @@
 <body style="background-color: red">
 iframe
 <script>
+
+parent./*OK*/postMessage('loaded-iframe', '*');
 parent.parent./*OK*/postMessage('loaded-iframe', '*');
 
 function getAmpWindow(sentinel) {
@@ -23,11 +25,11 @@ function getAmpWindow(sentinel) {
 }
 
 window.addEventListener('message', function(event) {
+  var sentinel, msg;
   if (event.data) {
-    if (event.data.type == 'requestHeight') {
-      var sentinel;
+    if (event.data.type === 'requestHeight') {
       if (event.data.is3p) {
-        sentinel = event.data.amp3pSentinel || event.data.sentinel;
+        sentinel = event.data.sentinel;
       } else {
         sentinel = 'amp';
       }
@@ -38,10 +40,9 @@ window.addEventListener('message', function(event) {
             height: event.data.height,
             width: event.data.width,
           }, '*');
-    } else if (event.data.type == 'subscribeToEmbedState') {
-      var sentinel;
+    } else if (event.data.type === 'subscribeToEmbedState') {
       if (event.data.is3p) {
-        sentinel = event.data.amp3pSentinel || event.data.sentinel;
+        sentinel = event.data.sentinel;
       } else {
         sentinel = 'amp';
       }
@@ -50,6 +51,22 @@ window.addEventListener('message', function(event) {
             sentinel: sentinel,
             type: 'send-embed-state',
           }, '*');
+    } else if (event.data.type === 'requestPymjsHeight') {
+      msg = [ 'pym', 'example', 'height', event.data.height ].join( 'xPYMx' );
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
+      getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
+    } else if (event.data.type === 'requestPymjsWidth' || 1) {
+      msg = [ 'pym', 'example', 'width', event.data.width ].join( 'xPYMx' );
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
+      getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
     }
   }
 });

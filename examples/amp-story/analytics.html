@@ -1,0 +1,189 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="analytics.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story
+      title="Analytics amp-story example"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+      poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+      poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+      standalone>
+
+      <amp-analytics id="analytics1">
+        <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+              "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
+              "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
+            },
+            "triggers": {
+              "trackAnchorClicks": {
+                "on": "click",
+                "selector": "amp-story-cta-layer a",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnAnyAnchor"
+                }
+              },
+              "trackBookendClicks": {
+                "on": "story-bookend-click",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnBookend"
+                }
+              },
+              "trackPageAttachmentOpen": {
+                "on": "story-open",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
+              "trackPageAttachmentClose": {
+                "on": "story-close",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
+              "trackFocusedState": {
+                "on": "story-focus",
+                "tagName": "a",
+                "request": "click"
+              },
+              "trackClickThru": {
+                "on": "story-click-through",
+                "tagName": "a",
+                "request": "click"
+              },
+              "trackPageview": {
+                "on": "story-page-visible",
+                "request": "pageView",
+                "storySpec": {
+                  "repeat": false
+                }
+              },
+              "trackBookendEnter": {
+                "on": "story-open",
+                "tagName": "amp-story-bookend",
+                "request": "pageView"
+              },
+              "trackBookendExit": {
+                "on": "story-close",
+                "tagName": "amp-story-bookend",
+                "request": "pageView"
+              },
+              "trackAudioEnable": {
+                "on": "story-audio-muted",
+                "request": "pageView"
+              },
+              "trackAudioDisable": {
+                "on": "story-audio-unmuted",
+                "request": "pageView"
+              }
+            }
+          }
+        </script>
+      </amp-analytics>
+
+      <amp-story-page id="p1">
+        <amp-story-grid-layer template="vertical">
+          <h1>Page One</h1>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay">
+          <div>
+            <h1>Some really cool video</h1>
+              <p style="color: black">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+          </div>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="p2">
+        <amp-story-grid-layer template="vertical">
+          <h1>Page Two</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p3">
+        <amp-story-grid-layer template="vertical">
+          <h1>Page Three</h1>
+          <a href="google.com">click me</a>
+        </amp-story-grid-layer>
+        <amp-story-cta-layer>
+          <a>click me</a>
+        </amp-story-cta-layer>
+      </amp-story-page>
+
+      <amp-story-page id="p4" style="background-color: grey">
+          <amp-story-grid-layer template="vertical">
+            <h1>Page Four</h1>
+            <a id="blink-3" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="shopping-cart">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-4" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="offer">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-5" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="flight">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-6" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="hotel">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-7" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="movie">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-8" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="activity">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+            <a id="blink-9" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="more-to-read">
+              amp.devamp.devamp.devamp.devamp.devamp.dev
+            </a>
+          </amp-story-grid-layer>
+        </amp-story-page>
+
+      <amp-story-page id="p5">
+        <amp-story-grid-layer template="vertical">
+          <h1>Page Five</h1>
+          <amp-video
+            id="vid1"
+            src="../av/ForBiggerJoyrides-short.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            autoplay>
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
+    </amp-story>
+  </body>
+</html>

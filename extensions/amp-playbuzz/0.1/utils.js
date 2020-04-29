@@ -14,38 +14,50 @@
  * limitations under the License.
  */
 
-// Returns a function, that, as long as it continues to be invoked, will not
-// be triggered. The function will be called after it stops being called for
-// N milliseconds. If `immediate` is passed, trigger the function on the
-// leading edge, instead of the trailing.
-
-import {rethrowAsync} from './../../../src/log';
+import {dict} from './../../../src/utils/object';
+import {getData} from './../../../src/event-helper';
+import {parseJson} from './../../../src/json';
 import {
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
+import {rethrowAsync} from './../../../src/log';
 
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing.
+ * @param {Function} func
+ * @param {number} wait
+ * @param {boolean=} immediate
+ * @return {Function}
+ */
 export function debounce(func, wait, immediate) {
   let timeout;
-  return function() {
-    const context = this, args = arguments;
+  return function () {
+    const context = this,
+      args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(function () {
       timeout = null;
-      if (!immediate) { func.apply(context, args); };
+      if (!immediate) {
+        func.apply(context, args);
+      }
     }, wait);
-    if (immediate && !timeout) { func.apply(context, args); }
+    if (immediate && !timeout) {
+      func.apply(context, args);
+    }
   };
-};
-
+}
 
 /**
  *
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
- * @param {!Document} document
- * @returns {!Element}
+ * @param {Document} document
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -56,20 +68,24 @@ export function getElementCreator(document) {
   };
 }
 
+/**
+ * Appends children to element
+ *
+ * @param {!Element} element
+ * @param {!Array<!Element>} children
+ */
 function appendChildren(element, children) {
-  children = (!children) ? [] : Array.isArray(children) ? children : [children];
-  children.forEach(child => element.appendChild(child));
-};
-
+  children = !children ? [] : Array.isArray(children) ? children : [children];
+  children.forEach((child) => element.appendChild(child));
+}
 
 /**
  * Handles a message from element by a given message name
  *
- * @export {function} handleMessageByName
- * @param {!Element} element
+ * @param {Element} element
  * @param {!Event} event
  * @param {string} messageName
- * @param {function} handler
+ * @param {Function} handler
  */
 export function handleMessageByName(element, event, messageName, handler) {
   const isMessageFromElement = element.contentWindow === event.source;
@@ -80,23 +96,22 @@ export function handleMessageByName(element, event, messageName, handler) {
 }
 
 /**
- * @param {Object} event
- * @param {String} eventName
+ * @param {!Event} event
+ * @param {string} eventName
  * @param {Function} handler
  */
 function handlePlaybuzzItemEvent(event, eventName, handler) {
-  const data = parsePlaybuzzEventData(event.data);
+  const data = parsePlaybuzzEventData(getData(event));
   if (data[eventName]) {
     handler(data[eventName]);
   }
 }
 
-
 /**
  * Parses Playbuzz Event Data
  *
- * @param {String|Object} data
- * @returns {Object} parsedObject
+ * @param {?JsonObject|string|undefined} data
+ * @return {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -105,54 +120,68 @@ function parsePlaybuzzEventData(data) {
   const err = 'error parsing json message from playbuzz item: ' + data;
   try {
     if (typeof data === 'string') {
-      return JSON.parse(data);
+      return parseJson(/** @type {string} */ (data));
     }
-  }
-  catch (e) {
+  } catch (e) {
     rethrowAsync('amp-playbuzz', err, e);
-    return {};
+    return dict({});
   }
 
   rethrowAsync('amp-playbuzz', err, data);
-  return {};
+  return dict({});
 }
 
-
 /**
- * @export {function} composeEmbedUrl
  * @param {Object} options
- * @returns {string} playbuzzEmbedUrl
+ * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
-  const embedUrl = options.itemUrl + '?' + serializeQueryString({
-    feed: true,
-    implementation: 'amp',
-    src: options.itemUrl,
-    embedBy: '00000000-0000-0000-0000-000000000000',
-    game: options.relativeUrl,
-    comments: undefined,
-    useComments: options.displayComments,
-    gameInfo: options.displayItemInfo,
-    useShares: options.displayShareBar,
-    socialReferrer: false, //always false - will use parent url for sharing
-    height: 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-    parentUrl: options.parentUrl, //used for sharing
-    parentHost: options.parentHost,
-  });
+  const embedUrl =
+    options.itemUrl +
+    '?' +
+    serializeQueryString(
+      dict({
+        'feed': true,
+        'implementation': 'amp',
+        'src': options.itemUrl,
+        'embedBy': '00000000-0000-0000-0000-000000000000',
+        'game': options.relativeUrl,
+        'comments': undefined,
+        'useComments': options.displayComments,
+        'gameInfo': options.displayItemInfo,
+        'useShares': options.displayShareBar,
+        'socialReferrer': false, //always false - will use parent url for sharing
+        'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+        'parentUrl': options.parentUrl, //used for sharing
+        'parentHost': options.parentHost,
+      })
+    );
   return embedUrl;
 }
 
+/**
+ * Satizes URL
+ *
+ * @param {*} localtion
+ * @return {string}
+ */
 function sanitizeUrl(localtion) {
-  return removeFragment(localtion.href)
-    .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  return removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 }
 
+/**
+ * Conposes src url
+ *
+ * @param {string} src
+ * @param {string} itemId
+ * @return {string}
+ */
 export function composeItemSrcUrl(src, itemId) {
   const DEFAULT_BASE_URL = '//www.playbuzz.com/';
 
-  const iframeSrcUrl = itemId ?
-    DEFAULT_BASE_URL + 'item/' + itemId :
-    sanitizeUrl(parseUrl(src));
+  const iframeSrcUrl = itemId
+    ? DEFAULT_BASE_URL + 'item/' + itemId
+    : sanitizeUrl(parseUrlDeprecated(src));
 
   return iframeSrcUrl;
 }

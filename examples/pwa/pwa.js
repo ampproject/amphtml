@@ -22,12 +22,17 @@ function log(args) {
   console/*OK*/.log.apply(console, var_args);
 }
 
+function startsWith(string, prefix) {
+  return string.lastIndexOf(prefix, 0) == 0;
+}
 
 class Shell {
-
-  constructor(win) {
+  constructor(win, useStreaming) {
     /** @private @const {!Window} */
     this.win = win;
+
+    /** @private @const {boolean} */
+    this.useStreaming_ = useStreaming;
 
     /** @private @const {!AmpViewer} */
     this.ampViewer_ = new AmpViewer(win,
@@ -35,6 +40,8 @@ class Shell {
 
     /** @private {string} */
     this.currentPage_ = win.location.pathname;
+
+    this.sidebarCloseButton_ = document.querySelector('#sidebarClose');
 
     win.addEventListener('popstate', this.handlePopState_.bind(this));
     win.document.documentElement.addEventListener('click',
@@ -80,15 +87,16 @@ class Shell {
   }
 
   /**
+   * @param {!Event} e
    */
   handleNavigate_(e) {
     if (e.defaultPrevented) {
       return false;
     }
-    if (event.button) {
+    if (e.button) {
       return false;
     }
-    let a = event.target;
+    let a = e.target;
     while (a) {
       if (a.tagName == 'A' && a.href) {
         break;
@@ -97,14 +105,15 @@ class Shell {
     }
     if (a) {
       const url = new URL(a.href);
-      if (url.origin == this.win.location.origin &&
-              url.pathname.indexOf('/pwa/') == 0 &&
-              url.pathname.indexOf('amp.max.html') != -1) {
+      const location = this.win.location;
+      if (url.origin == location.origin &&
+          startsWith(url.pathname, '/pwa/') &&
+          url.pathname.indexOf('amp.html') != -1) {
         e.preventDefault();
-        const newPage = url.pathname;
+        const newPage = url.pathname + location.search;
         log('Internal link to: ', newPage);
         if (newPage != this.currentPage_) {
-          this.navigateTo(newPage);
+          this.closeSidebar().then(() => this.navigateTo(newPage));
         }
       }
     }
@@ -148,9 +157,16 @@ class Shell {
     // Fetch.
     const url = this.resolveUrl_(path);
     log('Fetch and render doc:', path, url);
+    // TODO(dvoytenko, #9490): Make `streamDocument` the only used API once
+    // streaming is graduated out of experimental.
+    if (this.useStreaming_) {
+      log('Streaming started: ', url);
+      return this.ampViewer_.showAsStream(url).then(
+          shadowDoc => streamDocument(url, shadowDoc.writer));
+    }
     return fetchDocument(url).then(doc => {
       log('Fetch complete: ', doc);
-      this.ampViewer_.show(doc, url);
+      return this.ampViewer_.show(doc, url);
     });
   }
 
@@ -165,6 +181,19 @@ class Shell {
     this.a_.href = url;
     return this.a_.href;
   }
+
+  closeSidebar() {
+    if (this.sidebarCloseButton_) {
+      return new Promise(resolve => {
+        this.sidebarCloseButton_.click();
+        // TODO implement a better method to detect when
+        // closing sidebar has finished
+        setTimeout(() => resolve(), 100);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
 }
 
 
@@ -177,12 +206,33 @@ class AmpViewer {
     this.container = container;
 
     win.AMP_SHADOW = true;
-    this.ampReadyPromise_ = new Promise(resolve => {
+    const ampReadyPromise = new Promise(resolve => {
       (window.AMP = window.AMP || []).push(resolve);
     });
-    this.ampReadyPromise_.then(AMP => {
+    ampReadyPromise.then(AMP => {
       log('AMP LOADED:', AMP);
     });
+
+    const isShadowDomSupported = (
+      Element.prototype.attachShadow ||
+      Element.prototype.createShadowRoot
+    );
+    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+      if (isShadowDomSupported) {
+        resolve();
+      } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
+        this.win.addEventListener('WebComponentsReady', resolve);
+      } else {
+        // AMP polyfills small part of SD spec. It's functional, but some things
+        // (e.g. slots) are not available.
+        resolve();
+      }
+    });
+
+    this.readyPromise_ = Promise.all([
+      ampReadyPromise,
+      shadowDomReadyPromise,
+    ]).then(results => results[0]);
 
     /** @private @const {string} */
     this.baseUrl_ = null;
@@ -192,7 +242,7 @@ class AmpViewer {
     this.amp_ = null;
 
     // Immediately install amp-shadow.js.
-    this.installScript_('/dist/amp-shadow.js');
+    this.installScript_('/dist/shadow-v0.js', '/dist/amp-shadow.js');
   }
 
   /**
@@ -227,7 +277,7 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.ampReadyPromise_.then(AMP => {
+    return this.readyPromise_.then(AMP => {
       this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
       this.win.document.title = this.amp_.title || '';
       this.amp_.onMessage(this.onMessage_.bind(this));
@@ -236,11 +286,43 @@ class AmpViewer {
   }
 
   /**
+   * @param {string} url
+   * @return {!Promise<!ShadowDoc>}
+   */
+  showAsStream(url) {
+    log('Show stream document:', url);
+
+    // Cleanup the existing document if any.
+    this.clear();
+
+    this.baseUrl_ = url;
+
+    this.host_ = this.win.document.createElement('div');
+    this.host_.classList.add('amp-doc-host');
+
+    const hostTemplate = this.win.document.getElementById('amp-slot-template');
+    if (hostTemplate) {
+      this.host_.appendChild(hostTemplate.content.cloneNode(true));
+    }
+
+    this.container.appendChild(this.host_);
+
+    return this.readyPromise_.then(AMP => {
+      this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
+      return this.amp_;
+    });
+  }
+
+  /**
    * @param {string} src
+   * @param {string=} fallbackSrc
    * @param {string=} customElement
    * @param {string=} customTemplate
    */
-  installScript_(src, customElement, customTemplate) {
+  installScript_(src, fallbackSrc, customElement, customTemplate) {
     const doc = this.win.document;
     const el = doc.createElement('script');
     el.setAttribute('src', src);
@@ -250,8 +332,17 @@ class AmpViewer {
     if (customTemplate) {
       el.setAttribute('custom-template', customTemplate);
     }
+    el.onload = () => {
+      log('- script added: ', src, el);
+    };
+    el.onerror = () => {
+      log('- script failed to load: ', src, el);
+      doc.head.removeChild(el);
+      if (fallbackSrc) {
+        this.installScript_(fallbackSrc, undefined, customElement, customTemplate);
+      }
+    };
     doc.head.appendChild(el);
-    log('- script added: ', src, el);
   }
 
   /**
@@ -273,7 +364,6 @@ class AmpViewer {
   /**
    */
   onMessage_(type, data, rsvp) {
-    log('received message:', type, data, rsvp);
   }
 }
 
@@ -326,6 +416,74 @@ function fetchDocument(url) {
 
 
 /**
+ * @param {string} url
+ * @param {!WritableStreamDefaultWriter} writer
+ * @return {!Promise}
+ */
+function streamDocument(url, writer) {
+  // Try native first.
+  if (window.fetch && window.TextDecoder && window.ReadableStream) {
+    return fetch(url).then(response => {
+      // This should be a lot simpler with transforming streams and pipes,
+      // but, TMK, these are not supported anywhere yet.
+      const /** !ReadableStreamDefaultReader */ reader = response.body
+          .getReader();
+      const decoder = new TextDecoder();
+      function readChunk(chunk) {
+        const text = decoder.decode(
+            chunk.value || new Uint8Array(),
+            {stream: !chunk.done});
+        if (text) {
+          writer.write(text);
+        }
+        if (chunk.done) {
+          writer.close();
+        } else {
+          return reader.read().then(readChunk);
+        }
+      }
+      return reader.read().then(readChunk);
+    });
+  }
+
+  // Polyfill via XHR.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'text/html');
+    let pos = 0;
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
+        return;
+      }
+      if (xhr.status < 100 || xhr.status > 599) {
+        xhr.onreadystatechange = null;
+        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        return;
+      }
+      if (xhr.readyState == /* LOADING */ 3 ||
+          xhr.readyState == /* COMPLETE */ 4) {
+        const s = xhr.responseText;
+        const chunk = s.substring(pos);
+        pos = s.length;
+        writer.write(chunk);
+        if (xhr.readyState == /* COMPLETE */ 4) {
+          writer.close().then(resolve);
+        }
+      }
+    };
+    xhr.onerror = () => {
+      reject(new Error('Network failure'));
+    };
+    xhr.onabort = () => {
+      reject(new Error('Request aborted'));
+    };
+    xhr.send();
+  });
+}
+
+
+/**
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
@@ -336,7 +494,7 @@ function parseQueryString(queryString) {
   if (!queryString) {
     return params;
   }
-  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
+  if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
     queryString = queryString.substr(1);
   }
   const pairs = queryString.split('&');
@@ -360,4 +518,4 @@ function parseQueryString(queryString) {
 }
 
 
-var shell = new Shell(window);
+var shell = new Shell(window, /* useStreaming */ true);

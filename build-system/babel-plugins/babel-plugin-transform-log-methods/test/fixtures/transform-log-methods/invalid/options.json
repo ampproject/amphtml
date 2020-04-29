@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "messagesPath": "dist/.log-messages.test.invalid.temp"
+      }
+    ]
+  ]
+}

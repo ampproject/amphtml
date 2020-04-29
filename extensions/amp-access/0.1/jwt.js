@@ -14,50 +14,44 @@
  * limitations under the License.
  */
 
-import {
-  base64UrlDecodeToBytes,
-} from '../../../src/utils/base64';
-import {stringToBytes, utf8DecodeSync} from '../../../src/utils/bytes';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {pemToBytes} from '../../../src/utils/pem';
+import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {tryParseJson} from '../../../src/json';
-
 
 /**
  * @typedef {{
- *   header: !JSONObject,
- *   payload: !JSONObject,
+ *   header: (?JsonObject|undefined),
+ *   payload: (?JsonObject|undefined),
  *   verifiable: string,
  *   sig: string,
  * }}
  */
 let JwtTokenInternalDef;
 
-
 /**
  * Provides helper methods to decode and verify JWT tokens.
  */
 export class JwtHelper {
-
   /**
    * @param {!Window} win
    */
   constructor(win) {
-
     /** @const {!Window} */
     this.win = win;
 
     /**
      * Might be `null` if the platform does not support Crypto Subtle.
-     * @const @private {?SubtleCrypto}
+     * @const @private {?webCrypto.SubtleCrypto}
      */
-    this.subtle_ = win.crypto &&
-        (win.crypto.subtle || win.crypto.webkitSubtle) || null;
+    this.subtle_ =
+      (win.crypto && (win.crypto.subtle || win.crypto.webkitSubtle)) || null;
   }
 
   /**
    * Decodes JWT token and returns its payload.
    * @param {string} encodedToken
-   * @return {!JSONObject}
+   * @return {?JsonObject|undefined}
    */
   decode(encodedToken) {
     return this.decodeInternal_(encodedToken).payload;
@@ -75,34 +69,37 @@ export class JwtHelper {
    * Decodes HWT token and verifies its signature.
    * @param {string} encodedToken
    * @param {!Promise<string>} pemPromise
-   * @return {!Promise<!JSONObject>}
+   * @return {!Promise<!JsonObject>}
    */
   decodeAndVerify(encodedToken, pemPromise) {
     if (!this.subtle_) {
       throw new Error('Crypto is not supported on this platform');
     }
-    const decodedPromise = new Promise(
-        resolve => resolve(this.decodeInternal_(encodedToken)));
-    return decodedPromise.then(decoded => {
+    const decodedPromise = new Promise((resolve) =>
+      resolve(this.decodeInternal_(encodedToken))
+    );
+    return decodedPromise.then((decoded) => {
       const alg = decoded.header['alg'];
       if (!alg || alg != 'RS256') {
         // TODO(dvoytenko@): Support other RS* algos.
         throw new Error('Only alg=RS256 is supported');
       }
-      return this.importKey_(pemPromise).then(key => {
-        const sig = base64UrlDecodeToBytes(decoded.sig);
-        return this.subtle_.verify(
-          /* options */ {name: 'RSASSA-PKCS1-v1_5'},
-          key,
-          sig,
-          stringToBytes(decoded.verifiable)
-        );
-      }).then(isValid => {
-        if (isValid) {
-          return decoded.payload;
-        }
-        throw new Error('Signature verification failed');
-      });
+      return this.importKey_(pemPromise)
+        .then((key) => {
+          const sig = base64UrlDecodeToBytes(decoded.sig);
+          return this.subtle_.verify(
+            /* options */ {name: 'RSASSA-PKCS1-v1_5'},
+            key,
+            sig,
+            stringToBytes(decoded.verifiable)
+          );
+        })
+        .then((isValid) => {
+          if (isValid) {
+            return decoded.payload;
+          }
+          throw new Error('Signature verification failed');
+        });
     });
   }
 
@@ -112,7 +109,9 @@ export class JwtHelper {
    * @private
    */
   decodeInternal_(encodedToken) {
-    // See https://jwt.io/introduction/
+    /**
+     * See https://jwt.io/introduction/
+     */
     function invalidToken() {
       throw new Error(`Invalid token: "${encodedToken}"`);
     }
@@ -127,8 +126,8 @@ export class JwtHelper {
     const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
     const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
     return {
-      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
-      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      header: tryParseJson(utf8Decode(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8Decode(payloadUtf8Bytes), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: parts[2],
     };
@@ -136,10 +135,10 @@ export class JwtHelper {
 
   /**
    * @param {!Promise<string>} pemPromise
-   * @return {!Promise<!CryptoKey>}
+   * @return {!Promise<!webCrypto.CryptoKey>}
    */
   importKey_(pemPromise) {
-    return pemPromise.then(pem => {
+    return pemPromise.then((pem) => {
       return this.subtle_.importKey(
         /* format */ 'spki',
         pemToBytes(pem),
@@ -148,7 +147,8 @@ export class JwtHelper {
           hash: {name: 'SHA-256'},
         },
         /* extractable */ false,
-        /* uses */ ['verify']);
+        /* uses */ ['verify']
+      );
     });
   }
 }

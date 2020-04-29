@@ -29,12 +29,10 @@ export function setInViewportForTesting(inV) {
   inViewport = inV;
 }
 
-let rafId = 0;
-let rafQueue = {};
 // Active intervals. Must be global, because people clear intervals
 // with clearInterval from a different window.
 const intervals = {};
-let intervalId = 0;
+let intervalId = 1;
 
 /**
  * Add instrumentation to a window and all child iframes.
@@ -45,7 +43,7 @@ export function manageWin(win) {
     manageWin_(win);
   } catch (e) {
     // We use a try block, because the ad integrations often swallow errors.
-    console./*OK*/error(e.message, e.stack);
+    console./*OK*/ error(e.message, e.stack);
   }
 }
 
@@ -67,7 +65,6 @@ function manageWin_(win) {
   blockSyncPopups(win);
 }
 
-
 /**
  * Add instrumentation code to doc.write.
  * @param {!Window} parent
@@ -75,13 +72,15 @@ function manageWin_(win) {
  */
 function instrumentDocWrite(parent, win) {
   const doc = win.document;
-  const close = doc.close;
-  doc.close = function() {
-    parent.ampManageWin = function(win) {
+  const {close} = doc;
+  doc.close = function () {
+    parent.ampManageWin = function (win) {
       manageWin(win);
     };
-    doc.write('<script>window.parent.ampManageWin(window)</script>');
-    // .call does not work in Safari with document.write.
+    if (!parent.ampSeen) {
+      // .call does not work in Safari with document.write.
+      doc.write('<script>window.parent.ampManageWin(window)</script>');
+    }
     doc._close = close;
     return doc._close();
   };
@@ -94,7 +93,7 @@ function instrumentDocWrite(parent, win) {
  */
 function instrumentSrcdoc(parent, iframe) {
   let srcdoc = iframe.getAttribute('srcdoc');
-  parent.ampManageWin = function(win) {
+  parent.ampManageWin = function (win) {
     manageWin(win);
   };
   srcdoc += '<script>window.parent.ampManageWin(window)</script>';
@@ -115,15 +114,14 @@ function maybeInstrumentsNodes(win, addedNodes) {
       }
       const src = node.getAttribute('src');
       const srcdoc = node.getAttribute('srcdoc');
-      if (src == null || /^(about:|javascript:)/i.test(src.trim()) ||
-          srcdoc) {
+      if (src == null || /^(about:|javascript:)/i.test(src.trim()) || srcdoc) {
         if (node.contentWindow) {
           instrumentIframeWindow(node, win, node.contentWindow);
           node.addEventListener('load', () => {
             try {
               instrumentIframeWindow(node, win, node.contentWindow);
             } catch (e) {
-              console./*OK*/error(e.message, e.stack);
+              console./*OK*/ error(e.message, e.stack);
             }
           });
         } else if (srcdoc) {
@@ -131,7 +129,7 @@ function maybeInstrumentsNodes(win, addedNodes) {
         }
       }
     } catch (e) {
-      console./*OK*/error(e.message, e.stack);
+      console./*OK*/ error(e.message, e.stack);
     }
   }
 }
@@ -161,7 +159,7 @@ function installObserver(win) {
   if (!window.MutationObserver) {
     return;
   }
-  const observer = new MutationObserver(function(mutations) {
+  const observer = new MutationObserver(function (mutations) {
     for (let i = 0; i < mutations.length; i++) {
       maybeInstrumentsNodes(win, mutations[i].addedNodes);
     }
@@ -178,64 +176,47 @@ function installObserver(win) {
  */
 function instrumentEntryPoints(win) {
   // Change setTimeout to respect a minimum timeout.
-  const setTimeout = win.setTimeout;
-  win.setTimeout = function(fn, time) {
+  const {setTimeout} = win;
+  win.setTimeout = function (fn, time) {
     time = minTime(time);
     arguments[1] = time;
     return setTimeout.apply(this, arguments);
   };
   // Implement setInterval in terms of setTimeout to make
   // it respect the same rules
-  win.setInterval = function(fn) {
+  win.setInterval = function (fn) {
     const id = intervalId++;
     const args = Array.prototype.slice.call(arguments);
+    /**
+     * @return {*}
+     * @suppress {uselessCode}
+     */
     function wrapper() {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+        return (0, win.eval) /*NOT OK but whatcha gonna do.*/
+          .call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
     }
     args[0] = wrapper;
+    /**
+     *
+     */
     function next() {
       intervals[id] = win.setTimeout.apply(win, args);
     }
     next();
     return id;
   };
-  const clearInterval = win.clearInterval;
-  win.clearInterval = function(id) {
+  const {clearInterval} = win;
+  win.clearInterval = function (id) {
     clearInterval(id);
     win.clearTimeout(intervals[id]);
     delete intervals[id];
   };
-  // Throttle requestAnimationFrame.
-  const requestAnimationFrame = win.requestAnimationFrame ||
-      win.webkitRequestAnimationFrame;
-  win.requestAnimationFrame = function(cb) {
-    if (!inViewport) {
-      // If the doc is not visible, queue up the frames until we become
-      // visible again.
-      const id = rafId++;
-      rafQueue[id] = [win, cb];
-      // Only queue 20 frame requests to avoid mem leaks.
-      delete rafQueue[id - 20];
-      return id;
-    }
-    return requestAnimationFrame.call(this, cb);
-  };
-  const cancelAnimationFrame = win.cancelAnimationFrame;
-  win.cancelAnimationFrame = function(id) {
-    cancelAnimationFrame.call(this, id);
-    delete rafQueue[id];
-  };
-  if (win.webkitRequestAnimationFrame) {
-    win.webkitRequestAnimationFrame = win.requestAnimationFrame;
-    win.webkitCancelAnimationFrame = win.webkitCancelRequestAnimationFrame =
-        win.cancelAnimationFrame;
-  }
 }
 
 /**
@@ -244,6 +225,9 @@ function instrumentEntryPoints(win) {
  */
 function blockSyncPopups(win) {
   let count = 0;
+  /**
+   * Checks for security error.
+   */
   function maybeThrow() {
     // Prevent deep recursion.
     if (count++ > 2) {
@@ -252,31 +236,17 @@ function blockSyncPopups(win) {
   }
   try {
     win.alert = maybeThrow;
-    win.prompt = function() {
+    win.prompt = function () {
       maybeThrow();
       return '';
     };
-    win.confirm = function() {
+    win.confirm = function () {
       maybeThrow();
       return false;
     };
   } catch (e) {
-    console./*OK*/error(e.message, e.stack);
+    console./*OK*/ error(e.message, e.stack);
   }
-}
-
-/**
- * Run when we just became visible again. Runs all the queued up rafs.
- * @visibleForTesting
- */
-export function becomeVisible() {
-  for (const id in rafQueue) {
-    if (rafQueue.hasOwnProperty(id)) {
-      const f = rafQueue[id];
-      f[0].requestAnimationFrame(f[1]);
-    }
-  }
-  rafQueue = {};
 }
 
 /**
@@ -296,11 +266,11 @@ function minTime(time) {
   return time;
 }
 
+/**
+ * Installs embed state listener.
+ */
 export function installEmbedStateListener() {
-  listenParent(window, 'embed-state', function(data) {
-    inViewport = data.inViewport;
-    if (inViewport) {
-      becomeVisible();
-    }
+  listenParent(window, 'embed-state', function (data) {
+    inViewport = data['inViewport'];
   });
-};
+}

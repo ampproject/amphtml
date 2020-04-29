@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {stringHash32} from '../crypto';
-
+import {stringHash32} from '../string';
 
 /**
  * Gets a string of concatenated element names and relative positions
@@ -61,22 +60,23 @@ export function domFingerprintPlain(element) {
     element = element.parentElement;
   }
   return ids.join();
-};
+}
 
-/**
- * Calculates ad slot DOM fingerprint.  This key is intended to
- * identify "same" ad unit across many page views. This is
- * based on where the ad appears within the page's DOM structure.
- *
- * @param {?Element} element The DOM element from which to collect
- *     the DOM chain element IDs.  If null, DOM chain element IDs are not
- *     included in the hash.
- * @return {string} The ad unit hash key string.
- */
-export function domFingerprint(element) {
-  return stringHash32(domFingerprintPlain(element));
-};
-
+export class DomFingerprint {
+  /**
+   * Calculates ad slot DOM fingerprint.  This key is intended to
+   * identify "same" ad unit across many page views. This is
+   * based on where the ad appears within the page's DOM structure.
+   *
+   * @param {?Element} element The DOM element from which to collect
+   *     the DOM chain element IDs.  If null, DOM chain element IDs are not
+   *     included in the hash.
+   * @return {string} The ad unit hash key string.
+   */
+  static generate(element) {
+    return stringHash32(domFingerprintPlain(element));
+  }
+}
 
 /**
  * Gets a string showing the index of an element within
@@ -86,7 +86,7 @@ export function domFingerprint(element) {
  * @return {string} '.<index>' or ''.
  */
 function indexWithinParent(element) {
-  const nodeName = element.nodeName;
+  const {nodeName} = element;
   // Find my index within my parent's children
   let i = 0;
   let count = 0;
@@ -104,4 +104,4 @@ function indexWithinParent(element) {
   }
   // If we got to the end, then the count is accurate; otherwise skip count.
   return count < 25 && i < 100 ? `.${count}` : '';
-};
+}

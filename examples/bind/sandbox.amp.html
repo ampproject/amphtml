@@ -38,12 +38,10 @@
   <amp-state id="myState">
     <script type="application/json">
       {
-        "imageSrc": "https://ampbyexample.com/img/Shetland_Sheepdog.jpg"
+        "imageSrc": "https://amp.dev/static/samples/img/Shetland_Sheepdog.jpg"
       }
     </script>
   </amp-state>
-
-  <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
   <h2>Sandbox</h2>
 
@@ -68,7 +66,7 @@
   <p>2. Click "Evaluate" to reevaluate all expressions and apply updates to page.</p>
 
   <div>
-    <button on="tap:AMP.setState()">Evaluate</button>
+    <button on="tap:AMP.setState({})">Evaluate</button>
   </div>
 </body>
 </html>

@@ -14,46 +14,44 @@
  * limitations under the License.
  */
 
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
 
+const TAG = 'amp-call-tracking';
 
 /**
  * Bookkeeps all unique URL requests so that no URL is called twice.
- * @type {!Object<!string, !Promise>}
+ * @type {!Object<string, !Promise>}
  */
 let cachedResponsePromises_ = {};
-
 
 /**
  * Fetches vendor response.
  * @param {!Window} win
- * @param {!string} url
- * @return {!Promise<Object>}
+ * @param {string} url
+ * @return {!Promise<JsonObject>}
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
-    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url);
+    cachedResponsePromises_[url] = Services.xhrFor(win)
+      .fetchJson(url, {credentials: 'include'})
+      .then((res) => res.json());
   }
   return cachedResponsePromises_[url];
 }
 
-
-/** Visible for testing. */
-export function clearResponseCache() {
+/** @visibleForTesting */
+export function clearResponseCacheForTesting() {
   cachedResponsePromises_ = {};
 }
-
 
 /**
  * Implementation of `amp-call-tracking` component. See
  * {@link ../amp-call-tracking.md} for the spec.
  */
 export class AmpCallTracking extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -67,32 +65,40 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
   }
 
   /** @override */
   buildCallback() {
     this.configUrl_ = assertHttpsUrl(
-        this.element.getAttribute('config'), this.element);
+      this.element.getAttribute('config'),
+      this.element
+    );
 
     this.hyperlink_ = this.element.firstElementChild;
   }
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc()).expandAsync(this.configUrl_)
-      .then(url => fetch_(this.win, url))
-      .then(data => {
-        user().assert(data.phoneNumber,
-          'Response must contain a non-empty phoneNumber field %s',
-          this.element);
-
-        this.hyperlink_.setAttribute('href', `tel:${data.phoneNumber}`);
-        this.hyperlink_.textContent = data.formattedPhoneNumber
-            || data.phoneNumber;
+    return Services.urlReplacementsForDoc(this.element)
+      .expandUrlAsync(user().assertString(this.configUrl_))
+      .then((url) => fetch_(this.win, url))
+      .then((data) => {
+        if (data['phoneNumber']) {
+          this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
+          this.hyperlink_.textContent =
+            data['formattedPhoneNumber'] || data['phoneNumber'];
+        } else {
+          user().warn(
+            TAG,
+            'Response does not contain a phoneNumber field %s. Call tracking was not applied.',
+            this.element
+          );
+        }
       });
   }
 }
 
-
-AMP.registerElement('amp-call-tracking', AmpCallTracking);
+AMP.extension('amp-call-tracking', '0.1', (AMP) => {
+  AMP.registerElement('amp-call-tracking', AmpCallTracking);
+});

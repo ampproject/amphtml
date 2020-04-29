@@ -1,42 +1,133 @@
 language: node_js
-sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
-dist: trusty
+dist: xenial
 node_js:
-  - "stable"
-python:
-  - "2.7"
+  - 'lts/*'
 notifications:
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  sauce_connect: true
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
+    on_failure: change
 before_install:
-  - export CHROME_BIN=google-chrome
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  - sudo dpkg -i google-chrome*.deb
-before_script:
-  - pip install --user protobuf
-script: node build-system/pr-check.js
+  # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
+  - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+  - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+  # Ensure python v2 and v3 are available, and "python" defaults to v3 (docs.travis-ci.com/user/reference/xenial/#python-support)
+  - pyenv global 3.6.7 2.7.15
+  - python3 --version
+  - python2 --version
+  - python --version
+  # Xenial's version of python-protobuf is outdated (github.com/ampproject/amphtml/pull/22528)
+  - pip3 install --user protobuf
 branches:
   only:
     - master
     - release
     - canary
+    - nightly
     - /^amp-release-.*$/
-env:
-  global:
-    - NPM_CONFIG_PROGRESS="false"
-
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
+      - expect-dev
+      - google-cloud-sdk
+      - openssl
+      - protobuf-compiler
+      - pkg-config
+  chrome: stable
+  hosts:
+    - ads.localhost
+    - iframe.localhost
+    # CURLs amp subdomain for the amp-recaptcha-input integration test. The hash
+    # is the CURLS subdomain for localhost:9876
+    - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
+stages:
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = push
+jobs:
+  include:
+    - stage: build
+      name: 'Build'
+      script:
+        - unbuffer node build-system/pr-check/build.js
+    - stage: build
+      name: 'Checks'
+      script:
+        - unbuffer node build-system/pr-check/checks.js
+    - stage: build
+      name: 'Validator Tests'
+      script:
+        - unbuffer node build-system/pr-check/validator-tests.js
+    - stage: build
+      name: 'Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: build
+      name: 'Module Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+    - stage: test
+      name: 'Single Pass Tests'
+      script:
+        - unbuffer node build-system/pr-check/single-pass-tests.js
+    - stage: test
+      name: 'Visual Diff Tests'
+      script:
+        - unbuffer node build-system/pr-check/visual-diff-tests.js
+      env:
+        - CACHE_NAME=VISUALDIFFJOB
+    - stage: test
+      name: 'Local Tests'
+      script:
+        - unbuffer node build-system/pr-check/local-tests.js
+    - stage: test
+      name: 'Remote (Sauce Labs) Tests'
+      script:
+        - unbuffer node build-system/pr-check/remote-tests.js
+      after_script:
+        - build-system/sauce_connect/stop_sauce_connect.sh
+        - ps -ef
+    - stage: test
+      name: 'End to End Tests'
+      script:
+        - unbuffer node build-system/pr-check/e2e-tests.js
+      env:
+        - CACHE_NAME=E2EJOB
+    - stage: experiment
+      name: 'Experiment A Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+      cache: false
+    - stage: experiment
+      name: 'Experiment B Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+      cache: false
+    - stage: experiment
+      name: 'Experiment C Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+      cache: false
+before_cache:
+  # do not store cache for pr builds or experiment stage builds
+  - if [[ $TRAVIS_EVENT_TYPE == pull_request ]] || [[ $TRAVIS_BUILD_STAGE_NAME == experiment ]]; then exit $TRAVIS_TEST_RESULT ; fi
 cache:
-  yarn: true
   directories:
-  - node_modules
+    - node_modules
+    - build-system/tasks/e2e/node_modules
+    - build-system/tasks/visual-diff/node_modules
+    - sauce_connect
+    - validator/node_modules
+    - validator/nodejs/node_modules
+    - validator/webui/node_modules
+    - validator/java/bazel-installer
+    - $HOME/.m2
+  yarn: true

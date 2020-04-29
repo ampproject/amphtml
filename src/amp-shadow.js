@@ -19,21 +19,19 @@
  * multiple AMP Docs in Shadow DOM.
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {installDocService} from './service/ampdoc-impl';
-import {
-  adoptShadowMode,
-  installBuiltins,
-  installRuntimeServices,
-} from './runtime';
+import {adoptShadowMode} from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
-import {stubElements} from './custom-element';
-import {maybeTrackImpression} from './impression';
-
-// PWA shell manages its own visibility and shadow ampdocs their own.
-bodyAlwaysVisible(self);
+import {doNotTrackImpression} from './impression';
+import {
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
+import {installDocService} from './service/ampdoc-impl';
+import {internalRuntimeVersion} from './internal-version';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -45,21 +43,29 @@ installDocService(self, /* isSingleDoc */ false);
 // Core services.
 installRuntimeServices(self);
 
-maybeTrackImpression(self);
+// Impression tracking for PWA is not meaningful, but the dependent code
+// has to be unblocked.
+doNotTrackImpression();
+
+// PWA shell manages its own visibility and shadow ampdocs their own.
+bodyAlwaysVisible(self);
 
 // Builtins.
-installBuiltins(self);
+installBuiltinElements(self);
 
 // Final configuration and stubbing.
 adoptShadowMode(self);
-stubElements(self);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`
+  );
 }
-self.document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);
