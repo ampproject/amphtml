@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const log = require('fancy-log');
-const packageJson = require('../../../package.json');
 const path = require('path');
 const url = require('url');
 const util = require('util');
@@ -41,7 +40,8 @@ const {report, Report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
-const fileGlobs = packageJson.filesize.track;
+const filesizeConfigPath = require.resolve('./filesize.json');
+const fileGlobs = require(filesizeConfigPath).filesize.track;
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
@@ -59,7 +59,7 @@ async function getBrotliBundleSizes() {
 
   log(cyan('brotli'), 'bundle sizes are:');
   await report(
-    process.cwd(),
+    filesizeConfigPath,
     (content) => content.replace(replacementExpression, normalizedRtvNumber),
     class extends Report {
       update(context) {
