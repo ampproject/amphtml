@@ -69,6 +69,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getLocalizationService} from '../../../src/service/localization';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -263,9 +264,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationServiceForDoc(
-      getAmpdoc(this.win.document)
-    );
+    this.localizationService_ = getLocalizationService(this.win.document.body);
 
     const deferred = new Deferred();
 

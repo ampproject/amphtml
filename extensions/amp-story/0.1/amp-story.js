@@ -91,12 +91,13 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from '../../../src/service/localization';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
@@ -211,9 +212,7 @@ export class AmpStory extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationServiceForDoc(
-      getAmpdoc(this.win.document)
-    );
+    this.localizationService_ = getLocalizationService(this.element);
 
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)

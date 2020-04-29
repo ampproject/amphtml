@@ -37,6 +37,7 @@ import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
+import {getLocalizationService} from '../../../src/service/localization';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
@@ -1095,9 +1096,9 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      Services.localizationServiceForDoc(
-        getAmpdoc(this.win_.document)
-      ).getLocalizedString(embedConfig.localizedStringId) ||
+      getLocalizationService(this.storyEl_).getLocalizedString(
+        embedConfig.localizedStringId
+      ) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText = this.tooltip_.querySelector(
       '.i-amphtml-tooltip-text'

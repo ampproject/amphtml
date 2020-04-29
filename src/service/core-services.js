@@ -27,7 +27,6 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
-import {installLocalizationServiceForDoc} from './localization';
 import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -119,9 +118,6 @@ export function installAmpdocServices(ampdoc) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'storage')
     : installStorageServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'localization')
-    : installLocalizationServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

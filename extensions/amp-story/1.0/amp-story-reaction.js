@@ -28,7 +28,6 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
 import {getRequestService} from './amp-story-request-service';
 
 /** @const {string} */

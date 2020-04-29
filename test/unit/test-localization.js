@@ -18,14 +18,16 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../src/localized-strings';
-import {Services} from '../../src/services';
-import {getLanguageCodesFromString} from '../../src/service/localization';
+import {
+  getLanguageCodesFromString,
+  getLocalizationService,
+} from '../../src/service/localization';
 
 describes.fakeWin('localization', {}, (env) => {
   let localizationService;
 
   beforeEach(() => {
-    localizationService = Services.localizationServiceForDoc(env.ampdoc);
+    localizationService = getLocalizationService();
   });
 
   describe('localized string IDs', () => {

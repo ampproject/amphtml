@@ -22,6 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
+import {getLocalizationService} from '../../../src/service/localization';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -197,9 +198,6 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
-    this.localizationServicePromise_ = null;
-
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = Services.storyRequestServiceV01(this.win);
   }
@@ -220,9 +218,6 @@ export class ShareWidget {
     devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
-    this.localizationServicePromise_ = Services.localizationServiceForOrNullV01(
-      this.win
-    );
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
@@ -268,16 +263,14 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      this.localizationServicePromise_.then((localizationService) => {
-        devAssert(
-          localizationService,
-          'Could not retrieve LocalizationService.'
-        );
-        const failureString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-        );
-        Toast.show(this.win, dev().assertString(failureString));
-      });
+      const localizationService = getLocalizationService(
+        this.win.document.body
+      );
+      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+      const failureString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+      );
+      Toast.show(this.win, dev().assertString(failureString));
       return;
     }
 

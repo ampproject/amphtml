@@ -544,22 +544,14 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
+   * @param {!Element} element
+   * @return {?./service/localization.LocalizationService}
    */
-  static localizationServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true))
-    );
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/localization.LocalizationService}
-   */
-  static localizationServiceForDoc(elementOrAmpDoc) {
-    return getServiceForDoc(elementOrAmpDoc, 'localization');
+  static localizationServiceForDoc(element) {
+    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+      element,
+      'localization'
+    ));
   }
 
   /**
@@ -601,27 +593,6 @@ export class Services {
    */
   static storyRequestServiceV01(win) {
     return getService(win, 'story-request-v01');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
-   */
-  static localizationServiceForOrNullV01(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story', true))
-    );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
-   */
-  static localizationServiceV01(win) {
-    return getService(win, 'localization-v01');
   }
 
   /**

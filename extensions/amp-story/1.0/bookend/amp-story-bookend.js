@@ -42,6 +42,7 @@ import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
+import {getLocalizationService} from '../../../../src/service/localization';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
@@ -514,7 +515,7 @@ export class AmpStoryBookend extends DraggableDrawer {
   loadConfigAndMaybeRenderBookend(renderBookend = true) {
     return this.loadConfig().then((config) => {
       if (renderBookend && !this.isBookendRendered_ && config) {
-        return this.renderBookend_(config).then(() => config);
+        this.renderBookend_(config);
       }
       return config;
     });
@@ -606,14 +607,13 @@ export class AmpStoryBookend extends DraggableDrawer {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
-   * @return {!Promise}
    * @private
    */
   renderBookend_(bookendConfig) {
     this.assertBuilt_();
     this.isBookendRendered_ = true;
 
-    return this.renderComponents_(bookendConfig.components);
+    this.renderComponents_(bookendConfig.components);
   }
 
   /**
@@ -621,35 +621,30 @@ export class AmpStoryBookend extends DraggableDrawer {
    * a promise to ensure loadConfigAndMaybeRenderBookend renders the components
    * first before proceeding. This is needed for our unit tests.
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
-   * @return {!Promise}
    * @private
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
 
     if (!components.length) {
-      return Promise.resolve();
+      return;
     }
 
-    return Services.localizationServiceForOrNull(this.win)
-      .then((localizationService) => {
-        const bookendEls = BookendComponent.buildElements(
-          components,
-          this.win,
-          localizationService
-        );
-        const container = dev().assertElement(
-          BookendComponent.buildContainer(
-            this.getShadowRoot(),
-            this.win.document
-          )
-        );
-        this.mutateElement(() => container.appendChild(bookendEls));
-      })
-      .catch((e) => {
-        user().error(TAG, 'Unable to fetch localization service.', e.message);
-        return null;
-      });
+    const localizationService = getLocalizationService(this.element);
+    if (!localizationService) {
+      user().error(TAG, 'Unable to fetch localization service.');
+      return;
+    }
+
+    const bookendEls = BookendComponent.buildElements(
+      components,
+      this.win,
+      localizationService
+    );
+    const container = dev().assertElement(
+      BookendComponent.buildContainer(this.getShadowRoot(), this.win.document)
+    );
+    this.mutateElement(() => container.appendChild(bookendEls));
   }
 
   /** @return {!Element} */

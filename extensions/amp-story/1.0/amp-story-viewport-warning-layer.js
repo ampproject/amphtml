@@ -23,7 +23,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
-import {getAmpdoc} from '../../../src/service';
+import {getLocalizationService} from '../../../src/service/localization';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -82,9 +82,6 @@ export class ViewportWarningLayer {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    // TODO: at this point the localization service is not registered yet. We
-    // should refactor the way it is registered it so it works like the store
-    // and analytics services.
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
@@ -118,9 +115,7 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-    this.localizationService_ = Services.localizationServiceForDoc(
-      getAmpdoc(this.win_.document)
-    );
+    this.localizationService_ = getLocalizationService(this.storyElement_);
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
