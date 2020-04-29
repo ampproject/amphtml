@@ -83,7 +83,7 @@ function getPreClosureConfig() {
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,
-    argv.esm
+    !(argv.fortesting || isCheckTypes)
       ? [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
