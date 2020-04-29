@@ -19,7 +19,7 @@ import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
 import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../../src/intersection-observer-polyfill';
+} from '../../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,

@@ -94,6 +94,82 @@ describe('amp-analytics', function () {
   );
 
   describes.integration(
+    'basic pageview chunk',
+    {
+      body: `
+      <script>
+        // initialize _cid cookie with a CLIENT_ID
+        document.cookie='_cid=amp-12345';
+      </script>
+      <!-- put amp-analytics > 3 viewports away from viewport -->
+      <div style="height: 400vh">
+        viewport
+      </div>
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
+            }
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}",
+            "cid": "\${clientId(_cid)}",
+            "loadend": "\${navTiming(loadEventEnd)}",
+            "default": "\$DEFAULT( , test)",
+            "fcp": "FIRST_CONTENTFUL_PAINT",
+            "fvr": "FIRST_VIEWPORT_READY",
+            "mbv": "MAKE_BODY_VISIBLE",
+            "cookie": "\${cookie(test-cookie)}"
+          }
+        }
+        </script>
+      </amp-analytics>`,
+      extensions: ['amp-analytics'],
+      experiments: ['analytics-chunks'],
+    },
+    () => {
+      afterEach(() => {
+        // clean up written _cid cookie
+        document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+      });
+
+      it('should send request', () => {
+        return RequestBank.withdraw().then((req) => {
+          const q = parseQueryString(req.url.substr(1));
+          expect(q['a']).to.equal('2');
+          expect(q['b']).to.equal('AMP TEST');
+          expect(q['cid']).to.equal('amp-12345');
+          expect(q['loadend']).to.not.equal('0');
+          expect(q['default']).to.equal('test');
+          // cookie set via http response header when requesting
+          // localhost:9876/amp4test/compose-doc
+          expect(q['cookie']).to.equal('test');
+
+          if (window.PerformancePaintTiming) {
+            expect(q['fcp']).to.not.be.null;
+          }
+          expect(q['fvr']).to.not.be.null;
+          expect(q['mbv']).to.not.be.null;
+          expect(
+            req.headers.referer,
+            'should keep referrer if no referrerpolicy specified'
+          ).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
     'click trigger',
     {
       body: `

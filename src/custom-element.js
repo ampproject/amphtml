@@ -32,7 +32,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {parseSizeList} from './size-list';
@@ -566,21 +566,33 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
+     * Should only be called by Resources.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
-     * @param {boolean=} opt_measurementsChanged
+     * @param {boolean} sizeChanged
      */
-    updateLayoutBox(layoutBox, opt_measurementsChanged) {
+    updateLayoutBox(layoutBox, sizeChanged = false) {
       this.layoutWidth_ = layoutBox.width;
       this.layoutHeight_ = layoutBox.height;
       if (this.isBuilt()) {
-        try {
-          this.implementation_.onLayoutMeasure();
-          if (opt_measurementsChanged) {
-            this.implementation_.onMeasureChanged();
-          }
-        } catch (e) {
-          reportError(e, this);
+        this.onMeasure(sizeChanged);
+      }
+    }
+
+    /**
+     * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
+     * on the BaseElement implementation.
+     * Should only be called by Resources.
+     * @param {boolean} sizeChanged
+     */
+    onMeasure(sizeChanged = false) {
+      devAssert(this.isBuilt());
+      try {
+        this.implementation_.onLayoutMeasure();
+        if (sizeChanged) {
+          this.implementation_.onMeasureChanged();
         }
+      } catch (e) {
+        reportError(e, this);
       }
     }
 
@@ -1022,16 +1034,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Whether the element should render outside of renderOutsideViewport when
-     * the scheduler is idle.
-     * @return {boolean|number}
-     * @final
-     */
-    idleRenderOutsideViewport() {
-      return this.implementation_.idleRenderOutsideViewport();
-    }
-
-    /**
      * Returns a previously measured layout box adjusted to the viewport. This
      * mainly affects fixed-position elements that are adjusted to be always
      * relative to the document position in the viewport.
@@ -1226,7 +1228,8 @@ function createBaseCustomElementClass(win) {
             if (
               this.isInViewport_ &&
               this.ownerDocument &&
-              this.ownerDocument.defaultView
+              this.ownerDocument.defaultView &&
+              this.layoutCount_ === 0 // Ensures that layoutCallback hasn't completed in this 100ms window.
             ) {
               this.toggleLoading(true, {startTime: loadingStartTime});
             }

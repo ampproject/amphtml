@@ -1,5 +1,9 @@
 {
-  "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
+  "allow-doc-opt-in": [
+    "amp-next-page",
+    "inabox-viewport-friendly",
+    "analytics-chunks"
+  ],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
   "a4aProfilingRate": 0.01,
@@ -30,6 +34,7 @@
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
+  "random-subdomain-for-safeframe": 0.02,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "version-locking": 1

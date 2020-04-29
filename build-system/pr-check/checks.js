@@ -57,6 +57,7 @@ async function main() {
     timedExecOrDie('gulp server-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
+    timedExecOrDie('gulp check-sourcemaps');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -101,6 +102,7 @@ async function main() {
     if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
+      timedExecOrDie('gulp check-sourcemaps');
     }
   }
 

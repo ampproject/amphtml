@@ -137,6 +137,12 @@ export let SizeInfoDef;
     }} */
 export let CreativeMetaDataDef;
 
+/** @typedef {{
+      consentState: (?CONSENT_POLICY_STATE|undefined),
+      consentString: (?string|undefined),
+    }} */
+export let ConsentTupleDef;
+
 /**
  * Name of A4A lifecycle triggers.
  * @enum {string}
@@ -695,7 +701,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentString = consentResponse[1];
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          consentState,
+          {consentState, consentString},
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
       })
@@ -804,7 +810,7 @@ export class AmpA4A extends AMP.BaseElement {
           };
         });
       })
-      /** @return {!Promise<?ArrayBuffer>} */
+      /** @return {?Promise<?ArrayBuffer>} */
       .then((responseParts) => {
         checkStillCurrent();
         // Keep a handle to the creative body so that we can render into
@@ -815,7 +821,7 @@ export class AmpA4A extends AMP.BaseElement {
         // we should restructure the promise chain to pass this info along
         // more cleanly, without use of an object variable outside the chain.
         if (!responseParts) {
-          return Promise.resolve();
+          return null;
         }
         const {bytes, headers} = responseParts;
         const size = this.extractSize(responseParts.headers);
@@ -1238,11 +1244,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
-   * @param {?CONSENT_POLICY_STATE} unusedConsentState
+   * @param {!ConsentTupleDef=} opt_ununsedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
+  getAdUrl(opt_ununsedConsentTuple, opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1791,16 +1797,18 @@ export class AmpA4A extends AMP.BaseElement {
         }
 
         const urls = Services.urlForDoc(this.element);
-        metaData.customStylesheets.forEach((stylesheet) => {
-          if (
-            !isObject(stylesheet) ||
-            !stylesheet['href'] ||
-            typeof stylesheet['href'] !== 'string' ||
-            !urls.isSecure(stylesheet['href'])
-          ) {
-            throw new Error(errorMsg);
+        /** @type {!Array} */ (metaData.customStylesheets).forEach(
+          (stylesheet) => {
+            if (
+              !isObject(stylesheet) ||
+              !stylesheet['href'] ||
+              typeof stylesheet['href'] !== 'string' ||
+              !urls.isSecure(stylesheet['href'])
+            ) {
+              throw new Error(errorMsg);
+            }
           }
-        });
+        );
       }
       if (isArray(metaDataObj['images'])) {
         // Load maximum of 5 images.

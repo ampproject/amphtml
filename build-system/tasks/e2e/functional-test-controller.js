@@ -385,6 +385,14 @@ class FunctionalTestController {
   async type(unusedHandle, unusedKeys) {}
 
   /**
+   * Pastes from the clipboard by perfoming the keyboard shortcut.
+   * {@link https://stackoverflow.com/a/41046276}
+   *
+   * @return {!Promise}
+   */
+  async pasteFromClipboard() {}
+
+  /**
    * Scrolls the given element using the scroll options if provided.
    * If the element cannot scroll, then no scroll will be performed.
    * Note: This is not yet spec'd in the W3C WebDriver spec, but there are plans
