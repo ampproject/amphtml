@@ -227,12 +227,13 @@ export class NextPageService {
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    this.initializePageQueue_().finally(() => {
+    const fin = () => {
       // Render the initial recommendation box template with all pages
       this.refreshRecBox_();
       // Mark the page as ready
       this.readyResolver_();
-    });
+    };
+    this.initializePageQueue_().then(fin, fin);
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
@@ -252,27 +253,41 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
+    // If we already fetched the maximum number of pages
+    const exceededMaximum =
+      this.pages_.filter((page) => !page.is(PageState.QUEUED)).length >
+      this.maxPages_;
     // If a page is already queued to be fetched, we need to wait for it
     const isFetching = this.pages_.some((page) => page.is(PageState.FETCHING));
     // If we're still too far from the bottom, we don't need to perform this now
     const isTooEarly =
       this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
 
-    if (this.finished_ || isFetching || isTooEarly) {
+    if (this.finished_ || isFetching || isTooEarly || exceededMaximum) {
       return Promise.resolve();
     }
 
     const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (nextPage) {
-      return nextPage.fetch().then(() => {
-        if (nextPage.is(PageState.FAILED)) {
-          // Silently skip this page and get the recommendation box
-          // ready in case this page is the last one
-          this.setLastFetchedPage(nextPage);
-          return this.refreshRecBox_();
-        }
-      });
+      return nextPage
+        .fetch()
+        .then(() => {
+          if (nextPage.is(PageState.FAILED)) {
+            // Silently skip this page
+            this.setLastFetchedPage(nextPage);
+          }
+        })
+        .then(
+          () => {
+            return this.refreshRecBox_();
+          },
+          (reason) => {
+            return this.refreshRecBox_().then(() => {
+              throw reason;
+            });
+          }
+        );
     }
 
     // Attempt to get more pages
@@ -522,7 +537,7 @@ export class NextPageService {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
 
     const container = dev().assertElement(page.container);
@@ -581,7 +596,7 @@ export class NextPageService {
       return separatorPromise.then(() => amp);
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
   }
 
@@ -771,11 +786,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
-    if (
-      !pages.length ||
-      this.pages_.length > this.maxPages_ ||
-      this.finished_
-    ) {
+    if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
     // Queue the given pages
@@ -785,10 +796,7 @@ export class NextPageService {
         // Prevent loops by checking if the page already exists
         // we use initialUrl since the url can get updated if
         // the page issues a redirect
-        if (
-          this.pages_.some((page) => page.initialUrl == meta.url) ||
-          this.pages_.length > this.maxPages_
-        ) {
+        if (this.pages_.some((page) => page.initialUrl == meta.url)) {
           return;
         }
         // Queue the page for fetching
@@ -955,7 +963,6 @@ export class NextPageService {
       this.refreshRecBox_ = this.templates_.hasTemplate(providedRecBox)
         ? () => this.renderRecBoxTemplate_()
         : ASYNC_NOOP;
-      removeElement(providedRecBox);
       return providedRecBox;
     }
     // If no recommendation box is provided then we build a default one
@@ -983,6 +990,9 @@ export class NextPageService {
   renderRecBoxTemplate_() {
     const recBox = dev().assertElement(this.recBox_);
     devAssert(this.templates_.hasTemplate(recBox));
+    const templateElement = dev().assertElement(
+      this.templates_.maybeFindTemplate(recBox)
+    );
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
@@ -1000,6 +1010,7 @@ export class NextPageService {
       .then((rendered) => {
         return this.mutator_.mutateElement(recBox, () => {
           removeChildren(dev().assertElement(recBox));
+          recBox.appendChild(templateElement);
           recBox.appendChild(rendered);
         });
       });
@@ -1023,7 +1034,7 @@ export class NextPageService {
     });
 
     const html = htmlFor(this.getHost_());
-    const links = data['pages'].map((page) => {
+    const links = /** @type {!Array} */ (data['pages']).map((page) => {
       const link = html`
         <a class="amp-next-page-link">
           <img ref="image" class="amp-next-page-image" />

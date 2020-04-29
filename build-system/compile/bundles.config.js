@@ -144,7 +144,7 @@ exports.jsBundles = {
     },
   },
   'amp-story-player.js': {
-    srcDir: './src/',
+    srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',
@@ -647,6 +647,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-intersection-observer-polyfill',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-izlesene',
     version: '0.1',
     latestVersion: '0.1',
@@ -878,7 +884,8 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-quiz',
+        'amp-story-reaction',
+        'amp-story-reaction-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',

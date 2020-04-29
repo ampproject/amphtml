@@ -67,9 +67,9 @@ Enables light or dark mode for the page attachment header and content background
 Values: "light" (default), "dark"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" theme="dark"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment layout="nodisplay" theme="dark">
+  ...
+</amp-story-page-attachment>
 ```
 
 ## Linked content
@@ -77,9 +77,8 @@ Values: "light" (default), "dark"
 When providing a `href` attribute as page attachment, the respective URL is opened when the user activates the page attachment.
 
 ```html
-<amp-story-page-attachment layout="nodisplay" href="https://www.example.com"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment layout="nodisplay" href="https://www.example.com">
+</amp-story-page-attachment>
 ```
 
 ## Inline content
