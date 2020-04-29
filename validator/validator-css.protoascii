@@ -460,6 +460,7 @@ css {
   image_url_spec: {
     protocol: "https"
   }
+  expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
