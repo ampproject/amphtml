@@ -76,7 +76,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.platform_ = Services.platformFor(this.win);
     this.viewer_ = Services.viewerForDoc(element);
 
-    const systemShareSupported = 'share' in navigator;
+    const systemShareSupported = 'share' in this.win.navigator;
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!systemShareSupported) {
