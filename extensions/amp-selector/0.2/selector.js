@@ -29,18 +29,13 @@ export function Selector(props) {
   const {
     'as': Comp = 'div',
     'children': children,
-    'defaultValue': defaultValue,
     'disabled': disabled,
     'value': value,
     'multiple': multiple,
   } = props;
-  const [selectedState, setSelectedState] = useState(
-    value ? [].concat(value) : defaultValue ? [].concat(defaultValue) : []
-  );
+  const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
-  const selected = /** @type {!Array} */ (value
-    ? [].concat(value)
-    : selectedState);
+  const selected = /** @type {!Array} */ (value ? value : selectedState);
   const selectOption = (option) => {
     if (!option) {
       return;
