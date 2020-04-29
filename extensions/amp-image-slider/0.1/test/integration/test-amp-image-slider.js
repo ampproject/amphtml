@@ -116,7 +116,7 @@ t.run('amp-image-slider', function () {
         expect(win.getComputedStyle(s1.leftLabel)['padding']).to.equal('16px');
       });
 
-      describe('using mouse', () => {
+      describe.skip('using mouse', () => {
         it('should move slider bar to position on mousedown', () => {
           // Perform a mousedown
           // eventPos == targetPos
@@ -308,7 +308,7 @@ t.run('amp-image-slider', function () {
         });
       });
 
-      describe('using touchscreen', () => {
+      describe.skip('using touchscreen', () => {
         it('should move slider bar to position on touchstart', () => {
           // Perform a touchstart
           // eventPos == targetPos
@@ -504,7 +504,7 @@ t.run('amp-image-slider', function () {
         );
       });
 
-      describe('using a keyboard', () => {
+      describe.skip('using a keyboard', () => {
         it(
           'pressing ArrowLeft should move slider bar by 10% to the left ' +
             'when slider is focused',
