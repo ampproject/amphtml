@@ -41,7 +41,8 @@
     "tenantId": "_tenantId_",
     "pixelId": "_pixelId_",
     "property": "_property_",
-    "extraTrackingValues": "&title={$title}"
+    "extraTrackingValues": "&customTitle=_title_",
+    "event": "https://_tenantId_/s/_pixelId_.gif?property=_property&_property_=_clientId(cid)_&sourceUrl=_sourceUrl_&canonicalUrl=_canonicalUrl_&referrer=_documentReferrer_&title=_title_&visitDate=_timestamp_&geoLocation=_ampGeo_&userAgent=_userAgent_&customTitle=_title_"
   },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
