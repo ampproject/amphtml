@@ -57,8 +57,7 @@ function gitFindMaster() {
     .split(/\r?\n/)
     .map((name) => name.trim())
     .filter(Boolean);
-  while (remoteNames.length) {
-    const remoteName = remoteNames.pop();
+  for (const remoteName of remoteNames) {
     const remoteUrl = getStdout(`git remote get-url ${remoteName}`).trim();
     if (upstreamRegex.test(remoteUrl)) {
       return remoteName + '/master';
@@ -203,6 +202,15 @@ function gitCommitHash() {
 }
 
 /**
+ * Returns the commit hash of a branch, remote branch, tag, etc.
+ * @param {string} name
+ * @return {string}
+ */
+function gitNameToHash(name) {
+  return getStdout(`git rev-parse --verify ${name}`).trim();
+}
+
+/**
  * Returns the email of the author of the latest commit on the local branch.
  * @return {string}
  */
@@ -222,7 +230,10 @@ function gitCommitterEmail() {
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
-  return getStdout(`git cherry ${gitFindMaster()}`)
+  // Some git clients do not support substituting a remote branch for a ref
+  // https://github.com/ampproject/amphtml/pull/28035#pullrequestreview-402195659
+  const commit = gitNameToHash(gitFindMaster()) || 'master';
+  return getStdout(`git cherry ${commit}`)
     .trim()
     .split('\n')
     .map((line) => ({
@@ -250,7 +261,10 @@ function gitCommitFormattedTime(ref = 'HEAD') {
  * @return {string}
  */
 function gitMergeBaseMaster() {
-  return getStdout(`git merge-base ${gitFindMaster()} HEAD`).trim();
+  // Some git clients do not support substituting a remote branch for a ref
+  // https://github.com/ampproject/amphtml/pull/28035#pullrequestreview-402195659
+  const commit = gitNameToHash(gitFindMaster()) || 'master';
+  return getStdout(`git merge-base ${commit} HEAD`).trim();
 }
 
 /**
