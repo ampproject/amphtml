@@ -87,37 +87,6 @@ If `subscribe.google.com` is the "winning" service, the request to the `pingback
 
 Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
 
-Additionally, if `subscribe.google.com` returns an entitlement, and `hasAssociatedAccountUrl` and
-`accountCreationRedirectUrl` are set, the [deferred account creation flow](https://github.com/subscriptions-project/swg-js/blob/master/docs/deferred-account-flow.md)
-will be initiated.
-
-First, the `hasAssociatedAccountUrl` will receive a POST request with the following payload:
-```
-{ 
-  entitlements: ... //
-}
-```
-
-where the data in entitlements is a JSON representation of the value in the entitlement pingback.
-
-The return body should contain the following payload:
-
-```
-{ found: boolean }
-```
-
-where found indicates whether an account associated with the given entitlement was found on the publisher side.
-
-If the account was not found, the user will be asked
-whether they want to create an account on the publisher side to associate with 
-the google subscription service. In the positive case, the user will then be redirected
-to the URL at `accountCreationRedirectUrl`.
-
-The page at `accountCreationRedirectUrl` is expected to implement the 
-[deferred account creation flow](https://github.com/subscriptions-project/swg-js/blob/master/docs/deferred-account-flow.md)
-on their side to complete the association. Because the confirmation was already given on the AMP
-side, the page can skip requesting the user pemission again.
-
 ## Example with markup
 
 ```html
@@ -147,8 +116,6 @@ side, the page can skip requesting the user pemission again.
         },
         {
           "serviceId": "subscribe.google.com",
-          "hasAssociatedAccountUrl": "https://...",
-          "accountCreationRedirectUrl": "https://...",
         }
       ]
     }

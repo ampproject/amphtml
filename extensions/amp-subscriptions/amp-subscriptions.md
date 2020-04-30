@@ -232,6 +232,8 @@ The properties in the "local" service are (remote mode):
 - "type" - optional type, defaults to "remote"
 - "authorizationUrl" - the authorization endpoint URL.
 - "pingbackUrl" - the pingback endpoint URL.
+- "hasAssociatedAccountUrl" - See "Deferred Account Creation" section.
+- "accountCreationRedirectUrl" - See "Deferred Account Creation" section.
 - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
 
 In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
@@ -297,6 +299,40 @@ Pingback is optional. It's only enabled when the "pingbackUrl" property is speci
 By default, as the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint. However if the config for the "local" service contains `pingbackAllEntitlements: true` the body will contain an array of all the entitlments received, from all services, including those which do not grant access.
 
 **Important:** The pingback JSON object is sent with `Content-type: text/plain`. This is intentional as it removes the need for a CORS preflight check.
+
+## Deferred Account Creation Flow
+
+If the user has an account associated with the remote platform (e.g. "subscribe.google.com"), but no account associated with the local platform, the Deferred Account Creation Flow can prompt the
+user to create a local account to associate with the remote account. This is currently only possible when amp-subscriptions-google is set as the remote service.
+
+To enable the flow, `hasAssociatedAccountUrl` and `accountCreationRedirectUrl` must be set in the local configuration.
+
+First, the `hasAssociatedAccountUrl` will receive a POST request with the following payload:
+```
+{ 
+  entitlements: ... //
+}
+```
+
+where the data in entitlements is a JSON representation of the value in the entitlement pingback.
+
+The return body should contain the following payload:
+
+```
+{ found: boolean }
+```
+
+where found indicates whether an account associated with the given entitlement was found on the publisher side.
+
+If the account was not found, the user will be asked
+whether they want to create an account on the publisher side to associate with 
+the google subscription service. In the positive case, the user will then be redirected
+to the URL at `accountCreationRedirectUrl`.
+
+The page at `accountCreationRedirectUrl` is expected to implement the 
+[deferred account creation flow](https://github.com/subscriptions-project/swg-js/blob/master/docs/deferred-account-flow.md)
+on their side to complete the association. Because the confirmation was already given on the AMP
+side, the page can skip requesting the user pemission again.
 
 ## Actions
 
