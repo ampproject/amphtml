@@ -135,8 +135,8 @@
     "page_params": "<ignore for test>",
     "client_params": "<ignore for test>",
     "event_params": "<ignore for test>",
-    "audio-play": "https://!regionID-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&&ut=_timestamp_&pr=1234player&rn=1&c=!contentID&vt=1&ty=PL&sn=1",
-    "audio-stop": "https://!regionID-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&ut=_timestamp_&pr=1234player&rn=1&c=!contentID&vt=1&ty=ST&sn=1"
+    "audio-play": "https://!regionID-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=PL&sn=_counter(play__page_view_id_!streamID)_",
+    "audio-stop": "https://!regionID-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=ST&sn=_counter(play__page_view_id_!streamID)_"
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
