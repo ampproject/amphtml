@@ -16,73 +16,84 @@
   <h2>JWPlayer AMP Examples</h2>
 
   <h3>Responsive</h3>
-
   <amp-jwplayer
-  data-media-id="BZ6tc0gy"
-  data-player-id="uoIbMPm3"
-      layout="responsive" width="16" height="9">
+    data-media-id="BZ6tc0gy"
+    data-player-id="uoIbMPm3"
+    layout="responsive" 
+    width="16" 
+    height="9"
+  >
   </amp-jwplayer>
 
   <h3>Non-responsive, with a playlist</h3>
-
   <amp-jwplayer
-      data-playlist-id="482jsTAr"
+    data-playlist-id="482jsTAr"
     data-player-id="uoIbMPm3"
-    width="480" height="270">
+    width="480" 
+    height="270"
+  >
   </amp-jwplayer>
 
   <h3>Docking</h3>
-
   <amp-jwplayer
-      data-media-id="CtaIzmFs"
-      data-player-id="BjcwyK37"
-      dock
-      width="480" height="270"
-      >
+    data-media-id="CtaIzmFs"
+    data-player-id="BjcwyK37"
+    dock
+    width="480" 
+    height="270"
+  >
   </amp-jwplayer>
-  <h3>Responsive contextual</h3>
 
-    <amp-jwplayer
-      data-player-id="BjcwyK37"
-        data-media-id="CtaIzmFs"
-        data-content-search="__CONTEXTUAL__"
-        data-content-backfill=true
-        data-content-contextual=true
-        data-content-recency="9D"
-        layout="responsive" width="480" height="270">
-    </amp-jwplayer>
+  <h3>Responsive contextual</h3>
+  <amp-jwplayer
+    data-player-id="BjcwyK37"
+    data-media-id="CtaIzmFs"
+    data-content-search="__CONTEXTUAL__"
+    data-content-backfill=true
+    data-content-recency="9D"
+    layout="responsive" 
+    width="16" 
+    height="9"
+  >
+  </amp-jwplayer>
 
   <h3>Non-Responsive, with a VAST Ad</h3>
-
-    <amp-jwplayer
-      data-media-id="NsdRZqng"
-      data-player-id="WmASC9FK"
-      width="480" height="270">
-    </amp-jwplayer>
+  <amp-jwplayer
+    data-media-id="NsdRZqng"
+    data-player-id="WmASC9FK"
+    width="480" 
+    height="270"
+  >
+  </amp-jwplayer>
 
   <h3>Non-Responsive, with an IMA Ad</h3>
-
-    <amp-jwplayer
-      data-media-id="3h8NHAIV"
-      data-player-id="n6vw37Z7"
-      width="480" height="270">
-    </amp-jwplayer>
-
-
-   <h3>Actions</h3>
-   <amp-jwplayer
-   id="myVideo"
-      data-media-id="CtaIzmFs"
-      data-player-id="BjcwyK37"
-      width="300px" height="50vh"
-      controls=""
-      layout="fixed"
-      >
+  <amp-jwplayer
+    data-media-id="3h8NHAIV"
+    data-player-id="n6vw37Z7"
+    width="480" 
+    height="270"
+  >
   </amp-jwplayer>
+
+
+  <h3>External Controls</h3>
+  <amp-jwplayer
+    id="myVideo"
+    data-media-id="CtaIzmFs"
+    data-player-id="BjcwyK37"
+    width="480" height="270"
+    controls=""
+  >
+  </amp-jwplayer>
+  <br />
   <button on="tap:myVideo.play">Play</button>
   <button on="tap:myVideo.pause">Pause</button>
   <button on="tap:myVideo.mute">Mute</button>
   <button on="tap:myVideo.unmute">Unmute</button>
   <button on="tap:myVideo.fullscreen">FS</button>
+  <br />
+  <br />
+  <br />
+  <br />
 </body>
 </html>
