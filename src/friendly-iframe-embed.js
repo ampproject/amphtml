@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from './chunk';
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
@@ -109,10 +108,9 @@ function getDelayPromiseProducer(win) {
     getExperimentBranch(win, FIE_INIT_CHUNKING_EXP.id) ===
       FIE_INIT_CHUNKING_EXP.experiment
   ) {
-    const ampdoc = getAmpdoc(win.document);
     return (val) =>
       new Promise((resolve) => {
-        chunk(ampdoc, () => resolve(val), ChunkPriority.HIGH);
+        setTimeout(() => resolve(val), 1);
       });
   } else {
     return (val) => Promise.resolve(val);
