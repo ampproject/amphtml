@@ -75,7 +75,9 @@ function renderSingle(doc, elementDef) {
     : doc.createElement(elementDef.tag);
 
   if (elementDef.localizedStringId) {
-    const localizationService = Services.localizationForDoc(doc.body);
+    const localizationService = Services.localizationForDoc(
+      devAssert(doc.body)
+    );
 
     devAssert(localizationService, 'Could not retrieve LocalizationService.');
     el.textContent = localizationService.getLocalizedString(

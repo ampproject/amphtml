@@ -83,7 +83,9 @@ function renderSingle(doc, elementDef) {
   const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
   const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
   if (hasLocalizedTextContent || hasLocalizedLabel) {
-    const localizationService = Services.localizationForDoc(doc.body);
+    const localizationService = Services.localizationForDoc(
+      devAssert(doc.body)
+    );
     devAssert(localizationService, 'Could not retrieve LocalizationService.');
 
     if (hasLocalizedTextContent) {

@@ -21,7 +21,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story hint layer', {}, (env) => {
+describes.fakeWin('amp-story hint layer', {amp: true}, (env) => {
   let host;
   let win;
   let ampStoryHint;
@@ -31,7 +31,7 @@ describes.fakeWin('amp-story hint layer', {}, (env) => {
 
     const localizationService = Services.localizationForDoc(win.document.body);
     env.sandbox
-      .stub(Services, 'localizationServiceForDoc')
+      .stub(Services, 'localizationForDoc')
       .returns(localizationService);
 
     const storeService = new AmpStoryStoreService(win);
@@ -58,7 +58,6 @@ describes.fakeWin('amp-story hint layer', {}, (env) => {
     const hideAfterTimeoutStub = env.sandbox
       .stub(ampStoryHint, 'hideAfterTimeout')
       .callsFake(NOOP);
-
     ampStoryHint.showNavigationOverlay();
 
     const hintContainer = getHintContainerFromHost(host);

@@ -58,6 +58,13 @@ describes.realWin(
         };
       });
 
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;

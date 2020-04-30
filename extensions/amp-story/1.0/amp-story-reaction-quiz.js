@@ -17,6 +17,7 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';

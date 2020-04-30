@@ -363,22 +363,6 @@ exports.rules = [
       // For action macros.
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
-      // For localization.
-      'extensions/amp-story/0.1/amp-story.js->src/service/localization.js',
-      'extensions/amp-story/0.1/amp-story-info-dialog.js->src/service/localization.js',
-      'extensions/amp-story/0.1/amp-story-share.js->src/service/localization.js',
-      'extensions/amp-story/0.1/simple-template.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story.js->src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-embedded-component.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-info-dialog.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-viewport-warning-layer.js->src/service/localization.js',
-      'extensions/amp-story/1.0/simple-template.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-reaction-quiz.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-share.js->src/service/localization.js',
-      'extensions/amp-story/1.0/bookend/amp-story-bookend.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story-page.js->src/service/localization.js',
-      'extensions/amp-story-education/0.1/amp-story-education.js->src/service/localization.js',
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-location.js',

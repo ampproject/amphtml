@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {Layout} from '../../../src/layout';
-import {LocalizationService} from '../../../src/service/localization';
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -28,7 +27,6 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {getState} from '../../../src/history';
-import {registerServiceBuilderForDoc} from '../../../src/service';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 

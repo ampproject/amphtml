@@ -18,9 +18,7 @@
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
-import {Services} from '../services';
 import {closest} from '../dom';
-import {registerServiceBuilderForDoc} from '../service';
 
 /**
  * Language code used if there is no language code specified by the document.

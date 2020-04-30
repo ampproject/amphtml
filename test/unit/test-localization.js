@@ -21,11 +21,11 @@ import {
 import {Services} from '../../src/services';
 import {getLanguageCodesFromString} from '../../src/service/localization';
 
-describes.fakeWin('localization', {}, (env) => {
-  let localizationService;
+describes.fakeWin('localization', {amp: true}, (env) => {
+  let win;
 
   beforeEach(() => {
-    localizationService = Services.localizationForDoc();
+    win = env.win;
   });
 
   describe('localized string IDs', () => {
@@ -65,6 +65,9 @@ describes.fakeWin('localization', {}, (env) => {
 
   describe('localization service', () => {
     it('should get string text', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
@@ -78,6 +81,9 @@ describes.fakeWin('localization', {}, (env) => {
 
     it('should handle registration of uppercase locales', () => {
       env.win.document.documentElement.setAttribute('lang', 'zh-CN');
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('zh-CN', {
         '123': {
           string: '买票',
@@ -88,6 +94,9 @@ describes.fakeWin('localization', {}, (env) => {
     });
 
     it('should utilize fallback if string is missing', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           fallback: 'test fallback content',
@@ -100,6 +109,9 @@ describes.fakeWin('localization', {}, (env) => {
     });
 
     it('should not utilize fallback if string is present', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',

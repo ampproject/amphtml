@@ -121,7 +121,7 @@ describes.realWin(
         win.document.body
       );
       env.sandbox
-        .stub(Services, 'localizationServiceForDoc')
+        .stub(Services, 'localizationForDoc')
         .returns(localizationService);
 
       const viewer = Services.viewerForDoc(env.ampdoc);
