@@ -119,7 +119,6 @@ class AmpSelector extends PreactBaseElement {
         isExpectedMutation = false;
         return;
       }
-      console.log('rebuild');
       this.mutateProps(getOptionState());
     };
 
