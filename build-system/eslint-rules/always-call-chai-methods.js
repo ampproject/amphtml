@@ -164,8 +164,8 @@ module.exports = {
         context.report({
           node,
           message: [
-            `Chai method assertion "${method}" must be called!`,
-            `Do \`expect(foo).to.${method}()\` instead of \`expect(foo).to.${method}\``,
+            `Chai assertion method "${method}" must be called!`,
+            `Do \`expect(foo).to.${method}();\` instead of \`expect(foo).to.${method};\``,
             `(Confusingly, Chai doesn't invoke every assertion as a property getter)`,
           ].join('\n\t'),
 
