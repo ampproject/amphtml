@@ -101,6 +101,13 @@ jobs:
         - unbuffer node build-system/pr-check/e2e-tests.js
       env:
         - CACHE_NAME=E2EJOB
+      # TODO: move this to experiment stage in master
+    - stage: test
+      name: 'Performance Tests'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js
+      env:
+        - CACHE_NAME=PERFORMANCEJOB
     - stage: experiment
       name: 'Experiment A Tests'
       script:
