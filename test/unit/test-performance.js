@@ -1351,4 +1351,33 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       ]);
     });
   });
+
+  describe('inabox environment', () => {
+    let PerformanceObserverConstructorStub;
+
+    beforeEach(() => {
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+    });
+
+    it('disables many observers', () => {
+      // Disable creation of paint observer.
+      env.win.PerformancePaintTiming = null;
+
+      PerformanceObserverConstructorStub.supportedEntryTypes = [
+        'navigation',
+        'largest-contentful-paint',
+        'first-input',
+        'layout-shift',
+      ];
+      installPerformanceService(env.win);
+      const mode = getMode(env.win);
+      mode.runtime = 'inabox';
+      Services.performanceFor(env.win);
+      // Each supported entryType currently leads to creation of new observer.
+      expect(PerformanceObserverConstructorStub).not.to.be.called;
+    });
+  });
 });

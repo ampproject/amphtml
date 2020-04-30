@@ -117,8 +117,14 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
+    // TODO(ccordry): there is a lot of other unnecessary work happening in
+    // this class for inabox case, but will require a larger refactor.
+    const isInabox = getMode(this.win).runtime === 'inabox';
+
     const supportedEntryTypes =
-      (this.win.PerformanceObserver &&
+      // Turn off most performance metrics for inabox as there is no viewer.
+      (!isInabox &&
+        this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
       [];
     /**
