@@ -16,11 +16,6 @@
 
 import {validateData, validateSrcPrefix, writeScript} from '../3p/3p';
 
-// Valid adform ad source hosts
-const hosts = {
-    core: 'https://core.iprom.net'
-};
-
 /**
  * @param {!Window} global
  * @param {!Object} data
