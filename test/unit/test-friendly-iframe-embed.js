@@ -798,36 +798,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       expect(polls).to.have.length(0);
     });
 
-    it('should not poll if body is already ready', () => {
-      contentBody.firstChild = {};
-      contentDocument.body = contentBody;
-      contentWindow.document = contentDocument;
-      iframe.contentWindow = contentWindow;
-      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
-        url: 'https://acme.org/url1',
-        html: '<body></body>',
-      });
-      expect(polls).to.have.length(0);
-      let ready = false;
-      embedPromise.then(() => {
-        ready = true;
-      });
-      return Promise.race([
-        Promise.resolve()
-          .then()
-          .then()
-          .then()
-          .then()
-          .then()
-          .then()
-          .then()
-          .then(),
-        embedPromise,
-      ]).then(() => {
-        expect(ready).to.be.true;
-      });
-    });
-
     it('should poll until ready', () => {
       iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
