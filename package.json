@@ -179,7 +179,7 @@
     "sourcemap-codec": "1.4.8",
     "tcp-port-used": "1.0.1",
     "tempy": "0.5.0",
-    "terser": "4.6.12",
+    "terser": "4.6.13",
     "text-table": "0.2.0",
     "through2": "3.0.1",
     "topological-sort": "0.3.0",
