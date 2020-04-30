@@ -1099,7 +1099,7 @@ describes.sandboxed('DOM', {}, (env) => {
       const focusSpy = env.sandbox.spy(element, 'focus');
       dom.tryFocus(element);
       expect(focusSpy).to.have.been.called;
-      expect(focusSpy).to.not.throw;
+      expect(focusSpy).to.not.throw();
     });
   });
 

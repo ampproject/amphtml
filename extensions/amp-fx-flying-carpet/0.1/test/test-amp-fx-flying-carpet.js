@@ -166,7 +166,7 @@ describes.realWin(
           expect(ref.error.message).to.have.string(
             'elements must be positioned after the 75% of first viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.not.display();
         }
       );
     });
@@ -188,7 +188,7 @@ describes.realWin(
           expect(ref.error.message).to.have.string(
             'elements must be positioned before the last viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.not.display();
         }
       );
     });
