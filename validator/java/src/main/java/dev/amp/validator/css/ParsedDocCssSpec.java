@@ -1,6 +1,7 @@
 package dev.amp.validator.css;
 
 import com.google.protobuf.ProtocolStringList;
+import dev.amp.validator.ParsedUrlSpec;
 import dev.amp.validator.ValidatorProtos;
 
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ParsedDocCssSpec {
-
   /**
    * constructor
    *
@@ -32,6 +32,8 @@ public class ParsedDocCssSpec {
       if (!declaration.hasName()) continue;
       this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
     }
+
+    // TODO
     // Expand the list of declarations tracked by this spec by merging in any
     // declarations mentioned in declaration_lists referenced by this spec. This
     // mechanism reduces redundancy in the lists themselves, making rules more
@@ -60,6 +62,14 @@ public class ParsedDocCssSpec {
 //    }
   }
 
+  /**
+   * getter for cssDeclarationByName
+   * @return this cssDeclarationByName
+   */
+  public Map<String, ValidatorProtos.CssDeclaration> getCssDeclarationByName() {
+    return this.cssDeclarationByName;
+  }
+
   public ValidatorProtos.DocCssSpec getSpec() {
     return spec;
   }
@@ -78,6 +88,23 @@ public class ParsedDocCssSpec {
     return this.spec.getDisabledByList();
   }
 
+  // TODO where is this set
+  /**
+   * return this doc css fontUrlSpec
+   * @return this doc css fontUrlSpec
+   */
+  public ParsedUrlSpec getFontUrlSpec() {
+    return this.fontUrlSpec;
+  }
+
+  /**
+   *
+   * @return this doc css imageUrlSpec
+   */
+  public ParsedUrlSpec getImageUrlSpec() {
+    return this.imageUrlSpec;
+  }
+
   /**
    *
    */
@@ -92,4 +119,7 @@ public class ParsedDocCssSpec {
    *
    */
   private final HashMap<String, ValidatorProtos.CssDeclaration> cssDeclarationSvgByName;
+
+  private ParsedUrlSpec imageUrlSpec;
+  private ParsedUrlSpec fontUrlSpec;
 }

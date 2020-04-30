@@ -114,7 +114,14 @@ public class Declaration extends Rule {
         return name;
     }
 
-    /**
+  /**
+   * getter for important value
+   */
+  public boolean getImportant() {
+    return this.important;
+  }
+
+  /**
      * @param important the target value of important
      * Setter for importance of declaration
      */
@@ -122,7 +129,10 @@ public class Declaration extends Rule {
         this.important = important;
     }
 
-    private boolean important;
+  /**
+   * if this is an "important" element
+   */
+  private boolean important;
 
     @Nonnull
     private final String name;

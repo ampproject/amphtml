@@ -35,6 +35,7 @@ import dev.amp.validator.css.CssParsingConfig;
 
 import dev.amp.validator.utils.CssSpecUtils;
 import dev.amp.validator.utils.TagSpecUtils;
+import dev.amp.validator.visitor.InvalidDeclVisitor;
 import dev.amp.validator.visitor.InvalidRuleVisitor;
 import org.xml.sax.Locator;
 
@@ -47,8 +48,7 @@ import java.util.regex.Pattern;
 import static dev.amp.validator.css.CssTokenUtil.copyPosTo;
 import static dev.amp.validator.utils.AttributeSpecUtils.validateUrlAndProtocol;
 import static dev.amp.validator.utils.ByteUtils.byteLength;
-import static dev.amp.validator.utils.CssSpecUtils.stripMinMax;
-import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
+import static dev.amp.validator.utils.CssSpecUtils.*;
 import static dev.amp.validator.utils.TagSpecUtils.getTagSpecName;
 import static dev.amp.validator.utils.TagSpecUtils.getTagSpecUrl;
 import static dev.amp.validator.utils.UrlUtils.isDataUrl;
@@ -230,7 +230,6 @@ public class CdataMatcher {
                 cssErrors);
 
         final ParsedDocCssSpec maybeDocCssSpec = context.matchingDocCssSpec();
-        int urlBytes = 0;
 
         // We extract the urls from the stylesheet. As a side-effect, this can
         // generate errors for url(…) functions with invalid parameters.
@@ -290,35 +289,75 @@ public class CdataMatcher {
       // If `!important` is not allowed, record instances as errors.
       if (!cssSpec.getAllowImportant()) {
         final List<Declaration> important = new ArrayList<>();
-        // TODO extractImportantDeclarations(stylesheet, important);
+        extractImportantDeclarations(stylesheet, important);
         for (final Declaration decl : important) {
+          List<String> params = new ArrayList<>();
+          params.add(getTagSpecName(this.getTagSpec()));
+          params.add("CSS !important");
           context.addError(
             ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
-            new LineCol(decl.important_line, decl.important_col),
-            /* params */
-            [getTagSpecName(this.tagSpec_), 'CSS !important'],
-          getTagSpecUrl(this.tagSpec_), validationResult);
+            context.getLineCol().getLineNumber() + decl.getLine(),
+            context.getLineCol().getColumnNumber() + decl.getCol(),
+            params,
+            getTagSpecUrl(this.getTagSpec()),
+            validationResult);
         }
+      }
 
-        final ParsedUrlSpec parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.getFontUrlSpec());
-        final ParsedUrlSpec parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.getImageUrlSpec());
-        for (final ParsedCssUrl url : parsedUrls) {
-            // Some CSS specs can choose to not count URLs against the byte limit,
-            // but data URLs are always counted (or in other words, they aren't
-            // considered URLs).
-            if (!isDataUrl(url.getUtf8Url())) {
-                urlBytes += byteLength(url.getUtf8Url());
-            }
-            final UrlErrorInStylesheetAdapter adapter = new UrlErrorInStylesheetAdapter(url.getLine(), url.getCol());
-            validateUrlAndProtocol(
-                    ((url.getAtRuleScope().equals("font-face")) ? parsedFontUrlSpec : parsedImageUrlSpec),
-                    adapter, context, url.getUtf8Url(), this.getTagSpec(), validationResult);
+      int urlBytes = 0;
+
+      for (final ParsedCssUrl url : parsedUrls) {
+        // Some CSS specs can choose to not count URLs against the byte limit,
+        // but data URLs are always counted (or in other words, they aren't
+        // considered URLs).
+        if (!isDataUrl(url.getUtf8Url())) {
+          urlBytes += byteLength(url.getUtf8Url());
         }
+        if (maybeDocCssSpec != null) {
+          final UrlErrorInStylesheetAdapter adapter = new UrlErrorInStylesheetAdapter(url.getLine(), url.getCol());
+          validateUrlAndProtocol(
+            (url.getAtRuleScope().equals("font-face") ?
+              maybeDocCssSpec.getFontUrlSpec() :
+              maybeDocCssSpec.getImageUrlSpec()),
+            adapter, context, url.getUtf8Url(), this.getTagSpec(), validationResult);
+        }
+      }
 
-        final InvalidRuleVisitor visitor = new InvalidRuleVisitor(
-                this.getTagSpec(), cssSpec, context, validationResult);
-        stylesheet.accept(visitor);
-        return urlBytes;
+
+//      final ParsedUrlSpec parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.getFontUrlSpec());
+//        final ParsedUrlSpec parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.getImageUrlSpec());
+//        for (final ParsedCssUrl url : parsedUrls) {
+//            // Some CSS specs can choose to not count URLs against the byte limit,
+//            // but data URLs are always counted (or in other words, they aren't
+//            // considered URLs).
+//            if (!isDataUrl(url.getUtf8Url())) {
+//                urlBytes += byteLength(url.getUtf8Url());
+//            }
+//            final UrlErrorInStylesheetAdapter adapter = new UrlErrorInStylesheetAdapter(url.getLine(), url.getCol());
+//            validateUrlAndProtocol(
+//                    ((url.getAtRuleScope().equals("font-face")) ? parsedFontUrlSpec : parsedImageUrlSpec),
+//                    adapter, context, url.getUtf8Url(), this.getTagSpec(), validationResult);
+//        }
+//
+//        final InvalidRuleVisitor visitor = new InvalidRuleVisitor(
+//                this.getTagSpec(), cssSpec, context, validationResult);
+//        stylesheet.accept(visitor);
+//        return urlBytes;
+
+      // Validate the allowed CSS AT rules (eg: `@media`)
+      final InvalidRuleVisitor invalidRuleVisitor = new InvalidRuleVisitor(
+        this.getTagSpec(), cssSpec, context, validationResult);
+      stylesheet.accept(invalidRuleVisitor);
+
+      // Validate the allowed CSS declarations (eg: `background-color`)
+      if (maybeDocCssSpec != null &&
+        !maybeDocCssSpec.getSpec().getAllowAllDeclarationInStyleTag()) {
+        final InvalidDeclVisitor invalidDeclVisitor =
+          new InvalidDeclVisitor(maybeDocCssSpec, context, validationResult);
+        stylesheet.accept(invalidDeclVisitor);
+      }
+
+      return urlBytes;
     }
 
     /**

@@ -37,10 +37,7 @@ import dev.amp.validator.css.ParsedCssUrl;
 import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.css.Stylesheet;
 import dev.amp.validator.css.TokenType;
-import dev.amp.validator.visitor.Amp4AdsVisitor;
-import dev.amp.validator.visitor.KeyframesVisitor;
-import dev.amp.validator.visitor.RuleVisitor;
-import dev.amp.validator.visitor.UrlFunctionVisitor;
+import dev.amp.validator.visitor.*;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -117,6 +114,42 @@ public final class CssSpecUtils {
             parsedUrls.subList(parsedUrlsOldLength, parsedUrls.size()).clear();
         }
     }
+
+  /**
+   * Same as the stylesheet variant above, but operates on a single declaration at
+   * a time. Usedful when operating on parsed style attributes.
+   *
+   * @param declaration the decl to parse
+   * @param parsedUrls  collection of urls
+   * @param errors      reference
+   * @throws CssValidationException CssValidationException
+   */
+  public void extractUrlsFromDeclaration(@Nonnull final Declaration declaration, @Nonnull final List<ParsedCssUrl> parsedUrls,
+                                         @Nonnull final List<ErrorToken> errors) throws CssValidationException {
+    final int parsedUrlsOldLength = parsedUrls.size();
+    final int errorsOldLength = errors.size();
+    final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedUrls, errors);
+    declaration.accept(visitor);
+    // If anything went wrong, delete the urls we've already emitted.
+    if (errorsOldLength != errors.size()) {
+      parsedUrls.subList(parsedUrlsOldLength, parsedUrls.size()).clear();
+    }
+  }
+
+  /**
+   * Extracts the declarations marked `!important` within within the provided
+   * stylesheet, emitting them into `important`.
+   *
+   * @param stylesheet to walk through
+   * @param important  list to populate
+   */
+  public static void extractImportantDeclarations(@Nonnull final Stylesheet stylesheet,
+                                           @Nonnull final List<Declaration> important) throws CssValidationException {
+    final ImportantPropertyVisitor visitor = new ImportantPropertyVisitor(important);
+    stylesheet.accept(visitor);
+  }
+
+  ;
 
     /**
      * Strips vendor prefixes from identifiers, e.g. property names or names
@@ -197,6 +230,8 @@ public final class CssSpecUtils {
         final RuleVisitor visitor = new Amp4AdsVisitor(errors);
         styleSheet.accept(visitor);
     }
+
+
 
     /**
      * Returns true if the given Declaration is considered valid.
@@ -323,6 +358,8 @@ public final class CssSpecUtils {
         return tokenIdx + 1;
     }
 
+
+
     /**
      * Parse inline style content into Declaration objects.
      *
@@ -340,7 +377,7 @@ public final class CssSpecUtils {
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);
     }
 
-
+// TODO
 //  /**
 //   * Helper method for ValidateAttributes.
 //   *
