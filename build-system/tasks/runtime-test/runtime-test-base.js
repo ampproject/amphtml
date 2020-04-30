@@ -136,7 +136,7 @@ function getFiles(testType) {
         return files.concat(testConfig.unitTestOnSaucePaths);
       }
       if (argv.local_changes) {
-        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
+        return files.concat(unitTestsToRun());
       }
       return files.concat(testConfig.unitTestPaths);
 
