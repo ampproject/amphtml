@@ -36,7 +36,7 @@ const REMOVABLE = {
 };
 
 module.exports = function (babel) {
-  const {types: t, template} = babel;
+  const {types: t} = babel;
 
   /**
    * @param {!NodePath} path
@@ -76,7 +76,7 @@ module.exports = function (babel) {
       if (evaluation.confident) {
         if (type) {
           if (typeof evaluation.value !== type) {
-            path.replaceWith(template.ast`
+            path.replaceWith(babel.template.ast`
               (function() {
                 throw new Error('static type assertion failure');
               }());
@@ -84,7 +84,7 @@ module.exports = function (babel) {
             return;
           }
         } else if (!evaluation.value) {
-          path.replaceWith(template.ast`
+          path.replaceWith(babel.template.ast`
             (function() {
               throw new Error('static assertion failure');
             }());
