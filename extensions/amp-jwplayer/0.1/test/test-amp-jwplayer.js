@@ -290,10 +290,8 @@ describes.realWin(
           const spy = env.sandbox.spy(impl.element, 'dispatchCustomEvent');
           mockMessage('mute', {mute: true});
           expect(spy).calledWith(VideoEvents.MUTED);
-          expect(impl.muted_).equals(true);
           mockMessage('mute', {mute: false});
           expect(spy).calledWith(VideoEvents.UNMUTED);
-          expect(impl.muted_).equals(false);
         });
 
         it('updates played ranges from state', () => {

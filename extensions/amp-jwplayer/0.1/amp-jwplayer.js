@@ -94,9 +94,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {Object} */
     this.playlistItem_ = null;
 
-    /** @private {boolean} */
-    this.muted_ = false;
-
     /** @private {number} */
     this.duration_ = 0;
 
@@ -374,8 +371,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     const {element} = this;
 
     this.playlistItem_ = {...detail.playlistItem};
-    this.muted_ = !!detail.muted;
     this.playerReadyResolver_(this.iframe_);
+
+    // Inform Video Manager that the video is pre-muted from persisted options.
+    if (detail.muted) {
+      element.dispatchCustomEvent(VideoEvents.MUTED);
+    }
+
     element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
@@ -433,7 +435,6 @@ class AmpJWPlayer extends AMP.BaseElement {
         case 'mute':
           const {mute} = detail;
           const {element} = this;
-          this.muted_ = mute;
           element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
           break;
         case 'playedRanges':
