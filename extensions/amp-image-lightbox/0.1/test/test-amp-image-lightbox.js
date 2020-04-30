@@ -261,12 +261,13 @@ describes.realWin(
         {'layout': 'nodisplay'}
       );
       env.win.document.body.appendChild(element);
-      const spy = env.sandbox.spy();
-      element.enqueAction = spy;
-      element.getDefaultActionAlias = env.sandbox.stub();
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
       await dom.whenUpgradedToCustomElement(element);
 
-      element.implementation_.buildLightbox_();
+      const impl = await element.getImpl();
+      impl.buildLightbox_();
+      env.sandbox.stub(impl, 'open_');
       action.execute(
         element,
         'open',
@@ -276,7 +277,7 @@ describes.realWin(
         'event',
         ActionTrust.HIGH
       );
-      expect(spy).to.be.calledWith(
+      expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
           actionEventType: '?',
           args: null,
@@ -288,6 +289,7 @@ describes.realWin(
           trust: ActionTrust.HIGH,
         })
       );
+      expect(impl.open_).to.be.calledOnce;
     });
   }
 );

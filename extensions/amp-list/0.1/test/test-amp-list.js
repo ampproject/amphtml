@@ -1286,9 +1286,8 @@ describes.realWin(
         }
       );
       env.win.document.body.appendChild(element);
-      const spy = env.sandbox.spy();
-      element.enqueAction = spy;
-      element.getDefaultActionAlias = env.sandbox.stub().returns({'items': []});
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
       env.sandbox.stub(element.implementation_, 'fetchList_');
 
@@ -1302,7 +1301,7 @@ describes.realWin(
           'event',
           ActionTrust.HIGH
         );
-        expect(spy).to.be.calledWith(
+        expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
             actionEventType: '?',
             args: null,

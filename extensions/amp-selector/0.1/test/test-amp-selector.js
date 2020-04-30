@@ -1459,12 +1459,13 @@ describes.realWin(
         {'layout': 'container'}
       );
       env.win.document.body.appendChild(element);
-      const spy = env.sandbox.spy();
-      element.enqueAction = spy;
-      element.getDefaultActionAlias = env.sandbox.stub().returns({'items': []});
-      await whenUpgradedToCustomElement(element);
+      env.sandbox.stub(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl();
+      env.sandbox.stub(impl, 'setSelection_');
 
-      ['clear', 'selectDown', 'selectUp', 'toggle'].forEach((method) => {
+      [('clear', 'selectDown', 'selectUp', 'toggle')].forEach((method) => {
         action.execute(
           element,
           method,
@@ -1474,7 +1475,7 @@ describes.realWin(
           'event',
           ActionTrust.HIGH
         );
-        expect(spy).to.be.calledWith(
+        expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
             actionEventType: '?',
             args: null,

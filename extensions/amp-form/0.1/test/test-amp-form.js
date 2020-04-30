@@ -2994,9 +2994,6 @@ describes.repeated(
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
           const element = getForm();
           document.body.appendChild(element);
-          const spy = env.sandbox.spy();
-          element.enqueAction = spy;
-          element.getDefaultActionAlias = env.sandbox.stub();
           const form = new AmpForm(element, 'test-id');
           const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
           action.execute(
