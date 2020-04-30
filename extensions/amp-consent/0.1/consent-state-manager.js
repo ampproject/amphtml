@@ -16,13 +16,13 @@
 
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_TYPE, // eslint-disable-line no-unused-vars
+  CONSENT_STRING_TYPE, // eslint-disable-line no-unused-vars
   ConsentInfoDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
   getConsentStateValue,
-  getConsentTypeValue,
+  getConsentStringTypeValue,
   getStoredConsentInfo,
   hasDirtyBit,
   isConsentInfoStoredValueSame,
@@ -95,18 +95,18 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {CONSENT_TYPE=} consentType
+   * @param {CONSENT_STRING_TYPE=} consentStringType
    */
-  updateConsentInstanceState(state, consentStr, consentType) {
+  updateConsentInstanceState(state, consentStr, consentStringType) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, consentType, false);
+    this.instance_.update(state, consentStr, consentStringType, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(
-        constructConsentInfo(state, consentStr, consentType)
+        constructConsentInfo(state, consentStr, consentStringType)
       );
     }
   }
@@ -297,7 +297,7 @@ export class ConsentInstance {
       this.update(
         info['consentState'],
         info['consentString'],
-        info['consentType'],
+        info['consentStringType'],
         true
       );
     });
@@ -307,10 +307,10 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {CONSENT_TYPE=} consentType
+   * @param {CONSENT_STRING_TYPE=} consentStringType
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, consentType, opt_systemUpdate) {
+  update(state, consentString, consentStringType, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
@@ -319,12 +319,12 @@ export class ConsentInstance {
       const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
       // If state is dismissed, use the old consent string.
-      const localConsentType =
-        this.localConsentInfo_ && this.localConsentInfo_['consentType'];
+      const localConsentStringType =
+        this.localConsentInfo_ && this.localConsentInfo_['consentStringType'];
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         localConsentStr,
-        localConsentType
+        localConsentStringType
       );
       return;
     }
@@ -336,7 +336,7 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
-        consentType,
+        consentStringType,
         true
       );
     } else {
@@ -345,14 +345,14 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
-        consentType
+        consentStringType
       );
     }
 
     const newConsentInfo = constructConsentInfo(
       calculatedState,
       consentString,
-      consentType,
+      consentStringType,
       this.hasDirtyBitNext_
     );
 
@@ -503,9 +503,9 @@ export class ConsentInstance {
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }
-      if (consentInfo['consentType']) {
-        request['consentType'] = getConsentTypeValue(
-          consentInfo['consentType']
+      if (consentInfo['consentStringType']) {
+        request['consentStringType'] = getConsentStringTypeValue(
+          consentInfo['consentStringType']
         );
       }
       const init = {

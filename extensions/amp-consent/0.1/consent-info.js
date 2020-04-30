@@ -23,14 +23,14 @@ import {isEnumValue, isObject} from '../../../src/types';
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
- * CONSENT_TYPE: Set when a consent type is used to store more metadata on the consent string.
+ * CONSENT_STRING_TYPE: Set when a consent type is used to store more metadata on the consent string.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
 export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
-  CONSENT_TYPE: 'ct',
+  CONSENT_STRING_TYPE: 'cst',
   IS_DIRTY: 'd',
 };
 
@@ -51,7 +51,7 @@ export const CONSENT_ITEM_STATE = {
 /**
  * @enum {number}
  */
-export const CONSENT_TYPE = {
+export const CONSENT_STRING_TYPE = {
   TCF_V1: 1,
   TCF_V2: 2,
   US_PRIVACY_STRING: 3,
@@ -61,7 +61,7 @@ export const CONSENT_TYPE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
- *  consentType: (CONSENT_TYPE|undefined),
+ *  consentStringType: (CONSENT_STRING_TYPE|undefined),
  *  isDirty: (boolean|undefined),
  * }}
  */
@@ -93,7 +93,7 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
-    value[STORAGE_KEY.CONSENT_TYPE],
+    value[STORAGE_KEY.CONSENT_STRING_TYPE],
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -155,8 +155,8 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.STRING] = consentInfo['consentString'];
   }
 
-  if (consentInfo['consentType']) {
-    obj[STORAGE_KEY.CONSENT_TYPE] = consentInfo['consentType'];
+  if (consentInfo['consentStringType']) {
+    obj[STORAGE_KEY.CONSENT_STRING_TYPE] = consentInfo['consentStringType'];
   }
 
   if (consentInfo['isDirty'] === true) {
@@ -203,7 +203,7 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
       calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
       (infoA['consentString'] || '') === (infoB['consentString'] || '');
-    const typeEqual = infoA['consentType'] === infoB['consentType'];
+    const typeEqual = infoA['consentStringType'] === infoB['consentStringType'];
     let isDirtyEqual;
     if (opt_isDirty) {
       isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
@@ -229,20 +229,20 @@ function getLegacyStoredConsentInfo(value) {
  * Construct the consentInfo object from values
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
- * @param {CONSENT_TYPE=} opt_consentType
+ * @param {CONSENT_STRING_TYPE=} opt_consentStringType
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
-  opt_consentType,
+  opt_consentStringType,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
-    'consentType': opt_consentType,
+    'consentStringType': opt_consentStringType,
     'isDirty': opt_isDirty,
   };
 }
@@ -278,17 +278,17 @@ export function convertEnumValueToState(value) {
 }
 
 /**
- * Helper function to convert response enum value to CONSENT_TYPE value
+ * Helper function to convert response enum value to CONSENT_STRING_TYPE value
  * @param {*} value
- * @return {?CONSENT_TYPE}
+ * @return {?CONSENT_STRING_TYPE}
  */
-export function convertEnumValueToConsentType(value) {
+export function convertEnumValueToConsentStringType(value) {
   if (value === 'tcf-v1') {
-    return CONSENT_TYPE.TCF_V1;
+    return CONSENT_STRING_TYPE.TCF_V1;
   } else if (value === 'tcf-v2') {
-    return CONSENT_TYPE.TCF_V2;
+    return CONSENT_STRING_TYPE.TCF_V2;
   } else if (value === 'us-privacy-string') {
-    return CONSENT_TYPE.US_PRIVACY_STRING;
+    return CONSENT_STRING_TYPE.US_PRIVACY_STRING;
   }
   return null;
 }
@@ -326,17 +326,17 @@ export function getConsentStateValue(enumState) {
 }
 
 /**
- * Convert the CONSENT_TYPE back to readable string
- * @param {!CONSENT_TYPE} enumType
+ * Convert the CONSENT_STRING_TYPE back to readable string
+ * @param {!CONSENT_STRING_TYPE} enumType
  * @return {string|undefined}
  */
-export function getConsentTypeValue(enumType) {
+export function getConsentStringTypeValue(enumType) {
   switch (enumType) {
-    case CONSENT_TYPE.TCF_V1:
+    case CONSENT_STRING_TYPE.TCF_V1:
       return 'tcf-v1';
-    case CONSENT_TYPE.TCF_V2:
+    case CONSENT_STRING_TYPE.TCF_V2:
       return 'tcf-v2';
-    case CONSENT_TYPE.US_PRIVACY_STRING:
+    case CONSENT_STRING_TYPE.US_PRIVACY_STRING:
       return 'us-privacy-string';
     default:
       return undefined;
@@ -347,16 +347,16 @@ export function getConsentTypeValue(enumType) {
  * Handle consent metadata by returning and object with
  * fields based off consentString.
  * @param {string|undefined} consentString
- * @param {string|undefined} consentType
+ * @param {string|undefined} consentStringType
  * @return {!Object}
  */
-export function getConsentMetadata(consentString, consentType) {
+export function getConsentMetadata(consentString, consentStringType) {
   const metadata = {};
   // TODO(micajuineho) treat gdprApplies the same way
   if (consentString) {
     metadata['consentString'] = consentString;
-    metadata['consentType'] =
-      convertEnumValueToConsentType(consentType) || undefined;
+    metadata['consentStringType'] =
+      convertEnumValueToConsentStringType(consentStringType) || undefined;
   }
   return metadata;
 }

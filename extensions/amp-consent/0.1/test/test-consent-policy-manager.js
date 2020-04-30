@@ -17,9 +17,9 @@
 import * as lolex from 'lolex';
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_TYPE,
+  CONSENT_STRING_TYPE,
   constructConsentInfo,
-  getConsentTypeValue,
+  getConsentStringTypeValue,
 } from '../consent-info';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
@@ -88,7 +88,7 @@ describes.realWin(
         consentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
-          CONSENT_TYPE.TCF_V1
+          CONSENT_STRING_TYPE.TCF_V1
         );
         manager.setLegacyConsentInstanceId('ABC');
       });
@@ -98,8 +98,8 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
-        expect(manager.consentType_).to.equal(
-          getConsentTypeValue(CONSENT_TYPE.TCF_V1)
+        expect(manager.consentStringType_).to.equal(
+          getConsentStringTypeValue(CONSENT_STRING_TYPE.TCF_V1)
         );
       });
 

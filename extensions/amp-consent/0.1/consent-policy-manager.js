@@ -17,7 +17,7 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
-  getConsentTypeValue,
+  getConsentStringTypeValue,
 } from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
@@ -82,7 +82,7 @@ export class ConsentPolicyManager {
     this.consentString_ = null;
 
     /** @private {?string|undefined} */
-    this.consentType_ = null;
+    this.consentStringType_ = null;
   }
 
   /**
@@ -187,14 +187,16 @@ export class ConsentPolicyManager {
     const state = info['consentState'];
     const consentStr = info['consentString'];
     // Want to pass along the string to vendors not enum
-    const consentType = getConsentTypeValue(info['consentType']);
+    const consentStringType = getConsentStringTypeValue(
+      info['consentStringType']
+    );
     const {
       consentString_: prevConsentStr,
-      consentType_: prevConsentType,
+      consentStringType_: prevConsentStringType,
     } = this;
 
     this.consentString_ = consentStr;
-    this.consentType_ = consentType;
+    this.consentStringType_ = consentStringType;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -213,9 +215,9 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString and consentType doesn't change with dismiss action
+      // consentString and consentStringType doesn't change with dismiss action
       this.consentString_ = prevConsentStr;
-      this.consentType_ = prevConsentType;
+      this.consentStringType_ = prevConsentStringType;
     } else {
       this.consentState_ = state;
     }
@@ -315,9 +317,9 @@ export class ConsentPolicyManager {
    * @param {string} policyId
    * @return {!Promise<?string>}
    */
-  getConsentTypeInfo(policyId) {
+  getConsentStringTypeInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
-      return this.consentType_;
+      return this.consentStringType_;
     });
   }
 

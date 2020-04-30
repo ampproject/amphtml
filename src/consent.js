@@ -101,14 +101,16 @@ export function getConsentPolicyGdprApplies(element, policyId) {
  * @param {string} policyId
  * @return {!Promise<?string>}
  */
-export function getConsentTypeInfo(element, policyId) {
+export function getConsentStringTypeInfo(element, policyId) {
   // Return the stored consent type.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
-      return consentPolicy.getConsentTypeInfo(/** @type {string} */ (policyId));
+      return consentPolicy.getConsentStringTypeInfo(
+        /** @type {string} */ (policyId)
+      );
     }
   );
 }
