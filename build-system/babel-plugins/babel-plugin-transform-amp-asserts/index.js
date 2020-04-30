@@ -36,7 +36,7 @@ const REMOVABLE = {
 };
 
 module.exports = function (babel) {
-  const {types: t, template} = babel;
+  const {types: t} = babel;
 
   /**
    * @param {!NodePath} path
@@ -70,13 +70,14 @@ module.exports = function (babel) {
 
     const arg = argument.node;
     if (assertion) {
-      const evaluation = argument.evaluate();
-
       // If we can statically evaluate the value to a falsey expression
+      // TODO(jridgewell): enable this later.
+      /*
+      const evaluation = argument.evaluate();
       if (evaluation.confident) {
         if (type) {
           if (typeof evaluation.value !== type) {
-            path.replaceWith(template.ast`
+            path.replaceWith(babel.template.ast`
               (function() {
                 throw new Error('static type assertion failure');
               }());
@@ -84,7 +85,7 @@ module.exports = function (babel) {
             return;
           }
         } else if (!evaluation.value) {
-          path.replaceWith(template.ast`
+          path.replaceWith(babel.template.ast`
             (function() {
               throw new Error('static assertion failure');
             }());
@@ -92,6 +93,7 @@ module.exports = function (babel) {
           return;
         }
       }
+      */
     }
 
     if (type) {
@@ -103,7 +105,7 @@ module.exports = function (babel) {
       // Add a cast annotation to fix type.
       path.addComment('leading', `* @type {${type}} `);
     } else if (!assertion) {
-      path.replaceWith(t.parenthesizedExpression(arg));
+      path.remove();
     }
   }
 
@@ -113,7 +115,12 @@ module.exports = function (babel) {
         const callee = path.get('callee');
 
         if (callee.isIdentifier({name: 'devAssert'})) {
-          return eliminate(path, '', /* assertion */ true);
+          const args = path.get('arguments');
+          // Remove all but the first argument.
+          for (let i = args.length - 1; i >= 1; i--) {
+            args[i].remove();
+          }
+          return;
         }
 
         const isMemberAndCallExpression =
