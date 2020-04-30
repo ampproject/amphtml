@@ -35,33 +35,32 @@ const imgStyle = {
 export const listItems = () => {
   return (
     <Selector>
-      <Option style={imgStyle} option="1">
-        <img
-          style="width: 90px; height: 60px"
-          src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
-        />
-      </Option>
-      <Option style={imgStyle} option="2">
-        <img
-          style="width: 90px; height: 60px"
-          src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
-        />
-      </Option>
+      <Option
+        as="img"
+        style={{...imgStyle, width: '90px', height: '60px'}}
+        src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
+        option="1"
+        disabled
+      ></Option>
+      <Option
+        as="img"
+        style={{...imgStyle, width: '90px', height: '60px'}}
+        src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
+        option="2"
+      ></Option>
       <br></br>
-      <Option style={imgStyle} option="3">
-        <img
-          style="width: 90px; height: 60px"
-          option="3"
-          src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
-        />
-      </Option>
-      <Option style={imgStyle} option="4">
-        <img
-          style="width: 90px; height: 60px"
-          option="4"
-          src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
-        />
-      </Option>
+      <Option
+        as="img"
+        style={{...imgStyle, width: '90px', height: '60px'}}
+        src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
+        option="3"
+      ></Option>
+      <Option
+        as="img"
+        style={{...imgStyle, width: '90px', height: '60px'}}
+        src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
+        option="4"
+      ></Option>
     </Selector>
   );
 };
@@ -80,10 +79,20 @@ export const optionItems = () => {
 export const multiselect = () => {
   return (
     <Selector multiple>
-      <Option option="1">Option 1</Option>
-      <Option option="2">Option 2</Option>
-      <Option option="3">Option 3</Option>
-      <Option option="4">Option 4</Option>
+      <ul>
+        <Option as="li" option="1">
+          Option 1
+        </Option>
+        <Option as="li" option="2">
+          Option 2
+        </Option>
+        <Option as="li" option="3">
+          Option 3
+        </Option>
+        <Option as="li" option="4">
+          Option 4
+        </Option>
+      </ul>
     </Selector>
   );
 };
