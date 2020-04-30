@@ -24,6 +24,7 @@
 🐛 Bug fix
 🔥 P0 fix
 ✅ Tests
+❄️ Flaky tests
 🚀 Performance improvements
 🖍 CSS / Styling
 ♿ Accessibility

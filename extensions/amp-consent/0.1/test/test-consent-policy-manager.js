@@ -38,7 +38,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
     let consentManagerOnChangeSpy;
@@ -49,12 +49,12 @@ describes.realWin(
       consentManagerOnChangeSpy = env.sandbox.spy();
 
       resetServiceForTesting(win, 'consentStateManager');
-      registerServiceBuilder(win, 'consentStateManager', function() {
+      registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
           whenConsentReady: () => {
             return Promise.resolve();
           },
-          onConsentStateChange: handler => {
+          onConsentStateChange: (handler) => {
             consentManagerOnChangeSpy(handler);
             handler(consentInfo);
           },
@@ -64,6 +64,9 @@ describes.realWin(
                 'shared': 'test',
               })
             );
+          },
+          getConsentInstanceGdprApplies: () => {
+            return Promise.resolve(false);
           },
         });
       });
@@ -81,7 +84,7 @@ describes.realWin(
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('Initiate consent value', function*() {
+      it('Initiate consent value', function* () {
         yield macroTask();
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
@@ -89,19 +92,19 @@ describes.realWin(
       });
 
       describe('Register policy instance', () => {
-        it('Valid consent policy', function*() {
+        it('Valid consent policy', function* () {
           manager.registerConsentPolicyInstance('default', {
             'waitFor': {
               'ABC': undefined,
             },
           });
           yield macroTask();
-          return manager.whenPolicyResolved('default').then(status => {
+          return manager.whenPolicyResolved('default').then((status) => {
             expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
           });
         });
 
-        it('Invalid consent policy', function*() {
+        it('Invalid consent policy', function* () {
           consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED);
           expectAsyncConsoleError(
             '[consent-policy-manager] ' +
@@ -167,11 +170,13 @@ describes.realWin(
       describe('whenPolicyResolved/Unblock', () => {
         it('Invalid policy value', () => {
           expectAsyncConsoleError(/only predefined policies are supported/, 2);
-          return manager.whenPolicyResolved('invalid').then(state => {
+          return manager.whenPolicyResolved('invalid').then((state) => {
             expect(state).to.equal(CONSENT_POLICY_STATE.UNKNOWN);
-            return manager.whenPolicyUnblock('invalid').then(shouldUnblock => {
-              expect(shouldUnblock).to.be.false;
-            });
+            return manager
+              .whenPolicyUnblock('invalid')
+              .then((shouldUnblock) => {
+                expect(shouldUnblock).to.be.false;
+              });
           });
         });
 
@@ -214,28 +219,28 @@ describes.realWin(
           );
           const promises = [];
           promises.push(
-            manager.whenPolicyResolved('default').then(status => {
+            manager.whenPolicyResolved('default').then((status) => {
               expect(status).to.equal(
                 CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_accepted').then(status => {
+            manager.whenPolicyResolved('_till_accepted').then((status) => {
               expect(status).to.equal(
                 CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_responded').then(status => {
+            manager.whenPolicyResolved('_till_responded').then((status) => {
               expect(status).to.equal(
                 CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_auto_reject').then(status => {
+            manager.whenPolicyResolved('_auto_reject').then((status) => {
               expect(status).to.equal(
                 CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
               );
@@ -244,25 +249,25 @@ describes.realWin(
 
           // Unblock
           promises.push(
-            manager.whenPolicyUnblock('default').then(toUnblock => {
+            manager.whenPolicyUnblock('default').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_accepted').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_accepted').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_responded').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_responded').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_auto_reject').then(toUnblock => {
+            manager.whenPolicyUnblock('_auto_reject').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
@@ -275,47 +280,47 @@ describes.realWin(
           );
           const promises = [];
           promises.push(
-            manager.whenPolicyResolved('default').then(status => {
+            manager.whenPolicyResolved('default').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.UNKNOWN);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_accepted').then(status => {
+            manager.whenPolicyResolved('_till_accepted').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.UNKNOWN);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_responded').then(status => {
+            manager.whenPolicyResolved('_till_responded').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.UNKNOWN);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_auto_reject').then(status => {
+            manager.whenPolicyResolved('_auto_reject').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.UNKNOWN);
             })
           );
 
           // Unblock
           promises.push(
-            manager.whenPolicyUnblock('default').then(toUnblock => {
+            manager.whenPolicyUnblock('default').then((toUnblock) => {
               expect(toUnblock).to.be.false;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_accepted').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_accepted').then((toUnblock) => {
               expect(toUnblock).to.be.false;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_responded').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_responded').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_auto_reject').then(toUnblock => {
+            manager.whenPolicyUnblock('_auto_reject').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
@@ -328,22 +333,22 @@ describes.realWin(
           );
           const promises = [];
           promises.push(
-            manager.whenPolicyResolved('default').then(status => {
+            manager.whenPolicyResolved('default').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_accepted').then(status => {
+            manager.whenPolicyResolved('_till_accepted').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_till_responded').then(status => {
+            manager.whenPolicyResolved('_till_responded').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
             })
           );
           promises.push(
-            manager.whenPolicyResolved('_auto_reject').then(status => {
+            manager.whenPolicyResolved('_auto_reject').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
             })
           );
@@ -357,31 +362,31 @@ describes.realWin(
           );
           const promises = [];
           promises.push(
-            manager.whenPolicyResolved('default').then(status => {
+            manager.whenPolicyResolved('default').then((status) => {
               expect(status).to.equal(CONSENT_POLICY_STATE.INSUFFICIENT);
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('default').then(toUnblock => {
+            manager.whenPolicyUnblock('default').then((toUnblock) => {
               expect(toUnblock).to.be.false;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_accepted').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_accepted').then((toUnblock) => {
               expect(toUnblock).to.be.false;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_till_responded').then(toUnblock => {
+            manager.whenPolicyUnblock('_till_responded').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
 
           promises.push(
-            manager.whenPolicyUnblock('_auto_reject').then(toUnblock => {
+            manager.whenPolicyUnblock('_auto_reject').then((toUnblock) => {
               expect(toUnblock).to.be.true;
             })
           );
@@ -431,7 +436,7 @@ describes.realWin(
           clock = lolex.install({target: ampdoc.win});
         });
 
-        it('consent policy should resolve after timeout', function*() {
+        it('consent policy should resolve after timeout', function* () {
           instance = new ConsentPolicyInstance(config1);
           let ready = false;
           instance.getReadyPromise().then(() => (ready = true));
@@ -449,7 +454,7 @@ describes.realWin(
           );
         });
 
-        it('consent policy resolve before timeout', function*() {
+        it('consent policy resolve before timeout', function* () {
           instance = new ConsentPolicyInstance(config2);
           let ready = false;
           instance.getReadyPromise().then(() => (ready = true));
@@ -469,7 +474,7 @@ describes.realWin(
       });
 
       describe('getCurrentPolicyStatus', () => {
-        it('should return current policy state', function*() {
+        it('should return current policy state', function* () {
           instance = new ConsentPolicyInstance({
             'waitFor': {
               'ABC': [],
@@ -556,7 +561,7 @@ describes.realWin(
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('should return sharedData', function*() {
+      it('should return sharedData', function* () {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
@@ -568,6 +573,26 @@ describes.realWin(
         ).to.eventually.deep.equal({
           'shared': 'test',
         });
+      });
+    });
+
+    describe('getGdprApplies', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+      });
+
+      it('should return gdprApplies value', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        // Set above in getConsentInstanceGdprApplies mock
+        await expect(manager.getGdprApplies()).to.eventually.be.false;
       });
     });
   }

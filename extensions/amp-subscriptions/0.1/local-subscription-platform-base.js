@@ -115,7 +115,7 @@ export class LocalSubscriptionBasePlatform {
    * @protected
    */
   initializeListeners_() {
-    const handleClickOncePerEvent = e => {
+    const handleClickOncePerEvent = (e) => {
       if (e[CLICK_HANDLED_EVENT_PROPERTY]) {
         return;
       }
@@ -175,7 +175,7 @@ export class LocalSubscriptionBasePlatform {
     // Note all platforms are resolved at this stage
     // Get the factor states of each platform and
     // add them to the renderState object
-    this.createRenderState_(entitlement).then(renderState => {
+    this.createRenderState_(entitlement).then((renderState) => {
       this.renderer_.render(renderState);
     });
   }
@@ -190,7 +190,7 @@ export class LocalSubscriptionBasePlatform {
     const renderState = entitlement.json();
     return this.serviceAdapter_
       .getScoreFactorStates()
-      .then(scoresValues => {
+      .then((scoresValues) => {
         renderState['factors'] = scoresValues;
         return this.urlBuilder_.setAuthResponse(renderState);
       })
@@ -208,7 +208,7 @@ export class LocalSubscriptionBasePlatform {
   /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
-    return actionExecution.then(result => {
+    return actionExecution.then((result) => {
       if (result) {
         this.serviceAdapter_.resetPlatforms();
       }

@@ -19,12 +19,16 @@ const fs = require('fs');
 const path = require('path');
 
 const CDN_URL = 'https://cdn.ampproject.org/';
+const V0_PATH = '/dist/v0.js';
+const LOCAL_PATH_REGEXP = /dist\/(v0\/amp-[A-Za-z\-0-9\.]+.js)/;
+const ANALYTICS_VENDORS_PATH = '../../../dist/v0/analytics-vendors/';
 const CONTROL = 'control';
 const EXPERIMENT = 'experiment';
 const CACHE_PATH = path.join(__dirname, './cache');
 const CONTROL_CACHE_PATH = path.join(CACHE_PATH, `./${CONTROL}`);
 const EXPERIMENT_CACHE_PATH = path.join(CACHE_PATH, `./${EXPERIMENT}`);
 const RESULTS_PATH = path.join(__dirname, './results.json');
+const DEFAULT_EXTENSIONS = ['amp-auto-lightbox-0.1.js', 'amp-loader-0.1.js'];
 
 /**
  * Makes cache directories if they do not exist
@@ -36,7 +40,7 @@ function touchDirs() {
     path.join(CONTROL_CACHE_PATH, 'v0'),
     EXPERIMENT_CACHE_PATH,
     path.join(EXPERIMENT_CACHE_PATH, 'v0'),
-  ].forEach(dirPath => {
+  ].forEach((dirPath) => {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath);
     }
@@ -61,6 +65,25 @@ function urlToCachePath(url, version = CONTROL) {
 }
 
 /**
+ * @param {string} file
+ * @param {string} version Experiment or Control
+ * @return {string}
+ */
+function localFileToCachePath(file, version = EXPERIMENT) {
+  const directory =
+    version === CONTROL ? CONTROL_CACHE_PATH : EXPERIMENT_CACHE_PATH;
+  return path.join(directory, file);
+}
+
+/**
+ * @param {string} extension
+ * @return {string}
+ */
+function getLocalPathFromExtension(extension) {
+  return `v0/` + extension;
+}
+
+/**
  * Download a file to cache by url
  *
  * @param {string} url
@@ -71,8 +94,8 @@ function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
   return fetch(url)
-    .then(response => response.text())
-    .then(document => {
+    .then((response) => response.text())
+    .then((document) => {
       const filepath = urlToCachePath(url, version);
       fs.writeFileSync(filepath, document);
       return filepath.split(`performance/cache/${version}/`)[1];
@@ -80,16 +103,14 @@ function downloadToDisk(url, version = CONTROL) {
 }
 
 /**
- * Copy a script file from /dist to cache by url
+ * Copy a script file from /dist to cache from filePath
  *
- * @param {string} url
+ * @param {string} filePath
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function copyToCache(url, version = EXPERIMENT) {
+function copyToCache(filePath, version = EXPERIMENT) {
   touchDirs();
-
-  const filePath = url.split(CDN_URL)[1];
 
   const fromPath = path.join(__dirname, '../../../dist/', filePath);
   const destDir =
@@ -101,12 +122,44 @@ function copyToCache(url, version = EXPERIMENT) {
   return Promise.resolve(filePath);
 }
 
+/**
+ * Returns absolute path to vendor config.
+ *
+ * @param {string} vendor
+ * @return {!Promise<string>} Resolves with relative path to file
+ */
+function getLocalVendorConfig(vendor) {
+  const filepath = path.join(
+    __dirname,
+    ANALYTICS_VENDORS_PATH,
+    vendor + '.json'
+  );
+  return getFileFromAbsolutePath(filepath);
+}
+
+/**
+ * Return file contents from absolute filepath.
+ *
+ * @param {string} filePath
+ * @return {!Promise<string>} Resolves with relative path to file
+ */
+function getFileFromAbsolutePath(filePath) {
+  return Promise.resolve(fs.readFileSync(filePath));
+}
+
 module.exports = {
+  V0_PATH,
   CDN_URL,
   CONTROL,
+  DEFAULT_EXTENSIONS,
   EXPERIMENT,
+  LOCAL_PATH_REGEXP,
   RESULTS_PATH,
   copyToCache,
   downloadToDisk,
+  getFileFromAbsolutePath,
+  getLocalPathFromExtension,
+  getLocalVendorConfig,
+  localFileToCachePath,
   urlToCachePath,
 };

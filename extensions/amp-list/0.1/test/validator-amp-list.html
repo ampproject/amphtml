@@ -50,6 +50,10 @@
             [src]="foo.bar" [state]="baz.qux">
     <div></div>
   </amp-list>
+  <!-- Valid: amp-list with "amp-state" src -->
+  <amp-list width=10 height=10 src="amp-state:example"> 
+    <div></div>
+  </amp-list>
   <!-- Valid: amp-list with src and reset-on-refresh attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -154,6 +158,10 @@
   <!-- Invalid: width/height missing, so it's container layout
        which isn't supported. -->
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+    <div></div>
+  </amp-list>
+   <!-- Invalid: container layout -->
+  <amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
   <!-- Invalid amp-list with load-more attribute -->

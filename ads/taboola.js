@@ -41,7 +41,7 @@ export function taboola(global, data) {
   };
 
   // copy none blacklisted attribute to the 'params' map
-  Object.keys(data).forEach(k => {
+  Object.keys(data).forEach((k) => {
     if (blackList.indexOf(k) === -1) {
       params[k] = data[k];
     }
@@ -62,8 +62,8 @@ export function taboola(global, data) {
   ]);
 
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  global.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       if (c.intersectionRect.height) {
         global._taboola.push({
           visible: true,

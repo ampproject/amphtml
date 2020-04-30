@@ -15,25 +15,21 @@
  * limitations under the license.
  */
 
-goog.provide('parse_css.validateAmp4AdsCss');
+goog.module('amp.validator.validateAmp4AdsCss');
 
-goog.require('amp.validator.ValidationError');
-goog.require('parse_css.ErrorToken');
-goog.require('parse_css.RuleVisitor');
-goog.require('parse_css.Stylesheet');
-goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
-goog.require('parse_css.TokenType');
-goog.require('parse_css.stripVendorPrefix');
+const parse_css = goog.require('parse_css');
+const tokenize_css = goog.require('tokenize_css');
+const {ValidationError} = goog.require('amp.validator.protogenerated');
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.
- * @param {!parse_css.Token} positionToken
- * @param {!amp.validator.ValidationError.Code} code
+ * @param {!tokenize_css.Token} positionToken
+ * @param {!ValidationError.Code} code
  * @param {!Array<string>} params
- * @return {!parse_css.ErrorToken}
+ * @return {!tokenize_css.ErrorToken}
  */
 function createParseErrorTokenAt(positionToken, code, params) {
-  const token = new parse_css.ErrorToken(code, params);
+  const token = new tokenize_css.ErrorToken(code, params);
   positionToken.copyPosTo(token);
   return token;
 }
@@ -41,20 +37,20 @@ function createParseErrorTokenAt(positionToken, code, params) {
 /**
  * For a list of |tokens|, if the first non-whitespace token is an identifier,
  * returns its string value. Otherwise, returns the empty string.
- * @param {!Array<parse_css.Token>} tokens
+ * @param {!Array<!tokenize_css.Token>} tokens
  * @return {string}
  */
 function firstIdent(tokens) {
   if (tokens.length === 0) {
     return '';
   }
-  if (tokens[0].tokenType === parse_css.TokenType.IDENT) {
-    return /** @type {!parse_css.StringValuedToken} */ (tokens[0]).value;
+  if (tokens[0].tokenType === tokenize_css.TokenType.IDENT) {
+    return /** @type {!tokenize_css.StringValuedToken} */ (tokens[0]).value;
   }
   if (tokens.length >= 2 &&
-      (tokens[0].tokenType === parse_css.TokenType.WHITESPACE) &&
-      tokens[1].tokenType === parse_css.TokenType.IDENT) {
-    return /** @type {!parse_css.StringValuedToken} */ (tokens[1]).value;
+      (tokens[0].tokenType === tokenize_css.TokenType.WHITESPACE) &&
+      tokens[1].tokenType === tokenize_css.TokenType.IDENT) {
+    return /** @type {!tokenize_css.StringValuedToken} */ (tokens[1]).value;
   }
   return '';
 }
@@ -62,15 +58,15 @@ function firstIdent(tokens) {
 /** @private */
 class Amp4AdsVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!Array<parse_css.ErrorToken>} errors
+   * @param {!Array<!tokenize_css.ErrorToken>} errors
    */
   constructor(errors) {
     super();
 
-    /** @type {!Array<parse_css.ErrorToken>} */
+    /** @type {!Array<!tokenize_css.ErrorToken>} */
     this.errors = errors;
 
-    /** @type {parse_css.AtRule} */
+    /** @type {?parse_css.AtRule} */
     this.inKeyframes = null;
   }
 
@@ -83,8 +79,8 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     const ident = firstIdent(declaration.value);
     if (ident === 'fixed' || ident === 'sticky') {
       this.errors.push(createParseErrorTokenAt(
-          declaration, amp.validator.ValidationError.Code
-              .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+          declaration,
+          ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
           ['style', 'position', ident]));
     }
   }
@@ -102,10 +98,13 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
         if (transitionedPropertyStripped !== 'opacity' &&
             transitionedPropertyStripped !== 'transform') {
           this.errors.push(createParseErrorTokenAt(
-              decl, amp.validator.ValidationError.Code
+              decl,
+              ValidationError.Code
                   .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
               [
-                'style', 'transition', transitionedProperty,
+                'style',
+                'transition',
+                transitionedProperty,
                 '[\'opacity\', \'transform\']',
               ]));
         }
@@ -116,10 +115,12 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       if (this.inKeyframes !== null && name !== 'transform' &&
           name !== 'opacity' && name !== 'animation-timing-function') {
         this.errors.push(createParseErrorTokenAt(
-            decl, amp.validator.ValidationError.Code
-                .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
+            decl,
+            ValidationError.Code.CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
             [
-              'style', decl.name, this.inKeyframes.name,
+              'style',
+              decl.name,
+              this.inKeyframes.name,
               '[\'animation-timing-function\', \'opacity\', \'transform\']',
             ]));
       }
@@ -136,14 +137,17 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
   }
 
   /** @inheritDoc */
-  leaveAtRule(atRule) { this.inKeyframes = null; }
+  leaveAtRule(atRule) {
+    this.inKeyframes = null;
+  }
 }
 
 /**
  * @param {!parse_css.Stylesheet} styleSheet
- * @param {!Array<!parse_css.ErrorToken>} errors
+ * @param {!Array<!tokenize_css.ErrorToken>} errors
  */
-parse_css.validateAmp4AdsCss = function(styleSheet, errors) {
+const validateAmp4AdsCss = function(styleSheet, errors) {
   const visitor = new Amp4AdsVisitor(errors);
   styleSheet.accept(visitor);
 };
+exports.validateAmp4AdsCss = validateAmp4AdsCss;

@@ -35,8 +35,7 @@ const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -55,8 +54,10 @@ async function main() {
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('gulp server-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
+    timedExecOrDie('gulp check-sourcemaps');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -94,9 +95,14 @@ async function main() {
       timedExecOrDie('gulp check-owners --local_changes');
     }
 
+    if (buildTargets.has('SERVER')) {
+      timedExecOrDie('gulp server-tests');
+    }
+
     if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
+      timedExecOrDie('gulp check-sourcemaps');
     }
   }
 

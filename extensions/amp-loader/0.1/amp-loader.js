@@ -439,9 +439,9 @@ export class LoaderService {
   }
 }
 
-AMP.extension('amp-loader', '0.1', AMP => {
+AMP.extension('amp-loader', '0.1', (AMP) => {
   AMP.registerServiceForDoc('loader', LoaderService);
-  Services.extensionsFor(AMP.win).addDocFactory(ampDoc => {
+  Services.extensionsFor(AMP.win).addDocFactory((ampDoc) => {
     installStylesForDoc(ampDoc, CSS, () => {}, false, 'amp-loader');
   });
 });

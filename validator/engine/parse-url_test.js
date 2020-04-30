@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('parse_url.ParseURLTest');
+goog.module('parse_url.ParseURLTest');
 
-goog.require('parse_url.URL');
+const parse_url = goog.require('parse_url');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -65,7 +65,7 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
     assertStrictEqual(false, url.hasProtocol);
     assertStrictEqual(url.defaultProtocol, url.protocol);
-    assertStrictEqual('', url.host); // example.com is a relative path
+    assertStrictEqual('', url.host);  // example.com is a relative path
   });
 
   it('parses with invalid protocol characters', () => {
@@ -89,13 +89,13 @@ describe('parse_url', () => {
     assertStrictEqual('foo+bar-baz', url.protocol);
   });
 
-  it('parses uncommon protocols, but not URLs', () => {
+  it('parses uncommon protocols, but not parse_url.URLs', () => {
     const urlString = 'whatsapp:i have no idea what this should contain';
     const url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.hasProtocol);
     assertStrictEqual('whatsapp', url.protocol);
-    assertStrictEqual('i have no idea what this should contain',
-        url.schemeSpecificPart);
+    assertStrictEqual(
+        'i have no idea what this should contain', url.schemeSpecificPart);
   });
 
   it('parses basic login', () => {
@@ -135,34 +135,28 @@ describe('parse_url', () => {
   });
 
   it('parses valid IPv6 hostname', () => {
-    for (const urlString of [
-      'https://[2001:0db8::85a3]/',
-      'https://[::1]/',
-      'https://[::]/',
-      'https://[0:0:0:0:0:0:0:1]/',
-      'https://[0:0:0:0:0:0:8.8.8.8]/',
-      'https://[0:0:0:0:0:0:8.124.8.8]/',
-      'https://[0:0:0:0:0:0:8.8.8.22]/',
-      'https://[::8.8.8.8]/']) {
+    for (const urlString
+             of ['https://[2001:0db8::85a3]/', 'https://[::1]/',
+                 'https://[::]/', 'https://[0:0:0:0:0:0:0:1]/',
+                 'https://[0:0:0:0:0:0:8.8.8.8]/',
+                 'https://[0:0:0:0:0:0:8.124.8.8]/',
+                 'https://[0:0:0:0:0:0:8.8.8.22]/', 'https://[::8.8.8.8]/']) {
       const url = new parse_url.URL(urlString);
       assert.ok(url.isValid, 'Expected ' + urlString + ' to be valid.');
     }
   });
 
   it('fails on invalid IPv6 hostname', () => {
-    for (const urlString of [
-      'https://[2001:0db8:85a3]/',
-      'https://[20012:0db8::85a3]/',
-      'https://[200g:0db8:85a3]/',
-      'https://[:::1]/',
-      'https://[0:0:0:0:0:0:1]/',
-      'https://[0:0:0:0:0:0:0:0:1]/',
-      'https://[0:0:0:0:0:0:8.8.8.1024]/',
-      'https://[0:0:0:0:0:0:8.8.8]/',
-      'https://[0:0:0:0:0:0:8.8.8.8.8]/',
-      'https://[0:0:0:0:0:0:0:8.8.8.8]/',
-      'https://[0:0:0:0:0:8.8.8.8]/',
-      'https://[0:0:0:0:0:8.8.8.8:1]/']) {
+    for (const urlString
+             of ['https://[2001:0db8:85a3]/', 'https://[20012:0db8::85a3]/',
+                 'https://[200g:0db8:85a3]/', 'https://[:::1]/',
+                 'https://[0:0:0:0:0:0:1]/', 'https://[0:0:0:0:0:0:0:0:1]/',
+                 'https://[0:0:0:0:0:0:8.8.8.1024]/',
+                 'https://[0:0:0:0:0:0:8.8.8]/',
+                 'https://[0:0:0:0:0:0:8.8.8.8.8]/',
+                 'https://[0:0:0:0:0:0:0:8.8.8.8]/',
+                 'https://[0:0:0:0:0:8.8.8.8]/',
+                 'https://[0:0:0:0:0:8.8.8.8:1]/']) {
       const url = new parse_url.URL(urlString);
       assert.ok(!url.isValid, 'Expected ' + urlString + ' to be invalid.');
     }
@@ -268,7 +262,7 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
   });
 
-  it('parses relative URL with : character', () => {
+  it('parses relative parse_url.URL with : character', () => {
     const urlString = '/image:foo.jpg-bar';
     const url = new parse_url.URL(urlString);
     assertStrictEqual(true, url.isValid);
@@ -290,7 +284,7 @@ describe('parse_url', () => {
   });
 
   it('rejects http:/// (empty host)', () => {  // NOTYPO
-    const urlString = 'http:///';  // NOTYPO
+    const urlString = 'http:///';              // NOTYPO
     const url = new parse_url.URL(urlString);
     assertStrictEqual(false, url.isValid);
     assertStrictEqual('', url.host);
@@ -302,5 +296,4 @@ describe('parse_url', () => {
     assertStrictEqual(true, url.isValid);
     assertStrictEqual('example.com', url.host);
   });
-
 });

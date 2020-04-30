@@ -1,11 +1,10 @@
 {
-  "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
-  "allow-url-opt-in": [
-    "pump-early-frame",
-    "twitter-default-placeholder",
-    "twitter-default-placeholder-fade",
-    "twitter-default-placeholder-pulse"
+  "allow-doc-opt-in": [
+    "amp-next-page",
+    "inabox-viewport-friendly",
+    "analytics-chunks"
   ],
+  "allow-url-opt-in": ["pump-early-frame"],
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.01,
@@ -13,8 +12,8 @@
   "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
-  "amp-auto-ads-no-op-experiment": 0.05,
   "amp-consent-restrict-fullscreen": 1,
+  "amp-list-init-from-state": 1,
   "amp-mega-menu": 1,
   "amp-nested-menu": 1,
   "amp-playbuzz": 1,
@@ -31,10 +30,14 @@
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
+  "intersect-resources": 1,
   "ios-fixed-no-transfer": 1,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
+  "random-subdomain-for-safeframe": 0.02,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1
+  "version-locking": 1,
+  "amp-ad-no-center-css": 1,
+  "analytics-chunks": 1
 }

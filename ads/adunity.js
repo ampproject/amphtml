@@ -84,8 +84,8 @@ export function adunity(global, data) {
   let libAd = false;
 
   //execute tag only if in view
-  const inViewCb = global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  const inViewCb = global.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       if (!libAd && c.intersectionRect.height > data['height'] / 2) {
         libAd = true;
         inViewCb();

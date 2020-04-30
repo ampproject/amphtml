@@ -124,7 +124,7 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @return {*} TODO(#23582): Specify return type
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -298,6 +298,10 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     const messageId = data['id'];
     const methodReceived = data['method'];
 
@@ -402,7 +406,7 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const {promise} = this.readyDeferred_;
+    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
     if (!promise) {
       return;
     }
@@ -520,6 +524,6 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe);
 });

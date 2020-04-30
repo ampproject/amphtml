@@ -36,8 +36,8 @@ export function colombia(global, data) {
     clmbdivid: data.clmb_divid,
   });
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function(newrequest) {
-    newrequest.forEach(function(d) {
+  global.context.observeIntersection(function (newrequest) {
+    /** @type {!Array} */ (newrequest).forEach(function (d) {
       if (d.intersectionRect.height > 0) {
         global._colombia.push({
           visible: true,

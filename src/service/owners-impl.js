@@ -75,7 +75,7 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.pause();
     });
   }
@@ -85,7 +85,7 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.resume();
     });
   }
@@ -95,7 +95,7 @@ export class OwnersImpl {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.unlayout();
     });
   }
@@ -112,7 +112,7 @@ export class OwnersImpl {
   /** @override */
   requireLayout(element, opt_parentPriority) {
     const promises = [];
-    this.discoverResourcesForElement_(element, resource => {
+    this.discoverResourcesForElement_(element, (resource) => {
       if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
         return;
       }
@@ -147,7 +147,7 @@ export class OwnersImpl {
    * @private
    */
   findResourcesInElements_(parentResource, elements, callback) {
-    elements.forEach(element => {
+    elements.forEach((element) => {
       devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
@@ -195,19 +195,19 @@ export class OwnersImpl {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       if (resource.getState() === ResourceState.NOT_BUILT) {
         resource.whenBuilt().then(() => {
           this.measureAndTryScheduleLayout_(
             resource,
-            !layout,
+            /* isPreload */ !layout,
             parentResource.getLayoutPriority()
           );
         });
       } else {
         this.measureAndTryScheduleLayout_(
           resource,
-          !layout,
+          /* isPreload */ !layout,
           parentResource.getLayoutPriority()
         );
       }
@@ -228,7 +228,7 @@ export class OwnersImpl {
     ) {
       this.resources_.scheduleLayoutOrPreload(
         resource,
-        !isPreload,
+        /* layout */ !isPreload,
         opt_parentPriority
       );
     }
@@ -247,7 +247,7 @@ export class OwnersImpl {
     inLocalViewport
   ) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.findResourcesInElements_(parentResource, subElements, resource => {
+    this.findResourcesInElements_(parentResource, subElements, (resource) => {
       resource.setInViewport(inViewport);
     });
   }

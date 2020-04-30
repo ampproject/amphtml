@@ -49,7 +49,7 @@ export const Type = {
  * @param {!Element} element
  * @return {!Element}
  */
-const getBlockingTemplate = element => {
+const getBlockingTemplate = (element) => {
   return htmlFor(element)`
       <div class="i-amphtml-story-access-overflow">
         <div class="i-amphtml-story-access-container">
@@ -66,7 +66,7 @@ const getBlockingTemplate = element => {
  * @param {!Element} element
  * @return {!Element}
  */
-const getNotificationTemplate = element => {
+const getNotificationTemplate = (element) => {
   return htmlFor(element)`
       <div class="i-amphtml-story-access-overflow">
         <div class="i-amphtml-story-access-container">
@@ -129,19 +129,19 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.ACCESS_STATE, isAccess => {
+    this.storeService_.subscribe(StateProperty.ACCESS_STATE, (isAccess) => {
       this.onAccessStateChange_(isAccess);
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      currentPageIndex => {
+      (currentPageIndex) => {
         this.onCurrentPageIndexChange_(currentPageIndex);
       },
       true /** callToInitialize */
     );
 
-    this.element.addEventListener('click', event => this.onClick_(event));
+    this.element.addEventListener('click', (event) => this.onClick_(event));
   }
 
   /**
@@ -183,7 +183,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
     }
 
     // Closes the menu if click happened outside of the main container.
-    if (!closest(el, el => el === this.containerEl_, this.element)) {
+    if (!closest(el, (el) => el === this.containerEl_, this.element)) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
     }
   }
@@ -301,12 +301,12 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     const actions = [];
 
-    accessConfig.forEach(config => {
+    /** @type {!Array} */ (accessConfig).forEach((config) => {
       const {login, namespace} = /** @type {{login, namespace}} */ (config);
 
       if (isObject(login)) {
         const types = Object.keys(login);
-        types.forEach(type =>
+        types.forEach((type) =>
           actions.push(this.getActionObject_(namespace, type))
         );
       } else {
@@ -325,7 +325,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {
-    const method = ['login', namespace, type].filter(s => !!s).join('-');
+    const method = ['login', namespace, type].filter((s) => !!s).join('-');
     return {tagOrTarget: 'SCRIPT', method};
   }
 }

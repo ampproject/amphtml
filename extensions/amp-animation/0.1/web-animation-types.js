@@ -150,6 +150,13 @@ export let WebAnimationSelectorDef;
 export let WebAnimationSubtargetDef;
 
 /**
+ * @typedef {{
+ *   scope: (!Element|undefined),
+ * }}
+ */
+export let WebAnimationBuilderOptionsDef;
+
+/**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
  * @enum {string}
  */
@@ -192,6 +199,8 @@ const WHITELISTED_RPOPS = {
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,
+  'clip-path': true,
+  'clipPath': true,
 };
 
 /**

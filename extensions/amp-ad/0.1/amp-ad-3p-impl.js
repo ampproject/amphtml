@@ -244,14 +244,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach(p => {
+      /** @type {!Array} */ (this.config.prefetch).forEach((p) => {
         preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
       preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach(p => {
+      /** @type {!Array} */ (this.config.preconnect).forEach((p) => {
         preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
@@ -287,12 +287,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run(
         {
-          measure: state => {
+          measure: (state) => {
             state.direction = computedStyle(this.win, this.element)[
               'direction'
             ];
           },
-          mutate: state => {
+          mutate: (state) => {
             if (state.direction == 'rtl') {
               setStyle(this.element, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -366,7 +366,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then(consents => {
+    ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
       // ampcontext.js and this file are compiled in different compilation unit

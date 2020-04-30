@@ -25,25 +25,6 @@ limitations under the License.
 
 # amp-animation
 
-Defines and runs animations.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/animations.amp.html">animations.amp.html</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 AMP Animations rely on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and run animations in AMP documents.
@@ -429,6 +410,8 @@ performance. Currently the list contains:
 - [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
 - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
 - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
+- [`clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path). Only supported values are
+  `inset()`, `circle()`, `ellipse()`, and `polygon()`.
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
 
@@ -561,7 +544,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
       {
         "selector": ".target-class",
         "duration": "4s",
-        "delay": "var(--delay, 100ms)",
+        "delay": "var(--delay, 100ms)"
       }
     ]
   </script>

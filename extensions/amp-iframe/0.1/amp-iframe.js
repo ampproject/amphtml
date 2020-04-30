@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
@@ -54,13 +54,11 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'referrerpolicy',
   'scrolling',
   'tabindex',
+  'title',
 ];
 
 /** @type {number}  */
 let count = 0;
-
-/** @type {number}  */
-let trackingIframeCount = 0;
 
 /** @type {number}  */
 let trackingIframeTimeout = 5000;
@@ -97,8 +95,8 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private {boolean} */
     this.isResizable_ = false;
 
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserverHostApi} */
+    this.intersectionObserverHostApi_ = null;
 
     /** @private {string} */
     this.sandbox_ = '';
@@ -125,6 +123,11 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasErroredEmbedSize_ = false;
   }
 
   /** @override */
@@ -258,10 +261,9 @@ export class AmpIframe extends AMP.BaseElement {
   firstAttachedCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc =
-      /** @type {string} */ (this.transformSrc_(
-        this.element.getAttribute('src')
-      ) ||
+    const iframeSrc = /** @type {string} */ (this.transformSrc_(
+      this.element.getAttribute('src')
+    ) ||
       this.transformSrcDoc_(
         this.element.getAttribute('srcdoc'),
         this.sandbox_
@@ -321,9 +323,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This can be done by
-    // intersectionObserverApi onlayoutMeasure function.
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
+    // IntersectionObserverHostApi onlayoutMeasure function.
+    if (this.intersectionObserverHostApi_) {
+      this.intersectionObserverHostApi_.fire();
     }
   }
 
@@ -393,8 +395,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      trackingIframeCount++;
-      if (trackingIframeCount > 1) {
+      if (!this.getAmpDoc().registerTrackingIframe()) {
         console /*OK*/
           .error(
             'Only 1 analytics/tracking iframe allowed per ' +
@@ -440,7 +441,10 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
+      this.intersectionObserverHostApi_ = new IntersectionObserverHostApi(
+        this,
+        iframe
+      );
     }
 
     iframe.onload = () => {
@@ -465,7 +469,7 @@ export class AmpIframe extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.updateSize_(data['height'], data['width']);
       },
       /*opt_is3P*/ undefined,
@@ -474,7 +478,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     // Listen for resize messages sent by Pym.js.
-    this.unlistenPym_ = listen(this.win, 'message', event => {
+    this.unlistenPym_ = listen(this.win, 'message', (event) => {
       return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
     });
 
@@ -578,10 +582,10 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // Needs to clean up intersectionObserverApi_
-      if (this.intersectionObserverApi_) {
-        this.intersectionObserverApi_.destroy();
-        this.intersectionObserverApi_ = null;
+      // Needs to clean up intersectionObserverHostApi_
+      if (this.intersectionObserverHostApi_) {
+        this.intersectionObserverHostApi_.destroy();
+        this.intersectionObserverHostApi_ = null;
       }
     }
     return true;
@@ -589,8 +593,8 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    if (this.intersectionObserverHostApi_) {
+      this.intersectionObserverHostApi_.onViewportCallback(inViewport);
     }
   }
 
@@ -617,6 +621,11 @@ export class AmpIframe extends AMP.BaseElement {
           this.sandbox_
         );
       }
+    }
+    if (this.iframe_ && mutations['title']) {
+      // only propagating title because propagating all causes e2e error:
+      // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
+      this.propagateAttributes(['title'], this.iframe_);
     }
   }
 
@@ -665,11 +674,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      this.user().error(
-        TAG_,
-        'Ignoring embed-size request because this iframe is not resizable',
-        this.element
-      );
+      if (!this.hasErroredEmbedSize_) {
+        this.user().error(
+          TAG_,
+          'Ignoring embed-size request because this iframe is not resizable',
+          this.element
+        );
+        this.hasErroredEmbedSize_ = true;
+      }
       return;
     }
 
@@ -743,7 +755,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     // Register action (even if targetOrigin_ is not available so we can
     // provide a helpful error message).
-    this.registerAction('postMessage', invocation => {
+    this.registerAction('postMessage', (invocation) => {
       if (this.targetOrigin_) {
         this.iframe_.contentWindow./*OK*/ postMessage(
           invocation.args,
@@ -766,7 +778,7 @@ export class AmpIframe extends AMP.BaseElement {
     const maxUnexpectedMessages = 10;
     let unexpectedMessages = 0;
 
-    const listener = e => {
+    const listener = (e) => {
       if (e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
@@ -882,6 +894,6 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.extension(TAG_, '0.1', AMP => {
+AMP.extension(TAG_, '0.1', (AMP) => {
   AMP.registerElement(TAG_, AmpIframe);
 });

@@ -24,27 +24,6 @@ limitations under the License.
 
 # amp-video-docking
 
-[TOC]
-
-Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/">Advanced video docking</a> with multiple targets, event triggers and media queries.</li>
-    </ul></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `amp-video-docking` extension allows videos to be minimized to a corner or

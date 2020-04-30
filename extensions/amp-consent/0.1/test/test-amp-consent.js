@@ -37,7 +37,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
@@ -84,7 +84,7 @@ describes.realWin(
 
       storageMock = {
         setNonBoolean: () => {},
-        get: name => {
+        get: (name) => {
           return Promise.resolve(storageValue[name]);
         },
         set: (name, value) => {
@@ -94,14 +94,14 @@ describes.realWin(
       };
 
       resetServiceForTesting(win, 'xhr');
-      registerServiceBuilder(win, 'xhr', function() {
+      registerServiceBuilder(win, 'xhr', function () {
         return xhrServiceMock;
       });
 
       resetServiceForTesting(win, 'geo');
-      registerServiceBuilder(win, 'geo', function() {
+      registerServiceBuilder(win, 'geo', function () {
         return Promise.resolve({
-          isInCountryGroup: group =>
+          isInCountryGroup: (group) =>
             ISOCountryGroups.indexOf(group) >= 0
               ? GEO_IN_GROUP.IN
               : GEO_IN_GROUP.NOT_IN,
@@ -109,7 +109,7 @@ describes.realWin(
       });
 
       resetServiceForTesting(win, 'storage');
-      registerServiceBuilder(win, 'storage', function() {
+      registerServiceBuilder(win, 'storage', function () {
         return Promise.resolve(storageMock);
       });
     });
@@ -219,7 +219,7 @@ describes.realWin(
         await macroTask();
         return ampConsent
           .getConsentRequiredPromiseForTesting()
-          .then(isRequired => {
+          .then((isRequired) => {
             expect(isRequired).to.be.true;
           });
       });
@@ -385,7 +385,57 @@ describes.realWin(
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
+            'https://gdpr-applies/':
+              '{"consentRequired": true, "gdprApplies": false}',
           };
+        });
+
+        describe('gdprApplies value', () => {
+          it('uses given value', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': 'remote',
+              'checkConsentHref': 'https://gdpr-applies/',
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            const stateManagerGdprApplies = await ampConsent
+              .getConsentStateManagerForTesting()
+              .getConsentInstanceGdprApplies();
+            expect(stateManagerGdprApplies).to.be.false;
+          });
+
+          it('defaults to consentRequired remote value', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': 'remote',
+              'checkConsentHref': 'https://geo-override-check2/',
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            await expect(
+              ampConsent
+                .getConsentStateManagerForTesting()
+                .getConsentInstanceGdprApplies()
+            ).to.eventually.be.true;
+          });
+
+          it('never defaults to inline config when checkConsentHref is not defined', async () => {
+            const inlineConfig = {
+              'consentInstanceId': 'abc',
+              'consentRequired': true,
+            };
+            ampConsent = getAmpConsent(doc, inlineConfig);
+            await ampConsent.buildCallback();
+            await macroTask();
+            await expect(
+              ampConsent
+                .getConsentStateManagerForTesting()
+                .getConsentInstanceGdprApplies()
+            ).to.eventually.be.null;
+          });
         });
 
         it('should not update local storage when response is false', async () => {
@@ -414,7 +464,7 @@ describes.realWin(
           });
         });
 
-        it('should not update local storage when response is null', async () => {
+        it('should not update local storage when consent value response is null', async () => {
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': 'remote',
@@ -795,10 +845,10 @@ describes.realWin(
         consentElement.appendChild(postPromptUI);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
-        env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
+        env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake((fn) => {
           fn();
         });
-        env.sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
+        env.sandbox.stub(ampConsent, 'mutateElement').callsFake((fn) => {
           fn();
         });
       });

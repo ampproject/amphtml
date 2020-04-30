@@ -30,6 +30,7 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -56,6 +57,11 @@ class AmpSoundcloud extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
   }
 
   /**@override*/
@@ -117,6 +123,6 @@ class AmpSoundcloud extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-soundcloud', '0.1', AMP => {
+AMP.extension('amp-soundcloud', '0.1', (AMP) => {
   AMP.registerElement('amp-soundcloud', AmpSoundcloud);
 });

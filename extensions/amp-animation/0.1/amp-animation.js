@@ -20,16 +20,15 @@ import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
-import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
+import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -91,14 +90,7 @@ export class AmpAnimation extends AMP.BaseElement {
       );
     }
 
-    // Parse config.
-    const scriptElement = userAssert(
-      childElementByTag(this.element, 'script'),
-      '"<script type=application/json>" must be present'
-    );
-    this.configJson_ = tryParseJson(scriptElement.textContent, error => {
-      throw user().createError('failed to parse animation script', error);
-    });
+    this.configJson_ = getChildJsonConfig(this.element);
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
@@ -145,7 +137,7 @@ export class AmpAnimation extends AMP.BaseElement {
       ampdoc.onVisibilityChanged(() => {
         this.setVisible_(ampdoc.isVisible());
       });
-      this.getViewport().onResize(e => {
+      this.getViewport().onResize((e) => {
         if (e.relayoutAll) {
           this.onResize_();
         }
@@ -440,7 +432,7 @@ export class AmpAnimation extends AMP.BaseElement {
       this.runnerPromise_ = this.createRunner_(
         opt_args,
         opt_positionObserverData
-      ).then(runner => {
+      ).then((runner) => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -483,8 +475,8 @@ export class AmpAnimation extends AMP.BaseElement {
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
       .configJson_);
-    const args =
-      /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args || null);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
+      null);
 
     // Ensure polyfill is installed.
     installWebAnimationsIfNecessary(this.win);
@@ -535,7 +527,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerElement(TAG, AmpAnimation);
   AMP.registerServiceForDoc('web-animation', WebAnimationService);
 });

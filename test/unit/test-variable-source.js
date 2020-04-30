@@ -19,8 +19,6 @@ import {
   getTimingDataAsync,
 } from '../../src/service/variable-source';
 
-import {createElementWithAttributes} from '../../src/dom';
-
 describes.fakeWin(
   'VariableSource',
   {
@@ -28,7 +26,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let varSource;
     beforeEach(() => {
       varSource = new VariableSource(env.ampdoc);
@@ -54,7 +52,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -71,7 +69,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -90,7 +88,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -108,7 +106,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('baz');
         });
     });
@@ -127,15 +125,12 @@ describes.fakeWin(
           ampdoc: 'single',
         },
       },
-      env => {
+      (env) => {
         let variableSource;
         beforeEach(() => {
-          env.win.document.head.appendChild(
-            createElementWithAttributes(env.win.document, 'meta', {
-              name: 'amp-allowed-url-macros',
-              content: 'ABC,ABCD,CANONICAL',
-            })
-          );
+          env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+            'amp-allowed-url-macros': 'ABC,ABCD,CANONICAL',
+          });
           variableSource = new VariableSource(env.ampdoc);
         });
 
@@ -147,7 +142,7 @@ describes.fakeWin(
           return variableSource
             .get('ABCD')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('abcd');
             });
         });
@@ -160,7 +155,7 @@ describes.fakeWin(
           return variableSource
             .get('RANDOM')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('0.1234');
             });
         });
@@ -168,12 +163,9 @@ describes.fakeWin(
     );
 
     it('Should not work with empty variable whitelist', () => {
-      env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-allowed-url-macros',
-          content: '',
-        })
-      );
+      env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+        'amp-allowed-url-macros': '',
+      });
       const variableSource = new VariableSource(env.ampdoc);
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
@@ -183,12 +175,12 @@ describes.fakeWin(
       return variableSource
         .get('RANDOM')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('0.1234');
         });
     });
 
-    describes.fakeWin('getTimingData', {}, env => {
+    describes.fakeWin('getTimingData', {}, (env) => {
       let win;
 
       beforeEach(() => {
@@ -207,7 +199,7 @@ describes.fakeWin(
         expect(win.eventListeners.count('load')).to.equal(1);
         win.performance.timing.loadEventStart = 12;
         win.eventListeners.fire({type: 'load'});
-        return p.then(value => {
+        return p.then((value) => {
           expect(value).to.equal(11);
         });
       });

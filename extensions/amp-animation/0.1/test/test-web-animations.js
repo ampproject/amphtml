@@ -17,11 +17,13 @@ import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
+import {closestAncestorElementBySelector} from '../../../../src/dom';
+import {htmlFor, htmlRefs} from '../../../../src/static-template';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
 
-describes.realWin('MeasureScanner', {amp: 1}, env => {
+describes.realWin('MeasureScanner', {amp: 1}, (env) => {
   let win, doc;
   let vsync;
   let resources;
@@ -33,7 +35,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    env.sandbox.stub(win, 'matchMedia').callsFake(query => {
+    env.sandbox.stub(win, 'matchMedia').callsFake((query) => {
       if (query == 'match') {
         return {matches: true};
       }
@@ -45,7 +47,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     if (!win.CSS) {
       win.CSS = {supports: () => {}};
     }
-    env.sandbox.stub(win.CSS, 'supports').callsFake(condition => {
+    env.sandbox.stub(win.CSS, 'supports').callsFake((condition) => {
       if (condition == 'supported: 1') {
         return true;
       }
@@ -57,7 +59,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     warnStub = env.sandbox.stub(user(), 'warn');
 
     vsync = Services.vsyncFor(win);
-    env.sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
+    env.sandbox.stub(vsync, 'measurePromise').callsFake((callback) => {
       return Promise.resolve(callback());
     });
     resources = Services.resourcesForDoc(env.ampdoc);
@@ -145,7 +147,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
     expect(warnStub).to.not.be.calledWith(
       env.sandbox.match.any,
-      env.sandbox.match(arg => {
+      env.sandbox.match((arg) => {
         return /fractional/.test(arg);
       })
     );
@@ -375,10 +377,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should propagate vars', () => {
-    env.sandbox.stub(win, 'getComputedStyle').callsFake(target => {
+    env.sandbox.stub(win, 'getComputedStyle').callsFake((target) => {
       if (target == target2) {
         return {
-          getPropertyValue: prop => {
+          getPropertyValue: (prop) => {
             if (prop == '--var4') {
               return '50px';
             }
@@ -662,6 +664,60 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     })[0];
     expect(isArray(keyframes)).to.be.true;
     expect(keyframes).to.deep.equal([{opacity: '0'}, {opacity: '1'}]);
+  });
+
+  it('should parse object keyframe with vendor prefixes', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: {
+        'clip-path': ['A', 'B'],
+      },
+    })[0];
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes['clip-path'])).to.be.true;
+    expect(keyframes['clip-path']).to.deep.equal(['A', 'B']);
+    // WebKit version as well.
+    expect(isArray(keyframes['-webkit-clip-path'])).to.be.true;
+    expect(keyframes['-webkit-clip-path']).to.deep.equal(['A', 'B']);
+  });
+
+  it('should parse object keyframe with vendor prefixes in camel-case', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: {
+        'clipPath': ['A', 'B'],
+      },
+    })[0];
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes['clipPath'])).to.be.true;
+    expect(keyframes['clipPath']).to.deep.equal(['A', 'B']);
+    // WebKit version as well.
+    expect(isArray(keyframes['-webkit-clip-path'])).to.be.true;
+    expect(keyframes['-webkit-clip-path']).to.deep.equal(['A', 'B']);
+  });
+
+  it('should parse array keyframe with vendor prefixes', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: [{'clip-path': 'A'}, {'clip-path': 'B'}],
+    })[0];
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {'clip-path': 'A', '-webkit-clip-path': 'A'},
+      {'clip-path': 'B', '-webkit-clip-path': 'B'},
+    ]);
+  });
+
+  it('should parse array keyframe with vendor prefixes in camel-case', () => {
+    const {keyframes} = scan({
+      target: target1,
+      keyframes: [{'clipPath': 'A'}, {'clipPath': 'B'}],
+    })[0];
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {'clipPath': 'A', '-webkit-clip-path': 'A'},
+      {'clipPath': 'B', '-webkit-clip-path': 'B'},
+    ]);
   });
 
   it('should parse width/height functions', () => {
@@ -987,7 +1043,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       '--var1': '10px',
       '--var2': '20px',
     };
-    return builder.resolveRequests([], spec, args).then(requests => {
+    return builder.resolveRequests([], spec, args).then((requests) => {
       expect(requests).to.have.length(1);
       const request = requests[0];
       expect(request.target).to.equal(target1);
@@ -1043,7 +1099,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         () => {
           throw new Error('must have failed');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.match(/Recursive animations/);
         }
       );
@@ -1060,7 +1116,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           animation: 'animation2',
           delay: 100,
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(1);
           expect(requests[0].target).to.equal(target1);
           expect(requests[0].timing.duration).to.equal(2000);
@@ -1087,7 +1143,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
             delay: 200,
           },
         ])
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(2);
           expect(requests[0].target).to.equal(target2);
           expect(requests[0].timing.delay).to.equal(100);
@@ -1108,7 +1164,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           animation: 'animation2',
           delay: 100,
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(1);
           expect(requests[0].target).to.equal(target1);
           expect(requests[0].timing.duration).to.equal(2000);
@@ -1140,7 +1196,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           animation: 'animation2',
           delay: 100,
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(2);
           expect(requests[0].target).to.equal(target2);
           expect(requests[0].timing.duration).to.equal(2000);
@@ -1164,7 +1220,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           animation: 'animation2',
           delay: 100,
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(2);
           expect(requests[0].target).to.equal(target1);
           expect(requests[0].timing.duration).to.equal(2000);
@@ -1190,7 +1246,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           '--duration': 1500,
           '--x': '100px',
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(1);
           expect(requests[0].timing.duration).to.equal(1500);
           expect(requests[0].keyframes.transform[1]).to.equal(
@@ -1219,7 +1275,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
             {index: 1, '--y': '12px'},
           ],
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(2);
           expect(requests[0].timing.delay).to.equal(1000);
           expect(requests[0].vars).to.deep.equal({'--y': '11px'});
@@ -1244,7 +1300,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           animation: 'animation2',
           delay: 100,
         })
-        .then(requests => {
+        .then((requests) => {
           expect(requests).to.have.length(2);
           expect(requests[0].timing.delay).to.equal(1000);
           expect(requests[0].vars).to.deep.equal({'--y': '11px'});
@@ -1574,7 +1630,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       return createRunner([
         {target: target1, keyframes: {}},
         {target: target2, keyframes: {}},
-      ]).then(runner => {
+      ]).then((runner) => {
         expect(runner.requests_).to.have.length(2);
         expect(runner.requests_[0].target).to.equal(target1);
         expect(runner.requests_[1].target).to.equal(target2);
@@ -1596,7 +1652,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       createRunner([
         {target: amp1, keyframes: {}},
         {target: amp2, keyframes: {}},
-      ]).then(res => {
+      ]).then((res) => {
         runner = res;
       });
       return waitForNextMicrotask()
@@ -1625,7 +1681,144 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 });
 
-describes.sandboxed('NativeWebAnimationRunner', {}, env => {
+describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
+  function scan(spec, builderOptions) {
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      builderOptions
+    );
+    env.sandbox.stub(builder, 'requireLayout');
+    const scanner = builder.createScanner_([]);
+    const success = scanner.scan(spec);
+    if (success) {
+      return scanner.requests_;
+    }
+    expect(scanner.requests_).to.have.length(0);
+    return null;
+  }
+
+  let html;
+
+  beforeEach(() => {
+    html = htmlFor(env.win.document);
+  });
+
+  it('should scope selector', () => {
+    const tree = html`
+      <div>
+        <div class="target"></div>
+        <div id="target"></div>
+        <div id="scope" ref="scope">
+          <div class="target"></div>
+          <div id="target"></div>
+        </div>
+      </div>
+    `;
+
+    const {scope} = htmlRefs(tree);
+
+    env.win.document.body.appendChild(tree);
+
+    const requests = scan(
+      [
+        {selector: '#target', duration: 200, keyframes: {}},
+        {selector: '.target', duration: 300, keyframes: {}},
+      ],
+      {scope}
+    );
+
+    expect(requests).to.have.length(2);
+
+    // #target
+    expect(requests[0].target.id).to.equal('target');
+    expect(closestAncestorElementBySelector(requests[0].target, '#scope')).to
+      .not.be.null;
+
+    // .target
+    expect(requests[1].target.className).to.deep.equal('target');
+    expect(closestAncestorElementBySelector(requests[1].target, '#scope')).to
+      .not.be.null;
+  });
+
+  it('should not scope selector if no scope is provided', () => {
+    const tree = html`
+      <div>
+        <div class="target"></div>
+        <div id="target"></div>
+        <div>
+          <div class="target"></div>
+          <div id="target"></div>
+        </div>
+      </div>
+    `;
+
+    env.win.document.body.appendChild(tree);
+
+    const requests = scan(
+      [
+        {selector: '#target', duration: 200, keyframes: {}},
+        {selector: '.target', duration: 300, keyframes: {}},
+      ],
+      {}
+    );
+
+    expect(requests).to.have.length(4);
+
+    // #target
+    expect(requests[0].target.id).to.equal('target');
+    expect(requests[1].target.id).to.equal('target');
+
+    // .target
+    expect(requests[2].target.className).to.deep.equal('target');
+    expect(requests[3].target.className).to.deep.equal('target');
+  });
+
+  it('should resolve the closest element inside scope', () => {
+    const tree = html`
+      <div class="parent">
+        <div id="scope" ref="scope">
+          <div class="parent">
+            <div id="target1" ref="target1"></div>
+          </div>
+          <div id="target2" ref="target2"></div>
+        </div>
+      </div>
+    `;
+
+    const {scope, target1, target2} = htmlRefs(tree);
+
+    env.win.document.body.appendChild(tree);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope}
+    );
+
+    const css = builder.css_;
+
+    expect(() =>
+      css.withTarget(target1, 0, () => css.getElementSize('.parent', 'closest'))
+    ).to.not.throw();
+
+    allowConsoleError(() => {
+      expect(() =>
+        css.withTarget(target2, 0, () =>
+          css.getElementSize('.parent', 'closest')
+        )
+      ).to.throw(/Element not found/);
+    });
+  });
+});
+
+describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
   let target1, target2;
   let target1Mock, target2Mock;
   let keyframes1, keyframes2;
@@ -1790,14 +1983,8 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock
-      .expects('pause')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('pause')
-      .callThrough()
-      .once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
   });
@@ -1814,25 +2001,13 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock
-      .expects('pause')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('pause')
-      .callThrough()
-      .once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
 
-    anim1Mock
-      .expects('play')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('play')
-      .callThrough()
-      .once();
+    anim1Mock.expects('play').callThrough().once();
+    anim2Mock.expects('play').callThrough().once();
     runner.resume();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
@@ -1856,25 +2031,13 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     anim1.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock
-      .expects('pause')
-      .callThrough()
-      .never();
-    anim2Mock
-      .expects('pause')
-      .callThrough()
-      .once();
+    anim1Mock.expects('pause').callThrough().never();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
 
-    anim1Mock
-      .expects('play')
-      .callThrough()
-      .never();
-    anim2Mock
-      .expects('play')
-      .callThrough()
-      .once();
+    anim1Mock.expects('play').callThrough().never();
+    anim2Mock.expects('play').callThrough().once();
     runner.resume();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
@@ -1918,14 +2081,8 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock
-      .expects('finish')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('finish')
-      .callThrough()
-      .once();
+    anim1Mock.expects('finish').callThrough().once();
+    anim2Mock.expects('finish').callThrough().once();
     runner.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
   });
@@ -1954,14 +2111,8 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock
-      .expects('pause')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('pause')
-      .callThrough()
-      .once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekTo(101);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(101);
@@ -1973,14 +2124,8 @@ describes.sandboxed('NativeWebAnimationRunner', {}, env => {
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
     env.sandbox.stub(runner, 'getTotalDuration_').returns(500);
-    anim1Mock
-      .expects('pause')
-      .callThrough()
-      .once();
-    anim2Mock
-      .expects('pause')
-      .callThrough()
-      .once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekToPercent(0.5);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(250);

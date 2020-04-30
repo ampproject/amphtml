@@ -21,7 +21,7 @@ import {Services} from '../services';
 import {areMarginsChanged} from '../layout-rect';
 import {closest} from '../dom';
 import {computedStyle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {isExperimentOn} from '../experiments';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -55,13 +55,16 @@ export class MutatorImpl {
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
-    this.activeHistory_.onFocus(element => {
+    this.activeHistory_.onFocus((element) => {
       this.checkPendingChangeSize_(element);
     });
+
+    /** @private @const {boolean} */
+    this.intersect_ = this.resources_.isIntersectionExperimentOn();
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(
       Resource.forElement(element),
       newHeight,
@@ -74,7 +77,7 @@ export class MutatorImpl {
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(
         Resource.forElement(element),
@@ -83,7 +86,7 @@ export class MutatorImpl {
         opt_newMargins,
         opt_event,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             resolve();
           } else {
@@ -117,7 +120,7 @@ export class MutatorImpl {
         /* newMargin */ undefined,
         /* event */ undefined,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             const resource = Resource.forElement(element);
             resource.completeCollapse();
@@ -132,17 +135,27 @@ export class MutatorImpl {
 
   /** @override */
   collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
-    const resource = Resource.forElement(element);
-    if (box.width != 0 && box.height != 0) {
-      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-        this.dirtyElement(element);
-      } else {
-        this.resources_.setRelayoutTop(box.top);
+    // With IntersectionObserver, no need to relayout or remeasure
+    // due to a single element collapse (similar to "relayout top").
+    if (!this.intersect_) {
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        if (isExperimentOn(this.win, 'dirty-collapse-element')) {
+          this.dirtyElement(element);
+        } else {
+          this.resources_.setRelayoutTop(box.top);
+        }
       }
     }
+
+    const resource = Resource.forElement(element);
     resource.completeCollapse();
-    this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+    // Unlike completeExpand(), there's no requestMeasure() call here that
+    // requires another pass (with IntersectionObserver).
+    if (!this.intersect_) {
+      this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+    }
   }
 
   /** @override */
@@ -151,8 +164,13 @@ export class MutatorImpl {
   }
 
   /** @override */
-  mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
+  mutateElement(element, mutator, skipRemeasure) {
+    return this.measureMutateElementResources_(
+      element,
+      null,
+      mutator,
+      skipRemeasure
+    );
   }
 
   /** @override */
@@ -182,9 +200,15 @@ export class MutatorImpl {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
+   * @param {boolean} skipRemeasure
    * @return {!Promise}
    */
-  measureMutateElementResources_(element, measurer, mutator) {
+  measureMutateElementResources_(
+    element,
+    measurer,
+    mutator,
+    skipRemeasure = false
+  ) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -199,10 +223,20 @@ export class MutatorImpl {
         if (measurer) {
           measurer();
         }
-        relayoutTop = calcRelayoutTop();
+        // With IntersectionObserver, "relayout top" is no longer needed since
+        // relative positional changes won't affect correctness.
+        if (!this.intersect_ && !skipRemeasure) {
+          relayoutTop = calcRelayoutTop();
+        }
       },
       mutate: () => {
         mutator();
+
+        // `skipRemeasure` is set by callers when we know that `mutator`
+        // cannot cause a change in size/position e.g. toggleLoading().
+        if (skipRemeasure) {
+          return;
+        }
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -213,11 +247,17 @@ export class MutatorImpl {
           const r = Resource.forElement(ampElements[i]);
           r.requestMeasure();
         }
+        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+        // With IntersectionObserver, no need to set relayout top.
+        if (this.intersect_) {
+          this.resources_.maybeHeightChanged();
+          return;
+        }
+
         if (relayoutTop != -1) {
           this.resources_.setRelayoutTop(relayoutTop);
         }
-        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-
         // Need to measure again in case the element has become visible or
         // shifted.
         this.vsync_.measure(() => {
@@ -245,6 +285,7 @@ export class MutatorImpl {
    * @param {!Element} element
    */
   dirtyElement(element) {
+    devAssert(!this.intersect_);
     let relayoutAll = false;
     const isAmpElement = element.classList.contains('i-amphtml-element');
     if (isAmpElement) {
@@ -264,7 +305,7 @@ export class MutatorImpl {
   checkPendingChangeSize_(element) {
     const resourceElement = closest(
       element,
-      el => !!Resource.forElementOptional(el)
+      (el) => !!Resource.forElementOptional(el)
     );
     if (!resourceElement) {
       return;
@@ -402,6 +443,8 @@ export class MutatorImpl {
         callback: opt_callback,
       }
     );
+    // With IntersectionObserver, we still want to schedule a pass to execute
+    // the requested measures of the newly resized element(s).
     this.resources_.schedulePassVsync();
   }
 }

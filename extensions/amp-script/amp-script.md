@@ -7,10 +7,6 @@ teaser:
 experimental: true
 ---
 
-# amp-script
-
-Allows running custom JavaScript to render UI.
-
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -27,39 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
+# amp-script
 
 ## Overview
 
@@ -215,7 +179,7 @@ With regard to dynamic creation of AMP elements (e.g. via `document.createElemen
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-1. Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+1. Same-origin `src` must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
 
 Example of script hashes:
@@ -258,7 +222,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node.
 [/tip]
 
 ## Attributes
@@ -267,7 +231,7 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 For executing remote scripts.
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript` or `text/javascript`.
 
 **script**
 
@@ -281,17 +245,17 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
-**max-age (optional)**
+**max-age (optional, but required for signed exchanges if `script` is specified)**
 
 Requires the `script` attribute.
 
-The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing. [AMP Packager](https://github.com/ampproject/amppackager) uses this value to compute the SXG `expires` time.
 
 The value of `max-age` should be chosen carefully:
 
 - A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
 
-- A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
+- A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
 

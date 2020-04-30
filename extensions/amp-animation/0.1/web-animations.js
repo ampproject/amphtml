@@ -33,10 +33,16 @@ import {
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -62,6 +68,16 @@ let animIdCounter = 0;
 const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
+};
+
+/**
+ * Clip-path is an only CSS property we allow for animation that may require
+ * vendor prefix. And it's always "-webkit". Use a simple map to avoid
+ * expensive lookup for all other properties.
+ */
+const ADD_PROPS = {
+  'clip-path': '-webkit-clip-path',
+  'clipPath': '-webkit-clip-path',
 };
 
 /**
@@ -152,13 +168,14 @@ export class Builder {
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!../../../src/service/owners-interface.OwnersInterface} owners
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef=} options
    */
-  constructor(win, rootNode, baseUrl, vsync, owners) {
+  constructor(win, rootNode, baseUrl, vsync, owners, options = {}) {
     /** @const @private */
     this.win_ = win;
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl, options);
 
     /** @const @private */
     this.vsync_ = vsync;
@@ -182,7 +199,7 @@ export class Builder {
    * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
   createRunner(spec, opt_args, opt_positionObserverData = null) {
-    return this.resolveRequests([], spec, opt_args).then(requests => {
+    return this.resolveRequests([], spec, opt_args).then((requests) => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
@@ -399,7 +416,7 @@ export class MeasureScanner extends Scanner {
       animationElement.tagName == 'AMP-ANIMATION',
       `Element is not an animation: "${spec.animation}"`
     );
-    const otherSpecPromise = animationElement.getImpl().then(impl => {
+    const otherSpecPromise = animationElement.getImpl().then((impl) => {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
@@ -410,7 +427,7 @@ export class MeasureScanner extends Scanner {
         timing_: timing,
       } = this;
       const promise = otherSpecPromise
-        .then(otherSpec => {
+        .then((otherSpec) => {
           if (!otherSpec) {
             return;
           }
@@ -424,8 +441,10 @@ export class MeasureScanner extends Scanner {
             timing
           );
         })
-        .then(requests => {
-          requests.forEach(request => this.requests_.push(request));
+        .then((requests) => {
+          /** @type {!Array} */ (requests).forEach((request) =>
+            this.requests_.push(request)
+          );
         });
       this.deps_.push(promise);
     });
@@ -455,7 +474,7 @@ export class MeasureScanner extends Scanner {
     let specKeyframes = spec.keyframes;
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
-      const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
+      const keyframes = extractKeyframes(this.css_.rootNode, specKeyframes);
       userAssert(
         keyframes,
         `Keyframes not found in stylesheet: "${specKeyframes}"`
@@ -484,9 +503,12 @@ export class MeasureScanner extends Scanner {
           const toValue = isArray(value) ? value[0] : value;
           preparedValue = [fromValue, this.css_.resolveCss(toValue)];
         } else {
-          preparedValue = value.map(v => this.css_.resolveCss(v));
+          preparedValue = value.map((v) => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
+        if (prop in ADD_PROPS) {
+          keyframes[ADD_PROPS[prop]] = preparedValue;
+        }
       }
       return keyframes;
     }
@@ -520,6 +542,14 @@ export class MeasureScanner extends Scanner {
           }
         }
         keyframes.push(this.css_.resolveCssMap(frame));
+      }
+      for (let i = 0; i < keyframes.length; i++) {
+        const frame = keyframes[i];
+        for (const k in ADD_PROPS) {
+          if (k in frame) {
+            frame[ADD_PROPS[k]] = frame[k];
+          }
+        }
       }
       return keyframes;
     }
@@ -621,7 +651,7 @@ export class MeasureScanner extends Scanner {
     } else if (this.target_) {
       targets = [this.target_];
     }
-    targets.forEach(target => this.builder_.requireLayout(target));
+    targets.forEach((target) => this.builder_.requireLayout(target));
     return targets;
   }
 
@@ -636,7 +666,7 @@ export class MeasureScanner extends Scanner {
       return spec;
     }
     const result = map(spec);
-    spec.subtargets.forEach(subtargetSpec => {
+    spec.subtargets.forEach((subtargetSpec) => {
       const matcher = this.getMatcher_(subtargetSpec);
       if (matcher(target, index)) {
         Object.assign(result, subtargetSpec);
@@ -667,7 +697,7 @@ export class MeasureScanner extends Scanner {
     } else {
       // Match by selector, e.g. `:nth-child(2n+1)`.
       const specSelector = /** @type {string} */ (spec.selector);
-      matcher = target => {
+      matcher = (target) => {
         try {
           return matches(target, specSelector);
         } catch (e) {
@@ -819,13 +849,18 @@ class CssContextImpl {
    * @param {!Window} win
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
-  constructor(win, rootNode, baseUrl) {
+  constructor(win, rootNode, baseUrl, options) {
     /** @const @private */
     this.win_ = win;
 
-    /** @const @private */
+    /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
+
+    const {scope = null} = options;
+    /** @const @private {?Element} */
+    this.scope_ = scope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -858,6 +893,11 @@ class CssContextImpl {
     this.viewportSize_ = null;
   }
 
+  /** @return {!Document|!ShadowRoot} */
+  get rootNode() {
+    return this.rootNode_;
+  }
+
   /**
    * @param {string} mediaQuery
    * @return {boolean}
@@ -882,7 +922,7 @@ class CssContextImpl {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.rootNode_.getElementById(id);
+    return this.scopedQuerySelector_(`#${escapeCssSelectorIdent(id)}`);
   }
 
   /**
@@ -891,7 +931,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
+      return toArray(this.scopedQuerySelectorAll_(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -1204,12 +1244,18 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestAncestorElementBySelector(
+        const maybeFoundInScope = closestAncestorElementBySelector(
           this.requireTarget_(),
           selector
         );
+        if (
+          maybeFoundInScope &&
+          (!this.scope_ || this.scope_.contains(maybeFoundInScope))
+        ) {
+          element = maybeFoundInScope;
+        }
       } else {
-        element = this.rootNode_./*OK*/ querySelector(selector);
+        element = this.scopedQuerySelector_(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1231,5 +1277,29 @@ class CssContextImpl {
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
     return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelector_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelector(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelector(selector);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!NodeList}
+   * @private
+   */
+  scopedQuerySelectorAll_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelectorAll(selector);
   }
 }

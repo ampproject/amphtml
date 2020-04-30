@@ -51,7 +51,7 @@ export function blade(global, data) {
   const ctx = global.context;
 
   const bladeOnLoad = `_bladeOnLoad-${containerId}`;
-  global[bladeOnLoad] = function(error, player) {
+  global[bladeOnLoad] = function (error, player) {
     if (error) {
       global.context.noContentAvailable();
       return;
@@ -75,14 +75,13 @@ export function blade(global, data) {
       global.context.noContentAvailable();
     }
   );
-}
-
-/**
- * @param {string} elemId
- */
-function createContainer(elemId) {
-  const d = global.document.createElement('div');
-  d.id = elemId;
-  d.classList.add('blade');
-  global.document.getElementById('c').appendChild(d);
+  /**
+   * @param {string} elemId
+   */
+  function createContainer(elemId) {
+    const d = global.document.createElement('div');
+    d.id = elemId;
+    d.classList.add('blade');
+    global.document.getElementById('c').appendChild(d);
+  }
 }

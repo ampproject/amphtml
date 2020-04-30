@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-brid-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let timer;
 
@@ -72,7 +72,7 @@ describes.realWin(
         'data-partner': '264',
         'data-player': '4144',
         'data-video': '13663',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -90,7 +90,7 @@ describes.realWin(
           'data-video': '5204',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -127,7 +127,7 @@ describes.realWin(
           'data-video': '5204',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
 
         return Promise.resolve()
@@ -168,7 +168,7 @@ describes.realWin(
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -186,7 +186,7 @@ describes.realWin(
           'data-player': '979',
           'data-video': '13663',
           'aria-label': 'great video',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('alt')).to.equal(
@@ -199,7 +199,7 @@ describes.realWin(
           'data-partner': '264',
           'data-player': '979',
           'data-video': '13663',
-        }).then(brid => {
+        }).then((brid) => {
           const img = brid.querySelector('amp-img');
           const fallbackImg = img.querySelector('amp-img');
           expect(fallbackImg).to.not.be.null;

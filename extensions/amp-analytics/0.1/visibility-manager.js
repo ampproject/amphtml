@@ -18,7 +18,7 @@ import {
   DEFAULT_THRESHOLD,
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../src/intersection-observer-polyfill';
+} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
@@ -167,7 +167,7 @@ export class VisibilityManager {
     }
 
     // Unsubscribe everything else.
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -404,7 +404,7 @@ export class VisibilityManager {
         );
       }
       return () => {
-        unlisteners.forEach(unlistener => unlistener());
+        unlisteners.forEach((unlistener) => unlistener());
       };
     }
     const model = new VisibilityModel(spec, calcVisibility);
@@ -535,7 +535,7 @@ export class VisibilityManager {
 
     // Start update.
     model.update();
-    return function() {
+    return function () {
       model.dispose();
     };
   }
@@ -793,7 +793,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   onIntersectionChanges_(entries) {
-    entries.forEach(change => {
+    entries.forEach((change) => {
       let intersection = change.intersectionRect;
       // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
       // TODO(@zhouyx): Fix all InOb related type.

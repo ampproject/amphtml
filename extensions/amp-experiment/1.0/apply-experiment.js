@@ -64,7 +64,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     // count the number of mutations that will applied
     const mutationRecordsAndElements = [];
     let totalMutations = 0;
-    mutationRecords.forEach(mutationRecord => {
+    mutationRecords.forEach((mutationRecord) => {
       assertMutationRecordFormat(mutationRecord);
 
       // Select the elements from the mutation record
@@ -94,7 +94,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     );
 
     // Parse and validate all mutations
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       userAssert(
         mutation.parseAndValidate(),
         'Mutation %s has an an unsupported value.',
@@ -103,7 +103,7 @@ export function applyExperimentToVariant(ampdoc, config, experimentToVariant) {
     });
 
     // Apply all the mutations
-    mutations.forEach(mutation => {
+    mutations.forEach((mutation) => {
       mutation.mutate();
     });
   });
@@ -146,7 +146,7 @@ export function createMutationsFromMutationRecordsAndElements(
   mutationRecordsAndElements
 ) {
   const mutations = [];
-  mutationRecordsAndElements.forEach(mutationRecordAndElements => {
+  mutationRecordsAndElements.forEach((mutationRecordAndElements) => {
     const {mutationRecord, elements} = mutationRecordAndElements;
 
     let mutation = undefined;

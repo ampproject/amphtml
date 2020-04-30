@@ -24,26 +24,6 @@ limitations under the License.
 
 # amp-springboard-player
 
-Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
-  </tr>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.

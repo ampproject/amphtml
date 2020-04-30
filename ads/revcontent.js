@@ -36,6 +36,8 @@ export function revcontent(global, data) {
 
   const required = ['id', 'height'];
   const optional = [
+    'wrapper',
+    'subIds',
     'revcontent',
     'env',
     'loadscript',

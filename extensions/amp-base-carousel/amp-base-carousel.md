@@ -27,29 +27,6 @@ limitations under the License.
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-base-carousel</code> experiment to use this component.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-      fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, and responsive.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <a href="https://amp.dev/documentation/examples/components/amp-base-carousel/">amp-carousel example</a>
-    </td>
-  </tr>
-</table>
-
 ## Behavior
 
 Each of the `amp-base-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.

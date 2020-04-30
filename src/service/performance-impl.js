@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -61,11 +61,12 @@ export class Performance {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {number} */
-    this.initTime_ = this.win.Date.now();
-
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
+
+    /** @const @private {number} */
+    this.timeOrigin_ =
+      win.performance.timeOrigin || win.performance.timing.navigationStart;
 
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
@@ -144,6 +145,13 @@ export class Performance {
     this.supportsLargestContentfulPaint_ = supportedEntryTypes.includes(
       'largest-contentful-paint'
     );
+
+    /**
+     * Whether the user agent supports the navigation timing API
+     *
+     * @private {boolean}
+     */
+    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
     /**
      * The latest reported largest contentful paint time, where the loadTime
@@ -233,14 +241,10 @@ export class Performance {
     return channelPromise
       .then(() => {
         // Tick the "messaging ready" signal.
-        this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+        this.tickDelta('msr', this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tickDelta(
-          'timeOrigin',
-          this.win.performance.timeOrigin ||
-            this.win.performance.timing.navigationStart
-        );
+        this.tick('timeOrigin', undefined, this.timeOrigin_);
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -263,7 +267,7 @@ export class Performance {
    */
   maybeAddStoryExperimentId_() {
     const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
-    return isStoryDocument(ampdoc).then(isStory => {
+    return isStoryDocument(ampdoc).then((isStory) => {
       if (isStory) {
         this.addEnabledExperiment('story');
       }
@@ -293,7 +297,8 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-    const processEntry = entry => {
+    let recordedNavigation = false;
+    const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
         recordedFirstPaint = true;
@@ -322,6 +327,18 @@ export class Performance {
         if (entry.renderTime) {
           this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
+      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
+        [
+          'domComplete',
+          'domContentLoadedEventEnd',
+          'domContentLoadedEventStart',
+          'domInteractive',
+          'loadEventEnd',
+          'loadEventStart',
+          'requestStart',
+          'responseStart',
+        ].forEach((label) => this.tick(label, entry[label]));
+        recordedNavigation = true;
       }
     };
 
@@ -351,6 +368,11 @@ export class Performance {
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
+    if (this.supportsNavigation_) {
+      const navigationObserver = this.createPerformanceObserver_(processEntry);
+      navigationObserver.observe({type: 'navigation', buffered: true});
+    }
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -374,7 +396,7 @@ export class Performance {
    * @private
    */
   createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver(list => {
+    return new this.win.PerformanceObserver((list) => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
@@ -388,7 +410,7 @@ export class Performance {
     if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
       return;
     }
-    this.win.perfMetrics.onFirstInputDelay(delay => {
+    this.win.perfMetrics.onFirstInputDelay((delay) => {
       this.tickDelta('fid-polyfill', delay);
       this.flush();
     });
@@ -464,7 +486,7 @@ export class Performance {
    * method does nothing if it is available.
    */
   tickLegacyFirstPaintTime_() {
-    // Detect deprecated first pain time API
+    // Detect deprecated first paint time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
     if (
@@ -504,12 +526,10 @@ export class Performance {
    */
   measureUserPerceivedVisualCompletenessTime_() {
     const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
-    let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This will only be relevant if the ampdoc is in prerender mode.
-    // (hasn't been visible yet, ever at this point)
+    let docVisibleTime = -1;
     this.ampdoc_.whenFirstVisible().then(() => {
-      docVisibleTime = this.win.Date.now();
+      docVisibleTime = this.win.performance.now();
       // Mark this first visible instance in the browser timeline.
       this.mark('visible');
     });
@@ -518,7 +538,7 @@ export class Performance {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime =
           docVisibleTime > -1
-            ? this.win.Date.now() - docVisibleTime
+            ? this.win.performance.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
         this.ampdoc_.whenFirstVisible().then(() => {
@@ -536,9 +556,7 @@ export class Performance {
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
         this.tick('pc');
-        // We don't have the actual csi timer's clock start time,
-        // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -551,10 +569,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const {documentElement} = this.win.document;
-    const size = Services.viewportForDoc(documentElement).getSize();
-    const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
+      const {documentElement} = this.win.document;
+      const size = Services.viewportForDoc(documentElement).getSize();
+      const rect = layoutRectLtwh(0, 0, size.width, size.height);
       return whenContentIniLoad(
         documentElement,
         this.win,
@@ -572,20 +590,26 @@ export class Performance {
    *     when adding a new metric.
    * @param {number=} opt_delta The delta. Call tickDelta instead of setting
    *     this directly.
+   * @param {number=} opt_value The value to use. Overrides default calculation.
    */
-  tick(label, opt_delta) {
-    const data = dict({'label': label});
-    let storedVal;
+  tick(label, opt_delta, opt_value) {
+    devAssert(
+      opt_delta == undefined || opt_value == undefined,
+      'You may not set both opt_delta and opt_value.'
+    );
 
-    // Absolute value case (not delta).
-    if (opt_delta == undefined) {
-      // Marking only makes sense for non-deltas.
-      this.mark(label);
-      const now = this.win.Date.now();
-      data['value'] = now;
-      storedVal = now - this.initTime_;
+    const data = dict({'label': label});
+    let delta;
+
+    if (opt_delta != undefined) {
+      data['delta'] = delta = Math.max(opt_delta, 0);
+    } else if (opt_value != undefined) {
+      data['value'] = opt_value;
     } else {
-      data['delta'] = storedVal = Math.max(opt_delta, 0);
+      // Marking only makes sense for non-overridden values (and no deltas).
+      this.mark(label);
+      delta = this.win.performance.now();
+      data['value'] = this.timeOrigin_ + delta;
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
@@ -596,13 +620,13 @@ export class Performance {
 
     switch (label) {
       case 'fcp':
-        this.fcpDeferred_.resolve(storedVal);
+        this.fcpDeferred_.resolve(delta);
         break;
       case 'pc':
-        this.fvrDeferred_.resolve(storedVal);
+        this.fvrDeferred_.resolve(delta);
         break;
       case 'mbv':
-        this.mbvDeferred_.resolve(storedVal);
+        this.mbvDeferred_.resolve(delta);
         break;
     }
   }
@@ -638,7 +662,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = this.win.Date.now();
+    const now = this.timeOrigin_ + this.win.performance.now();
     const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
@@ -709,7 +733,7 @@ export class Performance {
       return;
     }
 
-    this.events_.forEach(tickEvent => {
+    this.events_.forEach((tickEvent) => {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;

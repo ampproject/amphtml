@@ -76,7 +76,7 @@ function updateBrowsers(config) {
 
   const chromeFlags = [];
   if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
+    argv.chrome_flags.split(',').forEach((flag) => {
       chromeFlags.push('--'.concat(flag));
     });
   }
@@ -127,7 +127,7 @@ function getFiles(testType) {
 
   switch (testType) {
     case 'unit':
-      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
+      files = testConfig.commonUnitTestPaths;
       if (argv.files) {
         return files.concat(argv.files);
       }
@@ -147,7 +147,7 @@ function getFiles(testType) {
       return files.concat(testConfig.integrationTestPaths);
 
     case 'a4a':
-      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
+      return testConfig.a4aTestPaths;
 
     default:
       throw new Error(`Test type ${testType} was not recognized`);
@@ -188,16 +188,16 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.browserify.configure = function(bundle) {
-      bundle.on('prebundle', function() {
+    this.browserify.configure = function (bundle) {
+      bundle.on('prebundle', function () {
         log(
           green('Transforming tests with'),
           cyan('browserify') + green('...')
         );
       });
-      bundle.on('transform', function(tr) {
+      bundle.on('transform', function (tr) {
         if (tr instanceof babelify) {
-          tr.once('babelify', function() {
+          tr.once('babelify', function () {
             process.stdout.write('.');
           });
         }
@@ -224,26 +224,6 @@ class RuntimeTestConfig {
           : ['html', 'text', 'text-summary'],
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
-
-      const instanbulPlugin = [
-        'istanbul',
-        {
-          exclude: [
-            'ads/**/*.js',
-            'build-system/**/*.js',
-            'extensions/**/test/**/*.js',
-            'third_party/**/*.js',
-            'test/**/*.js',
-            'testing/**/*.js',
-          ],
-        },
-      ];
-      // don't overwrite existing plugins
-      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
-
-      this.browserify.transform = [
-        ['babelify', {...this.babelifyConfig, plugins}],
-      ];
     }
   }
 }

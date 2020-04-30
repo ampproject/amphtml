@@ -24,28 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-form`"></a> `amp-form`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Allows you to create <code>form</code> and <code>input</code> tags.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-form/">amp-form</a> examples.</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-form
 
 ## Behavior
 
@@ -100,7 +79,7 @@ Here's an example of a basic form:
 
 ## Attributes
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ##### target
 
@@ -115,7 +94,7 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 
 [tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-[/tip][/filter] <!-- formats="websites, stories, ads" -->
+[/tip][/filter] <!-- formats="websites, ads" -->
 
 ##### action-xhr
 
@@ -129,9 +108,19 @@ This attribute is required for `method=POST`, and is optional for `method=GET`.
 
 The value for `action-xhr` can be the same or a different endpoint than `action` and has the same `action` requirements above.
 
+[filter formats="websites, ads"]
+
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
-[filter formats="websites, stories, ads"]
+##### enctype (optional)
+
+The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
+
+Summary of enctype values:
+
+- `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
+- `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
+- `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
 
 ##### data-initialize-from-url (optional)
 
@@ -162,13 +151,13 @@ Limitations:
 Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
 This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ##### custom-validation-reporting
 
@@ -176,7 +165,7 @@ This is an optional attribute that enables and selects a custom validation repor
 
 See the [Custom Validation](#custom-validations) section for more details.
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -302,6 +291,8 @@ For example, a common use case is to submit a form on input change (selecting a 
 
 See the [full example here](../../examples/forms.amp.html).
 
+[filter formats="websites, ads"]
+
 ### Analytics triggers
 
 The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
@@ -363,6 +354,8 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 - `formId`
 - `formFields[comment]`
 
+[/filter]<!-- formats="websites, ads" -->
+
 ## Success/error response rendering
 
 You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://amp.dev/documentation/components/amp-mustache), or success responses through data binding with [amp-bind](https://amp.dev/documentation/components/amp-bind) and the following response attributes:
@@ -391,12 +384,6 @@ In the following example, the responses are rendered in an inline template insid
     <input type="text" name="firstName" />
     ...
   </fieldset>
-  <div verify-error>
-    <template type="amp-mustache">
-      There is a mistake in the form!
-      {{#verifyErrors}}{{message}}{{/verifyErrors}}
-    </template>
-  </div>
   <div submitting>
     <template type="amp-mustache">
       Form submitting... Thank you for waiting {{name}}.

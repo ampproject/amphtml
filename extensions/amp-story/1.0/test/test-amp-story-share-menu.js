@@ -24,9 +24,10 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
+import {getStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;
   let parentEl;
   let shareMenu;
@@ -37,7 +38,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -53,7 +54,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     // Making sure the vsync tasks run synchronously.
     env.sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+      mutate: (fn) => fn(),
       run: (vsyncTaskSpec, vsyncState) => {
         vsyncTaskSpec.measure(vsyncState);
         vsyncTaskSpec.mutate(vsyncState);
@@ -61,7 +62,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
+    registerServiceBuilder(win, 'localization', function () {
       return localizationService;
     });
 
@@ -163,7 +164,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_).to.have.display('none');
+    expect(getStyle(shareMenu.element_, 'visibility')).to.equal('hidden');
   });
 
   it('should load the amp-social-share extension if system share', () => {

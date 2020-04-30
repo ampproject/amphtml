@@ -22,6 +22,12 @@
 let optsSupported;
 
 /**
+ * Whether addEventListener supports options or only takes passive as a boolean
+ * @type {boolean|undefined}
+ */
+let passiveSupported;
+
+/**
  * Listens for the specified event on the element.
  *
  * Do not use this directly. This method is implemented as a shared
@@ -47,7 +53,7 @@ export function internalListenImplementation(
    */
   let wrapped;
 
-  wrapped = event => {
+  wrapped = (event) => {
     try {
       return localListener(event);
     } catch (e) {
@@ -114,4 +120,41 @@ export function detectEvtListenerOptsSupport() {
  */
 export function resetEvtListenerOptsSupportForTesting() {
   optsSupported = undefined;
+}
+
+/**
+ * Return boolean. if listener option is supported, return `true`.
+ * if not supported, return `false`
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function supportsPassiveEventListener(win) {
+  if (passiveSupported !== undefined) {
+    return passiveSupported;
+  }
+
+  passiveSupported = false;
+  try {
+    const options = {
+      get passive() {
+        // This function will be called when the browser
+        // attempts to access the passive property.
+        passiveSupported = true;
+        return false;
+      },
+    };
+
+    win.addEventListener('test-options', null, options);
+    win.removeEventListener('test-options', null, options);
+  } catch (err) {
+    // EventListenerOptions are not supported
+  }
+  return passiveSupported;
+}
+
+/**
+ * Resets the test for whether addEventListener supports passive options or not.
+ */
+export function resetPassiveSupportedForTesting() {
+  passiveSupported = undefined;
 }

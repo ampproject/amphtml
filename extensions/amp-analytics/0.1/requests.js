@@ -145,7 +145,7 @@ export class RequestHandler {
         this.whiteList_
       );
 
-      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
+      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
           bindings,
@@ -173,7 +173,7 @@ export class RequestHandler {
           this.whiteList_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
-        .then(expandedRequestOrigin => {
+        .then((expandedRequestOrigin) => {
           return this.urlReplacementService_.expandUrlAsync(
             expandedRequestOrigin,
             bindings,
@@ -193,7 +193,7 @@ export class RequestHandler {
       bindings,
       this.element_,
       this.whiteList_
-    ).then(params => {
+    ).then((params) => {
       return dict({
         'trigger': trigger['on'],
         'timestamp': timestamp,
@@ -258,7 +258,7 @@ export class RequestHandler {
       ? requestOriginPromise
       : baseUrlTemplatePromise;
 
-    preconnectPromise.then(preUrl => {
+    preconnectPromise.then((preUrl) => {
       this.preconnect_.url(this.ampdoc_, preUrl, true);
     });
 
@@ -266,7 +266,7 @@ export class RequestHandler {
       baseUrlPromise,
       Promise.all(segmentPromises),
       requestOriginPromise,
-    ]).then(results => {
+    ]).then((results) => {
       const requestUrl = this.composeRequestUrl_(results[0], results[2]);
 
       const batchSegments = results[1];
@@ -421,7 +421,7 @@ export function expandPostMessage(
 
   const basePromise = variableService
     .expandTemplate(msg, expansionOption, element)
-    .then(base => {
+    .then((base) => {
       return urlReplacementService.expandStringAsync(base, bindings);
     });
   if (msg.indexOf('${extraUrlParams}') < 0) {
@@ -429,7 +429,7 @@ export function expandPostMessage(
     return basePromise;
   }
 
-  return basePromise.then(expandedMsg => {
+  return basePromise.then((expandedMsg) => {
     const params = {...configParams, ...trigger['extraUrlParams']};
     //return base url with the appended extra url params;
     return expandExtraUrlParams(
@@ -439,7 +439,7 @@ export function expandPostMessage(
       expansionOption,
       bindings,
       element
-    ).then(extraUrlParams => {
+    ).then((extraUrlParams) => {
       return defaultSerializer(expandedMsg, [
         dict({'extraUrlParams': extraUrlParams}),
       ]);
@@ -483,19 +483,21 @@ function expandExtraUrlParams(
     if (typeof value === 'string') {
       const request = variableService
         .expandTemplate(value, option, element)
-        .then(value =>
+        .then((value) =>
           urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
         )
-        .then(value => (params[key] = value));
+        .then((value) => (params[key] = value));
       requestPromises.push(request);
     } else if (isArray(value)) {
-      value.forEach((_, index) => expandObject(value, index));
+      /** @type {!Array} */ (value).forEach((_, index) =>
+        expandObject(value, index)
+      );
     } else if (isObject(value) && value !== null) {
-      Object.keys(value).forEach(key => expandObject(value, key));
+      Object.keys(value).forEach((key) => expandObject(value, key));
     }
   };
 
-  Object.keys(params).forEach(key => expandObject(params, key));
+  Object.keys(params).forEach((key) => expandObject(params, key));
 
   return Promise.all(requestPromises).then(() => params);
 }

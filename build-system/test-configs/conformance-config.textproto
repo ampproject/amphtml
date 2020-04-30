@@ -115,6 +115,18 @@ requirement: {
   whitelist: 'src/string.js'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.matchAll is not allowed'
+  value: 'string.prototype.matchAll'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.replaceAll is not allowed'
+  value: 'string.prototype.replaceAll'
+}
+
 # Object
 
 requirement: {
@@ -184,9 +196,21 @@ requirement: {
 # Promise
 
 requirement: {
-  type: BANNED_NAME
+  type: BANNED_PROPERTY_CALL
   error_message: 'Promise.prototype.finally is not allowed'
   value: 'Promise.prototype.finally'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Promise.prototype.allSettled is not allowed'
+  value: 'Promise.prototype.allSettled'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Promise.prototype.any is not allowed'
+  value: 'Promise.prototype.any'
 }
 
 # Number
@@ -219,6 +243,24 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
+  error_message: 'Reflect is not allowed'
+  value: 'Reflect'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Proxy is not allowed'
+  value: 'Proxy'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Intl is not allowed'
+  value: 'Intl'
+}
+
+requirement: {
+  type: BANNED_NAME
   error_message: 'Map is not allowed'
   value: 'Map'
 }
@@ -245,6 +287,12 @@ requirement: {
   type: BANNED_NAME
   error_message: 'Symbol is not allowed'
   value: 'Symbol'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'BigInt is not allowed'
+  value: 'BigInt'
 }
 
 requirement: {
@@ -347,6 +395,12 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
   value: 'Function.prototype.name'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'NodeList.prototype.forEach is not available in IE11. Convert to Array first.'
+  value: 'NodeList.prototype.forEach'
 }
 
 

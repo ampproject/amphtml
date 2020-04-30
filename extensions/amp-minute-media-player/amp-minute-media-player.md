@@ -23,26 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-minute-media-player`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An amp-minute-media-player component displays Minute Media player</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-minute-media-player" src="https://cdn.ampproject.org/v0/amp-minute-media-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td></td>
-  </tr>
-</table>
+# amp-minute-media-player
 
 ## Example
 
@@ -77,7 +58,7 @@ Example with FIXED layout - fixed width and height.
   <tr>
     <td width="40%"><strong>data-content-type</strong></td>
     <td><p>The Minute Media player type.</p>
-    <p>The options are <strong>'specific'</strong> or <strong>'semantic'</strong> .</p> 
+    <p>The options are <strong>'specific'</strong> or <strong>'semantic'</strong> .</p>
     <p>Choose <strong>'specific'</strong> in order to play specific content (insert the content id in the data-content-id attribute).</p>
     <p>By choosing <strong>'semantic'</strong> the playlist will be automatically created and match the content of the article to the most relevant video in real time.</p></td>
   </tr>
@@ -118,7 +99,7 @@ Example with FIXED layout - fixed width and height.
        <li>the video is automatically muted before autoplay starts</li>
        <li>when the video is scrolled out of view, the video is paused</li>
        <li>when the video is scrolled into view, the video resumes playback</li>
-       <li>when the user taps the video, the video is unmuted</li> 
+       <li>when the user taps the video, the video is unmuted</li>
        <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused..</li>
     </ul></p></td>
   </tr>

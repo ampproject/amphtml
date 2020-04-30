@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isLocalhostOrigin} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -137,11 +138,10 @@ export class Navigation {
      * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
      * @private @const {!Element|!ShadowRoot}
      */
-    this.serviceContext_ =
-      /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-      Node.DOCUMENT_NODE
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
+    this.serviceContext_ = /** @type {!Element|!ShadowRoot} */ (this.rootNode_
+      .nodeType == Node.DOCUMENT_NODE
+      ? this.rootNode_.documentElement
+      : this.rootNode_);
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -149,8 +149,20 @@ export class Navigation {
     this.rootNode_.addEventListener(EVENT_TYPE_CONTEXT_MENU, this.boundHandle_);
     /** @private {boolean} */
     this.appendExtraParams_ = false;
-    shouldAppendExtraParams(this.ampdoc).then(res => {
+    shouldAppendExtraParams(this.ampdoc).then((res) => {
       this.appendExtraParams_ = res;
+    });
+
+    /** @private {boolean} */
+    this.isTrustedViewer_ = false;
+    /** @private {boolean} */
+    this.isLocalViewer_ = false;
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
     });
 
     /**
@@ -337,7 +349,7 @@ export class Navigation {
       return meta
         .getAttribute('content')
         .split(',')
-        .map(s => s.trim());
+        .map((s) => s.trim());
     }
     return [];
   }
@@ -422,7 +434,7 @@ export class Navigation {
    * @param {!Event} e
    */
   applyAnchorMutators_(element, e) {
-    this.anchorMutators_.forEach(anchorMutator => {
+    this.anchorMutators_.forEach((anchorMutator) => {
       anchorMutator(element, e);
     });
   }
@@ -433,7 +445,7 @@ export class Navigation {
    * @return {string}
    */
   applyNavigateToMutators_(url) {
-    this.navigateToMutators_.forEach(mutator => {
+    this.navigateToMutators_.forEach((mutator) => {
       url = mutator(url);
     });
     return url;
@@ -515,7 +527,7 @@ export class Navigation {
     const relations = element
       .getAttribute('rel')
       .split(' ')
-      .map(s => s.trim());
+      .map((s) => s.trim());
     if (!relations.includes('amphtml')) {
       return false;
     }
@@ -566,6 +578,10 @@ export class Navigation {
         viewer.isEmbedded()
       ) {
         this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
+      }
+
+      if (this.viewerInterceptsNavigation(to, 'intercept_click')) {
+        e.preventDefault();
       }
     }
   }
@@ -738,6 +754,47 @@ export class Navigation {
     const baseHref =
       getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
     return this.parseUrl_(baseHref);
+  }
+
+  /**
+   * Requests navigation through a Viewer to the given destination.
+   *
+   * This function only proceeds if:
+   * 1. The viewer supports the 'interceptNavigation' capability.
+   * 2. The contained AMP doc has 'opted in' via including the 'allow-navigation-interception'
+   * attribute on the <html> tag.
+   * 3. The viewer is trusted or from localhost.
+   *
+   * @param {string} url A URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  viewerInterceptsNavigation(url, requestedBy) {
+    const viewerHasCapability = this.viewer_.hasCapability(
+      'interceptNavigation'
+    );
+    const docOptedIn = this.ampdoc
+      .getRootNode()
+      .documentElement.hasAttribute('allow-navigation-interception');
+
+    if (
+      !viewerHasCapability ||
+      !docOptedIn ||
+      !(this.isTrustedViewer_ || this.isLocalViewer_)
+    ) {
+      return false;
+    }
+
+    this.viewer_.sendMessage(
+      'navigateTo',
+      dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      })
+    );
+    return true;
   }
 }
 
