@@ -867,6 +867,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       onVisibilityChanged: () => {},
       whenFirstVisible: () => unresolvedPromise,
       getVisibilityState: () => viewerVisibilityState,
+      getFirstVisibleTime: () => 0,
     });
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => {},
@@ -1005,6 +1006,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     beforeEach(() => {
       setupFakesForVisibilityStateManipulation();
     });
+
     it('after performance service registered', () => {
       // Fake the Performance API.
       fakeWin.PerformanceObserver.supportedEntryTypes = [
@@ -1049,7 +1051,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'lcpl',
         delta: 10,

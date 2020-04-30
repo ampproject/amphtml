@@ -535,12 +535,15 @@ export class Performance {
   tickLargestContentfulPaint_() {
     if (this.largestContentfulPaintLoadTime_ !== null) {
       this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
-      this.tickSinceVisible('lcp-v', this.largestContentfulPaintLoadTime_);
     }
     if (this.largestContentfulPaintRenderTime_ !== null) {
       this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
-      this.tickSinceVisible('lcp-v', this.largestContentfulPaintRenderTime_);
     }
+    this.tickSinceVisible(
+      'lcp-v',
+      this.largestContentfulPaintLoadTime_ ||
+        this.largestContentfulPaintRenderTime_
+    );
     this.flush();
   }
 
@@ -678,11 +681,12 @@ export class Performance {
   /**
    * Tick time delta since the document has become visible.
    * @param {string} label The variable name as it will be reported.
+   * @param {number=} opt_value If present, use this value instead of now for comparison
    */
-  tickSinceVisible(label) {
-    const now = this.timeOrigin_ + this.win.performance.now();
+  tickSinceVisible(label, opt_value) {
+    const end = opt_value || this.timeOrigin_ + this.win.performance.now();
     const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
-    const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
+    const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }
 
