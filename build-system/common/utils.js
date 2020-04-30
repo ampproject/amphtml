@@ -85,7 +85,9 @@ function logFiles(files) {
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
-  return argv.files ? globby.sync(argv.files.split(/\s*,\s*/)) : [];
+  return argv.files
+    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    : [];
 }
 
 /**
