@@ -101,6 +101,8 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     const promptContainer = root.querySelector(
       '.i-amphtml-story-reaction-quiz-prompt-container'
     );
+
+    // First child must be heading h1-h3
     if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
       dev().error(
         TAG,

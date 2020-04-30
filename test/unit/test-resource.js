@@ -28,9 +28,11 @@ describes.realWin('Resource', {amp: true}, (env) => {
   let elementMock;
   let resources;
   let resource;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
+    sandbox = env.sandbox;
     doc = win.document;
 
     element = env.createAmpElement('amp-fake-element');
@@ -100,6 +102,24 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('updateLayoutBox').never();
     return resource.build().then(() => {
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
+    });
+  });
+
+  describe('intersect-resources', () => {
+    beforeEach(() => {
+      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
+      resource = new Resource(1, element, resources);
+    });
+
+    it('should be ready for layout if measured before build', () => {
+      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.measure(/* usePremeasuredRect */ true);
+      elementMock.expects('isUpgraded').returns(true).atLeast(1);
+      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
+      return resource.build().then(() => {
+        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      });
     });
   });
 
@@ -987,59 +1007,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });
-  });
-});
-
-describe('Resource idleRenderOutsideViewport', () => {
-  let element;
-  let resources;
-  let resource;
-  let idleRenderOutsideViewport;
-  let isWithinViewportRatio;
-
-  beforeEach(() => {
-    idleRenderOutsideViewport = window.sandbox.stub();
-    element = {
-      idleRenderOutsideViewport,
-      ownerDocument: {defaultView: window},
-      tagName: 'AMP-AD',
-      hasAttribute: () => false,
-      isBuilt: () => false,
-      isBuilding: () => false,
-      isUpgraded: () => false,
-      prerenderAllowed: () => false,
-      renderOutsideViewport: () => true,
-      build: () => false,
-      getBoundingClientRect: () => null,
-      updateLayoutBox: () => {},
-      isRelayoutNeeded: () => false,
-      layoutCallback: () => {},
-      applySize: () => {},
-      unlayoutOnPause: () => false,
-      unlayoutCallback: () => true,
-      pauseCallback: () => false,
-      resumeCallback: () => false,
-      viewportCallback: () => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
-    };
-    resources = new ResourcesImpl(new AmpDocSingle(window));
-    resource = new Resource(1, element, resources);
-    isWithinViewportRatio = window.sandbox.stub(
-      resource,
-      'isWithinViewportRatio'
-    );
-  });
-
-  it('should return true if isWithinViewportRatio', () => {
-    idleRenderOutsideViewport.returns(5);
-    isWithinViewportRatio.withArgs(5).returns(true);
-    expect(resource.idleRenderOutsideViewport()).to.equal(true);
-  });
-
-  it('should return false for false element idleRenderOutsideViewport', () => {
-    idleRenderOutsideViewport.returns(false);
-    isWithinViewportRatio.withArgs(false).returns(false);
-    expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
 
