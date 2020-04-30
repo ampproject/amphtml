@@ -71,15 +71,14 @@ describe
     const extensions = ['amp-lightbox', 'amp-accordion'];
     const section = `
       <section>
-          <h1 id="open-section">Title</h1>
-          <div>
-              <amp-img
-                id="image"
-                src="/examples/img/cats-anim.gif"
-                width="400px"
-                height="225px"
-              />
-          </div>
+        <h1>Title</h1>
+        <div>
+          <amp-img
+            src="/examples/img/cats-anim.gif"
+            width="400px"
+            height="225px"
+          />
+        </div>
       </section>
     `;
     const sections = [];
@@ -88,13 +87,24 @@ describe
     }
     const body = `
       <button id="open-lightbox" on="tap:lightbox">
-          Open
+        Open
       </button>
       <amp-lightbox id="lightbox" layout="nodisplay" scrollable="">
-          <amp-accordion id="accordion" animate="">
-            ${sections.join('')}
-          </amp-accordion>
-          <button on="tap:lightbox.close">Hide</button>
+        <amp-accordion id="accordion" animate="">
+          <section>
+            <h1 id="open-section">Title</h1>
+            <div>
+              <amp-img
+                id="image"
+                src="/examples/img/cats-anim.gif"
+                width="400px"
+                height="225px"
+              />
+            </div>
+          </section>
+          ${sections.join('')}
+        </amp-accordion>
+        <button on="tap:lightbox.close">Hide</button>
       </amp-lightbox>
     `;
     describes.integration(
@@ -116,7 +126,7 @@ describe
           return timeout(300).then(() => {
             const section = doc.getElementById('open-section');
             section.click();
-            return timeout(300).then(() => {
+            return timeout(1000).then(() => {
               const img = doc.getElementById('image');
               expect(img.childElementCount).to.equal(1);
             });
