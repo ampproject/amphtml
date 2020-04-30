@@ -117,14 +117,8 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
-    // TODO(ccordry): there is a lot of other unnecessary work happening in
-    // this class for inabox case, but will require a larger refactor.
-    const isInabox = getMode(this.win).runtime === 'inabox';
-
     const supportedEntryTypes =
-      // Turn off most performance metrics for inabox as there is no viewer.
-      (!isInabox &&
-        this.win.PerformanceObserver &&
+      (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
       [];
     /**
@@ -295,6 +289,14 @@ export class Performance {
    * See https://github.com/WICG/paint-timing
    */
   registerPerformanceObserver_() {
+    // Turn off performanceObserver derived metrics for inabox as there
+    // will never be a viewer to report to.
+    // TODO(ccordry): we are still doing some other unnecessary measurements for
+    // the inabox case, but would need a larger refactor.
+    if (getMode(this.win).runtime === 'inabox') {
+      return;
+    }
+
     // Chromium doesn't implement the buffered flag for PerformanceObserver.
     // That means we need to read existing entries and maintain state
     // as to whether we have reported a value yet, since in the future it may

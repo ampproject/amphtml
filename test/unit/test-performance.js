@@ -1363,9 +1363,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     });
 
     it('disables many observers', () => {
-      // Disable creation of paint observer.
-      env.win.PerformancePaintTiming = null;
-
       PerformanceObserverConstructorStub.supportedEntryTypes = [
         'navigation',
         'largest-contentful-paint',
@@ -1373,8 +1370,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         'layout-shift',
       ];
       installPerformanceService(env.win);
-      const mode = getMode(env.win);
-      mode.runtime = 'inabox';
+      env.win.__AMP_MODE.runtime = 'inabox';
       Services.performanceFor(env.win);
       // Each supported entryType currently leads to creation of new observer.
       expect(PerformanceObserverConstructorStub).not.to.be.called;
