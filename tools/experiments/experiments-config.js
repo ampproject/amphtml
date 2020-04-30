@@ -326,4 +326,9 @@ export const EXPERIMENTS = [
     name: 'Removing the centering css rule for amp-ad',
     spec: 'https://github.com/ampproject/amphtml/issues/27095',
   },
+  {
+    id: 'fie-init-chunking',
+    name: 'More chunking for friendly iframe initialization',
+    spec: 'https://github.com/ampproject/amphtml/issues/27584',
+  },
 ];
