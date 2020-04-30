@@ -17,6 +17,7 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
@@ -1535,6 +1536,7 @@ describes.repeated(
           const actions = {
             installActionHandler: () => {},
             trigger: env.sandbox.spy(),
+            addToWhitelist: () => {},
           };
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
@@ -2984,6 +2986,51 @@ describes.repeated(
               });
             });
           });
+        });
+
+        it('should allow default actions in email documents', async () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          const action = new ActionService(env.ampdoc, env.win.document);
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+          const element = getForm();
+          document.body.appendChild(element);
+          const form = new AmpForm(element, 'test-id');
+          const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
+          action.execute(
+            element,
+            'clear',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          expect(clearSpy).to.be.called;
+
+          env.sandbox.stub(form, 'submit_');
+          const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
+          action.execute(
+            element,
+            'submit',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          await whenCalled(submitSpy);
+          expect(submitSpy).to.be.calledWith(
+            env.sandbox.match({
+              actionEventType: '?',
+              args: null,
+              caller: 'caller',
+              event: 'event',
+              method: 'submit',
+              node: element,
+              source: 'source',
+              trust: ActionTrust.HIGH,
+            })
+          );
         });
 
         describe('Async Inputs', () => {

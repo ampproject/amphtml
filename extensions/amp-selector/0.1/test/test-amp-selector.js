@@ -15,9 +15,15 @@
  */
 
 import '../amp-selector';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Keys} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 
 describes.realWin(
   'amp-selector',
@@ -1428,6 +1434,59 @@ describes.realWin(
               expect(ampSelector.children[2].tabIndex).to.equal(0);
             });
         });
+      });
+    });
+  }
+);
+
+describes.realWin(
+  'amp-selector component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-selector:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-selector',
+        {'layout': 'container'}
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.stub(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl();
+      env.sandbox.stub(impl, 'setSelection_');
+
+      [('clear', 'selectDown', 'selectUp', 'toggle')].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
       });
     });
   }

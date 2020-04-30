@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
@@ -1413,5 +1418,61 @@ describes.repeated(
         }); // with amp-bind
       }
     );
+  }
+);
+
+describes.realWin(
+  'amp-list component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-list'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-list',
+        {
+          'width': '300',
+          'height': '100',
+          'src': 'https://data.com/list.json',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
+      await whenUpgradedToCustomElement(element);
+      env.sandbox.stub(element.implementation_, 'fetchList_');
+
+      ['changeToLayoutContainer', 'refresh'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
+      });
+    });
   }
 );
