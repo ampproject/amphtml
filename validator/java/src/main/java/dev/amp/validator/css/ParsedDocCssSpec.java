@@ -4,9 +4,12 @@ import com.google.protobuf.ProtocolStringList;
 import dev.amp.validator.ParsedUrlSpec;
 import dev.amp.validator.ValidatorProtos;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
 
 public class ParsedDocCssSpec {
   /**
@@ -60,6 +63,42 @@ public class ParsedDocCssSpec {
 //        }
 //      }
 //    }
+  }
+
+  /**
+   * @param candidate Returns the CssDeclaration rules for a matching css declaration name, if is
+   *                  found, else null.
+   * @return the CssDeclaration rules for a matching css declaration name, else null
+   */
+  public ValidatorProtos.CssDeclaration getCssDeclarationSvgByName(@Nonnull final String candidate) {
+    String key = candidate.toLowerCase();
+    if (this.getSpec().getExpandVendorPrefixes()) {
+      key = stripVendorPrefix(key);
+    }
+    ValidatorProtos.CssDeclaration cssDeclaration = this.cssDeclarationSvgByName.get(key);
+    if (cssDeclaration != null) {
+      return cssDeclaration;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the CssDeclaration rules for a matching css declaration name, if is
+   * found, else null.
+   *
+   * @param candidate to check for
+   * @return the CssDeclaration from mapping
+   */
+  public ValidatorProtos.CssDeclaration getCssDeclarationByName(@Nonnull final String candidate) {
+    String key = candidate.toLowerCase();
+    if (this.getSpec().getExpandVendorPrefixes()) {
+      key = stripVendorPrefix(key);
+    }
+    ValidatorProtos.CssDeclaration cssDeclaration = this.cssDeclarationByName.get(key);
+    if (cssDeclaration != null) {
+      return cssDeclaration;
+    }
+    return null;
   }
 
   /**
@@ -120,6 +159,13 @@ public class ParsedDocCssSpec {
    */
   private final HashMap<String, ValidatorProtos.CssDeclaration> cssDeclarationSvgByName;
 
+  /**
+   *
+   */
   private ParsedUrlSpec imageUrlSpec;
+
+  /**
+   *
+   */
   private ParsedUrlSpec fontUrlSpec;
 }

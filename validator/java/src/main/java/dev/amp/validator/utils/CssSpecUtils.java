@@ -38,6 +38,7 @@ import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.css.Stylesheet;
 import dev.amp.validator.css.TokenType;
 import dev.amp.validator.visitor.*;
+import net.sf.saxon.trans.Err;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.util.Map;
 import static dev.amp.validator.css.CssTokenUtil.copyPosTo;
 import static dev.amp.validator.css.CssTokenUtil.getTokenType;
 import static dev.amp.validator.utils.ByteUtils.byteLength;
+import static dev.amp.validator.utils.TagSpecUtils.getTagSpecName;
 
 /**
  * Methods to handle Css Spec processing.
@@ -124,8 +126,8 @@ public final class CssSpecUtils {
    * @param errors      reference
    * @throws CssValidationException CssValidationException
    */
-  public void extractUrlsFromDeclaration(@Nonnull final Declaration declaration, @Nonnull final List<ParsedCssUrl> parsedUrls,
-                                         @Nonnull final List<ErrorToken> errors) throws CssValidationException {
+  public static void extractUrlsFromDeclaration(@Nonnull final Declaration declaration, @Nonnull final List<ParsedCssUrl> parsedUrls,
+                                                @Nonnull final List<ErrorToken> errors) throws CssValidationException {
     final int parsedUrlsOldLength = parsedUrls.size();
     final int errorsOldLength = errors.size();
     final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedUrls, errors);
@@ -377,158 +379,172 @@ public final class CssSpecUtils {
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);
     }
 
-// TODO
-//  /**
-//   * Helper method for ValidateAttributes.
-//   *
-//   * @param parsedAttrSpec
-//   * @param context
-//   * @param tagSpec
-//   * @param attrName
-//   * @param attrValue
-//   * @param result
-//   * @throws IOException for css tokenize
-//   */
-//  public static void validateAttrCss(
-//    @Nonnull final ParsedAttrSpec parsedAttrSpec,
-//    @Nonnull final Context context,
-//    @Nonnull final String tagSpec,
-//    @Nonnull final String attrName,
-//    @Nonnull final String attrValue,
-//    @Nonnull final ValidateTagResult result) throws IOException, CssValidationException {
-//
-//    final int attrByteLen = byteLength(attrValue);
-//
-//    // Track the number of CSS bytes. If this tagspec is selected as the best
-//    // match, this count will be added to the overall document inline style byte
-//    // count for determining if that byte count has been exceeded.
-//    result.setInlineStyleCssBytes(attrByteLen);
-//
-//    final List<ErrorToken> cssErrors = new ArrayList<>();
-//    // The line/col we are passing in here is not the actual start point in the
-//    // text for the attribute string. It's the start point for the tag. This
-//    // means that any line/col values for tokens are also similarly offset
-//    // incorrectly. For error messages, this means we just use the line/col of
-//    // the tag instead of the token so as to minimize confusion. This could be
-//    // improved further.
-//    // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute
-//    // attribute offsets for use in CSS error messages.
-//    final CssParser cssParser = new CssParser(attrValue,
-//      context.getLineCol().getLineNumber(), context.getLineCol().getColumnNumber(), cssErrors);
-//    final List<Token> tokenList = cssParser.tokenize();
-//
-//    final List<Declaration> declarations = parseInlineStyle(tokenList, cssErrors);
-//
-//    for (final ErrorToken errorToken : cssErrors) {
-//      // Override the first parameter with the name of this style tag.
-//      final List<String> params = errorToken.getParams();
-//      // Override the first parameter with the name of this style tag.
-//      params.set(0, tagSpec);
-//      context.addError(
-//        errorToken.getCode(),
-//        errorToken.getLine(),
-//        errorToken.getCol(),
-//        params,
-//        /* url */ "",
-//        result.getValidationResult());
-//    }
-//
-//    // If there were errors parsing, exit from validating further.
-//    if (cssErrors.size() > 0) {
-//      return;
-//    }
-//
-//    /** @type {?ParsedDocCssSpec} */
-//  final ParsedDocCssSpec maybeSpec = context.matchingDocCssSpec();
-//    if (maybeSpec != null) {
-//      // Determine if we've exceeded the maximum bytes per inline style
-//      // requirements.
-//      if (maybeSpec.getSpec().maxBytesPerInlineStyle >= 0 &&
-//        attrByteLen > maybeSpec.getSpec().maxBytesPerInlineStyle) {
-//        if (maybeSpec.spec().maxBytesIsWarning) {
-//          context.addWarning(
-//            generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
-//            context.getLineCol(), /* params */
-//            [
-//            getTagSpecName(tagSpec), attrByteLen.toString(),
-//            maybeSpec.spec().maxBytesPerInlineStyle.toString()
-//            ],
-//          maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
-//        } else {
-//          context.addError(
-//            generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
-//            context.getLineCol(), /* params */
-//            [
-//            getTagSpecName(tagSpec), attrByteLen.toString(),
-//            maybeSpec.spec().maxBytesPerInlineStyle.toString()
-//            ],
-//          maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
-//        }
-//      }
-//
-//      // Loop over the declarations found in the document, verify that they are
-//      // in the allowed list for this DocCssSpec, and have allowed values if
-//      // relevant.
-//      for (const declaration of declarations){
-//        // Allowed declarations vary by context. SVG has its own set of CSS
-//        // declarations not supported generally in HTML.
-//      const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss == = true ?
-//          maybeSpec.cssDeclarationSvgByName(declaration.name) :
-//          maybeSpec.cssDeclarationByName(declaration.name);
-//        // If there is no matching declaration in the rules, then this declaration
-//        // is not allowed.
-//        if (cssDeclaration == = null) {
-//          context.addError(
-//            generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
-//            context.getLineCol(), /* params */
-//            [declaration.name, attrName, getTagSpecName(tagSpec)],
-//          context.getRules().getStylesSpecUrl(), result.validationResult);
-//          // Don't emit additional errors for this declaration.
-//          continue;
-//        } else if (cssDeclaration.valueCasei.length > 0) {
-//          let hasValidValue = false;
-//        const firstIdent = declaration.firstIdent();
-//          for (const value of cssDeclaration.valueCasei){
-//            if (firstIdent.toLowerCase() == value) {
-//              hasValidValue = true;
-//              break;
-//            }
-//          }
-//          if (!hasValidValue) {
-//            // Declaration value not allowed.
-//            context.addError(
-//              generated.ValidationError.Code
-//                .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-//              context.getLineCol(), /* params */
-//              [getTagSpecName(tagSpec), declaration.name, firstIdent],
-//            context.getRules().getStylesSpecUrl(), result.validationResult);
-//          }
-//        }
-//        if (!maybeSpec.spec().allowImportant) {
-//          if (declaration.important)
-//            // TODO(gregable): Use a more specific error message for
-//            // `!important` errors.
-//            context.addError(
-//              generated.ValidationError.Code.INVALID_ATTR_VALUE,
-//              context.getLineCol(),
-//              /* params */
-//              [attrName, getTagSpecName(tagSpec), 'CSS !important'],
-//          context.getRules().getStylesSpecUrl(), result.validationResult);
-//        }
-//        /** @type {!Array<!tokenize_css.ErrorToken>} */
-//        let urlErrors = [];
-//        /** @type {!Array<!parse_css.ParsedCssUrl>} */
-//        let parsedUrls = [];
-//        parse_css.extractUrlsFromDeclaration(declaration, parsedUrls, urlErrors);
-//        for (const errorToken of urlErrors){
-//          // Override the first parameter with the name of the tag.
-//          /** @type {!Array<string>} */
-//          let params = errorToken.params;
-//          params[0] = getTagSpecName(tagSpec);
-//          context.addError(
-//            errorToken.code, context.getLineCol(), params, /* spec_url*/ '',
-//            result.validationResult);
-//        }
+  /**
+   * Helper method for ValidateAttributes.
+   *
+   * @param parsedAttrSpec
+   * @param context
+   * @param tagSpec
+   * @param attrName
+   * @param attrValue
+   * @param result
+   * @throws IOException for css tokenize
+   */
+  public static void validateAttrCss(
+    @Nonnull final ParsedAttrSpec parsedAttrSpec,
+    @Nonnull final Context context,
+    @Nonnull final ValidatorProtos.TagSpec tagSpec,
+    @Nonnull final String attrName,
+    @Nonnull final String attrValue,
+  @Nonnull final ValidateTagResult result) throws IOException, CssValidationException {
+    final int attrByteLen = byteLength(attrValue);
+
+    // Track the number of CSS bytes. If this tagspec is selected as the best
+    // match, this count will be added to the overall document inline style byte
+    // count for determining if that byte count has been exceeded.
+    result.setInlineStyleCssBytes(attrByteLen);
+
+    final List<ErrorToken> cssErrors = new ArrayList<>();
+    // The line/col we are passing in here is not the actual start point in the
+    // text for the attribute string. It's the start point for the tag. This
+    // means that any line/col values for tokens are also similarly offset
+    // incorrectly. For error messages, this means we just use the line/col of
+    // the tag instead of the token so as to minimize confusion. This could be
+    // improved further.
+    // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute
+    // attribute offsets for use in CSS error messages.
+    final CssParser cssParser = new CssParser(attrValue,
+      context.getLineCol().getLineNumber(), context.getLineCol().getColumnNumber(), cssErrors);
+    final List<Token> tokenList = cssParser.tokenize();
+
+    final List<Declaration> declarations = parseInlineStyle(tokenList, cssErrors);
+
+    for (final ErrorToken errorToken : cssErrors) {
+      // Override the first parameter with the name of this style tag.
+      final List<String> params = errorToken.getParams();
+      // Override the first parameter with the name of this style tag.
+      params.set(0, tagSpec.getTagName());
+      context.addError(
+        errorToken.getCode(),
+        errorToken.getLine(),
+        errorToken.getCol(),
+        params,
+        /* url */ "",
+        result.getValidationResult());
+    }
+
+    // If there were errors parsing, exit from validating further.
+    if (cssErrors.size() > 0) {
+      return;
+    }
+
+  final ParsedDocCssSpec maybeSpec = context.matchingDocCssSpec();
+    if (maybeSpec != null) {
+      // Determine if we've exceeded the maximum bytes per inline style
+      // requirements.
+      if (maybeSpec.getSpec().getMaxBytesPerInlineStyle() >= 0 &&
+        attrByteLen > maybeSpec.getSpec().getMaxBytesPerInlineStyle()) {
+
+        List<String> params = new ArrayList<>();
+        params.add(getTagSpecName(tagSpec));
+        params.add(Integer.toString(attrByteLen));
+        params.add(Integer.toString(maybeSpec.getSpec().getMaxBytesPerInlineStyle()));
+
+        if (maybeSpec.getSpec().getMaxBytesIsWarning()) {
+
+          context.addWarning(
+            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), params,
+            maybeSpec.getSpec().getSpecUrl(), result.getValidationResult());
+          //TODO - tagchowder doesn't seem to maintain duplicate attributes.
+          //encounteredTag.dedupeAttrs();
+        } else {
+          context.addError(
+            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), params,
+            maybeSpec.getSpec().getSpecUrl(), result.getValidationResult());
+        }
+      }
+
+      // Loop over the declarations found in the document, verify that they are
+      // in the allowed list for this DocCssSpec, and have allowed values if
+      // relevant.
+      for (final Declaration declaration : declarations){
+        // Allowed declarations vary by context. SVG has its own set of CSS
+        // declarations not supported generally in HTML.
+      final ValidatorProtos.CssDeclaration cssDeclaration = parsedAttrSpec.getSpec().getValueDocCss() ?
+          maybeSpec.getCssDeclarationSvgByName(declaration.getName()) :
+          maybeSpec.getCssDeclarationByName(declaration.getName());
+        // If there is no matching declaration in the rules, then this declaration
+        // is not allowed.
+        if (cssDeclaration == null) {
+          List<String> params = new ArrayList<>();
+          params.add(declaration.getName());
+          params.add(attrName);
+          params.add(getTagSpecName(tagSpec));
+
+          context.addError(
+            ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+            context.getLineCol().getLineNumber() + declaration.getLine(),
+            context.getLineCol().getColumnNumber() + declaration.getCol(),
+            params,
+            "",
+            result.getValidationResult());
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (cssDeclaration.getValueCaseiList().size() > 0) {
+          boolean hasValidValue = false;
+        final String firstIdent = declaration.firstIdent();
+          for (final String value : cssDeclaration.getValueCaseiList()){
+            if (firstIdent.toLowerCase().equals(value)) {
+              hasValidValue = true;
+              break;
+            }
+          }
+          if (!hasValidValue) {
+            // Declaration value not allowed.
+            List<String> params = new ArrayList<>();
+            params.add(getTagSpecName(tagSpec));
+            params.add(declaration.getName());
+            params.add(firstIdent);
+
+            context.addError(
+              ValidatorProtos.ValidationError.Code
+                .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.getLineCol(),
+              params,
+            context.getRules().getStylesSpecUrl(), result.getValidationResult());
+          }
+        }
+        if (!maybeSpec.getSpec().getAllowImportant()) {
+          if (declaration.getImportant()) {
+            // TODO(gregable): Use a more specific error message for
+            // `!important` errors.
+            List<String> params = new ArrayList<>();
+            params.add(attrName);
+            params.add(getTagSpecName(tagSpec));
+            params.add("CSS !important");
+
+            context.addError(
+              ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getLineCol(),
+              params,
+            context.getRules().getStylesSpecUrl(), result.getValidationResult());
+          }
+        }
+
+        final List<ErrorToken> urlErrors = new ArrayList<>();
+        final List<ParsedCssUrl> parsedUrls = new ArrayList<>();
+        extractUrlsFromDeclaration(declaration, parsedUrls, urlErrors);
+        for (final ErrorToken errorToken : urlErrors){
+          // Override the first parameter with the name of the tag.
+          List<String> params = errorToken.getParams();
+          params.set(0, getTagSpecName(tagSpec));
+
+          context.addError(
+            errorToken.getCode(), context.getLineCol(), params, "",
+            result.getValidationResult());
+        }
 //        if (urlErrors.length > 0) continue;
 //        for (const url of parsedUrls){
 //          // Validate that the URL itself matches the spec.
@@ -547,8 +563,8 @@ public final class CssSpecUtils {
 //            result.inlineStyleCssBytes -= byteLength(url.utf8Url);
 //        }
 //      }
-//    }
-//  }
+    }
+  }
 
 
     /** Max number of allowed declarations. */
