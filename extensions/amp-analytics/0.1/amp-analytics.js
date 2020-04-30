@@ -37,7 +37,7 @@ import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {endsWith, expandTemplate, startsWith} from '../../../src/string';
+import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
@@ -372,11 +372,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
               return this.addTrigger_(trigger);
-            } else if (
-              trigger['selector'] &&
-              startsWith(trigger['selector'], '${') &&
-              endsWith(trigger['selector'], '}')
-            ) {
+            } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
