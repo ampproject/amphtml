@@ -1,7 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - 'lts/*'
+  - '12'
 notifications:
   email:
     recipients:
