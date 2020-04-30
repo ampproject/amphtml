@@ -18,9 +18,11 @@ import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
+import {addParamsToUrl, parseQueryString} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {getSocialConfig} from './amp-social-share-config';
+import {isObject} from '../../../src/types';
 import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString} from '../../../src/url';
-import {startsWith} from '../../../src/string';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 const DEFAULT_WIDTH = 60;
@@ -30,63 +32,196 @@ const DEFAULT_HEIGHT = 44;
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare(props) {
+export function SocialShare2(props) {
+  const name = 'SocialShare2';
+  useResourcesNotify();
+
+  const {
+    typeConfig,
+    baseEndpoint,
+    checkedWidth,
+    checkedHeight,
+    obsoleteType,
+  } = checkProps_(props, name);
+  if (obsoleteType) {
+    return;
+  }
+  const finalEndpoint = createEndpoint_(typeConfig, baseEndpoint, props);
+
   /**
-   * Handle key presses on the element.
-   * @param {!Event} event
+   * @private
+   * @param {!JsonObject} props
+   * @param {?string} name
+   * @return {!JsonObject}
+   */
+  function checkProps_(props, name) {
+    const {type, shareEndpoint, params, bindings, width, height} = props;
+
+    // Verify type is valid and cannot contain spaces
+    if (type === undefined) {
+      throwError_(`The type attribute is required. ${name}`);
+    }
+    if (/\s/.test(type)) {
+      throwError_(
+        `Space characters are not allowed in type attribute value. ${name}`
+      );
+    }
+
+    // bindings and params props must be objects
+    if (params && !isObject(params)) {
+      throwError_(`The params property should be an object. ${name}`);
+    }
+    if (bindings && !isObject(bindings)) {
+      throwError_(`The bindings property should be an object. ${name}`);
+    }
+
+    // User must provide shareEndpoint if they choose a type that is not
+    // pre-configured
+    const typeConfig = getSocialConfig(type) || dict();
+    const baseEndpoint = typeConfig['shareEndpoint'] || shareEndpoint;
+    if (baseEndpoint === undefined) {
+      throwError_(
+        `A shareEndpoint is required if not using a pre-configured type. ${name}`
+      );
+    }
+
+    // Throw warning if type is obsolete
+    const obsoleteType = typeConfig['obsolete'];
+    if (obsoleteType) {
+      throwWarning_(`Skipping obsolete share button ${type}. ${name}`);
+    }
+
+    // Verify width and height are valid integers
+    let checkedWidth = width || DEFAULT_WIDTH;
+    let checkedHeight = height || DEFAULT_HEIGHT;
+    if (width && !Number.isInteger(width)) {
+      throwWarning_(
+        `The width property should be an Integer, defaulting to ${DEFAULT_WIDTH}. ${name}`
+      );
+      checkedWidth = DEFAULT_WIDTH;
+    }
+    if (height && !Number.isInteger(height)) {
+      throwWarning_(
+        `The height property should be an Integer, defaulting to ${DEFAULT_HEIGHT}. ${name}`
+      );
+      checkedHeight = DEFAULT_HEIGHT;
+    }
+    return {
+      typeConfig,
+      baseEndpoint,
+      checkedWidth,
+      checkedHeight,
+      obsoleteType,
+    };
+  }
+
+  /**
+   * @private
+   * @param {!JsonObject} typeConfig
+   * @param {?string} baseEndpoint
+   * @param {!JsonObject} props
+   * @return {?string}
+   */
+  function createEndpoint_(typeConfig, baseEndpoint, props) {
+    const {params, bindings} = props;
+    const combinedParams = dict();
+    Object.assign(combinedParams, typeConfig['defaultParams'], params);
+    const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
+
+    const combinedBindings = dict();
+    const bindingVars = typeConfig['bindings'];
+    if (bindingVars) {
+      bindingVars.forEach((name) => {
+        combinedBindings[name.toUpperCase()] = params[name] ? params[name] : '';
+      });
+    }
+    if (bindings) {
+      Object.keys(bindings).forEach((name) => {
+        combinedBindings[name.toUpperCase()] = bindings[name]
+          ? bindings[name]
+          : '';
+      });
+    }
+    const finalEndpoint = Object.keys(combinedBindings).reduce(
+      (endpoint, binding) =>
+        endpoint.replace(new RegExp(binding, 'g'), combinedBindings[binding]),
+      endpointWithParams
+    );
+    return finalEndpoint;
+  }
+
+  /**
+   * @private
+   * @param {?string} message
+   */
+  function throwError_(message) {
+    throw new Error(message);
+  }
+
+  /**
+   * @private
+   * @param {?string} message
+   */
+  function throwWarning_(message) {
+    console.warn(message);
+  }
+
+  /**
    * @private
    */
-  function handleKeyPress(event) {
+  function handleActivation_() {
+    if (finalEndpoint.split(':', 1)[0] === 'navigator-share') {
+      if (window && window.navigator && window.navigator.share) {
+        const dataStr = finalEndpoint.substr(finalEndpoint.indexOf('?'));
+        const data = parseQueryString(dataStr);
+        window.navigator.share(data).catch((e) => {
+          throwWarning_(`${e.message}. ${name}`);
+        });
+      } else {
+        throwWarning_(
+          `Could not complete system share.  Navigator unavailable. ${name}`
+        );
+      }
+    } else {
+      const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+      openWindowDialog(window, finalEndpoint, '_blank', windowFeatures);
+    }
+  }
+
+  /**
+   * @private
+   * @param {!Event} event
+   */
+  function handleKeyPress_(event) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
-      handleActivation();
+      handleActivation_();
     }
   }
 
-  /** @private */
-  function handleActivation() {
-    const href = props['href'];
-    const target = props['target'] || '_blank';
-    if (!href) {
-      throw new Error('Clicked before href is set.');
-    }
-    if (startsWith(href, 'navigator-share:')) {
-      if (!navigator.share) {
-        throw new Error('no navigator.share');
-      }
-      const dataStr = href.substr(href.indexOf('?'));
-      const data = parseQueryString(dataStr);
-      navigator.share(data).catch(() => {
-        // TODO(alanorozco): Warn here somehow.
-        // warn(TAG, e.message, dataStr);
-      });
-    } else {
-      const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-      openWindowDialog(window, href, target, windowFeatures);
-    }
-  }
-
-  const type = props['type'].toUpperCase();
+  const {type} = props;
   const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type];
-  const size = {
-    width: props['width'] || DEFAULT_WIDTH,
-    height: props['height'] || DEFAULT_HEIGHT,
+  //Default to gray (d3d3d3) background if type is not preconfigured
+  const backgroundStyle = CSS[type.toUpperCase()] || {
+    'backgroundColor': 'd3d3d3',
   };
-  useResourcesNotify();
+  const size = {
+    width: checkedWidth,
+    height: checkedHeight,
+  };
   return (
     <div
       role="button"
       tabindex={props['tabIndex'] || '0'}
-      onKeyDown={handleKeyPress}
-      onClick={handleActivation}
+      onKeyDown={handleKeyPress_}
+      onClick={handleActivation_}
       style={{...size, ...props['style']}}
       {...props}
     >
       <SocialShareIcon
         style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
+        type={type.toUpperCase()}
       />
     </div>
   );
