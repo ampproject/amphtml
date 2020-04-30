@@ -23,6 +23,9 @@ const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
 const KEY_PROP = '__ampKey';
 const PRIVATE_ONLY = {};
 
+/** @type {?Promise} */
+let microtaskPromise = null;
+
 /**
  */
 export class ContextNode {
@@ -132,7 +135,7 @@ export class ContextNode {
     this.subtreeContexts_ = null;
 
     /** @private {?Map} */
-    this.consumers_ = null;
+    this.subscribers_ = null;
 
     this.discover();
 
@@ -146,7 +149,7 @@ export class ContextNode {
   discover() {
     // QQQQ: implement.
     // QQQQ: decide when to call.
-    Promise.resolve().then(() => this.discover_());
+    microtask(() => this.discover_());
   }
 
   /** @private */
@@ -180,7 +183,7 @@ export class ContextNode {
     if (!this.changedScheduled_) {
       this.changedScheduled_ = true;
       // QQQ: scheduling mechanism: vsync/chunk/etc.
-      setTimeout(() => this.changed_());
+      macrotask(() => this.changed_());
     }
   }
 
@@ -188,16 +191,14 @@ export class ContextNode {
   changed_() {
     console.log('ContextNode: changed:', this.node_);
     this.changedScheduled_ = false;
-    if (this.consumers_) {
+    if (this.subscribers_) {
       // QQQ: optimize by knowing the reason for change. E.g. a particular
       // context, vs the whole hierarchy.
-      this.consumers_.forEach((observers, key) => {
+      this.subscribers_.forEach((subscriber, key) => {
         const value = this.get(key);
-        // QQQQ: fire in microtask
-        // QQQQ: check that the value has actually changed.
-        // QQQQ: value=null is a perfectly ok value.
-        if (value != null) {
-          observers.fire(value);
+        if (value !== subscriber.value) {
+          subscriber.value = value;
+          microtask(() => subscriber.observers.fire(value));
         }
       });
     }
@@ -267,27 +268,55 @@ export class ContextNode {
   }
 
   /**
-   * Set up consumer.
+   * Set up subscriber.
    * @param {!Object|string} contextType
    * @param {function(value: *, contextType: *)} callback
    * @return {!UnsubscribeDef}
    */
-  consume(contextType, callback) {
+  subscribe(contextType, callback) {
     // QQQQ: change to have a single callback per node, not per contextType?
     // - The negative is that we'll also have to add `get(contextType)` then.
     // - Positive is asynchronous/re-entreable semantics and subscriber counts.
     // - The negative: how's memory consumption for this? Array<Listener> vs Map<*, Listener>?
-    if (!this.consumers_) {
-      this.consumers_ = new Map();
+    if (!this.subscribers_) {
+      this.subscribers_ = new Map();
     }
     const key = toKey(contextType);
-    let observers = this.consumers_.get(key);
-    if (!observers) {
-      observers = new Observable();
-      this.consumers_.set(key, observers);
+    let subscriber = this.subscribers_.get(key);
+    if (!subscriber) {
+      subscriber = {
+        value: null,
+        observers: new Observable(),
+      };
+      this.subscribers_.set(key, subscriber);
     }
-    // QQQQ: call immediately (via microtask?) on the existing value.
-    return observers.add(callback);
+    if (subscriber.value != null) {
+      microtask(() => callback(subscriber.value));
+    }
+    subscriber.observers.add(callback);
+    return this.unsubscribe.bind(this, contextType, callback);
+  }
+
+  /**
+   * Set up subscriber.
+   * @param {!Object|string} contextType
+   * @param {function(value: *, contextType: *)} callback
+   * @return {!UnsubscribeDef}
+   */
+  unsubscribe(contextType, callback) {
+    if (!this.subscribers_) {
+      return;
+    }
+    const key = toKey(contextType);
+    const subscriber = this.subscribers_.get(key);
+    if (!subscriber) {
+      return;
+    }
+    const {observers} = subscriber;
+    observers.remove(callback);
+    if (observers.getHandlerCount() == 0) {
+      this.subscribers_.delete(key);
+    }
   }
 }
 
@@ -297,6 +326,23 @@ export class ContextNode {
  */
 function toKey(contextType) {
   return typeof contextType == 'object' ? contextType[KEY_PROP] : contextType;
+}
+
+/**
+ * @param {function} callback
+ */
+function microtask(callback) {
+  if (!microtaskPromise) {
+    microtaskPromise = Promise.resolve();
+  }
+  microtaskPromise.then(callback);
+}
+
+/**
+ * @param {function} callback
+ */
+function macrotask(callback) {
+  setTimeout(callback);
 }
 
 /**
@@ -332,7 +378,7 @@ function debugContextNodeForTesting(contextNode) {
     }
     const obj = {};
     map.forEach((value, key) => {
-      obj[key] = getValue ? getValue(key) : value;
+      obj[key] = getValue ? getValue(key, value) : value;
     });
     return obj;
   }
@@ -343,6 +389,6 @@ function debugContextNodeForTesting(contextNode) {
     parent: debugContextNodeForTesting(contextNode.parent_),
     selfContexts: mapDebug(contextNode.selfContexts_),
     subtreeContexts: mapDebug(contextNode.subtreeContexts_),
-    consumers: mapDebug(contextNode.consumers_, (key) => contextNode.get(key)),
+    subscribers: mapDebug(contextNode.subscribers_, (key, {value}) => ({cached: value, latest: contextNode.get(key)})),
   };
 }

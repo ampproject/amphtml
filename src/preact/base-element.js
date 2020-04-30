@@ -105,14 +105,14 @@ export class PreactBaseElement extends AMP.BaseElement {
     };
 
     // Subscribe to the standard contexts.
-    contextNode.consume(AmpContext, contextConsumerCallback(AmpContext, consumeContext));
+    contextNode.subscribe(AmpContext, contextConsumerCallback(AmpContext, consumeContext));
 
     // Subscribe to the custom contexts.
     const Ctor = this.constructor;
     const {'useContexts': useContexts} = Ctor;
     if (useContexts) {
       useContexts.forEach(contextType => {
-        contextNode.consume(contextType, contextConsumerCallback(contextType, consumeContext));
+        contextNode.subscribe(contextType, contextConsumerCallback(contextType, consumeContext));
       });
     }
 
