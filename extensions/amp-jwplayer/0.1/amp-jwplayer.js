@@ -88,8 +88,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {function(Object)} */
     this.onReadyOnce_ = once((detail) => this.onReady_(detail));
 
-    this.muteOnAutoOnce_ = once(() => this.muteOnAuto_());
-
     /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
 
@@ -142,21 +140,14 @@ class AmpJWPlayer extends AMP.BaseElement {
     return this.playedRanges_ || [];
   }
 
-  /** @private */
-  muteOnAuto_() {
-    if (!this.muted_) {
-      this.mute();
-    }
-  }
-
   /** @override */
   play(isAutoplay) {
     let reason;
 
     if (isAutoplay) {
       reason = 'auto';
-      this.muteOnAutoOnce_();
     }
+
     this.sendCommand_('play', {reason});
   }
 
