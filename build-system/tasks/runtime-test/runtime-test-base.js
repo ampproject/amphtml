@@ -30,6 +30,7 @@ const {
   runTestInSauceLabs,
 } = require('./helpers');
 const {app} = require('../../server/test-server');
+const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
@@ -129,7 +130,7 @@ function getFiles(testType) {
     case 'unit':
       files = testConfig.commonUnitTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       if (argv.saucelabs) {
         return files.concat(testConfig.unitTestOnSaucePaths);
@@ -142,7 +143,7 @@ function getFiles(testType) {
     case 'integration':
       files = testConfig.commonIntegrationTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       return files.concat(testConfig.integrationTestPaths);
 
