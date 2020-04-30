@@ -357,7 +357,7 @@ describes.realWin(
     });
 
     describe('[type=system]', () => {
-      it.skip('should not throw if navigator.share fails', async () => {
+      it('should not throw if navigator.share fails', async () => {
         Object.defineProperty(env.win, 'navigator', {
           value: {share: env.sandbox.spy(() => Promise.reject())},
         });
