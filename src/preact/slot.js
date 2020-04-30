@@ -15,6 +15,7 @@
  */
 
 import * as Preact from './index';
+import {ContextNode} from '../node/node';
 import {dev} from '../log';
 import {getAmpContext} from './context';
 import {matches, toggleAttribute} from '../dom';
@@ -24,14 +25,16 @@ import {useContext, useEffect, useRef} from './index';
 import {useMountEffect} from './utils';
 
 /**
- * @param {!Element} element
- * @param {string} name
+ * @param {?Element} element
+ * @param {?string} name
  * @param {!Object|undefined} props
  * @return {!PreactDef.VNode}
  */
 export function createSlot(element, name, props) {
-  element.setAttribute('slot', name);
-  return <Slot {...(props || {})} name={name} />;
+  if (element) {
+    element.setAttribute('slot', name);
+  }
+  return <Slot {...props} name={name} />;
 }
 
 /**
@@ -41,21 +44,35 @@ export function createSlot(element, name, props) {
  * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
-  const context = useContext(getAmpContext());
+  const {exportContexts, ...rest} = props;
+
+  const AmpContext = getAmpContext();
+  const context = useContext(AmpContext);
+
   const ref = useRef(null);
-  const slotProps = {...props, ref};
+  const slotProps = {...rest, ref};
+
   useEffect(() => {
     const slot = dev().assertElement(ref.current);
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
-
-    // TBD: Just for debug for now. but maybe can also be used for hydration?
-    slot.setAttribute('i-amphtml-context', JSON.stringify(context));
-    // TODO: remove debug info.
     assignedElements.forEach((node) => {
-      node.__assignedSlot = slot;
-      node.setAttribute('i-amphtml-context', JSON.stringify(context));
+      ContextNode.assignSlot(node, slot);
     });
+
+    // Export the standard contexts. Non-standard contexts are exported as
+    // children of the slot component.
+    ContextNode.get(slot).setSelf(AmpContext, context);
+    console.log('Slot: ExportContext:', AmpContext, '=', value, 'for', slot);
+
+    // QQQQQ
+    // // TBD: Just for debug for now. but maybe can also be used for hydration?
+    // slot.setAttribute('i-amphtml-context', JSON.stringify(context));
+    // // TODO: remove debug info.
+    // assignedElements.forEach((node) => {
+    //   node.__assignedSlot = slot;
+    //   node.setAttribute('i-amphtml-context', JSON.stringify(context));
+    // });
 
     // Retarget slots and content.
     if (props['retarget']) {
@@ -107,22 +124,23 @@ export function Slot(props) {
 
     const oldContext = slot['i-amphtml-context'];
     if (!objectsEqualShallow(oldContext, context)) {
-      slot['i-amphtml-context'] = context;
-      // TODO: Switch to fast child-node discover. See Revamp for the algo.
-      const affectedNodes = [];
-      assignedElements.forEach((node) => {
-        node['i-amphtml-context'] = context;
-        affectedNodes.push.apply(affectedNodes, getAmpElements(node));
-      });
-      affectedNodes.forEach((node) => {
-        const event = new Event('i-amphtml-context-changed', {
-          bubbles: false,
-          cancelable: true,
-          composed: true,
-        });
-        event.data = context;
-        node.dispatchEvent(event);
-      });
+      //QQQQQ
+      // slot['i-amphtml-context'] = context;
+      // // TODO: Switch to fast child-node discover. See Revamp for the algo.
+      // const affectedNodes = [];
+      // assignedElements.forEach((node) => {
+      //   node['i-amphtml-context'] = context;
+      //   affectedNodes.push.apply(affectedNodes, getAmpElements(node));
+      // });
+      // affectedNodes.forEach((node) => {
+      //   const event = new Event('i-amphtml-context-changed', {
+      //     bubbles: false,
+      //     cancelable: true,
+      //     composed: true,
+      //   });
+      //   event.data = context;
+      //   node.dispatchEvent(event);
+      // });
     }
 
     // Post-rendering cleanup, if any.
@@ -137,22 +155,47 @@ export function Slot(props) {
   useMountEffect(() => {
     return () => {
       const slot = dev().assertElement(ref.current);
-      const affectedNodes = [];
       getAssignedElements(props, slot).forEach((node) => {
-        affectedNodes.push.apply(affectedNodes, getAmpElements(node));
+        // QQQ: is this enough for context?
+        ContextNode.unassignSlot(node, slot);
       });
-      affectedNodes.forEach((node) => {
-        const event = new Event('i-amphtml-unmounted', {
-          bubbles: false,
-          cancelable: true,
-          composed: true,
-        });
-        node.dispatchEvent(event);
-      });
+      //QQQQQ
+      // const affectedNodes = [];
+      // getAssignedElements(props, slot).forEach((node) => {
+      //   affectedNodes.push.apply(affectedNodes, getAmpElements(node));
+      // });
+      // affectedNodes.forEach((node) => {
+      //   const event = new Event('i-amphtml-unmounted', {
+      //     bubbles: false,
+      //     cancelable: true,
+      //     composed: true,
+      //   });
+      //   node.dispatchEvent(event);
+      // });
     };
   });
 
-  return <slot {...slotProps} />;
+  // QQQ: ExportContext are static and could be faster to just pass here
+  // as {children}.
+  return (
+    <slot {...slotProps}>
+      {exportContexts && exportContexts.map(context =>
+        <ExportContext key={context} slotRef={ref} contextType={context} />
+      )}
+    </slot>
+  );
+}
+
+/**
+ * A component with a sole purpose of exporting the specified component.
+ */
+function ExportContext({slotRef, contextType}) {
+  const value = useContext(contextType);
+  useMountEffect(() => {
+    const slot = slotRef.current;
+    console.log('Slot: ExportContext:', contextType, '=', value, 'for', slot);
+    ContextNode.get(slot).setSelf(contextType, value);
+  });
 }
 
 /**

@@ -16,7 +16,7 @@
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {BentoComponent} from './component';
+import {BentoComponent, CustomContext} from './component';
 import {dict} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -48,6 +48,9 @@ AmpBento['props'] = {
 };
 
 AmpBento['passthrough'] = true;
+
+AmpBento['exportContexts'] = [CustomContext];
+AmpBento['useContexts'] = [CustomContext];
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpBento);

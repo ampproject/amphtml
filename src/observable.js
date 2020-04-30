@@ -69,16 +69,16 @@ export class Observable {
 
   /**
    * Fires an event. All observers are called.
-   * @param {TYPE=} opt_event
+   * @param  {...*} args
    */
-  fire(opt_event) {
+  fire(...args) {
     if (!this.handlers_) {
       return;
     }
     const handlers = this.handlers_;
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
-      handler(opt_event);
+      handler(...args);
     }
   }
 

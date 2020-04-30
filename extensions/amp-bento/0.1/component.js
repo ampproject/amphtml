@@ -15,12 +15,12 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {createContext, useContext} from '../../../src/preact';
+import {createContext, useContext, useRef} from '../../../src/preact';
 import {WithAmpContext, getAmpContext} from '../../../src/preact/context';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
-const CustomContext = createContext({parent: null});
+export const CustomContext = createContext({parent: null});
 
 /**
  * @param {!JsonObject} props
@@ -31,7 +31,9 @@ export function BentoComponent(props) {
   const {id, renderable = true, playable = true} = props;
   const context = useContext(getAmpContext());
   const customContext = useContext(CustomContext);
-  console.log('id: ', id);
+  const counterRef = useRef(0);
+  counterRef.current++;
+  console.log('id: ', id, 'render:', counterRef.current);
   console.log('customContext: ', customContext);
   return (
     <WithAmpContext renderable={props.renderable} playable={props.playable}>
@@ -44,6 +46,9 @@ export function BentoComponent(props) {
             {props.children}
           </div>
         </CustomContext.Provider>
+        <div>
+          Render count: {counterRef.current}
+        </div>
         <div>
           Props: {JSON.stringify({
             renderable: props.renderable,

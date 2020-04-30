@@ -17,10 +17,11 @@
 import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
-import {WithAmpContext} from './context';
+import {WithAmpContext, getAmpContext} from './context';
 import {devAssert} from '../log';
 import {matches} from '../dom';
 import {render} from './index';
+import {ContextNode} from '../node/node';
 
 /**
  * @typedef {{
@@ -67,6 +68,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
+    /** @private @const {!Map>} */
+    this.contexts_ = new Map();
+
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
       this.rerender_();
@@ -93,6 +97,30 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     this.defaultProps_ = this.init() || null;
 
+    const contextNode = ContextNode.get(this.element);
+    const consumeContext = (value, contextType) => {
+      console.log('BaseElement: consumeContext:', value, contextType);
+      this.contexts_.set(contextType, value);
+      this.scheduleRender_();
+    };
+
+    // Subscribe to the standard contexts.
+    const AmpContext = getAmpContext();
+    contextNode.consume(AmpContext, consumeContext);
+    // // QQQ: test data
+    // this.contexts_.set(AmpContext, {playable: 17});
+
+    // Subscribe to the custom contexts.
+    const Ctor = this.constructor;
+    const {'useContexts': useContexts} = Ctor;
+    if (useContexts) {
+      useContexts.forEach(context => {
+        contextNode.consume(context, consumeContext);
+        // // QQQ: test data
+        // this.contexts_.set(context, {parent: 17});
+      });
+    }
+
     this.scheduleRender_();
 
     // context-changed is fired on each child element to notify it that the
@@ -110,6 +138,10 @@ export class PreactBaseElement extends AMP.BaseElement {
       e.stopPropagation();
       this.unmount_();
     });
+
+    // QQQ: move/disconnect/etc.
+    const mo = new MutationObserver(this.mutatedAttributesCallback.bind(this));
+    mo.observe(this.element, {attributes: true});
   }
 
   /** @override */
@@ -125,6 +157,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback() {
+    console.log('attributes mutated on ', this.element.id);
     if (this.container_) {
       this.scheduleRender_();
     }
@@ -167,6 +200,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     const Ctor = this.constructor;
+    const {Component} = Ctor;
 
     if (!this.container_) {
       if (Ctor['children'] || Ctor['passthrough']) {
@@ -188,9 +222,9 @@ export class PreactBaseElement extends AMP.BaseElement {
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
     const v = (
-      <WithAmpContext {...context}>
-        {Preact.createElement(Ctor['Component'], props)}
-      </WithAmpContext>
+      <WithContexts contexts={this.contexts_}>
+        <Component {...props} />
+      </WithContexts>
     );
 
     render(v, this.container_);
@@ -243,6 +277,21 @@ PreactBaseElement['props'] = {};
 PreactBaseElement['children'] = null;
 
 /**
+ */
+function WithContexts({contexts, children}) {
+  let tail = children;
+  if (contexts.size > 0) {
+    contexts.forEach((value, key) => {
+      if (value != null) {
+        const Context = key;
+        tail = Preact.createElement(Context.Provider, {value}, tail);
+      }
+    });
+  }
+  return tail;
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {!JsonObject|null|undefined} defaultProps
@@ -256,6 +305,7 @@ function collectProps(Ctor, element, defaultProps) {
     'props': propDefs,
     'passthrough': passthrough,
     'children': childrenDefs,
+    'exportContexts': exportContexts,
   } = Ctor;
 
   // Class.
@@ -292,7 +342,9 @@ function collectProps(Ctor, element, defaultProps) {
       !childrenDefs,
       'only one of "passthrough" or "children" may be given'
     );
-    props['children'] = [<Slot />];
+    //QQQ
+    // props['children'] = [<Slot />];
+    props['children'] = [createSlot(null, null, {exportContexts})]
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;
@@ -309,7 +361,7 @@ function collectProps(Ctor, element, defaultProps) {
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
-        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
+        props[name] = createSlot(childElement, `i-amphtml-${name}`, {exportContexts, ...slotProps});
       } else {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
@@ -317,7 +369,7 @@ function collectProps(Ctor, element, defaultProps) {
           createSlot(
             childElement,
             `i-amphtml-${name}-${list.length}`,
-            slotProps
+            {exportContexts, ...slotProps}
           )
         );
       }
