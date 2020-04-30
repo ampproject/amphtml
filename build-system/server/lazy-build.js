@@ -21,7 +21,7 @@ const {
   maybeInitializeExtensions,
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
-const {doBuildJs, compileCoreRuntime} = require('../tasks/helpers');
+const {doBuildJs} = require('../tasks/helpers');
 const {jsBundles} = require('../compile/bundles.config');
 
 const extensionBundles = {};
@@ -128,7 +128,7 @@ async function lazyBuildJs(req, res, next) {
  * Pre-builds the core runtime and the JS files that it loads.
  */
 async function preBuildRuntimeFiles() {
-  await compileCoreRuntime(/* watch */ true, argv.compiled);
+  await build(jsBundles, 'amp.js', doBuildJs);
   await build(jsBundles, 'ww.max.js', doBuildJs);
 }
 
