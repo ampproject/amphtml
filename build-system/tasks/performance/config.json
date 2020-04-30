@@ -4,9 +4,7 @@
   "handlers": [
     {
       "handlerName": "defaultHandler",
-      "urls": [
-        "http://localhost:8000/examples/bind/basic.amp.html"
-      ]
+      "urls": ["http://localhost:8000/examples/bind/basic.amp.html"]
     },
     {
       "handlerName": "analyticsHandler",
