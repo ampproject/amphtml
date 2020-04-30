@@ -40,10 +40,12 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
+    let isExpectedMutation = false;
 
-    this.registerAction('clear', () =>
-      this.mutateProps(dict({'value': value}))
-    );
+    this.registerAction('clear', () => {
+      isExpectedMutation = true;
+      this.mutateProps(dict({'value': value}));
+    });
 
     this.registerAction('selectUp', (invocation) => {
       const {args, trust} = invocation;
@@ -94,6 +96,12 @@ class AmpSelector extends PreactBaseElement {
             disabled,
             role: child.getAttribute('role') || 'option',
             domElement: child,
+            // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
+            // See https://github.com/ampproject/amp-react-prototype/issues/40.
+            postRender: () => {
+              // Skip mutations to avoid cycles.
+              mu.takeRecords();
+            },
             selected,
           };
           if (selected && option) {
@@ -105,6 +113,21 @@ class AmpSelector extends PreactBaseElement {
         });
       return {value, children, options};
     };
+
+    const rebuild = () => {
+      if (isExpectedMutation) {
+        isExpectedMutation = false;
+        return;
+      }
+      console.log('rebuild');
+      this.mutateProps(getOptionState());
+    };
+
+    const mu = new MutationObserver(rebuild);
+    mu.observe(element, {
+      attributeFilter: ['option', 'selected'],
+      subtree: true,
+    });
 
     const {value, children, options} = getOptionState();
 
@@ -119,6 +142,7 @@ class AmpSelector extends PreactBaseElement {
       const option = options[mod(index, children.length)];
       value.push(option);
       fireSelectEvent(this.win, action, element, option, value, trust);
+      isExpectedMutation = true;
       this.mutateProps(dict({'value': value}));
     };
 
@@ -146,6 +170,7 @@ class AmpSelector extends PreactBaseElement {
         value.splice(target, 1);
       }
       fireSelectEvent(this.win, action, element, option, value, trust);
+      isExpectedMutation = true;
       this.mutateProps(dict({'value': value}));
     };
 
@@ -163,6 +188,7 @@ class AmpSelector extends PreactBaseElement {
           value,
           ActionTrust.HIGH
         );
+        isExpectedMutation = true;
         this.mutateProps(dict({'value': value}));
       },
     });
