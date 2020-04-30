@@ -49,7 +49,7 @@ export const _default = () => {
     knobConfigurations,
     knobConfigurations[0]
   );
-  let href = text('Custom Share Endpoint', 'Not Specified');
+  let href = text('shareEndpoint', 'Not Specified');
 
   const config = getSocialConfig(type);
   if (type !== 'custom endpoint' && type !== 'random' && type) {
@@ -61,6 +61,8 @@ export const _default = () => {
     'subject': 'test',
     'recipient': 'email recipient',
   });
+  const width = text('width', undefined);
+  const height = text('height', undefined);
 
   return (
     <div>
@@ -75,7 +77,8 @@ export const _default = () => {
         shareEndpoint={href}
         params={params}
         bindings={bindings}
-        width={'cat'}
+        width={width}
+        height={height}
       />
     </div>
   );
