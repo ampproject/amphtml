@@ -187,6 +187,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -213,6 +216,15 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.action_ = Services.actionServiceForDoc(this.element);
+    /** If the element is in an email document,
+     * allow its `changeToLayoutContainer` and `refresh` actions. */
+    this.action_.addToWhitelist(
+      'AMP-LIST',
+      ['changeToLayoutContainer', 'refresh'],
+      ['email']
+    );
+
     this.viewport_ = this.getViewport();
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
@@ -652,8 +664,7 @@ export class AmpList extends AMP.BaseElement {
           dict({'response': error.response})
         )
       : null;
-    const actions = Services.actionServiceForDoc(this.element);
-    actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+    this.action_.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
   }
 
   /**

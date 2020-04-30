@@ -147,6 +147,8 @@ export class AmpSlideScroll extends BaseSlides {
   buildSlides() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToWhitelist(TAG, 'goToSlide', ['email']);
 
     this.hasNativeSnapPoints_ =
       getStyle(this.element, 'scrollSnapType') != undefined;
