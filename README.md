@@ -1,5 +1,3 @@
-_**Do you build things with AMP? Make sure to fill out the [AMP DevX Survey](https://go.amp.dev/devx-survey)!**_
-
 # AMP ⚡
 
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square 'Build Status')](https://travis-ci.org/ampproject/amphtml/builds)
