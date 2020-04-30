@@ -74,97 +74,106 @@ module.exports = {
   },
 
   create(context) {
-    function factory(method) {
-      // We have to look for both `expect()` and `.should` assertion forms.
-      // This will find `expect().to.be.METHOD` and `expect().to.be.METHOD()`.
-      const members = chaiLanguageChains.map(
-        (prop) => `MemberExpression[property.name=${prop}]`
-      );
-      const selector = `
-        MemberExpression[property.name=${method}] :matches(
+    // We have to look for both `expect()` and `.should` assertion forms.
+    // This will find `expect().to.be.METHOD` and `expect().to.be.METHOD()`.
+    const methodMembers = methods.map(
+      (prop) => `MemberExpression[property.name=${prop}]`
+    );
+    const languageMembers = chaiLanguageChains.map(
+      (prop) => `MemberExpression[property.name=${prop}]`
+    );
+    const selector = `
+        :matches(${methodMembers}) :matches(
           CallExpression[callee.name=expect],
-          ${members.join(', ')}
+          ${languageMembers}
         )
       `
-        .replace(/\s+/g, ' ')
-        .trim();
+      .replace(/\s+/g, ' ')
+      .trim();
 
-      return {
-        [selector](node) {
-          const ancestors = context.getAncestors().slice().reverse();
-          let ancestor = node;
-          let last = node;
-          let found = 0;
-          let index = 0;
+    return {
+      [selector](node) {
+        const ancestors = context.getAncestors().slice().reverse();
+        let ancestor = node;
+        let last = node;
+        let found = 0;
+        let index = 0;
+        let method;
 
-          // The matched node is the `expect()` call. We then traverse upwards
-          // until we leave the chain. In our example, we'd traverse:
-          // 1. expect().to
-          // 2. expect().to.be
-          // 3. expect().to.be.METHOD
-          // 4. expect().to.be.METHOD()
-          //
-          // We're trying to figure out if we actually find the METHOD in the
-          // current chain (we could have found a `expect(() => {
-          // expect().something }).to.be.METHOD()`), and what the topmost node
-          // is before breaking out of the chain.
-          for (; index < ancestors.length; index++) {
-            last = ancestor;
-            ancestor = ancestors[index];
+        // The matched node is the `expect()` call. We then traverse upwards
+        // until we leave the chain. In our example, we'd traverse:
+        // 1. expect().to
+        // 2. expect().to.be
+        // 3. expect().to.be.METHOD
+        // 4. expect().to.be.METHOD()
+        //
+        // We're trying to figure out if we actually find the METHOD in the
+        // current chain (we could have found a `expect(() => {
+        // expect().something }).to.be.METHOD()`), and what the topmost node is
+        // before breaking out of the chain.
+        for (; index < ancestors.length; index++) {
+          last = ancestor;
+          ancestor = ancestors[index];
 
-            if (ancestor.type === 'MemberExpression') {
-              const {name} = ancestor.property;
-              if (ancestor.object === last) {
-                if (name === method) {
-                  found = index;
-                }
-                if (chaiLanguageChains.includes(name)) {
-                  break;
-                }
-                continue;
+          if (ancestor.type === 'MemberExpression') {
+            const {name} = ancestor.property;
+            if (ancestor.object === last) {
+              if (method || chaiLanguageChains.includes(name)) {
+                break;
               }
-            }
-            if (
-              ancestor.type === 'CallExpression' &&
-              ancestor.callee === last
-            ) {
+
+              if (methods.includes(name)) {
+                if (index < ancestors.length - 2) {
+                  const parent = ancestors[index + 1];
+                  if (
+                    parent.type === 'CallExpression' &&
+                    parent.callee === ancestor
+                  ) {
+                    continue;
+                  }
+                }
+                method = name;
+                found = index;
+              }
+
               continue;
             }
-
-            break;
           }
 
-          // If the topmost node is a CallExpression, then the dev properly
-          // used the assertion.
-          if (last.type === 'CallExpression') {
-            return;
+          if (ancestor.type === 'CallExpression' && ancestor.callee === last) {
+            continue;
           }
 
-          // If we didn't find the METHOD, then we're not in the correct expect
-          // chain.
-          if (found === 0) {
-            return;
-          }
-          if (found < index - 1) {
-            return;
-          }
+          break;
+        }
 
-          context.report({
-            node,
-            message: [
-              `Chai method assertion "${method}" must be called!`,
-              `Do \`expect(foo).to.${method}()\` instead of \`expect(foo).to.${method}\``,
-              `(Confusingly, Chai doesn't invoke every assertion as a property getter)`,
-            ].join('\n\t'),
+        // If the topmost node is a CallExpression, then the dev properly used
+        // the assertion.
+        if (last.type === 'CallExpression') {
+          return;
+        }
 
-            fix(fixer) {
-              return fixer.insertTextAfter(last, '()');
-            },
-          });
-        },
-      };
-    }
+        if (!method) {
+          return;
+        }
 
-    return Object.assign({}, ...methods.map(factory));
+        if (found < index - 1) {
+          return;
+        }
+
+        context.report({
+          node,
+          message: [
+            `Chai method assertion "${method}" must be called!`,
+            `Do \`expect(foo).to.${method}()\` instead of \`expect(foo).to.${method}\``,
+            `(Confusingly, Chai doesn't invoke every assertion as a property getter)`,
+          ].join('\n\t'),
+
+          fix(fixer) {
+            return fixer.insertTextAfter(last, '()');
+          },
+        });
+      },
+    };
   },
 };
