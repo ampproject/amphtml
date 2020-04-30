@@ -22,6 +22,7 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'SlideScroll',
@@ -1518,7 +1519,7 @@ describes.realWin(
         })
       );
 
-      env.sandbox.stub(action, 'error_');
+      const userErrorStub = env.sandbox.stub(user(), 'error');
       action.execute(
         element,
         'toggleAutoplay',
@@ -1528,8 +1529,9 @@ describes.realWin(
         'event',
         ActionTrust.HIGH
       );
-      expect(action.error_).to.be.calledWithMatch(
-        /"AMP.CAROUSEL.toggleAutoplay" is not whitelisted/
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.match(
+        /"AMP-CAROUSEL.toggleAutoplay" is not whitelisted/
       );
     });
   }
