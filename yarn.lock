@@ -11119,10 +11119,10 @@ karma-super-dots-reporter@0.2.0:
     chalk "^0.5.1"
     log-symbols "^1.0.1"
 
-karma@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-5.0.3.tgz#b6cd8ca644cd182035e073a9a151bf552a47cfad"
-  integrity sha512-436fnV2PU7i4+dbc5NgIBnDfkCS8exSDkv8m33ttKTRd1OWSjZEdUM5tnEzQBC48Zs9S/bwM1oTi+WgLL935Og==
+karma@5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-5.0.4.tgz#b374a1e541ad66da668460b99c6faf20cfffc97a"
+  integrity sha512-UGqTe2LBiGQBXRN+Fygeiq63tbfOX45639SKSbPkLpARwnxROWJZg+froGkpHxr84FXCe8UGCf+1PITM6frT5w==
   dependencies:
     body-parser "^1.16.1"
     braces "^3.0.2"
