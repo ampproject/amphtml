@@ -173,7 +173,7 @@ describes.realWin(
 
     it('should render past 75% of first viewport', () => {
       return getAmpFlyingCarpet(null, '80vh').then((flyingCarpet) => {
-        expect(flyingCarpet).to.display;
+        expect(flyingCarpet).to.display();
       });
     });
 
@@ -197,7 +197,7 @@ describes.realWin(
       // Doc: 600px
       // Viewport: 150px
       return getAmpFlyingCarpet(null, '455px').then((flyingCarpet) => {
-        expect(flyingCarpet).to.display;
+        expect(flyingCarpet).to.display();
       });
     });
 

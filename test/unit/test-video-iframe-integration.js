@@ -296,7 +296,7 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
 
           it('fails if no initializer provided or Video.JS not present', () => {
             const win = {};
-            expect(() => getVideoJs(win)).to.throw;
+            expect(() => getVideoJs(win)).to.throw();
           });
         });
       });

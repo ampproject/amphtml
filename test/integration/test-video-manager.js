@@ -364,7 +364,7 @@ describe
     it('should suppress errors if detection play call throws', () => {
       playStub.throws();
       video.paused = true;
-      expect(supportsAutoplay(win, isLite)).not.to.throw;
+      expect(supportsAutoplay(win, isLite)).not.to.throw();
       return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
@@ -378,7 +378,7 @@ describe
       );
       playStub.returns(p);
       video.paused = true;
-      expect(supportsAutoplay(win, isLite)).not.to.throw;
+      expect(supportsAutoplay(win, isLite)).not.to.throw();
       return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
