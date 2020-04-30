@@ -82,9 +82,10 @@ describe
           </div>
       </section>
     `;
-    const sections = Array(5)
-      .fill('')
-      .map(() => section);
+    const sections = [];
+    for (let i = 0; i < 3; i++) {
+      sections.push(section);
+    }
     const body = `
       <button id="open-lightbox" on="tap:lightbox">
           Open
