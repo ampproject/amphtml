@@ -52,6 +52,7 @@ import {
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -393,6 +394,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           [AMP_AD_NO_CENTER_CSS_EXP.control],
           [AMP_AD_NO_CENTER_CSS_EXP.experiment],
+        ],
+      },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
