@@ -25,6 +25,18 @@ const CONFIG_PATH = 'build-system/tasks/performance/config.json';
 const LOCAL_HOST_URL = 'http://localhost:8000/';
 
 /**
+ * Throws an error with the given message. Duplicate function
+ * located in check-sourcemaps.js
+ *
+ * @param {string} message
+ */
+function throwError(message) {
+  const err = new Error(message);
+  err.showStack = false;
+  throw err;
+}
+
+/**
  * Entry point for 'gulp performance-urls'
  * Check if all localhost urls in performance/config.json exist
  * @return {!Promise}
@@ -37,21 +49,27 @@ async function performanceUrls() {
         obj = JSON.parse(file.contents.toString());
       } catch (e) {
         log(colors.yellow(`Could not parse ${CONFIG_PATH}. `));
+        throwError(`Could not parse ${CONFIG_PATH}. `);
         return;
       }
-      const urls = obj.handlers.flatMap((handler) =>
+      const filepaths = obj.handlers.flatMap((handler) =>
         handler.urls
           .filter((url) => url.startsWith(LOCAL_HOST_URL))
           .map((url) =>
             path.join(__dirname, '../../', url.split(LOCAL_HOST_URL)[1])
           )
       );
-      for (const url of urls) {
-        if (!fs.existsSync(url)) {
-          log(colors.red(url + ' does not exist.'));
-          process.exitCode = 1;
+      for (const filepath of filepaths) {
+        if (!fs.existsSync(filepath)) {
+          log(colors.red(filepath + ' does not exist.'));
+          throwError(`${filepath} does not exist.`);
+          return;
         }
       }
+      log(
+        colors.green('SUCCESS:'),
+        'All local performance task urls are valid.'
+      );
     })
   );
 }
