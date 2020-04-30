@@ -31,6 +31,7 @@ const {reportTestSkipped} = require('../report-test-status');
 const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
 const LARGE_REFACTOR_THRESHOLD = 50;
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+let testsToRun = null;
 
 /**
  * Returns true if the PR is a large refactor.
@@ -159,15 +160,18 @@ function getUnitTestsToRun() {
 
 /**
  * Extracts the list of unit tests to run based on the changes in the local
- * branch.
+ * branch. Return value is cached to optimize for multiple calls.
  *
- * @param {!Array<string>} unitTestPaths
  * @return {!Array<string>}
  */
-function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
+function unitTestsToRun() {
+  if (testsToRun) {
+    return testsToRun;
+  }
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
+  const {unitTestPaths} = testConfig;
+  testsToRun = [];
   let srcFiles = [];
 
   function isUnitTest(file) {
