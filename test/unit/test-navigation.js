@@ -699,6 +699,126 @@ describes.sandboxed('Navigation', {}, () => {
           expect(win.location.href).to.equal('https://amp.pub.com/different');
         });
       });
+
+      describe('viewer intercept navigation', () => {
+        let ampdoc;
+        let viewerInterceptsNavigationSpy;
+        let sendMessageStub;
+        let hasCapabilityStub;
+
+        beforeEach(() => {
+          ampdoc = Services.ampdoc(doc);
+          viewerInterceptsNavigationSpy = env.sandbox.spy(
+            handler,
+            'viewerInterceptsNavigation'
+          );
+          sendMessageStub = env.sandbox.stub(handler.viewer_, 'sendMessage');
+          hasCapabilityStub = env.sandbox.stub(
+            handler.viewer_,
+            'hasCapability'
+          );
+
+          handler.isTrustedViewer_ = true;
+          handler.isLocalViewer_ = false;
+          hasCapabilityStub.returns(true);
+
+          ampdoc
+            .getRootNode()
+            .documentElement.setAttribute('allow-navigation-interception', '');
+        });
+
+        it('should allow with trusted viewer', () => {
+          handler.isTrustedViewer_ = true;
+          handler.isLocalViewer_ = false;
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.be.calledOnce;
+          expect(sendMessageStub).to.be.calledWithExactly('navigateTo', {
+            url: 'https://www.google.com/other',
+            requestedBy: 'intercept_click',
+          });
+
+          expect(event.defaultPrevented).to.be.true;
+        });
+
+        it('should allow with local viewer', () => {
+          handler.isTrustedViewer_ = false;
+          handler.isLocalViewer_ = true;
+
+          handler.handle_(event);
+
+          expect(
+            ampdoc
+              .getRootNode()
+              .documentElement.hasAttribute('allow-navigation-interception')
+          ).to.be.true;
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.be.calledOnce;
+          expect(sendMessageStub).to.be.calledWithExactly('navigateTo', {
+            url: 'https://www.google.com/other',
+            requestedBy: 'intercept_click',
+          });
+
+          expect(event.defaultPrevented).to.be.true;
+        });
+
+        it('should require trusted or local viewer', () => {
+          handler.isTrustedViewer_ = false;
+          handler.isLocalViewer_ = false;
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
+        it('should require interceptNavigation viewer capability', () => {
+          hasCapabilityStub.returns(false);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
+        it('should require opted in ampdoc', () => {
+          ampdoc
+            .getRootNode()
+            .documentElement.removeAttribute('allow-navigation-interception');
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+      });
     }
   );
 

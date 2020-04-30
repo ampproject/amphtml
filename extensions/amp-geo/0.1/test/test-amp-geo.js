@@ -457,12 +457,38 @@ describes.realWin(
       });
     });
 
+    it('should recognize country and subdivision if API has valid schema', () => {
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      xhr.fetchJson.resolves({
+        json: () =>
+          Promise.resolve(JSON.parse('{"country": "us", "subdivision": "ca"}')),
+      });
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(userErrorStub).to.not.be.called;
+        expect(geo.ISOCountry).to.equal('us');
+        expectBodyHasClass(
+          [
+            'amp-iso-country-us',
+            'amp-geo-group-nafta',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+          ],
+          true
+        );
+      });
+    });
+
     it('should not recognize country if API has invalid schema', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
       env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       xhr.fetchJson.resolves({
-        json: () => Promise.resolve(JSON.parse('{"country": "abc"}')),
+        json: () =>
+          Promise.resolve(JSON.parse('{"country": "a", "subdivision": "ca"}')),
       });
       addConfigElement('script');
 

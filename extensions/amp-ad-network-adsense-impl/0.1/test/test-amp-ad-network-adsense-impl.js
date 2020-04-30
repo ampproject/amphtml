@@ -488,8 +488,6 @@ describes.realWin(
       function verifyCss(iframe) {
         expect(iframe).to.be.ok;
         const style = win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         // We expect these set, but the exact dimensions will be determined by the
         // IOb.
         expect(style.width).to.be.ok;
@@ -498,9 +496,7 @@ describes.realWin(
         // as this can vary depending on whether we use the height/width
         // attributes, or the actual size of the frame. To make this less of a
         // hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       it('centers iframe in slot when height && width', () => {
@@ -840,31 +836,45 @@ describes.realWin(
       });
 
       it('should return empty string if unknown consentState', () =>
-        expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(
-          ''
-        ));
+        expect(
+          impl.getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        ).to.eventually.equal(''));
 
       it('should include npa=1 if unknown consent & explicit npa', () => {
         impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-        return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then((url) => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        });
+        return impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          });
       });
 
       it('should include npa=1 if insufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then((url) => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should not include not npa, if sufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then((url) => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
 
       it('should not include npa, if not required consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then((url) => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
+
+      it('should include gdpr_consent, if TC String is provided', () =>
+        impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
         }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {

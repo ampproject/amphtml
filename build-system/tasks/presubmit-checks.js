@@ -144,21 +144,11 @@ const forbiddenTerms = {
     ],
     checkInTestFolder: true,
   },
-  // Match `getMode` that is not followed by a "()." and is assigned
-  // as a variable.
-  '\\bgetMode\\([^)]*\\)(?!\\.)': {
-    message: realiasGetMode,
-    whitelist: ['src/mode.js', 'dist.3p/current/integration.js'],
-  },
-  'import[^}]*\\bgetMode as': {
-    message: realiasGetMode,
-  },
   '\\bgetModeObject\\(': {
     message: realiasGetMode,
     whitelist: [
       'src/mode-object.js',
       'src/iframe-attributes.js',
-      'src/log.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -358,7 +348,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
-      'src/amp-story-player-manager.js',
+      'src/amp-story-player/amp-story-player-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
@@ -372,7 +362,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
-      'src/amp-story-player-impl.js',
+      'src/amp-story-player/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -435,7 +425,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
-      'extensions/amp-story/1.0/amp-story-quiz.js',
+      'extensions/amp-story/1.0/amp-story-reaction.js',
     ],
   },
   'getBaseCid': {
@@ -448,6 +438,7 @@ const forbiddenTerms = {
       'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-interface.js',
       'src/service/viewer-cid-api.js',
@@ -1033,6 +1024,7 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
+      'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1152,7 +1144,7 @@ const forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
-      'src/amp-story-player-impl.js',
+      'src/amp-story-player/amp-story-player-impl.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',

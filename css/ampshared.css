@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS shared across AMP4ADS and other formats.
+ */
+
+/**
  * We intentionally break with HTML5's default [hidden] styling to apply
  * !important.
  */
@@ -30,6 +34,7 @@
 
 .i-amphtml-blurry-placeholder {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  pointer-events: none;
 }
 
 /* layout=nodisplay are automatically hidden until JS initializes. */
@@ -58,7 +63,7 @@
 
 .i-amphtml-layout-responsive,
 [layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive)
+[width][height][sizes]:not([layout]):not(.i-amphtml-layout-responsive)
 {
   display: block;
   position: relative;
@@ -402,20 +407,12 @@ html.i-amphtml-fie > amp-analytics {
   position: initial !important;
 }
 
-
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
 form [submitting],
 form [submit-success],
 form [submit-error] {
-  display: none;
-}
-
-/**
- * amp-list error messaging container should be hidden at first.
- */
-amp-list [fetch-error] {
   display: none;
 }
 

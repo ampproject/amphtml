@@ -442,7 +442,9 @@ export class MeasureScanner extends Scanner {
           );
         })
         .then((requests) => {
-          requests.forEach((request) => this.requests_.push(request));
+          /** @type {!Array} */ (requests).forEach((request) =>
+            this.requests_.push(request)
+          );
         });
       this.deps_.push(promise);
     });

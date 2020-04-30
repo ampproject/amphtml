@@ -566,21 +566,33 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
+     * Should only be called by Resources.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
-     * @param {boolean=} opt_measurementsChanged
+     * @param {boolean} sizeChanged
      */
-    updateLayoutBox(layoutBox, opt_measurementsChanged) {
+    updateLayoutBox(layoutBox, sizeChanged = false) {
       this.layoutWidth_ = layoutBox.width;
       this.layoutHeight_ = layoutBox.height;
       if (this.isBuilt()) {
-        try {
-          this.implementation_.onLayoutMeasure();
-          if (opt_measurementsChanged) {
-            this.implementation_.onMeasureChanged();
-          }
-        } catch (e) {
-          reportError(e, this);
+        this.onMeasure(sizeChanged);
+      }
+    }
+
+    /**
+     * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
+     * on the BaseElement implementation.
+     * Should only be called by Resources.
+     * @param {boolean} sizeChanged
+     */
+    onMeasure(sizeChanged = false) {
+      devAssert(this.isBuilt());
+      try {
+        this.implementation_.onLayoutMeasure();
+        if (sizeChanged) {
+          this.implementation_.onMeasureChanged();
         }
+      } catch (e) {
+        reportError(e, this);
       }
     }
 
@@ -1019,16 +1031,6 @@ function createBaseCustomElementClass(win) {
      */
     renderOutsideViewport() {
       return this.implementation_.renderOutsideViewport();
-    }
-
-    /**
-     * Whether the element should render outside of renderOutsideViewport when
-     * the scheduler is idle.
-     * @return {boolean|number}
-     * @final
-     */
-    idleRenderOutsideViewport() {
-      return this.implementation_.idleRenderOutsideViewport();
     }
 
     /**

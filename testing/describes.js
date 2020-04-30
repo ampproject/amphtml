@@ -106,6 +106,7 @@ import {install as installCustomElements} from '../src/polyfills/custom-elements
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
+import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
 import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
@@ -196,6 +197,7 @@ export const fakeWin = describeEnv((spec) => [
  * @param {string} name
  * @param {{
  *   fakeRegisterElement: (boolean|undefined),
+ *   skipCustomElementsPolyfill: (boolean|undefined),
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -647,11 +649,14 @@ class RealWinFixture {
           Object.defineProperty(win, 'customElements', {
             get: () => customElements,
           });
-        } else {
+        } else if (!spec.skipCustomElementsPolyfill) {
           // The anonymous class parameter allows us to detect native classes
           // vs transpiled classes.
           installCustomElements(win, class {});
         }
+
+        // Install IntersectionObserver polyfill.
+        installIntersectionObserver(win);
 
         // Intercept event listeners
         interceptEventListeners(win);
