@@ -260,5 +260,33 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       expect(fetchStub).to.not.be.called;
       expect(deferredCreationStub).to.not.be.called;
     });
+
+    it('should handle storage exceptions when loading data', async () => {
+      const actualStorage = await storage;
+      env.sandbox
+        .stub(actualStorage, 'get')
+        .callsFake(() => Promise.reject(new Error('unsupported storage')));
+      env.sandbox
+        .stub(actualStorage, 'set')
+        .callsFake(() => Promise.reject(new Error('unsupported storage')));
+
+      deferredCreationStub.returns(Promise.resolve());
+      fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
+        Promise.resolve({
+          json: () => Promise.resolve({found: false}),
+        })
+      );
+
+      const deferredFlow = new DeferredAccountFlow(
+        env.ampdoc,
+        HAS_ACCOUNT_URL,
+        CREATE_ACCOUNT_URL,
+        platform
+      );
+      await deferredFlow.run(ENTITLEMENT);
+
+      expect(fetchStub).to.be.called;
+      expect(deferredCreationStub).to.be.called;
+    });
   });
 });

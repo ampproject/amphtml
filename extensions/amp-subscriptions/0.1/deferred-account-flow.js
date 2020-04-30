@@ -86,6 +86,10 @@ export class DeferredAccountFlow {
         storage = s;
         return s.get(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT);
       })
+      .catch(() => {
+        // This is fine since some AMP views don't support storage.
+        return undefined;
+      })
       .then((publisherAccountLocalValue) => {
         if (publisherAccountLocalValue !== undefined) {
           // We found a cached value for the API call, return.
@@ -106,10 +110,11 @@ export class DeferredAccountFlow {
           )
           .then((result) => result.json())
           .then((jsonResult) => {
-            storage.set(
-              LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT,
-              jsonResult.found
-            );
+            storage
+              .set(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT, jsonResult.found)
+              .catch(() => {
+                // This is fine since some AMP views don't support storage.
+              });
 
             return jsonResult;
           });
@@ -132,6 +137,10 @@ export class DeferredAccountFlow {
       .then((s) => {
         storage = s;
         return s.get(LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION);
+      })
+      .catch(() => {
+        // This is fine since some AMP views don't support storage.
+        return undefined;
       })
       .then((rejected) => {
         if (rejected) {
