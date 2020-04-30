@@ -94,12 +94,6 @@ class AmpSelector extends PreactBaseElement {
             disabled,
             role: child.getAttribute('role') || 'option',
             domElement: child,
-            // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
-            // See https://github.com/ampproject/amp-react-prototype/issues/40.
-            postRender: () => {
-              // Skip mutations to avoid cycles.
-              mu.takeRecords();
-            },
             selected,
           };
           if (selected && option) {
@@ -111,16 +105,6 @@ class AmpSelector extends PreactBaseElement {
         });
       return {value, children, options};
     };
-
-    const rebuild = () => {
-      this.mutateProps(getOptionState());
-    };
-
-    const mu = new MutationObserver(rebuild);
-    mu.observe(element, {
-      attributeFilter: ['option', 'selected'],
-      subtree: true,
-    });
 
     const {value, children, options} = getOptionState();
 
