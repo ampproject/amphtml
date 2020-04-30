@@ -610,15 +610,11 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
-    console.log("hjere4");
     this.platformStore_.getGrantStatus().then((grantState) => {
       this.processGrantState_(grantState);
       this.performPingback_();
 
-      console.log("hjere3");
-      console.log(grantState)
       if (grantState) {
-        console.log("hjere2");
         this.maybeStartDeferredAccountFlow_();
       }
     });
@@ -705,41 +701,50 @@ export class SubscriptionService {
     return null;
   }
 
+  /**
+   * Start deferred account creation flow if service config has
+   * appropriate configuration.
+   * @return {?Promise}
+   * @private
+   */
   maybeStartDeferredAccountFlow_() {
-    console.log("hjere");
-    const localService = this.platformConfig_['services'].filter(
-      (service) => 'local' === (service.serviceId || 'local')
-    );
+    return this.platformStore_
+      .getEntitlementPromiseFor('local')
+      .then((localEntitlement) => {
+        if (localEntitlement.grantReason == GrantReason.SUBSCRIBER) {
+          return;
+        }
+        const localServiceConfig = this.platformConfig_['services'].filter(
+          (service) => 'local' === (service.serviceId || 'local')
+        );
 
-    const matchedServiceConfig = userAssert(
-      localService[0],
-      'No matching services for local found'
-    );
-    if (
-      !matchedServiceConfig['hasAssociatedAccountUrl'] ||
-      !matchedServiceConfig['accountCreationRedirectUrl']
-    ) {
-      return;
-    }
-    console.log("hjere2");
-    this.platformStore_.getGrantEntitlement().then((entitlement) => {
-      if (entitlement.source == 'local') {
-        return;
-      }
-      console.log(entitlement.source);
-      const remotePlatform = this.platformStore_.getPlatform(
-        entitlement.source
-      );
-      console.log(remotePlatform);
-      
-      const deferredAccountFlow = new DeferredAccountFlow(
-        this.ampdoc_,
-        matchedServiceConfig['hasAssociatedAccountUrl'],
-        matchedServiceConfig['accountCreationRedirectUrl'],
-        remotePlatform
-      );
-      deferredAccountFlow.start(entitlement);
-    });
+        const matchedServiceConfig = userAssert(
+          localServiceConfig[0],
+          'No matching services for local found'
+        );
+        if (
+          !matchedServiceConfig['hasAssociatedAccountUrl'] ||
+          !matchedServiceConfig['accountCreationRedirectUrl']
+        ) {
+          return;
+        }
+        return this.platformStore_.getGrantEntitlement().then((entitlement) => {
+          if (entitlement.source == 'local') {
+            return;
+          }
+          const remotePlatform = this.platformStore_.getPlatform(
+            entitlement.source
+          );
+
+          const deferredAccountFlow = new DeferredAccountFlow(
+            this.ampdoc_,
+            matchedServiceConfig['hasAssociatedAccountUrl'],
+            matchedServiceConfig['accountCreationRedirectUrl'],
+            remotePlatform
+          );
+          return deferredAccountFlow.run(entitlement);
+        });
+      });
   }
 
   /**

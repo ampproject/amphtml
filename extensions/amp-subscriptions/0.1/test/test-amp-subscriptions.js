@@ -15,7 +15,6 @@
  */
 
 import * as utilsStory from '../../../../src/utils/story';
-import {DeferredAccountFlow} from '../deferred-account-flow';
 import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
@@ -54,7 +53,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       {
         authorizationUrl: 'https://lipsum.com/authorize',
         hasAssociatedAccountUrl: 'https://lipsum.com/hasAssociatedAccountUrl',
-        accountCreationRedirectUrl: 'https://lipsum.com/accountCreationRedirectUrl',
+        accountCreationRedirectUrl:
+          'https://lipsum.com/accountCreationRedirectUrl',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
@@ -599,69 +599,126 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     describe('deferredAccountCreation', async () => {
       let remoteEntitlement;
       let localPlatform;
-      let rermotePlatform;
+      let remotePlatform;
+      let xhr;
+      let storage;
+      let navigateToStub;
 
       beforeEach(() => {
+        remoteEntitlement = Entitlement.parseFromJson({
+          source: 'swg-google',
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+
+        xhr = Services.xhrFor(env.win);
+        storage = Services.storageForDoc(env.ampdoc);
+        const navigator = Services.navigationForDoc(env.ampdoc);
+        navigateToStub = env.sandbox.stub(navigator, 'navigateTo');
+        navigateToStub.callsFake(() => {
+          /* make fake to avoid redirect */
+        });
+
+        localPlatform = new SubscriptionPlatform();
+        env.sandbox
+          .stub(localPlatform, 'getServiceId')
+          .callsFake(() => Promise.resolve('local'));
+        remotePlatform = new SubscriptionPlatform();
+        env.sandbox
+          .stub(remotePlatform, 'getServiceId')
+          .callsFake(() => Promise.resolve('swg-google'));
+
         subscriptionService.platformStore_ = new PlatformStore([
           'local',
           'swg-google',
         ]);
-        const entitlementData = {
-          source: 'swg-google',
-          granted: true,
-          grantReason: GrantReason.SUBSCRIBER,
-        };
-        remoteEntitlement = Entitlement.parseFromJson(entitlementData);
-        localPlatform = new SubscriptionPlatform();
-        rermotePlatform =  new SubscriptionPlatform();
         subscriptionService.platformStore_.resolvePlatform(
           'local',
           localPlatform
         );
         subscriptionService.platformStore_.resolvePlatform(
           'swg-google',
-          rermotePlatform
+          remotePlatform
         );
       });
-      it('should start deferred account flow if granted', async () => {       
+
+      it('should start deferred account flow during start authorization flow', async () => {
         const getGrantStatus = env.sandbox
           .stub(subscriptionService.platformStore_, 'getGrantStatus')
           .callsFake(() => Promise.resolve(true));
-        env.sandbox
-          .stub(subscriptionService, 'processGrantState_');
-        env.sandbox
-          .stub(subscriptionService, 'performPingback_');
+        env.sandbox.stub(subscriptionService, 'processGrantState_');
+        env.sandbox.stub(subscriptionService, 'performPingback_');
         const startFlowStub = env.sandbox
           .stub(subscriptionService, 'maybeStartDeferredAccountFlow_')
           .callsFake(() => Promise.resolve(true));
-        const getPlatformStub = env.sandbox
-          .stub(subscriptionService.platformStore_, 'getPlatform')
-          .callsFake((serviceId) => callback(rermotePlatform));
 
         await subscriptionService.initialize_();
         await subscriptionService.startAuthorizationFlow_();
 
         expect(getGrantStatus).to.be.called;
         expect(startFlowStub).to.be.called;
-        //expect(getPlatformStub).to.be.calledWith('swg-google')
       });
 
-      it('should start deferred account flow if granted by non-local', async () => {       
-        const getGrantEntitlement = env.sandbox
+      it('should skip deferred account flow if granted by local', async () => {
+        const localEntitlement = Entitlement.parseFromJson({
+          source: 'local',
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+        env.sandbox
           .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
-          .callsFake(() => Promise.resolve(remoteEntitlement));
-        const getPlatformStub = env.sandbox
-          .stub(subscriptionService.platformStore_, 'getPlatform')
-          .callsFake((serviceId) => remotePlatform);
-        
-        const flowStub = sinon.createStubInstance(DeferredAccountFlow);
+          .callsFake(() => Promise.resolve(localEntitlement));
+        subscriptionService.platformStore_.resolveEntitlement(
+          'local',
+          localEntitlement
+        );
+        const getPlatformStub = env.sandbox.stub(
+          subscriptionService.platformStore_,
+          'getPlatform'
+        );
 
         await subscriptionService.initialize_();
         await subscriptionService.maybeStartDeferredAccountFlow_();
 
-        expect(getGrantEntitlement).to.be.called;
-        expect(flowStub.start).to.be.called;
-        expect(getPlatformStub).to.be.calledWith('swg-google')
+        expect(getPlatformStub).to.not.be.called;
+      });
+
+      it('should start deferred account flow if granted by non-local', async () => {
+        const getGrantEntitlementStub = env.sandbox
+          .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+          .callsFake(() => Promise.resolve(remoteEntitlement));
+
+        const actualStorage = await storage;
+        env.sandbox
+          .stub(actualStorage, 'get')
+          .callsFake(() => Promise.resolve(undefined));
+        const fetchStub = env.sandbox.stub(xhr, 'fetchJson');
+        fetchStub.callsFake(() =>
+          Promise.resolve({
+            json: () => Promise.resolve({found: false}),
+          })
+        );
+        const accountCreationStub = env.sandbox
+          .stub(remotePlatform, 'completeDeferredAccountCreation')
+          .callsFake(() => Promise.resolve(true));
+
+        subscriptionService.platformStore_.resolveEntitlement(
+          'local',
+          Entitlement.empty('local')
+        );
+
+        await subscriptionService.initialize_();
+        await subscriptionService.maybeStartDeferredAccountFlow_();
+
+        expect(accountCreationStub).to.be.called;
+        expect(getGrantEntitlementStub).to.be.called;
+        expect(fetchStub).to.be.calledWith(
+          'https://lipsum.com/hasAssociatedAccountUrl'
+        );
+        expect(navigateToStub).to.be.called;
+        expect(navigateToStub.getCall(0).args[1]).to.equal(
+          'https://lipsum.com/accountCreationRedirectUrl'
+        );
       });
     });
   });
