@@ -29,7 +29,6 @@ async function clean() {
     'build',
     '.amp-build',
     'deps.txt',
-    'EXTENSIONS_CSS_MAP',
     'build-system/runner/build',
     'build-system/runner/dist',
     'build-system/server/new-server/transforms/dist',
