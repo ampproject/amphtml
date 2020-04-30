@@ -18,6 +18,7 @@ import {
   addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
+  appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getCorsUrl,
@@ -1106,5 +1107,13 @@ describe('getProxyServingType', () => {
     expect(
       getProxyServingType('https://not.cdn.ampproject.org/test/blah.com/foo/')
     ).to.equal('test');
+  });
+});
+
+describe('appendPathToUrl', () => {
+  it('should properly join url and path', () => {
+    expect(appendPathToUrl('https://cdn.ampproject.org/', '/foo')).to.be.equal(
+      'https://cdn.ampproject.org/foo'
+    );
   });
 });

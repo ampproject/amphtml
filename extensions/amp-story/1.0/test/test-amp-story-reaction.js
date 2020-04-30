@@ -31,7 +31,7 @@ import {registerServiceBuilder} from '../../../../src/service';
  */
 export const getMockReactionData = () => {
   return {
-    data: [
+    options: [
       {
         reactionValue: 0,
         totalCount: 3,
@@ -214,7 +214,7 @@ describes.realWin(
     });
 
     it('should preprocess percentages properly', () => {
-      const responseData1 = getMockReactionData()['data'];
+      const responseData1 = getMockReactionData()['options'];
 
       const percentages1 = ampStoryReaction.preprocessPercentages_(
         responseData1

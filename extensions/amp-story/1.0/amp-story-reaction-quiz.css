@@ -312,16 +312,12 @@ h3.i-amphtml-story-reaction-quiz-prompt {
         border: solid 2px var(--reaction-answer-choice-background);
         transform: scale(0);
     }
-    20% {
-        visibility: hidden;
-    }
+    20% { visibility: hidden; }
     21% { 
-    visibility: visible;
-    transform: scale(0.01); 
+        visibility: visible;
+        transform: scale(0.01); 
     }
-    22% { 
-    transform: scale(0.013684856124433913); 
-    }
+    22% { transform: scale(0.013684856124433913); }
     23% { transform: scale(0.051769509391971655); }
     24% { transform: scale(0.10979880954474115); }
     25% { transform: scale(0.18341305176970135); }
