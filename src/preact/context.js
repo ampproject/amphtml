@@ -15,7 +15,7 @@
  */
 
 import * as Preact from './index';
-import {createContext, useContext} from './index';
+import {createKeyedContext, useContext} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -31,15 +31,10 @@ let context;
  *
  * @return {!PreactDef.Context}
  */
-export function getAmpContext() {
-  return (
-    context ||
-    (context = createContext({
-      'renderable': true,
-      'playable': true,
-    }))
-  );
-}
+export const AmpContext = createKeyedContext('AmpContext', {
+  'renderable': true,
+  'playable': true,
+});
 
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
@@ -48,14 +43,15 @@ export function getAmpContext() {
  * @return {!PreactDef.VNode}
  */
 export function WithAmpContext(props) {
-  const AmpContext = getAmpContext();
   const parent = useContext(AmpContext);
   const current = {
-    ...props,
-    'renderable': parent['renderable'] && props['renderable'],
-    'playable': parent['playable'] && props['playable'],
-    'children': undefined,
+    'renderable': parent['renderable'] && (props['renderable'] ?? true),
+    'playable': parent['playable'] && (props['playable'] ?? true),
   };
-
-  return <AmpContext.Provider children={props['children']} value={current} />;
+  console.log('WithAmpContext:', props.debug, parent, props, current);
+  return (
+    <AmpContext.Provider value={current}>
+      {props['children']}
+    </AmpContext.Provider>
+  );
 }

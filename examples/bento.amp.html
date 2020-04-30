@@ -15,9 +15,14 @@
       margin: 8px;
       border: 1px dotted lightgray;
     }
+    amp-bento2 {
+      margin: 8px;
+      border: 1px dotted lightgreen;
+    }
   </style>
 
   <script async custom-element="amp-bento" src="https://cdn.ampproject.org/v0/amp-bento-0.1.js"></script>
+  <script async custom-element="amp-bento2" src="https://cdn.ampproject.org/v0/amp-bento2-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 </head>
@@ -29,6 +34,9 @@
       Parent:
       <amp-bento _width="300" _height="50" id="child">
         Child:
+        <amp-bento2 _width="300" _height="50" id="grandchild">
+          Grandchild:
+        </amp-bento2>
       </amp-bento>
     </amp-bento>
   </main>

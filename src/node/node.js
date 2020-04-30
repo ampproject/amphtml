@@ -20,6 +20,7 @@ import {getMode} from '../mode';
 
 const NODE_PROP = '__ampNode';
 const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
+const KEY_PROP = '__ampKey';
 const PRIVATE_ONLY = {};
 
 /**
@@ -190,11 +191,14 @@ export class ContextNode {
     if (this.consumers_) {
       // QQQ: optimize by knowing the reason for change. E.g. a particular
       // context, vs the whole hierarchy.
-      this.consumers_.forEach((observers, contextType) => {
-        const value = this.get(contextType);
+      this.consumers_.forEach((observers, key) => {
+        const value = this.get(key);
         // QQQQ: fire in microtask
         // QQQQ: check that the value has actually changed.
-        observers.fire(value, contextType);
+        // QQQQ: value=null is a perfectly ok value.
+        if (value != null) {
+          observers.fire(value);
+        }
       });
     }
     if (this.children_) {
@@ -205,30 +209,33 @@ export class ContextNode {
 
   /**
    * Set an outer provider.
+   * @param {!Object|string} contextType
    * //QQQ: rename to provide?
    */
   setSelf(contextType, valueOrProvider) {
-    //QQQ: key(contextType)
     if (!this.selfContexts_) {
       this.selfContexts_ = new Map();
     }
-    const oldValue = this.selfContexts_.get(contextType);
+    const key = toKey(contextType);
+    const oldValue = this.selfContexts_.get(key);
     if (valueOrProvider !== oldValue) {
-      this.selfContexts_.set(contextType, valueOrProvider);
+      this.selfContexts_.set(key, valueOrProvider);
       this.changed();
     }
   }
 
   /**
    * Set an inner provider.
+   * @param {!Object|string} contextType
    */
   setSubtree(contextType, valueOrProvider) {
     if (!this.subtreeContexts_) {
       this.subtreeContexts_ = new Map();
     }
-    const oldValue = this.subtreeContexts_.get(contextType);
+    const key = toKey(contextType);
+    const oldValue = this.subtreeContexts_.get(key);
     if (valueOrProvider !== oldValue) {
-      this.subtreeContexts_.set(contextType, valueOrProvider);
+      this.subtreeContexts_.set(key, valueOrProvider);
       if (this.children_) {
         this.children_.forEach(child => child.changed());
       }
@@ -236,19 +243,21 @@ export class ContextNode {
   }
 
   /**
-   * @param {!Object} contextType
+   * @param {!Object|string} contextType
    * @return {*|null}
    */
   get(contextType) {
+    // QQQQ: use cache?
+    const key = toKey(contextType);
     for (let node = this; node; node = node.parent_) {
       if (node != this && node.subtreeContexts_) {
-        const value = node.subtreeContexts_.get(contextType);
+        const value = node.subtreeContexts_.get(key);
         if (value) {
           return value;
         }
       }
       if (node.selfContexts_) {
-        const value = node.selfContexts_.get(contextType);
+        const value = node.selfContexts_.get(key);
         if (value) {
           return value;
         }
@@ -259,7 +268,7 @@ export class ContextNode {
 
   /**
    * Set up consumer.
-   * @param {*} contextType
+   * @param {!Object|string} contextType
    * @param {function(value: *, contextType: *)} callback
    * @return {!UnsubscribeDef}
    */
@@ -271,10 +280,11 @@ export class ContextNode {
     if (!this.consumers_) {
       this.consumers_ = new Map();
     }
-    let observers = this.consumers_.get(contextType);
+    const key = toKey(contextType);
+    let observers = this.consumers_.get(key);
     if (!observers) {
       observers = new Observable();
-      this.consumers_.set(contextType, observers);
+      this.consumers_.set(key, observers);
     }
     // QQQQ: call immediately (via microtask?) on the existing value.
     return observers.add(callback);
@@ -282,10 +292,22 @@ export class ContextNode {
 }
 
 /**
+ * @param {!Object|string} contextType
+ * @return {string}
+ */
+function toKey(contextType) {
+  return typeof contextType == 'object' ? contextType[KEY_PROP] : contextType;
+}
+
+/**
  * @param {!ContextNode} contextNode
  * @return {!JsonObject}
  */
 function debugContextNodeForTesting(contextNode) {
+  if (!contextNode) {
+    return null;
+  }
+
   function nodeDebug(node) {
     if (!node) {
       return null;
@@ -304,28 +326,23 @@ function debugContextNodeForTesting(contextNode) {
     return p;
   }
 
+  function mapDebug(map, getValue) {
+    if (!map) {
+      return null;
+    }
+    const obj = {};
+    map.forEach((value, key) => {
+      obj[key] = getValue ? getValue(key) : value;
+    });
+    return obj;
+  }
+
   return {
     node: nodeDebug(contextNode),
     childrenCount: contextNode.children_ && contextNode.children_.length || 0,
-    path: path(contextNode.parent_).map(nodeDebug).join(' < '),
-    selfContexts: contextNode.selfContexts_,
-    subtreeContexts: contextNode.subtreeContexts_,
-    consumers: (() => {
-      if (!contextNode.consumers_) {
-        return null;
-      }
-      const map = [];
-      contextNode.consumers_.forEach((value, key) => {
-        map.push([key, contextNode.get(key)]);
-      });
-      return map;
-    })(),
+    parent: debugContextNodeForTesting(contextNode.parent_),
+    selfContexts: mapDebug(contextNode.selfContexts_),
+    subtreeContexts: mapDebug(contextNode.subtreeContexts_),
+    consumers: mapDebug(contextNode.consumers_, (key) => contextNode.get(key)),
   };
-  /*
-    this.selfContexts_ = null;
-
-    this.subtreeContexts_ = null;
-
-    this.consumers_ = null;
-  */
 }

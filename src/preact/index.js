@@ -62,6 +62,18 @@ export function createContext(value) {
   return preact.createContext(value);
 }
 
+/**
+ * @param {string} key
+ * @param {!Object} value
+ * @return {!PreactDef.Context}
+ */
+export function createKeyedContext(key, value) {
+  const context = createContext(value);
+  context['__ampKey'] = key;
+  context['__qqqq'] = Math.random();
+  return context;
+}
+
 // Defines the type interfaces for the approved Preact Hooks APIs.
 // TODO: useReducer, useImperativeHandle, useMemo, useCallback, useDebugValue, useErrorBoundary
 

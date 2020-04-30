@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {ContextNode} from '../node/node';
 import {dev} from '../log';
-import {getAmpContext} from './context';
+import {AmpContext} from './context';
 import {matches, toggleAttribute} from '../dom';
 import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
@@ -46,7 +46,6 @@ export function createSlot(element, name, props) {
 export function Slot(props) {
   const {exportContexts, ...rest} = props;
 
-  const AmpContext = getAmpContext();
   const context = useContext(AmpContext);
 
   const ref = useRef(null);
@@ -63,7 +62,7 @@ export function Slot(props) {
     // Export the standard contexts. Non-standard contexts are exported as
     // children of the slot component.
     ContextNode.get(slot).setSelf(AmpContext, context);
-    console.log('Slot: ExportContext:', AmpContext, '=', value, 'for', slot);
+    console.log('Slot: ExportContext:', 'AmpContext', '=', context, 'for', slot);
 
     // QQQQQ
     // // TBD: Just for debug for now. but maybe can also be used for hydration?
@@ -179,8 +178,8 @@ export function Slot(props) {
   // as {children}.
   return (
     <slot {...slotProps}>
-      {exportContexts && exportContexts.map(context =>
-        <ExportContext key={context} slotRef={ref} contextType={context} />
+      {exportContexts && exportContexts.map(contextType =>
+        <ExportContext key={contextType} slotRef={ref} contextType={contextType} />
       )}
     </slot>
   );
@@ -193,7 +192,7 @@ function ExportContext({slotRef, contextType}) {
   const value = useContext(contextType);
   useMountEffect(() => {
     const slot = slotRef.current;
-    console.log('Slot: ExportContext:', contextType, '=', value, 'for', slot);
+    console.log('Slot: ExportContext:', contextType.__ampKey || contextType.__c, '=', value, 'for', slot);
     ContextNode.get(slot).setSelf(contextType, value);
   });
 }

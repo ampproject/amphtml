@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
-import {WithAmpContext, getAmpContext} from './context';
+import {WithAmpContext, AmpContext} from './context';
 import {devAssert} from '../log';
 import {matches} from '../dom';
 import {render} from './index';
@@ -99,25 +99,20 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const contextNode = ContextNode.get(this.element);
     const consumeContext = (value, contextType) => {
-      console.log('BaseElement: consumeContext:', value, contextType);
+      console.log('BaseElement: consumeContext:', contextType.__ampKey || contextType.__c, '=', value);
       this.contexts_.set(contextType, value);
       this.scheduleRender_();
     };
 
     // Subscribe to the standard contexts.
-    const AmpContext = getAmpContext();
-    contextNode.consume(AmpContext, consumeContext);
-    // // QQQ: test data
-    // this.contexts_.set(AmpContext, {playable: 17});
+    contextNode.consume(AmpContext, contextConsumerCallback(AmpContext, consumeContext));
 
     // Subscribe to the custom contexts.
     const Ctor = this.constructor;
     const {'useContexts': useContexts} = Ctor;
     if (useContexts) {
-      useContexts.forEach(context => {
-        contextNode.consume(context, consumeContext);
-        // // QQQ: test data
-        // this.contexts_.set(context, {parent: 17});
+      useContexts.forEach(contextType => {
+        contextNode.consume(contextType, contextConsumerCallback(contextType, consumeContext));
       });
     }
 
@@ -222,7 +217,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
     const v = (
-      <WithContexts contexts={this.contexts_}>
+      <WithContexts debug={`BaseElement[${this.element.id}]`} contexts={this.contexts_}>
         <Component {...props} />
       </WithContexts>
     );
@@ -278,12 +273,13 @@ PreactBaseElement['children'] = null;
 
 /**
  */
-function WithContexts({contexts, children}) {
+function WithContexts({debug, contexts, children}) {
   let tail = children;
   if (contexts.size > 0) {
     contexts.forEach((value, key) => {
       if (value != null) {
         const Context = key;
+        console.log('WithContext:', debug, Context.__ampKey || Context.__c, '=', value);
         tail = Preact.createElement(Context.Provider, {value}, tail);
       }
     });
@@ -323,6 +319,9 @@ function collectProps(Ctor, element, defaultProps) {
       const v =
         def.type == 'number'
           ? Number(value)
+          : def.type == 'boolean'
+          // QQQ: confirm the rules of "true" values. It might be `!== 'false'`
+          ? (value === '' || value === 'true')
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -394,4 +393,13 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {!ContextType} contextType
+ * @param {function(*, !ContextType)} callback
+ * @param {function(*)}
+ */
+function contextConsumerCallback(contextType, callback) {
+  return (value) => callback(value, contextType);
 }
