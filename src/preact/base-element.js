@@ -19,6 +19,7 @@ import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
+import {hasOwn} from '../utils/object';
 import {matches} from '../dom';
 import {render} from './index';
 
@@ -197,6 +198,19 @@ export class PreactBaseElement extends AMP.BaseElement {
       deferred.resolve();
       this.scheduledRenderDeferred_ = null;
     }
+  }
+
+  /**
+   * @protected
+   * @param {string} prop
+   * @param {*} opt_fallback
+   * @return {*}
+   */
+  getProp(prop, opt_fallback) {
+    if (!hasOwn(this.defaultProps_, prop)) {
+      return opt_fallback;
+    }
+    return this.defaultProps_[prop];
   }
 }
 

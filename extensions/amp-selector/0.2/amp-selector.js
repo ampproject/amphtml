@@ -28,6 +28,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {dict, omit} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
 import {useEffect} from '../../../src/preact';
 
@@ -39,8 +40,36 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
+
+    this.registerAction('clear', () =>
+      this.mutateProps(dict({'value': value}))
+    );
+
+    this.registerAction('selectUp', (invocation) => {
+      const {args, trust} = invocation;
+      const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
+      select(delta, trust);
+    });
+
+    this.registerAction('selectDown', (invocation) => {
+      const {args, trust} = invocation;
+      const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
+      select(delta, trust);
+    });
+
+    this.registerAction(
+      'toggle',
+      (invocation) => {
+        const {args, trust} = invocation;
+        const {'index': index, 'value': opt_select} = args;
+        toggle(index, trust, opt_select);
+      },
+      ActionTrust.LOW
+    );
+
     const getOptionState = () => {
       const children = [];
+      const options = [];
       const optionChildren = toArray(element.querySelectorAll('[option]'));
 
       const value = [];
@@ -77,9 +106,10 @@ class AmpSelector extends PreactBaseElement {
             value.push(option);
           }
           const optionChild = <Option {...props} />;
+          options.push(option);
           children.push(optionChild);
         });
-      return {value, children};
+      return {value, children, options};
     };
 
     const rebuild = () => {
@@ -92,7 +122,49 @@ class AmpSelector extends PreactBaseElement {
       subtree: true,
     });
 
-    const {value, children} = getOptionState();
+    const {value, children, options} = getOptionState();
+
+    const select = (delta, trust) => {
+      const value = /** @type {!Array<string>} */ (this.getProp('value', []));
+      const previous = options.indexOf(value.shift());
+      // If previousIndex === -1 is true, then a negative delta will be offset
+      // one more than is wanted when looping back around in the options.
+      // This occurs when no options are selected and "selectUp" is called.
+      const selectUpWhenNoneSelected = previous === -1 && delta < 0;
+      const index = selectUpWhenNoneSelected ? delta : previous + delta;
+      const option = options[mod(index, children.length)];
+      value.push(option);
+      fireSelectEvent(this.win, action, element, option, value, trust);
+      this.mutateProps(dict({'value': value}));
+    };
+
+    const toggle = (index, trust, opt_select) => {
+      userAssert(index, "'index' must be specified");
+      userAssert(index >= 0, "'index' must be greater than 0");
+      userAssert(
+        index < options.length,
+        "'index' must " +
+          'be less than the length of options in the <amp-selector>'
+      );
+      const value = /** @type {!Array<string>} */ (this.getProp('value', []));
+
+      const option = options[index];
+      const target = value.indexOf(option);
+      if (target === -1) {
+        if (opt_select == false) {
+          return;
+        }
+        value.push(option);
+      } else {
+        if (opt_select == true) {
+          return;
+        }
+        value.splice(target, 1);
+      }
+      fireSelectEvent(this.win, action, element, option, value, trust);
+      this.mutateProps(dict({'value': value}));
+    };
+
     return dict({
       'domElement': element,
       'children': children,
