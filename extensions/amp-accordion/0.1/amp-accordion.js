@@ -323,7 +323,12 @@ class AmpAccordion extends AMP.BaseElement {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
         this.setRenderSubtreeIfEnabled_(content, '');
-        this.animateExpand_(section, trust);
+        this.animateExpand_(section, trust).then(() => {
+          Services.ownersForDoc(this.element).scheduleLayout(
+            this.element,
+            content
+          );
+        });
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach((sectionIter) => {
             if (sectionIter != section) {
@@ -336,12 +341,6 @@ class AmpAccordion extends AMP.BaseElement {
             }
           });
         }
-        setTimeout(() => {
-          Services.ownersForDoc(this.element).scheduleLayout(
-            this.element,
-            content
-          );
-        }, 500);
       } else {
         header.setAttribute('aria-expanded', 'false');
         this.setRenderSubtreeIfEnabled_(
@@ -375,12 +374,10 @@ class AmpAccordion extends AMP.BaseElement {
               }
             });
           }
-          setTimeout(() => {
-            Services.ownersForDoc(this.element).scheduleLayout(
-              this.element,
-              content
-            );
-          }, 500);
+          Services.ownersForDoc(this.element).scheduleLayout(
+            this.element,
+            content
+          );
         } else {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
