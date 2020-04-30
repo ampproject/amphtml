@@ -16,15 +16,12 @@
 
 import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
-import {
-  generateResponseDataFor,
-  getMockReactionData,
-} from './test-amp-story-reaction';
 import {getAnalyticsService} from '../story-analytics';
+import {getMockReactionData} from './test-amp-story-reaction';
 import {getRequestService} from '../amp-story-request-service';
+import {getVariableService} from '../variable-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
@@ -70,8 +67,6 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
-    let analytics;
-    let analyticsVars;
     let requestService;
 
     beforeEach(() => {
@@ -85,9 +80,6 @@ describes.realWin(
         'amp-story-reaction-quiz'
       );
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-
-      analyticsVars = getVariableService(win);
-      analytics = getAnalyticsService(win, win.document.body);
       requestService = getRequestService(win, ampStoryQuizEl);
 
       const storeService = new AmpStoryStoreService(win);
