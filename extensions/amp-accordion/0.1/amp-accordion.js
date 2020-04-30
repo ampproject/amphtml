@@ -341,7 +341,7 @@ class AmpAccordion extends AMP.BaseElement {
             this.element,
             content
           );
-        }, 0);
+        }, 500);
       } else {
         header.setAttribute('aria-expanded', 'false');
         this.setRenderSubtreeIfEnabled_(
@@ -380,7 +380,7 @@ class AmpAccordion extends AMP.BaseElement {
               this.element,
               content
             );
-          }, 0);
+          }, 500);
         } else {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
