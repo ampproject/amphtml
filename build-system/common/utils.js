@@ -89,7 +89,7 @@ function logFiles(files) {
  */
 function getFilesToCheck(globs, options = {}) {
   if (argv.files) {
-    return logFiles(globby.sync(argv.files.split(',')));
+    return logFiles(globby.sync(argv.files.split(',').map((s) => s.trim())));
   }
   if (argv.local_changes) {
     const filesChanged = getFilesChanged(globs);

@@ -93,6 +93,7 @@ async function e2e() {
 
     // specify tests to run
     if (argv.files) {
+      // TODO: Should this allow multiple globs?
       glob.sync(argv.files).forEach((file) => {
         delete require.cache[file];
         mocha.addFile(file);
@@ -116,6 +117,7 @@ async function e2e() {
       await resolver();
     });
   } else {
+    // TODO: Should this allow multiple globs?
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');

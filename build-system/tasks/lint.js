@@ -189,7 +189,7 @@ function lint() {
   maybeUpdatePackages();
   let filesToLint = config.lintGlobs;
   if (argv.files) {
-    filesToLint = getFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(argv.files.split(',').map((s) => s.trim()));
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {

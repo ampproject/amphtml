@@ -129,6 +129,7 @@ function getFiles(testType) {
     case 'unit':
       files = testConfig.commonUnitTestPaths;
       if (argv.files) {
+        // TODO: Should this allow multiple globs?
         return files.concat(argv.files);
       }
       if (argv.saucelabs) {
@@ -142,6 +143,7 @@ function getFiles(testType) {
     case 'integration':
       files = testConfig.commonIntegrationTestPaths;
       if (argv.files) {
+        // TODO: Should this allow multiple globs?
         return files.concat(argv.files);
       }
       return files.concat(testConfig.integrationTestPaths);
