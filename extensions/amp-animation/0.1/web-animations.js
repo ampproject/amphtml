@@ -48,6 +48,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -862,6 +863,10 @@ class CssContextImpl {
     /** @const @private {?Element} */
     this.scope_ = scope;
 
+    const {scaleDimsByScope = false} = options;
+    /** @const @private {boolean} */
+    this.scaleDimsByScope_ = scaleDimsByScope;
+
     /** @const @private */
     this.baseUrl_ = baseUrl;
 
@@ -891,6 +896,15 @@ class CssContextImpl {
 
     /** @private {?{width: number, height: number}} */
     this.viewportSize_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.viewportRect_ = null;
+
+    /** @private {number} */
+    this.scaleFactorX_ = 1;
+
+    /** @private {number} */
+    this.scaleFactorY_ = 1;
   }
 
   /** @return {!Document|!ShadowRoot} */
@@ -1179,13 +1193,39 @@ class CssContextImpl {
 
   /** @override */
   getViewportSize() {
+    this.resolveViewportRect_();
     if (!this.viewportSize_) {
+      const {width, height} = this.viewportRect_;
       this.viewportSize_ = {
-        width: this.win_./*OK*/ innerWidth,
-        height: this.win_./*OK*/ innerHeight,
+        width: width * this.scaleFactorX_,
+        height: height * this.scaleFactorY_,
       };
     }
     return this.viewportSize_;
+  }
+
+  /** @private */
+  resolveViewportRect_() {
+    if (this.viewportRect_) {
+      return;
+    }
+    if (!this.scope_) {
+      this.viewportRect_ = layoutRectLtwh(
+        0,
+        0,
+        this.win_./*OK*/ innerWidth,
+        this.win_./*OK*/ innerHeight
+      );
+      return;
+    }
+    this.viewportRect_ = this.scope_./*OK*/ getBoundingClientRect();
+
+    if (this.scaleDimsByScope_) {
+      this.scaleFactorX_ =
+        this.scope_./*OK*/ offsetWidth / (this.viewportRect_.width || 1);
+      this.scaleFactorY_ =
+        this.scope_./*OK*/ offsetHeight / (this.viewportRect_.height || 1);
+    }
   }
 
   /** @override */
@@ -1229,6 +1269,18 @@ class CssContextImpl {
     return this.getElementSize_(this.getElement_(selector, selectionMethod));
   }
 
+  /** @override */
+  getCurrentElementPosition() {
+    return this.getElementPosition_(this.requireTarget_());
+  }
+
+  /** @override */
+  getElementPosition(selector, selectionMethod) {
+    return this.getElementPosition_(
+      this.getElement_(selector, selectionMethod)
+    );
+  }
+
   /**
    * @param {string} selector
    * @param {?string} selectionMethod
@@ -1269,8 +1321,29 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    const b = target./*OK*/ getBoundingClientRect();
-    return {width: b.width, height: b.height};
+    this.resolveViewportRect_();
+    const {width, height} = target./*OK*/ getBoundingClientRect();
+    return {
+      width: width * this.scaleFactorX_,
+      height: height * this.scaleFactorY_,
+    };
+  }
+
+  /**
+   * @param {!Element} target
+   * @return {!{x: number, y: number}}
+   * @private
+   */
+  getElementPosition_(target) {
+    this.resolveViewportRect_();
+    const {x, y} = target./*OK*/ getBoundingClientRect();
+    const {x: offsetX, y: offsetY} = this.viewportRect_;
+
+    // This assumes default `transform-origin: center center`
+    return {
+      x: (x - offsetX) * this.scaleFactorX_,
+      y: (y - offsetY) * this.scaleFactorY_,
+    };
   }
 
   /** @override */

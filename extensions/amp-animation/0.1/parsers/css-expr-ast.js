@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = (2 * Math.PI) / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|min|max|clamp|var|url|rand|index|width|height|num|length)\(/i;
+const VAR_CSS_RE = /(calc|min|max|clamp|var|url|rand|index|width|height|num|length|([^a-z]|^)x|([^a-z]|^)y)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 const BOX_DIMENSIONS = ['h', 'w', 'h', 'w'];
@@ -99,6 +99,20 @@ export class CssContext {
    * @return {!{width: number, height: number}}
    */
   getElementSize(unusedSelector, unusedSelectionMethod) {}
+
+  /**
+   * Returns the current element's position.
+   * @return {!{x: number, y: number}}
+   */
+  getCurrentElementPosition() {}
+
+  /**
+   * Returns the specified element's position.
+   * @param {string} unusedSelector
+   * @param {?string} unusedSelectionMethod
+   * @return {!{x: number, y: number}}
+   */
+  getElementPosition(unusedSelector, unusedSelectionMethod) {}
 
   /**
    * Returns the dimension: "w" for width or "h" for height.
@@ -879,6 +893,44 @@ export class CssDimSizeNode extends CssNode {
       ? context.getElementSize(this.selector_, this.selectionMethod_)
       : context.getCurrentElementSize();
     return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+  }
+}
+
+/**
+ * AMP-specific `x()` and `y()` functions.
+ */
+export class CssDimPosNode extends CssNode {
+  /**
+   * @param {string} dim
+   * @param {?string=} opt_selector
+   * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
+   */
+  constructor(dim, opt_selector, opt_selectionMethod) {
+    super();
+    /** @const @private */
+    this.dim_ = dim;
+    /** @const @private */
+    this.selector_ = opt_selector || null;
+    /** @const @private */
+    this.selectionMethod_ = opt_selectionMethod || null;
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    const position = this.selector_
+      ? context.getElementPosition(this.selector_, this.selectionMethod_)
+      : context.getCurrentElementPosition();
+    return new CssLengthNode(position[this.dim_], 'px');
   }
 }
 

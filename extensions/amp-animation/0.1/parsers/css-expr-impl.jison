@@ -91,6 +91,8 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {C}{I}{R}{C}{L}{E}\(                return 'CIRCLE_START'
 {E}{L}{L}{I}{P}{S}{E}\(             return 'ELLIPSE_START'
 {P}{O}{L}{Y}{G}{O}{N}\(             return 'POLYGON_START'
+{X}\(                               return 'X_START'
+{Y}\(                               return 'Y_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -261,6 +263,8 @@ function:
   | translate_function
       {$$ = $1;}
   | dim_function
+      {$$ = $1;}
+  | pos_function
       {$$ = $1;}
   | num_function
       {$$ = $1;}
@@ -476,6 +480,29 @@ dim_function:
       {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
   | HEIGHT_START CLOSEST_START STRING ')' ')'
       {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+  ;
+
+
+/**
+ * AMP-specific `x()` and `y()` functions:
+ * - `x(".selector")`
+ * - `y(".selector")`
+ * - `x(closest(".selector"))`
+ * - `y(closest(".selector"))`
+ */
+pos_function:
+    X_START ')'
+      {$$ = new ast.CssDimPosNode('x');}
+  | Y_START ')'
+      {$$ = new ast.CssDimPosNode('y');}
+  | X_START STRING ')'
+      {$$ = new ast.CssDimPosNode('x', $2.slice(1, -1));}
+  | Y_START STRING ')'
+      {$$ = new ast.CssDimPosNode('y', $2.slice(1, -1));}
+  | X_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimPosNode('x', $3.slice(1, -1), 'closest');}
+  | Y_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimPosNode('y', $3.slice(1, -1), 'closest');}
   ;
 
 

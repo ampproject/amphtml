@@ -64,6 +64,13 @@ describes.sandboxed('CSS parse', {}, () => {
         `, ${n.selectionMethod_}>`
       );
     }
+    if (n instanceof ast.CssDimPosNode) {
+      return (
+        `POS<${n.dim_}` +
+        `, ${n.selector_ ? '"' + n.selector_ + '"' : null}` +
+        `, ${n.selectionMethod_}>`
+      );
+    }
     if (n instanceof ast.CssNumConvertNode) {
       return `NUMC<${n.value_ ? pseudo(n.value_) : null}>`;
     }
@@ -319,6 +326,27 @@ describes.sandboxed('CSS parse', {}, () => {
     );
     expect(parsePseudo('height(closest(".sel"))')).to.equal(
       'DIM<h, ".sel", closest>'
+    );
+  });
+
+  it('should parse a position function', () => {
+    // Current.
+    expect(parsePseudo('x()')).to.equal('POS<x, null, null>');
+    expect(parsePseudo('y()')).to.equal('POS<y, null, null>');
+
+    // Query.
+    expect(parsePseudo('x(".sel")')).to.equal('POS<x, ".sel", null>');
+    expect(parsePseudo('x(".sel > div")')).to.equal(
+      'POS<x, ".sel > div", null>'
+    );
+    expect(parsePseudo('y(".sel")')).to.equal('POS<y, ".sel", null>');
+
+    // Closest.
+    expect(parsePseudo('x(closest(".sel"))')).to.equal(
+      'POS<x, ".sel", closest>'
+    );
+    expect(parsePseudo('y(closest(".sel"))')).to.equal(
+      'POS<y, ".sel", closest>'
     );
   });
 

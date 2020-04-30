@@ -1584,6 +1584,52 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       ).to.deep.equal({width: 11, height: 12});
     });
 
+    it("should resolve current element's position", () => {
+      target1.style.position = 'absolute';
+      target1.style.left = '11px';
+      target1.style.top = '12px';
+      allowConsoleError(() => {
+        expect(() => css.getCurrentElementPosition()).to.throw(
+          /target is specified/
+        );
+      });
+      expect(
+        css.withTarget(target1, 0, () => css.getCurrentElementPosition())
+      ).to.deep.equal({x: 11, y: 12});
+    });
+
+    it("should resolve the selected element's position", () => {
+      target1.style.position = 'absolute';
+      target1.style.left = '11px';
+      target1.style.top = '12px';
+      target1.classList.add('parent');
+      const child = target1.ownerDocument.createElement('div');
+      target1.appendChild(child);
+
+      // Normal selectors search whole DOM and don't need context.
+      expect(css.getElementPosition('#target1', null)).to.deep.equal({
+        x: 11,
+        y: 12,
+      });
+      expect(
+        css.withTarget(target2, 0, () =>
+          css.getElementPosition('#target1', null)
+        )
+      ).to.deep.equal({x: 11, y: 12});
+
+      // Closest selectors always need a context node.
+      allowConsoleError(() => {
+        expect(() => css.getElementPosition('#target1', 'closest')).to.throw(
+          /target is specified/
+        );
+      });
+      expect(
+        css.withTarget(child, 0, () =>
+          css.getElementPosition('.parent', 'closest')
+        )
+      ).to.deep.equal({x: 11, y: 12});
+    });
+
     it('should resolve a valid URL', () => {
       expect(css.resolveUrl('/path')).to.equal('https://acme.org/path');
       expect(css.resolveUrl('//example.org/path')).to.equal(
@@ -1815,6 +1861,193 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
         )
       ).to.throw(/Element not found/);
     });
+  });
+
+  it("should resolve viewport size as scope element's size", () => {
+    const scope = html`<div></div>`;
+
+    scope.style.width = '200px';
+    scope.style.height = '300px';
+
+    env.win.document.body.appendChild(scope);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope}
+    );
+
+    const css = builder.css_;
+
+    const size = css.getViewportSize();
+    expect(size.width).to.equal(200);
+    expect(size.height).to.equal(300);
+
+    // cached:
+    expect(css.getViewportSize()).to.equal(size);
+  });
+
+  it('should resolve x and y relative to scope', () => {
+    const scope = html`<div>
+      <div id="target1" ref="target1"></div>
+      <div id="target2" ref="target2"></div>
+    </div>`;
+
+    const {target1, target2} = htmlRefs(scope);
+
+    scope.style.position = 'absolute';
+    scope.style.top = '20px';
+    scope.style.left = '10px';
+
+    target1.style.position = 'absolute';
+    target1.style.left = '40px';
+    target1.style.top = '30px';
+
+    target2.style.position = 'absolute';
+    target2.style.left = '30px';
+    target2.style.top = '20px';
+
+    env.win.document.body.appendChild(scope);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope}
+    );
+
+    const css = builder.css_;
+
+    const pos1 = css.getElementPosition('#target1', null);
+    expect(pos1.x).to.equal(40);
+    expect(pos1.y).to.equal(30);
+
+    const pos2 = css.getElementPosition('#target2', null);
+    expect(pos2.x).to.equal(30);
+    expect(pos2.y).to.equal(20);
+  });
+
+  it('should resolve dimensions and size rescaled relative to scope', () => {
+    const scope = html`<div>
+      <div id="target1" ref="target1"></div>
+      <div id="target2" ref="target2"></div>
+    </div>`;
+
+    const {target1, target2} = htmlRefs(scope);
+
+    scope.style.position = 'absolute';
+    scope.style.top = '20px';
+    scope.style.left = '10px';
+
+    scope.style.width = '1000px';
+    scope.style.height = '1000px';
+
+    scope.style.transform = 'scale(0.5)';
+
+    target1.style.position = 'absolute';
+    target1.style.left = '40px';
+    target1.style.top = '30px';
+    target1.style.width = '200px';
+    target1.style.height = '100px';
+
+    target2.style.position = 'absolute';
+    target2.style.left = '30px';
+    target2.style.top = '20px';
+    target2.style.width = '300px';
+    target2.style.height = '200px';
+
+    env.win.document.body.appendChild(scope);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope, scaleDimsByScope: true}
+    );
+
+    const css = builder.css_;
+
+    const pos1 = css.getElementPosition('#target1', null);
+    expect(pos1.x).to.equal(40);
+    expect(pos1.y).to.equal(30);
+
+    const size1 = css.getElementSize('#target1', null);
+    expect(size1.width).to.equal(200);
+    expect(size1.height).to.equal(100);
+
+    const pos2 = css.getElementPosition('#target2', null);
+    expect(pos2.x).to.equal(30);
+    expect(pos2.y).to.equal(20);
+
+    const size2 = css.getElementSize('#target2', null);
+    expect(size2.width).to.equal(300);
+    expect(size2.height).to.equal(200);
+  });
+
+  it('should resolve dimensions and size not rescaled relative to scope', () => {
+    const scope = html`<div>
+      <div id="target1" ref="target1"></div>
+      <div id="target2" ref="target2"></div>
+    </div>`;
+
+    const {target1, target2} = htmlRefs(scope);
+
+    scope.style.position = 'absolute';
+    scope.style.top = '20px';
+    scope.style.left = '10px';
+
+    scope.style.width = '1000px';
+    scope.style.height = '1000px';
+
+    scope.style.transform = 'scale(0.5)';
+
+    target1.style.position = 'absolute';
+    target1.style.left = '40px';
+    target1.style.top = '30px';
+    target1.style.width = '200px';
+    target1.style.height = '100px';
+
+    target2.style.position = 'absolute';
+    target2.style.left = '30px';
+    target2.style.top = '20px';
+    target2.style.width = '300px';
+    target2.style.height = '200px';
+
+    env.win.document.body.appendChild(scope);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope, scaleDimsByScope: false}
+    );
+
+    const css = builder.css_;
+
+    const pos1 = css.getElementPosition('#target1', null);
+    expect(pos1.x).to.equal(40 * 0.5);
+    expect(pos1.y).to.equal(30 * 0.5);
+
+    const size1 = css.getElementSize('#target1', null);
+    expect(size1.width).to.equal(200 * 0.5);
+    expect(size1.height).to.equal(100 * 0.5);
+
+    const pos2 = css.getElementPosition('#target2', null);
+    expect(pos2.x).to.equal(30 * 0.5);
+    expect(pos2.y).to.equal(20 * 0.5);
+
+    const size2 = css.getElementSize('#target2', null);
+    expect(size2.width).to.equal(300 * 0.5);
+    expect(size2.height).to.equal(200 * 0.5);
   });
 });
 

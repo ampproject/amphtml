@@ -747,6 +747,64 @@ describes.sandboxed('CSS resolve', {}, (env) => {
     });
   });
 
+  describe('position', () => {
+    let positions;
+
+    beforeEach(() => {
+      positions = {
+        'null(.class)': {x: 111, y: 222},
+        'closest(.class > div)': {x: 112, y: 224},
+      };
+      context.getCurrentElementPosition = () => ({x: 110, y: 220});
+
+      context.getElementPosition = (selector, selectionMethod) =>
+        positions[`${selectionMethod}(${selector})`];
+    });
+
+    it('should always consider as non-const', () => {
+      expect(ast.isVarCss('x()', false)).to.be.true;
+      expect(ast.isVarCss('y()', false)).to.be.true;
+      expect(ast.isVarCss('x("")')).to.be.true;
+      expect(ast.isVarCss('y("")')).to.be.true;
+    });
+
+    it('should be always a non-const and no css', () => {
+      const node = new ast.CssDimPosNode('?');
+      expect(node.isConst()).to.be.false;
+      expect(() => node.css()).to.throw(/no css/);
+    });
+
+    it('should resolve x coord on the current node', () => {
+      const node = new ast.CssDimPosNode('x');
+      expect(node.calc(context).css()).to.equal('110px');
+    });
+
+    it('should resolve y coord on the current node', () => {
+      const node = new ast.CssDimPosNode('y');
+      expect(node.calc(context).css()).to.equal('220px');
+    });
+
+    it('should resolve x coord on the selected node', () => {
+      const node = new ast.CssDimPosNode('x', '.class');
+      expect(node.calc(context).css()).to.equal('111px');
+    });
+
+    it('should resolve y coord on the selected node', () => {
+      const node = new ast.CssDimPosNode('y', '.class');
+      expect(node.calc(context).css()).to.equal('222px');
+    });
+
+    it('should resolve x coord on the selected closest node', () => {
+      const node = new ast.CssDimPosNode('x', '.class > div', 'closest');
+      expect(node.calc(context).css()).to.equal('112px');
+    });
+
+    it('should resolve y coord on the selected closest node', () => {
+      const node = new ast.CssDimPosNode('y', '.class > div', 'closest');
+      expect(node.calc(context).css()).to.equal('224px');
+    });
+  });
+
   describe('num-convert', () => {
     it('should always consider as non-const', () => {
       expect(ast.isVarCss('num(10px)')).to.be.true;
