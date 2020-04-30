@@ -18,7 +18,7 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
-import {getLocalizationService} from '../../../src/service/localization';
+import {Services} from '../../../src/services';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsEn from './_locales/en';
@@ -95,7 +95,9 @@ export class StoryAdLocalization {
    * Create localization service and register all bundles.
    */
   init_() {
-    this.localizationService_ = getLocalizationService(this.win_.document.body);
+    this.localizationService_ = Services.localizationForDoc(
+      this.win_.document.body
+    );
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,

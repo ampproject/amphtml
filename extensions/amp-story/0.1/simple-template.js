@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {getLocalizationService} from '../../../src/service/localization';
 import {isArray} from '../../../src/types';
 
 /**
@@ -75,7 +75,7 @@ function renderSingle(doc, elementDef) {
     : doc.createElement(elementDef.tag);
 
   if (elementDef.localizedStringId) {
-    const localizationService = getLocalizationService(doc.body);
+    const localizationService = Services.localizationForDoc(doc.body);
 
     devAssert(localizationService, 'Could not retrieve LocalizationService.');
     el.textContent = localizationService.getLocalizedString(

@@ -29,6 +29,11 @@ describes.fakeWin('amp-story hint layer', {}, (env) => {
   beforeEach(() => {
     win = env.win;
 
+    const localizationService = Services.localizationForDoc(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationServiceForDoc')
+      .returns(localizationService);
+
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;

@@ -92,7 +92,6 @@ import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
-import {getLocalizationService} from '../../../src/service/localization';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {getState} from '../../../src/history';
@@ -212,7 +211,7 @@ export class AmpStory extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(this.element);
+    this.localizationService_ = Services.localizationForDoc(this.element);
 
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)

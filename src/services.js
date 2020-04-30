@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LocalizationService} from './service/localization';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -21,6 +22,7 @@ import {
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -544,14 +546,22 @@ export class Services {
   }
 
   /**
+   * @return {!./service/localization.LocalizationService}
    * @param {!Element} element
-   * @return {?./service/localization.LocalizationService}
    */
-  static localizationServiceForDoc(element) {
-    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+  static localizationForDoc(element) {
+    let service = /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
       element,
       'localization'
     ));
+
+    if (!service) {
+      service = new LocalizationService(element);
+      registerServiceBuilderForDoc(element, 'localization', function () {
+        return service;
+      });
+    }
+    return service;
   }
 
   /**

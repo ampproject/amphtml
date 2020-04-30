@@ -23,7 +23,6 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
-import {getLocalizationService} from '../../../src/service/localization';
 import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} Class to toggle the info dialog. */
@@ -56,7 +55,7 @@ export class InfoDialog {
     this.isBuilt_ = false;
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(parentEl);
+    this.localizationService_ = Services.localizationForDoc(parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreServiceV01(this.win_);

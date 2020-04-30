@@ -117,6 +117,13 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationServiceForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
         .stub(viewer, 'hasCapability')
@@ -146,7 +153,6 @@ describes.realWin(
     it('should build with the expected number of pages', async () => {
       const pagesCount = 2;
       await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-
       await story.layoutCallback();
       expect(story.getPageCount()).to.equal(pagesCount);
     });

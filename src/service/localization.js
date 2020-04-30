@@ -159,15 +159,3 @@ export class LocalizationService {
     );
   }
 }
-
-export const getLocalizationService = (el) => {
-  let service = Services.localizationServiceForDoc(el);
-
-  if (!service) {
-    service = new LocalizationService(el);
-    registerServiceBuilderForDoc(el, 'localization', function () {
-      return service;
-    });
-  }
-  return service;
-};

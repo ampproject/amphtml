@@ -42,7 +42,6 @@ import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
-import {getLocalizationService} from '../../../../src/service/localization';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
@@ -630,7 +629,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       return;
     }
 
-    const localizationService = getLocalizationService(this.element);
+    const localizationService = Services.localizationForDoc(this.element);
     if (!localizationService) {
       user().error(TAG, 'Unable to fetch localization service.');
       return;
