@@ -37,7 +37,7 @@ const TAG = 'amp-selector';
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
-    const {/** @type {!Element} */ element} = this;
+    const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
     const getOptionState = () => {
       const children = [];
