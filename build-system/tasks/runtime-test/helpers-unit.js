@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const findImports = require('find-imports-forked');
 const fs = require('fs');
 const globby = require('globby');
+const listImportsExports = require('list-imports-exports');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
@@ -86,12 +86,8 @@ function extractCssJsFileMap() {
  * @return {!Array<string>}
  */
 function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
+  const jsFileContents = fs.readFileSync(jsFile, 'utf8');
+  const {imports} = listImportsExports.parse(jsFileContents);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
