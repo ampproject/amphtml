@@ -44,7 +44,7 @@ const ESM_DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_esm_dist_${travisBuildNumber()}.zip`
   : '';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';

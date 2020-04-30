@@ -15,22 +15,23 @@
  */
 'use strict';
 
-const findImports = require('find-imports-forked');
 const fs = require('fs');
 const globby = require('globby');
+const listImportsExports = require('list-imports-exports');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
-
+const {execOrDie} = require('../../common/exec');
+const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestSkipped} = require('../report-test-status');
 
-const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
 const LARGE_REFACTOR_THRESHOLD = 50;
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+let testsToRun = null;
 
 /**
  * Returns true if the PR is a large refactor.
@@ -43,15 +44,14 @@ function isLargeRefactor() {
 }
 
 /**
- * Extracts a mapping from CSS files to JS files from a well known file
- * generated during `gulp css`.
+ * Extracts extension info and creates a mapping from CSS files in different
+ * source directories to their equivalent JS files in the 'build/' directory.
  *
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  const extensionsCssMap = fs.readFileSync(EXTENSIONSCSSMAP, 'utf8');
-  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
-  const extensions = Object.keys(extensionsCssMapJson);
+  execOrDie('gulp css', {'stdio': 'ignore'});
+  maybeInitializeExtensions(extensions);
   const cssJsFileMap = {};
 
   // Adds an entry that maps a CSS file to a JS file
@@ -63,8 +63,8 @@ function extractCssJsFileMap() {
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
 
-  extensions.forEach((extension) => {
-    const cssData = extensionsCssMapJson[extension];
+  Object.keys(extensions).forEach((extension) => {
+    const cssData = extensions[extension];
     if (cssData['hasCss']) {
       addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
       if (cssData.hasOwnProperty('cssBinaries')) {
@@ -85,12 +85,8 @@ function extractCssJsFileMap() {
  * @return {!Array<string>}
  */
 function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
+  const jsFileContents = fs.readFileSync(jsFile, 'utf8');
+  const {imports} = listImportsExports.parse(jsFileContents);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
@@ -159,15 +155,18 @@ function getUnitTestsToRun() {
 
 /**
  * Extracts the list of unit tests to run based on the changes in the local
- * branch.
+ * branch. Return value is cached to optimize for multiple calls.
  *
- * @param {!Array<string>} unitTestPaths
  * @return {!Array<string>}
  */
-function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
+function unitTestsToRun() {
+  if (testsToRun) {
+    return testsToRun;
+  }
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
+  const {unitTestPaths} = testConfig;
+  testsToRun = [];
   let srcFiles = [];
 
   function isUnitTest(file) {

@@ -25,7 +25,7 @@ const {
   toPromise,
   watchDebounceDelay,
 } = require('./helpers');
-const {buildExtensions, extensions} = require('./extension-helpers');
+const {buildExtensions} = require('./extension-helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -132,9 +132,6 @@ function compileCss(watch) {
   }
 
   const startTime = Date.now();
-
-  // Used by `gulp unit --local_changes` to map CSS files to JS files.
-  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   let promise = Promise.resolve();
 
