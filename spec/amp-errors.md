@@ -19,6 +19,7 @@ limitations under the License.
 AMP reports 90% of errors to the endpoint specified by the `errorReportingUrl`
 config property, with the remaining 10% reporting to the endpoint specified by
 the `betaErrorReportingUrl` config. E.g. for `cdn.ampproject.org`
+
 - 90%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r`
 - 10%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta`
 
