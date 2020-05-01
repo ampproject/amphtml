@@ -83,7 +83,7 @@ export class SubscriptionPlatform {
    * @return {!Promise<boolean>|undefined} wheether the
    *     deferred creation was authorized.
    */
-  completeDeferredAccountCreation(unusedEntitlement) {}
+  consentDeferredAccountCreation(unusedEntitlement) {}
 
   /**
    * Tells if the platform supports a score factor

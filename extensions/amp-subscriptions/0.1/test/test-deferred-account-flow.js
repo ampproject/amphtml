@@ -50,12 +50,12 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
     storage = Services.storageForDoc(env.ampdoc);
     platform = {
       getServiceId: () => Promise.resolve(PLATFORM_ID),
-      completeDeferredAccountCreation: () => {},
+      consentDeferredAccountCreation: () => {},
     };
     fetchStub = env.sandbox.stub(xhr, 'fetchJson');
     deferredCreationStub = env.sandbox.stub(
       platform,
-      'completeDeferredAccountCreation'
+      'consentDeferredAccountCreation'
     );
   });
 

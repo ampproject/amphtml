@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {stringifyForPingback} from '../../../src/utils/xhr-utils';
+import {stringifyForPingback} from './stringify-for-pingback';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -85,7 +85,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
 
   /** @override */
   pingback(selectedEntitlement) {
-    if (!this.isPingbackEnabled() && !this.isDeferredAccountCreationEnabled()) {
+    if (!this.isPingbackEnabled()) {
       return;
     }
     const pingbackUrl = /** @type {string} */ (devAssert(

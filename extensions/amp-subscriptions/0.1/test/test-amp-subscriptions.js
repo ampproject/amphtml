@@ -699,7 +699,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           })
         );
         const accountCreationStub = env.sandbox
-          .stub(remotePlatform, 'completeDeferredAccountCreation')
+          .stub(remotePlatform, 'consentDeferredAccountCreation')
           .callsFake(() => Promise.resolve(true));
 
         subscriptionService.platformStore_.resolveEntitlement(

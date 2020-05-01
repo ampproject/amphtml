@@ -722,11 +722,9 @@ export class SubscriptionService {
           (service) => 'local' === (service.serviceId || 'local')
         );
 
-        const matchedServiceConfig = userAssert(
-          localServiceConfig[0],
-          'No matching services for local found'
-        );
+        const matchedServiceConfig = localServiceConfig[0] || null;
         if (
+          !matchedServiceConfig ||
           !matchedServiceConfig['hasAssociatedAccountUrl'] ||
           !matchedServiceConfig['accountCreationRedirectUrl']
         ) {

@@ -896,7 +896,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         .stub(platform.runtime_, 'completeDeferredAccountCreation')
         .resolves(deferredAccountCreationResponse);
 
-      const accepted = await platform.completeDeferredAccountCreation(
+      const accepted = await platform.consentDeferredAccountCreation(
         entitlements
       );
       expect(accepted).to.be.true;
@@ -917,7 +917,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         .stub(platform.runtime_, 'completeDeferredAccountCreation')
         .rejects();
 
-      const accepted = await platform.completeDeferredAccountCreation(
+      const accepted = await platform.consentDeferredAccountCreation(
         entitlements
       );
 

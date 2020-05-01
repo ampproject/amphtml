@@ -15,12 +15,13 @@
  */
 import {Services} from '../../../src/services';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
-import {stringifyForPingback} from '../../../src/utils/xhr-utils';
+import {stringifyForPingback} from './stringify-for-pingback';
 
 const LOCAL_STORAGE_KEYS = {
   HAS_PUBLISHER_ACCOUNT: 'account-exists-on-publisher-side',
   HAS_REJECTED_ACCOUNT_CREATION: 'user-rejected-account-creation-request',
 };
+
 /**
  * AMP-side implementation of deferred account creation, a flow responsible
  * for reconciling account existance discrepancies across platforms.
@@ -195,7 +196,7 @@ export class DeferredAccountFlow {
           return;
         }
 
-        this.platform_.completeDeferredAccountCreation().then((accepted) => {
+        this.platform_.consentDeferredAccountCreation().then((accepted) => {
           if (accepted) {
             // ...redirect the user to URL provided for this purpose.
             this.navigateTo_(this.accountCreationRedirectUrl_);

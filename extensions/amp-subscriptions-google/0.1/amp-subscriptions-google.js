@@ -479,7 +479,7 @@ export class GoogleSubscriptionsPlatform {
   pingback() {}
 
   /** @override */
-  completeDeferredAccountCreation(entitlements) {
+  consentDeferredAccountCreation(entitlements) {
     return this.runtime_
       .completeDeferredAccountCreation({
         entitlements,
