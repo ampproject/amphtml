@@ -65,13 +65,13 @@ t.run('amp-story-affiliate link', () => {
       it('should not send any analytics event on expand', async () => {
         browser.click('#blink-1');
         browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw();
+        await expect(RequestBank.withdraw()).to.throw();
       });
 
-      it('should not send any analytics event on collapse', () => {
+      it('should not send any analytics event on collapse', async () => {
         browser.click('#blink-1');
         browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw();
+        await expect(RequestBank.withdraw()).to.throw();
       });
 
       it.skip('should send analytics event on external click', async () => {
