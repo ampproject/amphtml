@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../test-configs/config');
@@ -30,6 +29,7 @@ const {
   runTestInSauceLabs,
 } = require('./helpers');
 const {app} = require('../../server/test-server');
+const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
@@ -129,20 +129,20 @@ function getFiles(testType) {
     case 'unit':
       files = testConfig.commonUnitTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       if (argv.saucelabs) {
         return files.concat(testConfig.unitTestOnSaucePaths);
       }
       if (argv.local_changes) {
-        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
+        return files.concat(unitTestsToRun());
       }
       return files.concat(testConfig.unitTestPaths);
 
     case 'integration':
       files = testConfig.commonIntegrationTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       return files.concat(testConfig.integrationTestPaths);
 
@@ -194,13 +194,6 @@ class RuntimeTestConfig {
           green('Transforming tests with'),
           cyan('browserify') + green('...')
         );
-      });
-      bundle.on('transform', function (tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function () {
-            process.stdout.write('.');
-          });
-        }
       });
     };
 

@@ -41,6 +41,7 @@ import {
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
@@ -230,6 +231,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           AMP_AD_NO_CENTER_CSS_EXP.experiment,
         ],
       },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -256,9 +264,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl(consentTuple) {
     let consentState = undefined;
     let consentString = undefined;
+    let gdprApplies = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
+      gdprApplies = consentTuple.gdprApplies;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -345,6 +355,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()
           : null,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
