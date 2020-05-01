@@ -273,7 +273,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Return a cleaned clone of the given element for building
    * carousel slides with.
    * @param {!Element} element
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Node}
    * @private
    */
   cloneLightboxableElement_(element) {

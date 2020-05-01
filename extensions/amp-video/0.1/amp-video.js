@@ -404,7 +404,7 @@ class AmpVideo extends AMP.BaseElement {
       currentSource,
       `Can't find source element for currentSrc ${this.video_.currentSrc}`
     );
-    removeElement(currentSource);
+    removeElement(dev().assertElement(currentSource));
     // Resets the loading and will catch the new source if any.
     event.stopImmediatePropagation();
     this.video_.load();

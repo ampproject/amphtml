@@ -111,7 +111,7 @@ export class AbstractAmpContext {
 
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win, this.getHostWindow_());
-    this.client_.setSentinel(dev().assertString(this.sentinel));
+    this.client_.setSentinel(devAssert(this.sentinel));
 
     this.listenForPageVisibility_();
   }

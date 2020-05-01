@@ -146,9 +146,6 @@ function compile(
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
-  if (argv.fortesting) {
-    define.push('FORTESTING=true');
-  }
   if (options.singlePassCompilation) {
     const compilationOptions = {
       define,
