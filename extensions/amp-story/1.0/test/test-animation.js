@@ -541,7 +541,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         `,
         ampdoc
       );
-      expect(async () => await animationManager.applyFirstFrame()).to.throw();
+      return expect(animationManager.applyFirstFrame()).to.reject;
     });
 
     it('passes keyframeOptions to runner', async () => {

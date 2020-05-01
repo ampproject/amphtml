@@ -648,7 +648,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           expect(failureStub).to.be.calledOnce;
           done();
         });
-      expect(promise).to.throw();
+      return expect(promise).to.reject;
     });
 
     it('should resolve entitlement if platform resolves', async () => {
