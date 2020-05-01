@@ -1023,6 +1023,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
       }));
 
+    it('should include gdpr=1, if gdprApplies is true', () =>
+      impl.getAdUrl({gdprApplies: true}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+      }));
+
+    it('should include gdpr=0, if gdprApplies is false', () =>
+      impl.getAdUrl({gdprApplies: false}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+      }));
+
+    it('should not include gdpr, if gdprApplies is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+      }));
+
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
