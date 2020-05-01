@@ -193,7 +193,7 @@ describe('Object', () => {
           throw new Error('deep merge tried to merge object with itself');
         },
       };
-      expect(object.deepMerge(destObject, destObject)).to.not.throw;
+      expect(() => object.deepMerge(destObject, destObject)).to.not.throw();
     });
   });
 });

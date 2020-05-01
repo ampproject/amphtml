@@ -641,14 +641,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
       );
-      const promise = subscriptionService
+      subscriptionService
         .initialize_()
         .then(() => subscriptionService.fetchEntitlements_(platform))
         .catch(() => {
           expect(failureStub).to.be.calledOnce;
           done();
         });
-      expect(promise).to.throw;
     });
 
     it('should resolve entitlement if platform resolves', async () => {

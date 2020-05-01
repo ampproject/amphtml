@@ -115,7 +115,7 @@ describes.realWin(
         'data-show-if-geo': 'nafta',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it.skip('should NOT require `data-show-if-geo`', () => {
@@ -124,7 +124,7 @@ describes.realWin(
         'data-show-if-href': 'https://www.ampproject.org/get',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it('should throw if more than one data-how-if-* attrib is defined', () => {
@@ -148,7 +148,7 @@ describes.realWin(
         'data-show-if-href': 'https://www.ampproject.org/get',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it('isDismissed should return true if dismissal has been recorded', () => {

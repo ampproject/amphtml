@@ -131,7 +131,7 @@ describes.sandboxed('test-document-submit', {}, (env) => {
       tgt.setAttribute('action', 'https://valid.example.com');
       tgt.__AMP_INIT_ACTION__ = undefined;
       tgt.setAttribute('target', '_blank');
-      expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
+      expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
     });
 
     it('should assert none of the inputs named __amp_source_origin', () => {
