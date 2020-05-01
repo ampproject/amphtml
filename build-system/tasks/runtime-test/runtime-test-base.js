@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../test-configs/config');
@@ -195,13 +194,6 @@ class RuntimeTestConfig {
           green('Transforming tests with'),
           cyan('browserify') + green('...')
         );
-      });
-      bundle.on('transform', function (tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function () {
-            process.stdout.write('.');
-          });
-        }
       });
     };
 

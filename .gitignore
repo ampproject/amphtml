@@ -1,6 +1,7 @@
 .DS_Store
 .g4ignore
 build/
+.karma-cache
 .amp-build
 c
 /dist

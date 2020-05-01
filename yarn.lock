@@ -2225,7 +2225,7 @@ adm-zip@~0.4.3:
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.4.13.tgz#597e2f8cc3672151e1307d3e95cddbc75672314a"
   integrity sha512-fERNJX8sOXfel6qCBCMPvZLzENBEhZTzKqg6vrOW5pvoEaQuJhRU4ndTAh6lHOxn1I6jnz2NHra56ZODM751uw==
 
-after@0.8.2:
+after@0.8.2, after@^0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/after/-/after-0.8.2.tgz#fedb394f9f0e02aa9768e702bda23b505fae7e1f"
   integrity sha1-/ts5T58OAqqXaOcCvaI7UF+ufh8=
@@ -3526,6 +3526,15 @@ browserify-des@^1.0.0:
     des.js "^1.0.0"
     inherits "^2.0.1"
     safe-buffer "^5.1.2"
+
+browserify-persist-fs@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/browserify-persist-fs/-/browserify-persist-fs-1.2.2.tgz#f38f4a1aa5f6cdea750f386567c2d5d04512e8f1"
+  integrity sha512-t3gCLq24to3tLkl0Dw3unbIKmCeeUJgdulnqbZHIy8w10WLSh2HvjHAk4hGFuOXPaVfm+5A4qywxGTI0eVXY4A==
+  dependencies:
+    after "^0.8.2"
+    mkdirp "^0.5.1"
+    xtend "^4.0.1"
 
 browserify-rsa@^4.0.0:
   version "4.0.1"
