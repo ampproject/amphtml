@@ -273,7 +273,7 @@ export class ConsentPolicyManager {
    * Get gdprApplies value of a policy.
    *
    * @param {string} policyId
-   * @return {!Promise<Object>}
+   * @return {!Promise<?boolean>}
    */
   getGdprApplies(policyId) {
     return this.whenPolicyResolved(policyId)
