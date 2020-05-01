@@ -1098,6 +1098,7 @@ describes.sandboxed('DOM', {}, (env) => {
       };
       const focusSpy = env.sandbox.spy(element, 'focus');
       expect(() => dom.tryFocus(element)).to.not.throw();
+      expect(focusSpy).to.have.been.called;
     });
   });
 
