@@ -159,7 +159,7 @@ const prettifyGlobs = [
   '**/OWNERS',
   '**/*.md',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -168,7 +168,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
