@@ -80,7 +80,7 @@ export function SocialShare(props) {
   /**
    * @private
    */
-  function handleActivation_() {
+  function handleActivation() {
     if (finalEndpoint.split(':', 1)[0] === 'navigator-share') {
       if (window && window.navigator && window.navigator.share) {
         const dataStr = finalEndpoint.substr(finalEndpoint.indexOf('?'));
@@ -103,11 +103,11 @@ export function SocialShare(props) {
    * @private
    * @param {!Event} event
    */
-  function handleKeyPress_(event) {
+  function handleKeyPress(event) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
-      handleActivation_();
+      handleActivation());
     }
   }
 
@@ -122,8 +122,8 @@ export function SocialShare(props) {
     <div
       role="button"
       tabindex={props['tabIndex'] || '0'}
-      onKeyDown={handleKeyPress_}
-      onClick={handleActivation_}
+      onKeyDown={handleKeyPress}
+      onClick={handleActivation}
       style={{...size, ...props['style']}}
       {...props}
     >
