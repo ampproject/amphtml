@@ -36,10 +36,10 @@ let compilerErrors = '';
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  message = message.replace(closurePluginLoggingPrefix, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, yellow('WARNING'));
-  message = message.replace(/ERROR/g, red('ERROR'));
+  message = highlight(message, {ignoreIllegals: true})
+    .replace(closurePluginLoggingPrefix, '')
+    .replace(/ WARNING /g, yellow(' WARNING '))
+    .replace(/ ERROR /g, red(' ERROR '));
   return message;
 }
 

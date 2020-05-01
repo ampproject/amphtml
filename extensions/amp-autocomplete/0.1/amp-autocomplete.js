@@ -574,7 +574,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   inputHandler_() {
     if (
-      this.binding_.shouldAutocomplete(dev().assertElement(this.inputElement_))
+      this.binding_.shouldAutocomplete(
+        /** @type {!HTMLInputElement} */ (dev().assertElement(
+          this.inputElement_
+        ))
+      )
     ) {
       return this.maybeFetchAndAutocomplete_();
     }
@@ -594,7 +598,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const isFirstInteraction =
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.binding_.getUserInputForUpdate(
-      dev().assertElement(this.inputElement_)
+      /** @type {!HTMLInputElement} */ (dev().assertElement(this.inputElement_))
     );
 
     // Fetch if autocomplete data is dynamic.
@@ -1076,8 +1080,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ActionTrust.HIGH
     );
 
-    dev().assertElement(this.inputElement_);
-
     // Ensure on="change" is triggered for input
     const changeName = 'change';
     const changeEvent = createCustomEvent(
@@ -1086,7 +1088,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       /** @type {!JsonObject} */ ({value})
     );
     this.action_.trigger(
-      this.inputElement_,
+      dev().assertElement(this.inputElement_),
       changeName,
       changeEvent,
       ActionTrust.HIGH
@@ -1128,7 +1130,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
-      dev().assertElement(this.inputElement_),
+      /** @type {!HTMLInputElement} */ (dev().assertElement(
+        this.inputElement_
+      )),
       newValue,
       this.userInput_
     );
@@ -1190,7 +1194,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   displayUserInput_() {
     this.binding_.resetInputOnWrapAround(
       this.userInput_,
-      dev().assertElement(this.inputElement_)
+      /** @type {!HTMLInputElement} */ (dev().assertElement(this.inputElement_))
     );
     this.resetActiveElement_();
   }
