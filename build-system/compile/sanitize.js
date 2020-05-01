@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ const through = require('through2');
 
 const argv = require('minimist')(process.argv.slice(2));
 
-exports.sanatize = function () {
+exports.sanitize = function () {
   return through.obj((file, enc, next) => {
-    if (!argv.sanatize_for_diff) {
+    if (!argv.sanitize_vars_for_diff) {
       return next(null, file);
     }
 
@@ -32,23 +32,23 @@ exports.sanatize = function () {
         // format it the same.
         const replaced = Object.create(null);
         let count = 0;
-        const presanatize = contents.replace(
+        const presanitize = contents.replace(
           /(?:[a-zA-Z$_][a-zA-Z$_0-9]*)?(?:JSCompiler|jscomp)[a-zA-Z$_0-9]*/g,
           (match) =>
             replaced[match] ||
             (replaced[match] = `___${String(count++).padStart(6, '0')}___`)
         );
 
-        const formatted = prettier.format(presanatize, {
+        const formatted = prettier.format(presanitize, {
           ...options,
           parser: 'babel',
         });
 
-        // Finally, strip the numbers from the sanatized jscomp variables. This
+        // Finally, strip the numbers from the sanitized jscomp variables. This
         // is so that a single extra variable doesn't cause thousands of diffs.
-        const sanatized = formatted.replace(/___\d+___/g, '______');
+        const sanitized = formatted.replace(/___\d+___/g, '______');
 
-        file.contents = Buffer.from(sanatized);
+        file.contents = Buffer.from(sanitized);
         next(null, file);
       } catch (e) {
         next(e);

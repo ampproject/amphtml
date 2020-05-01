@@ -76,6 +76,10 @@ const hostname = argv.hostname || 'cdn.ampproject.org';
  * Prints a useful help message prior to the gulp dist task
  */
 function printDistHelp() {
+  if (argv.sanitize_vars_for_diff && !argv.pseudo_names) {
+    throw new Error('--sanitize_vars_for_diff requires --pseudo_names');
+  }
+
   let cmd = 'gulp dist';
   if (argv.fortesting) {
     cmd = cmd + ' --fortesting';
@@ -118,9 +122,6 @@ async function runPreDistSteps(watch) {
  * @return {!Promise}
  */
 async function dist() {
-  if (argv.sanatize_for_diff && !argv.pseudo_names) {
-    throw new Error('--sanatize_for_diff requires --pseudo_names');
-  }
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
@@ -471,6 +472,6 @@ dist.flags = {
   debug: '  Outputs the file contents during compilation lifecycles',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
-  sanatize_for_diff:
-    '  Sanatize the output to diff build results. Requires --pseudo_names',
+  sanitize_vars_for_diff:
+    '  Sanitize the output to diff build results. Requires --pseudo_names',
 };
