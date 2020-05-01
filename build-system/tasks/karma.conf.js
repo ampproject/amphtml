@@ -83,7 +83,7 @@ module.exports = {
       './build/.karma-cache',
       {
         deps: createHash(fs.readFileSync('./yarn.lock')),
-        build: globby.sync('build-system/**/*').map((f) => {
+        build: globby.sync('build-system/**/*.js').map((f) => {
           return createHash(fs.readFileSync(f));
         }),
       },
