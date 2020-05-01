@@ -1228,7 +1228,7 @@ describe('amp-a4a', () => {
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
-          {consentState: null, consentString: null},
+          {consentState: null, consentString: null, gdprApplies: null},
           rtcResponse
         )
       ).to.be.true;
@@ -2278,7 +2278,7 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString;
+      let fixture, a4aElement, a4a, consentString, gdprApplies;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2290,6 +2290,7 @@ describe('amp-a4a', () => {
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
+        gdprApplies = true;
         return fixture;
       });
 
@@ -2307,6 +2308,7 @@ describe('amp-a4a', () => {
             Promise.resolve({
               whenPolicyResolved: () => policyPromise,
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2327,6 +2329,7 @@ describe('amp-a4a', () => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
+            gdprApplies,
           })
         ).calledOnce;
         expect(
@@ -2362,6 +2365,7 @@ describe('amp-a4a', () => {
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2378,6 +2382,7 @@ describe('amp-a4a', () => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
+            gdprApplies,
           })
         ).calledOnce;
         expect(
@@ -2403,6 +2408,9 @@ describe('amp-a4a', () => {
               getConsentStringInfo: () => {
                 throw new Error('consent err!');
               },
+              getGdprApplies: () => {
+                throw new Error('consent err!');
+              },
             })
           );
 
@@ -2419,6 +2427,7 @@ describe('amp-a4a', () => {
           getAdUrlSpy.withArgs({
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
+            gdprApplies: null,
           })
         ).calledOnce;
         expect(
