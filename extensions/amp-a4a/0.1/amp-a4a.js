@@ -46,6 +46,7 @@ import {
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
 import {
+  getConsentPolicyGdprApplies,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
@@ -140,6 +141,7 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      gdprApplies: (?boolean|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -687,10 +689,22 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
-          return Promise.all([consentStatePromise, consentStringPromise]);
+          const gdprAppliesPromise = getConsentPolicyGdprApplies(
+            this.element,
+            consentPolicyId
+          ).catch((err) => {
+            user().error(TAG, 'Error determining gdprApplies', err);
+            return null;
+          });
+
+          return Promise.all([
+            consentStatePromise,
+            consentStringPromise,
+            gdprAppliesPromise,
+          ]);
         }
 
-        return Promise.resolve([null, null]);
+        return Promise.resolve([null, null, null]);
       })
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
@@ -699,9 +713,10 @@ export class AmpA4A extends AMP.BaseElement {
 
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
+        const gdprApplies = consentResponse[2];
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          {consentState, consentString},
+          {consentState, consentString, gdprApplies},
           this.tryExecuteRealTimeConfig_(consentState, consentString)
         ));
       })

@@ -875,6 +875,21 @@ describes.realWin(
           expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
         }));
 
+      it('should include gdpr=1, if gdprApplies is true', () =>
+        impl.getAdUrl({gdprApplies: true}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+        }));
+
+      it('should include gdpr=0, if gdprApplies is false', () =>
+        impl.getAdUrl({gdprApplies: false}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+        }));
+
+      it('should not include gdpr, if gdprApplies is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+        }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
