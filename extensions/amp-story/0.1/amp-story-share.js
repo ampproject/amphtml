@@ -433,9 +433,12 @@ export class ShareWidget {
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
 export class ScrollableShareWidget extends ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} parentEl
+   */
+  constructor(win, parentEl) {
+    super(win, parentEl);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
@@ -450,10 +453,11 @@ export class ScrollableShareWidget extends ShareWidget {
 
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    * @return {!ScrollableShareWidget}
    */
-  static create(win) {
-    return new ScrollableShareWidget(win);
+  static create(win, parentEl) {
+    return new ScrollableShareWidget(win, parentEl);
   }
 
   /**
