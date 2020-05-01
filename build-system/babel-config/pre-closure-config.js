@@ -87,7 +87,7 @@ function getPreClosureConfig() {
           {isEsmBuild: !!argv.esm},
         ]
       : null,
-    !isCheckTypes
+    !(argv.fortesting || isCheckTypes)
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
