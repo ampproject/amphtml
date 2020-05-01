@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isArray, isObject} from '../types';
+import {isArray, isObject} from '../../../src/types';
 /**
  * Format data for pingback.
  * @param {any} obj
