@@ -264,9 +264,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   getAdUrl(consentTuple) {
     let consentState = undefined;
     let consentString = undefined;
+    let gdprApplies = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
+      gdprApplies = consentTuple.gdprApplies;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -353,6 +355,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()
           : null,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
