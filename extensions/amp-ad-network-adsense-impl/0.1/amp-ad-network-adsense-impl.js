@@ -521,7 +521,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
         AMP_AD_NO_CENTER_CSS_EXP.control
     ) {
-      setStyles(this.iframe, {
+      setStyles(dev().assertElement(this.iframe), {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
