@@ -186,8 +186,11 @@ function buildCopySuccessfulToast(doc, url) {
  * Social share widget for story bookend.
  */
 export class ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} parentEl
+   */
+  constructor(win, parentEl) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
@@ -197,16 +200,19 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
+    this.parentEl_ = parentEl;
+
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = Services.storyRequestServiceV01(this.win);
   }
 
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    * @return {!ShareWidget}
    */
-  static create(win) {
-    return new ShareWidget(win);
+  static create(win, parentEl) {
+    return new ShareWidget(win, parentEl);
   }
 
   /**
@@ -262,9 +268,7 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      const localizationService = Services.localizationForDoc(
-        this.win.document.body
-      );
+      const localizationService = Services.localizationForDoc(this.parentEl_);
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
       const failureString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT

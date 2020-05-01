@@ -583,7 +583,7 @@ export class AmpStory extends AMP.BaseElement {
       SHARE_WIDGET_PILL_CONTAINER
     );
 
-    this.shareWidget_ = new ShareWidget(this.win);
+    this.shareWidget_ = new ShareWidget(this.win, this.element);
 
     const shareLabelEl = dev().assertElement(
       container.querySelector('.i-amphtml-story-share-pill-label'),

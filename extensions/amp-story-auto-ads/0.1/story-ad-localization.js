@@ -71,11 +71,11 @@ export const CtaTypes = {
 
 export class StoryAdLocalization {
   /**
-   * @param {!Window} win
+   * @param {!Element} storyAutoAdsEl
    */
-  constructor(win) {
-    /** @private @const {!Window} win */
-    this.win_ = win;
+  constructor(storyAutoAdsEl) {
+    /** @private @const {!Element} */
+    this.storyAutoAdsEl_ = storyAutoAdsEl;
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
   }
@@ -96,7 +96,7 @@ export class StoryAdLocalization {
    */
   init_() {
     this.localizationService_ = Services.localizationForDoc(
-      this.win_.document.body
+      this.storyAutoAdsEl_
     );
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
