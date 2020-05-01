@@ -178,6 +178,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return el.tagName.toLowerCase() === 'amp-story-page';
     }).getAttribute('id');
     this.reactionId_ = `CANONICAL_URL+${pageId}`;
+    if (this.element.hasAttribute('id')) {
+      this.reactionId_ += '+' + this.element.getAttribute('id');
+    }
     return (this.responseDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveReactionData_()
       : Promise.resolve());
