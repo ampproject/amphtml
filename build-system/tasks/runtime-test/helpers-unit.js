@@ -30,6 +30,7 @@ const {isTravisBuild} = require('../../common/travis');
 const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
+const TEST_FILE_COUNT_THRESHOLD = 20;
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 let testsToRun = null;
 
@@ -140,6 +141,14 @@ function getUnitTestsToRun() {
     log(
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
+    );
+    reportTestSkipped();
+    return;
+  }
+  if (isTravisBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
+    log(
+      green('INFO:'),
+      'Several tests were affected by local changes. Running all tests below.'
     );
     reportTestSkipped();
     return;
