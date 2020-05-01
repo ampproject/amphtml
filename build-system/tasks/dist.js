@@ -118,6 +118,9 @@ async function runPreDistSteps(watch) {
  * @return {!Promise}
  */
 async function dist() {
+  if (argv.sanatize_for_diff && !argv.pseudo_names) {
+    throw new Error('--sanatize_for_diff requires --pseudo_names');
+  }
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
@@ -468,4 +471,6 @@ dist.flags = {
   debug: '  Outputs the file contents during compilation lifecycles',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
+  sanatize_for_diff:
+    '  Sanatize the output to diff build results. Requires --pseudo_names',
 };
