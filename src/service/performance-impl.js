@@ -533,17 +533,18 @@ export class Performance {
    * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
+    /** @type {number|null} */ let end;
     if (this.largestContentfulPaintLoadTime_ !== null) {
       this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
+      end = this.largestContentfulPaintLoadTime_;
     }
     if (this.largestContentfulPaintRenderTime_ !== null) {
       this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
+      end = end || this.largestContentfulPaintRenderTime_;
     }
-    this.tickSinceVisible(
-      'lcp-v',
-      this.largestContentfulPaintLoadTime_ ||
-        this.largestContentfulPaintRenderTime_
-    );
+    if (end !== null) {
+      this.tickSinceVisible('lcp-v', end);
+    }
     this.flush();
   }
 
