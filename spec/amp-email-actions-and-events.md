@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ The `on` attribute is used to install event handlers on elements. The events tha
 The value for the syntax is a simple domain-specific language of the form:
 
 [sourcecode:javascript]
-eventName:targetId[.methodName[(arg1=value, arg2=value)]]
-[/sourcecode]
+eventName:targetId[.methodName[(arg1=value, arg2=value)]][/sourcecode]
 
 See the table below for descriptions of each part of the syntax.
 
@@ -92,11 +91,11 @@ An element can only be shown if it was previously hidden by a `hide` or `toggleV
 For example, the following is possible in AMP:
 
 [sourcecode:html]
+
 <div id="warning-message">Warning...</div>
 
 <button on="tap:warning-message.hide">Cool, thanks!</button>
 [/sourcecode]
-
 
 [/tip]
 
@@ -124,7 +123,6 @@ For example, the following is possible in AMP:
     <th width="40%">Elements</th>
     <th>Data</th>
   </tr>
-  <!-- change -->
   <tr>
     <td rowspan=3><code>change</code></td>
     <td rowspan=3>Fired when the value of the element is changed and committed.
@@ -153,14 +151,12 @@ event.max
 event.value</pre>
     </td>
   </tr>
-  <!-- input-debounced -->
   <tr>
     <td><code>input-debounced</code></td>
     <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
     <td>Elements that fire <code>input</code> event.</td>
     <td>Same as <code>change</code> event data.</td>
   </tr>
-    <!-- input-throttled -->
   <tr>
     <td><code>input-throttled</code></td>
     <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it is throttled to firing at most once every 100ms while the value of the input is changing.</td>
@@ -423,15 +419,19 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>selectUp(delta=INTEGER)</code></td>
-    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to -1.</td>
   </tr>
   <tr>
     <td><code>selectDown(delta=INTEGER)</code></td>
-    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to 1.</td>
   </tr>
   <tr>
     <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
-    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
+    <td>Toggle's the application of the `selected`. If the select attribute is absent, this action adds it. If the select attribute is present, this action removes it.
+
+    You may force and keep an add or remove by including a boolean value in the `value` argument. A value of `true` will force add the `selected` attribute and not remove it if already present. A value of  `false` will remove the attribute, but not add it if absent.
+
+  </td>
   </tr>
 </table>
 

@@ -528,15 +528,18 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>selectUp(delta=INTEGER)</code></td>
-    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to -1.</td>
   </tr>
   <tr>
     <td><code>selectDown(delta=INTEGER)</code></td>
-    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to 1.</td>
   </tr>
   <tr>
     <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
-    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
+    <td>Toggle's the application of the `selected`. If the select attribute is absent, this action adds it. If the select attribute is present, this action removes it. 
+
+    You may force and keep an add or remove by including a boolean value in the `value` argument. A value of `true` will force add the `selected` attribute and not remove it if already present. A value of  `false` will remove the attribute, but not add it if absent.
+  </td>
   </tr>
 </table>
 
