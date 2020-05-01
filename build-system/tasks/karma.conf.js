@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const browserifyPersistFs = require('browserify-persist-fs');
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -69,6 +70,10 @@ module.exports = {
     transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
+
+    persistentCache: browserifyPersistFs('./build/.karma-cache', {}, () => {
+      process.stdout.write('.');
+    }),
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],

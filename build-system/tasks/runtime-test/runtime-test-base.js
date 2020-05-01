@@ -196,13 +196,6 @@ class RuntimeTestConfig {
           cyan('browserify') + green('...')
         );
       });
-      bundle.on('transform', function (tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function () {
-            process.stdout.write('.');
-          });
-        }
-      });
     };
 
     // c.client is available in test browser via window.parent.karma.config
