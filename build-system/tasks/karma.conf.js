@@ -16,6 +16,10 @@
 'use strict';
 
 const browserifyPersistFs = require('browserify-persist-fs');
+const crypto = require('crypto');
+const fs = require('fs');
+const globby = require('globby');
+
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -35,6 +39,10 @@ const SAUCE_TIMEOUT_CONFIG = {
   commandTimeout: 10 * 60,
   idleTimeout: 30 * 60,
 };
+
+function createHash(input) {
+  return crypto.createHash('sha1').update(input).digest('hex');
+}
 
 /**
  * @param {!Object} config
@@ -71,9 +79,18 @@ module.exports = {
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
 
-    persistentCache: browserifyPersistFs('./build/.karma-cache', {}, () => {
-      process.stdout.write('.');
-    }),
+    persistentCache: browserifyPersistFs(
+      './build/.karma-cache',
+      {
+        deps: createHash(fs.readFileSync('./yarn.lock')),
+        build: globby.sync('build-system/**/*').map((f) => {
+          return createHash(fs.readFileSync(f));
+        }),
+      },
+      () => {
+        process.stdout.write('.');
+      }
+    ),
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
