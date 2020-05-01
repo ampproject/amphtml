@@ -130,4 +130,5 @@ cache:
     - validator/webui/node_modules
     - validator/java/bazel-installer
     - $HOME/.m2
+    - .karma-cache
   yarn: true

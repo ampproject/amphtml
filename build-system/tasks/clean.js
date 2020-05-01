@@ -28,6 +28,7 @@ async function clean() {
     'dist.tools',
     'build',
     '.amp-build',
+    '.karma-cache',
     'deps.txt',
     'build-system/runner/build',
     'build-system/runner/dist',

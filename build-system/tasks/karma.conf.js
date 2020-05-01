@@ -40,9 +40,39 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 30 * 60,
 };
 
-function createHash(input) {
-  return crypto.createHash('sha1').update(input).digest('hex');
-}
+// Used by persistent browserify caching to further salt hashes with our
+// environment state. Eg, when updating a babel-plugin, the environment hash
+// must change somehow so that the cache busts and the file is retransformed.
+const createHash = (input) =>
+  crypto.createHash('sha1').update(input).digest('hex');
+
+const persistentCache = browserifyPersistFs(
+  '.karma-cache',
+  {
+    deps: createHash(fs.readFileSync('./yarn.lock')),
+    build: globby
+      .sync([
+        'build-system/**/*.js',
+        '!build-system/eslint-rules',
+        '!**/test/**',
+      ])
+      .map((f) => {
+        return createHash(fs.readFileSync(f));
+      }),
+  },
+  () => {
+    process.stdout.write('.');
+  }
+);
+
+persistentCache.gc(
+  {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  () => {
+    // swallow errors
+  }
+);
 
 /**
  * @param {!Object} config
@@ -79,18 +109,7 @@ module.exports = {
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
 
-    persistentCache: browserifyPersistFs(
-      './build/.karma-cache',
-      {
-        deps: createHash(fs.readFileSync('./yarn.lock')),
-        build: globby.sync('build-system/**/*.js').map((f) => {
-          return createHash(fs.readFileSync(f));
-        }),
-      },
-      () => {
-        process.stdout.write('.');
-      }
-    ),
+    persistentCache,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
