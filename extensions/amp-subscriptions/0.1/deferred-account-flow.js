@@ -75,50 +75,100 @@ export class DeferredAccountFlow {
   }
 
   /**
-   * @param {?./entitlement.Entitlement} selectedEntitlement
+   * Get key for the storage with the entitlement as part of the key.
+   *
+   * @param {string} storageKey
+   * @param {!./entitlement.Entitlement} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  getStorageKey_(storageKey, entitlements) {
+    const arrayBuffer = new ArrayBuffer(
+      btoa(JSON.stringify(entitlements.json()))
+    );
+    return crypto.subtle.digest('SHA-256', arrayBuffer).then((hash) => {
+      return `${storageKey}_${btoa(hash)}`;
+    });
+  }
+
+  /**
+   * Get data from the storage with the entitlement as part of the key.
+   *,
+   * @param {string} storageKey
+   * @param {!./entitlement.Entitlement} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  getStorageData_(storageKey, entitlements) {
+    return this.getStorageKey_(storageKey, entitlements).then((key) => {
+      return this.storage_
+        .then((s) => {
+          return s.get(key);
+        })
+        .catch(() => {
+          // This is fine since some AMP views don't support storage.
+          return undefined;
+        });
+    });
+  }
+
+  /**
+   * Set data in the storage with the entitlement as part of the key.
+   *
+   * @param {string} storageKey
+   * @param {!./entitlement.Entitlement} entitlements
+   * @param {any} value
+   * @return {!Promise}
+   * @private
+   */
+  setStorageData_(storageKey, entitlements, value) {
+    return this.getStorageKey_(storageKey, entitlements).then((key) => {
+      return this.storage_.then((s) => {
+        return s.set(key, value).catch(() => {
+          // This is fine since some AMP views don't support storage.
+        });
+      });
+    });
+  }
+
+  /**
+   * @param {!./entitlement.Entitlement} entitlements
    * @return {!Promise<{found: boolean}>}
    * @private
    */
-  hasAssociatedUserAccount_(selectedEntitlement) {
-    let storage;
-    return this.storage_
-      .then((s) => {
-        storage = s;
-        return s.get(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT);
-      })
-      .catch(() => {
-        // This is fine since some AMP views don't support storage.
-        return undefined;
-      })
-      .then((publisherAccountLocalValue) => {
-        if (publisherAccountLocalValue !== undefined) {
-          // We found a cached value for the API call, return.
-          return {found: publisherAccountLocalValue};
-        }
+  hasAssociatedUserAccount_(entitlements) {
+    return this.getStorageData_(
+      LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT,
+      entitlements
+    ).then((publisherAccountLocalValue) => {
+      if (publisherAccountLocalValue !== undefined) {
+        // We found a cached value for the API call, return.
+        return {found: publisherAccountLocalValue};
+      }
 
-        // Do the actual call and then store the value in storage
-        return this.urlBuilder_
-          .buildUrl(this.hasAssociatedAccountUrl_, /* useAuthData */ true)
-          .then((url) =>
-            this.xhr_.fetchJson(url, {
-              method: 'POST',
-              credentials: 'include',
-              body: {
-                entitlements: stringifyForPingback(selectedEntitlement),
-              },
-            })
-          )
-          .then((result) => result.json())
-          .then((jsonResult) => {
-            storage
-              .set(LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT, jsonResult.found)
-              .catch(() => {
-                // This is fine since some AMP views don't support storage.
-              });
+      // Do the actual call and then store the value in storage
+      return this.urlBuilder_
+        .buildUrl(this.hasAssociatedAccountUrl_, /* useAuthData */ true)
+        .then((url) =>
+          this.xhr_.fetchJson(url, {
+            method: 'POST',
+            credentials: 'include',
+            body: {
+              entitlements: stringifyForPingback(entitlements),
+            },
+          })
+        )
+        .then((result) => result.json())
+        .then((jsonResult) => {
+          this.setStorageData_(
+            LOCAL_STORAGE_KEYS.HAS_PUBLISHER_ACCOUNT,
+            entitlements,
+            jsonResult.found
+          );
 
-            return jsonResult;
-          });
-      });
+          return jsonResult;
+        });
+    });
   }
 
   /**
@@ -127,49 +177,39 @@ export class DeferredAccountFlow {
    * exist and the user gives consent, the user will then be redirected
    * to the accountCreationRedirectUrl passed in the constructor.
    *
-   * @param {?./entitlement.Entitlement} entitlements
+   * @param {!./entitlement.Entitlement} entitlements
    * @return {!Promise|undefined}
    */
   run(entitlements) {
     // Check if user has denied account creation already
-    let storage;
-    return this.storage_
-      .then((s) => {
-        storage = s;
-        return s.get(LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION);
-      })
-      .catch(() => {
-        // This is fine since some AMP views don't support storage.
-        return undefined;
-      })
-      .then((rejected) => {
-        if (rejected) {
+    return this.getStorageData_(
+      LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION,
+      entitlements
+    ).then((rejected) => {
+      if (rejected) {
+        return;
+      }
+      // Check if there is an associated user account
+      return this.hasAssociatedUserAccount_(entitlements).then((jsonResult) => {
+        if (jsonResult.found) {
           return;
         }
-        // Check if there is an associated user account
-        return this.hasAssociatedUserAccount_(entitlements).then(
-          (jsonResult) => {
-            if (jsonResult.found) {
-              return;
-            }
 
-            this.platform_
-              .completeDeferredAccountCreation()
-              .then((accepted) => {
-                if (accepted) {
-                  // ...redirect the user to URL provided for this purpose.
-                  this.navigateTo_(this.accountCreationRedirectUrl_);
-                } else {
-                  // The user did not authorize the creation of a linked account.
-                  // Save response so we won't ask again (for a while).
-                  return storage.set(
-                    LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION,
-                    true
-                  );
-                }
-              });
+        this.platform_.completeDeferredAccountCreation().then((accepted) => {
+          if (accepted) {
+            // ...redirect the user to URL provided for this purpose.
+            this.navigateTo_(this.accountCreationRedirectUrl_);
+          } else {
+            // The user did not authorize the creation of a linked account.
+            // Save response so we won't ask again (for a while).
+            return this.setStorageData_(
+              LOCAL_STORAGE_KEYS.HAS_REJECTED_ACCOUNT_CREATION,
+              entitlements,
+              true
+            );
           }
-        );
+        });
       });
+    });
   }
 }

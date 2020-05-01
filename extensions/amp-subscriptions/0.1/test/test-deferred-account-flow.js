@@ -29,6 +29,7 @@ const ENTITLEMENT = new Entitlement({
 });
 const RAW_ENTITLEMENT =
   '{"raw":"","service":"fake_platform_id","granted":true,"grantReason":"SUBSCRIBER","data":{"data":"this is the data"}}';
+const ENTITLEMENT_HASH = 'W29iamVjdCBBcnJheUJ1ZmZlcl0=';
 
 describes.realWin('deferred-account-flow', {amp: true}, (env) => {
   let xhr;
@@ -155,7 +156,7 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const actualStorage = await storage;
       env.sandbox
         .stub(actualStorage, 'get')
-        .withArgs('account-exists-on-publisher-side')
+        .withArgs(`account-exists-on-publisher-side_${ENTITLEMENT_HASH}`)
         .callsFake(() => Promise.resolve(true));
       env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
 
@@ -177,7 +178,7 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const actualStorage = await storage;
       env.sandbox
         .stub(actualStorage, 'get')
-        .withArgs('account-exists-on-publisher-side')
+        .withArgs(`account-exists-on-publisher-side_${ENTITLEMENT_HASH}`)
         .callsFake(() => Promise.resolve(false));
       env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
 
@@ -201,14 +202,31 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       expect(deferredCreationStub).to.be.called;
     });
 
+    it('should save data when setStorageData_ is called', async () => {
+      const actualStorage = await storage;
+      const saveStorageStub = env.sandbox
+        .stub(actualStorage, 'set')
+        .callsFake(() => Promise.resolve());
+
+      const deferredFlow = new DeferredAccountFlow(
+        env.ampdoc,
+        HAS_ACCOUNT_URL,
+        CREATE_ACCOUNT_URL,
+        platform
+      );
+      await deferredFlow.setStorageData_('storage_key', ENTITLEMENT, 'data');
+
+      expect(saveStorageStub).to.be.calledWith(
+        `storage_key_${ENTITLEMENT_HASH}`,
+        'data'
+      );
+    });
+
     it('should save user found status and rejection', async () => {
       const actualStorage = await storage;
       env.sandbox
         .stub(actualStorage, 'get')
-        .withArgs('account-exists-on-publisher-side')
-        .callsFake(() => Promise.resolve());
-      const saveStorageStub = env.sandbox
-        .stub(actualStorage, 'set')
+        .withArgs(`account-exists-on-publisher-side_${ENTITLEMENT_HASH}`)
         .callsFake(() => Promise.resolve());
 
       fetchStub.withArgs(HAS_ACCOUNT_URL).returns(
@@ -225,16 +243,23 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
         CREATE_ACCOUNT_URL,
         platform
       );
+
+      const saveStorageStub = env.sandbox
+        .stub(deferredFlow, 'setStorageData_')
+        .callsFake(() => Promise.resolve());
+
       await deferredFlow.run(ENTITLEMENT);
 
       expect(fetchStub).to.be.called;
       expect(deferredCreationStub).to.be.called;
       expect(saveStorageStub).to.be.calledWith(
-        'account-exists-on-publisher-side',
+        `account-exists-on-publisher-side`,
+        ENTITLEMENT,
         false
       );
       expect(saveStorageStub).to.be.calledWith(
-        'user-rejected-account-creation-request',
+        `user-rejected-account-creation-request`,
+        ENTITLEMENT,
         true
       );
     });
@@ -243,7 +268,7 @@ describes.realWin('deferred-account-flow', {amp: true}, (env) => {
       const actualStorage = await storage;
       env.sandbox
         .stub(actualStorage, 'get')
-        .withArgs('user-rejected-account-creation-request')
+        .withArgs(`user-rejected-account-creation-request_${ENTITLEMENT_HASH}`)
         .callsFake(() => Promise.resolve(true));
       env.sandbox.stub(actualStorage, 'set').callsFake(() => Promise.resolve());
 
