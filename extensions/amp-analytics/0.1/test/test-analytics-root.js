@@ -26,6 +26,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let win;
@@ -365,6 +366,10 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         child.classList.add('i-amphtml-element');
         child2.classList.add('i-amphtml-element');
         child3.classList.add('i-amphtml-element');
+
+        child.setAttribute('data-vars-id', 'child1');
+        child2.setAttribute('data-vars-id', 'child2');
+        child3.setAttribute('data-vars-id', 'child3');
         toggleExperiment(win, 'visibility-trigger-improvements', true);
       });
 
@@ -384,6 +389,25 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         expect(
           await root.getAmpElements(body, '.notMyClass', null)
         ).to.deep.equal([child3]);
+      });
+
+      it('should only find elements with data-vars-*', async () => {
+        const spy = env.sandbox.spy(user(), 'warn');
+
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        child3.classList.add('myClass');
+
+        child3.removeAttribute('data-vars-id');
+        const children = await root.getAmpElements(body, ['.myClass']);
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'amp-analytics/analytics-root',
+          '%s element(s) ommited from selector "%s" because no data-vars-* attribute was found.',
+          1,
+          '.myClass'
+        );
+        expect(children).to.deep.equal([child, child2]);
       });
 
       it('should remove duplicate elements found', async () => {
@@ -724,8 +748,27 @@ describes.realWin(
     });
 
     describe('get amp elements', () => {
+      let child2;
+      let child3;
+
       beforeEach(() => {
+        child2 = win.document.createElement('child');
+        child3 = win.document.createElement('child');
+        body.appendChild(child2);
+        body.appendChild(child3);
+
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        child3.classList.add('notMyClass');
+
         child.classList.add('i-amphtml-element');
+        child2.classList.add('i-amphtml-element');
+        child3.classList.add('i-amphtml-element');
+
+        child.setAttribute('data-vars-id', '123');
+        child2.setAttribute('data-vars-id', '456');
+        child3.setAttribute('data-vars-id', '789');
+
         toggleExperiment(
           parentRoot.ampdoc.win,
           'visibility-trigger-improvements',
@@ -739,28 +782,53 @@ describes.realWin(
       });
 
       it('should find all elements by selector', async () => {
-        const child2 = win.document.createElement('child');
-        const child3 = win.document.createElement('child');
-        // Parent child attached to parent doc should not be captured
-        const parentChild = env.parentWin.document.createElement('child');
-        body.appendChild(child2);
-        body.appendChild(child3);
-        env.parentWin.document.body.appendChild(parentChild);
-        child.classList.add('myClass');
-        child2.classList.add('myClass');
-        child3.classList.add('notMyClass');
-        parentChild.classList.add('myClass');
-        child2.classList.add('i-amphtml-element');
-        child3.classList.add('i-amphtml-element');
-        parentChild.classList.add('i-amphtml-element');
-        expect(
-          await root.getAmpElements(body, ['.myClass'], null)
-        ).to.deep.equals([child, child2]);
+        const elements = await root.getAmpElements(body, ['.myClass'], null);
+
+        expect(elements).to.deep.equals([child, child2]);
         // Check that non-experiment version works
         toggleExperiment(win, 'visibility-trigger-improvements', false);
         expect(
           await root.getAmpElements(body, '.notMyClass', null)
         ).to.deep.equals([child3]);
+      });
+
+      it('should not find elements from parent doc', async () => {
+        const parentChild = env.parentWin.document.createElement('child');
+        env.parentWin.document.body.appendChild(parentChild);
+        parentChild.classList.add('myClass');
+        parentChild.classList.add('i-amphtml-element');
+        parentChild.setAttribute('data-vars-id', 'abc');
+
+        const elements = await root.getAmpElements(body, ['.myClass'], null);
+        expect(elements).to.deep.equals([child, child2]);
+      });
+
+      it('should only find elements with data-vars-*', async () => {
+        const spy = env.sandbox.spy(user(), 'warn');
+
+        child3.classList.add('myClass');
+        child3.removeAttribute('data-vars-id');
+
+        const children = await root.getAmpElements(body, ['.myClass']);
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'amp-analytics/analytics-root',
+          '%s element(s) ommited from selector "%s" because no data-vars-* attribute was found.',
+          1,
+          '.myClass'
+        );
+        expect(children).to.deep.equal([child, child2]);
+      });
+
+      it('should remove duplicate elements found', async () => {
+        child.id = 'myId';
+        child2.id = 'myId';
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        // Each selector should find both elements, but only report once
+        expect(
+          await root.getAmpElements(body, ['.myClass', '#myId'], null)
+        ).to.deep.equal([child, child2]);
       });
 
       it('should handle missing selector for AMP search', async () => {
@@ -773,6 +841,7 @@ describes.realWin(
       it('should fail if the found element is not AMP for AMP search', async () => {
         expectAsyncConsoleError(/required to be an AMP element/, 1);
         child.classList.remove('i-amphtml-element');
+        child.setAttribute('data-vars-id', '123');
         await expect(
           root.getAmpElements(body, ['#child'], null)
         ).to.be.rejectedWith(/required to be an AMP element/);
