@@ -541,7 +541,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         `,
         ampdoc
       );
-      expect(async () => await animationManager.applyFirstFrame()).to.throw;
+      return expect(() => animationManager.applyFirstFrame()).to.throw();
     });
 
     it('passes keyframeOptions to runner', async () => {
@@ -619,7 +619,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       `;
       env.win.document.body.appendChild(page);
       const animationManager = new AnimationManager(page, ampdoc);
-      expect(() => animationManager.applyFirstFrame()).to.throw;
+      expect(() => animationManager.applyFirstFrame()).to.throw();
     });
 
     it('passes animate-in-after id in definition', async () => {
