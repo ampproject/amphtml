@@ -731,7 +731,10 @@ export class SubscriptionService {
           return;
         }
         return this.platformStore_.getGrantEntitlement().then((entitlement) => {
-          if (entitlement.source == 'local') {
+          if (
+            entitlement.source == 'local' ||
+            entitlement.grantReason != GrantReason.SUBSCRIBER
+          ) {
             return;
           }
           const remotePlatform = this.platformStore_.getPlatform(

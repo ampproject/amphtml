@@ -659,6 +659,30 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         expect(startFlowStub).to.be.called;
       });
 
+      it('should skip deferred account flow if granted but not subscriber', async () => {
+        const unlockedEntitlement = Entitlement.parseFromJson({
+          source: 'swg-google',
+          granted: true,
+          grantReason: GrantReason.UNLOCKED,
+        });
+        env.sandbox
+          .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+          .callsFake(() => Promise.resolve(unlockedEntitlement));
+        subscriptionService.platformStore_.resolveEntitlement(
+          'local',
+          Entitlement.empty('local')
+        );
+        const getPlatformStub = env.sandbox.stub(
+          subscriptionService.platformStore_,
+          'getPlatform'
+        );
+
+        await subscriptionService.initialize_();
+        await subscriptionService.maybeStartDeferredAccountFlow_();
+
+        expect(getPlatformStub).to.not.be.called;
+      });
+
       it('should skip deferred account flow if granted by local', async () => {
         const localEntitlement = Entitlement.parseFromJson({
           source: 'local',
