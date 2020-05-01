@@ -83,4 +83,4 @@ TIP: How can we:
 
 ---
 
-/cc @ampproject/wg-approvers @ampproject/cherry-pick-approvers
+/cc @ampproject/release-on-duty @ampproject/wg-approvers @ampproject/cherry-pick-approvers

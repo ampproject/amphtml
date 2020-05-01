@@ -44,3 +44,5 @@ Notes
 ---
 <Additional notes>
 -->
+
+/cc @ampproject/release-on-duty
