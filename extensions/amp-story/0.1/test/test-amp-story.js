@@ -110,7 +110,7 @@ describes.realWin(
       element.remove();
     });
 
-    it.skip('should build with the expected number of pages', () => {
+    it('should build with the expected number of pages', () => {
       const pagesCount = 2;
       createPages(story.element, pagesCount, ['cover', 'page-1']);
 
@@ -119,7 +119,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should activate the first page when built', () => {
+    it('should activate the first page when built', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
 
       return story
@@ -143,7 +143,7 @@ describes.realWin(
         });
     });
 
-    it.skip('should update the navigation state when built', () => {
+    it('should update the navigation state when built', () => {
       const firstPageId = 'cover';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
@@ -161,7 +161,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should preload the bookend if navigating to the last page', () => {
+    it('should preload the bookend if navigating to the last page', () => {
       createPages(story.element, 1, ['cover']);
 
       const buildBookendStub = env.sandbox.stub(story.bookend_, 'build');
@@ -175,7 +175,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should not preload the bookend if not on the last page', () => {
+    it('should not preload the bookend if not on the last page', () => {
       createPages(story.element, 2, ['cover']);
 
       const buildBookendStub = env.sandbox.stub(story.bookend_, 'build');
@@ -189,7 +189,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should prerender/load the share menu', () => {
+    it('should prerender/load the share menu', () => {
       createPages(story.element, 1, ['cover']);
 
       env.sandbox.stub(story.bookend_, 'build');
@@ -200,7 +200,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should not prerender/load the share menu on desktop', () => {
+    it('should not prerender/load the share menu on desktop', () => {
       createPages(story.element, 1, ['cover']);
 
       story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
@@ -318,7 +318,7 @@ describes.realWin(
       expect(pages[1].hasAttribute('active')).to.be.true;
     });
 
-    it.skip('lock body when amp-story is initialized', () => {
+    it('lock body when amp-story is initialized', () => {
       story.lockBody_();
       expect(win.document.body.style.getPropertyValue('overflow')).to.be.equal(
         'hidden'
@@ -328,7 +328,7 @@ describes.realWin(
       ).to.be.equal('hidden');
     });
 
-    it.skip('builds and attaches pagination buttons ', () => {
+    it('builds and attaches pagination buttons ', () => {
       const paginationButtonsStub = {
         attach: env.sandbox.spy(),
         onNavigationStateChange: env.sandbox.spy(),
@@ -370,7 +370,7 @@ describes.realWin(
         .be.false;
     });
 
-    it.skip('should update page id in store', () => {
+    it('should update page id in store', () => {
       const firstPageId = 'page-one';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
@@ -384,7 +384,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should update page id in browser history', () => {
+    it('should update page id in browser history', () => {
       // Have to stub this because tests run in iframe and you can't write
       // history from another domain (about:srcdoc)
       const replaceStub = env.sandbox.stub(win.history, 'replaceState');
@@ -401,7 +401,7 @@ describes.realWin(
       });
     });
 
-    it.skip('should NOT update page id in browser history if ad', () => {
+    it('should NOT update page id in browser history if ad', () => {
       // Have to stub this because tests run in iframe and you can't write
       // history from another domain (about:srcdoc)
       const replaceStub = env.sandbox.stub(win.history, 'replaceState');
@@ -443,38 +443,38 @@ describes.realWin(
       story.hashOrigin_ = IDENTITY_FN;
     });
 
-    it.skip('should allow exact whitelisted origin with https scheme', () => {
+    it('should allow exact whitelisted origin with https scheme', () => {
       story.originWhitelist_ = ['example.com'];
       expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
     });
 
-    it.skip('should allow exact whitelisted origin with http scheme', () => {
+    it('should allow exact whitelisted origin with http scheme', () => {
       story.originWhitelist_ = ['example.com'];
       expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
     });
 
-    it.skip('should allow www subdomain of origin', () => {
+    it('should allow www subdomain of origin', () => {
       story.originWhitelist_ = ['example.com'];
       expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
     });
 
-    it.skip('should allow subdomain of origin', () => {
+    it('should allow subdomain of origin', () => {
       story.originWhitelist_ = ['example.com'];
       expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be
         .true;
     });
 
-    it.skip('should not allow exact whitelisted domain under different tld', () => {
+    it('should not allow exact whitelisted domain under different tld', () => {
       story.originWhitelist_ = ['example.com'];
       expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
     });
 
-    it.skip('should not allow exact whitelisted domain infixed in another tld', () => {
+    it('should not allow exact whitelisted domain infixed in another tld', () => {
       story.originWhitelist_ = ['example.co.uk'];
       expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
     });
 
-    it.skip('should not allow domain that contains whitelisted domain', () => {
+    it('should not allow domain that contains whitelisted domain', () => {
       story.originWhitelist_ = ['example.co'];
       expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
     });
