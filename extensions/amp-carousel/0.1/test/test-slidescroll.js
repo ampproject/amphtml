@@ -15,14 +15,21 @@
  */
 
 import '../amp-carousel';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'SlideScroll',
   {
     amp: {
       extensions: ['amp-carousel'],
+      runtimeOn: true,
     },
   },
   (env) => {
@@ -1468,6 +1475,63 @@ describes.realWin(
           expect(getNextTitle(el)).to.equal('Next item in carousel (1 of 3)');
         });
       });
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-carousel',
+        {
+          'type': 'slides',
+          'width': '400',
+          'height': '300',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      action.execute(
+        element,
+        'goToSlide',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'goToSlide',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+
+      const userErrorStub = env.sandbox.stub(user(), 'error');
+      action.execute(
+        element,
+        'toggleAutoplay',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.match(
+        /"AMP-CAROUSEL.toggleAutoplay" is not whitelisted/
+      );
     });
   }
 );

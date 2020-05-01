@@ -165,6 +165,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
               getRootNode() {
                 return win.document;
               },
+              hasAttribute: () => {},
             },
           },
           Math: {
