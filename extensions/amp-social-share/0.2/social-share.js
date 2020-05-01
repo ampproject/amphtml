@@ -32,88 +32,17 @@ const DEFAULT_HEIGHT = 44;
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare2(props) {
-  const name = 'SocialShare2';
+export function SocialShare(props) {
+  const name = 'SocialShare';
   useResourcesNotify();
 
   const {
-    typeConfig,
-    baseEndpoint,
-    checkedWidth,
-    checkedHeight,
-    obsoleteType,
-  } = checkProps_(props, name);
-  if (obsoleteType) {
-    return;
-  }
-  const finalEndpoint = createEndpoint_(typeConfig, baseEndpoint, props);
-
-  /**
-   * @private
-   * @param {!JsonObject} props
-   * @param {?string} name
-   * @return {!JsonObject}
-   */
-  function checkProps_(props, name) {
-    const {type, shareEndpoint, params, bindings, width, height} = props;
-
-    // Verify type is valid and cannot contain spaces
-    if (type === undefined) {
-      throwError_(`The type attribute is required. ${name}`);
-    }
-    if (/\s/.test(type)) {
-      throwError_(
-        `Space characters are not allowed in type attribute value. ${name}`
-      );
-    }
-
-    // bindings and params props must be objects
-    if (params && !isObject(params)) {
-      throwError_(`The params property should be an object. ${name}`);
-    }
-    if (bindings && !isObject(bindings)) {
-      throwError_(`The bindings property should be an object. ${name}`);
-    }
-
-    // User must provide shareEndpoint if they choose a type that is not
-    // pre-configured
-    const typeConfig = getSocialConfig(type) || dict();
-    const baseEndpoint = typeConfig['shareEndpoint'] || shareEndpoint;
-    if (baseEndpoint === undefined) {
-      throwError_(
-        `A shareEndpoint is required if not using a pre-configured type. ${name}`
-      );
-    }
-
-    // Throw warning if type is obsolete
-    const obsoleteType = typeConfig['obsolete'];
-    if (obsoleteType) {
-      throwWarning_(`Skipping obsolete share button ${type}. ${name}`);
-    }
-
-    // Verify width and height are valid integers
-    let checkedWidth = width || DEFAULT_WIDTH;
-    let checkedHeight = height || DEFAULT_HEIGHT;
-    if (width && !Number.isInteger(width)) {
-      throwWarning_(
-        `The width property should be an Integer, defaulting to ${DEFAULT_WIDTH}. ${name}`
-      );
-      checkedWidth = DEFAULT_WIDTH;
-    }
-    if (height && !Number.isInteger(height)) {
-      throwWarning_(
-        `The height property should be an Integer, defaulting to ${DEFAULT_HEIGHT}. ${name}`
-      );
-      checkedHeight = DEFAULT_HEIGHT;
-    }
-    return {
-      typeConfig,
-      baseEndpoint,
-      checkedWidth,
-      checkedHeight,
-      obsoleteType,
-    };
-  }
+    'typeConfig': typeConfig,
+    'baseEndpoint': baseEndpoint,
+    'checkedWidth': checkedWidth,
+    'checkedHeight': checkedHeight,
+  } = checkProps(props, name);
+  const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
 
   /**
    * @private
@@ -122,7 +51,7 @@ export function SocialShare2(props) {
    * @param {!JsonObject} props
    * @return {?string}
    */
-  function createEndpoint_(typeConfig, baseEndpoint, props) {
+  function createEndpoint(typeConfig, baseEndpoint, props) {
     const {params, bindings} = props;
     const combinedParams = dict();
     Object.assign(combinedParams, typeConfig['defaultParams'], params);
@@ -132,14 +61,12 @@ export function SocialShare2(props) {
     const bindingVars = typeConfig['bindings'];
     if (bindingVars) {
       bindingVars.forEach((name) => {
-        combinedBindings[name.toUpperCase()] = params[name] ? params[name] : '';
+        combinedBindings[name.toUpperCase()] = params[name] || '';
       });
     }
     if (bindings) {
       Object.keys(bindings).forEach((name) => {
-        combinedBindings[name.toUpperCase()] = bindings[name]
-          ? bindings[name]
-          : '';
+        combinedBindings[name.toUpperCase()] = bindings[name] || '';
       });
     }
     const finalEndpoint = Object.keys(combinedBindings).reduce(
@@ -152,22 +79,6 @@ export function SocialShare2(props) {
 
   /**
    * @private
-   * @param {?string} message
-   */
-  function throwError_(message) {
-    throw new Error(message);
-  }
-
-  /**
-   * @private
-   * @param {?string} message
-   */
-  function throwWarning_(message) {
-    console.warn(message);
-  }
-
-  /**
-   * @private
    */
   function handleActivation_() {
     if (finalEndpoint.split(':', 1)[0] === 'navigator-share') {
@@ -175,10 +86,10 @@ export function SocialShare2(props) {
         const dataStr = finalEndpoint.substr(finalEndpoint.indexOf('?'));
         const data = parseQueryString(dataStr);
         window.navigator.share(data).catch((e) => {
-          throwWarning_(`${e.message}. ${name}`);
+          throwWarning(`${e.message}. ${name}`);
         });
       } else {
-        throwWarning_(
+        throwWarning(
           `Could not complete system share.  Navigator unavailable. ${name}`
         );
       }
@@ -200,12 +111,9 @@ export function SocialShare2(props) {
     }
   }
 
-  const {type} = props;
+  const type = props.type.toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
-  //Default to gray (d3d3d3) background if type is not preconfigured
-  const backgroundStyle = CSS[type.toUpperCase()] || {
-    'backgroundColor': 'd3d3d3',
-  };
+  const backgroundStyle = CSS[type] || CSS.DEFAULT;
   const size = {
     width: checkedWidth,
     height: checkedHeight,
@@ -221,8 +129,69 @@ export function SocialShare2(props) {
     >
       <SocialShareIcon
         style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type.toUpperCase()}
+        type={type}
       />
     </div>
   );
+}
+
+/**
+ * @param {!JsonObject} props
+ * @param {?string} name
+ * @return {!JsonObject}
+ */
+function checkProps(props, name) {
+  const {type, shareEndpoint, params, bindings, width, height} = props;
+
+  // Verify type is provided
+  if (type === undefined) {
+    throw new Error(`The type attribute is required. ${name}`);
+  }
+
+  // bindings and params props must be objects
+  if (params && !isObject(params)) {
+    throw new Error(`The params property should be an object. ${name}`);
+  }
+  if (bindings && !isObject(bindings)) {
+    throw new Error(`The bindings property should be an object. ${name}`);
+  }
+
+  // User must provide shareEndpoint if they choose a type that is not
+  // pre-configured
+  const typeConfig = getSocialConfig(type) || dict();
+  const baseEndpoint = typeConfig['shareEndpoint'] || shareEndpoint;
+  if (baseEndpoint === undefined) {
+    throw new Error(
+      `A shareEndpoint is required if not using a pre-configured type. ${name}`
+    );
+  }
+
+  // Verify width and height are valid integers
+  let checkedWidth = Math.floor(width || DEFAULT_WIDTH);
+  let checkedHeight = Math.floor(height || DEFAULT_HEIGHT);
+  if (!(checkedWidth > 0)) {
+    throwWarning(
+      `The width property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_WIDTH}. ${name}`
+    );
+    checkedWidth = DEFAULT_WIDTH;
+  }
+  if (!(checkedHeight > 0)) {
+    throwWarning(
+      `The height property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_HEIGHT}. ${name}`
+    );
+    checkedHeight = DEFAULT_HEIGHT;
+  }
+  return {
+    typeConfig,
+    baseEndpoint,
+    checkedWidth,
+    checkedHeight,
+  };
+}
+
+/**
+ * @param {?string} message
+ */
+function throwWarning(message) {
+  console.warn(message);
 }

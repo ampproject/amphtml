@@ -15,15 +15,15 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {SocialShare2} from '../social-share';
+import {SocialShare} from '../social-share';
 import {addParamsToUrl} from '../../../../src/url';
 import {getSocialConfig} from '../amp-social-share-config';
 import {object, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
-  title: 'Social Share 2',
-  component: SocialShare2,
+  title: 'Social Share',
+  component: SocialShare,
   decorators: [withA11y, withKnobs],
 };
 
@@ -71,7 +71,7 @@ export const _default = () => {
         Update the provider using storybook knobs. Choose Provider Type: 'custom
         endpoint' to specify your own share endpoint.
       </p>
-      <SocialShare2
+      <SocialShare
         type={type}
         href={href}
         shareEndpoint={href}
