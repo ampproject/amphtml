@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   ExpansionOptions,
@@ -31,19 +28,14 @@ import {
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {LayoutPriority} from '../../../src/layout';
-import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
-import {getMode} from '../../../src/mode';
-import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
-import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -58,16 +50,7 @@ const WHITELIST_EVENT_IN_SANDBOX = [
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    super(element);
-
-    /** @private {!Promise} */
-    this.consentPromise_ = Promise.resolve();
-
-    /**
-     * The html id of the `amp-user-notification` element.
-     * @private {?string}
-     */
-    this.consentNotificationId_ = null;
+    super(element)
 
     /** @private {boolean} */
     this.isSandbox_ = false;
@@ -99,26 +82,17 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {./transport.Transport} */
     this.transport_ = null;
-
-    /** @private {boolean} */
-    this.isInabox_ = getMode(this.win).runtime == 'inabox';
-
-    /** @private {?./linker-manager.LinkerManager} */
-    this.linkerManager_ = null;
-
-    /** @private {?boolean} */
-    this.isInFie_ = null;
   }
 
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
+    return LayoutPriority.CONTENT;
   }
 
   /** @override */
   isAlwaysFixed() {
-    return !isInFie(this.element);
+    return true
   }
 
   /** @override */
@@ -132,28 +106,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.element.setAttribute('aria-hidden', 'true');
 
-    this.consentNotificationId_ = this.element.getAttribute(
-      'data-consent-notification-id'
-    );
-
-    if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = Services.userNotificationManagerForDoc(
-        this.element
-      ).then((service) =>
-        service.get(dev().assertString(this.consentNotificationId_))
-      );
-    }
-
-    if (this.element.getAttribute('trigger') == 'immediate') {
-      this.ensureInitialized_();
-    }
-  }
-
-  /** @override */
-  layoutCallback() {
-    // Now that we are rendered, stop rendering the element to reduce
-    // resource consumption.
-    return this.ensureInitialized_();
+    this.ensureInitialized_();
   }
 
   /** @override */
@@ -163,23 +116,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_ = null;
     }
 
-    if (this.linkerManager_) {
-      this.linkerManager_.dispose();
-      this.linkerManager_ = null;
-    }
-
     for (const request in this.requests_) {
       this.requests_[request].dispose();
       delete this.requests_[request];
-    }
-  }
-
-  /** @override */
-  resumeCallback() {
-    if (this.iniPromise_) {
-      this.iniPromise_.then(() => {
-        this.transport_.maybeInitIframeTransport(this.element);
-      });
     }
   }
 
@@ -231,17 +170,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
-          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
-        } else {
-          loadConfigTask();
-        }
+        loadConfigTask();
         return loadConfigDeferred.promise;
-      })
-      .then((config) => {
-        this.config_ = /** @type {!JsonObject} */ (config);
-        // CookieWriter not enabled on proxy origin, do not chunk
-        return new CookieWriter(this.win, this.element, this.config_).write();
       })
       .then(() => {
         this.transport_ = new Transport(
@@ -250,7 +180,6 @@ export class AmpAnalytics extends AMP.BaseElement {
         );
       })
       .then(this.registerTriggers_.bind(this))
-      .then(this.initializeLinker_.bind(this));
     return this.iniPromise_;
   }
 
@@ -262,13 +191,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   allowParentPostMessage_() {
-    if (this.isInabox_) {
-      return true;
-    }
-    if (this.isInFie_ == null) {
-      this.isInFie_ = isInFie(this.element);
-    }
-    return this.isInFie_;
+    return true;
   }
 
   /**
@@ -304,8 +227,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ = this.instrumentation_.createAnalyticsGroup(
       this.element
     );
-
-    this.transport_.maybeInitIframeTransport(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -568,29 +489,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Create the linker-manager that will append linker params as necessary.
-   * The initialization is asynchronous and non blocking
-   * @private
-   */
-  initializeLinker_() {
-    const type = this.element.getAttribute('type');
-    this.linkerManager_ = new LinkerManager(
-      this.getAmpDoc(),
-      this.config_,
-      type,
-      this.element
-    );
-    const linkerTask = () => {
-      this.linkerManager_.init();
-    };
-    if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
-      chunk(this.element, linkerTask, ChunkPriority.LOW);
-    } else {
-      linkerTask();
-    }
-  }
-
-  /**
    * Callback for events that are registered by the config's triggers. This
    * method generates requests and sends them out.
    *
@@ -720,11 +618,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
-        chunk(this.element, sampleInTask, ChunkPriority.LOW);
-      } else {
-        sampleInTask();
-      }
+      sampleInTask();
       return sampleDeferred.promise;
     }
     user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
@@ -836,8 +730,6 @@ AMP.extension(TAG, '0.1', (AMP) => {
     'amp-analytics-instrumentation',
     InstrumentationService
   );
-  AMP.registerServiceForDoc('activity', Activity);
-  installLinkerReaderService(AMP.win);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);

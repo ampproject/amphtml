@@ -15,9 +15,8 @@
  */
 
 import {AnalyticsEventType} from './events';
-import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
+import {defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -87,7 +86,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.whiteList_ = undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;

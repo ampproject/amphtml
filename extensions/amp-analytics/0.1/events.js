@@ -29,9 +29,6 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
-const SCROLL_PRECISION_PERCENT = 5;
-const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
-const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -49,8 +46,6 @@ export const AnalyticsEventType = {
   HIDDEN: 'hidden',
   INI_LOAD: 'ini-load',
   RENDER_START: 'render-start',
-  SCROLL: 'scroll',
-  STORY: 'story',
   TIMER: 'timer',
   VIDEO: 'video',
   VISIBLE: 'visible',
@@ -103,20 +98,6 @@ const TRACKER_TYPE = Object.freeze({
       return new SignalTracker(root);
     },
   },
-  [AnalyticsEventType.SCROLL]: {
-    name: AnalyticsEventType.SCROLL,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function (root) {
-      return new ScrollEventTracker(root);
-    },
-  },
-  [AnalyticsEventType.STORY]: {
-    name: AnalyticsEventType.STORY,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: function (root) {
-      return new AmpStoryEventTracker(root);
-    },
-  },
   [AnalyticsEventType.TIMER]: {
     name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
@@ -147,14 +128,6 @@ export const trackerTypeForTesting = TRACKER_TYPE;
  * @param {string} triggerType
  * @return {boolean}
  */
-function isAmpStoryTriggerType(triggerType) {
-  return startsWith(triggerType, 'story');
-}
-
-/**
- * @param {string} triggerType
- * @return {boolean}
- */
 function isVideoTriggerType(triggerType) {
   return startsWith(triggerType, 'video');
 }
@@ -174,9 +147,6 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
-  }
-  if (isAmpStoryTriggerType(eventType)) {
-    return AnalyticsEventType.STORY;
   }
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
@@ -405,97 +375,6 @@ export class CustomEventTracker extends EventTracker {
   }
 }
 
-// TODO(Enriqe): If needed, add support for sandbox story event.
-// (e.g. sandbox-story-xxx).
-export class AmpStoryEventTracker extends CustomEventTracker {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   */
-  constructor(root) {
-    super(root);
-  }
-
-  /** @override */
-  add(context, eventType, config, listener) {
-    const rootTarget = this.root.getRootElement();
-
-    // Fire buffered events if any.
-    const buffer = this.buffer_ && this.buffer_[eventType];
-    if (buffer) {
-      const bufferLength = buffer.length;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const event = buffer[i];
-        this.fireListener_(event, rootTarget, config, listener);
-      }
-    }
-
-    let observables = this.observables_[eventType];
-    if (!observables) {
-      observables = new Observable();
-      this.observables_[eventType] = observables;
-    }
-
-    return this.observables_[eventType].add((event) => {
-      this.fireListener_(event, rootTarget, config, listener);
-    });
-  }
-
-  /**
-   * Fires listener given the specified configuration.
-   * @param {!AnalyticsEvent} event
-   * @param {!Element} rootTarget
-   * @param {!JsonObject} config
-
-   * @param {function(!AnalyticsEvent)} listener
-   */
-  fireListener_(event, rootTarget, config, listener) {
-    const type = event['type'];
-    const vars = event['vars'];
-
-    const storySpec = config['storySpec'] || {};
-    const repeat =
-      storySpec['repeat'] === undefined ? true : storySpec['repeat'];
-    const eventDetails = vars['eventDetails'];
-    const tagName = config['tagName'];
-
-    if (
-      tagName &&
-      eventDetails['tagName'] &&
-      tagName.toLowerCase() !== eventDetails['tagName']
-    ) {
-      return;
-    }
-
-    if (repeat === false && eventDetails['repeated']) {
-      return;
-    }
-
-    listener(new AnalyticsEvent(rootTarget, type, vars));
-  }
-
-  /**
-   * Triggers a custom event for the associated root, or buffers them if the
-   * observables aren't present yet.
-   * @param {!AnalyticsEvent} event
-   */
-  trigger(event) {
-    const eventType = event['type'];
-    const observables = this.observables_[eventType];
-
-    // If listeners already present - trigger right away.
-    if (observables) {
-      observables.fire(event);
-    }
-
-    // Create buffer and enqueue event if needed.
-    if (this.buffer_) {
-      this.buffer_[eventType] = this.buffer_[eventType] || [];
-      this.buffer_[eventType].push(event);
-    }
-  }
-}
-
 /**
  * Tracks click events.
  */
@@ -550,169 +429,6 @@ export class ClickEventTracker extends EventTracker {
       VARIABLE_DATA_ATTRIBUTE_KEY
     );
     listener(new AnalyticsEvent(target, 'click', params));
-  }
-}
-
-/**
- * Tracks scroll events.
- */
-export class ScrollEventTracker extends EventTracker {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   */
-  constructor(root) {
-    super(root);
-
-    /** @private {!./analytics-root.AnalyticsRoot} root */
-    this.root_ = root;
-
-    /** @private {function(!Object)|null} */
-    this.boundScrollHandler_ = null;
-  }
-
-  /** @override */
-  dispose() {
-    if (this.boundScrollHandler_ !== null) {
-      this.root_
-        .getScrollManager()
-        .removeScrollHandler(this.boundScrollHandler_);
-      this.boundScrollHandler_ = null;
-    }
-  }
-
-  /** @override */
-  add(context, eventType, config, listener) {
-    if (!config['scrollSpec']) {
-      user().error(TAG, 'Missing scrollSpec on scroll trigger.');
-      return NO_UNLISTEN;
-    }
-
-    if (
-      !Array.isArray(config['scrollSpec']['verticalBoundaries']) &&
-      !Array.isArray(config['scrollSpec']['horizontalBoundaries'])
-    ) {
-      user().error(
-        TAG,
-        'Boundaries are required for the scroll trigger to work.'
-      );
-      return NO_UNLISTEN;
-    }
-
-    const boundsV = this.normalizeBoundaries_(
-      config['scrollSpec']['verticalBoundaries']
-    );
-    const boundsH = this.normalizeBoundaries_(
-      config['scrollSpec']['horizontalBoundaries']
-    );
-    const useInitialPageSize = !!config['scrollSpec']['useInitialPageSize'];
-
-    this.boundScrollHandler_ = this.scrollHandler_.bind(
-      this,
-      boundsH,
-      boundsV,
-      useInitialPageSize,
-      listener
-    );
-
-    return this.root_
-      .getScrollManager()
-      .addScrollHandler(this.boundScrollHandler_);
-  }
-
-  /**
-   * Function to handle scroll events from the Scroll manager
-   * @param {!Object<number,boolean>} boundsH
-   * @param {!Object<number,boolean>} boundsV
-   * @param {boolean} useInitialPageSize
-   * @param {function(!AnalyticsEvent)} listener
-   * @param {!Object} e
-   * @private
-   */
-  scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
-    // Calculates percentage scrolled by adding screen height/width to
-    // top/left and dividing by the total scroll height/width.
-    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
-
-    this.triggerScrollEvents_(
-      boundsV,
-      ((e.top + e.height) * 100) / scrollHeight,
-      VAR_V_SCROLL_BOUNDARY,
-      listener
-    );
-
-    this.triggerScrollEvents_(
-      boundsH,
-      ((e.left + e.width) * 100) / scrollWidth,
-      VAR_H_SCROLL_BOUNDARY,
-      listener
-    );
-  }
-
-  /**
-   * Rounds the boundaries for scroll trigger to nearest
-   * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
-   * as keys and false as values.
-   *
-   * @param {!Array<number>} bounds array of bounds.
-   * @return {!JsonObject} Object with normalized bounds as keys
-   * and false as value.
-   * @private
-   */
-  normalizeBoundaries_(bounds) {
-    const result = dict({});
-    if (!bounds || !Array.isArray(bounds)) {
-      return result;
-    }
-
-    for (let b = 0; b < bounds.length; b++) {
-      let bound = bounds[b];
-      if (typeof bound !== 'number' || !isFinite(bound)) {
-        user().error(TAG, 'Scroll trigger boundaries must be finite.');
-        return result;
-      }
-
-      bound = Math.min(
-        Math.round(bound / SCROLL_PRECISION_PERCENT) * SCROLL_PRECISION_PERCENT,
-        100
-      );
-      result[bound] = false;
-    }
-    return result;
-  }
-
-  /**
-   * @param {!Object<number, boolean>} bounds
-   * @param {number} scrollPos Number representing the current scroll
-   * @param {string} varName variable name to assign to the bound that
-   * @param {function(!AnalyticsEvent)} listener
-   * triggers the event position.
-   */
-  triggerScrollEvents_(bounds, scrollPos, varName, listener) {
-    if (!scrollPos) {
-      return;
-    }
-
-    // Goes through each of the boundaries and fires an event if it has not
-    // been fired so far and it should be.
-    for (const b in bounds) {
-      if (!hasOwn(bounds, b)) {
-        continue;
-      }
-      const bound = parseInt(b, 10);
-      if (bound > scrollPos || bounds[bound]) {
-        continue;
-      }
-      bounds[bound] = true;
-      const vars = dict();
-      vars[varName] = b;
-      listener(
-        new AnalyticsEvent(
-          this.root_.getRootElement(),
-          AnalyticsEventType.SCROLL,
-          vars
-        )
-      );
-    }
   }
 }
 
@@ -1450,14 +1166,7 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = 'documentHidden';
     }
 
-    const visibilityManagerPromise = this.root
-      .isUsingHostAPI()
-      .then((hasHostAPI) => {
-        if (hasHostAPI) {
-          this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
-        }
-        return this.root.getVisibilityManager();
-      });
+    const visibilityManagerPromise = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(

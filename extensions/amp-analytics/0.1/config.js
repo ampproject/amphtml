@@ -16,14 +16,11 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, user, userAssert} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
+import { user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject, toWin} from '../../../src/types';
-import {isCanary} from '../../../src/experiments';
+import {isArray, isObject} from '../../../src/types';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -66,103 +63,8 @@ export class AnalyticsConfig {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
-    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
-      .then(this.processConfigs_.bind(this))
-      .then(this.checkWarningMessage_.bind(this))
+    return this.processConfigs_()
       .then(() => this.config_);
-  }
-
-  /**
-   * Constructs the URL where the given vendor config is located
-   * @private
-   * @param {string} vendor the vendor name
-   * @return {string} the URL to request the vendor config file from
-   */
-  getVendorUrl_(vendor) {
-    const baseUrl = calculateScriptBaseUrl(
-      this.win_.location,
-      getMode().localDev
-    );
-    // bg has a special canary config
-    const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
-    return `${baseUrl}/rtv/${
-      getMode().rtvVersion
-    }/v0/analytics-vendors/${vendor}${canary}.json`;
-  }
-
-  /**
-   * Returns a promise that resolves when vendor config is ready (or
-   * immediately if no vendor config is specified)
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  fetchVendorConfig_() {
-    const type = this.element_.getAttribute('type');
-    if (!type) {
-      return Promise.resolve();
-    }
-
-    const vendorUrl = this.getVendorUrl_(type);
-
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching vendor config', vendorUrl);
-
-    return Services.xhrFor(toWin(this.win_))
-      .fetchJson(vendorUrl, {ampCors: false})
-      .then((res) => res.json())
-      .then(
-        (jsonValue) => {
-          this.predefinedConfig_[type] = jsonValue;
-          dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
-        },
-        (err) => {
-          user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
-        }
-      );
-  }
-
-  /**
-   * Returns a promise that resolves when remote config is ready (or
-   * immediately if no remote config is specified.)
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  fetchRemoteConfig_() {
-    let remoteConfigUrl = this.element_.getAttribute('config');
-    if (!remoteConfigUrl || this.isSandbox_) {
-      return Promise.resolve();
-    }
-    assertHttpsUrl(remoteConfigUrl, this.element_);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {};
-    if (this.element_.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element_.getAttribute('data-credentials');
-    }
-    return Services.urlReplacementsForDoc(this.element_)
-      .expandUrlAsync(remoteConfigUrl)
-      .then((expandedUrl) => {
-        remoteConfigUrl = expandedUrl;
-        return Services.xhrFor(toWin(this.win_)).fetchJson(
-          remoteConfigUrl,
-          fetchConfig
-        );
-      })
-      .then((res) => res.json())
-      .then(
-        (jsonValue) => {
-          this.remoteConfig_ = jsonValue;
-          dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
-        },
-        (err) => {
-          user().error(
-            TAG,
-            'Error loading remote config: ',
-            remoteConfigUrl,
-            err
-          );
-        }
-      );
   }
 
   /**
@@ -172,153 +74,13 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_()['url'];
-
     const config = dict({});
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
-    mergeObjects(this.remoteConfig_, config);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
+    this.config_ = this.mergeConfigs_(config);
       // use default configuration merge.
-      return Promise.resolve();
-    }
-
-    return this.handleConfigRewriter_(config, configRewriterUrl);
-  }
-
-  /**
-   * Handles logic if configRewriter is enabled.
-   * @param {!JsonObject} config
-   * @param {string} configRewriterUrl
-   * @return {!Promise<undefined>}
-   */
-  handleConfigRewriter_(config, configRewriterUrl) {
-    assertHttpsUrl(configRewriterUrl, this.element_);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
-
-    return this.handleVarGroups_(config).then(() => {
-      const fetchConfig = {
-        method: 'POST',
-        body: config,
-      };
-      if (this.element_.hasAttribute('data-credentials')) {
-        fetchConfig.credentials = this.element_.getAttribute(
-          'data-credentials'
-        );
-      }
-      return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(configRewriterUrl)
-        .then((expandedUrl) => {
-          return Services.xhrFor(toWin(this.win_)).fetchJson(
-            expandedUrl,
-            fetchConfig
-          );
-        })
-        .then((res) => res.json())
-        .then(
-          (jsonValue) => {
-            this.config_ = this.mergeConfigs_(jsonValue);
-            dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-          },
-          (err) => {
-            user().error(
-              TAG,
-              'Error rewriting configuration: ',
-              configRewriterUrl,
-              err
-            );
-          }
-        );
-    });
-  }
-
-  /**
-   * Check if config has warning, display on console and
-   * remove the property.
-   * @private
-   */
-  checkWarningMessage_() {
-    if (this.config_['warningMessage']) {
-      const TAG = this.getName_();
-      const type = this.element_.getAttribute('type');
-      const remoteConfigUrl = this.element_.getAttribute('config');
-
-      user().warn(
-        TAG,
-        'Warning from analytics vendor%s%s: %s',
-        type ? ' ' + type : '',
-        remoteConfigUrl ? ' with remote config url ' + remoteConfigUrl : '',
-        String(this.config_['warningMessage'])
-      );
-      delete this.config_['warningMessage'];
-    }
-  }
-
-  /**
-   * Check to see which varGroups are enabled, resolve and merge them into
-   * vars object.
-   * @param {!JsonObject} pubConfig
-   * @return {!Promise}
-   */
-  handleVarGroups_(pubConfig) {
-    const pubRewriterConfig = pubConfig['configRewriter'];
-    const pubVarGroups = pubRewriterConfig && pubRewriterConfig['varGroups'];
-    const vendorVarGroups = this.getConfigRewriter_()['varGroups'];
-
-    if (!pubVarGroups && !vendorVarGroups) {
-      return Promise.resolve();
-    }
-
-    if (pubVarGroups && !vendorVarGroups) {
-      const TAG = this.getName_();
-      user().warn(
-        TAG,
-        'This analytics provider does not currently support varGroups'
-      );
-      return Promise.resolve();
-    }
-
-    // Create object that will later hold all the resolved variables, and any
-    // intermediary objects as necessary.
-    pubConfig['configRewriter'] = pubConfig['configRewriter'] || dict();
-    const rewriterConfig = pubConfig['configRewriter'];
-    rewriterConfig['vars'] = dict({});
-
-    const allPromises = [];
-    // Merge publisher && vendor varGroups to see what has been enabled.
-    const mergedConfig = pubVarGroups || dict();
-    deepMerge(mergedConfig, vendorVarGroups);
-
-    Object.keys(mergedConfig).forEach((groupName) => {
-      const group = mergedConfig[groupName];
-      if (!group['enabled']) {
-        // Any varGroups must be explicitly enabled.
-        return;
-      }
-
-      const groupPromise = this.shallowExpandObject(this.element_, group).then(
-        (expandedGroup) => {
-          // This is part of the user config and should not be sent.
-          delete expandedGroup['enabled'];
-          // Merge all groups into single `vars` object.
-          Object.assign(rewriterConfig['vars'], expandedGroup);
-        }
-      );
-      allPromises.push(groupPromise);
-    });
-
-    return Promise.all(allPromises).then(() => {
-      // Don't send an empty vars payload.
-      if (!Object.keys(rewriterConfig['vars']).length) {
-        return delete pubConfig['configRewriter'];
-      }
-      // Don't send varGroups in payload to configRewriter endpoint.
-      pubVarGroups && delete rewriterConfig['varGroups'];
-    });
+    return Promise.resolve();
   }
 
   /**
@@ -344,24 +106,11 @@ export class AnalyticsConfig {
     const defaultConfig = this.predefinedConfig_['default'] || {};
     mergeObjects(expandConfigRequest(defaultConfig), config);
     mergeObjects(
-      expandConfigRequest(this.getTypeConfig_()),
-      config,
-      /* predefined */ true
-    );
-    mergeObjects(
       expandConfigRequest(rewrittenConfig),
       config,
       /* predefined */ true
     );
     return config;
-  }
-
-  /**
-   * Reads configRewriter from a vendor config.
-   * @return {!JsonObject}
-   */
-  getConfigRewriter_() {
-    return this.getTypeConfig_()['configRewriter'] || {};
   }
 
   /**
@@ -493,23 +242,8 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
     to = {};
   }
 
-  // Assert that optouts are allowed only in predefined configs.
-  // The last expression adds an exception of known, safe optout function
-  // that is already being used in the wild.
-  userAssert(
-    opt_predefinedConfig ||
-      !from ||
-      !from['optout'] ||
-      from['optout'] == '_gaUserPrefs.ioo' ||
-      from['optoutElementId'] == '__gaOptOutExtension',
-    'optout property is only available to vendor config.'
-  );
 
   for (const property in from) {
-    userAssert(
-      opt_predefinedConfig || property != 'iframePing',
-      'iframePing config is only available to vendor config.'
-    );
     // Only deal with own properties.
     if (hasOwn(from, property)) {
       if (isArray(from[property])) {

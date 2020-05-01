@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {dev, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-
-/**
- * @const {number}
- * We want to execute the first trigger immediately to reduce the viewability
- * delay as much as possible.
- */
-const IMMEDIATE_TRIGGER_THRES = 1;
-
-/** @const {number} */
-const HIGH_PRIORITY_TRIGGER_THRES = 3;
 
 /**
  * Represents the group of analytics triggers for a single config. All triggers
@@ -104,20 +91,7 @@ export class AnalyticsGroup {
       this.listeners_.push(unlisten);
       deferred.resolve();
     };
-    if (
-      this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
-      !isExperimentOn(this.win_, 'analytics-chunks') ||
-      getMode(this.win_).runtime == 'inabox'
-    ) {
-      task();
-    } else {
-      const priority =
-        this.triggerCount_ < HIGH_PRIORITY_TRIGGER_THRES
-          ? ChunkPriority.HIGH
-          : ChunkPriority.LOW;
-      chunk(this.analyticsElement_, task, priority);
-    }
-    this.triggerCount_++;
+    task();
     return deferred.promise;
   }
 }

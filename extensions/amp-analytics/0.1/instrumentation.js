@@ -15,18 +15,13 @@
  */
 
 import {
-  AmpStoryEventTracker,
   AnalyticsEvent,
-  AnalyticsEventType,
   CustomEventTracker,
   getTrackerKeyName,
 } from './events';
-import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
+import {AmpdocAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
-import {Services} from '../../../src/services';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
-  getParentWindowFrameElement,
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
@@ -78,12 +73,7 @@ export class InstrumentationService {
    * @private
    */
   getTrackerClass_(trackerName) {
-    switch (trackerName) {
-      case AnalyticsEventType.STORY:
-        return AmpStoryEventTracker;
-      default:
-        return CustomEventTracker;
-    }
+    return CustomEventTracker;
   }
 
   /**
@@ -97,7 +87,7 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
-    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
+    const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
       trackerName,
       this.getTrackerClass_(trackerName)
     ));
@@ -108,22 +98,12 @@ export class InstrumentationService {
    * @param {!Node} context
    * @return {!./analytics-root.AnalyticsRoot}
    */
-  findRoot_(context) {
-    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
-    // `ampdoc.getParent()`.
-    const ampdoc = Services.ampdoc(context);
-    const frame = getParentWindowFrameElement(context);
-    const embed = frame && getFriendlyIframeEmbedOptional(frame);
-    if (ampdoc == this.ampdoc && !embed && this.root_) {
+  findRoot_() {
+    if (this.root_) {
       // Main root already exists.
       return this.root_;
     }
-    return this.getOrCreateRoot_(embed || ampdoc, () => {
-      if (embed) {
-        return new EmbedAnalyticsRoot(ampdoc, embed);
-      }
-      return new AmpdocAnalyticsRoot(ampdoc);
-    });
+    return new AmpdocAnalyticsRoot(ampdoc);
   }
 
   /**
