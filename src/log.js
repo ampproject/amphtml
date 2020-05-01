@@ -392,18 +392,10 @@ export class Log {
    *     not evaluate to true.
    * @param {!Array|string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
-   * @return {R} The value of shouldBeTrueish.
-   * @throws {!Error} When `value` is `null` or `undefined`.
+   * @return {T} The value of shouldBeTrueish.
+   * @throws {!Error} When `value` is falsey.
    * @template T
-   * @template R :=
-   *     mapunion(T, (V) =>
-   *         cond(eq(V, 'null'),
-   *             none(),
-   *             cond(eq(V, 'undefined'),
-   *                 none(),
-   *                 V)))
-   *  =:
-   * @closurePrimitive {asserts.matchesReturn}
+   * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
@@ -900,18 +892,10 @@ export function isFromEmbed(win, opt_element) {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function devAssert(
   shouldBeTrueish,
