@@ -166,14 +166,14 @@ describes.realWin(
           expect(ref.error.message).to.have.string(
             'elements must be positioned after the 75% of first viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.display('none');
         }
       );
     });
 
     it('should render past 75% of first viewport', () => {
       return getAmpFlyingCarpet(null, '80vh').then((flyingCarpet) => {
-        expect(flyingCarpet).to.display;
+        expect(flyingCarpet).to.display('block');
       });
     });
 
@@ -188,7 +188,7 @@ describes.realWin(
           expect(ref.error.message).to.have.string(
             'elements must be positioned before the last viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.display('none');
         }
       );
     });
@@ -197,7 +197,7 @@ describes.realWin(
       // Doc: 600px
       // Viewport: 150px
       return getAmpFlyingCarpet(null, '455px').then((flyingCarpet) => {
-        expect(flyingCarpet).to.display;
+        expect(flyingCarpet).to.display('block');
       });
     });
 

@@ -270,11 +270,11 @@ describes.realWin(
         });
 
         it('should noop pause', () => {
-          expect(() => ad3p.pauseCallback()).to.not.throw;
+          expect(() => ad3p.pauseCallback()).to.not.throw();
         });
 
         it('should noop resume', () => {
-          expect(() => ad3p.resumeCallback()).to.not.throw;
+          expect(() => ad3p.resumeCallback()).to.not.throw();
         });
       });
 
