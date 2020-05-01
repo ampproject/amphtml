@@ -62,16 +62,16 @@ t.run('amp-story-affiliate link', () => {
         return browser.waitForElementLayout('amp-analytics');
       });
 
-      it('should not send any analytics event on expand', async () => {
+      it.skip('should not send any analytics event on expand', async () => {
         browser.click('#blink-1');
         browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw;
+        await expect(RequestBank.withdraw()).to.be.rejected;
       });
 
-      it('should not send any analytics event on collapse', () => {
+      it.skip('should not send any analytics event on collapse', async () => {
         browser.click('#blink-1');
         browser.click('h1');
-        expect(RequestBank.withdraw()).to.throw;
+        await expect(RequestBank.withdraw()).to.be.rejected;
       });
 
       it.skip('should send analytics event on external click', async () => {
