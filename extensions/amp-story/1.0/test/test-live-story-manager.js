@@ -58,6 +58,14 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
+
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       env.sandbox.stub(win.history, 'replaceState');

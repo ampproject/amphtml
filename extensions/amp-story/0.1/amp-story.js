@@ -55,7 +55,6 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
@@ -211,9 +210,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    const localizationService = this.localizationService_;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
+
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('en', LocalizedStringsEn);
@@ -226,10 +225,6 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-
-    registerServiceBuilder(this.win, 'localization-v01', function () {
-      return localizationService;
-    });
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
@@ -588,7 +583,7 @@ export class AmpStory extends AMP.BaseElement {
       SHARE_WIDGET_PILL_CONTAINER
     );
 
-    this.shareWidget_ = new ShareWidget(this.win);
+    this.shareWidget_ = new ShareWidget(this.win, this.element);
 
     const shareLabelEl = dev().assertElement(
       container.querySelector('.i-amphtml-story-share-pill-label'),

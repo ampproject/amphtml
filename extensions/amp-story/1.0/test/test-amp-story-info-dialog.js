@@ -27,7 +27,7 @@ import {
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
+describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;
   let embedded;
   let parentEl;
@@ -51,10 +51,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
         callback();
         return Promise.resolve();
       },
-    });
-
-    env.sandbox.stub(Services, 'localizationService').returns({
-      getLocalizedString: (localizedStringId) => `string(${localizedStringId})`,
     });
 
     env.sandbox.stub(Services, 'viewerForDoc').returns({
