@@ -17,7 +17,6 @@
 import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
@@ -148,11 +147,6 @@ describes.realWin(
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
-      });
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
       });
 
       storyEl = win.document.createElement('amp-story');

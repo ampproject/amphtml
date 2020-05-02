@@ -89,10 +89,10 @@ export function getLanguageCodesFromString(languageCode) {
  */
 export class LocalizationService {
   /**
-   * @param {!Window} win
+   * @param {!Element} element
    */
-  constructor(win) {
-    const rootEl = win.document.documentElement;
+  constructor(element) {
+    const rootEl = element.ownerDocument.documentElement;
 
     /**
      * @private @const {!Array<string>}

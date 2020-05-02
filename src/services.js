@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LocalizationService} from './service/localization';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -21,6 +22,7 @@ import {
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -544,22 +546,22 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
-   */
-  static localizationServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true))
-    );
-  }
-
-  /**
-   * @param {!Window} win
    * @return {!./service/localization.LocalizationService}
+   * @param {!Element} element
    */
-  static localizationService(win) {
-    return getService(win, 'localization');
+  static localizationForDoc(element) {
+    let service = /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+      element,
+      'localization'
+    ));
+
+    if (!service) {
+      service = new LocalizationService(element);
+      registerServiceBuilderForDoc(element, 'localization', function () {
+        return service;
+      });
+    }
+    return service;
   }
 
   /**
@@ -601,27 +603,6 @@ export class Services {
    */
   static storyRequestServiceV01(win) {
     return getService(win, 'story-request-v01');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
-   */
-  static localizationServiceForOrNullV01(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story', true))
-    );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
-   */
-  static localizationServiceV01(win) {
-    return getService(win, 'localization-v01');
   }
 
   /**

@@ -17,7 +17,7 @@ import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disa
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {isArray, toWin} from '../../../src/types';
+import {isArray} from '../../../src/types';
 
 /**
  * @typedef {{
@@ -75,17 +75,13 @@ function renderSingle(doc, elementDef) {
     : doc.createElement(elementDef.tag);
 
   if (elementDef.localizedStringId) {
-    const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNullV01(win).then(
-      (localizationService) => {
-        devAssert(
-          localizationService,
-          'Could not retrieve LocalizationService.'
-        );
-        el.textContent = localizationService.getLocalizedString(
-          /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-        );
-      }
+    const localizationService = Services.localizationForDoc(
+      devAssert(doc.body)
+    );
+
+    devAssert(localizationService, 'Could not retrieve LocalizationService.');
+    el.textContent = localizationService.getLocalizedString(
+      /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
     );
   }
 

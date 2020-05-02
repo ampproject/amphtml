@@ -38,7 +38,6 @@ describe('amp-inabox', () => {
       installAmpdocServices(ampdoc);
 
       const installedServicesByRegularAmp = installedServices.slice(0);
-
       installedServices = [];
       installAmpdocServicesForInabox(ampdoc);
       expect(installedServices).to.deep.equal(installedServicesByRegularAmp);

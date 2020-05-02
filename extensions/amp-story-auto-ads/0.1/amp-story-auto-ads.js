@@ -127,7 +127,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.storeService_ = null;
 
     /** @private {!./story-ad-localization.StoryAdLocalization} */
-    this.localizationService_ = new StoryAdLocalization(this.win);
+    this.localizationService_ = new StoryAdLocalization(this.element);
 
     /** @private {boolean} */
     this.hasForcedRender_ = false;
