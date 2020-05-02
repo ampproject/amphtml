@@ -1095,7 +1095,7 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      Services.localizationService(this.win_).getLocalizedString(
+      Services.localizationForDoc(this.storyEl_).getLocalizedString(
         embedConfig.localizedStringId
       ) ||
       getSourceOriginForElement(target, this.getElementHref_(target));

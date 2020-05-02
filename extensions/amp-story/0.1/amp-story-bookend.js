@@ -286,7 +286,7 @@ export class Bookend {
     this.requestService_ = Services.storyRequestServiceV01(this.win_);
 
     /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(this.win_);
+    this.shareWidget_ = ScrollableShareWidget.create(this.win_, parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreServiceV01(this.win_);

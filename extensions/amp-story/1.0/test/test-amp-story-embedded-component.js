@@ -22,7 +22,6 @@ import {
 } from '../amp-story-store-service';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent} from '../story-analytics';
 import {addAttributesToElement} from '../../../../src/dom';
@@ -51,11 +50,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       measureMutateElement: (measure, mutate) => {
         return Promise.resolve().then(measure).then(mutate);
       },
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     parentEl = win.document.createElement('div');
