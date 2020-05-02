@@ -18,7 +18,6 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -49,11 +48,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     registerServiceBuilder(win, 'performance', function () {
