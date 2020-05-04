@@ -201,7 +201,6 @@ public class AttributeSpecUtilsTest {
 
     result =
       new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
-
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
     } catch (TagValidationException | IOException | CssValidationException e) {
