@@ -164,3 +164,71 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     });
   });
 });
+
+describes.fakeWin('viewer localization', {amp: true}, (env) => {
+  describe('viewer language override', () => {
+    let win;
+
+    beforeEach(() => {
+      win = env.win;
+      env.sandbox
+        .stub(Services.viewerForDoc(env.ampdoc), 'getParam')
+        .returns('fr');
+    });
+
+    it('should take precedence over document language', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      localizationService.registerLocalizedStringBundle('fr', {
+        'test_string_id': {
+          string: 'oui',
+        },
+      });
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'oui'
+      );
+    });
+
+    it('should fall back if string is not found', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      localizationService.registerLocalizedStringBundle('fr', {
+        'incorrect_test_string_id': {
+          string: 'non',
+        },
+      });
+      localizationService.registerLocalizedStringBundle('en', {
+        'correct_test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(
+        localizationService.getLocalizedString('correct_test_string_id')
+      ).to.equal('yes');
+    });
+
+    it('should fall back if language code is not registered', () => {
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'yes'
+      );
+    });
+  });
+});
