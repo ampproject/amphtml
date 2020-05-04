@@ -22,19 +22,7 @@
 package dev.amp.validator.utils;
 
 import com.steadystate.css.parser.Token;
-import dev.amp.validator.Context;
-import dev.amp.validator.CssLength;
-import dev.amp.validator.ExtensionsContext;
-import dev.amp.validator.ParsedAttrSpec;
-import dev.amp.validator.ParsedHtmlTag;
-import dev.amp.validator.ParsedTagSpec;
-import dev.amp.validator.ParsedUrlSpec;
-import dev.amp.validator.ParsedValueProperties;
-import dev.amp.validator.SrcsetParsingResult;
-import dev.amp.validator.SrcsetSourceDef;
-import dev.amp.validator.UrlErrorAdapter;
-import dev.amp.validator.UrlErrorInAttrAdapter;
-import dev.amp.validator.ValidatorProtos;
+import dev.amp.validator.*;
 import dev.amp.validator.css.CssParser;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.css.Declaration;
@@ -57,8 +45,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static dev.amp.validator.utils.CssSpecUtils.parseInlineStyle;
-import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
+import static dev.amp.validator.utils.CssSpecUtils.*;
 import static dev.amp.validator.utils.ExtensionsUtils.isAmpRuntimeScript;
 import static dev.amp.validator.utils.ExtensionsUtils.isExtensionScript;
 import static dev.amp.validator.utils.ExtensionsUtils.validateScriptSrcAttr;
@@ -132,11 +119,11 @@ public final class AttributeSpecUtils {
                                         @Nonnull final ParsedTagSpec bestMatchReferencePoint,
                                         @Nonnull final Context context,
                                         @Nonnull final ParsedHtmlTag encounteredTag,
-                                        @Nonnull final ValidatorProtos.ValidationResult.Builder result)
+                                        @Nonnull final ValidateTagResult result)
     throws TagValidationException, IOException, CssValidationException {
     final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
     if (spec.hasAmpLayout()) {
-      validateLayout(parsedTagSpec, context, encounteredTag, result);
+      validateLayout(parsedTagSpec, context, encounteredTag, result.getValidationResult());
     }
     // For extension TagSpecs, we track if we've validated a src attribute.
     // We must have done so for the extension to be valid.
@@ -178,7 +165,7 @@ public final class AttributeSpecUtils {
       if (encounteredTag.attrs().getValue(i).equals("src") &&
         (isExtensionScript(encounteredTag)
           || isAmpRuntimeScript(encounteredTag))) {
-        validateScriptSrcAttr(encounteredTag.attrs().getValue(i), spec, context, result);
+        validateScriptSrcAttr(encounteredTag.attrs().getValue(i), spec, context, result.getValidationResult());
       }
       if (!(attrsByName.containsKey(name))) {
         // The HTML tag specifies type identifiers which are validated in
@@ -204,27 +191,27 @@ public final class AttributeSpecUtils {
         // method.  For 'src', we also keep track whether we validated it this
         // way, (seen_src_attr), since it's a mandatory attr.
         if (spec.hasExtensionSpec()
-          && validateAttributeInExtension(spec, context, name, value, result)) {
+          && validateAttributeInExtension(spec, context, name, value, result.getValidationResult())) {
           if (name.equals("src")) {
             seenExtensionSrcAttr = true;
           }
           continue;
         }
-        validateAttrNotFoundInSpec(parsedTagSpec, context, name, result);
-        if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
+        validateAttrNotFoundInSpec(parsedTagSpec, context, name, result.getValidationResult());
+        if (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
           continue;
         }
         if (hasTemplateAncestor) {
-          validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result);
-          if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
+          validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result.getValidationResult());
+          if (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
             continue;
           }
         }
         continue;
       }
       if (hasTemplateAncestor) {
-        validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result);
-        if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
+        validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result.getValidationResult());
+        if (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
           continue;
         }
       }
@@ -248,7 +235,7 @@ public final class AttributeSpecUtils {
           context.getLineCol(),
           params,
           TagSpecUtils.getTagSpecUrl(spec),
-          result);
+          result.getValidationResult());
         continue;
       }
       if (attrSpec.hasDeprecation()) {
@@ -261,21 +248,23 @@ public final class AttributeSpecUtils {
           context.getLineCol(),
           params,
           attrSpec.getDeprecationUrl(),
-          result);
+          result.getValidationResult());
         // Deprecation is only a warning, so we don't return.
       }
       if (attrSpec.getRequiresExtensionCount() > 0) {
-        validateAttrRequiredExtensions(parsedAttrSpec, context, result);
+        validateAttrRequiredExtensions(parsedAttrSpec, context, result.getValidationResult());
       }
-      if (attrSpec.getCssDeclarationCount() > 0) {
+      if (attrSpec.hasValueDocCss() || attrSpec.hasValueDocSvgCss()) {
+        validateAttrCss(parsedAttrSpec, context, spec, name, value, result);
+      } else if (attrSpec.getCssDeclarationCount() > 0) {
         validateAttrDeclaration(
           parsedAttrSpec, context, TagSpecUtils.getTagSpecName(spec), name, value,
-          result);
+          result.getValidationResult());
       }
       if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(value)) {
         validateNonTemplateAttrValueAgainstSpec(
-          parsedAttrSpec, context, name, value, spec, result);
-        if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
+          parsedAttrSpec, context, name, value, spec, result.getValidationResult());
+        if (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
           continue;
         }
       }
@@ -294,7 +283,7 @@ public final class AttributeSpecUtils {
             context.getLineCol(),
             params,
             TagSpecUtils.getTagSpecUrl(spec),
-            result);
+            result.getValidationResult());
           continue;
         }
       }
@@ -312,7 +301,7 @@ public final class AttributeSpecUtils {
           context.getLineCol(),
           params,
           TagSpecUtils.getTagSpecUrl(spec),
-          result);
+          result.getValidationResult());
         continue;
       }
       final String mandatoryOneof = attrSpec.getMandatoryOneof(); // question const {mandatoryOneof} = attrSpec;
@@ -329,7 +318,7 @@ public final class AttributeSpecUtils {
             context.getLineCol(),
             params,
             TagSpecUtils.getTagSpecUrl(spec),
-            result);
+            result.getValidationResult());
           continue;
         }
 
@@ -353,7 +342,7 @@ public final class AttributeSpecUtils {
             context.getLineCol(),
             params,
             TagSpecUtils.getTagSpecUrl(spec),
-            result);
+            result.getValidationResult());
           continue;
         }
       }
@@ -381,7 +370,7 @@ public final class AttributeSpecUtils {
         }
       }
     }
-    if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
+    if (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
       return;
     }
     // The "exactly 1" part of mandatory_oneof: If none of the
@@ -396,7 +385,7 @@ public final class AttributeSpecUtils {
           context.getLineCol(),
           params,
           TagSpecUtils.getTagSpecUrl(spec),
-          result);
+          result.getValidationResult());
       }
     }
     // The "at least 1" part of mandatory_anyof: If none of the
@@ -411,7 +400,7 @@ public final class AttributeSpecUtils {
           context.getLineCol(),
           params,
           TagSpecUtils.getTagSpecUrl(spec),
-          result);
+          result.getValidationResult());
       }
     }
     for (final ValidatorProtos.AttrSpec attrSpec : triggersToCheck) {
@@ -430,7 +419,7 @@ public final class AttributeSpecUtils {
             context.getLineCol(),
             params,
             TagSpecUtils.getTagSpecUrl(spec),
-            result);
+            result.getValidationResult());
         }
       }
     }
@@ -451,7 +440,7 @@ public final class AttributeSpecUtils {
         context.getLineCol(),
         params,
         TagSpecUtils.getTagSpecUrl(spec),
-        result);
+        result.getValidationResult());
     }
     // Extension specs mandate the 'src' attribute.
     if (spec.hasExtensionSpec() && !seenExtensionSrcAttr) {
@@ -463,7 +452,7 @@ public final class AttributeSpecUtils {
         context.getLineCol(),
         params,
         TagSpecUtils.getTagSpecUrl(spec),
-        result);
+        result.getValidationResult());
     }
   }
 
