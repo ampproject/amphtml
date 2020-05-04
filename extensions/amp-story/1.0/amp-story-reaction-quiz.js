@@ -84,7 +84,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   buildComponent(element) {
     this.rootEl_ = buildQuizTemplate(element);
     this.attachContent_(this.rootEl_);
-    this.localizeComponent(this.rootEl_);
+    this.localizeComponent_(this.rootEl_);
     return this.rootEl_;
   }
 
@@ -103,19 +103,15 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     );
 
     // First child must be heading h1-h3
-    if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
-      dev().error(
-        TAG,
-        'The first child must be a heading element <h1>, <h2>, or <h3>'
-      );
-      this.rootEl_.removeChild(promptContainer);
-    } else {
+    if (['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
       const prompt = document.createElement(promptInput.tagName);
       prompt.textContent = promptInput.textContent;
       prompt.classList.add('i-amphtml-story-reaction-quiz-prompt');
 
       this.element.removeChild(promptInput);
       promptContainer.appendChild(prompt);
+    } else {
+      this.rootEl_.removeChild(promptContainer);
     }
 
     // Configure options.
@@ -130,7 +126,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       optionsContainer.appendChild(this.generateOption_(option))
     );
 
-    // Check all elements were processed.
     if (this.element.children.length !== 0) {
       dev().error(TAG, 'Too many children');
     }
@@ -138,17 +133,16 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
   /**
    * Localize the answer choice options if available.
+   * @private
    * @param {Element} root
    */
-  localizeComponent(root) {
-    // Get localized answer choice options, if exsting.
+  localizeComponent_(root) {
     let answerChoiceOptions = ['A', 'B', 'C', 'D'];
     answerChoiceOptions = answerChoiceOptions.map((choice) => {
       return this.localizationService_.getLocalizedString(
         LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
       );
     });
-    // Set content of answer choices to options.
     toArray(
       root.querySelectorAll('.i-amphtml-story-reaction-quiz-answer-choice')
     ).forEach((option, index) => {
@@ -159,8 +153,8 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /**
    * Creates an option template filled with the option details from the <option> element.
    *
-   * @param {Element} option
-   * @return {Element} option element
+   * @param {!Element} option
+   * @return {!Element} configured option element
    * @private
    */
   generateOption_(option) {
