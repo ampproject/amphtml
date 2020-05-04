@@ -1233,11 +1233,29 @@ describes.realWin(
       });
     });
 
-    it('should measure initial contentHeight', () => {
+    it('should measure initial contentHeight and send it to the viewer', () => {
       const contentHeight = resources.viewport_.getContentHeight();
       expect(resources.maybeChangeHeight_).to.equal(false);
       expect(resources.documentReady_).to.equal(true);
       expect(resources.contentHeight_).to.equal(contentHeight);
+    });
+
+    it('should only send contentHeight to the viewer once amp finishes init', () => {
+      resources.firstPassAfterDocumentReady_ = false;
+      resources.documentReady_ = false;
+      resources.ampInitialized_ = false;
+      resources.doPass();
+      expect(viewerSendMessageStub).not.called;
+
+      resources.firstPassAfterDocumentReady_ = true;
+      resources.documentReady_ = true;
+      resources.ampInitialized_ = true;
+      resources.doPass();
+      expect(viewerSendMessageStub).calledWithExactly(
+        'documentHeight',
+        {height: 0},
+        true
+      );
     });
 
     it('should send contentHeight to viewer if height was changed', () => {
