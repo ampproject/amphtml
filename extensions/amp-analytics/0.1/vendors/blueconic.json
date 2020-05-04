@@ -1,9 +1,9 @@
 {
   "requests": {
-    "event": "https://${tenantId}/s/${pixelId}.gif?${trackingIdentifier}${defaultTrackingValues}${extraTrackingValues}"
+    "event": "https://${tenantId}/s/${pixelId}.gif?${trackingIdentifier}${defaultTrackingValues}${extraTrackingValues}",
+    "trackingIdentifier": "property=${property}&${property}=${clientId(cid-scope-cookie-fallback-name)}"
   },
   "vars": {
-    "trackingIdentifier": "property=${property}&${property}=${clientId(cid-scope-cookie-fallback-name)}",
     "defaultTrackingValues": "&sourceUrl=${sourceUrl}&canonicalUrl=${canonicalUrl}&referrer=${documentReferrer}&title=${title}&visitDate=${timestamp}&geoLocation=${ampGeo}&userAgent=${userAgent}",
     "extraTrackingValues": ""
   }
