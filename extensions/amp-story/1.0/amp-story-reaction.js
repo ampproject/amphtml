@@ -445,7 +445,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(url, this.reactionId_);
+      url = appendPathToUrl(url, dev().assertString(this.reactionId_));
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
@@ -490,7 +490,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array<ReactionOptionType} data
+   * @param {!Array<ReactionOptionType>} data
    * @private
    */
   updateComponentOnDataRetrieval_(data) {

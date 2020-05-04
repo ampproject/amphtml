@@ -77,7 +77,11 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(
+      this.element,
+      dev().assertElement(this.rootEl_),
+      CSS
+    );
   }
 
   /** @override */
