@@ -347,7 +347,10 @@ export class AmpScript extends AMP.BaseElement {
             );
             // TODO(#24266): user().createError() messages are not extracted and
             // don't perform string substitution.
-            throw new Error();
+            throw user().createError(
+              'Same-origin "src" requires "Content-Type: text/javascript" or ' +
+                '"Content-Type: application/javascript".'
+            );
           }
           return response.text();
         } else {
@@ -523,7 +526,9 @@ export class AmpScriptService {
         );
         // TODO(#24266): user().createError() messages are not extracted and
         // don't perform string substitution.
-        throw new Error();
+        throw user().createError(
+          'Script hash not found; sha384 missing from meta tag.'
+        );
       }
     });
   }
