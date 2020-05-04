@@ -21,7 +21,6 @@ import {
   TransportSerializers,
   defaultSerializer,
 } from './transport-serializer';
-import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {
@@ -31,12 +30,9 @@ import {
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
 import {dev, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -71,9 +67,6 @@ export class Transport {
     /** @private {boolean} */
     this.useBody_ = !!this.options_['useBody'];
 
-    /** @private {?IframeTransport} */
-    this.iframeTransport_ = null;
-
     /** @private {boolean} */
     this.isInabox_ = getMode(win).runtime == 'inabox';
   }
@@ -104,15 +97,6 @@ export class Transport {
 
     const getRequest = cacheFuncResult(generateRequest);
 
-    if (this.options_['iframe']) {
-      if (!this.iframeTransport_) {
-        dev().error(TAG_, 'iframe transport was inadvertently deleted');
-        return;
-      }
-      this.iframeTransport_.sendRequest(getRequest(false).url);
-      return;
-    }
-
     if (
       this.options_['beacon'] &&
       Transport.sendRequestUsingBeacon(this.win_, getRequest(this.useBody_))
@@ -138,50 +122,6 @@ export class Transport {
       return;
     }
     user().warn(TAG_, 'Failed to send request', url, this.options_);
-  }
-
-  /**
-   * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
-   * This is limited to MRC-accreddited vendors. The frame is removed if the
-   * user navigates/swipes away from the page, and is recreated if the user
-   * navigates back to the page.
-   *
-   * @param {!Element} element
-   */
-  maybeInitIframeTransport(element) {
-    if (!this.options_['iframe'] || this.iframeTransport_) {
-      return;
-    }
-
-    // In the case of FIE rendering, we should be using the parent doc win.
-    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
-    const type = element.getAttribute('type');
-    // In inabox there is no amp-ad element.
-    const ampAdResourceId = this.isInabox_
-      ? '1'
-      : user().assertString(
-          getAmpAdResourceId(element, topWin),
-          'No friendly amp-ad ancestor element was found ' +
-            'for amp-analytics tag with iframe transport.'
-        );
-
-    this.iframeTransport_ = new IframeTransport(
-      topWin,
-      type,
-      this.options_,
-      ampAdResourceId
-    );
-  }
-
-  /**
-   * Deletes iframe transport.
-   */
-  deleteIframeTransport() {
-    if (this.iframeTransport_) {
-      this.iframeTransport_.detach();
-      this.iframeTransport_ = null;
-    }
   }
 
   /**

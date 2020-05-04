@@ -17,30 +17,20 @@
 import {Services} from '../../../src/services';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
-
-const EXTERNAL_CONSENT_POLICY_STATE_STRING = {
-  1: 'sufficient',
-  2: 'insufficient',
-  3: 'not_required',
-  4: 'unknown',
-};
 
 /** @typedef {{name: string, argList: string}} */
 let FunctionNameArgsDef;
@@ -206,9 +196,6 @@ export class VariableService {
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
     );
-    this.register_('LINKER_PARAM', (name, id) =>
-      this.linkerReader_.get(name, id)
-    );
 
     // Returns the IANA timezone code
     this.register_('TIMEZONE_CODE', () => {
@@ -255,13 +242,7 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
-    const elementMacros = {
-      'COOKIE': (name) =>
-        cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
-      'CONSENT_STATE': getConsentStateStr(element),
-    };
-    const merged = {...this.macros_, ...elementMacros};
-    return /** @type {!JsonObject} */ (merged);
+    return this.macros_;
   }
 
   /**
@@ -467,20 +448,6 @@ export function variableServicePromiseForDoc(elementOrAmpDoc) {
  */
 export function getNameArgsForTesting(key) {
   return getNameArgs(key);
-}
-
-/**
- * Get the resolved consent state value to send with analytics request
- * @param {!Element} element
- * @return {!Promise<?string>}
- */
-function getConsentStateStr(element) {
-  return getConsentPolicyState(element).then((consent) => {
-    if (!consent) {
-      return null;
-    }
-    return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
-  });
 }
 
 /**
