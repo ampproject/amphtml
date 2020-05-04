@@ -18,7 +18,7 @@
 /**
  * @fileoverview
  * This script runs performance tests.
- * This is run during the CI stage = test; job = performance tests.
+ * This is run during the CI stage = experiment; job = performance tests.
  */
 
 const {
