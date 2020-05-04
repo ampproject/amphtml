@@ -230,6 +230,7 @@
       this.startResolve_ = null;
       this.startPromise_ = null;
       this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
+      this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -248,7 +249,7 @@
         if (activeId == this.id) {
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
-      }.bind(this));
+      }.bind(this)); 
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -436,6 +437,7 @@
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
+      this.receivedMessages.push([name, data]); 
       switch(name) {
         case 'bindReady':
           return Promise.resolve();
