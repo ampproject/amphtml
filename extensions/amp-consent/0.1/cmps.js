@@ -70,3 +70,9 @@ CMP_CONFIG['SourcePoint'] = {
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
+
+CMP_CONFIG['opencmp'] = {
+  'consentInstanceId': 'opencmp',
+  'checkConsentHref': 'https://amp.opencmp.net/consent/check',
+  'promptUISrc': 'https://cmp.opencmp.net/tcf-v2/amp/cmp.html',
+};

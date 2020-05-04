@@ -269,6 +269,20 @@
         </div>
       </amp-consent>
       <!-- End SourcePoint example -->
+
+      <!-- opencmp example -->
+      <amp-consent id='consent' layout='nodisplay' type='opencmp'>
+        <script type="application/json">
+          {
+            "postPromptUI": "opencmp-consent-prompt-ui"
+          }
+        </script>
+        <div id="opencmp-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=opencmp)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End opencmp example -->
     </div>
   </body>
 </html>
