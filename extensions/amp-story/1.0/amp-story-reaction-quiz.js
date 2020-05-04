@@ -70,6 +70,9 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   constructor(element) {
     super(element, ReactionType.QUIZ);
 
+    /** @private Array<string> */
+    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
+
     /** @private {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = Services.localizationService(this.win);
   }
@@ -88,7 +91,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   buildComponent(element) {
     this.rootEl_ = buildQuizTemplate(element);
     this.attachContent_(this.rootEl_);
-    this.localizeComponent_(this.rootEl_);
     return this.rootEl_;
   }
 
@@ -126,8 +128,8 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     const optionsContainer = root.querySelector(
       '.i-amphtml-story-reaction-quiz-option-container'
     );
-    options.forEach((option) =>
-      optionsContainer.appendChild(this.generateOption_(option))
+    options.forEach((option, optionIndex) =>
+      optionsContainer.appendChild(this.generateOption_(option, optionIndex))
     );
 
     if (this.element.children.length !== 0) {
@@ -136,38 +138,28 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   }
 
   /**
-   * Localize the answer choice options if available.
-   * @private
-   * @param {Element} root
-   */
-  localizeComponent_(root) {
-    let answerChoiceOptions = ['A', 'B', 'C', 'D'];
-    answerChoiceOptions = answerChoiceOptions.map((choice) => {
-      return this.localizationService_.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-      );
-    });
-    toArray(
-      root.querySelectorAll('.i-amphtml-story-reaction-quiz-answer-choice')
-    ).forEach((option, index) => {
-      option.textContent = answerChoiceOptions[index];
-    });
-  }
-
-  /**
    * Creates an option template filled with the option details from the <option> element.
    *
    * @param {!Element} option
+   * @param {number} optionIndex
    * @return {!Element} configured option element
    * @private
    */
-  generateOption_(option) {
+  generateOption_(option, optionIndex) {
     const convertedOption = buildOptionTemplate(dev().assertElement(option));
 
-    const optionText = convertedOption.querySelector(
+    convertedOption.querySelector(
       '.i-amphtml-story-reaction-quiz-option-text'
+    ).textContent = option.textContent;
+
+    const localizedAnswerChoice = this.localizationService_.getLocalizedString(
+      LocalizedStringId[
+        `AMP_STORY_QUIZ_ANSWER_CHOICE_${this.answerChoiceOptions_[optionIndex]}`
+      ]
     );
-    optionText.textContent = option.textContent;
+    convertedOption.querySelector(
+      '.i-amphtml-story-reaction-quiz-answer-choice'
+    ).textContent = localizedAnswerChoice;
 
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
