@@ -42,14 +42,14 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp performance --nobuild');
+    timedExecOrDie('gulp performance --nobuild --quiet');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp performance --nobuild');
+      timedExecOrDie('gulp performance --nobuild --quiet');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,

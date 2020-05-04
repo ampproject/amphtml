@@ -1,6 +1,6 @@
 {
   "headless": true,
-  "runs": 100,
+  "runs": 50,
   "handlers": [
     {
       "handlerName": "defaultHandler",
