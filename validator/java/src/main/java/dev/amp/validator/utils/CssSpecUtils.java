@@ -22,23 +22,9 @@
 package dev.amp.validator.utils;
 
 import com.steadystate.css.parser.Token;
-import dev.amp.validator.Context;
-import dev.amp.validator.ParsedAttrSpec;
-import dev.amp.validator.ValidateTagResult;
-import dev.amp.validator.ValidatorProtos;
-import dev.amp.validator.css.Canonicalizer;
-import dev.amp.validator.css.CssParser;
-import dev.amp.validator.css.CssTokenUtil;
-import dev.amp.validator.css.CssValidationException;
-import dev.amp.validator.css.Declaration;
-import dev.amp.validator.css.EOFToken;
-import dev.amp.validator.css.ErrorToken;
-import dev.amp.validator.css.ParsedCssUrl;
-import dev.amp.validator.css.ParsedDocCssSpec;
-import dev.amp.validator.css.Stylesheet;
-import dev.amp.validator.css.TokenType;
+import dev.amp.validator.*;
+import dev.amp.validator.css.*;
 import dev.amp.validator.visitor.*;
-import net.sf.saxon.trans.Err;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -49,8 +35,10 @@ import java.util.Map;
 
 import static dev.amp.validator.css.CssTokenUtil.copyPosTo;
 import static dev.amp.validator.css.CssTokenUtil.getTokenType;
+import static dev.amp.validator.utils.AttributeSpecUtils.validateUrlAndProtocol;
 import static dev.amp.validator.utils.ByteUtils.byteLength;
 import static dev.amp.validator.utils.TagSpecUtils.getTagSpecName;
+import static dev.amp.validator.utils.UrlUtils.isDataUrl;
 
 /**
  * Methods to handle Css Spec processing.
@@ -545,24 +533,24 @@ public final class CssSpecUtils {
             errorToken.getCode(), context.getLineCol(), params, "",
             result.getValidationResult());
         }
-//        if (urlErrors.length > 0) continue;
-//        for (const url of parsedUrls){
-//          // Validate that the URL itself matches the spec.
-//          // Only image specs apply to inline styles. Fonts are only defined in
-//          // @font-face rules which we require a full stylesheet to define.
-//          if (maybeSpec.spec().imageUrlSpec != = null) {
-//          const adapter = new UrlErrorInStylesheetAdapter(
-//              context.getLineCol().getLine(), context.getLineCol().getCol());
-//            validateUrlAndProtocol(
-//              maybeSpec.imageUrlSpec(), adapter, context, url.utf8Url, tagSpec,
-//              result.validationResult);
-//          }
-//          // Subtract off URL lengths from doc-level inline style bytes, if
-//          // specified by the DocCssSpec.
-//          if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
-//            result.inlineStyleCssBytes -= byteLength(url.utf8Url);
-//        }
-//      }
+        if (urlErrors.size() > 0) continue;
+        for (final ParsedCssUrl url : parsedUrls){
+          // Validate that the URL itself matches the spec.
+          // Only image specs apply to inline styles. Fonts are only defined in
+          // @font-face rules which we require a full stylesheet to define.
+          if (maybeSpec.getSpec().hasImageUrlSpec()) {
+          final UrlErrorInStylesheetAdapter adapter = new UrlErrorInStylesheetAdapter(
+              context.getLineCol().getLineNumber(), context.getLineCol().getColumnNumber());
+            validateUrlAndProtocol(
+              maybeSpec.getImageUrlSpec(), adapter, context, url.getUtf8Url(), tagSpec,
+              result.getValidationResult());
+          }
+          // Subtract off URL lengths from doc-level inline style bytes, if
+          // specified by the DocCssSpec.
+          if (!maybeSpec.getSpec().getUrlBytesIncluded() && !isDataUrl(url.getUtf8Url()))
+            result.setInlineStyleCssBytes(result.getInlineStyleCssBytes() - byteLength(url.getUtf8Url()));
+        }
+      }
     }
   }
 
