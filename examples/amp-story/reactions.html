@@ -47,8 +47,7 @@
             <amp-story-reaction-quiz
                 id="city-dark-connected"
                 endpoint="http://localhost:3000/reactions"
-                theme="dark"
-                chip-corner="sharp">
+                theme="dark">
               <h1>What is the best city ever?</h1>
               <option>Tokyo</option>
               <option>Paris</option>
@@ -92,8 +91,7 @@
           <amp-story-grid-layer template="center">
             <amp-story-reaction-quiz
                 id="city-light-connected"
-                endpoint="http://localhost:3000/reactions"
-                chip-corner="sharp">
+                endpoint="http://localhost:3000/reactions">
               <h1>What is the best city ever?</h1>
               <option correct>Montevideo</option>
               <option>Mexico City</option>
@@ -117,6 +115,50 @@
               <option correct>Montevideo</option>
               <option>Mexico City</option>
             </amp-story-reaction-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="http://localhost:3000/reactions"
+                id="movie-light-connected"
+                chip-corner="sharp">
+                <option>Doctor Strange</option>
+                <option>Black Panther</option>
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="http://localhost:3000/reactions"
+                id="movie-dark-connected""
+                theme="dark">
+                <option>Doctor Strange</option>
+                <option>Black Panther</option>
+              </amp-story-reaction-poll-binary>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

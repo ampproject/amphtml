@@ -35,9 +35,7 @@ const TAG = 'amp-story-reaction-quiz';
 const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div
-      class="i-amphtml-story-reaction-quiz-container i-amphtml-story-reaction-container"
-    >
+    <div class="i-amphtml-story-reaction-quiz-container">
       <div class="i-amphtml-story-reaction-quiz-prompt-container"></div>
       <div class="i-amphtml-story-reaction-quiz-option-container"></div>
     </div>
@@ -126,9 +124,10 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     const optionsContainer = root.querySelector(
       '.i-amphtml-story-reaction-quiz-option-container'
     );
-    options.forEach((option) =>
-      optionsContainer.appendChild(this.generateOption_(option))
-    );
+    options.forEach((option) => {
+      optionsContainer.appendChild(this.generateOption_(option));
+      this.element.removeChild(option);
+    });
 
     // Check all elements were processed.
     if (this.element.children.length !== 0) {
@@ -157,7 +156,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   }
 
   /**
-   * Creates an option template filled with the option details from the <option> element.
+   * Creates an option template filled with the details from the <option> element.
    *
    * @param {Element} option
    * @return {Element} option element
@@ -174,7 +173,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
-    this.element.removeChild(option);
     return convertedOption;
   }
 

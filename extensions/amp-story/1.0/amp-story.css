@@ -881,6 +881,8 @@ amp-story .amp-video-eq,
   --reaction-chip-shadow: none !important;
   --reaction-answer-choice-border: var(--reaction-accent-color) !important;
   --reaction-answer-choice-background: white !important;
+  --reaction-main-color: #005AF0;
+  --reaction-main-color-transparent: #005AF016;
 }
 
 .i-amphtml-story-reaction[theme="dark"] {
@@ -888,6 +890,8 @@ amp-story .amp-video-eq,
   --reaction-theme-background: #202124 !important;
   --reaction-theme-border: #3C4043 !important;
   --reaction-theme-shading: #3C4043 !important;
+  --reaction-main-color: rgb(255, 255, 255);
+  --reaction-main-color-transparent: #FFFFFF16;
 }
 
 .i-amphtml-story-reaction[chip-corner="sharp"] {

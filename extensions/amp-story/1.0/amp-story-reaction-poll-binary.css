@@ -1,0 +1,96 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+ @import url('https://fonts.googleapis.com/css?family=Poppins:wght@500;700&display=swap');
+
+.i-amphtml-story-reaction-poll-binary-container {
+    --transition-time: 0.3s !important;
+    --transition-type: ease-out !important;
+
+    font-family: 'Poppins', sans-serif !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    width: 296px !important;
+    height: 90px !important;
+    border-radius: var(--reaction-chip-radius) !important;
+    box-shadow: 0px 2px 4px #000000aa !important;
+    color: var(--reaction-main-color) !important;
+    background: var(--reaction-theme-background) !important;
+    overflow: hidden !important;
+}
+
+.i-amphtml-story-reaction-poll-binary-container:not(.i-amphtml-story-reaction-post-selection) {
+    cursor: pointer !important;
+}
+
+.i-amphtml-story-reaction-poll-binary-container.emoji .i-amphtml-story-reaction-title {
+    font-size: 28px !important;
+}
+
+.i-amphtml-story-reaction-option {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    flex-direction: column !important;
+    flex-grow: 50;
+    flex: 100;
+    overflow: hidden !important;
+    transition: all var(--transition-type) var(--transition-time) !important;
+    transition-delay: var(--transition-time) !important;
+}
+
+.i-amphtml-story-reaction-option:hover .i-amphtml-story-reaction-option-title {
+    transform: translateY(-2px);
+}
+
+.i-amphtml-story-reaction-option:first-child {
+    border-right: 1px solid var(--reaction-main-color-translucent) !important;
+}
+
+.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected {
+    background-color: var(--reaction-main-color-transparent) !important;
+}
+
+.i-amphtml-story-reaction-option-title {
+    font-weight: 800 !important;
+    font-size: 28px !important;
+    margin: 0 !important;
+    line-height: 28px !important;
+    transition: transform var(--transition-type) var(--transition-time) !important;
+    max-width: 140px !important;
+    height: 56px !important;
+}
+
+.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title {
+    transform: scale(0.5) !important;
+    margin-bottom: -14px !important;
+    margin-top: -14px !important;
+}
+
+.i-amphtml-story-reaction-option-percentage-text {
+    font-weight: 700 !important;
+    font-size: 22px !important;
+    margin: 0 !important;
+    max-height: 1px !important;
+    overflow-y: hidden !important;
+    transition: all var(--transition-type) var(--transition-time) !important;
+}
+
+.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-percentage-text {
+    max-height: 30px !important;
+}

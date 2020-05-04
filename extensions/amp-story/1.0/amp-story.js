@@ -52,6 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryReactionPollBinary} from './amp-story-reaction-poll-binary';
 import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -2804,5 +2805,9 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerElement('amp-story-reaction-quiz', AmpStoryReactionQuiz);
+  AMP.registerElement(
+    'amp-story-reaction-poll-binary',
+    AmpStoryReactionPollBinary
+  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
