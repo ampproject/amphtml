@@ -478,6 +478,7 @@ const forbiddenTerms = {
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-subscriptions/0.1/deferred-account-flow.js',
     ],
   },
   'localStorage': {
