@@ -17,7 +17,7 @@
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
-import {buildUrl} from './url-builder';
+import {buildUrl} from './shared/url-builder';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -26,9 +26,11 @@ import {
   toggleExperiment,
 } from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
+import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -36,13 +38,20 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 16384;
+const MAX_URL_LENGTH = 15360;
 
 /** @enum {string} */
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
   AMP_AD_IFRAME_GET: '5',
+};
+
+/** @const {!{id: string, control: string, experiment: string}} */
+export const AMP_AD_NO_CENTER_CSS_EXP = {
+  id: 'amp-ad-no-center-css',
+  control: '21065897',
+  experiment: '21065898',
 };
 
 /** @const {!Object} */
@@ -92,7 +101,7 @@ export let AmpAnalyticsConfigDef;
 export let NameframeExperimentConfig;
 
 /**
- * @const {!./url-builder.QueryParameterDef}
+ * @const {!./shared/url-builder.QueryParameterDef}
  * @visibleForTesting
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
@@ -110,8 +119,12 @@ const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/
  * @return {number}
  */
 function getNavigationTiming(win, timingEvent) {
-  return (win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing'][timingEvent]) || 0;
+  return (
+    (win['performance'] &&
+      win['performance']['timing'] &&
+      win['performance']['timing'][timingEvent]) ||
+    0
+  );
 }
 
 /**
@@ -125,8 +138,10 @@ function getNavigationTiming(win, timingEvent) {
  *   pathway.
  */
 export function isGoogleAdsA4AValidEnvironment(win) {
-  return supportsNativeCrypto(win) && (
-    !!isCdnProxy(win) || getMode(win).localDev || getMode(win).test);
+  return (
+    supportsNativeCrypto(win) &&
+    (!!isCdnProxy(win) || getMode(win).localDev || getMode(win).test)
+  );
 }
 
 /**
@@ -160,8 +175,10 @@ export function isReportingEnabled(ampElement) {
   if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
     toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
-  return (type == 'doubleclick' || type == 'adsense') &&
-      isExperimentOn(win, 'a4aProfilingRate');
+  return (
+    (type == 'doubleclick' || type == 'adsense') &&
+    isExperimentOn(win, 'a4aProfilingRate')
+  );
 }
 
 /**
@@ -193,51 +210,57 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
-export function groupAmpAdsByType(win, type, groupFn) {
+export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
   // standard container type.  Note that display none containers will not be
   // included as they will never be measured.
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
-  const ampAdSelector =
-      r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
-  const {documentElement} = win.document;
-  return Services.resourcesForDoc(documentElement).getMeasuredResources(win,
-      r => {
-        const isAmpAdType = r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type;
-        if (isAmpAdType) {
-          return true;
-        }
-        const isAmpAdContainerElement =
-          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!ampAdSelector(r);
-        return isAmpAdContainerElement;
-      })
+  const ampAdSelector = (r) =>
+    r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
+  return (
+    getMeasuredResources(ampdoc, ampdoc.win, (r) => {
+      const isAmpAdType =
+        r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
+      if (isAmpAdType) {
+        return true;
+      }
+      const isAmpAdContainerElement =
+        Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+        !!ampAdSelector(r);
+      return isAmpAdContainerElement;
+    })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
-      .then(resources => Promise.all(resources.map(
-          resource => {
+      .then((resources) =>
+        Promise.all(
+          resources.map((resource) => {
             if (resource.element.tagName == 'AMP-AD') {
               return resource.element;
             }
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
             return whenUpgradedToCustomElement(
-                dev().assertElement(ampAdSelector(resource)));
-          })))
+              dev().assertElement(ampAdSelector(resource))
+            );
+          })
+        )
+      )
       // Group by networkId.
-      .then(elements => elements.reduce((result, element) => {
-        const groupId = groupFn(element);
-        (result[groupId] || (result[groupId] = [])).push(element.getImpl());
-        return result;
-      }, {}));
+      .then((elements) =>
+        elements.reduce((result, element) => {
+          const groupId = groupFn(element);
+          (result[groupId] || (result[groupId] = [])).push(element.getImpl());
+          return result;
+        }, {})
+      )
+  );
 }
 
 /**
@@ -250,63 +273,62 @@ export function googlePageParameters(a4a, startTime) {
   const ampDoc = a4a.getAmpDoc();
   // Do not wait longer than 1 second to retrieve referrer to ensure
   // viewer integration issues do not cause ad requests to hang indefinitely.
-  const referrerPromise = Services.timerFor(win).timeoutPromise(
-      1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
-      .catch(() => {
-        dev().expectedError('AMP-A4A', 'Referrer timeout!');
-        return '';
-      });
+  const referrerPromise = Services.timerFor(win)
+    .timeoutPromise(1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
+    .catch(() => {
+      dev().expectedError('AMP-A4A', 'Referrer timeout!');
+      return '';
+    });
   const domLoading = getNavigationTiming(win, 'domLoading');
   return Promise.all([
-    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'), referrerPromise])
-      .then(promiseResults => {
-        const clientId = promiseResults[0];
-        const referrer = promiseResults[1];
-        const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
-        // Read by GPT for GA/GPT integration.
-        win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
-        const {screen} = win;
-        const viewport = Services.viewportForDoc(ampDoc);
-        const viewportRect = viewport.getRect();
-        const viewportSize = viewport.getSize();
-        const visibilityState = Services.viewerForDoc(ampDoc)
-            .getVisibilityState();
-        return {
-          'is_amp': a4a.isXhrAllowed() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_IFRAME_GET,
-          'amp_v': '$internalRuntimeVersion$',
-          'd_imp': '1',
-          'c': getCorrelator(win, ampDoc, clientId),
-          'ga_cid': win.gaGlobal.cid || null,
-          'ga_hid': win.gaGlobal.hid || null,
-          'dt': startTime,
-          'biw': viewportRect.width,
-          'bih': viewportRect.height,
-          'u_aw': screen ? screen.availWidth : null,
-          'u_ah': screen ? screen.availHeight : null,
-          'u_cd': screen ? screen.colorDepth : null,
-          'u_w': screen ? screen.width : null,
-          'u_h': screen ? screen.height : null,
-          'u_tz': -new Date().getTimezoneOffset(),
-          'u_his': getHistoryLength(win),
-          'isw': win != win.top ? viewportSize.width : null,
-          'ish': win != win.top ? viewportSize.height : null,
-          'art': getAmpRuntimeTypeParameter(win),
-          'vis': visibilityStateCodes[visibilityState] || '0',
-          'scr_x': viewport.getScrollLeft(),
-          'scr_y': viewport.getScrollTop(),
-          'bc': getBrowserCapabilitiesBitmap(win) || null,
-          'debug_experiment_id':
-              (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
-                  null,
-          'url': canonicalUrl || null,
-          'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-          'loc': win.location.href == canonicalUrl ? null : win.location.href,
-          'ref': referrer || null,
-          'bdt': domLoading ? startTime - domLoading : null,
-        };
-      });
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    referrerPromise,
+  ]).then((promiseResults) => {
+    const clientId = promiseResults[0];
+    const referrer = promiseResults[1];
+    const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
+    // Read by GPT for GA/GPT integration.
+    win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
+    const {screen} = win;
+    const viewport = Services.viewportForDoc(ampDoc);
+    const viewportRect = viewport.getRect();
+    const viewportSize = viewport.getSize();
+    const visibilityState = ampDoc.getVisibilityState();
+    return {
+      'is_amp': a4a.isXhrAllowed()
+        ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
+        : AmpAdImplementation.AMP_AD_IFRAME_GET,
+      'amp_v': internalRuntimeVersion(),
+      'd_imp': '1',
+      'c': getCorrelator(win, ampDoc, clientId),
+      'ga_cid': win.gaGlobal.cid || null,
+      'ga_hid': win.gaGlobal.hid || null,
+      'dt': startTime,
+      'biw': viewportRect.width,
+      'bih': viewportRect.height,
+      'u_aw': screen ? screen.availWidth : null,
+      'u_ah': screen ? screen.availHeight : null,
+      'u_cd': screen ? screen.colorDepth : null,
+      'u_w': screen ? screen.width : null,
+      'u_h': screen ? screen.height : null,
+      'u_tz': -new Date().getTimezoneOffset(),
+      'u_his': getHistoryLength(win),
+      'isw': win != win.top ? viewportSize.width : null,
+      'ish': win != win.top ? viewportSize.height : null,
+      'art': getAmpRuntimeTypeParameter(win),
+      'vis': visibilityStateCodes[visibilityState] || '0',
+      'scr_x': viewport.getScrollLeft(),
+      'scr_y': viewport.getScrollTop(),
+      'bc': getBrowserCapabilitiesBitmap(win) || null,
+      'debug_experiment_id':
+        (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
+      'url': canonicalUrl || null,
+      'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+      'loc': win.location.href == canonicalUrl ? null : win.location.href,
+      'ref': referrer || null,
+      'bdt': domLoading ? startTime - domLoading : null,
+    };
+  });
 }
 
 /**
@@ -320,14 +342,18 @@ export function googlePageParameters(a4a, startTime) {
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-  a4a, baseUrl, startTime, parameters, opt_experimentIds) {
+  a4a,
+  baseUrl,
+  startTime,
+  parameters,
+  opt_experimentIds
+) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  return googlePageParameters(a4a, startTime)
-      .then(pageLevelParameters => {
-        Object.assign(parameters, blockLevelParameters, pageLevelParameters);
-        return truncAndTimeUrl(baseUrl, parameters, startTime);
-      });
+  return googlePageParameters(a4a, startTime).then((pageLevelParameters) => {
+    Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+    return truncAndTimeUrl(baseUrl, parameters, startTime);
+  });
 }
 
 /**
@@ -337,9 +363,11 @@ export function googleAdUrl(
  * @return {string}
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
-  return buildUrl(
-      baseUrl, parameters, MAX_URL_LENGTH - 10, TRUNCATION_PARAM)
-    + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+  return (
+    buildUrl(baseUrl, parameters, MAX_URL_LENGTH - 10, TRUNCATION_PARAM) +
+    '&dtd=' +
+    elapsedTimeWithCeiling(Date.now(), startTime)
+  );
 }
 
 /**
@@ -392,9 +420,11 @@ function topWindowUrlOrDomain(win) {
       return win.top.location.hostname;
     }
     const secondFromTop = secondWindowFromTop(win);
-    if (secondFromTop == win ||
-        origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return extractHost(secondFromTop./*OK*/document.referrer);
+    if (
+      secondFromTop == win ||
+      origin == ancestorOrigins[ancestorOrigins.length - 2]
+    ) {
+      return extractHost(secondFromTop./*OK*/ document.referrer);
     }
     return extractHost(topOrigin);
   } else {
@@ -403,7 +433,7 @@ function topWindowUrlOrDomain(win) {
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return extractHost(secondFromTop./*OK*/document.referrer);
+      return extractHost(secondFromTop./*OK*/ document.referrer);
     } catch (e) {}
     return null;
   }
@@ -416,8 +446,7 @@ function topWindowUrlOrDomain(win) {
 function secondWindowFromTop(win) {
   let secondFromTop = win;
   let depth = 0;
-  while (secondFromTop.parent != secondFromTop.parent.parent &&
-        depth < 100) {
+  while (secondFromTop.parent != secondFromTop.parent.parent && depth < 100) {
     secondFromTop = secondFromTop.parent;
     depth++;
   }
@@ -449,10 +478,12 @@ function elapsedTimeWithCeiling(time, start) {
  */
 export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
-    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
-      Math.floor(4503599627370496 * Math.random()) :
-      makeCorrelator(
-          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId, opt_cid);
+    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator')
+      ? Math.floor(4503599627370496 * Math.random())
+      : makeCorrelator(
+          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId,
+          opt_cid
+        );
   }
   return win.ampAdPageCorrelator;
 }
@@ -465,7 +496,7 @@ export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
 function makeCorrelator(pageViewId, opt_clientId) {
   const pageViewIdNumeric = Number(pageViewId || 0);
   if (opt_clientId) {
-    return pageViewIdNumeric + ((opt_clientId.replace(/\D/g, '') % 1e6) * 1e6);
+    return pageViewIdNumeric + (opt_clientId.replace(/\D/g, '') % 1e6) * 1e6;
   } else {
     // In this case, pageViewIdNumeric is only 4 digits => too low entropy
     // to be useful as a page correlator.  So synthesize one from scratch.
@@ -474,7 +505,6 @@ function makeCorrelator(pageViewId, opt_clientId) {
     return Math.floor(4503599627370496 * Math.random());
   }
 }
-
 
 /**
  * Collect additional dimensions for the brdim parameter.
@@ -498,7 +528,8 @@ export function additionalDimensions(win, viewportSize) {
     innerWidth = viewportSize.width;
     innerHeight = viewportSize.height;
   } catch (e) {}
-  return [win.screenLeft,
+  return [
+    win.screenLeft,
     win.screenTop,
     screenX,
     screenY,
@@ -507,7 +538,8 @@ export function additionalDimensions(win, viewportSize) {
     outerWidth,
     outerHeight,
     innerWidth,
-    innerHeight].join();
+    innerHeight,
+  ].join();
 }
 
 /**
@@ -556,7 +588,7 @@ export function getCsiAmpAnalyticsConfig() {
         // ast => ad schedule time
         // ars => ad render start
         'met.a4a':
-            'ast.${scheduleTime}~ars_lvt.${viewerLastVisibleTime}~ars.${time}',
+          'ast.${scheduleTime}~ars_lvt.${viewerLastVisibleTime}~ars.${time}',
         'qqid': '${qqid}',
       }),
       'adIframeLoaded': csiTrigger('ad-iframe-loaded', {
@@ -583,17 +615,17 @@ export function getCsiAmpAnalyticsConfig() {
  * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
+ * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
-  const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = {
+  const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-  };
+    'viewerLastVisibleTime': ampdoc.getLastVisibleTime() - navStart,
+  });
   if (qqid) {
     vars['qqid'] = qqid;
   }
@@ -617,8 +649,9 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     return null;
   }
   try {
-    const analyticsConfig =
-        parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
+    const analyticsConfig = parseJson(
+      responseHeaders.get(AMP_ANALYTICS_HEADER)
+    );
     devAssert(Array.isArray(analyticsConfig['url']));
     const urls = analyticsConfig['url'];
     if (!urls.length) {
@@ -648,12 +681,15 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     }
     // Security review needed here.
     config['requests'] = requests;
-    config['triggers']['continuousVisible']['request'] =
-        Object.keys(requests);
+    config['triggers']['continuousVisible']['request'] = Object.keys(requests);
     return config;
   } catch (err) {
-    dev().error('AMP-A4A', 'Invalid analytics', err,
-        responseHeaders.get(AMP_ANALYTICS_HEADER));
+    dev().error(
+      'AMP-A4A',
+      'Invalid analytics',
+      err,
+      responseHeaders.get(AMP_ANALYTICS_HEADER)
+    );
   }
   return null;
 }
@@ -674,10 +710,11 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  * @see parseExperimentIds, validateExperimentIds
  */
 export function mergeExperimentIds(newIds, currentIdString) {
-  const newIdString = newIds.filter(newId => Number(newId)).join(',');
+  const newIdString = newIds.filter((newId) => Number(newId)).join(',');
   currentIdString = currentIdString || '';
-  return currentIdString + (currentIdString && newIdString ? ',' : '')
-      + newIdString;
+  return (
+    currentIdString + (currentIdString && newIdString ? ',' : '') + newIdString
+  );
 }
 
 /**
@@ -692,22 +729,31 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(
-  win, element, config, qqid, isVerifiedAmpCreative) {
+  win,
+  element,
+  config,
+  qqid,
+  isVerifiedAmpCreative
+) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win, element);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
-  const eids = encodeURIComponent(
-      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const eids = encodeURIComponent(element.getAttribute(EXPERIMENT_ATTRIBUTE));
   const adType = element.getAttribute('type');
-  const initTime =
-      Number(getTimingDataSync(win, 'navigationStart') || Date.now());
-  const deltaTime = Math.round(win.performance && win.performance.now ?
-    win.performance.now() : (Date.now() - initTime));
-  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-      `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-      `&dt=${initTime}` +
-      (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
-      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  const initTime = Number(
+    getTimingDataSync(win, 'navigationStart') || Date.now()
+  );
+  const deltaTime = Math.round(
+    win.performance && win.performance.now
+      ? win.performance.now()
+      : Date.now() - initTime
+  );
+  const baseCsiUrl =
+    'https://csi.gstatic.com/csi?s=a4a' +
+    `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+    `&dt=${initTime}` +
+    (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+    `&rls=${internalRuntimeVersion()}&adt.${slotId}=${adType}`;
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
     'on': 'ini-load',
@@ -721,14 +767,14 @@ export function addCsiSignalsToAmpAnalyticsConfig(
     'selectionMethod': 'closest',
     'request': 'renderStartCsi',
   };
-  config['requests']['iniLoadCsi'] = baseCsiUrl +
-      `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
-  config['requests']['renderStartCsi'] = baseCsiUrl +
-      `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['iniLoadCsi'] =
+    baseCsiUrl + `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['renderStartCsi'] =
+    baseCsiUrl + `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
 
   // Add CSI ping for visibility.
-  config['requests']['visibilityCsi'] = baseCsiUrl +
-      `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
+  config['requests']['visibilityCsi'] =
+    baseCsiUrl + `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
   config['triggers']['continuousVisible']['request'].push('visibilityCsi');
   return config;
 }
@@ -742,8 +788,11 @@ export function addCsiSignalsToAmpAnalyticsConfig(
  */
 export function getEnclosingContainerTypes(adElement) {
   const containerTypeSet = {};
-  for (let el = adElement.parentElement, counter = 0;
-    el && counter < 20; el = el.parentElement, counter++) {
+  for (
+    let el = adElement.parentElement, counter = 0;
+    el && counter < 20;
+    el = el.parentElement, counter++
+  ) {
     const tagName = el.tagName.toUpperCase();
     if (ValidAdContainerTypes[tagName]) {
       containerTypeSet[ValidAdContainerTypes[tagName]] = true;
@@ -765,9 +814,12 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
   // truncated and error parameter is not already present.  Note that we assume
   // that added, error parameter length will be less than truncation parameter
   // so adding will not cause length to exceed maximum.
-  if (new RegExp(`[?|&](${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
-      `${encodeURIComponent(String(TRUNCATION_PARAM.value))}|aet=[^&]*)$`)
-      .test(adUrl)) {
+  if (
+    new RegExp(
+      `[?|&](${encodeURIComponent(TRUNCATION_PARAM.name)}=` +
+        `${encodeURIComponent(String(TRUNCATION_PARAM.value))}|aet=[^&]*)$`
+    ).test(adUrl)
+  ) {
     return;
   }
   const modifiedAdUrl = adUrl + `&aet=${parameterValue}`;
@@ -781,11 +833,19 @@ export function maybeAppendErrorParameter(adUrl, parameterValue) {
  * @return {?string}
  */
 export function getBinaryTypeNumericalCode(type) {
-  return {
-    'production': '0',
-    'control': '1',
-    'canary': '2',
-  }[type] || null;
+  return (
+    {
+      'production': '0',
+      'control': '1',
+      'experimental': '2',
+      'rc': '3',
+      'experimentA': '10',
+      'experimentB': '11',
+      'experimentC': '12',
+      'nomod': '42',
+      'mod': '43',
+    }[type] || null
+  );
 }
 
 /** @const {!RegExp} */
@@ -810,15 +870,18 @@ export let IdentityToken;
 export function getIdentityToken(win, ampDoc, consentPolicyId) {
   // If configured to use amp-consent, delay request until consent state is
   // resolved.
-  win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      (consentPolicyId ? getConsentPolicyState(ampDoc, consentPolicyId) :
-        Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
-          .then(consentState =>
-            consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-            consentState == CONSENT_POLICY_STATE.UNKNOWN ?
-            /** @type{!IdentityToken} */({}) :
-              executeIdentityTokenFetch(win, ampDoc));
-  return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
+  win['goog_identity_prom'] =
+    win['goog_identity_prom'] ||
+    (consentPolicyId
+      ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
+      : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED)
+    ).then((consentState) =>
+      consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+      consentState == CONSENT_POLICY_STATE.UNKNOWN
+        ? /** @type {!IdentityToken} */ ({})
+        : executeIdentityTokenFetch(win, ampDoc)
+    );
+  return /** @type {!Promise<!IdentityToken>} */ (win['goog_identity_prom']);
 }
 
 /**
@@ -829,42 +892,63 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
  * @param {number=} startTime
  * @return {!Promise<!IdentityToken>}
  */
-function executeIdentityTokenFetch(win, ampDoc, redirectsRemaining = 1,
-  domain = undefined, startTime = Date.now()) {
+function executeIdentityTokenFetch(
+  win,
+  ampDoc,
+  redirectsRemaining = 1,
+  domain = undefined,
+  startTime = Date.now()
+) {
   const url = getIdentityTokenRequestUrl(win, ampDoc, domain);
-  return Services.xhrFor(win).fetchJson(url, {
-    mode: 'cors',
-    method: 'GET',
-    ampCors: false,
-    credentials: 'include',
-  }).then(res => res.json())
-      .then(obj => {
-        const token = obj['newToken'];
-        const jar = obj['1p_jar'] || '';
-        const pucrd = obj['pucrd'] || '';
-        const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
-        const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
-        const altDomain = obj['altDomain'];
-        const fetchTimeMs = Date.now() - startTime;
-        if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
-          if (!redirectsRemaining--) {
-            // Max redirects, log?
-            return {fetchTimeMs};
-          }
-          return executeIdentityTokenFetch(
-              win, ampDoc, redirectsRemaining, altDomain, startTime);
-        } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
-            typeof token == 'string') {
-          return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
-            fetchTimeMs};
+  return Services.xhrFor(win)
+    .fetchJson(url, {
+      mode: 'cors',
+      method: 'GET',
+      ampCors: false,
+      credentials: 'include',
+    })
+    .then((res) => res.json())
+    .then((obj) => {
+      const token = obj['newToken'];
+      const jar = obj['1p_jar'] || '';
+      const pucrd = obj['pucrd'] || '';
+      const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
+      const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
+      const altDomain = obj['altDomain'];
+      const fetchTimeMs = Date.now() - startTime;
+      if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
+        if (!redirectsRemaining--) {
+          // Max redirects, log?
+          return {fetchTimeMs};
         }
-        // returning empty
-        return {fetchTimeMs};
-      })
-      .catch(unusedErr => {
-        // TODO log?
-        return {};
-      });
+        return executeIdentityTokenFetch(
+          win,
+          ampDoc,
+          redirectsRemaining,
+          altDomain,
+          startTime
+        );
+      } else if (
+        freshLifetimeSecs > 0 &&
+        validLifetimeSecs > 0 &&
+        typeof token == 'string'
+      ) {
+        return {
+          token,
+          jar,
+          pucrd,
+          freshLifetimeSecs,
+          validLifetimeSecs,
+          fetchTimeMs,
+        };
+      }
+      // returning empty
+      return {fetchTimeMs};
+    })
+    .catch((unusedErr) => {
+      // TODO log?
+      return {};
+    });
 }
 
 /**
@@ -877,12 +961,14 @@ function executeIdentityTokenFetch(win, ampDoc, redirectsRemaining = 1,
 export function getIdentityTokenRequestUrl(win, ampDoc, domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
     const matches = IDENTITY_DOMAIN_REGEXP_.exec(
-        win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
+      win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]
+    );
     domain = (matches && matches[0]) || undefined;
   }
   domain = domain || '.google.com';
-  const canonical =
-    extractHost(Services.documentInfoForDoc(ampDoc).canonicalUrl);
+  const canonical = extractHost(
+    Services.documentInfoForDoc(ampDoc).canonicalUrl
+  );
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
@@ -903,7 +989,7 @@ export function isCdnProxy(win) {
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {
   const nameframeExperimentHeader = headers.get('amp-nameframe-exp');
   if (nameframeExperimentHeader) {
-    nameframeExperimentHeader.split(';').forEach(config => {
+    nameframeExperimentHeader.split(';').forEach((config) => {
       if (config == 'instantLoad' || config == 'writeInBody') {
         nameframeConfig[config] = true;
       }

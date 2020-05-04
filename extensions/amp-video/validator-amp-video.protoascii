@@ -17,7 +17,7 @@
 tags: {  # amp-video
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   # Typically the extension_spec takes care of this, but we have
   # a unique situation where we need to refer to this earlier in
@@ -69,6 +69,8 @@ attr_lists: {
     name: "noaudio"
     value: ""
   }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"
@@ -107,7 +109,7 @@ attr_lists: {
 tags: {  # <amp-video> not in amp-story.
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-VIDEO"
   # There is an alternate spec for amp-video in amp-story.
   disallowed_ancestor: "AMP-STORY"
@@ -119,7 +121,30 @@ tags: {  # <amp-video> not in amp-story.
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-video> in amp-story-page-attachment (same rules as regular AMPHTML).
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: ACTIONS
+  tag_name: "AMP-VIDEO"
+  spec_name: "amp-story >> amp-story-page-attachment >> amp-video"
+  mandatory_ancestor: "AMP-STORY-PAGE-ATTACHMENT"
+  also_requires_tag_warning: "amp-video extension .js script"
+  attrs: { name: "poster" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -143,12 +168,23 @@ tags: {  # <amp-video> in amp-story
     mandatory: true
   }
   attrs: {
+    name: "controls"
+    value: ""
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
+    name: "[controls]"
+    deprecation: "- no replacement"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/23798"
+  }
+  attrs: {
     name: "poster"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

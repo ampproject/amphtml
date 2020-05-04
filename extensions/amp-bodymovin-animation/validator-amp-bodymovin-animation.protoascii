@@ -52,7 +52,7 @@ tags: {  # <amp-bodymovin-animation>
     value_casei: "svg"
     value_casei: "html"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation"
+  spec_url: "https://amp.dev/documentation/components/amp-bodymovin-animation"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

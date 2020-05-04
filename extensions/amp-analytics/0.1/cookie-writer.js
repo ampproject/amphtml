@@ -15,23 +15,19 @@
  */
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
+import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {getNameArgs} from './variables';
 import {hasOwn} from '../../../src/utils/object';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isCookieAllowed} from './cookie-reader';
+import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
-import {isProxyOrigin} from '../../../src/url';
-import {linkerReaderServiceFor} from './linker-reader';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
+import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/cookie-writer';
-
-const EXPAND_WHITELIST = {
-  'QUERY_PARAM': true,
-  'LINKER_PARAM': true,
-};
 
 const RESERVED_KEYS = {
   'referrerDomains': true,
@@ -43,7 +39,6 @@ const RESERVED_KEYS = {
 };
 
 export class CookieWriter {
-
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -59,26 +54,35 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
-    this.linkerReader_ = linkerReaderServiceFor(win);
-
-    /** @private {?Promise} */
-    this.writePromise_ = null;
+    /** @private {?Deferred} */
+    this.writeDeferred_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
 
-    this.binding_ = {};
+    /** @const @private {!JsonObject} */
+    this.bindings_ = variableServiceForDoc(element).getMacros(element);
   }
 
   /**
    * @return {!Promise}
    */
   write() {
-    if (!this.writePromise_) {
-      this.writePromise_ = this.init_();
+    if (!this.writeDeferred_) {
+      this.writeDeferred_ = new Deferred();
+      const task = () => {
+        this.writeDeferred_.resolve(this.init_());
+      };
+      if (
+        isExperimentOn(this.win_, 'analytics-chunks') &&
+        getMode(this.win_).runtime != 'inabox'
+      ) {
+        chunk(this.element_, task, ChunkPriority.LOW);
+      } else {
+        task();
+      }
     }
-
-    return this.writePromise_;
+    return this.writeDeferred_.promise;
   }
 
   /**
@@ -98,14 +102,11 @@ export class CookieWriter {
    */
   init_() {
     // TODO: Need the consider the case for shadow doc.
-    if (isInFie(this.element_) || isProxyOrigin(this.win_.location) ||
-        getMode(this.win_).runtime == 'inabox') {
-      // Disable cookie writer in friendly iframe and proxy origin and inabox.
+    if (!isCookieAllowed(this.win_, this.element_)) {
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
       return Promise.resolve();
     }
-
 
     if (!hasOwn(this.config_, 'cookies')) {
       return Promise.resolve();
@@ -116,7 +117,6 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
-    this.registerDynamicBinding_();
     const inputConfig = this.config_['cookies'];
 
     if (inputConfig['enabled'] === false) {
@@ -125,13 +125,21 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
+    const cookieExpireDateMs = this.getCookieMaxAgeMs_(inputConfig);
+
     const ids = Object.keys(inputConfig);
     const promises = [];
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
-        promises.push(this.expandAndWrite_(cookieName, cookieObj['value']));
+        promises.push(
+          this.expandAndWrite_(
+            cookieName,
+            cookieObj['value'],
+            cookieExpireDateMs
+          )
+        );
       }
     }
 
@@ -139,11 +147,46 @@ export class CookieWriter {
   }
 
   /**
+   * Retrieves cookieMaxAge from given config, provides default value if no
+   * value is found or value is invalid
+   * @param {JsonObject} inputConfig
+   * @return {number}
+   */
+  getCookieMaxAgeMs_(inputConfig) {
+    if (!hasOwn(inputConfig, 'cookieMaxAge')) {
+      return BASE_CID_MAX_AGE_MILLIS;
+    }
+
+    const cookieMaxAgeNumber = Number(inputConfig['cookieMaxAge']);
+
+    // 0 is a special case which we allow
+    if (!cookieMaxAgeNumber && cookieMaxAgeNumber !== 0) {
+      user().error(
+        TAG,
+        'invalid cookieMaxAge %s, falling back to default value (1 year)',
+        inputConfig['cookieMaxAge']
+      );
+      return BASE_CID_MAX_AGE_MILLIS;
+    }
+
+    if (cookieMaxAgeNumber <= 0) {
+      user().warn(
+        TAG,
+        'cookieMaxAge %s less than or equal to 0, cookie will immediately expire',
+        inputConfig['cookieMaxAge']
+      );
+    }
+
+    // convert cookieMaxAge (sec) to milliseconds
+    return cookieMaxAgeNumber * 1000;
+  }
+
+  /**
    * Check whether the cookie value is supported. Currently only support
    * QUERY_PARAM(***) and LINKER_PARAM(***, ***)
    *
    * CookieObj should looks like
-   * cookeName: {
+   * cookieName: {
    *  value: string (cookieValue),
    * }
    * @param {string} cookieName
@@ -165,15 +208,6 @@ export class CookieWriter {
       return false;
     }
 
-    const str = cookieConfig['value'];
-    // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
-    const {name} = getNameArgs(str);
-    if (!EXPAND_WHITELIST[name]) {
-      user().error(TAG, `cookie value ${str} not supported. ` +
-        'Only QUERY_PARAM and LINKER_PARAM is supported');
-      return false;
-    }
-
     return true;
   }
 
@@ -181,34 +215,26 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
+   * @param {number} cookieExpireDateMs
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue) {
+  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
-    return this.urlReplacementService_.expandStringAsync(cookieValue,
-        this.binding_, EXPAND_WHITELIST).then(
-        value => {
-          // Note: We ignore empty cookieValue, that means currently we don't
-          // provide a way to overwrite or erase existing cookie
-          if (value) {
-            const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
-            setCookie(this.win_, cookieName, value, expireDate);
-          }
-        }).catch(e => {
-      user().error(TAG, 'Error expanding cookie string', e);
-    });
-  }
-
-  /**
-   * register the dynamic binding.
-   * Supported MACRO is LINKER_PARAM(name, id)
-   */
-  registerDynamicBinding_() {
-    this.binding_['LINKER_PARAM'] = (name, id) => {
-      return this.linkerReader_.get(name, id);
-    };
+    return this.urlReplacementService_
+      .expandStringAsync(cookieValue, this.bindings_)
+      .then((value) => {
+        // Note: We ignore empty cookieValue, that means currently we don't
+        // provide a way to overwrite or erase existing cookie
+        if (value) {
+          const expireDate = Date.now() + cookieExpireDateMs;
+          setCookie(this.win_, cookieName, value, expireDate, {
+            highestAvailableDomain: true,
+          });
+        }
+      })
+      .catch((e) => {
+        user().error(TAG, 'Error expanding cookie string', e);
+      });
   }
 }
-
-

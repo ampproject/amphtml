@@ -1,3 +1,12 @@
+---
+$category@: presentation
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
+---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,99 +23,92 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-timeago`"></a> `amp-timeago`
+# amp-timeago
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-timeago/">amp-timeago example</a>.</td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
+Use the amp-timago component to count up to, or away from, a specified date and time.
 
-## Behavior
-
-Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
+The component replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
 
 Example:
 
+[example preview="inline" playground="true" imports="amp-timeago"]
+
 ```html
-<amp-timeago layout="fixed" width="160"
-    height="20"
-    datetime="2017-04-11T00:37:33.809Z"
-    locale="en">Saturday 11 April 2017 00.37</amp-timeago>
+<amp-timeago
+  layout="fixed"
+  width="160"
+  height="20"
+  datetime="2017-04-11T00:37:33.809Z"
+  locale="en"
+>
+  Saturday 11 April 2017 00.37
+</amp-timeago>
 ```
+
+[/example]
+
+The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
 
 ## Attributes
 
-##### datetime (required)
+### `datetime`
 
-An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) *or* 2017-03-09T20:00:00-05:00 (specifying timezone offset).
+The required `datetime` attribute sets the date and time. The value must be an [ISO datetime](https://www.w3.org/QA/Tips/iso-date).
 
-##### locale (optional)
+- Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
+- Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
 
-By default, the local is set to <code>en</code>; however, you can specify one of the following locales:
+### `locale` (optional)
 
-<ul>
-  <li>ar (Arabic)</li>
-  <li>be (Belarusian)</li>
-  <li>bg (Bulgarian)</li>
-  <li>ca (Catalan)</li>
-  <li>da (Danish)</li>
-  <li>de (German)</li>
-  <li>el (Greek)</li>
-  <li>en (English)</li>
-  <li>enShort (English - short)</li>
-  <li>es (Spanish)</li>
-  <li>eu (Basque)</li>
-  <li>fi (Finnish)</li>
-  <li>fr (French)</li>
-  <li>he (Hebrew)</li>
-  <li>hu (Hungarian)</li>
-  <li>inBG (Bangla)</li>
-  <li>inHI (Hindi)</li>
-  <li>inID (Malay)</li>
-  <li>it (Italian)</li>
-  <li>ja (Japanese)</li>
-  <li>ko (Korean)</li>
-  <li>ml (Malayalam)</li>
-  <li>nbNO (Norwegian Bokmål)</li>
-  <li>nl (Dutch)</li>
-  <li>nnNO (Norwegian Nynorsk)</li>
-  <li>pl (Polish)</li>
-  <li>ptBR (Portuguese)</li>
-  <li>ro (Romanian)</li>
-  <li>ru (Russian)</li>
-  <li>sv (Swedish)</li>
-  <li>ta (Tamil)</li>
-  <li>th (Thai)</li>
-  <li>tr (Turkish)</li>
-  <li>uk (Ukrainian)</li>
-  <li>vi (Vietnamese)</li>
-  <li>zhCN (Chinese)</li>
-  <li>zhTW (Taiwanese)</li>
-</ul>
+The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
 
-##### cutoff (optional)
+- `ar` (Arabic)
+- `be` (Belarusian)
+- `bg` (Bulgarian)
+- `ca` (Catalan)
+- `da` (Danish)
+- `de` (German)
+- `el` (Greek)
+- `en` (English)
+- `enShort` (English - short)
+- `es` (Spanish)
+- `eu` (Basque)
+- `fi` (Finnish)
+- `fr` (French)
+- `he` (Hebrew)
+- `hu` (Hungarian)
+- `inBG` (Bangla)
+- `inHI` (Hindi)
+- `inID` (Malay)
+- `it` (Italian)
+- `ja` (Japanese)
+- `ko` (Korean)
+- `ml` (Malayalam)
+- `nbNO` (Norwegian Bokmål)
+- `nl` (Dutch)
+- `nnNO` (Norwegian Nynorsk)
+- `pl` (Polish)
+- `ptBR` (Portuguese)
+- `ro` (Romanian)
+- `ru` (Russian)
+- `sv` (Swedish)
+- `ta` (Tamil)
+- `th` (Thai)
+- `tr` (Turkish)
+- `uk` (Ukrainian)
+- `vi` (Vietnamese)
+- `zhCN` (Chinese)
+- `zhTW` (Taiwanese)
 
-Display the original date if time distance is older than cutoff (seconds).
+### `cutoff`
 
-##### common attributes
+Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds.
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+### Common attributes
+
+The AMP provided set of [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) is available to `<amp-timeago>`.
 
 ## Validation
 

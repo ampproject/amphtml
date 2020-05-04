@@ -36,15 +36,17 @@ export function onnetwork(global, data) {
 
   // Custom movie url using "data-src" attribute
   if (src) {
-    validateSrcPrefix(Object.keys(hosts).map(type => hosts[type]), src);
+    validateSrcPrefix(
+      Object.keys(hosts).map((type) => hosts[type]),
+      src
+    );
     url = src;
   }
   // Movie tag using "data-sid" attribute
   else if (sid) {
     url = hosts.video + '/embed.php?ampsrc=1&sid=' + encodeURIComponent(sid);
-  // Movie placement using "data-mid" attribute
-  }
-  else if (mid) {
+    // Movie placement using "data-mid" attribute
+  } else if (mid) {
     url = hosts.video + '/embed.php?ampsrc=1&mid=' + encodeURIComponent(mid);
   }
 

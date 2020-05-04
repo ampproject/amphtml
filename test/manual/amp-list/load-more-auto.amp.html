@@ -1,0 +1,45 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    .footer {
+      width: 100%;
+      height: 50px;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+</head>
+<body>
+<article>
+
+  <!-- Do not change this without editing the E2E test -->
+  <amp-list width="auto" height="400"
+    layout="fixed-height"
+    src="/list/infinite-scroll?items=2&left=1"
+    load-more="auto"
+    load-more-bookmark="next">
+    <template type="amp-mustache">
+      <div class="item">
+        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
+        <div class="title">{{title}}</div>
+      </div>
+    </template>
+    <div fallback>
+      FALLBACK
+    </div>
+    <amp-list-load-more load-more-end>
+      The END
+    </amp-list-load-more>
+  </amp-list>
+  <div class="footer"></div>
+</article>
+</body>
+</html>

@@ -27,7 +27,7 @@ describe('CircularBuffer', () => {
   it('add and get', () => {
     const buf = new CircularBuffer(5);
     for (let i = 0; i < 7; i++) {
-      buf.add(i);
+      buf.push(i);
     }
     const elems = [];
     for (let i = 0; i < 10; i++) {
@@ -41,14 +41,14 @@ describe('canonicalizeString', () => {
   it('test examples', () => {
     expect(canonicalizeString('a b  c')).to.equal('abc');
     expect(canonicalizeString('abc.d')).to.equal('abcd');
-    expect(canonicalizeString('a\u2019b')).to.equal('a\'b');
-    expect(canonicalizeString('\u201chello\u201d')).to.equal('\"hello\"');
+    expect(canonicalizeString('a\u2019b')).to.equal("a'b");
+    expect(canonicalizeString('\u201chello\u201d')).to.equal('"hello"');
     expect(canonicalizeString('\u2022 hello')).to.equal('hello');
     expect(canonicalizeString('a,b.c')).to.equal('abc');
   });
 });
 
-describes.realWin('findSentences', {}, env => {
+describes.realWin('findSentences', {}, (env) => {
   let win, document;
   beforeEach(() => {
     win = env.win;
@@ -74,9 +74,11 @@ describes.realWin('findSentences', {}, env => {
   it('multiple nodes', () => {
     const root = document.createElement('div');
     root.innerHTML =
-        '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
-    const ranges = findSentences(
-        win, root, ['header with bold text', 'additional text']);
+      '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
+    const ranges = findSentences(win, root, [
+      'header with bold text',
+      'additional text',
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -92,9 +94,10 @@ describes.realWin('findSentences', {}, env => {
   it('block node', () => {
     const root = document.createElement('div');
     root.innerHTML =
-        '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
-    const ranges = findSentences(
-        win, root, ['Here\'s an instruction: Do something.']);
+      '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
+    const ranges = findSentences(win, root, [
+      "Here's an instruction: Do something.",
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -110,8 +113,9 @@ describes.realWin('findSentences', {}, env => {
   it('special chars', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>“double ‘single quoted’ quoted text,<p>';
-    const ranges = findSentences(
-        win, root, ['"double \'single quoted\' quoted']);
+    const ranges = findSentences(win, root, [
+      "\"double 'single quoted' quoted",
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -123,9 +127,120 @@ describes.realWin('findSentences', {}, env => {
     }
     expect(texts).to.deep.equal(['“double ‘single quoted’ quoted']);
   });
+
+  it('dupFirstSentenceBeforeSecond', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc abc def hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 4, end: 7, text: 'abc'},
+      {start: 8, end: 11, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_dupFirstSentenceAfterSecond', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def abc hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 4, end: 7, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_dupSecondSentence', () => {
+    const root = document.createElement('div');
+    // With the current algorithm, the second sentence matches to the latter
+    // occurrence.
+    root.innerHTML = '<p>abc def def hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 8, end: 11, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_emptyStringAfterCanonicalization', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, ['abc', '...', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 8, end: 11, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_emptySentences', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, []);
+    expect(ranges).to.be.null;
+  });
+
+  it('testFindSentences_emptySentencesAfterCanonicalization', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, ['...']);
+    expect(ranges).to.be.null;
+  });
 });
 
-describes.realWin('TextScanner', {}, env => {
+describes.realWin('TextScanner', {}, (env) => {
   let win, root;
   beforeEach(() => {
     win = env.win;
@@ -156,8 +271,9 @@ describes.realWin('TextScanner', {}, env => {
   });
 
   it('elements', () => {
-    root.innerHTML = '<b>bold</b><i>italic</i><div>block</div>' +
-        '<ul><li>nest0</li><li>nest1</li></ul>';
+    root.innerHTML =
+      '<b>bold</b><i>italic</i><div>block</div>' +
+      '<ul><li>nest0</li><li>nest1</li></ul>';
 
     const chars = [];
     const scanner = new TextScanner(win, root);
@@ -190,7 +306,7 @@ describes.realWin('TextScanner', {}, env => {
   });
 });
 
-describes.realWin('markTextRangeList', {}, env => {
+describes.realWin('markTextRangeList', {}, (env) => {
   let win, document;
   beforeEach(() => {
     win = env.win;
@@ -213,14 +329,17 @@ describes.realWin('markTextRangeList', {}, env => {
     root.innerHTML = '<b>abc</b><div>def</div><i>ghi</i>';
     const b = root.querySelector('b');
     const i = root.querySelector('i');
-    markTextRangeList(win, [{
-      start: {node: b.firstChild, offset: 1},
-      end: {node: i.firstChild, offset: 1},
-    }]);
-    '<b>a<span>bc</span></b><div>def</div><i>ghi</i>';
+    markTextRangeList(win, [
+      {
+        start: {node: b.firstChild, offset: 1},
+        end: {node: i.firstChild, offset: 1},
+      },
+    ]);
+    ('<b>a<span>bc</span></b><div>def</div><i>ghi</i>');
     expect(root.innerHTML).to.equal(
-        '<b>a<span>bc</span></b><div><span>def</span></div>' +
-          '<i><span>g</span>hi</i>');
+      '<b>a<span>bc</span></b><div><span>def</span></div>' +
+        '<i><span>g</span>hi</i>'
+    );
   });
 
   it('concat ranges', () => {

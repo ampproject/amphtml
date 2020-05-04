@@ -16,109 +16,222 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '../../../src/services';
+import {deepMerge, hasOwn, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
 
 const TAG = 'amp-consent/consent-config';
 
-export class ConsentConfig {
+const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
+  'promptUI': true,
+  'checkConsentHref': true,
+  'promptIfUnknownForGeoGroup': true,
+  'onUpdateHref': true,
+};
 
+export class ConsentConfig {
   /** @param {!Element} element */
   constructor(element) {
     /** @private {!Element} */
     this.element_ = element;
 
-    /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
 
-    /** @private {boolean} */
-    this.isMultiSupported_ = isExperimentOn(this.win_, 'multi-consent');
-
-    /** @private {?JsonObject} */
-    this.config_ = null;
-  }
-
-  /**
-   * Return the consents config
-   * @return {!JsonObject}
-   */
-  getConsentConfig() {
-    return this.getConfig_()['consents'];
-  }
-
-  /**
-   * Return the policy config
-   * @return {!JsonObject}
-   */
-  getPolicyConfig() {
-    return this.getConfig_()['policy'] || dict({});
-  }
-
-  /**
-   * Return the postPromptUI config
-   * @return {string|undefined}
-   */
-  getPostPromptUI() {
-    return this.getConfig_()['postPromptUI'];
+    /** @private {?Promise<!JsonObject>} */
+    this.configPromise_ = null;
   }
 
   /**
    * Read validate and return the config
-   * @return {!JsonObject}
+   * @return {!Promise<!JsonObject>}
    */
-  getConfig_() {
-    if (!this.config_) {
-      this.config_ = this.validateAndParseConfig_();
+  getConsentConfigPromise() {
+    if (!this.configPromise_) {
+      this.configPromise_ = this.validateAndParseConfig_();
     }
-    return this.config_;
+    return this.configPromise_;
   }
 
+  /**
+   * Returns the matched geoGroup. Call after getConsentConfigPromise
+   * has resolved.
+   * @return {?string}
+   */
+  getMatchedGeoGroup() {
+    return this.matchedGeoGroup_;
+  }
+
+  /**
+   * Convert the inline config to new format
+   * @param {!JsonObject} config
+   * @return {!Object}
+   */
+  convertInlineConfigFormat_(config) {
+    const consentsConfigDepr = config['consents'];
+
+    if (!config['consents']) {
+      // New format, return
+      return config;
+    }
+    // Assert single consent instance
+    const keys = Object.keys(consentsConfigDepr);
+
+    userAssert(
+      keys.length <= 1,
+      '%s: only single consent instance is supported',
+      TAG
+    );
+
+    if (keys.length > 0) {
+      config['consentInstanceId'] = keys[0];
+      // Copy config['consents']['key'] to config
+      const consentInstanceConfigDepr = config['consents'][keys[0]];
+      const attrs = Object.keys(consentInstanceConfigDepr);
+      for (let i = 0; i < attrs.length; i++) {
+        const attr = attrs[i];
+        if (!config[attr] && ALLOWED_DEPR_CONSENTINSTANCE_ATTRS[attr]) {
+          // Do not override if has been specified, or the attr is not supported
+          // in consent instance before
+          config[attrs[i]] = consentInstanceConfigDepr[attrs[i]];
+        }
+      }
+    }
+
+    delete config['consents'];
+    return config;
+  }
 
   /**
    * Read and parse consent config
    * An example valid config json looks like
    * {
-   *   "consents": {
-   *     "consentABC": {
-   *       "checkConsentHref": "https://fake.com"
-   *     }
-   *   }
+   *  "consentInstanceId": "ABC",
+   *  "checkConsentHref": "https://fake.com"
    * }
-   * @return {!JsonObject}
+   * @return {!Promise<!JsonObject>}
    */
   validateAndParseConfig_() {
-    const inlineConfig = this.getInlineConfig_();
+    const inlineConfig = this.convertInlineConfigFormat_(
+      /** @type {!JsonObject} */ (userAssert(
+        this.getInlineConfig_(),
+        '%s: Inline config not found'
+      ))
+    );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */
-        (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
+    const config = /** @type {!JsonObject} */ (deepMerge(
+      cmpConfig || {},
+      inlineConfig || {},
+      1
+    ));
 
-    const consents = config['consents'];
-    userAssert(consents, '%s: consents config is required', TAG);
-    userAssert(Object.keys(consents).length != 0,
-        '%s: can\'t find consent instance', TAG);
-    if (!this.isMultiSupported_) {
-      // Assert single consent instance
-      userAssert(Object.keys(consents).length <= 1,
-          '%s: only single consent instance is supported', TAG);
-      if (config['policy']) {
-        // Only respect 'default' consent policy;
-        const keys = Object.keys(config['policy']);
-        for (let i = 0; i < keys.length; i++) {
-          if (keys[i] != 'default') {
-            user().warn(TAG, 'policy %s is currently not supported ' +
-              'and will be ignored', keys[i]);
-            delete config['policy'][keys[i]];
-          }
+    userAssert(
+      config['consentInstanceId'],
+      '%s: consentInstanceId to store consent info is required',
+      TAG
+    );
+
+    if (config['policy']) {
+      // Only respect 'default' consent policy;
+      const keys = Object.keys(config['policy']);
+      // TODO (@zhouyx): Validate waitFor value
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] != 'default') {
+          user().warn(
+            TAG,
+            'policy %s is currently not supported and will be ignored',
+            keys[i]
+          );
+          delete config['policy'][keys[i]];
         }
       }
     }
 
-    return config;
+    // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
+    // Migrate to geoOverride
+    const group = config['promptIfUnknownForGeoGroup'];
+    if (typeof group === 'string') {
+      config['consentRequired'] = false;
+      config['geoOverride'] = {
+        [group]: {
+          'consentRequired': true,
+        },
+      };
+    } else if (
+      config['consentRequired'] === undefined &&
+      config['checkConsentHref']
+    ) {
+      config['consentRequired'] = 'remote';
+    }
+
+    return this.mergeGeoOverride_(config).then((mergedConfig) =>
+      this.validateMergedGeoOverride_(mergedConfig)
+    );
+  }
+
+  /**
+   * Merge correct geoOverride object into toplevel config.
+   * @param {!JsonObject} config
+   * @return {!Promise<!JsonObject>}
+   */
+  mergeGeoOverride_(config) {
+    if (!config['geoOverride']) {
+      return Promise.resolve(config);
+    }
+    return Services.geoForDocOrNull(this.element_).then((geoService) => {
+      userAssert(
+        geoService,
+        '%s: requires <amp-geo> to use `geoOverride`',
+        TAG
+      );
+      const mergedConfig = map(config);
+      const geoGroups = Object.keys(config['geoOverride']);
+      // Stop at the first group that the geoService says we're in and then merge configs.
+      for (let i = 0; i < geoGroups.length; i++) {
+        if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+          const geoConfig = config['geoOverride'][geoGroups[i]];
+          if (hasOwn(geoConfig, 'consentInstanceId')) {
+            user().error(
+              TAG,
+              'consentInstanceId cannot be overriden in geoGroup:',
+              geoGroups[i]
+            );
+            delete geoConfig['consentInstanceId'];
+          }
+          deepMerge(mergedConfig, geoConfig, 1);
+          this.matchedGeoGroup_ = geoGroups[i];
+          break;
+        }
+      }
+      delete mergedConfig['geoOverride'];
+      return mergedConfig;
+    });
+  }
+
+  /**
+   * Validate merged geoOverride
+   * @param {!JsonObject} mergedConfig
+   * @return {!JsonObject}
+   */
+  validateMergedGeoOverride_(mergedConfig) {
+    const consentRequired = mergedConfig['consentRequired'];
+    userAssert(
+      typeof consentRequired === 'boolean' || consentRequired === 'remote',
+      '`consentRequired` is required',
+      TAG
+    );
+    if (consentRequired === 'remote') {
+      userAssert(
+        mergedConfig['checkConsentHref'],
+        '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
+        TAG
+      );
+    }
+    return mergedConfig;
   }
 
   /**
@@ -131,7 +244,7 @@ export class ConsentConfig {
     try {
       return getChildJsonConfig(this.element_);
     } catch (e) {
-      throw user(this.element_).createError('%s: %s', TAG, e);
+      throw user(this.element_).createError(TAG, e);
     }
   }
 
@@ -139,20 +252,16 @@ export class ConsentConfig {
    * Read and format the CMP config
    * The returned CMP config should looks like
    * {
-   *   "consents": {
-   *     "foo": {
-   *       "checkConsentHref": "https://fake.com",
-   *       "promptUISrc": "https://fake.com/promptUI.html"
-   *     }
+   *  "consentInstanceId": "foo",
+   *  "checkConsentHref": "https://fake.com",
+   *  "promptUISrc": "https://fake.com/promptUI.html",
+   *  "uiConfig": {
+   *    "overlay": true
    *   }
    * }
    * @return {?JsonObject}
    */
   getCMPConfig_() {
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      return null;
-    }
-
     const type = this.element_.getAttribute('type');
     if (!type) {
       return null;
@@ -160,17 +269,7 @@ export class ConsentConfig {
     userAssert(CMP_CONFIG[type], '%s: invalid CMP type %s', TAG, type);
     const importConfig = CMP_CONFIG[type];
     this.validateCMPConfig_(importConfig);
-    const constentInstance = importConfig['consentInstanceId'];
-
-    const cmpConfig = dict({
-      'consents': dict({}),
-    });
-
-    const config = Object.assign({}, importConfig);
-    delete config['consentInstanceId'];
-
-    cmpConfig['consents'][constentInstance] = config;
-    return cmpConfig;
+    return importConfig;
   }
 
   /**
@@ -178,8 +277,11 @@ export class ConsentConfig {
    * @param {!JsonObject} config
    */
   validateCMPConfig_(config) {
-    const assertValues =
-        ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
+    const assertValues = [
+      'consentInstanceId',
+      'checkConsentHref',
+      'promptUISrc',
+    ];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
       devAssert(config[attribute], 'CMP config must specify %s', attribute);
@@ -190,17 +292,15 @@ export class ConsentConfig {
 /**
  * Expand the passed in policyConfig and generate predefined policy entires
  * @param {!JsonObject} policyConfig
- * @param {!JsonObject} consentConfig
+ * @param {string} consentId
  * @return {!JsonObject}
  */
-export function expandPolicyConfig(policyConfig, consentConfig) {
+export function expandPolicyConfig(policyConfig, consentId) {
   // Generate default policy
-  const instanceKeys = Object.keys(consentConfig);
   const defaultWaitForItems = {};
-  for (let i = 0; i < instanceKeys.length; i++) {
-    // TODO: Need to support an array.
-    defaultWaitForItems[instanceKeys[i]] = undefined;
-  }
+
+  defaultWaitForItems[consentId] = undefined;
+
   const defaultPolicy = {
     'waitFor': defaultWaitForItems,
   };

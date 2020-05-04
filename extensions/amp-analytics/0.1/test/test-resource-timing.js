@@ -15,7 +15,8 @@
  */
 
 import {getResourceTiming} from '../resource-timing';
-import {installVariableService} from '../variables';
+import {installLinkerReaderService} from '../linker-reader';
+import {installVariableServiceForTesting} from '../variables';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.
@@ -25,17 +26,17 @@ export function newResourceTimingSpec() {
   return {
     'resources': {
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
       'foo_style': {
-        'host': 'example.com',
+        'host': 'example.test',
         'path': '.*.css',
       },
     },
     'encoding': {
       'entry':
-          '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
+        '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
       'delim': '~',
     },
   };
@@ -54,7 +55,13 @@ export function newResourceTimingSpec() {
  * @return {!JsonObject}
  */
 export function newPerformanceResourceTiming(
-  url, initiatorType, startTime, duration, bodySize, cached) {
+  url,
+  initiatorType,
+  startTime,
+  duration,
+  bodySize,
+  cached
+) {
   const dnsTime = cached ? 0 : duration * 0.1;
   const tcpTime = cached ? 0 : duration * 0.2;
   const serverTime = cached ? duration : duration * 0.4;
@@ -79,8 +86,10 @@ export function newPerformanceResourceTiming(
   };
 }
 
-describes.realWin('resourceTiming', {amp: true}, env => {
+describes.realWin('resourceTiming', {amp: true}, (env) => {
   let win;
+  let ampdoc;
+  let element;
 
   /**
    * @param {!Array<!PerformanceResourceTiming} fakeEntries
@@ -88,60 +97,85 @@ describes.realWin('resourceTiming', {amp: true}, env => {
    * @param {string} expectedResult
    * @return {!Promise<undefined>}
    */
-  const runSerializeTest = function(
-    fakeEntries, resourceTimingSpec, expectedResult) {
-    sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return getResourceTiming(win, resourceTimingSpec, Date.now())
-        .then(result => {
-          expect(result).to.equal(expectedResult);
-        });
+  const runSerializeTest = function (
+    fakeEntries,
+    resourceTimingSpec,
+    expectedResult
+  ) {
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
+    return getResourceTiming(element, resourceTimingSpec, Date.now()).then(
+      (result) => {
+        expect(result).to.equal(expectedResult);
+      }
+    );
   };
 
   beforeEach(() => {
     win = env.win;
-    installVariableService(win);
+    ampdoc = env.ampdoc;
+    element = document.createElement('amp-analytics');
+    element.getAmpDoc = () => ampdoc;
+    env.win.document.body.appendChild(element);
+    installVariableServiceForTesting(ampdoc);
+    installLinkerReaderService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
-    const fakeWin = {};
-    return getResourceTiming(fakeWin, newResourceTimingSpec(), Date.now())
-        .then(result => {
-          expect(result).to.equal('');
-        });
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
+      (result) => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty when resource timing is not supported', () => {
-    // Performance API (fakeWin.performance) doesn't support resource timing.
-    const fakeWin = {performance: {}};
-    return getResourceTiming(fakeWin, newResourceTimingSpec(), Date.now())
-        .then(result => {
-          expect(result).to.equal('');
-        });
+    // Performance API (ampdoc.performance) doesn't support resource timing.
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
+      (result) => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty when start time has passed 1s', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
-    sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
-    return getResourceTiming(win, spec, Date.now() - 60 * 1000)
-        .then(result => {
-          expect(result).to.equal('');
-        });
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
+    return getResourceTiming(element, spec, Date.now() - 60 * 1000).then(
+      (result) => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty if resourceTimingSpec is empty', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     return runSerializeTest([entry], {}, '');
   });
 
   it('should return empty if encoding spec is empty', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     delete spec['encoding'];
     return runSerializeTest([entry], spec, '');
@@ -149,8 +183,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if encoding spec is missing delim', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     delete spec['encoding']['delim'];
     return runSerializeTest([entry], spec, '');
@@ -158,8 +197,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if encoding spec is missing entry', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     delete spec['encoding']['entry'];
     return runSerializeTest([entry], spec, '');
@@ -167,8 +211,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should serialize matching entries', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     const expect = 'foo_bar-script-100-500-7200';
     return runSerializeTest([entry], spec, expect);
@@ -176,25 +225,43 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should serialize multiple matching entries', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      'http://bar.example.test/lib.js',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
     return runSerializeTest(
-        [entry1, entry2], newResourceTimingSpec(),
-        'foo_bar-script-100-500-7200~foo_bar-script-700-100-0');
+      [entry1, entry2],
+      newResourceTimingSpec(),
+      'foo_bar-script-100-500-7200~foo_bar-script-700-100-0'
+    );
   });
 
   it('should match against the first spec', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
 
     const spec = newResourceTimingSpec();
     // Note that both spec'd resources match.
     spec.resources = {
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
       'any': {},
@@ -205,15 +272,20 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should accept empty per-resource specs', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
 
     const spec = newResourceTimingSpec();
     // Note that both spec'd resources match.
     spec.resources = {
       'any': {},
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
     };
@@ -223,40 +295,74 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should should only report resources if the host matches', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000, false);
+      'http://foo.example.test/lib.js',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://baz.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      'http://baz.example.test/lib.js',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
 
     const spec = newResourceTimingSpec();
-    spec.resources = {'foo': {'host': 'foo.example.com'}};
+    spec.resources = {'foo': {'host': 'foo.example.test'}};
     return runSerializeTest([entry1, entry2], spec, 'foo-script-100-500-7200');
   });
 
   it('should should only report resources if the path matches', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000, false);
+      'http://foo.example.test/lib.js',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://foo.example.com/extra.js', 'script', 700, 100, 80 * 1000, true);
+      'http://foo.example.test/extra.js',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
 
     const spec = newResourceTimingSpec();
     spec.resources = {
-      'foo': {'host': 'foo.example.com', 'path': 'lib.js'},
+      'foo': {'host': 'foo.example.test', 'path': 'lib.js'},
     };
     return runSerializeTest([entry1, entry2], spec, 'foo-script-100-500-7200');
   });
 
   it('should should only report resources if the query matches', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=200', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=200',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=test', 'script', 700, 100, 80 * 1000,
-        true);
+      'http://foo.example.test/lib.js?v=test',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
 
     const spec = newResourceTimingSpec();
     spec.resources = {
       'foo': {
-        'host': 'foo.example.com',
+        'host': 'foo.example.test',
         'path': 'lib.js',
         'query': '^\\?v=\\d+',
       },
@@ -266,8 +372,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${key} and ${initiatorType}', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${key}.${initiatorType}';
     return runSerializeTest([entry], spec, 'foo_style.link');
@@ -275,8 +386,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${startTime} and ${duration}', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${startTime}.${duration}';
     return runSerializeTest([entry], spec, '100.500');
@@ -284,8 +400,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${domainLookupTime} and ${tcpConnectTime}', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${domainLookupTime}.${tcpConnectTime}';
     return runSerializeTest([entry], spec, '50.100');
@@ -293,28 +414,42 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${serverResponseTime} and ${networkTransferTime}', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${serverResponseTime}.${networkTransferTime}';
     return runSerializeTest([entry], spec, '200.150');
   });
 
-  it('should replace ${transferSize}, ${encodedBodySize}, ${decodedBodySize}',
-      () => {
-        const entry = newPerformanceResourceTiming(
-            'http://foo.example.com/style.css?v=200', 'link', 100, 500,
-            10 * 1000, false);
-        const spec = newResourceTimingSpec();
-        spec['encoding']['entry'] =
-           '${transferSize}.${encodedBodySize}.${decodedBodySize}';
-        return runSerializeTest([entry], spec, '7200.7000.10000');
-      });
+  it('should replace ${transferSize}, ${encodedBodySize}, ${decodedBodySize}', () => {
+    const entry = newPerformanceResourceTiming(
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
+    const spec = newResourceTimingSpec();
+    spec['encoding']['entry'] =
+      '${transferSize}.${encodedBodySize}.${decodedBodySize}';
+    return runSerializeTest([entry], spec, '7200.7000.10000');
+  });
 
   it('should use the base specified in encoding', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${decodedBodySize}';
     spec['encoding']['base'] = 36;
@@ -324,8 +459,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should reject invalid bases (over 36)', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${decodedBodySize}';
     spec['encoding']['base'] = 40;
@@ -336,10 +476,21 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should not replace other analytics variables', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      'http://bar.example.test/lib.js',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${startTime}.${random}.${undefinedVariable}';
     // The counter is incremented for each entry.
@@ -348,37 +499,76 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should URL-encode the results', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      'http://bar.example.test/lib.js',
+      'script',
+      700,
+      100,
+      80 * 1000,
+      true
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${key}?${startTime},${duration}';
     spec['encoding']['delim'] = ':';
     return runSerializeTest(
-        [entry1, entry2], spec, 'foo_bar?100,500:foo_bar?700,100');
+      [entry1, entry2],
+      spec,
+      'foo_bar?100,500:foo_bar?700,100'
+    );
   });
 
   it('should only include resources downloaded after `responseAfter`', () => {
     const entry1 = newPerformanceResourceTiming(
-        'http://foo.example.com/lib.js?v=123', 'script', 100, 200, 10 * 1000,
-        false);
+      'http://foo.example.test/lib.js?v=123',
+      'script',
+      100,
+      200,
+      10 * 1000,
+      false
+    );
     const entry2 = newPerformanceResourceTiming(
-        'http://bar.example.com/lib.js', 'script', 200, 200, 80 * 1000, true);
+      'http://bar.example.test/lib.js',
+      'script',
+      200,
+      200,
+      80 * 1000,
+      true
+    );
     const entry3 = newPerformanceResourceTiming(
-        'http://bar.example.com/lib.js', 'script', 300, 200, 80 * 1000, true);
+      'http://bar.example.test/lib.js',
+      'script',
+      300,
+      200,
+      80 * 1000,
+      true
+    );
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${key}.${startTime}';
     spec['encoding']['delim'] = '-';
     spec['responseAfter'] = 350;
     return runSerializeTest(
-        [entry1, entry2, entry3], spec, 'foo_bar.200-foo_bar.300');
+      [entry1, entry2, entry3],
+      spec,
+      'foo_bar.200-foo_bar.300'
+    );
   });
 
   it('should reject invalid (non-numeric) responseAfter fields', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['responseAfter'] = '100';
     return runSerializeTest([entry], spec, '').then(() => {
@@ -388,39 +578,56 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should update responseAfter', () => {
     const initialEntry = newPerformanceResourceTiming(
-        'https://example.com/lib.css', 'link', 100, 400, 5 * 1000, false);
+      'https://example.test/lib.css',
+      'link',
+      100,
+      400,
+      5 * 1000,
+      false
+    );
     const laterEntry = newPerformanceResourceTiming(
-        'https://bar.example.com/lib.js', 'script', 200, 500, 10 * 1000, false);
+      'https://bar.example.test/lib.js',
+      'script',
+      200,
+      500,
+      10 * 1000,
+      false
+    );
 
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    const nowStub = sandbox.stub(win.performance, 'now');
+    const nowStub = env.sandbox.stub(win.performance, 'now');
     nowStub.onCall(0).returns(600);
     nowStub.onCall(1).returns(800);
 
-    const getEntriesStub = sandbox.stub(win.performance, 'getEntriesByType');
+    const getEntriesStub = env.sandbox.stub(
+      win.performance,
+      'getEntriesByType'
+    );
     getEntriesStub.onCall(0).returns([initialEntry]);
     getEntriesStub.onCall(1).returns([initialEntry, laterEntry]);
 
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return getResourceTiming(win, spec, Date.now()).then(result => {
-      expect(result).to.equal('link.100.400');
-      expect(spec['responseAfter']).to.equal(600);
+    return getResourceTiming(element, spec, Date.now())
+      .then((result) => {
+        expect(result).to.equal('link.100.400');
+        expect(spec['responseAfter']).to.equal(600);
 
-      // Check resource timings a second time.
-      return getResourceTiming(win, spec, Date.now());
-    }).then(result => {
-      expect(result).to.equal('script.200.500');
-      expect(spec['responseAfter']).to.equal(800);
-    });
+        // Check resource timings a second time.
+        return getResourceTiming(element, spec, Date.now());
+      })
+      .then((result) => {
+        expect(result).to.equal('script.200.500');
+        expect(spec['responseAfter']).to.equal(800);
+      });
   });
 
   it('should not update responseAfter if greater', () => {
     const spec = newResourceTimingSpec();
     spec['responseAfter'] = 1000;
-    sandbox.stub(win.performance, 'now').returns(500);
+    env.sandbox.stub(win.performance, 'now').returns(500);
     return runSerializeTest([], spec, '').then(() => {
       // responseAfter is greater than performance.now(), so it should not be
       // modified.
@@ -430,12 +637,17 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should stop reporting after reaching the buffer limit', () => {
     const entry = newPerformanceResourceTiming(
-        'http://does_not_match.com/lib.js', 'script', 100, 500, 10 * 1000,
-        false);
+      'http://does_not_match.com/lib.js',
+      'script',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const entries = new Array(150).fill(entry);
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    sandbox.stub(win.performance, 'now').returns(700);
+    env.sandbox.stub(win.performance, 'now').returns(700);
     const spec = newResourceTimingSpec();
     return runSerializeTest(entries, spec, '').then(() => {
       expect(spec['done']).to.be.true;
@@ -444,8 +656,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should not report if resourceTimingSpec is done', () => {
     const entry = newPerformanceResourceTiming(
-        'http://foo.example.com/style.css?v=200', 'link', 100, 500, 10 * 1000,
-        false);
+      'http://foo.example.test/style.css?v=200',
+      'link',
+      100,
+      500,
+      10 * 1000,
+      false
+    );
     const spec = newResourceTimingSpec();
     spec['done'] = true;
     return runSerializeTest([entry], spec, '');

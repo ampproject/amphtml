@@ -16,13 +16,27 @@
   <amp-analytics>
     <script type="application/json">
     {
+      "vars": {
+        "linkerVar": "LINKER_PARAM(ga, foo)"
+      },
       "requests": {
-        "endpoint": "/analytics/foo?b=${encoded}"
+        "endpoint": "/analytics/foo?b=${encoded}",
+        "click": "${endpoint}&gclid=LINKER_PARAM(ga, gclid)"
       },
       "triggers": {
         "pageview": {
           "on": "visible",
           "request": "endpoint"
+        },
+        "click": {
+          "on": "click",
+          "request": "click",
+          "selector": "#btn",
+          "extraUrlParams": {
+            "extraGclid": "LINKER_PARAM(ga, gclid)",
+            "foo": "1",
+            "linkerFoo": "${linkerVar}"
+          }
         }
       },
       "linkers" : {
@@ -31,7 +45,8 @@
         "ga": {
           "ids": {
             "_ga": "CLIENT_ID(_ga)",
-            "gclid": "QUERY_PARAM(gclid)"
+            "gclid": "$IF(QUERY_PARAM(gclid), QUERY_PARAM(gclid), LINKER_PARAM(ga, gclid))",
+            "foo": "123"
           },
           "destinationDomains": ["www.google.com"]
         },
@@ -70,7 +85,7 @@
   <div><a href="https://www.example.com">example.com #2</a></div>
   <div><a href="https://www.google.com">google.com</a></div>
   <div><a href="https://www.ampproject.com">ampproject.com</a></div>
-
+  <button id="btn">Button</button>
   <form method="post"
     action-xhr="https://www.example.com"
     target="_top">

@@ -42,6 +42,7 @@
   <!-- Valid -->
   <amp-ad width=300 height=250
       type="custom"
+      data-url="https://foobar.com"
       template="template-1">
   </amp-ad>
   <!-- Valid -->
@@ -66,5 +67,16 @@
   </amp-fx-flying-carpet>
   <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
   <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
+  <!-- Invalid: amp-ad type=custom missing data-url-->
+  <amp-ad width=300 height=250
+      type="custom"
+      template="template-1">
+  </amp-ad>
+  <!-- Invalid: amp-ad type=custom non-https data-url-->
+  <amp-ad width=300 height=250
+      type="custom"
+      data-url="http://foobar.com"
+      template="template-1">
+  </amp-ad>
 </body>
 </html>

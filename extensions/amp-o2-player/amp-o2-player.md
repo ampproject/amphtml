@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays an AOL O2Player.
+---
+
 <!---
 Copyright 2016 O2Player. All Rights Reserved.
 
@@ -14,28 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-o2-player"></a> `amp-o2-player`
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Displays the AOL O2Player.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-   <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-o2-player/">Annotated code example for amp-o2-player</a></td>
-  </tr>
-</table>
-
-[TOC]
+# amp-o2-player
 
 ## Example
 
@@ -45,42 +32,47 @@ Example:
 
 ```html
 <amp-o2-player
-    data-pid="12345"
-    data-bcid="5678"
-    data-bid="54321"
-    data-vid="98765"
-    layout="responsive"
-    width="480" height="270">
+  data-pid="12345"
+  data-bcid="5678"
+  data-bid="54321"
+  data-vid="98765"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-o2-player>
 ```
 
 ## Attributes
 
-##### data-pid (required)
+<table>
+  <tr>
+    <td width="40%"><strong>data-pid (required)</strong></td>
+    <td>The Player ID for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-bcid (required)</strong></td>
+    <td>The Buyer Company ID (bcid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-bid</strong></td>
+    <td>The Playlist ID (bid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-vid</strong></td>
+    <td>The Video ID (vid) for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-macros</strong></td>
+    <td>The macros for the O2Player.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The Player ID for the O2Player.
-
-##### data-bcid (required)
-
-The Buyer Company ID (bcid) for the O2Player.
-
-##### data-bid
-
-The Playlist ID (bid) for the O2Player.
-
-##### data-vid
-
-The Video ID (vid) for the O2Player.
-
-##### data-macros
-
-The macros for the O2Player.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
-## Validation 
+## Validation
 
 See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
 
@@ -92,7 +84,7 @@ The following lists validation errors specific to the `amp-o2-player` tag:
     <th>Description</th>
   </tr>
   <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
     <td>Error thrown when required <code>amp-o2-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>

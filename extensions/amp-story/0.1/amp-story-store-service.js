@@ -19,10 +19,8 @@ import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 
-
 /** @type {string} */
 const TAG = 'amp-story';
-
 
 /**
  * @typedef {{
@@ -47,8 +45,7 @@ const TAG = 'amp-story';
  */
 export let State;
 
-
-/** @private @const @enum {string} */
+/** @package @const @enum {string} */
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'caninsertautomaticad',
@@ -75,8 +72,7 @@ export const StateProperty = {
   CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
-
-/** @private @const @enum {string} */
+/** @package @const @enum {string} */
 export const Action = {
   CHANGE_PAGE: 'changepage',
   SET_CONSENT_ID: 'setconsentid',
@@ -91,7 +87,6 @@ export const Action = {
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
 };
 
-
 /**
  * Returns the new sate.
  * @param  {!State} state Immutable state
@@ -103,69 +98,86 @@ const actions = (state, action, data) => {
   switch (action) {
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.AD_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.AD_STATE]: !!data,
+      });
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
         return state;
       }
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.BOOKEND_STATE]: !!data,
+      });
     // Triggers the desktop UI.
     case Action.TOGGLE_DESKTOP:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.DESKTOP_STATE]: !!data,
+      });
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.INFO_DIALOG_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.INFO_DIALOG_STATE]: !!data,
+      });
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.HAS_AUDIO_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.HAS_AUDIO_STATE]: !!data,
+      });
     case Action.TOGGLE_LANDSCAPE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.LANDSCAPE_STATE]: !!data,
+      });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.MUTED_STATE]: !!data,
+      });
     case Action.TOGGLE_SUPPORTED_BROWSER:
       if (data) {
         dev().error(TAG, 'Cannot exit unsupported browser state.');
       }
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-            [StateProperty.CAN_SHOW_BOOKEND]: false,
-            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-            [StateProperty.BOOKEND_STATE]: false,
-            [StateProperty.DESKTOP_STATE]: false,
-            [StateProperty.HAS_AUDIO_STATE]: false,
-            [StateProperty.MUTED_STATE]: true,
-            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
-          }));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+        [StateProperty.CAN_SHOW_BOOKEND]: false,
+        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        [StateProperty.BOOKEND_STATE]: false,
+        [StateProperty.DESKTOP_STATE]: false,
+        [StateProperty.HAS_AUDIO_STATE]: false,
+        [StateProperty.MUTED_STATE]: true,
+        [StateProperty.SUPPORTED_BROWSER_STATE]: false,
+      });
     case Action.TOGGLE_SHARE_MENU:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SHARE_MENU_STATE]: !!data,
+      });
     case Action.SET_CONSENT_ID:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CONSENT_ID]: data}));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CONSENT_ID]: data,
+      });
     case Action.CHANGE_PAGE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.CURRENT_PAGE_ID]: data.id,
-            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-          }));
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CURRENT_PAGE_ID]: data.id,
+        [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+      });
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
   }
 };
-
 
 /**
  * Store service.
@@ -182,8 +194,10 @@ export class AmpStoryStoreService {
     this.listeners_ = {};
 
     /** @private {!State} */
-    this.state_ = /** @type {!State} */ (Object.assign(
-        {}, this.getDefaultState_(), this.getEmbedOverrides_()));
+    this.state_ = /** @type {!State} */ ({
+      ...this.getDefaultState_(),
+      ...this.getEmbedOverrides_(),
+    });
   }
 
   /**
@@ -228,10 +242,10 @@ export class AmpStoryStoreService {
    * @param  {*} data
    */
   dispatch(action, data) {
-    const oldState = Object.assign({}, this.state_);
+    const oldState = {...this.state_};
     this.state_ = actions(this.state_, action, data);
 
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       if (oldState[key] !== this.state_[key]) {
         this.listeners_[key].fire(this.state_[key]);
       }

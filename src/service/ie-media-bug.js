@@ -17,9 +17,7 @@
 import {Services} from '../services';
 import {dev} from '../log';
 
-
 const TAG = 'ie-media-bug';
-
 
 /**
  * An ugly fix for IE's problem with `matchMedia` API, where media queries
@@ -37,7 +35,7 @@ export function checkAndFix(win, opt_platform) {
   }
 
   // Poll until the expression resolves correctly, but only up to a point.
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     /** @const {number} */
     const endTime = Date.now() + 2000;
     /** @const {number} */
@@ -65,8 +63,9 @@ function matchMediaIeQuite(win) {
   // In IE `min-width: X` actually compares string `<`, thus we add -1 to
   // `min-width` and add +1 to `max-width`. Given the expression above, it's
   // a non-essential correction by 1px.
-  const q = `(min-width: ${win./*OK*/innerWidth - 1}px)` +
-      ` AND (max-width: ${win./*OK*/innerWidth + 1}px)`;
+  const q =
+    `(min-width: ${win./*OK*/ innerWidth - 1}px)` +
+    ` AND (max-width: ${win./*OK*/ innerWidth + 1}px)`;
   try {
     return win.matchMedia(q).matches;
   } catch (e) {

@@ -22,10 +22,11 @@ import {
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
 import {getDetail} from '../../../src/event-helper';
-import {getExistingServiceForDocInEmbedScope, getParentWindowFrameElement}
-  from '../../../src/service';
-import {getFriendlyIframeEmbedOptional}
-  from '../../../src/friendly-iframe-embed';
+import {
+  getExistingServiceForDocInEmbedScope,
+  getParentWindowFrameElement,
+} from '../../../src/service';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {userAssert} from '../../../src/log';
 
 /**
@@ -81,8 +82,12 @@ const ACTION_IMPL_ARGS = {
   'togglePlay': ['args.id'],
   'gotoAndPlay': ['args.id', 'args.label'],
   'gotoAndPause': ['args.id', 'args.label'],
-  'gotoAndPlayNTimes':
-      ['args.id', 'args.label', 'args.N', 'event.detail.eventName'],
+  'gotoAndPlayNTimes': [
+    'args.id',
+    'args.label',
+    'args.N',
+    'event.detail.eventName',
+  ],
   'setCurrentPage': ['args.index'],
 };
 
@@ -113,11 +118,13 @@ export class GwdAnimation extends AMP.BaseElement {
   buildCallback() {
     // Record the timeline event prefix.
     this.timelineEventPrefix_ =
-        this.element.getAttribute('timeline-event-prefix') || '';
+      this.element.getAttribute('timeline-event-prefix') || '';
 
     // Record whether the extension is in a FIE.
-    const frameElement =
-        getParentWindowFrameElement(this.element, this.getAmpDoc().win);
+    const frameElement = getParentWindowFrameElement(
+      this.element,
+      this.getAmpDoc().win
+    );
     if (frameElement) {
       this.fie_ = getFriendlyIframeEmbedOptional(frameElement);
     }
@@ -129,7 +136,10 @@ export class GwdAnimation extends AMP.BaseElement {
     // Listen for GWD timeline events to re-broadcast them via the doc action
     // service.
     root.addEventListener(
-        GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
+      GWD_TIMELINE_EVENT,
+      this.boundOnGwdTimelineEvent_,
+      true
+    );
 
     // If the document has a GWD pagedeck, automatically generate listeners for
     // `slideChange` events, on which the active animations context must be
@@ -138,10 +148,8 @@ export class GwdAnimation extends AMP.BaseElement {
     if (gwdPageDeck) {
       userAssert(this.element.id, `The ${TAG} element must have an id.`);
 
-      const setCurrentPageAction =
-          `${this.element.id}.setCurrentPage(index=event.index)`;
-      addAction(this.element, gwdPageDeck, 'slideChange',
-          setCurrentPageAction);
+      const setCurrentPageAction = `${this.element.id}.setCurrentPage(index=event.index)`;
+      addAction(this.element, gwdPageDeck, 'slideChange', setCurrentPageAction);
     }
 
     // Register handlers for supported actions.
@@ -159,9 +167,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   getRoot_() {
-    return this.fie_ ?
-      this.fie_.win.document :
-      this.getAmpDoc().getRootNode();
+    return this.fie_ ? this.fie_.win.document : this.getAmpDoc().getRootNode();
   }
 
   /**
@@ -188,6 +194,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * Returns whether the given action invocation should be executed.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   shouldExecuteInvocation_(invocation) {
     if (invocation.method == 'setCurrentPage') {
@@ -210,12 +217,14 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   executeInvocation_(invocation) {
     const service = userAssert(
-        getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
-        'Cannot execute action because the GWD service is not registered.');
+      getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
+      'Cannot execute action because the GWD service is not registered.'
+    );
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const actionArgs =
-        argPaths.map(argPath => getValueForExpr(invocation, argPath));
+    const actionArgs = argPaths.map((argPath) =>
+      getValueForExpr(invocation, argPath)
+    );
 
     service[invocation.method].apply(service, actionArgs);
   }
@@ -232,14 +241,22 @@ export class GwdAnimation extends AMP.BaseElement {
     const eventName = getDetail(event)['eventName'];
     const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
 
+    // TODO(wg-ui-and-a11y): Should animation timeline events be low trust?
     actionService.trigger(
-        this.element, timelineEventName, event, ActionTrust.HIGH);
+      this.element,
+      timelineEventName,
+      event,
+      ActionTrust.HIGH
+    );
   }
 
   /** @override */
   detachedCallback() {
     this.getRoot_().removeEventListener(
-        GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
+      GWD_TIMELINE_EVENT,
+      this.boundOnGwdTimelineEvent_,
+      true
+    );
     return true;
   }
 }
@@ -266,9 +283,10 @@ export function addAction(context, target, event, actionStr) {
     const actionsStartIndex = eventActionsIndex + eventPrefix.length;
 
     newActionsStr =
-        currentActionsStr.substr(0, actionsStartIndex) +
-        actionStr + ',' +
-        currentActionsStr.substr(actionsStartIndex);
+      currentActionsStr.substr(0, actionsStartIndex) +
+      actionStr +
+      ',' +
+      currentActionsStr.substr(actionsStartIndex);
   } else {
     // No actions defined yet for this event. Create the event:action string and
     // append it to the existing actions string.
@@ -284,7 +302,7 @@ export function addAction(context, target, event, actionStr) {
   actionService.setActions(target, newActionsStr);
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
   AMP.registerElement(TAG, GwdAnimation, CSS);
 });

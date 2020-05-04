@@ -41,7 +41,6 @@ const allowedMethods = ['GET', 'POST'];
  */
 let XMLHttpRequestDef;
 
-
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.
  *
@@ -55,7 +54,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  */
 export function fetchPolyfill(input, init = {}) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
 
@@ -68,7 +67,7 @@ export function fetchPolyfill(input, init = {}) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -150,6 +149,9 @@ class FetchResponse {
 
     /** @type {?ReadableStream} */
     this.body = null;
+
+    /** @type {string|null} */
+    this.url = xhr.responseURL;
   }
 
   /**
@@ -186,8 +188,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-      this.drainText_().then(parseJson));
+    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
+      parseJson
+    ));
   }
 
   /**
@@ -196,8 +199,9 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-      this.drainText_().then(utf8Encode));
+    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
+      utf8Encode
+    ));
   }
 }
 
@@ -213,14 +217,13 @@ function normalizeMethod(method) {
   }
   method = method.toUpperCase();
   devAssert(
-      allowedMethods.includes(method),
-      'Only one of %s is currently allowed. Got %s',
-      allowedMethods.join(', '),
-      method
+    allowedMethods.includes(method),
+    'Only one of %s is currently allowed. Got %s',
+    allowedMethods.join(', '),
+    method
   );
   return method;
 }
-
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
@@ -260,35 +263,34 @@ export class Response extends FetchResponse {
    */
   constructor(body, init = {}) {
     const lowercasedHeaders = map();
-    const data = Object.assign({
+    const data = {
       status: 200,
       statusText: 'OK',
-      responseText: (body ? String(body) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
+      responseText: body ? String(body) : '',
       getResponseHeader(name) {
         const headerName = String(name).toLowerCase();
-        return hasOwn(lowercasedHeaders, headerName) ?
-          lowercasedHeaders[headerName] : null;
+        return hasOwn(lowercasedHeaders, headerName)
+          ? lowercasedHeaders[headerName]
+          : null;
       },
-    }, init);
+      ...init,
+    };
 
-    data.status = (init.status === undefined) ? 200 :
-      parseInt(init.status, 10);
+    data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
-        lowercasedHeaders[String(headerName).toLowerCase()] =
-            String(headerValue);
+        lowercasedHeaders[String(headerName).toLowerCase()] = String(
+          headerValue
+        );
       });
     } else if (isObject(init.headers)) {
       for (const key in init.headers) {
-        lowercasedHeaders[String(key).toLowerCase()] =
-            String(init.headers[key]);
+        lowercasedHeaders[String(key).toLowerCase()] = String(
+          init.headers[key]
+        );
       }
     }
 
@@ -296,7 +298,7 @@ export class Response extends FetchResponse {
       data.statusText = String(init.statusText);
     }
 
-    super(/** @type {XMLHttpRequestDef} */(data));
+    super(/** @type {XMLHttpRequestDef} */ (data));
   }
 }
 

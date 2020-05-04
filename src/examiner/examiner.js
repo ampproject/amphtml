@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-if (isLongTaskApiSupported(self)) {
-  detectLongTasks(self);
-}
-
 /**
  * @param {!Window} win
  */
 function detectLongTasks(win) {
-  const observer = new win.PerformanceObserver(function(entryList) {
+  const observer = new win.PerformanceObserver(function (entryList) {
     const entries = entryList.getEntries();
     for (let i = 0; i < entries.length; i++) {
-      if (entries[i].entryType != 'longtask'
-          || entries[i].name != 'cross-origin-descendant') {
+      if (
+        entries[i].entryType != 'longtask' ||
+        entries[i].name != 'cross-origin-descendant'
+      ) {
         continue;
       }
       const attr = entries[i].attribution[0];
@@ -42,10 +40,10 @@ function detectLongTasks(win) {
           culprit = `<amp-ad type="${match[1]}">`;
         }
       }
-      console./*OK*/log(
-          `%c LONG TASK %c ${duration}ms from ${culprit}`,
-          'background: red; color: white',
-          'background: #fff; color: #000'
+      console./*OK*/ log(
+        `%c LONG TASK %c ${duration}ms from ${culprit}`,
+        'background: red; color: white',
+        'background: #fff; color: #000'
       );
     }
   });
@@ -57,7 +55,13 @@ function detectLongTasks(win) {
  * @return {boolean}
  */
 function isLongTaskApiSupported(win) {
-  return !!win.PerformanceObserver
-      && !!win.TaskAttributionTiming
-      && ('containerName' in win.TaskAttributionTiming.prototype);
+  return (
+    !!win.PerformanceObserver &&
+    !!win.TaskAttributionTiming &&
+    'containerName' in win.TaskAttributionTiming.prototype
+  );
+}
+
+if (isLongTaskApiSupported(self)) {
+  detectLongTasks(self);
 }

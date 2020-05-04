@@ -77,7 +77,7 @@ tags: {  # <amp-video-iframe> with poster
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -91,13 +91,14 @@ tags: {  # <amp-video-iframe> with poster
 
 tags: {  # <amp-video-iframe> with [placeholder]
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "AMP-VIDEO-IFRAME"
   spec_name: "AMP-VIDEO-IFRAME with [placeholder]"
   requires_extension: "amp-video-iframe"
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
   reference_points: {
     tag_spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
     mandatory: true
@@ -114,13 +115,61 @@ tags: {  # <amp-video-iframe> with [placeholder]
   }
 }
 
+tags: {  # <amp-video-iframe> with [placeholder] (transformed)
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "AMP-VIDEO-IFRAME"
+  spec_name: "AMP-VIDEO-IFRAME with [placeholder] (transformed)"
+  requires_extension: "amp-video-iframe"
+  attr_lists: "extended-amp-global"
+  attr_lists: "amp-video-iframe-common"
+  attr_lists: "lightboxable-elements"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  reference_points: {
+    tag_spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
+    mandatory: true
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]"
+  }
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
-  spec_name : "AMP-VIDEO-IFRAME > [placeholder]"
+  spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
   attrs: {
     name: "placeholder"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+}
+
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]"
+  explicit_attrs_only: true
+  attrs: {
+    name: "style"
+    mandatory: true
+    blacklisted_value_regex: "!\\s*important"
+    css_declaration: {
+      name: "display"
+      value_casei: "block"
+    }
+    css_declaration: { name: "padding-top" }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
 }

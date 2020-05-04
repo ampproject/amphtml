@@ -19,6 +19,7 @@
  * presets.
  */
 
+import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
 import {mapRange} from '../../../../src/utils/math';
 import {startsWith} from '../../../../src/string';
@@ -34,21 +35,21 @@ const MAX_TABLET_WIDTH = 1000;
  * @return {string} cubic-bezier() notation.
  */
 export function convertEasingKeyword(keyword) {
-  switch (keyword) {
-    case 'linear':
-      return 'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
-    case 'ease-in-out':
-      return 'cubic-bezier(0.80, 0.00, 0.20, 1.00)';
-    case 'ease-in':
-      return 'cubic-bezier(0.80, 0.00, 0.60, 1.00)';
-    case 'ease-out':
-      return 'cubic-bezier(0.40, 0.00, 0.40, 1.00)';
-    default:
-      userAssert(startsWith(keyword, 'cubic-bezier'),
-          'All custom bezier curves should be specified by following the ' +
-            '`cubic-bezier()` function notation.');
-      return keyword;
+  const curves = {
+    'linear': 'cubic-bezier(0.00, 0.00, 1.00, 1.00)',
+    'ease-in-out': 'cubic-bezier(0.80, 0.00, 0.20, 1.00)',
+    'ease-in': 'cubic-bezier(0.80, 0.00, 0.60, 1.00)',
+    'ease-out': 'cubic-bezier(0.40, 0.00, 0.40, 1.00)',
+  };
+  if (curves[keyword]) {
+    return curves[keyword];
   }
+  userAssert(
+    startsWith(keyword, 'cubic-bezier'),
+    'All custom bezier curves should be specified by following the ' +
+      '`cubic-bezier()` function notation.'
+  );
+  return keyword;
 }
 
 /**
@@ -74,24 +75,24 @@ export function resolvePercentageToNumber(val) {
  */
 export function installStyles(element, fxType) {
   switch (fxType) {
-    case 'parallax':
+    case FxType.PARALLAX:
       return {
         'will-change': 'transform',
       };
-    case 'fade-in':
+    case FxType.FADE_IN:
       return {
         'will-change': 'opacity',
         'opacity': 0,
       };
-    case 'fade-in-scroll':
+    case FxType.FADE_IN_SCROLL:
       return {
         'will-change': 'opacity',
         'opacity': 0,
       };
-    case 'fly-in-bottom':
-    case 'fly-in-top':
-    case 'fly-in-left':
-    case 'fly-in-right':
+    case FxType.FLY_IN_BOTTOM:
+    case FxType.FLY_IN_TOP:
+    case FxType.FLY_IN_LEFT:
+    case FxType.FLY_IN_RIGHT:
       return {
         'will-change': 'transform',
       };
@@ -111,16 +112,22 @@ export function installStyles(element, fxType) {
  */
 export function defaultDurationValues(ampdoc, fxType) {
   switch (fxType) {
-    case 'fade-in':
+    case FxType.FADE_IN:
       return '1000ms';
-    case 'fly-in-bottom':
-    case 'fly-in-top':
-    case 'fly-in-left':
-    case 'fly-in-right':
+    case FxType.FLY_IN_BOTTOM:
+    case FxType.FLY_IN_TOP:
+    case FxType.FLY_IN_LEFT:
+    case FxType.FLY_IN_RIGHT:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      return mapRange(
-          Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600)
-          + 'ms';
+      return (
+        mapRange(
+          Math.min(1000, width),
+          MAX_MOBILE_WIDTH,
+          MAX_TABLET_WIDTH,
+          400,
+          600
+        ) + 'ms'
+      );
     default:
       return '1ms';
   }
@@ -135,16 +142,17 @@ export function defaultDurationValues(ampdoc, fxType) {
  */
 export function defaultFlyInDistanceValues(ampdoc, fxType) {
   switch (fxType) {
-    case 'fly-in-bottom':
-    case 'fly-in-top':
+    case FxType.FLY_IN_BOTTOM:
+    case FxType.FLY_IN_TOP:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      if (width < MAX_TABLET_WIDTH) { // mobile and tablets
+      if (width < MAX_TABLET_WIDTH) {
+        // mobile and tablets
         return 25;
       }
       // laptops and desktops
       return 33;
-    case 'fly-in-left':
-    case 'fly-in-right':
+    case FxType.FLY_IN_LEFT:
+    case FxType.FLY_IN_RIGHT:
       return 100;
     default:
       return 1;
@@ -159,15 +167,15 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
  */
 export function defaultMarginValues(fxType) {
   switch (fxType) {
-    case 'fade-in':
-    case 'fly-in-right':
-    case 'fly-in-left':
-    case 'fly-in-top':
-    case 'fly-in-bottom':
+    case FxType.FADE_IN:
+    case FxType.FLY_IN_RIGHT:
+    case FxType.FLY_IN_LEFT:
+    case FxType.FLY_IN_TOP:
+    case FxType.FLY_IN_BOTTOM:
       return {
         'start': 0.05,
       };
-    case 'fade-in-scroll':
+    case FxType.FADE_IN_SCROLL:
       return {
         'start': 0,
         'end': 0.5,
@@ -188,12 +196,12 @@ export function defaultMarginValues(fxType) {
  */
 export function defaultEasingValues(fxType) {
   switch (fxType) {
-    case 'fade-in':
+    case FxType.FADE_IN:
       return 'ease-in';
-    case 'fly-in-right':
-    case 'fly-in-left':
-    case 'fly-in-top':
-    case 'fly-in-bottom':
+    case FxType.FLY_IN_RIGHT:
+    case FxType.FLY_IN_LEFT:
+    case FxType.FLY_IN_TOP:
+    case FxType.FLY_IN_BOTTOM:
       return 'ease-out';
     default:
       return 'ease-in';

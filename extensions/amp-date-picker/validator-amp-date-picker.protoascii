@@ -62,6 +62,7 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -115,6 +116,7 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -133,6 +135,10 @@ tags: {
 
 attr_lists: {
   name: "amp-date-picker-common-attributes"
+  attrs: {
+    name: "allow-blocked-end-date"
+    value: ""
+  }
   attrs: {
     name: "allow-blocked-ranges"
     value: ""
@@ -165,6 +171,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       protocol: "https"
@@ -174,6 +184,7 @@ attr_lists: {
   }
   attrs: { name: "week-day-format" }
   # amp-bind
+  attrs: { name: "[src]" }
   attrs: { name: "[max]" }
   attrs: { name: "[min]" }
 }

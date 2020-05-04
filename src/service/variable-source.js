@@ -13,22 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../services';
 import {devAssert} from '../log';
+import {isAmp4Email} from '../format';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
+import {whenDocumentComplete} from '../document-ready';
 
 /** @typedef {string|number|boolean|undefined|null} */
-let ResolverReturnDef;
+export let ResolverReturnDef;
 
-/** @typedef {function(...*):ResolverReturnDef} */
+/** @typedef {function(...string):ResolverReturnDef} */
 export let SyncResolverDef;
 
-/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
+/** @typedef {function(...string):!Promise<ResolverReturnDef>} */
 export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
 
+/**
+ * A list of events that the navTiming needs to wait for.
+ * Sort event in order
+ * @enum {number}
+ */
+const WAITFOR_EVENTS = {
+  VIEWER_FIRST_VISIBLE: 1,
+  DOCUMENT_COMPLETE: 2,
+  LOAD: 3,
+  LOAD_END: 4,
+};
+
+/**
+ * A list of events on which event they should wait
+ * @const {!Object<string, WAITFOR_EVENTS>}
+ */
+const NAV_TIMING_WAITFOR_EVENTS = {
+  // ready on viewer first visible
+  'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'redirectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'fetchStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'domainLookupEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'secureConnectionStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'connectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'requestStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'responseEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  // ready on document complte
+  'domLoading': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domInteractive': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domContentLoaded': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domComplete': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  // ready on load
+  'loadEventStart': WAITFOR_EVENTS.LOAD,
+  // ready on load complete
+  'loadEventEnd': WAITFOR_EVENTS.LOAD_END,
+};
 
 /**
  * Returns navigation timing information based on the start and end events.
@@ -42,7 +85,35 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  return loadPromise(win).then(() => {
+  // Fallback to load event if we don't know what to wait for
+  const startWaitForEvent =
+    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
+  const endWaitForEvent = endEvent
+    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
+    : startWaitForEvent;
+
+  const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
+
+  // set wait for onload to be default
+  let readyPromise;
+  if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
+    readyPromise = Promise.resolve();
+  } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
+    readyPromise = whenDocumentComplete(win.document);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {
+    readyPromise = loadPromise(win);
+  } else if (waitForEvent === WAITFOR_EVENTS.LOAD_END) {
+    // performance.timing.loadEventEnd returns 0 before the load event handler
+    // has terminated, that's when the load event is completed.
+    // To wait for the event handler to terminate, wait 1ms and defer to the
+    // event loop.
+    const timer = Services.timerFor(win);
+    readyPromise = loadPromise(win).then(() => timer.promise(1));
+  }
+
+  devAssert(readyPromise, 'waitForEvent not supported ' + waitForEvent);
+
+  return readyPromise.then(() => {
     return getTimingDataSync(win, startEvent, endEvent);
   });
 }
@@ -66,9 +137,10 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     return;
   }
 
-  const metric = (endEvent === undefined)
-    ? timingInfo[startEvent]
-    : timingInfo[endEvent] - timingInfo[startEvent];
+  const metric =
+    endEvent === undefined
+      ? timingInfo[startEvent]
+      : timingInfo[endEvent] - timingInfo[startEvent];
 
   if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
@@ -83,11 +155,9 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @param {!Window} win
  * @param {string} attribute
  * @return {ResolverReturnDef}
- * @private
  */
 export function getNavigationData(win, attribute) {
-  const navigationInfo = win['performance'] &&
-    win['performance']['navigation'];
+  const navigationInfo = win['performance'] && win['performance']['navigation'];
   if (!navigationInfo || navigationInfo[attribute] === undefined) {
     // PerformanceNavigation interface is not supported or attribute is not
     // implemented.
@@ -95,7 +165,6 @@ export function getNavigationData(win, attribute) {
   }
   return navigationInfo[attribute];
 }
-
 
 /**
  * A class to provide variable substitution related features. Extend this class
@@ -159,8 +228,10 @@ export class VariableSource {
    */
   set(varName, syncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].sync = syncResolver;
     return this;
   }
@@ -177,8 +248,10 @@ export class VariableSource {
    */
   setAsync(varName, asyncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].async = asyncResolver;
     return this;
   }
@@ -200,12 +273,13 @@ export class VariableSource {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   * @return {!RegExp}
    */
   getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
-    const all = Object.assign({}, this.replacements_, opt_bindings);
+    const all = {...this.replacements_, ...opt_bindings};
     return this.buildExpr_(Object.keys(all), opt_whiteList);
   }
 
@@ -221,12 +295,12 @@ export class VariableSource {
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
-      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+      keys = keys.filter((key) => this.getUrlMacroWhitelist_().includes(key));
     }
     // If a whitelist is passed into the call to GlobalVariableSource.expand_
     // then we only resolve values contained in the whitelist.
     if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
+      keys = keys.filter((key) => opt_whiteList[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -237,7 +311,7 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     // Keys that start with a `$` need to be escaped so that they do not
     // interfere with the regex that is constructed.
-    const escaped = keys.map(key => {
+    const escaped = keys.map((key) => {
       if (key[0] === '$') {
         return '\\' + key;
       }
@@ -257,8 +331,8 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
-   *     a meta tag).
+   * For email documents, all URL macros are disallowed by default.
+   * @return {Array<string>|undefined} The allowlist of substitutable AMP variables
    * @private
    */
   getUrlMacroWhitelist_() {
@@ -266,25 +340,17 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    const {head} = this.ampdoc.getRootNode();
-    if (!head) {
-      return null;
+    // Disallow all URL macros for AMP4Email format documents.
+    if (this.ampdoc.isSingleDoc()) {
+      const doc = /** @type {!Document} */ (this.ampdoc.getRootNode());
+      if (isAmp4Email(doc)) {
+        /**
+         * The whitelist of variables allowed for variable substitution.
+         * @private {?Array<string>}
+         */
+        this.variableWhitelist_ = [''];
+        return this.variableWhitelist_;
+      }
     }
-
-    // A meta[name="amp-allowed-url-macros"] tag, if present,
-    // contains, in its content attribute, a whitelist of variable substitution.
-    const meta =
-      head.querySelector('meta[name="amp-allowed-url-macros"]');
-    if (!meta) {
-      return null;
-    }
-
-    /**
-     * The whitelist of variables allowed for variable substitution.
-     * @private {?Array<string>}
-     */
-    this.variableWhitelist_ = meta.getAttribute('content').split(',')
-        .map(variable => variable.trim());
-    return this.variableWhitelist_;
   }
 }

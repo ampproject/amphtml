@@ -223,10 +223,12 @@ const createLinkerTests = [
     description: 'works for AMP CID API generated Client ID',
     version: '1',
     pairs: {
-      '_ga': 'amp-' +
+      '_ga':
+        'amp-' +
         'oRg8vByriPdstwLgkz-UNWbp2P13vNFsnhES5vW8s5WodTOoea0mTiY7X62utLyz',
     },
-    output: '1*1fkd1zz*_ga*' +
+    output:
+      '1*1fkd1zz*_ga*' +
       'YW1wLW9SZzh2QnlyaVBkc3R3TGdrei1VTldicDJQMT' +
       'N2TkZzbmhFUzV2VzhzNVdvZFRPb2VhMG1UaVk3WDYydXRMeXo.',
   },
@@ -234,36 +236,32 @@ const createLinkerTests = [
     description: 'works for AMP Viewer generated Client ID',
     version: '1',
     pairs: {
-      '_ga':
-          'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
+      '_ga': 'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
     },
-    output: '1*19eaxqc*_ga*' +
+    output:
+      '1*19eaxqc*_ga*' +
       'V2djYUFENFhOMmx5ZGhRVk5GcnVrNlg4endvVWc2Sz' +
       'JSbmFSbGhqczZDWHZUdjRhSlYtM29WTGRJMVd4eHZKYg..',
   },
 ];
 
 describe('Linker', () => {
-  let sandbox;
   let mockWin;
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
-    sandbox = sinon.sandbox;
-    sandbox.useFakeTimers(BASE_TIME);
-    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
-    mockWin = mockWindowInterface(sandbox);
-    mockWin.getUserAgent.returns('Mozilla/5.0 (X11; Linux x86_64) ' +
+    window.sandbox.useFakeTimers(BASE_TIME);
+    window.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    mockWin = mockWindowInterface(window.sandbox);
+    mockWin.getUserAgent.returns(
+      'Mozilla/5.0 (X11; Linux x86_64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
-        'Safari/537.36');
+        'Safari/537.36'
+    );
     mockWin.getUserLanguage.returns('en-US');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   describe('createLinker', () => {
-    createLinkerTests.forEach(test => {
+    createLinkerTests.forEach((test) => {
       it(test.description, () => {
         if (test.expectErrors) {
           expectAsyncConsoleError(/Invalid linker key/, test.expectErrors);
@@ -274,13 +272,13 @@ describe('Linker', () => {
   });
 
   describe('parseLinker', () => {
-    parseLinkerTests.forEach(test => {
+    parseLinkerTests.forEach((test) => {
       it(test.description, () => {
         if (test.errorMsg) {
           expectAsyncConsoleError(TAG + ' ' + test.errorMsg);
         }
         if (test.currentTime) {
-          sandbox.useFakeTimers(test.currentTime);
+          window.sandbox.useFakeTimers(test.currentTime);
         }
         expect(parseLinker(test.value)).to.deep.equal(test.output);
       });

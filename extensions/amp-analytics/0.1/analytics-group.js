@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
+import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {dev, userAssert} from '../../../src/log';
-import {
-  getTrackerKeyName,
-  getTrackerTypesForParentType,
-} from './events';
+import {getMode} from '../../../src/mode';
+import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
+import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
+
+/**
+ * @const {number}
+ * We want to execute the first trigger immediately to reduce the viewability
+ * delay as much as possible.
+ */
+const IMMEDIATE_TRIGGER_THRES = 1;
+
+/** @const {number} */
+const HIGH_PRIORITY_TRIGGER_THRES = 3;
 
 /**
  * Represents the group of analytics triggers for a single config. All triggers
@@ -32,7 +44,6 @@ export class AnalyticsGroup {
    * @param {!Element} analyticsElement
    */
   constructor(root, analyticsElement) {
-
     /** @const */
     this.root_ = root;
     /** @const */
@@ -40,11 +51,17 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
+
+    /** @private {number} */
+    this.triggerCount_ = 0;
+
+    /** @private @const {!Window} */
+    this.win_ = toWin(analyticsElement.ownerDocument.defaultView);
   }
 
   /** @override */
   dispose() {
-    this.listeners_.forEach(listener => {
+    this.listeners_.forEach((listener) => {
       listener();
     });
   }
@@ -58,6 +75,7 @@ export class AnalyticsGroup {
    *
    * @param {!JsonObject} config
    * @param {function(!./events.AnalyticsEvent)} handler
+   * @return {!Promise}
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
@@ -65,13 +83,41 @@ export class AnalyticsGroup {
     const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
 
     const tracker = this.root_.getTrackerForWhitelist(
-        trackerKey, trackerWhitelist);
-    userAssert(!!tracker,
-        'Trigger type "%s" is not allowed in the %s', eventType,
-        this.root_.getType());
-    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-        handler);
-    this.listeners_.push(unlisten);
+      trackerKey,
+      trackerWhitelist
+    );
+    userAssert(
+      !!tracker,
+      'Trigger type "%s" is not allowed in the %s',
+      eventType,
+      this.root_.getType()
+    );
+    let unlisten;
+    const deferred = new Deferred();
+    const task = () => {
+      unlisten = tracker.add(
+        this.analyticsElement_,
+        eventType,
+        config,
+        handler
+      );
+      this.listeners_.push(unlisten);
+      deferred.resolve();
+    };
+    if (
+      this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
+      !isExperimentOn(this.win_, 'analytics-chunks') ||
+      getMode(this.win_).runtime == 'inabox'
+    ) {
+      task();
+    } else {
+      const priority =
+        this.triggerCount_ < HIGH_PRIORITY_TRIGGER_THRES
+          ? ChunkPriority.HIGH
+          : ChunkPriority.LOW;
+      chunk(this.analyticsElement_, task, priority);
+    }
+    this.triggerCount_++;
+    return deferred.promise;
   }
 }
-

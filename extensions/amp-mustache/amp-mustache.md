@@ -1,3 +1,13 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - ads
+  - email
+teaser:
+  text: Allows rendering of Mustache templates.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,43 +24,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-mustache"></a> `amp-mustache`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-mustache/">annotated amp-mustache</a> example.</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-mustache
 
 ## Version notes
 
-| Version | Description |
-| ------- | ----- |
-| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
-| 0.1 | Initial implementation. |
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
+| 0.1     | Initial implementation.                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Syntax
 
-Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/) for more details. Some of the core Mustache tags are:
+Mustache is a logic-less template syntax. See [Mustache specification](http://mustache.github.io/mustache.5.html) for more details. Some of the core Mustache tags are:
 
 - `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
-- `{{#section}}``{{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
-- `{{^section}}``{{/section}}`: An inverted tag. It can test the non-existence of a variable.
+- `{{#section}} {{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
+- `{{^section}} {{/section}}`: An inverted tag. It can test the non-existence of a variable.
 - `{{{unescaped}}}`: Unescaped HTML. It's restricted in the markup it may output (see "Restrictions" below).
 
 ## Usage
@@ -61,21 +50,39 @@ The `amp-mustache` template has to be defined and used according to the
 First, the `amp-mustache` has to be declared/loaded like this:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+<script
+  async
+  custom-template="amp-mustache"
+  src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+></script>
 ```
 
-Then, the Mustache templates can be defined in the `template` tags like this:
+Then, the Mustache templates can be defined either in a `script` or `template` tag like this:
 
 ```html
+<!-- Using template tag. -->
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
 
-How templates are discovered, when they are rendered, how data is provided is  all decided by the
-target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
+or
+
+<!-- Using script tag. -->
+
+```html
+<script type="text/plain" template="amp-mustache">
+  Hello {{world}}!
+</script>
+```
+
+Use `template` tag wherever possible, as AMP validation provides useful dev-x hints. Use the `script` template for edge cases and issues with templating in the context of tables. See the "Tables" section further below.
+
+How templates are discovered, when they are rendered, how data is provided is all decided by the target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
 
 ## Restrictions
+
+### Validation
 
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
@@ -83,7 +90,11 @@ that among other things, you can't use `amp-mustache` to:
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 
-The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `col`, `colgroup`, `code`, `del`, `div`, `em`, `hr`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
+
+### Sanitization
+
+Mustache output is sanitized for security reasons and to maintain AMP validity. This may result in certain elements and attributes being silently removed.
 
 ## Pitfalls
 
@@ -121,7 +132,9 @@ Since AMP template strings must be specified in `<template>` elements, this can 
 <template type="amp-mustache">
   <table>
     <tr>
-      {{#foo}}<td></td>{{/foo}}
+      {{#foo}}
+      <td></td>
+      {{/foo}}
     </tr>
   </table>
 </template>
@@ -130,8 +143,7 @@ Since AMP template strings must be specified in `<template>` elements, this can 
 The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 
 ```html
-{{#foo}}
-{{/foo}}
+{{#foo}} {{/foo}}
 <table>
   <tr>
     <td></td>
@@ -139,7 +151,17 @@ The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 </table>
 ```
 
-Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`) or using non-table elements like `<div>` instead.
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using a `<script type="text/plain">` tag to define your templates.
+
+```html
+<script type="text/plain" template="amp-mustache">
+  <table>
+    <tr>
+      {{#foo}}<td></td>{{/foo}}
+    </tr>
+  </table>
+</script>
+```
 
 ### Quote escaping
 
@@ -148,7 +170,7 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 ```html
 <template type="amp-mustache">
   <!-- A double-quote (") in foo will cause malformed HTML. -->
-  <amp-img alt="{{foo}}" src="example.jpg" width=100 height=100></amp-img>
+  <amp-img alt="{{foo}}" src="example.jpg" width="100" height="100"></amp-img>
 
   <!-- A single-quote (') or double-quote (") in bar will cause an AMP runtime parse error. -->
   <button on="tap:AMP.setState({foo: '{{bar}}'})">Click me</button>

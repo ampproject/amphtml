@@ -15,9 +15,8 @@
  */
 
 import {dev} from '../../../src/log';
+import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-
 
 /**
  * Key values for retriving/storing consent info object.
@@ -27,7 +26,7 @@ import {map} from '../../../src/utils/object';
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
-const STORAGE_KEY = {
+export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
@@ -64,7 +63,10 @@ export let ConsentInfoDef;
 export function getStoredConsentInfo(value) {
   if (value === undefined) {
     return constructConsentInfo(
-        CONSENT_ITEM_STATE.UNKNOWN, undefined, undefined);
+      CONSENT_ITEM_STATE.UNKNOWN,
+      undefined,
+      undefined
+    );
   }
   if (typeof value === 'boolean') {
     // legacy format
@@ -75,22 +77,39 @@ export function getStoredConsentInfo(value) {
   }
 
   const consentState = convertValueToState(value[STORAGE_KEY.STATE]);
-  return constructConsentInfo(consentState,
-      value[STORAGE_KEY.STRING],
-      (value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1));
+  return constructConsentInfo(
+    consentState,
+    value[STORAGE_KEY.STRING],
+    value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
+  );
+}
+
+/**
+ * Helper function to detect if stored consent has dirtyBit set
+ * @param {?ConsentInfoDef} consentInfo
+ * @return {boolean}
+ */
+export function hasDirtyBit(consentInfo) {
+  if (!consentInfo) {
+    return false;
+  }
+  if (hasOwn(consentInfo, 'isDirty') && consentInfo['isDirty'] == true) {
+    return true;
+  }
+  return false;
 }
 
 /**
  * Return the new consent state value based on stored state and new state
  * @param {!CONSENT_ITEM_STATE} newState
  * @param {!CONSENT_ITEM_STATE} previousState
+ * @return {!CONSENT_ITEM_STATE}
  */
 export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
   }
-  if (newState == CONSENT_ITEM_STATE.DISMISSED ||
-      newState == CONSENT_ITEM_STATE.UNKNOWN) {
+  if (newState == CONSENT_ITEM_STATE.DISMISSED) {
     return previousState || CONSENT_ITEM_STATE.UNKNOWN;
   }
   if (newState == CONSENT_ITEM_STATE.NOT_REQUIRED) {
@@ -104,16 +123,9 @@ export function recalculateConsentStateValue(newState, previousState) {
 /**
  * Compose the value to store to localStorage based on the consentInfo
  * @param {!ConsentInfoDef} consentInfo
- * @param {boolean=} opt_forceNew
  * @return {?boolean|Object}
  */
-export function composeStoreValue(consentInfo, opt_forceNew) {
-  if (!opt_forceNew &&
-      !consentInfo['consentString'] &&
-      consentInfo['isDirty'] === undefined) {
-    // TODO: Remove after turn on amp-consent-v2
-    return calculateLegacyStateValue(consentInfo['consentState']);
-  }
+export function composeStoreValue(consentInfo) {
   const obj = map();
   const consentState = consentInfo['consentState'];
   if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {
@@ -160,18 +172,25 @@ export function calculateLegacyStateValue(consentState) {
  * Return true if they can be converted to the same stored value.
  * @param {?ConsentInfoDef} infoA
  * @param {?ConsentInfoDef} infoB
+ * @param {boolean=} opt_isDirty
  * @return {boolean}
  */
-export function isConsentInfoStoredValueSame(infoA, infoB) {
+export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
   if (!infoA && !infoB) {
     return true;
   }
   if (infoA && infoB) {
-    const stateEqual = calculateLegacyStateValue(infoA['consentState']) ===
-        calculateLegacyStateValue(infoB['consentState']);
+    const stateEqual =
+      calculateLegacyStateValue(infoA['consentState']) ===
+      calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
-        ((infoA['consentString'] || '') === (infoB['consentString'] || ''));
-    const isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
+      (infoA['consentString'] || '') === (infoB['consentString'] || '');
+    let isDirtyEqual;
+    if (opt_isDirty) {
+      isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
+    } else {
+      isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
+    }
     return stateEqual && stringEqual && isDirtyEqual;
   }
   return false;
@@ -194,8 +213,11 @@ function getLegacyStoredConsentInfo(value) {
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
-export function constructConsentInfo(consentState,
-  opt_consentString, opt_isDirty) {
+export function constructConsentInfo(
+  consentState,
+  opt_consentString,
+  opt_isDirty
+) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
@@ -206,14 +228,31 @@ export function constructConsentInfo(consentState,
 /**
  * Helper function to convert stored value to CONSENT_ITEM_STATE value
  * @param {*} value
+ * @return {!CONSENT_ITEM_STATE}
  */
-function convertValueToState(value) {
+export function convertValueToState(value) {
   if (value === true || value === 1) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === false || value === 0) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
+}
+
+/**
+ * Helper function to convert response enum value to CONSENT_ITEM_STATE value
+ * @param {*} value
+ * @return {?CONSENT_ITEM_STATE}
+ */
+export function convertEnumValueToState(value) {
+  if (value === 'accepted') {
+    return CONSENT_ITEM_STATE.ACCEPTED;
+  } else if (value === 'rejected') {
+    return CONSENT_ITEM_STATE.REJECTED;
+  } else if (value === 'unknown') {
+    return CONSENT_ITEM_STATE.UNKNOWN;
+  }
+  return null;
 }
 
 /**
@@ -225,6 +264,25 @@ export function hasStoredValue(info) {
   if (info['consentString']) {
     return true;
   }
-  return info['consentState'] === CONSENT_ITEM_STATE.ACCEPTED ||
-      info['consentState'] === CONSENT_ITEM_STATE.REJECTED;
+  return (
+    info['consentState'] === CONSENT_ITEM_STATE.ACCEPTED ||
+    info['consentState'] === CONSENT_ITEM_STATE.REJECTED
+  );
+}
+
+/**
+ * Convert the CONSENT_ITEM_STATE back to readable string
+ * @param {!CONSENT_ITEM_STATE} enumState
+ * @return {string}
+ */
+export function getConsentStateValue(enumState) {
+  if (enumState === CONSENT_ITEM_STATE.ACCEPTED) {
+    return 'accepted';
+  }
+
+  if (enumState === CONSENT_ITEM_STATE.REJECTED) {
+    return 'rejected';
+  }
+
+  return 'unknown';
 }

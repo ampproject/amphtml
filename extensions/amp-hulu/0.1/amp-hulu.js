@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpHulu extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -32,7 +34,10 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_()
+    );
   }
 
   /** @override */
@@ -70,20 +75,24 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     this.eid_ = userAssert(
-        this.element.getAttribute('data-eid'),
-        'The data-eid attribute is required for <amp-hulu> %s',
-        this.element);
+      this.element.getAttribute('data-eid'),
+      'The data-eid attribute is required for <amp-hulu> %s',
+      this.element
+    );
   }
 
   /** @return {string} */
   getVideoIframeSrc_() {
     devAssert(this.eid_);
-    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
+    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(
+      this.eid_ || ''
+    )}`;
   }
 }
 
-
-AMP.extension('amp-hulu', '0.1', AMP => {
+AMP.extension('amp-hulu', '0.1', (AMP) => {
   AMP.registerElement('amp-hulu', AmpHulu);
 });

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {AmpEvents} from './amp-events';
 import {Services} from './services';
 import {
@@ -25,17 +24,10 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
-import {
-  experimentTogglesOrNull,
-  getBinaryType,
-  isCanary,
-  isExperimentOn,
-} from './experiments';
+import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {
-  isLoadErrorMessage,
-} from './event-helper';
+import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
@@ -52,6 +44,10 @@ const CANCELLED = 'CANCELLED';
  */
 const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
 
+/**
+ * @const {string}
+ */
+const ABORTED = 'AbortError';
 
 /**
  * The threshold for errors throttled because nothing can be done about
@@ -67,14 +63,19 @@ const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
  */
 const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
+/**
+ * Chance to post to the new error reporting endpoint.
+ * @const {number}
+ */
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
-let accumulatedErrorMessages = self.AMPErrors || [];
+let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
-self.AMPErrors = accumulatedErrorMessages;
+self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements
@@ -97,7 +98,7 @@ function pushLimit(array, element, limit) {
  * @param {function()} work the function to execute after backoff
  * @return {number} the setTimeout id
  */
-let reportingBackoff = function(work) {
+let reportingBackoff = function (work) {
   // Set reportingBackoff as the lazy-created function. JS Vooodoooo.
   reportingBackoff = exponentialBackoff(1.5);
   return reportingBackoff(work);
@@ -131,9 +132,13 @@ let detectedJsEngine;
  */
 export function reportErrorForWin(win, error, opt_associatedElement) {
   reportError(error, opt_associatedElement);
-  if (error && !!win && isUserErrorMessage(error.message)
-      && !isUserErrorEmbed(error.message)) {
-    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  if (
+    error &&
+    !!win &&
+    isUserErrorMessage(error.message) &&
+    !isUserErrorEmbed(error.message)
+  ) {
+    reportErrorToAnalytics(/** @type {!Error} */ (error), win);
   }
 }
 
@@ -154,7 +159,7 @@ export function reportError(error, opt_associatedElement) {
     let isValidError;
     if (error) {
       if (error.message !== undefined) {
-        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
+        error = duplicateErrorIfNecessary(/** @type {!Error} */ (error));
         isValidError = true;
       } else {
         const origError = error;
@@ -166,9 +171,10 @@ export function reportError(error, opt_associatedElement) {
     }
     // Report if error is not an expected type.
     if (!isValidError && getMode().localDev && !getMode().test) {
-      setTimeout(function() {
+      setTimeout(function () {
         const rethrow = new Error(
-            '_reported_ Error reported incorrectly: ' + error);
+          '_reported_ Error reported incorrectly: ' + error
+        );
         throw rethrow;
       });
     }
@@ -190,7 +196,7 @@ export function reportError(error, opt_associatedElement) {
 
     // Report to console.
     if (self.console) {
-      const output = (console.error || console.log);
+      const output = console.error || console.log;
       if (error.messageArray) {
         output.apply(console, error.messageArray);
       } else {
@@ -209,10 +215,16 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    onError['call'](undefined, undefined, undefined, undefined,
-        undefined, error);
+    onError['call'](
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      error
+    );
   } catch (errorReportingError) {
-    setTimeout(function() {
+    setTimeout(function () {
       throw errorReportingError;
     });
   }
@@ -269,17 +281,19 @@ export function isBlockedByConsent(errorOrMessage) {
   return false;
 }
 
-
 /**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (onError);
-  win.addEventListener('unhandledrejection', event => {
-    if (event.reason &&
+  win.addEventListener('unhandledrejection', (event) => {
+    if (
+      event.reason &&
       (event.reason.message === CANCELLED ||
-      event.reason.message === BLOCK_BY_CONSENT)) {
+        event.reason.message === BLOCK_BY_CONSENT ||
+        event.reason.message === ABORTED)
+    ) {
       event.preventDefault();
       return;
     }
@@ -316,12 +330,40 @@ function onError(message, filename, line, col, error) {
     // due to buggy browser extensions may be helpful to notify authors.
     return;
   }
-  const data = getErrorReportData(message, filename, line, col, error,
-      hasNonAmpJs);
+  const data = getErrorReportData(
+    message,
+    filename,
+    line,
+    col,
+    error,
+    hasNonAmpJs
+  );
   if (data) {
-    reportingBackoff(() =>
-      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data)));
+    reportingBackoff(() => {
+      try {
+        return reportErrorToServerOrViewer(
+          this,
+          /** @type {!JsonObject} */
+          (data)
+        ).catch(() => {
+          // catch async errors to avoid recursive errors.
+        });
+      } catch (e) {
+        // catch async errors to avoid recursive errors.
+      }
+    });
   }
+}
+
+/**
+ * Determines the error reporting endpoint which should be used.
+ * If changing this URL, keep `/spec/amp-errors.md` in sync.
+ * @return {string} error reporting endpoint URL.
+ */
+function chooseReportingUrl_() {
+  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+    ? urls.betaErrorReporting
+    : urls.errorReporting;
 }
 
 /**
@@ -334,10 +376,10 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
-  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+  return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
+      xhr.open('POST', chooseReportingUrl_(), true);
       xhr.send(JSON.stringify(data));
     }
   });
@@ -362,23 +404,20 @@ export function maybeReportErrorToViewer(win, data) {
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve(false);
   }
-  const ampdocSingle = ampdocService.getAmpDoc();
+  const ampdocSingle = ampdocService.getSingleDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve(false);
   }
-
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve(false);
   }
-
-  return viewer.isTrustedViewer().then(viewerTrusted => {
+  return viewer.isTrustedViewer().then((viewerTrusted) => {
     if (!viewerTrusted) {
       return false;
     }
-
     viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
@@ -397,6 +436,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
     'el': errorReportData['el'], // tagName
+    'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'jse': errorReportData['jse'], // detectedJsEngine
   });
@@ -434,8 +474,14 @@ function buildErrorMessage_(message, error) {
  * @return {!JsonObject|undefined} The data to post
  * visibleForTesting
  */
-export function getErrorReportData(message, filename, line, col, error,
-  hasNonAmpJs) {
+export function getErrorReportData(
+  message,
+  filename,
+  line,
+  col,
+  error,
+  hasNonAmpJs
+) {
   message = buildErrorMessage_(message, error);
   // An "expected" error is still an error, i.e. some features are disabled
   // or not functioning fully because of it. However, it's an expected
@@ -456,13 +502,15 @@ export function getErrorReportData(message, filename, line, col, error,
 
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
-  if (isLoadErrorMessage(message) ||
+  if (
+    isLoadErrorMessage(message) ||
     // See https://github.com/ampproject/amphtml/issues/7353
     // for context.
     message == 'Script error.' ||
     // Window has become detached, really anything can happen
     // at this point.
-    detachedWindow) {
+    detachedWindow
+  ) {
     expected = true;
 
     if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
@@ -493,7 +541,10 @@ export function getErrorReportData(message, filename, line, col, error,
   data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
-  if (self.context && self.context.location) {
+  if (IS_ESM) {
+    runtime = 'esm';
+    data['esm'] = '1';
+  } else if (self.context && self.context.location) {
     data['3p'] = '1';
     runtime = '3p';
   } else if (getMode().runtime) {
@@ -576,7 +627,7 @@ export function getErrorReportData(message, filename, line, col, error,
     data['l'] = line || '';
     data['c'] = col || '';
   }
-  data['r'] = self.document.referrer;
+  data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
@@ -593,6 +644,9 @@ export function getErrorReportData(message, filename, line, col, error,
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
+  if (!win.document) {
+    return false;
+  }
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
     if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
@@ -620,7 +674,7 @@ export function resetAccumulatedErrorMessagesForTesting() {
 export function detectJsEngineFromStack() {
   /** @constructor */
   function Fn() {}
-  Fn.prototype.t = function() {
+  Fn.prototype.t = function () {
     throw new Error('message');
   };
   const object = new Fn();
@@ -664,7 +718,9 @@ export function detectJsEngineFromStack() {
  * @param {!Window} win
  */
 export function reportErrorToAnalytics(error, win) {
-  if (isExperimentOn(win, 'user-error-reporting')) {
+  // Currently this can only be executed in a single-doc mode. Otherwise,
+  // it's not clear which ampdoc the event would belong too.
+  if (Services.ampdocServiceFor(win).isSingleDoc()) {
     const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
@@ -679,6 +735,6 @@ export function reportErrorToAnalytics(error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  const root = Services.ampdocServiceFor(win).getSingleDoc().getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

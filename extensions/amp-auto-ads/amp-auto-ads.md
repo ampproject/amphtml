@@ -1,3 +1,11 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: Dynamically injects ads into an AMP page by using a remotely-served configuration file.
+---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,46 +22,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-auto-ads"></a> `amp-auto-ads`
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically injects ads into an AMP page by
-      using a remotely-served configuration file.
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-auto-ads"
-        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-auto-ads
 
 ## Behavior
+
 Given a sufficient number of valid placements (supplied in the configuration),
 `amp-auto-ads` tries to insert additional ads while adhering to a set of
 constraints specified by the ad network. These constraints will limit:
+
 <ul>
   <li>The total number of ads that can be inserted</li>
   <li>The minimum distance that there should be between any adjacent ads</li>
@@ -65,30 +41,34 @@ The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 
 The ad network type and any additional information (required by the ad network)
 should be specified on the tag.
+
 ```html
-<amp-auto-ads
-    type="adsense"
-    data-ad-client="ca-pub-5439573510495356">
+<amp-auto-ads type="adsense" data-ad-client="ca-pub-5439573510495356">
 </amp-auto-ads>
 ```
 
 ## Supported ad networks
+
 - [AdSense](../../ads/google/adsense.md)
+- [Denakop](https://denakop.com)
 - [DoubleClick (experimental)](../../ads/google/doubleclick.md)
 
 ## Attributes
 
-##### type (required)
-
-An identifier for the ad network.
-
-##### data-foo-bar
-
-Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>type (required)</strong></td>
+    <td>An identifier for the ad network.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-foo-bar</strong></td>
+    <td>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar". See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Configuration Spec
 
@@ -108,24 +88,25 @@ positions immediately after all `<P class='paragraph'>` elements that are within
         "index": 2,
         "sub": {
           "selector": "P.paragraph",
-          "all": true,
-        },
+          "all": true
+        }
       },
       "pos": 4,
       "type": 1,
       "style": {
         "top_m": 5,
-        "bot_m": 10,
-      },
-    },
+        "bot_m": 10
+      }
+    }
   ]
 }
 ```
+
 ### Object Definitions
 
 #### ConfigObj
 
-The fields to specify in the configuration object: 
+The fields to specify in the configuration object:
 
 <table>
   <tr>
@@ -161,7 +142,7 @@ The fields to specify in the configuration object:
 
 #### PlacementObj
 
-The fields to specify in the `placements` configuration object: 
+The fields to specify in the `placements` configuration object:
 
 <table>
   <tr>
@@ -202,11 +183,20 @@ The fields to specify in the `placements` configuration object:
       </ul>
     </td>
   </tr>
+  <tr>
+    <td><code>stickyAdAttributes</code></td>
+    <td>Object&lt;string, string&gt;</td>
+    <td>An <em>optional</em> field for a  map from attribute name to value for attributes to apply to all <code>&lt;amp-sticky-ad&gt;</code> elements injected using this placement. Only the following attribute names are allowed:
+      <ul>
+        <li>data-* (i.e. any data attribute)</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 #### AnchorObj
 
-The fields to specify in the `anchor` configuration object: 
+The fields to specify in the `anchor` configuration object:
 
 <table>
   <tr>
@@ -246,7 +236,7 @@ The fields to specify in the `anchor` configuration object:
 
 #### PlacementStyleObj
 
-The fields to specify in the `style` configuration object: 
+The fields to specify in the `style` configuration object:
 
 <table>
   <tr>
@@ -270,7 +260,7 @@ The fields to specify in the `style` configuration object:
 
 #### RelativePositionEnum
 
-The ENUM values for the `pos` field in the `placements` configuration object: 
+The ENUM values for the `pos` field in the `placements` configuration object:
 
 <table>
   <tr>
@@ -300,9 +290,31 @@ The ENUM values for the `pos` field in the `placements` configuration object:
   </tr>
 </table>
 
+#### AttributesEnum
+
+The ENUM value indicates attributes from configuration object for different ad formats:
+
+<table>
+  <tr>
+    <th class="col-fourty">Name</th>
+    <th class="col-twenty">Value</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td>BASE_ATTRIBUTES</td>
+    <td>attributes</td>
+    <td>Indicates the `attributes` field in the configuration object.</td>
+  </tr>
+  <tr>
+    <td>STICKY_AD_ATTRIBUTES</td>
+    <td>stickyAdAttributes</td>
+    <td>Indicates the `stickyAdAttributes` field in the configuration object.</td>
+  </tr>
+</table>
+
 #### PlacementTypeEnum
 
-The ENUM values for the `type` field in the `placements` configuration object: 
+The ENUM values for the `type` field in the `placements` configuration object:
 
 <table>
   <tr>
@@ -319,7 +331,7 @@ The ENUM values for the `type` field in the `placements` configuration object:
 
 #### AdConstraintsObj
 
-The fields to specify in the `adConstraints` configuration object: 
+The fields to specify in the `adConstraints` configuration object:
 
 <table>
   <tr>
@@ -362,6 +374,7 @@ The fields to specify in the `adConstraints` configuration object:
 The fields to specify in the `subsequentMinSpacing` configuration object. `subsequentMinSpacing` entries
 can be used to change the spacing required between any additional ads based on the number of ads already on
 the page. As an example, consider the following scenario:
+
 <ul>
   <li>2 existing ads on the page</li>
   <li>subsequentMinSpacing field is:

@@ -16,21 +16,32 @@
 'use strict';
 
 const del = require('del');
-const gulp = require('gulp-help')(require('gulp'));
-
 
 /**
  * Clean up the build artifacts
+ * @return {!Promise}
  */
-function clean() {
+async function clean() {
   return del([
     'dist',
     'dist.3p',
     'dist.tools',
     'build',
     '.amp-build',
+    '.karma-cache',
+    'deps.txt',
+    'build-system/runner/build',
+    'build-system/runner/dist',
+    'build-system/server/new-server/transforms/dist',
+    'validator/java/target',
+    'validator/java/src/main/resources',
+    'validator/java/src/main/java/dev/amp/validator/ValidatorProtos.java',
+    'validator/java/bazel-*',
   ]);
 }
 
+module.exports = {
+  clean,
+};
 
-gulp.task('clean', 'Removes build output', clean);
+clean.description = 'Removes build output';

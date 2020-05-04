@@ -56,7 +56,6 @@ export function appnexus(global, data) {
   }
 
   appnexusAst(global, data);
-
 }
 
 /**
@@ -66,10 +65,17 @@ export function appnexus(global, data) {
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
-  if (context.isMaster) { // in case we are in the master iframe, we load AST
+  if (context.isMaster) {
+    // in case we are in the master iframe, we load AST
     context.master.apntag = context.master.apntag || {};
     context.master.apntag.anq = context.master.apntag.anq || [];
     apntag = context.master.apntag;
+
+    context.master.adUnitTargetIds = context.master.adUnitTargetIds || [];
+
+    context.master.adUnitTargetIds = data.adUnits.map(
+      (adUnit) => adUnit.targetId
+    );
 
     apntag.anq.push(() => {
       if (data.pageOpts) {
@@ -80,10 +86,9 @@ function appnexusAst(global, data) {
         });
       }
 
-      data.adUnits.forEach(adUnit => {
+      /** @type {!Array} */ (data.adUnits).forEach((adUnit) => {
         apntag.defineTag(adUnit);
       });
-
     });
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
@@ -111,6 +116,21 @@ function appnexusAst(global, data) {
     //preserve a global reference
     /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
+  }
+
+  if (!context.isMaster && data.adUnits) {
+    const newAddUnits = data.adUnits.filter((adUnit) => {
+      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
+    });
+    if (newAddUnits.length) {
+      apntag.anq.push(() => {
+        /** @type {!Array} */ (newAddUnits).forEach((adUnit) => {
+          apntag.defineTag(adUnit);
+          context.master.adUnitTargetIds.push(adUnit.targetId);
+        });
+        apntag.loadTags();
+      });
+    }
   }
 
   // check for ad responses received for a slot but before listeners are

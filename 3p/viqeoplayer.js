@@ -27,9 +27,16 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   const data = getData(global.context);
   let viqeoPlayerInstance;
   VIQEO['setConfig']({url: sourceUrl, amp: {pageViewId, canonicalUrl}});
-  VIQEO['subscribeTracking'](params => {
+  VIQEO['subscribeTracking']((params) => {
     viqeoPlayerInstance = params['player'];
   }, 'Player:added');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
+    sendMessage('updateCurrentTime', viqeoPlayerInstance['getCurrentTime']());
+  }, 'Player:currentTimeUpdated');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updateDuration', viqeoPlayerInstance['getDuration']());
+  }, 'Player:durationUpdated');
   VIQEO['createPlayer']({
     videoId: data['videoid'],
     profileId: data['profileid'],
@@ -38,16 +45,16 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
 
   global.addEventListener('message', parseMessage, false);
 
-  subscribe('videoLoaded', 'ready');
-  subscribe('previewLoaded', 'ready');
-  subscribe('started', 'started');
+  subscribe('ready', 'ready');
   subscribe('paused', 'pause');
+  subscribe('started', 'play');
   subscribe('played', 'play');
   subscribe('replayed', 'play');
-  subscribeTracking({
-    Mute: 'mute',
-    Unmute: 'unmute',
-  });
+  subscribe('ended', 'end');
+  subscribe('advStarted', 'startAdvert');
+  subscribe('advEnded', 'endAdvert');
+  subscribe('muted', 'mute');
+  subscribe('unmuted', 'unmute');
 
   /**
    * Subscribe on viqeo's events
@@ -56,35 +63,19 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
    * @private
    */
   function subscribe(playerEventName, targetEventName) {
-    VIQEO['subscribeTracking'](
-        () => { sendMessage(targetEventName); },
-        `Player:${playerEventName}`);
-  }
-
-  /**
-   * Subscribe viqeo's tracking
-   * @param {Object.<string, string>} eventsDescription
-   * @private
-   */
-  function subscribeTracking(eventsDescription) {
-    VIQEO['subscribeTracking'](params => {
-      const name = params && params['trackingParams'] &&
-          params['trackingParams'].name;
-      const targetEventName = eventsDescription[name];
-      if (targetEventName) {
-        sendMessage(targetEventName);
-      }
-    }, 'Player:userAction');
+    VIQEO['subscribeTracking'](() => {
+      sendMessage(targetEventName);
+    }, `Player:${playerEventName}`);
   }
 
   const sendMessage = (eventName, value = null) => {
     const {parent} = global;
-    const message = /** @type {JsonObject} */({
+    const message = /** @type {JsonObject} */ ({
       source: 'ViqeoPlayer',
       action: eventName,
       value,
     });
-    parent./*OK*/postMessage(message, '*');
+    parent./*OK*/ postMessage(message, '*');
   };
 
   /**
@@ -121,16 +112,11 @@ export function viqeoplayer(global) {
 
   let scriptPlayerInit = data['script-url'];
   scriptPlayerInit =
-      (scriptPlayerInit
-          && tryDecodeUriComponent(scriptPlayerInit)
-      )
-      ||
-      (kindIsProd
-        ? 'https://cdn.viqeo.tv/js/vq_starter.js'
-        : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1'
-      );
+    (scriptPlayerInit && tryDecodeUriComponent(scriptPlayerInit)) ||
+    (kindIsProd
+      ? 'https://cdn.viqeo.tv/js/vq_starter.js'
+      : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1');
 
-  global['onViqeoLoad'] = VIQEO =>
-    viqeoPlayerInitLoaded(global, VIQEO);
+  global['onViqeoLoad'] = (VIQEO) => viqeoPlayerInitLoaded(global, VIQEO);
   loadScript(global, scriptPlayerInit);
 }

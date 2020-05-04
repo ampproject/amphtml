@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Global configuration file for the babelify transform.
+ * @fileoverview Global configuration file for various babel transforms.
  *
  * Notes: From https://babeljs.io/docs/en/plugins#plugin-ordering:
  * 1. Plugins run before Presets.
@@ -25,27 +25,52 @@
 
 'use strict';
 
-const minimist = require('minimist');
-const argv = minimist(process.argv.slice(2));
+const log = require('fancy-log');
+const {
+  getDepCheckConfig,
+  getPostClosureConfig,
+  getPreClosureConfig,
+  getSinglePassDepsConfig,
+  getSinglePassPostConfig,
+  getTestConfig,
+  getUnminifiedConfig,
+} = require('./build-system/babel-config');
+const {cyan, yellow} = require('ansi-colors');
 
-module.exports = function(api) {
-  api.cache(true);
-  // Single pass builds do not use any of the default settings below.
-  if (argv._.includes('dist') && argv.single_pass) {
+/**
+ * Mapping of babel transform callers to their corresponding babel configs.
+ */
+const babelTransforms = new Map([
+  ['babel-jest', {}],
+  ['dep-check', getDepCheckConfig()],
+  ['post-closure', getPostClosureConfig()],
+  ['pre-closure', getPreClosureConfig()],
+  ['single-pass-deps', getSinglePassDepsConfig()],
+  ['single-pass-post', getSinglePassPostConfig()],
+  ['test', getTestConfig()],
+  ['unminified', getUnminifiedConfig()],
+]);
+
+/**
+ * Main entry point. Returns babel config corresponding to the caller, or a
+ * blank config if the caller is unrecognized.
+ *
+ * @param {!Object} api
+ * @return {!Object}
+ */
+module.exports = function (api) {
+  const callerName = api.caller((callerObj) => {
+    return callerObj ? callerObj.name : '<unnamed>';
+  });
+  if (callerName && babelTransforms.has(callerName)) {
+    return babelTransforms.get(callerName);
+  } else {
+    log(
+      yellow('WARNING:'),
+      'Unrecognized Babel caller',
+      cyan(callerName),
+      '(see babel.config.js).'
+    );
     return {};
   }
-  return {
-    'presets': [
-      ['@babel/env', {
-        'modules': 'commonjs',
-        'loose': true,
-        'targets': {
-          'browsers': process.env.TRAVIS ?
-            ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
-        },
-      }],
-    ],
-    'compact': false,
-    'sourceType': 'module',
-  };
 };

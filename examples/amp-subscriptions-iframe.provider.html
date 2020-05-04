@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <script src="../extensions/amp-access/0.1/iframe-api/build/index.js"></script>
+
+  <script>
+    
+    var pageConfig;
+    var pageProtocol;
+    function log() {
+      if (!console || !console.log) {
+        return;
+      }
+      var var_args = Array.prototype.slice.call(arguments, 0);
+      console.log.apply(console, var_args);
+    }
+
+    /** Implementation of AccessController */
+    var Controller = function() {
+    };
+    Controller.prototype.connect = function(origin, protocol, config) {
+      pageConfg = config; 
+      pageProtocol = protocol;
+      log('connect: ', origin, protocol, config);
+    };
+    Controller.prototype.authorize = function() {
+      log('authorize');
+      if (pageProtocol === "amp-subscriptions") {
+        // Handle amp-subscriptions auth request.
+        // This is a typed response and must use the format
+        // defined for local autorization endpoints.
+        return Promise.resolve({
+          "granted":true,
+          "grantReason":"SUBSCRIBER",
+          "data":{
+            "loggedIn":true,
+            "subscribed": true
+          }
+        });
+      } else if (pageProtocol === "amp-access") {
+        // the same iframe could also handle amp-access protocol
+        // allowing common iframecode for CMS systems that support
+        // both extensions.
+        return Promise.resolve({
+          views: 3,
+          maxViews: 5
+        });
+      } else {
+        log('unknown protocol');
+        return Promise.resovle({});
+      }
+    };
+    Controller.prototype.pingback = function() {
+      // Platform specific action, typically update paywall counter
+      // and maybe log somthing to a server.
+      log('pingback');
+    };
+
+    var iframeApi = new AmpAccessIframeApi(new Controller());
+    iframeApi.connect();
+  </script>
+</head>
+<body>
+  Hidden iframe.
+</body>
+</html>

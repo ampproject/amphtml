@@ -39,7 +39,6 @@ export const AD_TYPE = {
   AFSH_BACKFILL: 3,
 };
 
-
 /**
  * Request Custom Search Ads (Adsense for Search or AdSense for Shopping).
  * @param {!Window} global The window object of the iframe
@@ -47,15 +46,19 @@ export const AD_TYPE = {
  */
 export function csa(global, data) {
   // Get parent width in case we want to override
-  const width = global.document.body./*OK*/clientWidth;
+  const width = global.document.body./*OK*/ clientWidth;
 
-  validateData(data, [], [
-    'afshPageOptions',
-    'afshAdblockOptions',
-    'afsPageOptions',
-    'afsAdblockOptions',
-    'ampSlotIndex',
-  ]);
+  validateData(
+    data,
+    [],
+    [
+      'afshPageOptions',
+      'afshAdblockOptions',
+      'afsPageOptions',
+      'afsAdblockOptions',
+      'ampSlotIndex',
+    ]
+  );
 
   // Add the ad container to the document
   const containerDiv = global.document.createElement('div');
@@ -68,13 +71,21 @@ export function csa(global, data) {
 
   // Parse all the options
   const afshPage = Object.assign(
-      Object(tryParseJson(data['afshPageOptions'])), pageOptions);
+    Object(tryParseJson(data['afshPageOptions'])),
+    pageOptions
+  );
   const afsPage = Object.assign(
-      Object(tryParseJson(data['afsPageOptions'])), pageOptions);
+    Object(tryParseJson(data['afsPageOptions'])),
+    pageOptions
+  );
   const afshAd = Object.assign(
-      Object(tryParseJson(data['afshAdblockOptions'])), adblockOptions);
+    Object(tryParseJson(data['afshAdblockOptions'])),
+    adblockOptions
+  );
   const afsAd = Object.assign(
-      Object(tryParseJson(data['afsAdblockOptions'])), adblockOptions);
+    Object(tryParseJson(data['afsAdblockOptions'])),
+    adblockOptions
+  );
 
   // Special case for AFSh when "auto" is the requested width
   if (afshAd['width'] == 'auto') {
@@ -82,18 +93,25 @@ export function csa(global, data) {
   }
 
   // Event listener needed for iOS9 bug
-  global.addEventListener('orientationchange',
-      orientationChangeHandler.bind(null, global, containerDiv));
+  global.addEventListener(
+    'orientationchange',
+    orientationChangeHandler.bind(null, global, containerDiv)
+  );
 
   // Register resize callbacks
   global.context.onResizeSuccess(
-      resizeSuccessHandler.bind(null, global, containerDiv));
+    resizeSuccessHandler.bind(null, global, containerDiv)
+  );
   global.context.onResizeDenied(
-      resizeDeniedHandler.bind(null, global, containerDiv));
+    resizeDeniedHandler.bind(null, global, containerDiv)
+  );
 
   // Only call for ads once the script has loaded
-  loadScript(global, 'https://www.google.com/adsense/search/ads.js',
-      requestCsaAds.bind(null, global, data, afsPage, afsAd, afshPage, afshAd));
+  loadScript(
+    global,
+    'https://www.google.com/adsense/search/ads.js',
+    requestCsaAds.bind(null, global, data, afsPage, afsAd, afshPage, afshAd)
+  );
 }
 
 /**
@@ -109,7 +127,7 @@ function orientationChangeHandler(global, containerDiv) {
   global.setTimeout(() => {
     // Force DOM reflow and repaint.
     // eslint-disable-next-line no-unused-vars
-    const ignore = global.document.body./*OK*/offsetHeight;
+    const ignore = global.document.body./*OK*/ offsetHeight;
     // Capture new height.
     let newHeight = getStyle(containerDiv, 'height');
     // In older versions of iOS, this height will be different because the
@@ -122,8 +140,8 @@ function orientationChangeHandler(global, containerDiv) {
       // Also update the onclick function to resize to the right height.
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
-        overflow.onclick =
-            () => global.context.requestResize(undefined, newHeight);
+        overflow.onclick = () =>
+          global.context.requestResize(undefined, newHeight);
       }
       // Resize the container to the correct height.
       global.context.requestResize(undefined, newHeight);
@@ -218,8 +236,7 @@ function getAdType(data) {
   }
   if (data['afsPageOptions'] != null && data['afshPageOptions'] != null) {
     return AD_TYPE.AFSH_BACKFILL;
-  }
-  else {
+  } else {
     return AD_TYPE.UNSUPPORTED;
   }
 }
@@ -249,7 +266,7 @@ export function callbackWithNoBackfill(global, containerName, hasAd) {
  * @param {string} containerName The name of the CSA container
  * @param {boolean} hasAd Whether or not CSA returned an ad
  * @visibleForTesting
-*/
+ */
 export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
   if (hasAd) {
     resizeIframe(global, containerName);
@@ -268,10 +285,10 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
 export function resizeIframe(global, containerName) {
   // Get actual height of container
   const container = global.document.getElementById(containerName);
-  const height = container./*OK*/offsetHeight;
+  const height = container./*OK*/ offsetHeight;
   // Set initial AMP height
   currentAmpHeight =
-      global.context.initialIntersection.boundingClientRect.height;
+    global.context.initialIntersection.boundingClientRect.height;
 
   // If the height of the container is larger than the height of the
   // initially requested AMP tag, add the overflow element
@@ -336,10 +353,11 @@ function getOverflowLine(global) {
  * @return {!Element}
  */
 function getOverflowChevron(global) {
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
-      'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
-      ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
-      '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
+    'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
+    ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
+    '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
 
   const chevron = global.document.createElement('div');
   setStyles(chevron, {
@@ -349,7 +367,7 @@ function getOverflowChevron(global) {
     marginRight: 'auto',
     display: 'block',
   });
-  chevron./*OK*/innerHTML = svg;
+  chevron./*OK*/ innerHTML = svg;
   return chevron;
 }
 

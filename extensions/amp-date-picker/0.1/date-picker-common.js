@@ -17,20 +17,19 @@
 import {dict, omit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 
-
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)} A date picker component with common functionality
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const reactDates = requireExternal('react-dates');
-
+  const isSameDay = reactDates['isSameDay'];
   const isInclusivelyAfterDay = reactDates['isInclusivelyAfterDay'];
   const isInclusivelyBeforeDay = reactDates['isInclusivelyBeforeDay'];
-  const React = requireExternal('react');
-  const moment = requireExternal('moment');
+  const react = requireExternal('react');
+  const Moment = requireExternal('moment');
 
   /**
    * If `max` is null, the default minimum date is the current date.
@@ -41,7 +40,7 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {?moment}
    */
   function getDefaultMinDate(max) {
-    const today = moment();
+    const today = Moment();
     if (max) {
       return !isInclusivelyAfterDay(today, max) ? today : null;
     } else {
@@ -57,8 +56,9 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isInclusivelyBetween(date, min, max) {
-    return isInclusivelyAfterDay(date, min) &&
-        isInclusivelyBeforeDay(date, max);
+    return (
+      isInclusivelyAfterDay(date, min) && isInclusivelyBeforeDay(date, max)
+    );
   }
 
   /**
@@ -68,8 +68,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
-    const maxInclusive = max ? moment(max) : null;
-    const minInclusive = min ? moment(min) : getDefaultMinDate(maxInclusive);
+    const maxInclusive = max ? Moment(max) : null;
+    const minInclusive = min ? Moment(min) : getDefaultMinDate(maxInclusive);
     if (!maxInclusive && !minInclusive) {
       return false;
     } else if (!minInclusive) {
@@ -94,6 +94,7 @@ export function withDatePickerCommon(WrappedComponent) {
   }
 
   const defaultProps = dict({
+    'allowBlockedEndDate': false,
     'blocked': null,
     'highlighted': null,
     'initialVisibleMonth': '',
@@ -102,82 +103,132 @@ export function withDatePickerCommon(WrappedComponent) {
   });
 
   /**
-   * @struct
+   * Detect if a date is a blocked date. This is aware of the
+   * `allow-blocked-end-date` attribute to allow the user to select the first
+   * blocked date after their selected start date.
+   * @param {!./dates-list.DatesList} list
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   * @param {boolean} allowBlockedEndDate
+   * @param {!moment} day
+   * @return {*} TODO(#23582): Specify return type
    */
-  class Component extends React.Component {
-    /**
-     * Creates an instance of Component.
-     * @param {!JsonObject} props
-     */
-    constructor(props) {
-      super(props);
+  function isDayBlocked(list, startDate, endDate, allowBlockedEndDate, day) {
+    const isBlocked = datesListContains(list, day);
 
-      /** @type {!JsonObject} */
-      this.props;
+    if (startDate && !endDate && allowBlockedEndDate) {
+      return isBlocked && !isSameDay(day, list.firstDateAfter(startDate));
+    }
 
-      const blocked = props['blocked'];
-      const highlighted = props['highlighted'];
-      const min = props['min'];
-      const max = props['max'];
+    return isBlocked;
+  }
 
-      this.isDayBlocked = datesListContains.bind(null, blocked);
-      this.isDayHighlighted = datesListContains.bind(null, highlighted);
+  /**
+   * Creates an instance of Component.
+   * @param {!JsonObject} props
+   * @struct
+   * @constructor
+   * @extends {React.Component}
+   */
+  function DateComponent(props) {
+    react.Component.call(this, props);
+
+    /** @type {!JsonObject} */
+    this.props;
+
+    const allowBlockedEndDate = props['allowBlockedEndDate'];
+    const blocked = props['blocked'];
+    const endDate = props['endDate'];
+    const highlighted = props['highlighted'];
+    const max = props['max'];
+    const min = props['min'];
+    const startDate = props['startDate'];
+
+    this.isDayBlocked = isDayBlocked.bind(
+      null,
+      blocked,
+      startDate,
+      endDate,
+      allowBlockedEndDate
+    );
+    this.isDayHighlighted = datesListContains.bind(null, highlighted);
+    this.isOutsideRange = isOutsideRange.bind(null, min, max);
+  }
+
+  DateComponent.prototype = Object.create(react.Component.prototype);
+  DateComponent.prototype.constructor = DateComponent;
+
+  /** @override */
+  DateComponent.prototype.componentDidMount = function () {
+    if (this.props['onMount']) {
+      this.props['onMount']();
+    }
+  };
+
+  /** @override */
+  DateComponent.prototype.componentWillReceiveProps = function (nextProps) {
+    const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
+    const blocked = nextProps['blocked'];
+    const endDate = nextProps['endDate'];
+    const highlighted = nextProps['highlighted'];
+    const max = nextProps['max'];
+    const min = nextProps['min'];
+    const startDate = nextProps['startDate'];
+
+    if (min != this.props['min'] || max != this.props['max']) {
       this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
 
-    /** @override */
-    componentDidMount() {
-      if (this.props['onMount']) {
-        this.props['onMount']();
-      }
+    if (
+      blocked != this.props['blocked'] ||
+      allowBlockedEndDate != this.props['allowBlockedEndDate'] ||
+      startDate != this.props['startDate'] ||
+      endDate != this.props['endDate']
+    ) {
+      this.isDayBlocked = isDayBlocked.bind(
+        null,
+        blocked,
+        startDate,
+        endDate,
+        allowBlockedEndDate
+      );
     }
 
-    /** @override */
-    componentWillReceiveProps(nextProps) {
-      const max = nextProps['max'];
-      const min = nextProps['min'];
-      const blocked = nextProps['blocked'];
-      const highlighted = nextProps['highlighted'];
-      if (min != this.props['min'] || max != this.props['max']) {
-        this.isOutsideRange = isOutsideRange.bind(null, min, max);
-      }
-
-      if (blocked != this.props['blocked']) {
-        this.isDayBlocked = datesListContains.bind(null, blocked);
-      }
-
-      if (highlighted != this.props['highlighted']) {
-        this.isDayHighlighted = datesListContains.bind(null, highlighted);
-      }
+    if (highlighted != this.props['highlighted']) {
+      this.isDayHighlighted = datesListContains.bind(null, highlighted);
     }
+  };
 
-    /** @override */
-    render() {
-      const props = /** @type {!JsonObject} */ (
-        omit(this.props, Object.keys(defaultProps)));
+  /** @override */
+  DateComponent.prototype.render = function () {
+    const props = /** @type {!JsonObject} */ (omit(
+      this.props,
+      Object.keys(defaultProps)
+    ));
 
-      const date = props['date'];
-      const daySize = props['daySize'];
-      const endDate = props['endDate'];
-      const initialVisibleMonth = props['initialVisibleMonth'];
-      const startDate = props['startDate'];
+    const date = props['date'];
+    const daySize = props['daySize'];
+    const endDate = props['endDate'];
+    const initialVisibleMonth = props['initialVisibleMonth'];
+    const startDate = props['startDate'];
 
-      const initialDate =
-          initialVisibleMonth || date || startDate || endDate || undefined;
-      props['initialVisibleMonth'] = () => moment(initialDate);
+    const initialDate =
+      initialVisibleMonth || date || startDate || endDate || undefined;
+    props['initialVisibleMonth'] = () => Moment(initialDate);
 
-      return React.createElement(WrappedComponent, Object.assign({}, props,
-          dict({
-            'daySize': Number(daySize),
-            'isDayBlocked': this.isDayBlocked,
-            'isDayHighlighted': this.isDayHighlighted,
-            'isOutsideRange': this.isOutsideRange,
-          })));
-    }
-  }
+    return react.createElement(WrappedComponent, {
+      ...props,
+      ...dict({
+        'daySize': Number(daySize),
+        'isDayBlocked': this.isDayBlocked,
+        'isDayHighlighted': this.isDayHighlighted,
+        'isOutsideRange': this.isOutsideRange,
+      }),
+    });
+  };
 
   /** @dict */
-  Component['defaultProps'] = defaultProps;
+  DateComponent['defaultProps'] = defaultProps;
 
-  return Component;
+  return DateComponent;
 }

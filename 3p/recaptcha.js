@@ -17,8 +17,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import ampToolboxCacheUrl from
-  '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {
@@ -28,7 +27,7 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict} from '../src/utils/object';
+import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
@@ -57,10 +56,14 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
-/** {?IframeMessaginClient} **/
+/** @const {string} */
+const GLOBAL_RECAPTCHA_API_URL =
+  'https://www.recaptcha.net/recaptcha/api.js?render=';
+
+/** {?IframeMessaginClient} */
 let iframeMessagingClient = null;
 
-/** {?string} **/
+/** {?string} */
 let sitekey = null;
 
 /**
@@ -76,9 +79,9 @@ init();
 
 /**
  * Main function called by the recaptcha bootstrap frame
+ * @param {string} recaptchaApiBaseUrl
  */
-export function initRecaptcha() {
-
+export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
   const win = window;
 
   /**
@@ -96,22 +99,35 @@ export function initRecaptcha() {
 
   // Get our sitekey from the iframe name attribute
   devAssert(
-      dataObject.sitekey,
-      'The sitekey is required for the <amp-recaptcha-input> iframe'
+    dataObject.sitekey,
+    'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   sitekey = dataObject.sitekey;
-  const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
+  // Determine the recaptcha api URL based on global property
+  devAssert(
+    hasOwn(dataObject, 'global'),
+    'The global property is required for the <amp-recaptcha-input> iframe'
+  );
+  if (dataObject.global) {
+    recaptchaApiBaseUrl = GLOBAL_RECAPTCHA_API_URL;
+  }
+  const recaptchaApiUrl = recaptchaApiBaseUrl + sitekey;
 
-  loadScript(win, recaptchaApiUrl, function() {
-    const {grecaptcha} = win;
+  loadScript(
+    win,
+    recaptchaApiUrl,
+    function () {
+      const {grecaptcha} = win;
 
-    grecaptcha.ready(function() {
-      initializeIframeMessagingClient(win, grecaptcha, dataObject);
-      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-ready');
-    });
-  }, function() {
-    dev().error(TAG + ' Failed to load recaptcha api script');
-  });
+      grecaptcha.ready(function () {
+        initializeIframeMessagingClient(win, grecaptcha, dataObject);
+        iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-ready');
+      });
+    },
+    function () {
+      dev().error(TAG + ' Failed to load recaptcha api script');
+    }
+  );
 }
 window.initRecaptcha = initRecaptcha;
 
@@ -122,11 +138,11 @@ window.initRecaptcha = initRecaptcha;
  * @param {!JsonObject} dataObject
  */
 function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
-  iframeMessagingClient = new IframeMessagingClient(win);
+  iframeMessagingClient = new IframeMessagingClient(win, win.parent);
   iframeMessagingClient.setSentinel(dataObject.sentinel);
   iframeMessagingClient.registerCallback(
-      'amp-recaptcha-action',
-      actionTypeHandler.bind(this, win, grecaptcha)
+    'amp-recaptcha-action',
+    actionTypeHandler.bind(this, win, grecaptcha)
   );
 }
 
@@ -143,27 +159,44 @@ function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
  * @param {Object} data
  */
 function actionTypeHandler(win, grecaptcha, data) {
-  doesOriginDomainMatchIframeSrc(win, data).then(() => {
-    const executePromise = grecaptcha.execute(sitekey, {
-      action: data.action,
-    });
+  doesOriginDomainMatchIframeSrc(win, data)
+    .then(() => {
+      const executePromise = grecaptcha.execute(sitekey, {
+        action: data.action,
+      });
 
-    // .then() promise pollyfilled by recaptcha api script
-    executePromise./*OK*/then(function(token) {
-      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-token', dict({
-        'id': data.id,
-        'token': token,
-      }));
-    }, function(err) {
-      user().error(TAG, '%s', err.message);
-      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
-        'id': data.id,
-        'error': err.message,
-      }));
+      // .then() promise pollyfilled by recaptcha api script
+      executePromise./*OK*/ then(
+        function (token) {
+          iframeMessagingClient./*OK*/ sendMessage(
+            'amp-recaptcha-token',
+            dict({
+              'id': data.id,
+              'token': token,
+            })
+          );
+        },
+        function (err) {
+          let message =
+            'There was an error running ' +
+            'execute() on the reCAPTCHA script.';
+          if (err) {
+            message = err.toString();
+          }
+          user().error(TAG, '%s', message);
+          iframeMessagingClient./*OK*/ sendMessage(
+            'amp-recaptcha-error',
+            dict({
+              'id': data.id,
+              'error': message,
+            })
+          );
+        }
+      );
+    })
+    .catch((error) => {
+      dev().error(TAG, '%s', error.message);
     });
-  }).catch(error => {
-    dev().error(TAG, '%s', error.message);
-  });
 }
 
 /**
@@ -174,11 +207,8 @@ function actionTypeHandler(win, grecaptcha, data) {
  * @return {!Promise}
  */
 export function doesOriginDomainMatchIframeSrc(win, data) {
-
   if (!data.origin) {
-    return Promise.reject(
-        new Error('Could not retreive the origin domain')
-    );
+    return Promise.reject(new Error('Could not retreive the origin domain'));
   }
 
   // Using the deprecated parseUrl here, as we don't have access
@@ -190,10 +220,11 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
     return compareCurlsDomain(win, curlsSubdomain, data.origin);
   }
 
-  return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
-      .then(curlsSubdomain => {
-        return compareCurlsDomain(win, curlsSubdomain, data.origin);
-      });
+  return ampToolboxCacheUrl
+    .createCurlsSubdomain(data.origin)
+    .then((curlsSubdomain) => {
+      return compareCurlsDomain(win, curlsSubdomain, data.origin);
+    });
 }
 
 /**
@@ -205,19 +236,18 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
  * @return {!Promise}
  */
 function compareCurlsDomain(win, curlsSubdomain, origin) {
-
   // Get the hostname after the culrs subdomain of the current iframe window
-  const locationWithoutCurlsSubdomain =
-    win.location.hostname.split('.').slice(1).join('.');
-  const curlsHostname =
-    curlsSubdomain + '.' + locationWithoutCurlsSubdomain;
+  const locationWithoutCurlsSubdomain = win.location.hostname
+    .split('.')
+    .slice(1)
+    .join('.');
+  const curlsHostname = curlsSubdomain + '.' + locationWithoutCurlsSubdomain;
 
   if (curlsHostname === win.location.hostname) {
     return Promise.resolve();
   }
 
   return Promise.reject(
-      new Error('Origin domain does not match Iframe src: ' + origin)
+    new Error('Origin domain does not match Iframe src: ' + origin)
   );
 }
-

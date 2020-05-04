@@ -15,12 +15,18 @@
  */
 
 import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
@@ -28,8 +34,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {toggle} from '../../../src/style';
-
+import {setStyles} from '../../../src/style';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -39,9 +44,9 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = element => {
+const getTemplate = (element) => {
   return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset">
+    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
         <span class="i-amphtml-story-share-menu-close-button" role="button">
           &times;
@@ -55,7 +60,7 @@ const getTemplate = element => {
  * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = element => {
+const getAmpSocialSystemShareTemplate = (element) => {
   return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
 };
 
@@ -89,6 +94,9 @@ export class ShareMenu {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
+
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
 
@@ -108,12 +116,13 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
-    this.isSystemShareSupported_ =
-        this.shareWidget_.isSystemShareSupported(getAmpdoc(this.parentEl_));
+    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
+      getAmpdoc(this.parentEl_)
+    );
 
-    this.isSystemShareSupported_ ?
-      this.buildForSystemSharing_() :
-      this.buildForFallbackSharing_();
+    this.isSystemShareSupported_
+      ? this.buildForSystemSharing_()
+      : this.buildForFallbackSharing_();
   }
 
   /**
@@ -136,7 +145,11 @@ export class ShareMenu {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      toggle(dev().assertElement(this.element_), false);
+      setStyles(dev().assertElement(this.element_), {
+        'visibility': 'hidden',
+        'pointer-events': 'none',
+        'z-index': -1,
+      });
       this.parentEl_.appendChild(this.element_);
     });
   }
@@ -147,6 +160,7 @@ export class ShareMenu {
    */
   buildForFallbackSharing_() {
     const root = this.win_.document.createElement('div');
+    root.classList.add('i-amphtml-story-share-menu-host');
 
     this.element_ = getTemplate(this.parentEl_);
     createShadowRootWithStyle(root, this.element_, CSS);
@@ -155,9 +169,9 @@ export class ShareMenu {
 
     this.vsync_.run({
       measure: () => {
-        this.innerContainerEl_ =
-            this.element_
-                ./*OK*/querySelector('.i-amphtml-story-share-menu-container');
+        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
+          '.i-amphtml-story-share-menu-container'
+        );
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
@@ -172,19 +186,31 @@ export class ShareMenu {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, isOpen => {
+    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
     });
 
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener(
-          'click', event => this.onShareMenuClick_(event));
+      this.element_.addEventListener('click', (event) =>
+        this.onShareMenuClick_(event)
+      );
+
+      this.win_.addEventListener('keyup', (event) => {
+        if (event.key == Keys.ESCAPE) {
+          event.preventDefault();
+          this.close_();
+        }
+      });
     }
   }
 
@@ -209,8 +235,14 @@ export class ShareMenu {
     if (!this.isSystemShareSupported_) {
       this.vsync_.mutate(() => {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+        this.element_.setAttribute('aria-hidden', !isOpen);
       });
     }
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+    this.analyticsService_.triggerEvent(
+      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element_
+    );
   }
 
   /**
@@ -221,11 +253,11 @@ export class ShareMenu {
     const el = dev().assertElement(event.target);
 
     if (el.classList.contains('i-amphtml-story-share-menu-close-button')) {
-      return this.close_();
+      this.close_();
     }
 
     // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
       this.close_();
     }
   }
@@ -237,9 +269,9 @@ export class ShareMenu {
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP_FULLBLEED ?
-        this.element_.setAttribute('desktop-fullbleed', '') :
-        this.element_.removeAttribute('desktop-fullbleed');
+      uiState !== UIType.MOBILE
+        ? this.element_.setAttribute('desktop', '')
+        : this.element_.removeAttribute('desktop');
     });
   }
 

@@ -15,17 +15,28 @@
  */
 
 @import './amp-story-access.css';
+@import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-panels.css';
+@import './amp-story-draggable-drawer.css';
+@import './amp-story-page-attachment.css';
+@import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
+@import './amp-story-vertical.css';
 @import './pagination-buttons.css';
 
 /** Common */
-amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
+amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
+  -webkit-touch-callout: none !important;
 }
 
-amp-consent {
+amp-story-grid-layer {
+  contain: size layout !important;
+  -webkit-touch-callout: none !important;
+}
+
+amp-story amp-consent {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -33,6 +44,23 @@ amp-consent {
   width: 100% !important;
   background: none !important;
   z-index: initial !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/**
+ * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
+ * because of amp-story-shadow-reset.css. Use display: none instead.
+ */
+amp-consent.amp-hidden {
+  display: none !important;
 }
 
 .i-amphtml-story-system-reset,
@@ -47,6 +75,7 @@ amp-consent {
   margin: 0 !important;
   padding: 0 !important;
   text-align: start !important;
+  text-shadow: none !important;
   width: auto !important;
 }
 
@@ -61,9 +90,13 @@ amp-story {
   touch-action: manipulation !important;
 }
 
+html.i-amphtml-story-standalone {
+  font-size: calc(2.5 * var(--story-page-vmax, 8px));
+}
+
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
-  font-size: calc(2 * var(--i-amphtml-story-vh, 8px));
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -75,28 +108,28 @@ html.i-amphtml-story-standalone body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
-amp-story p,
-amp-story h4 {
+p,
+h4 {
   font-size: 1rem;
 }
 
-amp-story h1 {
+h1 {
   font-size: 2rem;
 }
 
-amp-story h2 {
+h2 {
   font-size: 1.5rem;
 }
 
-amp-story h3 {
+h3 {
   font-size: 1.17rem;
 }
 
-amp-story h5 {
+h5 {
   font-size: 0.83rem;
 }
 
-amp-story h6 {
+h6 {
   font-size: 0.67rem;
 }
 
@@ -116,6 +149,11 @@ amp-story[standalone] {
   max-width: initial !important;
   min-height: initial !important;
   min-width: initial !important;
+}
+
+amp-story[standalone].amp-notbuilt {
+  /* Ensures amp-story has a height and is prerendered. */
+  min-height: 1px !important;
 }
 
 amp-story[standalone]:-webkit-full-screen {
@@ -160,6 +198,7 @@ amp-story .amp-video-eq:not(.amp-video-eq-play) {
 }
 
 /** Page level */
+.i-amphtml-story-media-query-matcher,
 amp-story-page {
   bottom: 0 !important;
   height: auto !important;
@@ -168,28 +207,40 @@ amp-story-page {
   right: 0 !important;
   top: 0 !important;
   opacity: 1 !important;
+  /** Required by Chrome to consider touch events on story-pages as user gestures. */
+  touch-action: none !important;
   transition: none !important;
   z-index: 0 !important;
+}
+
+.i-amphtml-story-media-query-matcher {
+  height: inherit !important;
+  width: inherit !important;
+  border: 0 !important;
+  z-index: -1 !important;
 }
 
 amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-story amp-sidebar[side][open] {
-  background-color: #ffffff !important;
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
-  display: block !important;
+.i-amphtml-story-sidebar[open] {
+  animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-duration: 0.3s !important;
+  animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
-[desktop] amp-sidebar[side][open]{
-  max-width: 320px !important;
+[desktop] .i-amphtml-story-sidebar {
+  min-width: 25% !important;
+  max-width: 600px !important;
 }
 
-.i-amphtml-story-fallback amp-story-page {
-  display: none !important;
+.i-amphtml-story-sidebar {
+  min-width: 75% !important;
+  max-width: 360px !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
+  animation-duration: 0.2s !important;
+  animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
 /* Setting `translateY` distances as a trick so that the runtime schedules
@@ -197,10 +248,18 @@ amp-story amp-sidebar[side][open] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story-page:not([active]) {
-  transform: translateY(1000%) !important;
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
 }
 
+amp-story-page:not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the ampdoc.css file.
+ */
 amp-story-page[active],
 amp-story-page[distance="0"],
 amp-story-page[distance="1"] {
@@ -209,6 +268,15 @@ amp-story-page[distance="1"] {
 
 amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
+}
+
+amp-story-page [data-text-background-color] {
+  border-radius: 3px !important;
+  line-height: 1.5em !important;
+  padding: 2px 4px !important;
+  text-indent: 0 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 
 [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
@@ -246,38 +314,26 @@ amp-story-page[distance="2"] {
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  opacity: 0.55 !important;
+  opacity: 1 !important;
+  display: block !important;
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
-  background-color: #000 !important;
-  z-index: 100001 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  visibility: visible;
+  z-index: 100003 !important;
+  transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-opacity-mask[hidden] {
   opacity: 0 !important;
   pointer-events: none !important;
   display: block !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) reverse !important;
+  visibility: hidden;
+  transition: visibility 0.2s, opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 .i-amphtml-sidebar-mask {
   display: none !important;
-}
-
-/**
- * Click shield to make sure click events are never swallowed by videos on
- * Safari iOS 11.2, which would prevent the user from navigating through the
- * story.
- * See #14401
- */
-amp-story amp-video::after {
-  content: "" !important;
-  position: absolute !important;
-  height: 100% !important;
-  width: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
 }
 
 /** Call to action layer, positioned at the bottom 20% of the screen. */
@@ -306,8 +362,62 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+ amp-story-grid-layer amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
+ */
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+  display: none !important;
+}
+
 amp-story-grid-layer > * {
   pointer-events: auto !important;
+}
+
+/** Ensure clicks inside anchor tags are handled by the tooltip. */
+amp-story-grid-layer a * {
+  pointer-events: none !important;
+}
+
+/** Apply click shield on embedded components on initial load. */
+amp-story-grid-layer .i-amphtml-embedded-component::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
+  height: 0px !important;
+  width: 0px !important;
+}
+
+.i-amphtml-expanded-mode amp-story-grid-layer,
+.i-amphtml-expanded-mode amp-story-grid-layer * {
+  contain: none !important;
+  z-index: auto !important;
+}
+
+.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
+  z-index: 1 !important;
+  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {
@@ -316,18 +426,8 @@ amp-story-grid-layer > * {
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > :not(:first-child) {
-  display: none !important;
-}
-
-.i-amphtml-story-logo {
-  display: none !important;
-  margin: 15px !important;
-}
-
-.i-amphtml-story-grid-template-fill > :first-child {
+.i-amphtml-story-grid-template-fill > * {
   bottom: 0 !important;
-  display: block !important;
   height: auto !important;
   left: 0 !important;
   position: absolute !important;
@@ -352,6 +452,13 @@ amp-story-grid-layer > * {
   grid-template-areas: "upper-third"
                        "middle-third"
                        "lower-third" !important;
+}
+
+.i-amphtml-story-grid-template-aspect {
+  margin: auto;
+  width: var(--i-amphtml-story-layer-width, 100%);
+  height: var(--i-amphtml-story-layer-height, 100%);
+  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
 }
 
 /**
@@ -493,7 +600,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-weight: 400 !important;
   font-size: 12px !important;
   max-width: 640px !important;
-  z-index: 100002 !important; /** Bookend + 1 */
+  z-index: 100004 !important; /** share menu + 1 */
 }
 
 @media (min-width: 640px) {
@@ -595,6 +702,7 @@ amp-story .amp-video-eq,
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   animation-iteration-count: infinite !important;
   opacity: 1 !important;
+  filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25)) !important;
 }
 
 @keyframes fill-unfill-rotate {
@@ -677,6 +785,7 @@ amp-story .amp-video-eq,
   to { transform: rotate(-130deg) }
 }
 
+.i-amphtml-story-page-error,
 .i-amphtml-story-page-play-button {
   display: flex !important;
   align-items: center !important;
@@ -692,6 +801,27 @@ amp-story .amp-video-eq,
   z-index: 10000 !important;
 }
 
+.i-amphtml-story-expanded-view-overflow {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 1) !important;
+  position: absolute !important;
+}
+
+.i-amphtml-expanded-view-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 12px !important;
+  height: 24px !important;
+  width: 24px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  cursor: pointer !important;
+  text-align: center !important;
+}
+
 @keyframes play-button-fly-in {
   0% {
     opacity: 0;
@@ -703,17 +833,20 @@ amp-story .amp-video-eq,
   }
 }
 
+.i-amphtml-story-page-error[hidden],
 .i-amphtml-story-page-play-button[hidden] {
   display: none !important;
 }
 
+.i-amphtml-story-page-error-label,
 .i-amphtml-story-page-play-label {
   color: #fff !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
 
+.i-amphtml-story-page-error-icon,
 .i-amphtml-story-page-play-icon {
   display: inline-block !important;
   height: 24px !important;
@@ -721,5 +854,51 @@ amp-story .amp-video-eq,
   margin: 0 8px !important;
   border-radius: 24px !important;
   filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+}
+
+.i-amphtml-story-page-error-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
+}
+
+.i-amphtml-story-page-play-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
+}
+
+.i-amphtml-story-reaction {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
+  --reaction-accent-color: #005AF0;
+  --reaction-prompt-text-color: white;
+  --reaction-option-text-color: #5F6368;
+  --reaction-theme-background: white !important;
+  --reaction-theme-border: #DADCE0 !important;
+  --reaction-theme-shading: #ECEDEF !important;
+  --reaction-chip-radius: 32px !important;
+  --reaction-chip-shadow: none !important;
+  --reaction-answer-choice-border: var(--reaction-accent-color) !important;
+  --reaction-answer-choice-background: white !important;
+}
+
+.i-amphtml-story-reaction[theme="dark"] {
+  --reaction-option-text-color: white;
+  --reaction-theme-background: #202124 !important;
+  --reaction-theme-border: #3C4043 !important;
+  --reaction-theme-shading: #3C4043 !important;
+}
+
+.i-amphtml-story-reaction[chip-corner="sharp"] {
+  --reaction-chip-radius: 8px !important;
+}
+
+.i-amphtml-story-reaction[chip-style="shadow"] {
+  --reaction-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.12) !important;
+  --reaction-theme-border: rgba(0, 0, 0, 0) !important;
+}
+
+.i-amphtml-story-reaction[chip-style="shadow"][theme="dark"] {
+  --reaction-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3) !important;
 }

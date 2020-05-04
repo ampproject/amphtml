@@ -16,8 +16,7 @@
 
 import {DocImpl} from '../doc-impl';
 
-
-describes.realWin('DocImpl', {amp: true}, env => {
+describes.realWin('DocImpl', {amp: true}, (env) => {
   let ampdoc;
   let configDoc;
 
@@ -29,16 +28,17 @@ describes.realWin('DocImpl', {amp: true}, env => {
   it('should proxy inteface to ampdoc', () => {
     expect(configDoc.getWin()).to.equal(ampdoc.win);
     expect(configDoc.getRootNode()).to.equal(ampdoc.getRootNode());
-    expect(configDoc.getRootElement())
-        .to.equal(ampdoc.getRootNode().documentElement);
+    expect(configDoc.getRootElement()).to.equal(
+      ampdoc.getRootNode().documentElement
+    );
     expect(configDoc.getHead()).to.equal(ampdoc.getHeadNode());
   });
 
   it('should resolve body correctly', () => {
     const body = {};
     let bodyAvailable = false;
-    const bodyStub = sandbox.stub(ampdoc, 'getBody').callsFake(() => body);
-    sandbox.stub(ampdoc, 'isBodyAvailable').callsFake(() => bodyAvailable);
+    const bodyStub = env.sandbox.stub(ampdoc, 'getBody').callsFake(() => body);
+    env.sandbox.stub(ampdoc, 'isBodyAvailable').callsFake(() => bodyAvailable);
 
     // Body not available yet.
     expect(configDoc.getBody()).to.be.null;
@@ -51,8 +51,8 @@ describes.realWin('DocImpl', {amp: true}, env => {
   });
 
   it('should delegate ready signals to ampdoc', () => {
-    const readyStub = sandbox.stub(ampdoc, 'isReady');
-    const whenReadyStub = sandbox.stub(ampdoc, 'whenReady');
+    const readyStub = env.sandbox.stub(ampdoc, 'isReady');
+    const whenReadyStub = env.sandbox.stub(ampdoc, 'whenReady');
 
     configDoc.isReady();
     expect(readyStub).to.be.calledOnce;

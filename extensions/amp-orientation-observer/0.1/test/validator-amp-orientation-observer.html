@@ -42,6 +42,8 @@
   <amp-orientation-observer layout="nodisplay" alpha-range="0 90" on="alpha:foo(angle=event.angle);beta:bar;gamma:baz"></amp-orientation-observer>
   <amp-orientation-observer layout="nodisplay" beta-range="0 90" on="alpha:foo;beta:bar(percent=event.percent);gamma:baz"></amp-orientation-observer>
   <amp-orientation-observer layout="nodisplay" beta-range="0 90" on="alpha:foo;beta:bar(angle=event.angle);gamma:baz"></amp-orientation-observer>
+  <amp-orientation-observer layout="nodisplay" smoothing="5"></amp-orientation-observer>
+  <amp-orientation-observer layout="nodisplay" smoothing></amp-orientation-observer>
 
   <!-- Invalid: missing required layout value -->
   <amp-orientation-observer></amp-orientation-observer>
@@ -70,5 +72,11 @@
   <amp-orientation-observer gamma-range="100 100 100" layout="nodisplay"></amp-orientation-observer>
   <amp-orientation-observer gamma-range="a 100" layout="nodisplay"></amp-orientation-observer>
   <amp-orientation-observer gamma-range="a b" layout="nodisplay"></amp-orientation-observer>
+
+  <!-- Invalid: smoothing value not valid -->
+  <amp-orientation-observer smoothing="b" layout="nodisplay"></amp-orientation-observer>
+  <amp-orientation-observer smoothing="2.5" layout="nodisplay"></amp-orientation-observer>
+  <amp-orientation-observer smoothing="0.5" layout="nodisplay"></amp-orientation-observer>
+  <amp-orientation-observer smoothing="-5" layout="nodisplay"></amp-orientation-observer>
 </body>
 </html>

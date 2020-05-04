@@ -34,13 +34,10 @@ tags: {  # <amp-app-banner>
   # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
   # mandatory_parent.
   requires: "amp-app-banner button[open-button]"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-id-attr"
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-app-banner"
+  spec_url: "https://amp.dev/documentation/components/amp-app-banner"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

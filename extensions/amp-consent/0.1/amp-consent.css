@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Styling for the amp-consent
+ * component. This also has a lot of specific
+ * styling for the CMP Modal. Note: this does
+ * specifc percentage vs. viewport based css
+ * for the heights and tranforms of the CMP modal,
+ * to handle URL and Safari Navigation bar transitions.
+ * Please refer to the following, before changing
+ * the viewport or percentage based heights,
+ * to avoid unintentionally breaking the intended
+ * behavior.
+ *
+ * https://developers.google.com/web/updates/2016/12/url-bar-resizing
+ *
+ */
+
 amp-consent {
   /* Fixed to make position independent of page other elements. */
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 0;
   overflow: hidden !important;
@@ -69,11 +85,20 @@ amp-consent.amp-hidden {
   animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
 }
 
+.i-amphtml-consent-alertdialog {
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  left: -10000px;
+  top: auto;
+}
+
 .i-amphtml-consent-ui-fill {
   position: absolute;
   top: 0;
   left: 0;
-  height: 30vh;
+  /* Initial height (Default 30vh) will be set through styles */
   width: 100%;
 }
 
@@ -82,29 +107,38 @@ iframe.i-amphtml-consent-ui-fill {
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active {
-  width: 100vw !important;
+  width: 100% !important;
   height: 100vh !important;
   padding: 0px !important;
   margin: 0px !important;
 
+  /**Scrolling support/UX for iOS**/
+  overflow: auto !important;
+
+  transform: translate3d(0px, 100vh, 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-enable-border {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
-
-  transform: translate3d(0px, 100%, 0px) !important;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
-  transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
+  /* Initial height transform will be set through styles */
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
-  transform: translate3d(0px, calc(100% - 100vh), 0px) !important;
+  top: 0px !important;
+  transform: translate3d(0px, 0px, 0px) !important;
+
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
 }
 
 amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-ui-fill {
-  height: 100vh !important;
+  height: 100% !important;
 }
 
 @keyframes i-amphtml-consent-ui-mask {
@@ -119,7 +153,7 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
   width: 100vw !important;
   height: 100vh !important;
   opacity: 0.2;
-  animation: i-amphtml-consent-ui-mask 0.5s ease-in;
+  animation: i-amphtml-consent-ui-mask 0.25s ease-in;
   /* Prevent someone from making this a full-sceen image */
   background-image: none !important;
   background-color: #000;

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
-
 export class DwellMonitor {
   /**
    * Creates an instance of DwellMonitor.
    */
   constructor() {
     this.dwellTime_ = 0;
-    this.viewer_ = null;
+    this.ampdoc_ = null;
   }
 
   /**
@@ -31,17 +29,17 @@ export class DwellMonitor {
    * @param {!../../../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    */
   startForDoc(ampDoc) {
-    this.viewer_ = Services.viewerForDoc(ampDoc);
-    this.viewer_.onVisibilityChanged(this.listener.bind(this));
+    this.ampdoc_ = ampDoc;
+    this.ampdoc_.onVisibilityChanged(this.listener.bind(this));
   }
 
   /**
    * Calculates dwell time.
    */
   listener() {
-    if (!this.viewer_.isVisible()) {
-      const lastVisibleTime = this.viewer_.getLastVisibleTime() || 0;
-      this.dwellTime_ += (Date.now() - lastVisibleTime);
+    if (!this.ampdoc_.isVisible()) {
+      const lastVisibleTime = this.ampdoc_.getLastVisibleTime() || 0;
+      this.dwellTime_ += Date.now() - lastVisibleTime;
     }
   }
 

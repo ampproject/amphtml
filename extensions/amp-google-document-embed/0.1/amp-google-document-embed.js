@@ -27,6 +27,7 @@
  * </code>
  */
 
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -34,14 +35,11 @@ import {removeElement} from '../../../src/dom';
 
 export const TAG = 'amp-google-document-embed';
 
-const ATTRIBUTES_TO_PROPAGATE = [
-  'title',
-];
+const ATTRIBUTES_TO_PROPAGATE = ['title'];
 
 const GOOGLE_DOCS_EMBED_RE = /^https?:\/\/docs\.google\.com.+\/pub.*\??/;
 
 export class AmpDriveViewer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -56,7 +54,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://docs.google.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://docs.google.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -75,9 +77,10 @@ export class AmpDriveViewer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-        this.element.getAttribute('src'),
-        'The src attribute is required for <amp-google-document-embed> %s',
-        this.element);
+      this.element.getAttribute('src'),
+      'The src attribute is required for <amp-google-document-embed> %s',
+      this.element
+    );
   }
 
   /** @override */
@@ -99,7 +102,8 @@ export class AmpDriveViewer extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined);
+      (value) => mutations[value] !== undefined
+    );
     const iframe = dev().assertElement(this.iframe_);
     this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
     const src = mutations['src'];
@@ -119,7 +123,10 @@ export class AmpDriveViewer extends AMP.BaseElement {
       return src;
     }
     return addParamToUrl(
-        'https://docs.google.com/gview?embedded=true', 'url', src);
+      'https://docs.google.com/gview?embedded=true',
+      'url',
+      src
+    );
   }
 
   /** @override */
@@ -137,7 +144,6 @@ export class AmpDriveViewer extends AMP.BaseElement {
   }
 }
 
-
-AMP.extension('amp-google-document-embed', '0.1', AMP => {
+AMP.extension('amp-google-document-embed', '0.1', (AMP) => {
   AMP.registerElement('amp-google-document-embed', AmpDriveViewer);
 });

@@ -30,7 +30,6 @@
  * @interface
  */
 export class AsyncInput {
-
   /**
    * Called to get the asynchronous value of an
    * AsyncInput field.
@@ -40,13 +39,33 @@ export class AsyncInput {
 }
 
 /**
+ * Attributes
+ *
+ * Components implementing the AsyncInput,
+ * are expected to assert these attributes
+ * at the appropriate time.
+ *
+ * @enum {string}
+ */
+export const AsyncInputAttributes = {
+  /**
+   * data-name
+   *
+   * Required attribute that must be asserted by every async-input
+   * Element. This is used by AMP form to add the key
+   * for the form submission request
+   */
+  NAME: 'name',
+};
+
+/**
  * Classes
  *
  * Components implementing the AsyncInput,
  * are expected to add the following classes
  * at the appropriate time.
  *
- * @constant {!Object<string, string>}
+ * @enum {string}
  */
 export const AsyncInputClasses = {
   /**
@@ -58,5 +77,12 @@ export const AsyncInputClasses = {
    * and use async-input elements.
    */
   'ASYNC_INPUT': 'i-amphtml-async-input',
+  /**
+   * i-async-require-action
+   *
+   * Class that is added when the async call should be treated
+   * as a required action for the form. These calls will be
+   * executed before the presubmit calls of all async inputs.
+   */
+  'ASYNC_REQUIRED_ACTION': 'i-async-require-action',
 };
-

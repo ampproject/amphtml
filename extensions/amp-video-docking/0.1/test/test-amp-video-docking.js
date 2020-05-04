@@ -14,321 +14,1532 @@
  * limitations under the License.
  */
 import {
-  Direction,
+  Actions,
+  BASE_CLASS_NAME,
+  DOCKED_TO_CORNER_SIZING_RATIO,
+  DockTargetType,
+  MARGIN_AREA_WIDTH_PERC,
+  MARGIN_MAX,
+  MIN_WIDTH,
+  PLACEHOLDER_ICON_BREAKPOINTS,
+  PLACEHOLDER_ICON_LARGE_MARGIN,
+  PLACEHOLDER_ICON_LARGE_WIDTH,
+  PLACEHOLDER_ICON_SMALL_MARGIN,
+  PLACEHOLDER_ICON_SMALL_WIDTH,
   REVERT_TO_INLINE_RATIO,
   VideoDocking,
+  getPosterImageSrc,
 } from '../amp-video-docking';
+import {Deferred, tryResolve} from '../../../../src/utils/promise';
+import {DirectionX, DirectionY} from '../def.js';
 import {PlayingStates} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {htmlFor} from '../../../../src/static-template';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-
 
 const noop = () => {};
 
 const slotId = 'my-slot-element';
 
-describes.repeated('', {
-  'Minimize to corner': {
-    useSlot: false,
-    topBoundary: 0,
-  },
-  'Minimize to slot element': {
-    useSlot: true,
-    topBoundary: 20,
-  },
-}, (name, variant) => {
+describes.realWin('video docking', {amp: true}, (env) => {
+  let ampdoc;
+  let manager;
+  let viewport;
+  let docking;
+  let querySelectorStub;
+  let any;
+  let slotAttr = '';
 
-  const {useSlot, topBoundary} = variant;
+  const viewportSize = {width: 0, height: 0};
 
-  describes.realWin('↗ 🔲', {amp: true}, env => {
-    let ampdoc;
-    let manager;
-    let viewport;
-    let docking;
-    let querySelectorStub;
+  function createAmpElementMock(tag = 'div', attrs = {}) {
+    const element = createElementWithAttributes(env.win.document, tag, attrs);
+    const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
+    Object.assign(element, {
+      getIntersectionChangeEntry: noop,
+      getLayoutBox: () => defaultLayoutRect,
+    });
+    return {
+      element,
+      getLayoutBox: () => defaultLayoutRect,
+      mutateElement: (cb) => tryResolve(cb),
+      applyFillContent: env.sandbox.spy(),
+    };
+  }
 
-    const viewportSize = {width: 0, height: 0};
+  function createVideo() {
+    const video = createAmpElementMock();
 
-    const targetType = useSlot ? 'slot element' : 'corner';
-    const skipForSlot = useSlot ? it.skip : it;
+    video.element.setAttribute('dock', slotAttr);
 
-    function createVideo() {
-      const video = createAmpElementMock();
+    // VideoDocking.querySlot_() expects this guy:
+    querySelectorStub.withArgs('[dock]').returns(video.element);
 
-      video.element.setAttribute('dock', useSlot ? '#' + slotId : '');
-
-      // VideoDocking.querySlot_() expects this guy:
-      querySelectorStub
-          .withArgs('[dock]')
-          .returns(video.element);
-
-      // VideoDocking.querySlot_() expects the VideoEvents.REGISTERED signal.
-      // This is normally set by virtue of the Video service, which is not
-      // tested here.
-      video.signals = () => ({
-        get: () => true,
-      });
-
-      video.element.signals = video.signals;
-
-      return video;
-    }
-
-    function createAmpElementMock(tag = 'div') {
-      const element = env.win.document.createElement(tag);
-      const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
-      Object.assign(element, {
-        getIntersectionChangeEntry: noop,
-        getLayoutBox: () => defaultLayoutRect,
-      });
-      return {
-        element,
-        getLayoutBox: () => defaultLayoutRect,
-      };
-    }
-
-    function stubLayoutBox(impl, rect, ratio = 0) {
-      sandbox.stub(impl, 'getLayoutBox').returns(rect);
-      sandbox.stub(impl.element, 'getLayoutBox').returns(rect);
-      sandbox.stub(impl.element, 'getIntersectionChangeEntry').returns({
-        intersectionRatio: ratio,
-        intersectionRect: rect,
-      });
-    }
-
-    function maybeCreateSlotElementLtwh(left, top, width, height, ratio = 0) {
-      if (!useSlot) {
-        return;
-      }
-      const impl = createAmpElementMock('amp-layout');
-      impl.element.id = slotId;
-      impl.element.setAttribute('layout', 'fill');
-      stubLayoutBox(impl, layoutRectLtwh(left, top, width, height), ratio);
-      env.win.document.body.appendChild(impl.element);
-
-      querySelectorStub
-          .withArgs('#' + slotId)
-          .returns(impl.element);
-    }
-
-    function setValidAreaWidth() {
-      mockAreaWidth(400);
-    }
-
-    function mockInvalidAreaWidth() {
-      const min = 320;
-      mockAreaWidth(min - 1);
-    }
-
-    function mockAreaWidth(width) {
-      viewport.width = width;
-      sandbox.stub(docking, 'getAreaWidth_').returns(width);
-    }
-
-    function setValidAreaHeight(videoHeight = 400) {
-      mockAreaHeight(videoHeight * REVERT_TO_INLINE_RATIO);
-    }
-
-    function mockAreaHeight(height) {
-      viewport.height = height;
-      sandbox.stub(docking, 'getAreaHeight_').returns(height);
-    }
-
-    function placeVideoLtwh(video, left, top, width, height, ratio = 0) {
-      stubLayoutBox(video, layoutRectLtwh(left, top, width, height), ratio);
-    }
-
-    function setScrollDirection(direction) {
-      docking.scrollDirection_ = direction;
-    }
-
-    function stubDock() {
-      return sandbox.stub(docking, 'dockInTwoSteps_');
-    }
-
-    beforeEach(() => {
-      ampdoc = env.ampdoc;
-
-      querySelectorStub = sandbox.stub(ampdoc.getRootNode(), 'querySelector');
-
-      manager = {
-        getPlayingState() { return PlayingStates.PLAYING_MANUAL; },
-        isMuted() { return false; },
-      };
-
-      viewport = {
-        getScrollTop: () => 0,
-        getSize: () => viewportSize,
-      };
-
-      sandbox.stub(Services, 'viewportForDoc').returns(viewport);
-      sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
-
-      const positionObserverMock = {};
-
-      docking = new VideoDocking(ampdoc, positionObserverMock);
+    // VideoDocking.querySlot_() expects the VideoEvents.REGISTERED signal.
+    // This is normally set by virtue of the Video service, which is not
+    // tested here.
+    video.signals = () => ({
+      get: () => true,
     });
 
-    afterEach(() => {
-      viewport.width = 0;
-      viewport.height = 0;
+    video.element.signals = video.signals;
+
+    video.pause = env.sandbox.spy();
+    video.showControls = env.sandbox.spy();
+    video.hideControls = env.sandbox.spy();
+
+    return video;
+  }
+
+  function stubLayoutBox(impl, rect) {
+    impl.getLayoutBox = () => rect;
+    impl.getPageLayoutBox = impl.getLayoutBox;
+    impl.element.getLayoutBox = impl.getLayoutBox;
+    impl.element.getPageLayoutBox = impl.getLayoutBox;
+    impl.element.getIntersectionChangeEntry = () => ({
+      intersectionRect: rect,
     });
+  }
 
-    it(`should use a ${targetType} as target`, () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+  function setValidAreaWidth() {
+    return mockAreaWidth(400);
+  }
 
-      const video = createVideo();
+  function mockInvalidAreaWidth() {
+    const min = 320;
+    return mockAreaWidth(min - 1);
+  }
 
-      const videoWidth = 400;
-      const videoHeight = 300;
+  function mockAreaWidth(width) {
+    viewportSize.width = width;
+    return width;
+  }
 
-      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
+  function setValidAreaHeight(videoHeight = 400) {
+    return mockAreaHeight(videoHeight * REVERT_TO_INLINE_RATIO);
+  }
 
-      setScrollDirection(Direction.UP);
+  function mockAreaHeight(height) {
+    viewportSize.height = height;
+    return height;
+  }
 
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
+  function placeElementLtwh(ampEl, left, top, width, height) {
+    stubLayoutBox(ampEl, layoutRectLtwh(left, top, width, height));
+  }
 
-      const target = docking.getTargetFor_(video);
+  function placeRatio(ampEl, width, height, ratio) {
+    const visibleHeight = ratio * height;
+    placeElementLtwh(ampEl, 0, visibleHeight - height, width, height);
+    mockAreaHeight(height);
+  }
 
-      expect(target).to.not.be.null;
+  function setScrollDirection(direction) {
+    docking.scrollDirection_ = direction;
+  }
 
-      if (useSlot) {
-        expect(target.nodeType).to.equal(/* ELEMENT */ 1);
-        expect(target.posX).to.be.undefined;
-        expect(target.posY).to.be.undefined;
-      } else {
-        expect(target.nodeType).to.be.undefined;
-        expect(target.posX).to.not.be.undefined;
-        expect(target.posY).to.not.be.undefined;
-      }
-    });
+  function stubDockInTransferLayerStep() {
+    return env.sandbox.stub(docking, 'dockInTransferLayerStep_');
+  }
 
-    it('should not dock if the viewport is too small', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+  function enableComputedStyle(el) {
+    env.win.document.body.appendChild(el);
+  }
 
-      const video = createVideo();
-      const dock = stubDock();
+  function stubControls() {
+    const controls = {
+      positionOnVsync: env.sandbox.spy(),
+      enable: env.sandbox.spy(),
+      disable: env.sandbox.spy(),
+      hide: env.sandbox.spy(),
+      setVideo: env.sandbox.spy(),
+      overlay: env.win.document.createElement('div'),
+      container: env.win.document.createElement('div'),
+    };
 
-      const videoWidth = 400;
-      const videoHeight = 300;
+    env.sandbox.stub(docking, 'getControls_').returns(controls);
 
-      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
+    return controls;
+  }
 
-      setScrollDirection(Direction.UP);
+  // This may output differently depending on browser
+  // TODO(alanorozco): Compare against the output of a statically defined
+  // transform on a dummy element.
+  const transformMatrix = (x, y, scale) =>
+    `matrix(${[scale, 0, 0, scale, x, y].join(', ')})`;
 
-      mockInvalidAreaWidth();
-      setValidAreaHeight(videoHeight);
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    any = env.sandbox.match.any;
+    querySelectorStub = env.sandbox.stub(ampdoc.getRootNode(), 'querySelector');
 
-      docking.updateOnPositionChange_(video);
+    manager = {
+      getPlayingState() {
+        return PlayingStates.PLAYING_MANUAL;
+      },
+      isMuted() {
+        return false;
+      },
+    };
 
-      expect(dock).to.not.have.been.called;
-    });
+    viewport = {
+      getScrollTop: () => 0,
+      getSize: () => viewportSize,
+      animateScrollIntoView: env.sandbox.spy(),
+    };
 
-    it('should not dock if the video is portrait', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+    env.sandbox.stub(Services, 'viewportForDoc').returns(viewport);
+    env.sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
 
-      const dock = stubDock();
-      const video = createVideo();
+    const positionObserverMock = {};
 
-      const videoWidth = 300;
-      const videoHeight = 400;
+    docking = new VideoDocking(ampdoc, positionObserverMock);
 
-      setScrollDirection(Direction.UP);
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
-
-      placeVideoLtwh(video, 0, -400, videoWidth, videoHeight);
-
-      allowConsoleError(() => {
-        // user().error() expected.
-        docking.updateOnPositionChange_(video);
-      });
-
-      expect(dock).to.not.have.been.called;
-    });
-
-    // TODO(alanorozco): Unskip for slot
-    skipForSlot('does not dock if the video\'s layout box is not sized', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const video = createVideo();
-      const dock = stubDock();
-
-      placeVideoLtwh(video, 0, -100, 0, 0);
-
-      setScrollDirection(Direction.UP);
-
-      setValidAreaWidth();
-      setValidAreaHeight();
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
-    });
-
-    it('should not dock if another video is docked', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      setValidAreaWidth();
-
-      placeVideoLtwh(video, 0, 0, 0, 0);
-
-      docking.currentlyDocked_ = {video: createVideo()};
-
-      setScrollDirection(Direction.UP);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
-    });
-
-    it('should dock if video is over top boundary', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      setScrollDirection(Direction.UP);
-
-      const videoWidth = 400;
-      const videoHeight = 300;
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
-
-      placeVideoLtwh(
-          video, 0, -250, videoWidth, videoHeight, /* ratio */ 1 / 3);
-
-      sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.have.been.calledOnce;
-    });
-
-    // TODO(alanorozco): Unskip
-    skipForSlot('should not dock if video does not touch boundaries', () => {
-      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
-
-      const dock = stubDock();
-      const video = createVideo();
-
-      const videoWidth = 400;
-      const videoHeight = 300;
-
-      setValidAreaWidth();
-      setValidAreaHeight(videoHeight);
-      setScrollDirection(Direction.UP);
-      placeVideoLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.not.have.been.called;
+    env.sandbox.stub(docking, 'getTimer_').returns({
+      promise: () => Promise.resolve(),
     });
   });
+
+  afterEach(() => {
+    viewportSize.width = 0;
+    viewportSize.height = 0;
+  });
+
+  describe('placeAt_', () => {
+    let video;
+    let html;
+    let internalElement;
+
+    let getComputedStyle;
+    let bodyLayerElement;
+    let videoLayerElement;
+
+    const elementExists = (root, selector) => {
+      const elOrNull = root.querySelector(selector);
+      expect(elOrNull, selector).to.be.ok;
+      return elOrNull;
+    };
+
+    beforeEach(() => {
+      html = htmlFor(env.win.document);
+      video = createVideo();
+      internalElement = html` <video></video> `;
+
+      video.element.appendChild(internalElement);
+
+      env.sandbox.stub(env.win, 'requestAnimationFrame').callsArg(0);
+
+      getComputedStyle = (el) => env.win.getComputedStyle(el);
+
+      bodyLayerElement = (s) => elementExists(env.win.document.body, s);
+      videoLayerElement = (s) => elementExists(video.element, s);
+    });
+
+    it('delegates controls positioning', async () => {
+      const {positionOnVsync} = stubControls();
+
+      const x = 0;
+      const y = 0;
+      const scale = 0;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      expect(positionOnVsync).to.have.been.calledOnce;
+    });
+
+    it('reparents placeholder', async () => {
+      stubControls();
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      expect(videoLayerElement('.amp-video-docked-placeholder-background')).to
+        .be.ok;
+    });
+
+    it('fills component area with placeholder elemenets', async () => {
+      stubControls();
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      expect(
+        video.applyFillContent.withArgs(
+          videoLayerElement('.amp-video-docked-placeholder-background')
+        )
+      ).to.have.been.calledOnce;
+
+      expect(
+        video.applyFillContent.withArgs(
+          videoLayerElement('.amp-video-docked-placeholder-background-poster')
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    it('styles and transforms elements into docked area', async () => {
+      const {overlay} = stubControls();
+
+      enableComputedStyle(video.element);
+      enableComputedStyle(overlay);
+
+      const width = 400;
+      const height = 300;
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 200;
+
+      placeElementLtwh(video, 0, 0, width, height);
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      const shadow = bodyLayerElement('.amp-video-docked-shadow');
+
+      const expectedTransform = transformMatrix(x, y, scale);
+
+      [internalElement, overlay, shadow].forEach((el) => {
+        expect(getComputedStyle(el)).to.include({
+          'transform': expectedTransform,
+          'width': width + 'px',
+          'min-width': width + 'px',
+          'height': height + 'px',
+          'min-height': height + 'px',
+        });
+      });
+    });
+
+    it('sets poster image', async () => {
+      const posterSrc = 'https://whatever.com/image.png';
+
+      stubControls();
+      enableComputedStyle(video.element);
+
+      video.element.setAttribute('poster', posterSrc);
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      const poster = videoLayerElement(
+        '.amp-video-docked-placeholder-background-poster'
+      );
+
+      expect(getComputedStyle(poster)['backgroundImage']).to.equal(
+        `url("${posterSrc}")`
+      );
+    });
+
+    for (let step = 0; step <= 1; step = Number((step + 0.1).toFixed(1))) {
+      it(`sets opacity = step @ step = ${step}`, async () => {
+        stubControls();
+        enableComputedStyle(video.element);
+
+        const x = 30;
+        const y = 60;
+        const scale = 0.5;
+        const transitionDurationMs = 0;
+
+        await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+        const shadow = bodyLayerElement('.amp-video-docked-shadow');
+        const placeholder = videoLayerElement(
+          '.amp-video-docked-placeholder-background'
+        );
+
+        expect(Number(getComputedStyle(shadow)['opacity'])).to.equal(step);
+        expect(Number(getComputedStyle(placeholder)['opacity'])).to.equal(step);
+      });
+    }
+
+    it('overrides overflow to render outside of component area', async () => {
+      stubControls();
+      enableComputedStyle(video.element);
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      expect(getComputedStyle(video.element)['overflow']).to.equal('visible');
+    });
+
+    it('applies classname on internal element', async () => {
+      stubControls();
+
+      const x = 30;
+      const y = 60;
+      const scale = 0.5;
+      const step = 1;
+      const transitionDurationMs = 0;
+
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+
+      expect(internalElement).to.have.class(BASE_CLASS_NAME);
+    });
+
+    [
+      {step: 0, fn: 'ease-in'},
+      {step: 1, fn: 'ease-out'},
+    ].forEach(({step, fn}) => {
+      it(`sets transition timing on elements for step = ${step}`, async () => {
+        const {overlay} = stubControls();
+
+        enableComputedStyle(video.element);
+        enableComputedStyle(overlay);
+
+        const x = 30;
+        const y = 60;
+        const scale = 0.5;
+
+        const durationMs = 260;
+        const durationSecondsStr = '0.26s';
+
+        await docking.placeAt_(video, x, y, scale, step, durationMs);
+
+        [
+          internalElement,
+          overlay,
+          videoLayerElement('.amp-video-docked-placeholder-background'),
+          videoLayerElement('.amp-video-docked-placeholder-icon'),
+          bodyLayerElement('.amp-video-docked-shadow'),
+        ].forEach((el) => {
+          const style = getComputedStyle(el);
+
+          expect(style['transitionDuration']).to.equal(durationSecondsStr);
+          expect(style['transitionTimingFunction']).to.equal(fn);
+        });
+      });
+    });
+
+    PLACEHOLDER_ICON_BREAKPOINTS.forEach(({minWidth, className}) => {
+      const width = Math.max(200, minWidth);
+
+      const iconMargin =
+        className == 'amp-small'
+          ? PLACEHOLDER_ICON_SMALL_MARGIN
+          : PLACEHOLDER_ICON_LARGE_MARGIN;
+
+      const iconWidth =
+        className == 'amp-small'
+          ? PLACEHOLDER_ICON_SMALL_WIDTH
+          : PLACEHOLDER_ICON_LARGE_WIDTH;
+
+      const step = 1;
+
+      it(`sets ${className} on icon @ ${width}px wide`, async () => {
+        stubControls();
+
+        const x = 30;
+        const y = 60;
+        const scale = 0.5;
+        const transitionDurationMs = 0;
+
+        placeElementLtwh(video, 0, 0, width, 200);
+
+        await docking.placeAt_(
+          video,
+          x,
+          y,
+          scale,
+          step,
+          transitionDurationMs,
+          // Expecting relative placement to apply icon styling but direction
+          // is irrelevant in this case.
+          DirectionX.RIGHT
+        );
+
+        expect(
+          videoLayerElement('.amp-video-docked-placeholder-icon')
+        ).to.have.class(className);
+      });
+
+      [
+        {
+          relativeX: DirectionX.RIGHT,
+          relativeXTextual: 'right',
+          expectedIconX: width - iconWidth - iconMargin * 2,
+        },
+        {
+          relativeX: DirectionX.LEFT,
+          relativeXTextual: 'left',
+          expectedIconX: -width + iconWidth + iconMargin * 2,
+        },
+      ].forEach(({relativeX, relativeXTextual, expectedIconX}) => {
+        it(`translates placeholder icon horizontally for posX=${relativeXTextual} in threshold for .${className}`, async () => {
+          stubControls();
+          enableComputedStyle(video.element);
+
+          const expectedTransformMatrix = transformMatrix(
+            expectedIconX,
+            /* y */ 0,
+            /* scale */ 1
+          );
+
+          const x = 30;
+          const y = 60;
+          const scale = 0.5;
+          const transitionDurationMs = 0;
+
+          placeElementLtwh(video, 0, 0, width, 200);
+
+          await docking.placeAt_(
+            video,
+            x,
+            y,
+            scale,
+            step,
+            transitionDurationMs,
+            relativeX
+          );
+
+          const computedStyle = getComputedStyle(
+            videoLayerElement('.amp-video-docked-placeholder-icon')
+          );
+
+          expect(computedStyle['transform']).to.equal(expectedTransformMatrix);
+        });
+      });
+    });
+
+    [
+      {
+        relativeX: DirectionX.RIGHT,
+        directionTextual: 'left to right',
+        hasAmpRtl: false,
+      },
+      {
+        relativeX: DirectionX.LEFT,
+        directionTextual: 'right to left',
+        hasAmpRtl: true,
+      },
+    ].forEach(({relativeX, directionTextual, hasAmpRtl}) => {
+      const setsOrUnsets = hasAmpRtl ? 'sets' : 'unsets';
+
+      it(
+        `${setsOrUnsets} amp-rtl classname on icon when docking from ` +
+          directionTextual,
+        async () => {
+          stubControls();
+          enableComputedStyle(video.element);
+
+          await docking.placeAt_(
+            video,
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
+            relativeX
+          );
+
+          expect(
+            videoLayerElement(
+              '.amp-video-docked-placeholder-icon'
+            ).classList.contains('amp-rtl')
+          ).to.equal(hasAmpRtl);
+        }
+      );
+
+      it(
+        `${setsOrUnsets} amp-rtl classname on controls layer when docking ` +
+          `from ${directionTextual}`,
+        async () => {
+          const controls = stubControls();
+          enableComputedStyle(video.element);
+
+          await docking.placeAt_(
+            video,
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
+            relativeX
+          );
+
+          expect(controls.container.classList.contains('amp-rtl')).to.equal(
+            hasAmpRtl
+          );
+        }
+      );
+    });
+  });
+
+  describe('getPosterImageSrc', () => {
+    let html;
+    beforeEach(() => {
+      html = htmlFor(env.win.document);
+    });
+
+    it('uses `poster` attr', () => {
+      const el = html` <amp-video poster="foo.png"></amp-video> `;
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
+    });
+
+    it('uses `data-poster` attr', () => {
+      const el = html` <amp-video data-poster="foo.png"></amp-video> `;
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
+    });
+
+    it('uses `placeholder` amp-img', () => {
+      const el = html`
+        <amp-video>
+          <amp-img src="foo.png" placeholder></amp-img>
+        </amp-video>
+      `;
+
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
+    });
+
+    it('uses amp-img in a `placeholder`', () => {
+      const el = html`
+        <amp-video>
+          <div placeholder>
+            <amp-img src="foo.png"></amp-img>
+          </div>
+        </amp-video>
+      `;
+
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
+    });
+
+    it('uses `placeholder` img', () => {
+      const el = html`
+        <amp-video>
+          <img src="foo.png" placeholder />
+        </amp-video>
+      `;
+
+      expect(getPosterImageSrc(el)).to.equal('foo.png');
+    });
+  });
+
+  describe('dockInTransferLayerStep_', () => {
+    // Something weird causing this to flake in certain leftover states.
+    // TODO(alanorozco): Unskip.
+    it.skip('should not overflow', async () => {
+      const video = {};
+      const target = {};
+
+      const dock = env.sandbox
+        .stub(docking, 'dock_')
+        .returns(Promise.resolve());
+
+      await docking.dockInTransferLayerStep_(video, target);
+
+      expect(dock).to.have.been.called;
+    });
+  });
+
+  describe.skip('getTargetAreaFromPos_', () => {
+    [
+      {
+        posX: DirectionX.RIGHT,
+        posXTextual: 'right',
+        expectedXFn: (vw, margin, width) => vw - margin - width,
+      },
+      {
+        posX: DirectionX.LEFT,
+        posXTextual: 'left',
+        expectedXFn: (unusedVw, margin, unusedWidth) => margin,
+      },
+    ].forEach(({posX, posXTextual, expectedXFn}) => {
+      const videoWidth = 600;
+      const videoHeight = 400;
+
+      const aspectRatio = videoWidth / videoHeight;
+
+      let video;
+
+      beforeEach(() => {
+        video = createVideo();
+        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+      });
+
+      it('sizes the dock area relative to viewport area', () => {
+        const vw = mockAreaWidth(
+          Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO)
+        );
+
+        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
+        const expectedHeight = expectedWidth / aspectRatio;
+
+        mockAreaHeight(200);
+
+        const {width, height} = docking.getTargetAreaFromPos_(
+          video,
+          posX,
+          DirectionY.TOP
+        );
+
+        expect(width, 'width').to.equal(expectedWidth);
+        expect(height, 'height').to.equal(expectedHeight);
+      });
+
+      it(`sets relative margin for posX = ${posXTextual}`, () => {
+        const vw = mockAreaWidth(
+          Math.max(MIN_WIDTH / DOCKED_TO_CORNER_SIZING_RATIO)
+        );
+
+        mockAreaHeight(200);
+
+        const expectedMargin = MARGIN_AREA_WIDTH_PERC * vw;
+        const expectedY = expectedMargin;
+        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
+
+        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+
+        const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
+
+        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
+
+        expect(pos.x, 'x').to.equal(expectedX);
+        expect(pos.y, 'y').to.equal(expectedY);
+      });
+
+      it(`limits margin for posX = ${posXTextual}`, () => {
+        const video = createVideo();
+
+        const vw = mockAreaWidth(10000);
+
+        mockAreaHeight(8000);
+
+        const expectedMargin = MARGIN_MAX;
+        const expectedY = expectedMargin;
+        const expectedWidth = vw * DOCKED_TO_CORNER_SIZING_RATIO;
+
+        placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+
+        const expectedX = expectedXFn(vw, expectedMargin, expectedWidth);
+
+        const pos = docking.getTargetAreaFromPos_(video, posX, DirectionY.TOP);
+
+        expect(pos.x, 'x').to.equal(expectedX);
+        expect(pos.y, 'y').to.equal(expectedY);
+      });
+    });
+  });
+
+  describe.skip('getTargetAreaFromSlot_', () => {
+    it('returns valid dimensions for same aspect ratio as component', () => {
+      const video = createVideo();
+      const slot = createAmpElementMock('amp-layout');
+
+      const slotWidth = 300;
+      const slotHeight = 300;
+
+      const slotX = 10;
+      const slotY = 10;
+
+      placeElementLtwh(slot, slotX, slotY, slotWidth, slotHeight);
+
+      const videoWidth = 200;
+      const videoHeight = 200;
+
+      placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+
+      const scrollTop = 500;
+
+      const expectedScale = slotWidth / videoWidth;
+
+      const expectedX = slotX;
+      const expectedY = slotY - scrollTop;
+
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+
+      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+        video,
+        slot.element
+      );
+
+      expect(x, 'x').to.equal(expectedX);
+      expect(y, 'y').to.equal(expectedY);
+      expect(width, 'width').to.equal(videoWidth * expectedScale);
+      expect(height, 'height').to.equal(videoHeight * expectedScale);
+    });
+
+    it('returns valid dimensions for a slot wider than component', () => {
+      const video = createVideo();
+      const slot = createAmpElementMock('amp-layout');
+
+      const slotWidth = 400;
+      const slotHeight = 300;
+
+      const slotX = 10;
+      const slotY = 10;
+
+      placeElementLtwh(slot, slotX, slotY, slotWidth, slotHeight);
+
+      const videoWidth = 200;
+      const videoHeight = 200;
+
+      placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+
+      const scrollTop = 500;
+
+      const expectedScale = slotHeight / videoHeight;
+
+      const expectedX =
+        // Center
+        slotX +
+        slotWidth / 2 +
+        // Offset center by width delta
+        -((videoWidth * expectedScale) / 2);
+
+      const expectedY = slotY - scrollTop;
+
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+
+      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+        video,
+        slot.element
+      );
+
+      expect(x, 'x').to.equal(expectedX);
+      expect(y, 'y').to.equal(expectedY);
+      expect(width, 'width').to.equal(videoWidth * expectedScale);
+      expect(height, 'height').to.equal(videoHeight * expectedScale);
+    });
+
+    it('returns valid dimensions for a slot taller than component', () => {
+      const video = createVideo();
+      const slot = createAmpElementMock('amp-layout');
+
+      const slotWidth = 300;
+      const slotHeight = 400;
+
+      const slotX = 10;
+      const slotY = 10;
+
+      placeElementLtwh(slot, slotX, slotY, slotWidth, slotHeight);
+
+      const videoWidth = 200;
+      const videoHeight = 200;
+
+      placeElementLtwh(video, 0, 0, videoWidth, videoHeight);
+
+      const scrollTop = 500;
+
+      const expectedScale = slotWidth / videoWidth;
+
+      const expectedY =
+        // Center
+        slotY -
+        scrollTop +
+        slotHeight / 2 +
+        // Offset center by height delta
+        -((videoHeight * expectedScale) / 2);
+
+      const expectedX = slotX;
+
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+
+      const {x, y, width, height} = docking.getTargetAreaFromSlot_(
+        video,
+        slot.element
+      );
+
+      expect(x, 'x').to.equal(expectedX);
+      expect(y, 'y').to.equal(expectedY);
+      expect(width, 'width').to.equal(videoWidth * expectedScale);
+      expect(height, 'height').to.equal(videoHeight * expectedScale);
+    });
+  });
+
+  describe('getDims_', () => {
+    let video;
+
+    const scrollTop = 5;
+
+    const videoX = 10;
+    const videoY = 10;
+
+    const videoWidth = 500;
+    const videoHeight = 300;
+
+    const targetX = 50;
+    const targetY = 20;
+    const targetWidth = 440;
+    const targetHeight = 264;
+
+    const target = {
+      rect: layoutRectLtwh(targetX, targetY, targetWidth, targetHeight),
+    };
+
+    beforeEach(() => {
+      video = createVideo();
+      placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
+
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+    });
+
+    it('returns starting position for step = 0', () => {
+      const step = 0;
+      const {x, y, scale} = docking.getDims_(video, target, step);
+
+      expect(x, 'x').to.equal(videoX);
+      expect(y, 'y').to.equal(videoY - scrollTop);
+      expect(scale, 'scale').to.equal(1);
+    });
+
+    it('returns final position for step = 1', () => {
+      const step = 1;
+      const {x, y, scale} = docking.getDims_(video, target, step);
+
+      expect(x, 'x').to.equal(targetX);
+      expect(y, 'y').to.equal(targetY);
+      expect(scale, 'scale').to.equal(targetWidth / videoWidth);
+    });
+
+    [
+      {
+        expectedRelativeX: DirectionX.RIGHT,
+        placementTextual: 'right',
+        videoX: 0,
+        targetX: 10,
+      },
+      {
+        expectedRelativeX: DirectionX.LEFT,
+        placementTextual: 'left',
+        videoX: 10,
+        targetX: 0,
+      },
+    ].forEach(({expectedRelativeX, placementTextual, videoX, targetX}) => {
+      it(
+        `returns relativeX=${placementTextual.toUpperCase()} when target ` +
+          `placed ${placementTextual} of component`,
+        () => {
+          const step = 1;
+
+          placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
+
+          target.rect = layoutRectLtwh(
+            targetX,
+            targetY,
+            targetWidth,
+            targetHeight
+          );
+
+          expect(docking.getDims_(video, target, step).relativeX).to.equal(
+            expectedRelativeX
+          );
+        }
+      );
+    });
+  });
+
+  describe('dock_', () => {
+    let video;
+    let placeAt;
+    let setCurrentlyDocked;
+
+    const target = {};
+    const step = 1;
+    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: DirectionX.RIGHT};
+
+    beforeEach(() => {
+      video = createVideo();
+
+      placeElementLtwh(video, 0, 0, 400, 300);
+
+      setCurrentlyDocked = env.sandbox.stub(docking, 'setCurrentlyDocked_');
+      placeAt = env.sandbox
+        .stub(docking, 'placeAt_')
+        .returns(Promise.resolve());
+
+      env.sandbox.stub(docking, 'getDims_').returns(targetDims);
+    });
+
+    it('sets currently docked', async () => {
+      stubControls();
+
+      await docking.dock_(video, target, step);
+
+      expect(setCurrentlyDocked.withArgs(video, target, step)).to.have.been
+        .calledOnce;
+    });
+
+    it('places element at the result of getDims_', async () => {
+      stubControls();
+
+      await docking.dock_(video, target, step);
+
+      const {x, y, scale, relativeX} = targetDims;
+
+      expect(
+        placeAt.withArgs(
+          video,
+          x,
+          y,
+          scale,
+          step,
+          /* durationMs */ any,
+          relativeX
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    it('hides component controls', async () => {
+      await docking.dock_(video, target, step);
+
+      expect(video.hideControls).to.have.been.calledOnce;
+    });
+
+    it('enables docked controls', async () => {
+      const {enable} = stubControls();
+
+      await docking.dock_(video, target, step);
+
+      expect(enable).to.have.been.calledOnce;
+    });
+
+    it('does not enable docked controls if transferring layer', async () => {
+      const {enable} = stubControls();
+
+      await docking.dock_(video, target, step, /* isTransferLayerStep */ true);
+
+      expect(enable).to.not.have.been.called;
+    });
+  });
+
+  describe('setCurrentlyDocked_', () => {
+    const video = {foo: 'bar'};
+    const target = {rect: layoutRectLtwh(0, 0, 50, 50)};
+
+    const step = 1;
+
+    let trigger;
+
+    beforeEach(() => {
+      trigger = env.sandbox.stub(docking, 'trigger_');
+    });
+
+    it('triggers action', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledOnce;
+    });
+
+    it('does not retrigger action', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledOnce;
+    });
+
+    it('retriggers action when videos change', () => {
+      stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+      docking.setCurrentlyDocked_({a: 'b'}, target, step);
+      docking.setCurrentlyDocked_({c: 'd'}, target, step);
+
+      expect(trigger.withArgs(Actions.DOCK)).to.have.been.calledThrice;
+    });
+
+    it('retriggers action when target rects change', () => {
+      stubControls();
+
+      const a = {rect: layoutRectLtwh(1, 0, 0, 0)};
+      const b = {rect: layoutRectLtwh(2, 0, 0, 0)};
+      const c = {rect: layoutRectLtwh(3, 0, 0, 0)};
+      const d = {rect: layoutRectLtwh(4, 0, 0, 0)};
+
+      docking.setCurrentlyDocked_(video, a, step);
+      docking.setCurrentlyDocked_(video, b, step);
+      docking.setCurrentlyDocked_(video, c, step);
+      docking.setCurrentlyDocked_(video, d, step);
+      docking.setCurrentlyDocked_(video, d, step);
+
+      expect(trigger.withArgs(Actions.DOCK).callCount).to.equal(4);
+    });
+
+    it("updates controls' video reference", () => {
+      const {setVideo} = stubControls();
+
+      docking.setCurrentlyDocked_(video, target, step);
+
+      expect(setVideo.withArgs(video, target.rect)).to.have.been.calledOnce;
+    });
+  });
+
+  describe('undock_', () => {
+    let video;
+    let trigger;
+    let resetOnUndock;
+    let placeAt;
+    let maybeUpdateStaleYAfterScroll;
+
+    const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: DirectionX.RIGHT};
+
+    beforeEach(() => {
+      video = createVideo();
+
+      placeElementLtwh(video, 0, 0, 400, 300);
+
+      trigger = env.sandbox.stub(docking, 'trigger_');
+      resetOnUndock = env.sandbox.stub(docking, 'resetOnUndock_');
+      maybeUpdateStaleYAfterScroll = env.sandbox
+        .stub(docking, 'maybeUpdateStaleYAfterScroll_')
+        .returns(Promise.resolve());
+
+      placeAt = env.sandbox
+        .stub(docking, 'placeAt_')
+        .returns(Promise.resolve());
+
+      docking.currentlyDocked_ = {target: 'foo'};
+
+      env.sandbox
+        .stub(docking, 'getDims_')
+        .withArgs(video, docking.currentlyDocked_.target, /* step */ 0)
+        .returns(targetDims);
+    });
+
+    it('triggers action', async () => {
+      stubControls();
+
+      await docking.undock_(video);
+
+      expect(trigger.withArgs(Actions.UNDOCK)).to.have.been.calledOnce;
+    });
+
+    it('updates stale Y after undock', async () => {
+      const {promise, resolve} = new Deferred();
+
+      placeAt.returns(promise);
+
+      const done = docking.undock_(video);
+
+      expect(maybeUpdateStaleYAfterScroll.withArgs(video)).to.not.have.been
+        .called;
+
+      resolve();
+
+      await done;
+
+      expect(maybeUpdateStaleYAfterScroll.withArgs(video)).to.have.been
+        .calledOnce;
+    });
+
+    it('resets after undock', async () => {
+      const {promise, resolve} = new Deferred();
+
+      placeAt.returns(promise);
+
+      const done = docking.undock_(video);
+
+      expect(resetOnUndock.withArgs(video)).to.not.have.been.called;
+
+      resolve();
+
+      await done;
+
+      expect(resetOnUndock.withArgs(video)).to.have.been.calledOnce;
+    });
+
+    it('hides and disables docked controls', async () => {
+      const {hide, disable} = stubControls();
+
+      await docking.undock_(video);
+
+      expect(hide).to.have.been.calledOnce;
+      expect(disable).to.have.been.calledOnce;
+    });
+
+    it('places element at the result of getDims_', async () => {
+      stubControls();
+
+      await docking.undock_(video);
+
+      const {x, y, scale, relativeX} = targetDims;
+
+      expect(
+        placeAt.withArgs(
+          video,
+          x,
+          y,
+          scale,
+          /* step */ 0,
+          /* durationMs */ any,
+          relativeX
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    const inlinePercVis = `${REVERT_TO_INLINE_RATIO * 100}% visible`;
+
+    it(`pauses video when < ${inlinePercVis}`, async () => {
+      placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+      await docking.undock_(video);
+
+      expect(video.pause).to.have.been.calledOnce;
+    });
+
+    it(`doesn't pause video when >= ${inlinePercVis}`, async () => {
+      placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
+
+      await docking.undock_(video);
+
+      expect(video.pause).to.not.have.been.called;
+    });
+
+    describe('Chrome freeze when out-of-view workaround', () => {
+      it(`shows component controls early when < ${inlinePercVis}`, () => {
+        const {promise, resolve} = new Deferred();
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+        placeAt.returns(promise);
+
+        const done = docking.undock_(video);
+
+        expect(video.showControls).to.have.been.calledOnce;
+
+        resolve();
+
+        return done;
+      });
+
+      it(`shows component controls late when >= ${inlinePercVis}`, () => {
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
+
+        const {promise, resolve} = new Deferred();
+
+        placeAt.returns(promise);
+
+        const done = docking.undock_(video);
+
+        expect(video.showControls).to.not.have.been.called;
+
+        resolve();
+
+        return done.then(() => {
+          expect(video.showControls).to.have.been.calledOnce;
+        });
+      });
+
+      it(`does not animate transition when < ${inlinePercVis}`, async () => {
+        const expectedTransitionDurationMs = 0;
+
+        placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
+
+        await docking.undock_(video);
+
+        expect(
+          placeAt.withArgs(
+            video,
+            /* x */ any,
+            /* y */ any,
+            /* scale */ any,
+            /* step */ any,
+            expectedTransitionDurationMs
+          )
+        ).to.have.been.calledOnce;
+      });
+
+      it(`animates transition when >= ${inlinePercVis}`, async () => {
+        const expectedTransitionDurationMs = 555;
+
+        env.sandbox
+          .stub(docking, 'calculateTransitionDuration_')
+          .returns(expectedTransitionDurationMs);
+
+        placeRatio(video, 400, 400, REVERT_TO_INLINE_RATIO);
+
+        await docking.undock_(video);
+
+        expect(
+          placeAt.withArgs(
+            video,
+            /* x */ any,
+            /* y */ any,
+            /* scale */ any,
+            /* step */ any,
+            expectedTransitionDurationMs
+          )
+        ).to.have.been.calledOnce;
+      });
+    });
+  });
+
+  describe('scrollBack_', () => {
+    beforeEach(() => {
+      // Requests ampdoc when calling `setCurrentlyDocked_`. Node is detached
+      // and we don't care about callee's side effects.
+      env.sandbox.stub(docking, 'trigger_');
+    });
+
+    it('does not scroll when undocked', () => {
+      docking.scrollBack_();
+
+      expect(viewport.animateScrollIntoView).to.not.have.been.called;
+    });
+
+    it("scrolls back to video component's inline box when docked", () => {
+      const video = createVideo();
+
+      docking.setCurrentlyDocked_(
+        video,
+        /* target, irrelevant */ {},
+        /* step, irrelevant */ 1
+      );
+
+      docking.scrollBack_();
+
+      expect(viewport.animateScrollIntoView.withArgs(video.element, 'center'))
+        .to.have.been.calledOnce;
+    });
+  });
+
+  describes.repeated(
+    '',
+    {
+      'Minimize to corner': {
+        useSlot: false,
+        topBoundary: 0,
+      },
+      'Minimize to slot element': {
+        useSlot: true,
+        topBoundary: 20,
+      },
+    },
+    (name, {useSlot, topBoundary}) => {
+      const DocktargetType = useSlot ? 'slot element' : 'corner';
+
+      function maybeCreateSlotElementLtwh(left, top, width, height) {
+        if (!useSlot) {
+          return;
+        }
+        const impl = createAmpElementMock('amp-layout', {
+          id: slotId,
+          layout: 'fill',
+        });
+        stubLayoutBox(impl, layoutRectLtwh(left, top, width, height));
+        env.win.document.body.appendChild(impl.element);
+
+        querySelectorStub.withArgs('#' + slotId).returns(impl.element);
+
+        return impl.element;
+      }
+
+      beforeEach(() => {
+        if (useSlot) {
+          slotAttr = `#${slotId}`;
+        }
+      });
+
+      describe('getTargetFor_', () => {
+        it(`should use ${DocktargetType} as target type`, () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 150);
+
+          const video = createVideo();
+
+          const videoWidth = 400;
+          const videoHeight = 300;
+
+          placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
+
+          setScrollDirection(DirectionY.TOP);
+
+          setValidAreaWidth();
+          setValidAreaHeight(videoHeight);
+
+          const target = docking.getTargetFor_(video);
+
+          expect(target).to.not.be.null;
+          expect(target.rect).to.not.be.null;
+
+          if (useSlot) {
+            expect(target.type).to.equal(DockTargetType.SLOT);
+          } else {
+            expect(target.type).to.equal(DockTargetType.CORNER);
+            expect(target.directionX).to.not.be.undefined;
+          }
+        });
+      });
+
+      describe('updateOnPositionChange_', () => {
+        it('should not dock if the viewport is too small', () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const video = createVideo();
+          const dock = stubDockInTransferLayerStep();
+
+          const videoWidth = 400;
+          const videoHeight = 300;
+
+          placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
+
+          setScrollDirection(DirectionY.TOP);
+
+          mockInvalidAreaWidth();
+          setValidAreaHeight(videoHeight);
+
+          docking.updateOnPositionChange_(video);
+
+          expect(dock).to.not.have.been.called;
+        });
+
+        it('should not dock if the video is portrait', () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const dock = stubDockInTransferLayerStep();
+          const video = createVideo();
+
+          const videoWidth = 300;
+          const videoHeight = 400;
+
+          setScrollDirection(DirectionY.TOP);
+
+          setValidAreaWidth();
+          setValidAreaHeight(videoHeight);
+
+          placeElementLtwh(video, 0, -400, videoWidth, videoHeight);
+
+          allowConsoleError(() => {
+            // user().error() expected.
+            docking.updateOnPositionChange_(video);
+          });
+
+          expect(dock).to.not.have.been.called;
+        });
+
+        it("doesn't dock when video's layout box is not sized", () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const video = createVideo();
+          const dock = stubDockInTransferLayerStep();
+
+          placeElementLtwh(video, 0, -100, 0, 0);
+
+          setScrollDirection(DirectionY.TOP);
+
+          setValidAreaWidth();
+          setValidAreaHeight();
+
+          docking.updateOnPositionChange_(video);
+
+          expect(dock).to.not.have.been.called;
+        });
+
+        it('should not dock if another video is docked', () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const dock = stubDockInTransferLayerStep();
+          const video = createVideo();
+
+          setValidAreaWidth();
+
+          placeElementLtwh(video, 0, 0, 0, 0);
+
+          docking.currentlyDocked_ = {video: createVideo()};
+
+          setScrollDirection(DirectionY.TOP);
+
+          docking.updateOnPositionChange_(video);
+
+          expect(dock).to.not.have.been.called;
+        });
+
+        it('should dock if video is over top boundary', () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const dock = stubDockInTransferLayerStep();
+          const video = createVideo();
+
+          setScrollDirection(DirectionY.TOP);
+
+          const videoWidth = 400;
+          const videoHeight = 300;
+
+          setValidAreaWidth();
+          setValidAreaHeight(videoHeight * 2);
+
+          placeElementLtwh(video, 0, -250, videoWidth, videoHeight);
+
+          docking.updateOnPositionChange_(video);
+
+          expect(dock).to.have.been.calledOnce;
+        });
+
+        it('should not dock if video does not touch boundaries', () => {
+          maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+          const dock = stubDockInTransferLayerStep();
+          const video = createVideo();
+
+          const videoWidth = 400;
+          const videoHeight = 300;
+
+          setValidAreaWidth();
+          setValidAreaHeight(videoHeight);
+          setScrollDirection(DirectionY.TOP);
+          placeElementLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
+
+          docking.updateOnPositionChange_(video);
+
+          expect(dock).to.not.have.been.called;
+        });
+      });
+
+      describe('trigger_', () => {
+        const targetElementTextual = useSlot ? 'video' : 'slot';
+
+        it(`triggers action from ${targetElementTextual} element`, () => {
+          const actions = {trigger: env.sandbox.spy()};
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+          const slot = maybeCreateSlotElementLtwh(23, 17, 100, 100);
+          const video = createVideo();
+          const action = '🌮';
+
+          docking.currentlyDocked_ = {
+            video,
+            target: {
+              type: useSlot ? DockTargetType.SLOT : DockTargetType.CORNER,
+            },
+          };
+
+          docking.trigger_(action);
+
+          expect(
+            actions.trigger.withArgs(
+              slot || video.element,
+              action,
+              /* event */ any,
+              /* trust */ any
+            )
+          ).to.have.been.called;
+          expect(actions.trigger).to.have.been.calledOnce;
+        });
+      });
+    }
+  );
 });

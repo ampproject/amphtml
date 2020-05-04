@@ -20,6 +20,7 @@ import {
 } from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
+import {Services} from '../../../src/services';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 import {addParamToUrl} from '../../../src/url';
@@ -45,8 +46,10 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
     /** @const {string} */
     this.baseRequestUrl_ = this.element.getAttribute('src');
-    devAssert(this.baseRequestUrl_,
-        'Invalid network configuration: no request URL specified');
+    devAssert(
+      this.baseRequestUrl_,
+      'Invalid network configuration: no request URL specified'
+    );
 
     this.getContext().win = this.win;
   }
@@ -67,20 +70,27 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     // We collect all fields in the dataset of the form
     // 'data-request-param-<field_name>=<val>`, and append &<field_name>=<val>
     // to the add request URL.
-    Object.keys(this.element.dataset).forEach(dataField => {
+    Object.keys(this.element.dataset).forEach((dataField) => {
       if (startsWith(dataField, DATA_REQUEST_PARAM_PREFIX)) {
         const requestParamName = dataField.slice(
-            DATA_REQUEST_PARAM_PREFIX.length, dataField.length);
+          DATA_REQUEST_PARAM_PREFIX.length,
+          dataField.length
+        );
         if (requestParamName) {
           // Set the first character to lower case, as reading it in camelCase
           // will automatically put it into upper case.
-          const finalParamName = requestParamName.charAt(0).toLowerCase() +
-              requestParamName.slice(1);
+          const finalParamName =
+            requestParamName.charAt(0).toLowerCase() +
+            requestParamName.slice(1);
           url = addParamToUrl(
-              url, finalParamName, this.element.dataset[dataField]);
+            url,
+            finalParamName,
+            this.element.dataset[dataField]
+          );
         }
       }
     });
+    url = Services.urlReplacementsForDoc(this.element).expandUrlSync(url);
     this.getContext().adUrl = url;
     return url;
   }
@@ -88,6 +98,6 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
 const TAG = 'amp-ad-custom';
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdTemplate);
 });

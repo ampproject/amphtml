@@ -73,13 +73,11 @@ You can listen to multiple events on an element by separating the events with a 
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
-
 ## Multiple actions for one event
 
 You can execute multiple actions in sequence for the same event by separating the actions with a comma ','.
 
 Example: `on="tap:target1.actionA,target2.actionB"`
-
 
 ## Globally-defined events and actions
 
@@ -97,11 +95,13 @@ For example, the following is possible in AMP:
 
 <button on="tap:warning-message.hide">Cool, thanks!</button>
 ```
+
 {% endcall %}
 
 ## Element-specific events
 
-### * - all elements
+### \* - all elements
+
 <table>
   <tr>
     <th>Event</th>
@@ -114,6 +114,7 @@ For example, the following is possible in AMP:
 </table>
 
 ### Input elements
+
 <table>
   <tr>
     <th width="20%">Event</th>
@@ -167,6 +168,7 @@ event.value</pre>
 </table>
 
 ### amp-carousel[type="slides"]
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -179,14 +181,10 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
-  <tr>
-    <td><code>toggleAutoplay</code></td>
-    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
-    <td><pre>optional toggle status</pre></td>
-  </tr>
 </table>
 
 ### amp-lightbox
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -205,7 +203,23 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-list
+
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-selector
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -220,10 +234,12 @@ event.targetOption
 
 // Array of "option" attribute values of all selected elements.
 event.selectedOptions</pre></td>
+
   </tr>
 </table>
 
 ### amp-sidebar
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -242,7 +258,23 @@ event.selectedOptions</pre></td>
   </tr>
 </table>
 
+### amp-state
+
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-video, amp-youtube
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -262,6 +294,7 @@ event.selectedOptions</pre></td>
 </table>
 
 ### form
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -297,10 +330,10 @@ event.response</pre></td>
   </tr>
 </table>
 
-
 ## Element-specific actions
 
-### * (all elements)
+### \* (all elements)
+
 <table>
   <tr>
     <th width="40%">Action</th>
@@ -312,11 +345,15 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>show</code></td>
-    <td>Shows the target element.</td>
+    <td>Shows the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleVisibility</code></td>
-    <td>Toggles the visibility of the target element.</td>
+    <td>Toggles the visibility of the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
@@ -324,12 +361,13 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
-    <td>Scrolls an element into view with a smooth animation. If defined,
-    <code>duration</code> specifies the length of the animation in milliseconds
-    (default is 500ms). <code>position</code> is optional and takes one of
-    <code>top</code>, <code>center</code> or <code>bottom</code> defining where
-    in the viewport the element will be at the end of the scroll (default is
-    <code>top</code>).</td>
+    <td>Scrolls an element into view with a smooth animation.<br>
+    <code>duration</code> is optional. Specifies the length of the animation in milliseconds. If unspecified, an amount relative to scroll difference
+    under or equal to 500 milliseconds is used.<br>
+    <code>position</code> is optional. One of <code>top</code>, <code>center</code>
+    or <code>bottom</code> (default <code>top</code>).
+    Specifies the position of the element relative to the viewport after
+    scrolling.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>
@@ -341,6 +379,7 @@ event.response</pre></td>
 </table>
 
 ### amp-audio
+
 <table>
   <tr>
     <th width="20%">Action</th>
@@ -357,6 +396,7 @@ event.response</pre></td>
 </table>
 
 ### amp-bodymovin-animation
+
 <table>
   <tr>
     <th>Action</th>
@@ -385,6 +425,7 @@ event.response</pre></td>
 </table>
 
 ### amp-carousel[type="slides"]
+
 <table>
   <tr>
     <th>Action</th>
@@ -394,9 +435,14 @@ event.response</pre></td>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
   </tr>
+  <tr>
+    <td><code>toggleAutoplay(toggleOn=true|false)</code></td>
+    <td>Toggle the carousel's autoplay status. <code>toggleOn</code> is optional.</td>
+  </tr>
 </table>
 
 ### amp-image-lightbox
+
 <table>
   <tr>
     <th width="40%">Action</th>
@@ -409,6 +455,7 @@ event.response</pre></td>
 </table>
 
 ### amp-lightbox
+
 <table>
   <tr>
     <th>Action</th>
@@ -424,7 +471,21 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-lightbox-gallery <a name="amp-lightbox-gallery"></a>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>open</code></td>
+    <td>Opens the lightbox-gallery. Can be triggered by tapping another element, if you specify the image id: `on="tap:amp-lightbox-gallery.open(id='image-id')"`.</td>
+  </tr>
+</table>
+
 ### amp-list
+
 <table>
   <tr>
     <th>Action</th>
@@ -437,6 +498,7 @@ event.response</pre></td>
 </table>
 
 ### amp-live-list
+
 <table>
   <tr>
     <th>Action</th>
@@ -449,6 +511,7 @@ event.response</pre></td>
 </table>
 
 ### amp-selector
+
 <table>
   <tr>
     <th>Action</th>
@@ -469,6 +532,7 @@ event.response</pre></td>
 </table>
 
 ### amp-sidebar
+
 <table>
   <tr>
     <th>Action</th>
@@ -489,6 +553,7 @@ event.response</pre></td>
 </table>
 
 ### amp-state
+
 <table>
   <tr>
     <th>Action</th>
@@ -501,6 +566,7 @@ event.response</pre></td>
 </table>
 
 ### amp-user-notification
+
 <table>
   <tr>
     <th>Action</th>
@@ -538,12 +604,13 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <td>Unmutes the video.</td>
   </tr>
   <tr>
-    <td><code>fullscreen</code></td>
+    <td><code>fullscreenenter</code></td>
     <td>Takes the video to fullscreen.</td>
   </tr>
 </table>
 
 ### form
+
 <table>
   <tr>
     <th>Action</th>
@@ -600,7 +667,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state.</p>
       <p></p>
     </td>
@@ -608,7 +675,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>pushState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
 </table>
@@ -617,11 +684,11 @@ actions that apply to the whole document.
 
 ### Target: amp-access
 
-The `amp-access` target is provided by the [amp-access](https://www.ampproject.org/docs/reference/components/amp-access.html) component.
+The `amp-access` target is provided by the [amp-access](https://amp.dev/documentation/components/amp-access.html) component.
 
 The `amp-access` target is special for these reasons:
 
 1.  You can't give an arbitrary ID to this target. The target is always `amp-access`.
-2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://www.ampproject.org/docs/reference/components/amp-access#configuration).
+2.  The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
 
-See [details](https://www.ampproject.org/docs/reference/components/amp-access#login-link) about using the `amp-access` target.
+See [details](https://amp.dev/documentation/components/amp-access#login-link) about using the `amp-access` target.

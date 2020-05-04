@@ -15,9 +15,7 @@
  */
 
 import {FilterType} from './filters/filter';
-import {
-  IFRAME_TRANSPORTS,
-} from '../../amp-analytics/0.1/iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -42,7 +40,8 @@ export let AmpAdExitConfig;
  *   finalUrl: string,
  *   trackingUrls: (!Array<string>|undefined),
  *   vars: (VariablesDef|undefined),
- *   filters: (!Array<string>|undefined)
+ *   filters: (!Array<string>|undefined),
+ *   behaviors: (BehaviorsDef|undefined)
  * }}
  */
 export let NavigationTargetConfig;
@@ -59,6 +58,17 @@ export let VariableDef;
  * @typedef {!Object<string, !VariableDef>}
  */
 export let VariablesDef;
+
+/**
+ * Supported Behaviors:
+ *  -- clickTarget -- Specifies where to try to open the click.
+ *                    Either '_blank'(default) or '_top'
+ *
+ * @typedef {{
+ *   clickTarget: (string|undefined)
+ * }}
+ */
+export let BehaviorsDef;
 
 /**
  * @typedef {{
@@ -126,8 +136,10 @@ export function assertConfig(config) {
  */
 function assertTransport(transport) {
   for (const t in transport) {
-    userAssert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
-        `Unknown transport option: '${t}'`);
+    userAssert(
+      t == TransportMode.BEACON || t == TransportMode.IMAGE,
+      `Unknown transport option: '${t}'`
+    );
     userAssert(typeof transport[t] == 'boolean');
   }
 }
@@ -143,10 +155,15 @@ function assertFilters(filters) {
     FilterType.INACTIVE_ELEMENT,
   ];
   for (const name in filters) {
-    userAssert(typeof filters[name] == 'object',
-        'Filter specification \'%s\' is malformed', name);
-    userAssert(validFilters.indexOf(filters[name].type) != -1,
-        'Supported filters: ' + validFilters.join(', '));
+    userAssert(
+      typeof filters[name] == 'object',
+      "Filter specification '%s' is malformed",
+      name
+    );
+    userAssert(
+      validFilters.indexOf(filters[name].type) != -1,
+      'Supported filters: ' + validFilters.join(', ')
+    );
   }
 }
 
@@ -157,7 +174,7 @@ function assertFilters(filters) {
  * @param {!JsonObject} config
  */
 function assertTargets(targets, config) {
-  userAssert(typeof targets == 'object', '\'targets\' must be an object');
+  userAssert(typeof targets == 'object', "'targets' must be an object");
   for (const target in targets) {
     assertTarget(target, targets[target], config);
   }
@@ -172,20 +189,24 @@ function assertTargets(targets, config) {
  */
 function assertTarget(name, target, config) {
   userAssert(
-      typeof target['finalUrl'] == 'string',
-      'finalUrl of target \'%s\' must be a string', name);
+    typeof target['finalUrl'] == 'string',
+    "finalUrl of target '%s' must be a string",
+    name
+  );
   if (target['filters']) {
-    target['filters'].forEach(filter => {
-      userAssert(
-          config['filters'][filter], 'filter \'%s\' not defined', filter);
+    /** @type {!Array} */ (target['filters']).forEach((filter) => {
+      userAssert(config['filters'][filter], "filter '%s' not defined", filter);
     });
   }
   if (target['vars']) {
     const pattern = /^_[a-zA-Z0-9_-]+$/;
     for (const variable in target['vars']) {
       userAssert(
-          pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
-          variable, pattern);
+        pattern.test(variable),
+        "'%s' must match the pattern '%s'",
+        variable,
+        pattern
+      );
     }
   }
 }
@@ -197,7 +218,9 @@ function assertTarget(name, target, config) {
  * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
-  return user().assertString(IFRAME_TRANSPORTS[vendor],
-      `Unknown or invalid vendor ${vendor}, ` +
-      'note that vendor must use transport: iframe');
+  return user().assertString(
+    IFRAME_TRANSPORTS[vendor],
+    `Unknown or invalid vendor ${vendor}, ` +
+      'note that vendor must use transport: iframe'
+  );
 }

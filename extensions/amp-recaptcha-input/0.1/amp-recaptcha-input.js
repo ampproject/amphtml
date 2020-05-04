@@ -20,29 +20,29 @@
  * recaptcha tokens
  */
 
-import {AsyncInputClasses} from '../../../src/async-input';
-import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {Layout} from '../../../src/layout';
 import {
-  installRecaptchaServiceForDoc,
+  AmpRecaptchaService,
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
-import {isExperimentOn} from '../../../src/experiments';
+import {
+  AsyncInputAttributes,
+  AsyncInputClasses,
+} from '../../../src/async-input';
+import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
+import {Layout} from '../../../src/layout';
 import {setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-
 /** @implements {../../../src/async-input.AsyncInput} */
 export class AmpRecaptchaInput extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {?string} **/
+    /** @private {?string} */
     this.sitekey_ = null;
 
     /** @private {?string} */
@@ -55,44 +55,52 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     this.registerPromise_ = null;
 
     /** @private {boolean} */
-    this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
+    this.global_ = false;
   }
 
   /** @override */
   buildCallback() {
-    if (!this.isExperimentEnabled_) {
-      return;
-    }
-
     this.sitekey_ = userAssert(
-        this.element.getAttribute('data-sitekey'),
-        'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+      this.element.getAttribute('data-sitekey'),
+      'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+      this.element
+    );
 
     this.action_ = userAssert(
-        this.element.getAttribute('data-action'),
-        'The data-action attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+      this.element.getAttribute('data-action'),
+      'The data-action attribute is required for <amp-recaptcha-input> %s',
+      this.element
+    );
 
-    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
+    userAssert(
+      this.element.getAttribute(AsyncInputAttributes.NAME),
+      'The %s attribute is required for <amp-recaptcha-input> %s',
+      AsyncInputAttributes.NAME,
+      this.element
+    );
 
-    return this.mutateElement(() => {
-      toggle(this.element);
-      // Add the required AsyncInput class
-      this.element.classList.add(AsyncInputClasses['ASYNC_INPUT']);
-      /**
-       * We are applying styles here, to minizime the amp.css file.
-       * These styles will create an in-place element, that is 1x1,
-       * but invisible. Absolute positioning keeps it where it would have
-       * been, without taking up space. Thus, layoutCallback will still
-       * be called at the appropriate time
-       */
-      setStyles(this.element, {
-        'position': 'absolute',
-        'width': '1px',
-        'height': '1px',
-        'overflow': 'hidden',
-        'visibility': 'hidden',
+    this.global_ = this.element.hasAttribute('data-global');
+
+    return recaptchaServiceForDoc(this.element).then((service) => {
+      this.recaptchaService_ = service;
+
+      return this.mutateElement(() => {
+        toggle(this.element);
+        // Add the required AsyncInput class
+        this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+        /**
+         * These styles will create an in-place element, that is 1x1,
+         * but invisible. Absolute positioning keeps it where it would have
+         * been, without taking up space. Thus, layoutCallback will still
+         * be called at the appropriate time
+         */
+        setStyles(this.element, {
+          'position': 'absolute',
+          'width': '1px',
+          'height': '1px',
+          'overflow': 'hidden',
+          'visibility': 'hidden',
+        });
       });
     });
   }
@@ -105,7 +113,10 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
-      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
+      this.registerPromise_ = this.recaptchaService_.register(
+        this.sitekey_,
+        this.global_
+      );
     }
 
     return /** @type {!Promise} */ (this.registerPromise_);
@@ -129,17 +140,20 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   getValue() {
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
-          this.element.getResourceId(), this.action_
+        this.element.getResourceId(),
+        this.action_
       );
     }
-    return Promise.reject(new Error(
+    return Promise.reject(
+      new Error(
         'amp-recaptcha-input requires both the data-sitekey,' +
-        ' and data-action attribute'
-    ));
+          ' and data-action attribute'
+      )
+    );
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaServiceForDoc(AMP.ampdoc);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

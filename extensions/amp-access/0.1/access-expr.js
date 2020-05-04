@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {accessParser as parser} from './access-expr-impl';
-
+import {hasOwn, map} from '../../../src/utils/object';
+import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
 
 /**
- * Evaluates access expression.
+ * Evaluates access expressions.
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
- * described in the [access-expr-impl.md].
+ * built into the `gulp build` and `gulp dist` tasks.
  *
  * Grammar highlights:
  * - Shorthand truthy expressions are allowed, such as `field`. Truthy value
@@ -43,5 +43,41 @@ export function evaluateAccessExpr(expr, data) {
     return !!parser.parse(expr);
   } finally {
     parser.yy = null;
+  }
+}
+
+/**
+ * AmpAccessEvaluator evaluates amp-access expressions.
+ * It uses a cache to speed up repeated evals for the same expression.
+ */
+export class AmpAccessEvaluator {
+  /** */
+  constructor() {
+    /** @type {Object<string, boolean>} */
+    this.cache = null;
+
+    /** @private @type {JsonObject} */
+    this.lastData_ = null;
+  }
+
+  /**
+   * Evaluate access expressions, but turn to a cache first.
+   * Cache is invalidated when given new data.
+   *
+   * @param {string} expr
+   * @param {!JsonObject} data
+   * @return {boolean}
+   */
+  evaluate(expr, data) {
+    if (this.lastData_ !== data) {
+      this.lastData_ = data;
+      this.cache = map();
+    }
+
+    if (!hasOwn(this.cache, expr)) {
+      this.cache[expr] = evaluateAccessExpr(expr, data);
+    }
+
+    return this.cache[expr];
   }
 }

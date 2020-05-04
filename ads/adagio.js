@@ -21,7 +21,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adagio(global, data) {
-
   validateData(data, ['sid', 'loc']);
 
   const $neodata = global;

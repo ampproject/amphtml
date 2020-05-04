@@ -27,26 +27,25 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, () => {
-  let sandbox;
+describes.realWin('media-tasks', {}, (env) => {
   let el;
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     el = document.createElement('video');
 
     // Mock vsync
     vsyncApi = {
       mutatePromise: () => {},
     };
-    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {callback();});
-
+    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
+      callback();
+    });
   });
 
   describe('PauseTask', () => {
     it('should call pause()', () => {
-      const pause = sandbox.spy(el, 'pause');
+      const pause = env.sandbox.spy(el, 'pause');
       const task = new PauseTask();
       task.execute(el);
       expect(pause).to.have.been.called;
@@ -57,7 +56,7 @@ describes.realWin('media-tasks', {}, () => {
     it('should call play() if element was not yet playing', () => {
       expect(el.paused).to.be.true;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).to.have.been.called;
@@ -67,7 +66,7 @@ describes.realWin('media-tasks', {}, () => {
       el.play();
       expect(el.paused).to.be.false;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).not.to.have.been.called;
@@ -98,7 +97,7 @@ describes.realWin('media-tasks', {}, () => {
 
   describe('LoadTask', () => {
     it('should call load()', () => {
-      const load = sandbox.spy(el, 'load');
+      const load = env.sandbox.spy(el, 'load');
       const task = new LoadTask();
       task.execute(el);
       expect(load).to.have.been.called;
@@ -140,7 +139,7 @@ describes.realWin('media-tasks', {}, () => {
      * @return {!Array<!Element>}
      */
     function getFakeSources(indices) {
-      return indices.map(index => getFakeSource(index));
+      return indices.map((index) => getFakeSource(index));
     }
 
     it('should clear existing src attribute', () => {
@@ -157,7 +156,7 @@ describes.realWin('media-tasks', {}, () => {
 
     it('should clear existing source elements', () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 
@@ -186,7 +185,7 @@ describes.realWin('media-tasks', {}, () => {
       const OLD_SRC_ELS = getFakeSources([1, 2, 3]);
       const NEW_SRC_ELS = getFakeSources([4, 5, 6]);
 
-      OLD_SRC_ELS.forEach(source => {
+      OLD_SRC_ELS.forEach((source) => {
         el.appendChild(source);
       });
 

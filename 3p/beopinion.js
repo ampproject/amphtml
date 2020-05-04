@@ -25,7 +25,7 @@ import {setStyles} from '../src/style';
  * @param {!Window} global
  */
 function getBeOpinion(global) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {});
+  loadScript(global, 'https://widget.beop.io/sdk.js', function () {});
 }
 
 /**
@@ -45,6 +45,7 @@ function addCanonicalLinkTag(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function createContainer(global, data) {
   // add canonical link tag
@@ -73,9 +74,7 @@ function createContainer(global, data) {
 
   setStyles(container, {
     width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'block',
   });
 
   return container;
@@ -88,20 +87,22 @@ function createContainer(global, data) {
  */
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
-  return function() {
+  return function () {
+    context.onResizeDenied(function (requestedHeight, requestedWidth) {
+      context.requestResize(requestedWidth, requestedHeight);
+    });
     global.BeOpinionSDK.init({
       account: accountId,
-      onContentReceive: function(hasContent) {
+      onContentReceive: function (hasContent) {
         if (hasContent) {
           context.renderStart();
         } else {
           context.noContentAvailable();
         }
       },
-      onHeightChange: function(newHeight) {
+      onHeightChange: function (newHeight) {
         const c = global.document.getElementById('c');
-        const boundingClientRect = c./*REVIEW*/getBoundingClientRect();
-        context.onResizeDenied(context.requestResize.bind(context));
+        const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });

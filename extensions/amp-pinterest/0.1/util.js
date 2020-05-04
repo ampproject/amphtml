@@ -49,7 +49,7 @@ function filter(str) {
   ret = '';
   try {
     decoded = decodeURIComponent(str);
-  } catch (e) { }
+  } catch (e) {}
   ret = decoded.replace(/</g, '&lt;');
   ret = ret.replace(/>/g, '&gt;');
   return ret;
@@ -62,7 +62,9 @@ function filter(str) {
  * @return {Element}
  */
 function make(doc, data) {
-  let el = null, tag, attr;
+  let el = null,
+    tag,
+    attr;
   for (tag in data) {
     el = doc.createElement(tag);
     for (attr in data[tag]) {

@@ -19,14 +19,12 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;
   let parentEl;
   let shareMenu;
@@ -37,7 +35,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     isSystemShareSupported = false;
 
@@ -46,20 +46,17 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       isSystemShareSupported: () => isSystemShareSupported,
       loadRequiredExtensions: () => {},
     };
-    shareWidgetMock = sandbox.mock(shareWidget);
-    sandbox.stub(ShareWidget, 'create').returns(shareWidget);
+    shareWidgetMock = env.sandbox.mock(shareWidget);
+    env.sandbox.stub(ShareWidget, 'create').returns(shareWidget);
 
     // Making sure the vsync tasks run synchronously.
-    sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+    env.sandbox.stub(Services, 'vsyncFor').returns({
+      mutate: (fn) => fn(),
       run: (vsyncTaskSpec, vsyncState) => {
         vsyncTaskSpec.measure(vsyncState);
         vsyncTaskSpec.mutate(vsyncState);
       },
     });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
@@ -81,9 +78,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
   it('should build the share widget when building the component', () => {
     shareWidgetMock
-        .expects('build')
-        .once()
-        .returns(win.document.createElement('div'));
+      .expects('build')
+      .once()
+      .returns(win.document.createElement('div'));
 
     shareMenu.build();
 
@@ -161,7 +158,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    const clickCallbackSpy = sandbox.spy();
+    const clickCallbackSpy = env.sandbox.spy();
     shareMenu.element_.addEventListener('click', clickCallbackSpy);
 
     // Toggling the share menu dispatches a click event on the amp-social-share

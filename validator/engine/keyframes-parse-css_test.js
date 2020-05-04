@@ -14,15 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('parse_css.KeyframesParseCssTest');
+goog.module('parse_css.KeyframesParseCssTest');
 
-goog.require('json_testutil.makeJsonKeyCmpFn');
-goog.require('json_testutil.renderJSON');
-goog.require('parse_css.BlockType');
-goog.require('parse_css.parseAStylesheet');
-goog.require('parse_css.tokenize');
-goog.require('parse_css.validateKeyframesCss');
-
+const json_testutil = goog.require('json_testutil');
+const parse_css = goog.require('parse_css');
+const tokenize_css = goog.require('tokenize_css');
+const {validateKeyframesCss} = goog.require('amp.validator.keyframesParseCss');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -49,8 +46,8 @@ const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn(
  */
 function assertJSONEquals(left, right) {
   assertStrictEqual(
-      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/4),
-      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/4));
+      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/ 4),
+      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/ 4));
 }
 
 /** @type {!Object<string,parse_css.BlockType>} */
@@ -64,7 +61,6 @@ const keyframesCssParsingSpec = {
 };
 
 describe('validateKeyframesCss', () => {
-
   it('validates good keyframes example', () => {
     const css = '@keyframes anim1 {' +
         '0% {transform: translateX(-100%);}' +
@@ -103,12 +99,12 @@ describe('validateKeyframesCss', () => {
         '}' +
         '}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -120,24 +116,24 @@ describe('validateKeyframesCss', () => {
         '@media (min-width: 300px) {}' +
         '@supports (offset-distance: 0) {}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
   it('validates bad not "@" rule', () => {
     const css = 'amp-img {}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -155,12 +151,12 @@ describe('validateKeyframesCss', () => {
         '100% {offset-distance: 100%}' +
         '}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -176,12 +172,12 @@ describe('validateKeyframesCss', () => {
   it('validates correct prelude concatenation', () => {
     const css = 'a.underlined {}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -197,12 +193,12 @@ describe('validateKeyframesCss', () => {
   it('validates bad qualified rule, not inside "@" rule', () => {
     const css = 'a { color: red }';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -222,12 +218,12 @@ describe('validateKeyframesCss', () => {
         '}' +
         '}';
     const errors = [];
-    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, keyframesCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    parse_css.validateKeyframesCss(sheet, errors);
+    validateKeyframesCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,

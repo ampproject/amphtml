@@ -33,7 +33,8 @@ export function bidtellect(global, data) {
     'videotypeid',
     'videocloseicon',
     'targetid',
-    'bustframe'];
+    'bustframe',
+  ];
   validateData(data, requiredParams, optionalParams);
   let params = '?t=' + encodeURIComponent(data.t);
   params += '&pid=' + encodeURIComponent(data.pid);
@@ -44,7 +45,7 @@ export function bidtellect(global, data) {
   if (data.height) {
     params += '&h=' + encodeURIComponent(data.height);
   }
-  optionalParams.forEach(function(param) {
+  optionalParams.forEach(function (param) {
     if (data[param]) {
       params += '&' + param + '=' + encodeURIComponent(data[param]);
     }

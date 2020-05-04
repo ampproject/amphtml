@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  FailureType,
-  RecoveryModeType,
-} from './amp-ad-type-defs';
-import {Services} from '../../../src/services';
+import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
 import {dev, devAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {map} from '../../../src/utils/object';
@@ -30,7 +26,6 @@ const TAG = 'amp-ad-network-base';
  * @abstract
  */
 export class AmpAdNetworkBase extends AMP.BaseElement {
-
   /**
    * Creates an instance of AmpAdNetworkBase.
    * @param {!AmpElement} element
@@ -72,17 +67,21 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    this.sendRequest_();
+    if (!this.adResponsePromise_) {
+      this.sendRequest_();
+    }
   }
 
   /** @override */
   layoutCallback() {
-    devAssert(this.adResponsePromise_,
-        'layoutCallback invoked before XHR request!');
+    devAssert(
+      this.adResponsePromise_,
+      'layoutCallback invoked before XHR request!'
+    );
     return this.adResponsePromise_
-        .then(response => this.invokeValidator_(response))
-        .then(validatorResult => this.invokeRenderer_(validatorResult))
-        .catch(error => this.handleFailure_(error.type, error.msg));
+      .then((response) => this.invokeValidator_(response))
+      .then((validatorResult) => this.invokeRenderer_(validatorResult))
+      .catch((error) => this.handleFailure_(error.type, error.msg));
   }
 
   /**
@@ -92,8 +91,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   onFailure(failure, recovery) {
     if (this.recoveryModes_[failure]) {
-      dev().warn(TAG,
-          `Recovery mode for failure type ${failure} already registered!`);
+      dev().warn(
+        TAG,
+        `Recovery mode for failure type ${failure} already registered!`
+      );
     }
     this.recoveryModes_[failure] = recovery;
   }
@@ -148,10 +149,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @private
    */
   sendRequest_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      const url = this.getRequestUrl();
-      this.adResponsePromise_ = sendXhrRequest(this.win, url);
-    });
+    this.adResponsePromise_ = this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() => {
+        const url = this.getRequestUrl();
+        return sendXhrRequest(this.win, url);
+      });
   }
 
   /**
@@ -164,15 +167,15 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     if (!response.arrayBuffer) {
       return Promise.reject(this.handleFailure_(FailureType.INVALID_RESPONSE));
     }
-    return response.arrayBuffer().then(unvalidatedBytes => {
-      const validatorType = response.headers.get('AMP-Ad-Response-Type')
-          || 'default';
-      devAssert(this.validators_[validatorType],
-          'Validator never registered!');
-      return this.validators_[validatorType].validate(
-          this.context_, unvalidatedBytes, response.headers)
-          .catch(err =>
-            Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err}));
+    return response.arrayBuffer().then((unvalidatedBytes) => {
+      const validatorType =
+        response.headers.get('AMP-Ad-Response-Type') || 'default';
+      devAssert(this.validators_[validatorType], 'Validator never registered!');
+      return this.validators_[validatorType]
+        .validate(this.context_, unvalidatedBytes, response.headers)
+        .catch((err) =>
+          Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err})
+        );
     });
   }
 
@@ -184,10 +187,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   invokeRenderer_(validatorOutput) {
     const renderer = this.renderers_[validatorOutput.type];
     devAssert(renderer, 'Renderer for AMP creatives never registered!');
-    return renderer.render(
-        this.context_, this.element, validatorOutput.creativeData)
-        .catch(err =>
-          Promise.reject({type: FailureType.RENDERER_ERROR, msg: err}));
+    return renderer
+      .render(this.context_, this.element, validatorOutput.creativeData)
+      .catch((err) =>
+        Promise.reject({type: FailureType.RENDERER_ERROR, msg: err})
+      );
   }
 
   /**

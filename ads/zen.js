@@ -24,9 +24,9 @@ const renderTo = 'zen-widget';
  */
 export function zen(global, data) {
   validateData(
-      data,
-      ['clid'],
-      ['size', 'orientation', 'successCallback', 'failCallback']
+    data,
+    ['clid'],
+    ['size', 'orientation', 'successCallback', 'failCallback']
   );
 
   addToQueue(global, data);
@@ -40,7 +40,6 @@ export function zen(global, data) {
 function addToQueue(global, data) {
   global[n] = global[n] || [];
   global[n].push(() => {
-
     // Create container
     createContainer(global, renderTo);
 

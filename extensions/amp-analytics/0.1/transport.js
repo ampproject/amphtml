@@ -21,7 +21,7 @@ import {
   TransportSerializers,
   defaultSerializer,
 } from './transport-serializer';
-import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
+import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {
@@ -36,6 +36,7 @@ import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
+import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -45,12 +46,11 @@ const TAG_ = 'amp-analytics/transport';
  * Transport defines the ways how the analytics pings are going to be sent.
  */
 export class Transport {
-
   /**
    * @param {!Window} win
    * @param {!JsonObject} options
    */
-  constructor(win, options = /** @type {!JsonObject} */({})) {
+  constructor(win, options = /** @type {!JsonObject} */ ({})) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -58,7 +58,9 @@ export class Transport {
     this.options_ = options;
 
     /** @private {string|undefined} */
-    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_['referrerPolicy']);
+    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_[
+      'referrerPolicy'
+    ]);
 
     // no-referrer is only supported in image transport
     if (this.referrerPolicy_ === 'no-referrer') {
@@ -111,21 +113,28 @@ export class Transport {
       return;
     }
 
-    if (this.options_['beacon'] && Transport.sendRequestUsingBeacon(
-        this.win_, getRequest(this.useBody_))) {
+    if (
+      this.options_['beacon'] &&
+      Transport.sendRequestUsingBeacon(this.win_, getRequest(this.useBody_))
+    ) {
       return;
     }
-    if (this.options_['xhrpost'] && Transport.sendRequestUsingXhr(
-        this.win_, getRequest(this.useBody_))) {
+    if (
+      this.options_['xhrpost'] &&
+      Transport.sendRequestUsingXhr(this.win_, getRequest(this.useBody_))
+    ) {
       return;
     }
     const image = this.options_['image'];
     if (image) {
-      const suppressWarnings = (typeof image == 'object' &&
-      image['suppressWarnings']);
+      const suppressWarnings =
+        typeof image == 'object' && image['suppressWarnings'];
       Transport.sendRequestUsingImage(
-          this.win_, getRequest(false), suppressWarnings,
-          /** @type {string|undefined} */ (this.referrerPolicy_));
+        this.win_,
+        getRequest(false),
+        suppressWarnings,
+        /** @type {string|undefined} */ (this.referrerPolicy_)
+      );
       return;
     }
     user().warn(TAG_, 'Failed to send request', url, this.options_);
@@ -138,27 +147,31 @@ export class Transport {
    * user navigates/swipes away from the page, and is recreated if the user
    * navigates back to the page.
    *
-   * @param {!Window} win
    * @param {!Element} element
-   * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
    */
-  maybeInitIframeTransport(win, element, opt_preconnect) {
+  maybeInitIframeTransport(element) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
-    if (opt_preconnect) {
-      opt_preconnect.preload(getIframeTransportScriptUrl(win), 'script');
-    }
 
+    // In the case of FIE rendering, we should be using the parent doc win.
+    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
-    const ampAdResourceId = this.isInabox_ ? '1' : user().assertString(
-        getAmpAdResourceId(element, getTopWindow(win)),
-        'No friendly amp-ad ancestor element was found ' +
-        'for amp-analytics tag with iframe transport.');
+    const ampAdResourceId = this.isInabox_
+      ? '1'
+      : user().assertString(
+          getAmpAdResourceId(element, topWin),
+          'No friendly amp-ad ancestor element was found ' +
+            'for amp-analytics tag with iframe transport.'
+        );
 
     this.iframeTransport_ = new IframeTransport(
-        win, type, this.options_, ampAdResourceId);
+      topWin,
+      type,
+      this.options_,
+      ampAdResourceId
+    );
   }
 
   /**
@@ -190,11 +203,12 @@ export class Transport {
 
     assertHttpsUrl(request, 'amp-analytics request');
     userAssert(
-        parseUrlDeprecated(request).origin !=
+      parseUrlDeprecated(request).origin !=
         parseUrlDeprecated(this.win_.location.href).origin,
-        'Origin of iframe request must not be equal to the document origin.' +
+      'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
+    );
 
     /** @const {!Element} */
     const iframe = this.win_.document.createElement('iframe');
@@ -215,7 +229,9 @@ export class Transport {
    * @return {!TransportSerializerDef}
    */
   getSerializer_() {
-    return /** @type {!TransportSerializerDef} */(TransportSerializers['default']);
+    return /** @type {!TransportSerializerDef} */ (TransportSerializers[
+      'default'
+    ]);
   }
 
   /**
@@ -225,15 +241,23 @@ export class Transport {
    * @param {string|undefined} referrerPolicy
    */
   static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    if (!win) {
+      return;
+    }
     const image = createPixel(win, request.url, referrerPolicy);
-    loadPromise(image).then(() => {
-      dev().fine(TAG_, 'Sent image request', request.url);
-    }).catch(() => {
-      if (!suppressWarnings) {
-        user().warn(TAG_, 'Response unparseable or failed to send image ' +
-            'request', request.url);
-      }
-    });
+    loadPromise(image)
+      .then(() => {
+        dev().fine(TAG_, 'Sent image request', request.url);
+      })
+      .catch(() => {
+        if (!suppressWarnings) {
+          user().warn(
+            TAG_,
+            'Response unparseable or failed to send image request',
+            request.url
+          );
+        }
+      });
   }
 
   /**
@@ -263,7 +287,6 @@ export class Transport {
     if (!XMLHttpRequest) {
       return false;
     }
-    /** @const {XMLHttpRequest} */
     const xhr = new XMLHttpRequest();
     if (!('withCredentials' in xhr)) {
       return false; // Looks like XHR level 1 - CORS is not supported.
@@ -293,7 +316,7 @@ export class Transport {
  */
 function cacheFuncResult(func) {
   const cachedValue = {};
-  return arg => {
+  return (arg) => {
     const key = String(arg);
     if (cachedValue[key] === undefined) {
       cachedValue[key] = func(arg);

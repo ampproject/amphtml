@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-// Requires polyfills in immediate side effect.
-import '../polyfills';
-
+import {getMode} from '../mode';
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
 
 const TAG = 'timer';
+let timersForTesting;
 
 /**
  * Helper with all things Timer.
- *
-* @implements {../service.EmbeddableService}
  */
 export class Timer {
-
   /**
    * @param {!Window} win
    */
@@ -49,9 +45,9 @@ export class Timer {
   }
 
   /**
-  * Returns time since start in milliseconds.
-  * @return {number}
-  */
+   * Returns time since start in milliseconds.
+   * @return {number}
+   */
   timeSinceStart() {
     return Date.now() - this.startTime_;
   }
@@ -71,13 +67,15 @@ export class Timer {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
       const id = 'p' + this.taskCount_++;
-      this.resolved_.then(() => {
-        if (this.canceled_[id]) {
-          delete this.canceled_[id];
-          return;
-        }
-        callback();
-      }).catch(reportError);
+      this.resolved_
+        .then(() => {
+          if (this.canceled_[id]) {
+            delete this.canceled_[id];
+            return;
+          }
+          callback();
+        })
+        .catch(reportError);
       return id;
     }
     const wrapped = () => {
@@ -88,7 +86,14 @@ export class Timer {
         throw e;
       }
     };
-    return this.win.setTimeout(wrapped, opt_delay);
+    const index = this.win.setTimeout(wrapped, opt_delay);
+    if (getMode().test) {
+      if (!timersForTesting) {
+        timersForTesting = [];
+      }
+      timersForTesting.push(index);
+    }
+    return index;
   }
 
   /**
@@ -110,7 +115,7 @@ export class Timer {
    * @return {!Promise}
    */
   promise(opt_delay) {
-    return new this.win.Promise(resolve => {
+    return new this.win.Promise((resolve) => {
       // Avoid wrapping in closure if no specific result is produced.
       const timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
@@ -159,7 +164,7 @@ export class Timer {
    * @return {!Promise}
    */
   poll(delay, predicate) {
-    return new this.win.Promise(resolve => {
+    return new this.win.Promise((resolve) => {
       const interval = this.win.setInterval(() => {
         if (predicate()) {
           this.win.clearInterval(interval);
@@ -168,11 +173,6 @@ export class Timer {
       }, delay);
     });
   }
-
-  /** @override @nocollapse */
-  static installInEmbedWindow(embedWin, unusedAmpDoc) {
-    installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
-  }
 }
 
 /**
@@ -180,4 +180,22 @@ export class Timer {
  */
 export function installTimerService(window) {
   registerServiceBuilder(window, TAG, Timer);
+}
+
+/**
+ * @param {!Window} embedWin
+ */
+export function installTimerInEmbedWindow(embedWin) {
+  installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
+}
+
+/**
+ * Cancels all timers scheduled during the current test
+ */
+export function cancelTimersForTesting() {
+  if (!timersForTesting) {
+    return;
+  }
+  timersForTesting.forEach(clearTimeout);
+  timersForTesting = null;
 }

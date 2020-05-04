@@ -27,7 +27,6 @@ const TAG = 'Storage';
 /** @const */
 const MAX_VALUES_PER_ORIGIN = 8;
 
-
 /**
  * The storage API. This is an API equivalent to the Web LocalStorage API but
  * extended to all AMP embedding scenarios.
@@ -39,17 +38,16 @@ const MAX_VALUES_PER_ORIGIN = 8;
  * @private Visible for testing only.
  */
 export class Storage {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/viewer-impl.Viewer} viewer
+   * @param {!../service/viewer-interface.ViewerInterface} viewer
    * @param {!StorageBindingDef} binding
    */
   constructor(ampdoc, viewer, binding) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private @const {!../service/viewer-impl.Viewer} */
+    /** @private @const {!../service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /** @private @const {!StorageBindingDef} */
@@ -64,7 +62,7 @@ export class Storage {
 
   /**
    * @return {!Storage}
-   * @private
+   * @protected
    */
   start_() {
     this.listenToBroadcasts_();
@@ -78,7 +76,7 @@ export class Storage {
    * @return {!Promise<*>}
    */
   get(name) {
-    return this.getStore_().then(store => store.get(name));
+    return this.getStore_().then((store) => store.get(name));
   }
 
   /**
@@ -104,7 +102,7 @@ export class Storage {
    * @return {!Promise}
    */
   setNonBoolean(name, value, opt_isUpdate) {
-    return this.saveStore_(store => store.set(name, value, opt_isUpdate));
+    return this.saveStore_((store) => store.set(name, value, opt_isUpdate));
   }
 
   /**
@@ -114,7 +112,7 @@ export class Storage {
    * @return {!Promise}
    */
   remove(name) {
-    return this.saveStore_(store => store.remove(name));
+    return this.saveStore_((store) => store.remove(name));
   }
 
   /**
@@ -123,13 +121,14 @@ export class Storage {
    */
   getStore_() {
     if (!this.storePromise_) {
-      this.storePromise_ = this.binding_.loadBlob(this.origin_)
-          .then(blob => blob ? parseJson(atob(blob)) : {})
-          .catch(reason => {
-            dev().expectedError(TAG, 'Failed to load store: ', reason);
-            return {};
-          })
-          .then(obj => new Store(obj));
+      this.storePromise_ = this.binding_
+        .loadBlob(this.origin_)
+        .then((blob) => (blob ? parseJson(atob(blob)) : {}))
+        .catch((reason) => {
+          dev().expectedError(TAG, 'Failed to load store: ', reason);
+          return {};
+        })
+        .then((obj) => new Store(obj));
     }
     return this.storePromise_;
   }
@@ -141,19 +140,24 @@ export class Storage {
    */
   saveStore_(mutator) {
     return this.getStore_()
-        .then(store => {
-          mutator(store);
-          const blob = btoa(JSON.stringify(store.obj));
-          return this.binding_.saveBlob(this.origin_, blob);
-        })
-        .then(this.broadcastReset_.bind(this));
+      .then((store) => {
+        mutator(store);
+        // Need to encode stored object to avoid plain text,
+        // but doesn't need to be base64encode. Can convert to some other
+        // encoding method for further improvement.
+        const blob = btoa(JSON.stringify(store.obj));
+        return this.binding_.saveBlob(this.origin_, blob);
+      })
+      .then(this.broadcastReset_.bind(this));
   }
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onBroadcast(message => {
-      if (message['type'] == 'amp-storage-reset' &&
-              message['origin'] == this.origin_) {
+    this.viewer_.onBroadcast((message) => {
+      if (
+        message['type'] == 'amp-storage-reset' &&
+        message['origin'] == this.origin_
+      ) {
         dev().fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
@@ -163,13 +167,14 @@ export class Storage {
   /** @private */
   broadcastReset_() {
     dev().fine(TAG, 'Broadcasted reset message');
-    this.viewer_.broadcast(/** @type {!JsonObject} */ ({
-      'type': 'amp-storage-reset',
-      'origin': this.origin_,
-    }));
+    this.viewer_.broadcast(
+      /** @type {!JsonObject} */ ({
+        'type': 'amp-storage-reset',
+        'origin': this.origin_,
+      })
+    );
   }
 }
-
 
 /**
  * The implementation of store logic for get, set and remove.
@@ -224,8 +229,11 @@ export class Store {
    * @param {boolean=} opt_isUpdate
    */
   set(name, value, opt_isUpdate) {
-    devAssert(name != '__proto__' && name != 'prototype',
-        'Name is not allowed: %s', name);
+    devAssert(
+      name != '__proto__' && name != 'prototype',
+      'Name is not allowed: %s',
+      name
+    );
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];
@@ -270,13 +278,11 @@ export class Store {
   }
 }
 
-
 /**
  * A binding provides the specific implementation of storage technology.
  * @interface
  */
 class StorageBindingDef {
-
   /**
    * Returns the promise that yields the store blob for the specified origin.
    * @param {string} unusedOrigin
@@ -294,14 +300,12 @@ class StorageBindingDef {
   saveBlob(unusedOrigin, unusedBlob) {}
 }
 
-
 /**
  * Storage implementation using Web LocalStorage API.
  * @implements {StorageBindingDef}
  * @private Visible for testing only.
  */
 export class LocalStorageBinding {
-
   /**
    * @param {!Window} win
    */
@@ -351,7 +355,7 @@ export class LocalStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve(null);
         return;
@@ -362,7 +366,7 @@ export class LocalStorageBinding {
 
   /** @override */
   saveBlob(origin, blob) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.isLocalStorageSupported_) {
         resolve();
         return;
@@ -373,50 +377,55 @@ export class LocalStorageBinding {
   }
 }
 
-
 /**
  * Storage implementation delegated to the Viewer.
  * @implements {StorageBindingDef}
  * @private Visible for testing only.
  */
 export class ViewerStorageBinding {
-
   /**
-   * @param {!../service/viewer-impl.Viewer} viewer
+   * @param {!../service/viewer-interface.ViewerInterface} viewer
    */
   constructor(viewer) {
-    /** @private @const {!../service/viewer-impl.Viewer} */
+    /** @private @const {!../service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
   }
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessageAwaitResponse('loadStore',
-        dict({'origin': origin})).then(response => response['blob']);
+    return this.viewer_
+      .sendMessageAwaitResponse('loadStore', dict({'origin': origin}))
+      .then((response) => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'saveStore', dict({'origin': origin, 'blob': blob})));
+    return /** @type {!Promise} */ (this.viewer_
+      .sendMessageAwaitResponse(
+        'saveStore',
+        dict({'origin': origin, 'blob': blob})
+      )
+      .catch((reason) => {
+        throw dev().createExpectedError(TAG, 'Failed to save store: ', reason);
+      }));
   }
 }
-
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installStorageServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
-      ampdoc,
-      'storage',
-      function() {
-        const viewer = Services.viewerForDoc(ampdoc);
-        const overrideStorage = parseInt(viewer.getParam('storage'), 10);
-        const binding = overrideStorage ?
-          new ViewerStorageBinding(viewer) :
-          new LocalStorageBinding(ampdoc.win);
-        return new Storage(ampdoc, viewer, binding).start_();
-      },
-      /* opt_instantiate */ true);
+    ampdoc,
+    'storage',
+    function () {
+      const viewer = Services.viewerForDoc(ampdoc);
+      const overrideStorage = parseInt(viewer.getParam('storage'), 10);
+      const binding = overrideStorage
+        ? new ViewerStorageBinding(viewer)
+        : new LocalStorageBinding(ampdoc.win);
+      return new Storage(ampdoc, viewer, binding).start_();
+    },
+    /* opt_instantiate */ true
+  );
 }

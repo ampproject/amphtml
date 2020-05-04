@@ -23,13 +23,14 @@ import {loadScript, validateData} from '../3p/3p';
 export function revjet(global, data) {
   validateData(data, ['tag', 'key'], ['plc', 'opts', 'params']);
 
-  global._revjetData = Object.assign({}, data);
+  global._revjetData = {...data};
 
   loadScript(
-      global,
-      'https://cdn.revjet.com/~cdn/JS/03/amp.js',
-      /* opt_cb */ undefined,
-      () => {
-        global.context.noContentAvailable();
-      });
+    global,
+    'https://cdn.revjet.com/~cdn/JS/03/amp.js',
+    /* opt_cb */ undefined,
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
 }

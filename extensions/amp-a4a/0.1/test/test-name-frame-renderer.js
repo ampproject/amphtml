@@ -24,8 +24,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('NameFrameRenderer', realWinConfig, env => {
-
+describes.realWin('NameFrameRenderer', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
@@ -50,7 +49,10 @@ describes.realWin('NameFrameRenderer', realWinConfig, env => {
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.getPageLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.getIntersectionChangeEntry = () => ({});
     document.body.appendChild(containerElement);

@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
-  getData,
-  listen,
-  listenOncePromise,
-} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+  createFrameFor,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dict} from '../../../src/utils/object';
+import {getData, listen, listenOncePromise} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
-import {CSS} from '../../../build/amp-delight-player-0.1.css';
-
 /** @const */
 const TAG = 'amp-delight-player';
+
+/**
+ * TODO: export this from a lower level, like 'src'
+ * @private @const
+ * */
+const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @const @enum {string} */
 const DelightEvent = {
@@ -47,7 +53,8 @@ const DelightEvent = {
   UNMUTED: 'x-dl8-to-parent-unmuted',
   ENTERED_FULLSCREEN: 'x-dl8-to-parent-entered-fullscreen',
   EXITED_FULLSCREEN: 'x-dl8-to-parent-exited-fullscreen',
-
+  AD_START: 'x-dl8-to-parent-amp-ad-start',
+  AD_END: 'x-dl8-to-parent-amp-ad-end',
   PLAY: 'x-dl8-to-iframe-play',
   PAUSE: 'x-dl8-to-iframe-pause',
   ENTER_FULLSCREEN: 'x-dl8-to-iframe-enter-fullscreen',
@@ -56,6 +63,8 @@ const DelightEvent = {
   UNMUTE: 'x-dl8-to-iframe-unmute',
   ENABLE_INTERFACE: 'x-dl8-to-iframe-enable-interface',
   DISABLE_INTERFACE: 'x-dl8-to-iframe-disable-interface',
+  SEEK: 'x-dl8-to-iframe-seek',
+  CUSTOM_TICK: 'x-dl8-to-parent-amp-custom-tick',
 
   PING: 'x-dl8-ping',
   PONG: 'x-dl8-pong',
@@ -69,7 +78,6 @@ const DelightEvent = {
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpDelightPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -125,7 +133,11 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.baseURL_, onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.baseURL_,
+      onLayout
+    );
   }
 
   /** @override */
@@ -136,8 +148,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.contentID_ = userAssert(
-        this.element.getAttribute('data-content-id'),
-        'The data-content-id attribute is required'
+      this.element.getAttribute('data-content-id'),
+      'The data-content-id attribute is required'
     );
 
     const deferred = new Deferred();
@@ -155,7 +167,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     iframe.setAttribute('allow', 'vr');
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleDelightMessage_(event);
     });
 
@@ -168,6 +180,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+      return false; // do nothing, do not relayout
+    }
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -192,13 +208,16 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.element.ownerDocument.createElement('div');
+    const html = htmlFor(this.element);
+    const placeholder = html`
+      <div placeholder><amp-img layout="fill"></amp-img></div>
+    `;
+
     const src = `${this.baseURL_}/poster/${this.contentID_}`;
-    placeholder.setAttribute('placeholder', '');
 
-    setStyle(placeholder, 'background-image', `url(${src})`);
+    placeholder.firstElementChild.setAttribute('src', src);
 
-    this.placeholderEl_ = placeholder;
+    this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
     return placeholder;
   }
@@ -235,26 +254,45 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   handleDelightMessage_(event) {
-    if (event.source !== this.iframe_.contentWindow) {
+    if (!originMatches(event, this.iframe_, /.*/)) {
       return;
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === undefined || data['type'] === undefined) {
+    if (!data || !data['type']) {
       return; // We only process valid JSON.
     }
 
     const {element} = this;
 
+    const redispatched = redispatch(element, data['type'], {
+      [DelightEvent.PLAYING]: VideoEvents.PLAYING,
+      [DelightEvent.PAUSED]: VideoEvents.PAUSE,
+      [DelightEvent.ENDED]: VideoEvents.ENDED,
+      [DelightEvent.MUTED]: VideoEvents.MUTED,
+      [DelightEvent.UNMUTED]: VideoEvents.UNMUTED,
+      [DelightEvent.AD_START]: VideoEvents.AD_START,
+      [DelightEvent.AD_END]: VideoEvents.AD_END,
+    });
+
+    if (redispatched) {
+      return;
+    }
+
     switch (data['type']) {
       case DelightEvent.PING: {
         const guid = data['guid'];
         if (guid) {
-          this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(/** @type {JsonObject} */ ({
-            type: DelightEvent.PONG,
-            guid,
-            idx: 0,
-          })), '*');
+          this.iframe_.contentWindow./*OK*/ postMessage(
+            JSON.stringify(
+              /** @type {JsonObject} */ ({
+                type: DelightEvent.PONG,
+                guid,
+                idx: 0,
+              })
+            ),
+            '*'
+          );
         }
         break;
       }
@@ -263,30 +301,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
         this.playerReadyResolver_(this.iframe_);
         break;
       }
-      case DelightEvent.PLAYING: {
-        element.dispatchCustomEvent(VideoEvents.PLAYING);
-        break;
-      }
-      case DelightEvent.PAUSED: {
-        element.dispatchCustomEvent(VideoEvents.PAUSE);
-        break;
-      }
-      case DelightEvent.ENDED: {
-        element.dispatchCustomEvent(VideoEvents.ENDED);
-        break;
-      }
       case DelightEvent.TIME_UPDATE: {
         const payload = data['payload'];
         this.currentTime_ = payload.currentTime;
         this.playedRanges_ = payload.playedRanges;
-        break;
-      }
-      case DelightEvent.MUTED: {
-        element.dispatchCustomEvent(VideoEvents.MUTED);
-        break;
-      }
-      case DelightEvent.UNMUTED: {
-        element.dispatchCustomEvent(VideoEvents.UNMUTED);
         break;
       }
       case DelightEvent.DURATION: {
@@ -310,7 +328,26 @@ class AmpDelightPlayer extends AMP.BaseElement {
         this.isFullscreen_ = false;
         break;
       }
+      case DelightEvent.CUSTOM_TICK: {
+        const payload = data['payload'];
+        this.dispatchCustomAnalyticsEvent_(payload.type, payload);
+        break;
+      }
     }
+  }
+
+  /**
+   * @param {string} eventType The eventType must be prefixed with video-custom- to prevent naming collisions with other analytics event types.
+   * @param {!Object<string, string>=} vars
+   */
+  dispatchCustomAnalyticsEvent_(eventType, vars) {
+    this.element.dispatchCustomEvent(
+      VideoEvents.CUSTOM_TICK,
+      dict({
+        'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
+        'vars': vars,
+      })
+    );
   }
 
   /**
@@ -320,10 +357,11 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   sendCommand_(type, payload = {}) {
-    this.playerReadyPromise_.then(iframe => {
+    this.playerReadyPromise_.then((iframe) => {
       if (iframe && iframe.contentWindow) {
-        iframe.contentWindow./*OK*/postMessage(
-            JSON.stringify(/** @type {JsonObject} */ ({type, payload})), '*'
+        iframe.contentWindow./*OK*/ postMessage(
+          JSON.stringify(/** @type {JsonObject} */ ({type, payload})),
+          '*'
         );
       }
     });
@@ -351,9 +389,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   registerEventHandlers_() {
     const dispatchScreenOrientationChangeEvents = () => {
-      const orientation = window.screen.orientation ||
-                          window.screen.mozOrientation ||
-                          window.screen.msOrientation;
+      const orientation =
+        window.screen.orientation ||
+        window.screen.mozOrientation ||
+        window.screen.msOrientation;
       this.sendCommand_(DelightEvent.SCREEN_CHANGE, {
         orientation: {
           angle: orientation.angle,
@@ -367,7 +406,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         orientation,
       });
     };
-    const dispatchDeviceOrientationEvents = event => {
+    const dispatchDeviceOrientationEvents = (event) => {
       this.sendCommand_(DelightEvent.WINDOW_DEVICEORIENTATION, {
         alpha: event.alpha,
         beta: event.beta,
@@ -376,60 +415,74 @@ class AmpDelightPlayer extends AMP.BaseElement {
         timeStamp: event.timeStamp,
       });
     };
-    const dispatchDeviceMotionEvents = event => {
-      this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, {
-        acceleration: {
-          x: event.acceleration.x,
-          y: event.acceleration.y,
-          z: event.acceleration.z,
-        },
-        accelerationIncludingGravity: {
-          x: event.accelerationIncludingGravity.x,
-          y: event.accelerationIncludingGravity.y,
-          z: event.accelerationIncludingGravity.z,
-        },
-        rotationRate: {
-          alpha: event.rotationRate.alpha,
-          beta: event.rotationRate.beta,
-          gamma: event.rotationRate.gamma,
-        },
+    const dispatchDeviceMotionEvents = (event) => {
+      const payload = {
         interval: event.interval,
         timeStamp: event.timeStamp,
-      });
+      };
+      if (event.acceleration) {
+        Object.assign(payload, {
+          acceleration: {
+            x: event.acceleration.x,
+            y: event.acceleration.y,
+            z: event.acceleration.z,
+          },
+        });
+      }
+      if (event.accelerationIncludingGravity) {
+        Object.assign(payload, {
+          accelerationIncludingGravity: {
+            x: event.accelerationIncludingGravity.x,
+            y: event.accelerationIncludingGravity.y,
+            z: event.accelerationIncludingGravity.z,
+          },
+        });
+      }
+      if (event.rotationRate) {
+        Object.assign(payload, {
+          rotationRate: {
+            alpha: event.rotationRate.alpha,
+            beta: event.rotationRate.beta,
+            gamma: event.rotationRate.gamma,
+          },
+        });
+      }
+      this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, payload);
     };
     if (window.screen) {
-      const screen = window.screen.orientation ||
-                     window.screen.mozOrientation ||
-                     window.screen.msOrientation;
+      const screen =
+        window.screen.orientation ||
+        window.screen.mozOrientation ||
+        window.screen.msOrientation;
       if (screen && screen.addEventListener) {
         this.unlistenScreenOrientationChange_ = listen(
-            screen,
-            'change',
-            dispatchScreenOrientationChangeEvents
+          screen,
+          'change',
+          dispatchScreenOrientationChangeEvents
         );
       } else {
         this.unlistenOrientationChange_ = listen(
-            this.win,
-            'orientationchange',
-            dispatchOrientationChangeEvents
+          this.win,
+          'orientationchange',
+          dispatchOrientationChangeEvents
         );
       }
     } else {
       this.unlistenOrientationChange_ = listen(
-          this.win,
-          'orientationchange',
-          dispatchOrientationChangeEvents
+        this.win,
+        'orientationchange',
+        dispatchOrientationChangeEvents
       );
     }
     this.unlistenDeviceOrientation_ = listen(
-        this.win,
-        'deviceorientation',
-        dispatchDeviceOrientationEvents
+      this.win,
+      'deviceorientation',
+      dispatchDeviceOrientationEvents
     );
     this.unlistenDeviceMotion_ = listen(
-        this.win,
-        'devicemotion',
-        dispatchDeviceMotionEvents
+      this.win,
+      'devicemotion',
+      dispatchDeviceMotionEvents
     );
   }
 
@@ -540,11 +593,15 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return this.playedRanges_;
+    return /** @type {!Array<Array<number>>} */ (this.playedRanges_);
   }
 
+  /** @override */
+  seekTo(time) {
+    this.sendCommand_(DelightEvent.SEEK, {time});
+  }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDelightPlayer, CSS);
 });

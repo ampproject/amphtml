@@ -13,6 +13,8 @@
 "false"                   return 'FALSE'
 "("                       return '('
 ")"                       return ')'
+"["                       return '['
+"]"                       return ']'
 "|"                       return '|'
 "<="                      return 'LTE'
 "<"                       return 'LT'
@@ -140,10 +142,12 @@ atom:
 
 /**
  * A field reference.
- * Ex: `field1`.
+ * Ex: `obj.field1`.
  */
 field_ref:
     field_ref DOT field_name
+      {$$ = Object.prototype.toString.call($1) == '[object Object]' && $1.hasOwnProperty($3) ? $1[$3] : null;}
+  | field_ref '[' string ']'
       {$$ = Object.prototype.toString.call($1) == '[object Object]' && $1.hasOwnProperty($3) ? $1[$3] : null;}
   | field_name
       {$$ = yy[$1] !== undefined ? yy[$1] : null;}
@@ -159,12 +163,20 @@ field_name:
   ;
 
 /**
- * A literal: string, number, boolean (true/false) or null.
- * Ex: `"A"`, `1234`, `TRUE`, `NULL`.
+ * A string.
+ * Ex: `"A"`, `'A'`.
  */
-literal:
+string:
     STRING
       {$$ = yytext.substring(1, yytext.length - 1);}
+  ;
+
+/**
+ * A literal: string, number, boolean (true/false) or null.
+ * Ex: `"A"`, `'A'`, `1234`, `TRUE`, `NULL`.
+ */
+literal:
+    string
   | NUMERIC
       {$$ = Number(yytext);}
   | TRUE

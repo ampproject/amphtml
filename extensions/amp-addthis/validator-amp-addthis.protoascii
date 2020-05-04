@@ -30,8 +30,8 @@ tags: {  # <amp-addthis>
   tag_name: "AMP-ADDTHIS"
   requires_extension: "amp-addthis"
   attrs: {
-    name: "data-pub-id"
-    mandatory: true
+    name: "data-product-code"
+    mandatory_oneof: "['data-product-code', 'data-widget-id']"
   }
   attrs: {
     name: "data-share-media"
@@ -51,7 +51,10 @@ tags: {  # <amp-addthis>
   }
   attrs: {
     name: "data-widget-id"
-    mandatory: true
+    trigger: {
+      also_requires_attr: "data-pub-id"
+    }
+    mandatory_oneof: "['data-product-code', 'data-widget-id']"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

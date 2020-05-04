@@ -15,7 +15,6 @@
  */
 import {px, resetStyles, setStyles, translate} from './style';
 
-
 /**
  * Centers a frame with a translate transition.
  * This function does direct DOM manipulation, so it needs to run under vsync
@@ -26,16 +25,21 @@ import {px, resetStyles, setStyles, translate} from './style';
  * @param {number} transitionTimeMs
  */
 export function centerFrameUnderVsyncMutate(
-  iframe, iframeRect, viewportSize, transitionTimeMs) {
-
+  iframe,
+  iframeRect,
+  viewportSize,
+  transitionTimeMs
+) {
   // TODO(alanorozco): Place a sentinel sibling on inabox to account for
   // gap necessary for position: fixed.
 
   const translateX = px(
-      (viewportSize.width / 2) - (iframeRect.width / 2) - iframeRect.left);
+    viewportSize.width / 2 - iframeRect.width / 2 - iframeRect.left
+  );
 
   const translateY = px(
-      (viewportSize.height / 2) - (iframeRect.height / 2) - iframeRect.top);
+    viewportSize.height / 2 - iframeRect.height / 2 - iframeRect.top
+  );
 
   setStyles(iframe, {
     'position': 'fixed',
@@ -50,7 +54,6 @@ export function centerFrameUnderVsyncMutate(
     'margin': 0,
   });
 }
-
 
 /**
  * Expands frame to fill the entire viewport.
@@ -74,7 +77,6 @@ export function expandFrameUnderVsyncMutate(iframe) {
     'border': 0,
   });
 }
-
 
 /**
  * Resets frame that was previously expanded to fill the entire viewport.

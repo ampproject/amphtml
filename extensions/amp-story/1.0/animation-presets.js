@@ -24,9 +24,33 @@ import {
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
+/** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
+/** @const {string} */
 const FILL_TEMPLATE_LAYOUT = 'fill';
+/** @const {number} */
+const SCALE_HIGH_DEFAULT = 3;
+/** @const {number} */
+const SCALE_LOW_DEFAULT = 1;
+
+/** @const {string} */
+const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
+/** @const {string} */
+const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
+/** @const {string} */
+const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
+/** @const {string} */
+const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+
+/** @const {!Array<string>} */
+export const PRESET_OPTION_ATTRIBUTES = [
+  SCALE_START_ATTRIBUTE_NAME,
+  SCALE_END_ATTRIBUTE_NAME,
+  TRANSLATE_X_ATTRIBUTE_NAME,
+  TRANSLATE_Y_ATTRIBUTE_NAME,
+];
 
 /**
  * A list of animations that are full bleed.
@@ -47,7 +71,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
-      'i-amphtml-story-grid-template-with-full-bleed-animation',
+    'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**
@@ -59,22 +83,28 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT])) {
-      parent.classList
-          .remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]);
+    if (
+      parent.classList.contains(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      )
+    ) {
+      parent.classList.remove(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      );
     }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
 
-/** @const {!Object<string, !StoryAnimationPresetDef>} */
-// First keyframe will always be considered offset: 0 and will be applied to the
-// element as the first frame before animation starts.
-export const PRESETS = {
+/**
+ * First keyframe will always be considered offset: 0 and will be applied to the
+ * element as the first frame before animation starts.
+ * @type {!Object<string, !StoryAnimationPresetDef>}
+ */
+export const presets = {
   'pulse': {
-    duration: 500,
-    easing: 'linear',
+    duration: 400,
+    easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
     keyframes: [
       {
         offset: 0,
@@ -95,56 +125,56 @@ export const PRESETS = {
     ],
   },
   'fly-in-left': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-right': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-top': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'fly-in-bottom': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'rotate-in-left': {
-    duration: 700,
-    easing: 'ease-out',
+    duration: 600,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return rotateAndTranslate(offsetX, 0, 0, 0, -1);
     },
   },
   'rotate-in-right': {
-    duration: 700,
-    easing: 'ease-out',
+    duration: 600,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return rotateAndTranslate(offsetX, 0, 0, 0, 1);
     },
   },
   'fade-in': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes: [
       {
         opacity: 0,
@@ -157,8 +187,10 @@ export const PRESETS = {
   'drop': {
     duration: 1600,
     keyframes(dimensions) {
-      const maxBounceHeight =
-          Math.max(160, dimensions.targetY + dimensions.targetHeight);
+      const maxBounceHeight = Math.max(
+        160,
+        dimensions.targetY + dimensions.targetHeight
+      );
 
       return [
         {
@@ -209,16 +241,16 @@ export const PRESETS = {
     ],
   },
   'whoosh-in-left': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return whooshIn(offsetX, 0, 0, 0);
     },
   },
   'whoosh-in-right': {
-    duration: 500,
-    easing: 'ease-out',
+    duration: 400,
+    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return whooshIn(offsetX, 0, 0, 0);
@@ -227,7 +259,8 @@ export const PRESETS = {
   'pan-left': {
     duration: 1000,
     easing: 'linear',
-    keyframes(dimensions) {
+    keyframes(dimensions, options) {
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -235,13 +268,21 @@ export const PRESETS = {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-      return scaleAndTranslate(offsetX, offsetY, 0, offsetY, scalingFactor);
+      return scaleAndTranslate(
+        offsetX,
+        offsetY,
+        translateX ? offsetX + translateX : 0,
+        offsetY,
+        scalingFactor
+      );
     },
   },
   'pan-right': {
     duration: 1000,
     easing: 'linear',
-    keyframes(dimensions) {
+    keyframes(dimensions, options) {
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
+
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -249,13 +290,20 @@ export const PRESETS = {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-      return scaleAndTranslate(0, offsetY, offsetX, offsetY, scalingFactor);
+      return scaleAndTranslate(
+        0,
+        offsetY,
+        -translateX || offsetX,
+        offsetY,
+        scalingFactor
+      );
     },
   },
   'pan-down': {
     duration: 1000,
     easing: 'linear',
-    keyframes(dimensions) {
+    keyframes(dimensions, options) {
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -263,13 +311,20 @@ export const PRESETS = {
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-      return scaleAndTranslate(offsetX, 0, offsetX, offsetY, scalingFactor);
+      return scaleAndTranslate(
+        offsetX,
+        0,
+        offsetX,
+        -translateY || offsetY,
+        scalingFactor
+      );
     },
   },
   'pan-up': {
     duration: 1000,
     easing: 'linear',
-    keyframes(dimensions) {
+    keyframes(dimensions, options) {
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
       const scalingFactor = calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -277,23 +332,55 @@ export const PRESETS = {
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-      return scaleAndTranslate(offsetX, offsetY, offsetX, 0, scalingFactor);
+      return scaleAndTranslate(
+        offsetX,
+        offsetY,
+        offsetX,
+        translateY ? offsetY + translateY : 0,
+        scalingFactor
+      );
     },
   },
   'zoom-in': {
     duration: 1000,
     easing: 'linear',
-    keyframes: [
-      {transform: 'scale(1,1)'},
-      {transform: 'scale(3,3)'},
-    ],
+    keyframes(unusedDimensions, options) {
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
+
+      if (scaleStart) {
+        userAssert(
+          scaleEnd > scaleStart,
+          '"scale-end" value must be greater ' +
+            'than "scale-start" value when using "zoom-in" animation.'
+        );
+      }
+
+      return [
+        {transform: `scale(${scaleStart || SCALE_LOW_DEFAULT})`},
+        {transform: `scale(${scaleEnd || SCALE_HIGH_DEFAULT})`},
+      ];
+    },
   },
   'zoom-out': {
     duration: 1000,
     easing: 'linear',
-    keyframes: [
-      {transform: 'scale(3,3)'},
-      {transform: 'scale(1,1)'},
-    ],
+    keyframes(unusedDimensions, options) {
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
+
+      if (scaleStart) {
+        userAssert(
+          scaleStart > scaleEnd,
+          '"scale-start" value must be ' +
+            'higher than "scale-end" value when using "zoom-out" animation.'
+        );
+      }
+
+      return [
+        {transform: `scale(${scaleStart || SCALE_HIGH_DEFAULT})`},
+        {transform: `scale(${scaleEnd || SCALE_LOW_DEFAULT})`},
+      ];
+    },
   },
 };

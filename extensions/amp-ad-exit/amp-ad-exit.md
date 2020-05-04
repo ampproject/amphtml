@@ -1,3 +1,12 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - ads
+teaser:
+  text: Provides configurable behavior for ad exits for AMPHTML ads.
+---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,29 +23,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ad-exit"></a> `amp-ad-exit`
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for <a href="https://www.ampproject.org/docs/ads/amphtml_ads">AMPHTML ads</a>.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay or do not specify a layout</td>
-  </tr>
-</table>
+# amp-ad-exit
 
 ## Overview
 
 The `amp-ad-exit` element is configured with a JSON child script element and
-exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampproject.org/docs/ads/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
+exposes an "exit" action to other elements in the [AMPHTML ad)](https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
 
 1. Parse the JSON config (if it hasn't yet been parsed).
 2. Find the requested exit target.
@@ -49,45 +41,48 @@ exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampp
 
 ```html
 <amp-ad-exit id="exit-api">
-<script type="application/json">
-{
-  "targets": {
-    "landingPage": {
-      "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
-      "vars": {
-        "_clickArea": {
-          "defaultValue": "headline"
+  <script type="application/json">
+    {
+      "targets": {
+        "landingPage": {
+          "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
+          "vars": {
+            "_clickArea": {
+              "defaultValue": "headline"
+            }
+          }
+        },
+        "flour": {
+          "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
+          "filters": ["3sClick", "borderProtection"],
+          "behaviors": {
+            "clickTarget": "_top"
+          }
+        },
+        "bannetons": {
+          "finalUrl": "https://example.com/artisan-baking/bannetons",
+          "trackingUrls": [
+            "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
+            "https://tracker.adnetwork.example.com/?url=example.com"
+          ],
+          "filters": ["3sClick", "borderProtection"]
+        }
+      },
+      "filters": {
+        "3sClick": {
+          "type": "clickDelay",
+          "delay": 3000
+        },
+        "borderProtection": {
+          "type": "clickLocation",
+          "top": 10,
+          "right": 10,
+          "bottom": 10,
+          "left": 10
         }
       }
-    },
-    "flour": {
-      "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3sClick", "borderProtection"]
-    },
-    "bannetons": {
-      "finalUrl": "https://example.com/artisan-baking/bannetons",
-      "trackingUrls": [
-        "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
-        "https://tracker.adnetwork.example.com/?url=example.com"
-      ],
-      "filters": ["3sClick", "borderProtection"]
     }
-  },
-  "filters": {
-    "3sClick": {
-      "type": "clickDelay",
-      "delay": 3000
-    },
-    "borderProtection": {
-      "type": "clickLocation",
-      "top": 10,
-      "right": 10,
-      "bottom": 10,
-      "left": 10
-    }
-  }
-}
-</script>
+  </script>
 </amp-ad-exit>
 
 <h1 on="tap:exit-api.exit(target='landingPage')">Artisan Baking Supplies</h1>
@@ -99,7 +94,10 @@ exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampp
   <p>Bannetons</p>
   <amp-img src="..." width="..." height="..."></amp-img>
 </div>
-<div id="footer" on="tap:exit-api.exit(target='landingPage', _clickArea='footer')">
+<div
+  id="footer"
+  on="tap:exit-api.exit(target='landingPage', _clickArea='footer')"
+>
   example.com/artisan-baking
 </div>
 ```
@@ -170,34 +168,34 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
   </tr>
 </table>
 
-Note that the default 1 second click delay uses time from extension load as interval.  However, this can be overridden to use startTimingEvent value via options object in the root of the config.  All other click filters will use the startTimingEvent if a value is not explicitly given.  Example:
+Note that the default 1 second click delay uses time from extension load as interval. However, this can be overridden to use startTimingEvent value via options object in the root of the config. All other click filters will use the startTimingEvent if a value is not explicitly given. Example:
 
 ```html
 <amp-ad-exit id="exit-api">
-<script type="application/json">
-{
-  "targets": {
-    "flour": {
-      "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3sClick", "2sClick"]
-    },
-  },
-  "options": {
-    "startTimingEvent": "navigationStart"
-  },
-  "filters": {
-    "3sClick": {
-      "type": "clickDelay",
-      "delay": 3000,
-      "startTimingEvent": "domContentLoadedEventStart"
-    },
-    "2sClick": {
-      "type": "clickDelay",
-      "delay": 2000,
+  <script type="application/json">
+    {
+      "targets": {
+        "flour": {
+          "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
+          "filters": ["3sClick", "2sClick"]
+        }
+      },
+      "options": {
+        "startTimingEvent": "navigationStart"
+      },
+      "filters": {
+        "3sClick": {
+          "type": "clickDelay",
+          "delay": 3000,
+          "startTimingEvent": "domContentLoadedEventStart"
+        },
+        "2sClick": {
+          "type": "clickDelay",
+          "delay": 2000
+        }
+      }
     }
-  }
-}
-</script>
+  </script>
 </amp-ad-exit>
 ```
 
@@ -220,7 +218,7 @@ The `inactiveElement` filter type specifies elements that should not cause exits
   </tr>
 </table>
 
-*Example: Using filters*
+_Example: Using filters_
 
 ```json
 {
@@ -309,6 +307,7 @@ applies to navigation URLs and click tracking URLs.
 </table>
 
 ### Custom variables
+
 Custom variables must begin with an underscore. Define variables in the
 config alongside the navigation target. Variables should have a `"defaultValue"`
 property. The default value can be overridden in the `exit` action invocation:
@@ -322,27 +321,34 @@ is the name of the vendor and `collected-data` is a key in the message from the
 vendor iframe. There must not be a space after the comma.
 
 Example:
+
 ```html
-<amp-ad-exit id="exit-api"><script type="application/json">
-{
-  "targets": {
-    "product": {
-      "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics",
-      "vars": {
-        "_productCategory": {
-          "defaultValue": "none"
-        },
-        "_3pAnalytics": {
-          "defaultValue": "no_response",
-          "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
-         }
+<amp-ad-exit id="exit-api"
+  ><script type="application/json">
+    {
+      "targets": {
+        "product": {
+          "finalUrl": "http://example.com/?page=_productCategory&verification=_3pAnalytics",
+          "vars": {
+            "_productCategory": {
+              "defaultValue": "none"
+            },
+            "_3pAnalytics": {
+              "defaultValue": "no_response",
+              "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
+            }
+          }
+        }
       }
     }
-  }
-}
-</script></amp-ad-exit>
-<a on="tap:exit-api.exit(target='product', _productCategory='shoes')">buy shoes</a>
-<a on="tap:exit-api.exit(target='product', _productCategory='hats')">buy hats</a>
+  </script></amp-ad-exit
+>
+<a on="tap:exit-api.exit(target='product', _productCategory='shoes')"
+  >buy shoes</a
+>
+<a on="tap:exit-api.exit(target='product', _productCategory='hats')"
+  >buy hats</a
+>
 ```
 
 By convention, user-defined variables should be in `_camelCase`. System
@@ -350,14 +356,48 @@ variables are in `ALL_CAPS`.
 
 {% call callout('Warning', type='caution') %}
 Be careful with your variable names. Substitution works by simple
-string replacement. *Any* occurrence of the variable in the URL will be
-replaced. For example, if you define a custom variable named "_b" with value
+string replacement. _Any_ occurrence of the variable in the URL will be
+replaced. For example, if you define a custom variable named "\_b" with value
 "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
 {% endcall %}
 
-## `exit` action
+## Behaviors
 
-The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
+Behaviors specify additional properties of the exit action.
+
+### Click Target
+
+The `clickTarget` behavior specifies where a target's click should try to open. A click defaults to opening a new tab, if it is possible in the environment. With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`. If this is not set to `"_top"`, then it will fall back to opening a new tab.
+
+## Actions
+
+### `setVariable` action
+
+`amp-ad-exit` also supports variable targets. The variable targets do not define exit URLs by themselves, but instead point to one of the named `NavigationTarget`s in the `ExitConfig`. Not to be confused with the URL custom variables, these are state variables maintained by the `amp-ad-exit` element that can be updated at runtime which enable stateful exit behavior. See the example below.
+
+`setVariable` action is used to set up the mapping from a state variable to a named `NavigationTarget` in the `ExitConfig`.
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>name</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the state variable.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>target</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the <code>NavigationTarget</code> in the <code>ExitConfig</code> that this state variable points to.</td>
+  </tr>
+</table>
+
+### `exit` action
+
+The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`, or a "variable" string parameter which is a state variable that points to a `NavigationTarget`. Custom variables beginning with an underscore can also be passed in.
 
 <table>
   <tr>
@@ -371,21 +411,76 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
     <td>The name of a  <code>NavigationTarget</code> in the <code>ExitConfig</code>.</td>
   </tr>
   <tr>
+    <td class="col-thirty"><code>variable</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of a state variable.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>default</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the default <code>NavigationTarget</code> that the state variable points to when it's never set, only meaningful when <code>variable</code> is used.</td>
+  </tr>
+  <tr>
     <td><code>_[a-zA-Z0-9_-]+</code></td>
     <td><code>string|boolean|number</code></td>
     <td>Replace the URL parameter with this name and value into the final and tracking URLs.</td>
   </tr>
 </table>
 
+{% call callout('Warning', type='caution') %}
+When triggering the `exit` action, either `target` or `variable` should be provided, but not both, e.g. `exit(target='product1')` or `exit(variable='currentProduct', default='product1')`.
+{% endcall %}
+
+_Example: Using variable targets_
+
+```html
+<amp-ad-exit id="exit-api" layout="nodisplay">
+  <script type="application/json">
+    {
+      "targets": {
+        "product1": {
+          "finalUrl": "https://example.com/product1"
+        },
+        "product2": {
+          "finalUrl": "https://example.com/product2"
+        }
+      }
+    }
+  </script>
+</amp-ad-exit>
+<amp-selector
+  id="exit-selector"
+  layout="nodisplay"
+  on="select:exit-api.setVariable(name='currentProduct', target=event.targetOption)"
+>
+  <option option="product1" selected></option>
+  <option option="product2"></option>
+</amp-selector>
+<amp-carousel
+  type="slides"
+  autoplay
+  on="slideChange:exit-selector.toggle(index=event.index, value=true),
+        tap:exit-api.exit(variable='currentProduct', default='product1')"
+>
+  <div>product 1</div>
+  <div>product 2</div>
+</amp-carousel>
+```
+
 ## Configuration spec
+
 See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
 
 ## Attributes
 
-##### id
-
-An `id` is required so that `amp-exit` can be referenced by tappable elements.
+<table>
+  <tr>
+    <td width="40%"><strong>id</strong></td>
+    <td>An <code>id</code> is required so that <code>amp-exit</code> can be referenced by tappable elements.</td>
+  </tr>
+</table>
 
 ## Validation
+
 The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).
 See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii) for the AMP validator specification.

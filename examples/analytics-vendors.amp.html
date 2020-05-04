@@ -53,13 +53,16 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>browsi</option>
       <option>burt</option>
       <option>byside</option>
+      <option>captainmetrics</option>
       <option>chartbeat</option>
       <option>clicky</option>
       <option>colanalytics</option>
       <option>comscore</option>
       <option>cxense</option>
+      <option>deepbi</option>
       <option>dynatrace</option>
       <option>epica</option>
       <option>euleriananalytics</option>
@@ -70,6 +73,7 @@
       <option>infonline</option>
       <option>iplabel</option>
       <option>keen</option>
+      <option>kenshoo</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -77,7 +81,9 @@
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
+      <option>memo</option>
       <option>mobify</option>
+      <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
       <option>newrelic</option>
@@ -94,11 +100,13 @@
       <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
+      <option>reppublika</option>
       <option>retargetly</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>snowplow_v2</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -106,12 +114,16 @@
       <option>treasuredata</option>
       <option>umenganalytics</option>
       <option>upscore</option>
+      <option>vponanalytics</option>
+      <option>webengage</option>
       <option>webtrekk</option>
       <option>webtrekk_v2</option>
     </select>
     <input type="submit" value="Go">
   </form>
 </div>
+
+<amp-geo layout="nodisplay"></amp-geo>
 
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
@@ -178,6 +190,10 @@ For complete documentation and additional examples please see: https://marketing
       "vars": {
         "eVar1": "button clicked"
       }
+    },
+    "linkers": {
+      "enabled": true,
+      "destinationDomains": ["localhost"]
     }
   }
 }
@@ -321,6 +337,18 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- Baidu stats example -->
 
+  <!-- Browsi prediction tracking example -->
+  <amp-analytics type="browsi" id="browsi">
+    <script type="application/json">
+      {
+        "vars": {
+          "pubKey": "demo-pub",
+          "siteKey": "demo-site"
+        }
+      }
+    </script>
+  </amp-analytics>
+  <!-- End Browsi prediction tracking example -->
 
 <!-- Burt tracking -->
 <amp-analytics type="burt" id="burt">
@@ -361,6 +389,71 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End BySide example -->
+
+<!-- Captain Metrics tracking -->
+<amp-analytics type="captainmetrics" id="captainmetrics">
+<script type="application/json">
+  {
+    "vars": {
+      "projectId": "your_project_id"
+    },
+    "triggers": {
+      "pageview": {
+        "on": "visible",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "pageview",
+          "pageview": {
+            "title": "${title}",
+            "page": "${sourceUrl}",
+            "product": {
+              "externalId": "product-id",
+              "sku": "product-sku",
+              "name": "product-name",
+              "brand": "product-brand",
+              "category": "product-category",
+              "variant": "product-variant",
+              "price": 1000,
+              "currency": "EUR"
+            },
+            "props": {
+              "customProperty": "xxx"
+            }
+          }
+        }
+      },
+      "event": {
+        "on": "click",
+        "selector": "#event-test-button",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "event",
+          "event": {
+            "label": "my_event",
+            "value": 1,
+            "nonInteractive": false
+          },
+          "props": {
+            "customProperty": "xxx"
+          }
+        }
+      },
+      "hidden": {
+        "on": "hidden",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "timeSpent",
+          "timeSpent": {
+            "pageId": "${pageViewId}",
+            "secs": "${incrementalEngagedTime(cm)}"
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Captain Metrics example -->
 
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat" id="chartbeat">
@@ -423,6 +516,24 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Cxense example -->
+
+<!-- Deep.BI tracking -->
+<amp-analytics type="deepbi" id="deepbi">
+<script type="application/json">
+{
+  "vars": {
+    "datasetKey": "aBcDeFgHiJkL",
+    "accessKey": "aBcDeFgHiJkLMn0123456789",
+    "gdpr":"true"
+  },
+  "extraUrlParams": {
+    "dimension1": "value1"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Deep.BI example -->
+
 
 <!-- dynatrace tracking -->
 <amp-analytics type="dynatrace" id="dynatrace">
@@ -601,7 +712,6 @@ For complete documentation and additional examples please see: https://marketing
 
 <!--
   INFOnline example
-
   Important: url needs to point to a copy of
   amp-analytics-infonline.html on a different subdomain
   than your AMP files.
@@ -684,6 +794,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Keen Analytics tracking -->
+
+<!-- Kenshoo example -->
+<amp-analytics type="kenshoo" id="kenshoo">
+  <script type="application/json">
+    {
+      "vars": {
+        "tid": "KT-XXXXX-XXX",
+        "userId": "<USER_ID>"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Kenshoo example -->
 
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
@@ -823,6 +946,21 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Mediator.media example -->
 
+<!-- Memo Tracking -->
+<amp-analytics type="memo" id="memo">
+<script type="application/json">
+  {
+    "vars": {
+      "pid": "000000000000000000000000",
+      "title": "Article Title",
+      "authors": ["Joe Author 1", "Jane Author 2"],
+      "published_at": "2019-01-01 00:00:00"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Memo Example -->
+
 <!-- Mobify tracking -->
 <amp-analytics type="mobify" id="mobify">
 <script type="application/json">
@@ -835,6 +973,31 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mobify example -->
+
+<!-- start MoEngage Analytics example -->
+<amp-analytics type="moengage" id="moengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "appId": "78FL7RI8NHROB3HLU4X42O44"
+      },
+      "triggers": {
+        "clickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "extraUrlParams": {
+            "a": {
+              "title": "${title}"
+            },
+            "e": "amp example button click"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end MoEngage Analytics example -->
 
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
@@ -1121,6 +1284,29 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Quantcast example -->
 
+<!-- Reppublika example -->
+<amp-analytics type="reppublika" id="reppublika">
+<script type="application/json">
+{
+  "vars": {
+    "code": "XX-XXXXX",
+    "type": "1",
+    "service": "YY-YYYYY",
+    "category": "category1",
+    "channel": "channel1",
+    "device": "mobile"
+  },
+  "triggers": {
+    "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      }
+    }
+}
+</script>
+</amp-analytics>
+<!-- End Reppublika example -->
+
 <!-- Retargetly example -->
 <amp-analytics data-credentials="include" type="retargetly" id="retargetly">
 <script type="application/json">
@@ -1227,6 +1413,95 @@ For complete documentation and additional examples please see: https://marketing
     }
   }
 }
+</script>
+</amp-analytics>
+<!-- End Snowplow Analytics example -->
+
+<!-- Snowplow v2 Analytics tracking -->
+<amp-analytics type="snowplow_v2" id="snowplow_v2" data-credentials="include">
+<script type="application/json">
+  {
+    "vars": {
+      "collectorHost": "collector.snplow.net",
+      "appId": "amp-examples-v2.0.2",
+      "userId": "someUserId",
+      "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
+    },
+    "linkers": {
+      "enabled": true,
+      "proxyOnly": false,
+      "destinationDomains": ["localhost"]
+    },
+    "triggers": {
+      "defaultPageview": {
+        "on": "visible",
+        "request": "pageView"
+      },
+      "trackFirstPagePing": {
+        "on": "timer",
+        "request": "ampPagePing",
+        "timerSpec": {
+          "interval": 10,
+          "maxTimerLength": 9.99,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackPagePings": {
+        "on": "timer",
+        "request": "ampPagePing",
+        "timerSpec": {
+          "interval": 30,
+          "maxTimerLength": 1800,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackSelfDescribingEvent": {
+        "on": "click",
+        "selector": "a",
+        "request": "selfDescribingEvent",
+        "vars": {
+          "customEventSchemaVendor": "com.snowplowanalytics.snowplow",
+          "customEventSchemaName": "link_click",
+          "customEventSchemaVersion": "1-0-1",
+          "customEventSchemaData": "{\"targetUrl\":\"${targetUrl}\",\"elementId\":\"TEST\",\"elementContent\":\"${elementContent}\"}"
+        }
+      },
+      "clickOnTest1Trigger": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-test1"
+        }
+      },
+      "clickOnTopTrigger": {
+        "on": "click",
+        "selector": "#top",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-header"
+        }
+      }
+    }
+  }
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
@@ -1463,28 +1738,66 @@ For complete documentation and additional examples please see: https://marketing
 <script type="application/json">
 {
   "vars": {
-    "aid": "99999999"
+    "aid": "99999999",
+    "ctIds": "1234,34343,564645",
+    "ag": "agency",
+    "au": "author1,author2",
+    "pt": "publishTime",
+    "ct": "1",
+    "d":"m.ibeatdev.com",
   }
 }
 </script>
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
 <!--UpScore Analytics Example -->
-<amp-geo layout="nodisplay"></amp-geo>
 <amp-analytics type="upscore" id="upscore">
   <script type="application/json">
-{
-  "vars": {
-  "object_id": "foo",
-  "object_type":"bar",
-  "section":"sport",
-  "author":"john suran",
-  "creator":"john suran",
-  "domain":"clientDomain",
-  "pubDate":"01/01/0001"
+  {
+    "vars": {
+      "object_id": "foo",
+      "object_type":"bar",
+      "section":"sport",
+      "author":"john suran",
+      "creator":"john suran",
+      "domain":"clientDomain",
+      "pubdate":"2015-01-01 00:00:00",
+      "customKeys": ["source","user_status"],
+      "customValues": ["digital team","0"]
+    },
+    "triggers": {
+      "videoPlays": {
+        "on": "video-play",
+        "selector": "#myVideo",
+        "request": "video-play",
+        "vars" : {
+          "video_id" : "myVideo",
+          "video_name" : "test test test",
+          "video_thumbnail" : "poster_test"
+        }
+      },
+      "videoPauses": {
+        "on": "video-pause",
+        "selector": "#myVideo",
+        "request": "video-pause"
+      },
+      "videoSecondsPlayed": {
+        "on": "video-seconds-played",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "exclude-autoplay": false,
+          "interval": 10
+        },
+        "request": "video-info"
+      },
+      "videoEnded": {
+        "on": "video-ended",
+        "selector": "#myVideo",
+        "request": "video-stop"
+      }
+    }
   }
-}
-</script>
+  </script>
 </amp-analytics>
 <!-- End Upscore Analytics example -->
 <!-- Umeng+ Analytics Example -->
@@ -1508,6 +1821,74 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End Umeng Analytics example -->
+<!-- Vpon Analytics example -->
+<amp-analytics type="vponanalytics" id="vponanalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "licence_key": "xxxxxxxxxxxxxxx",
+        "category": "web"
+      },
+      "triggers": {
+        "custom_event": {
+         "on": "click",
+         "selector": ".vp_search",
+         "request": "event",
+         "vars": {
+           "ev_name": "search",
+           "payload": "{\"keyword\":\"裙子\"}"
+         }
+        },
+        "element_Interact": {
+         "on": "click",
+         "selector": ".vp_track_0",
+         "request": "elementInteract",
+         "vars": {
+           "action": "click",
+           "label": "ev_0_search-flight"
+         }
+        },
+        "scroll": {
+          "on": "scroll",
+          "selector": "body",
+          "request": "scroll",
+          "vars": {
+            "action": "scroll_${verticalScrollBoundary}"
+          },
+          "scrollSpec": {
+            "verticalBoundaries": [5,30,50,70,95]
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- Vpon Analytics example -->
+
+<!-- start WebEngage Analytics example -->
+<amp-analytics type="webengage" id="webengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "licenseCode": "in~~716809b6",
+        "region": "in"
+      },
+      "requests": {
+        "weClick": {
+          "baseUrl": "${base}&eventName=Element Clicked&element=test1"
+        }
+      },
+      "triggers": {
+        "weClickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "weClick"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end WebEngage Analytics example -->
 </div>
 
 <div class="logo"></div>
@@ -1515,6 +1896,9 @@ For complete documentation and additional examples please see: https://marketing
 <span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
+<p>
+Example of <a id="ext" data-vars-target-url="../"  data-vars-element-id="home" data-vars-element-content="Internal Link" href="../">Internal Link</a>.
+</p>
 <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
 </p>

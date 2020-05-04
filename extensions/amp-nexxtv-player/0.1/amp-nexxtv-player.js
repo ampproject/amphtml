@@ -32,16 +32,14 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 
+const TAG = 'amp-nexxtv-player';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpNexxtvPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -67,7 +65,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_(), opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_(),
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -93,19 +95,22 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     const {element: el} = this;
 
     const mediaId = userAssert(
-        el.getAttribute('data-mediaid'),
-        'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-        el);
+      el.getAttribute('data-mediaid'),
+      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+      el
+    );
 
-    const client = userAssert(el.getAttribute('data-client'),
-        'The data-client attribute is required for <amp-nexxtv-player> %s',
-        el);
+    const client = userAssert(
+      el.getAttribute('data-client'),
+      'The data-client attribute is required for <amp-nexxtv-player> %s',
+      el
+    );
 
     const delay = el.getAttribute('data-seek-to') || '0';
     const mode = el.getAttribute('data-mode') || 'static';
     const streamtype = el.getAttribute('data-streamtype') || 'video';
-    const origin = el.getAttribute('data-origin')
-        || 'https://embed.nexx.cloud/';
+    const origin =
+      el.getAttribute('data-origin') || 'https://embed.nexx.cloud/';
     const disableAds = el.getAttribute('data-disable-ads');
     const streamingFilter = el.getAttribute('data-streaming-filter');
 
@@ -142,7 +147,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleNexxMessage_(event);
     });
 
@@ -191,9 +196,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage(dict({
-          'cmd': command,
-        }), '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          dict({
+            'cmd': command,
+          }),
+          '*'
+        );
       }
     });
   }
@@ -209,7 +217,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (!data) {
+    if (data == null) {
       return;
     }
 
@@ -319,9 +327,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-nexxtv-player', '0.1', AMP => {
-  AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpNexxtvPlayer);
 });

@@ -17,15 +17,17 @@
 import {
   BIND_PREFIX,
   BLACKLISTED_TAGS,
+  EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-  rewriteAttributeValue,
-} from './purifier';
+} from './purifier/sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isAmp4Email} from './format';
+import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
 
@@ -65,12 +67,6 @@ const SELF_CLOSING_TAGS = dict({
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
- * Monotonically increasing counter used for keying nodes.
- * @private {number}
- */
-let KEY_COUNTER = 0;
-
-/**
  * Sanitizes the provided HTML.
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
@@ -78,27 +74,31 @@ let KEY_COUNTER = 0;
  * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
  *
  * @param {string} html
- * @param {boolean=} diffing
+ * @param {!Document} doc
  * @return {string}
  */
-export function sanitizeHtml(html, diffing) {
-  const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
-    parsed.getScheme() === 'https' ? parsed : null);
+export function sanitizeHtml(html, doc) {
+  const tagPolicy = htmlSanitizer.makeTagPolicy((parsed) =>
+    parsed.getScheme() === 'https' ? parsed : null
+  );
   const output = [];
   let ignore = 0;
 
-  const emit = content => {
+  const emit = (content) => {
     if (ignore == 0) {
       output.push(content);
     }
   };
 
   // No Caja support for <script> or <svg>.
-  const cajaBlacklistedTags = Object.assign(
-      {'script': true, 'svg': true}, BLACKLISTED_TAGS);
+  const cajaBlacklistedTags = {
+    'script': true,
+    'svg': true,
+    ...BLACKLISTED_TAGS,
+  };
 
   const parser = htmlSanitizer.makeSaxParser({
-    'startTag': function(tagName, attribs) {
+    'startTag': function (tagName, attribs) {
       if (ignore > 0) {
         if (!SELF_CLOSING_TAGS[tagName]) {
           ignore++;
@@ -126,15 +126,23 @@ export function sanitizeHtml(html, diffing) {
 
       if (cajaBlacklistedTags[tagName]) {
         ignore++;
-      } else if (!isAmpElement) {
+      } else if (isAmpElement) {
+        // Enforce AMP4EMAIL tag whitelist at runtime.
+        if (isAmp4Email(doc) && !EMAIL_WHITELISTED_AMP_TAGS[tagName]) {
+          ignore++;
+        }
+      } else {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = tagPolicy(tagName, attribs);
+        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
+          tagName,
+          attribs
+        ));
         if (!scrubbed) {
           ignore++;
         } else {
-          attribs = scrubbed.attribs;
+          attribs = scrubbed['attribs'];
           // Restore some of the attributes that AMP is directly responsible
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
@@ -143,8 +151,10 @@ export function sanitizeHtml(html, diffing) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrName.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)) {
+            } else if (
+              WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+              WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)
+            ) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -184,30 +194,23 @@ export function sanitizeHtml(html, diffing) {
         return;
       }
       // Filter out bindings with empty attribute values.
-      const hasBindings = bindingAttribs.some(i => !!attribs[i + 1]);
+      const hasBindings = bindingAttribs.some((i) => !!attribs[i + 1]);
       if (hasBindings) {
         // Set a custom attribute to identify elements with bindings.
         // This is an optimization that avoids the need for a DOM scan later.
         attribs.push('i-amphtml-binding', '');
-      }
-      // Elements with bindings and AMP elements must opt-out of DOM diffing.
-      // - Opt-out nodes with bindings because amp-bind scans newly
-      //   rendered elements and discards _all_ old elements _before_ diffing,
-      //   so preserving some old elements would cause loss of functionality.
-      // - Opt-out AMP elements because they don't support arbitrary mutation.
-      if (hasBindings || isAmpElement) {
-        if (diffing) {
-          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
-        }
       }
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(tagName, attrName, attrValue)) {
-          user().error(TAG, `Removing "${attrName}" attribute with invalid `
-              + `value in <${tagName} ${attrName}="${attrValue}">.`);
+        if (!isValidAttr(tagName, attrName, attrValue, doc, false)) {
+          user().error(
+            TAG,
+            `Removing "${attrName}" attribute with invalid ` +
+              `value in <${tagName} ${attrName}="${attrValue}">.`
+          );
           continue;
         }
         emit(' ');
@@ -220,7 +223,7 @@ export function sanitizeHtml(html, diffing) {
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.
           // Bindings contain expressions and shouldn't be rewritten.
-          const rewrite = (bindingAttribs.includes(i))
+          const rewrite = bindingAttribs.includes(i)
             ? attrValue
             : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
@@ -229,7 +232,7 @@ export function sanitizeHtml(html, diffing) {
       }
       emit('>');
     },
-    'endTag': function(tagName) {
+    'endTag': function (tagName) {
       if (ignore > 0) {
         ignore--;
         return;
@@ -264,6 +267,7 @@ export function sanitizeTagsForTripleMustache(html) {
  * Tag policy for handling what is valid html in templates.
  * @param {string} tagName
  * @param {!Array<string>} attribs
+ * @return {?{tagName: string, attribs: !Array<string>}}
  */
 function tripleMustacheTagPolicy(tagName, attribs) {
   if (tagName == 'template') {

@@ -81,13 +81,22 @@ module.exports = {
         }
 
         const {parent} = node;
-        if (parent.type === 'MemberExpression' &&
-            shouldCheckMember(parent, false) &&
-            !isAssignment(parent)) {
+        if (
+          parent.type === 'MemberExpression' &&
+          shouldCheckMember(parent, false) &&
+          !isAssignment(parent)
+        ) {
+          return;
+        }
+
+        if (
+          parent.type === 'Property' &&
+          parent.key === node &&
+          parent.parent.type === 'ObjectPattern'
+        ) {
           return;
         }
       }
-
 
       const message = [
         `Unused restricted private "${name}".`.padEnd(80),
@@ -132,13 +141,13 @@ module.exports = {
       context.report({node, message});
     }
 
-
-
     function shouldCheckMember(node, needsThis = true) {
       const {computed, object, property} = node;
-      if (computed ||
+      if (
+        computed ||
         (needsThis && object.type !== 'ThisExpression') ||
-        property.type !== 'Identifier') {
+        property.type !== 'Identifier'
+      ) {
         return false;
       }
 
@@ -166,7 +175,7 @@ module.exports = {
         stack.push({used: new Set(), declared: new Map()});
       },
 
-      'ClassBody:exit': function() {
+      'ClassBody:exit': function () {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -179,14 +188,13 @@ module.exports = {
         });
       },
 
-      'ClassBody > MethodDefinition': function(node) {
+      'ClassBody > MethodDefinition': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }
 
         const {computed, key} = node;
-        if (computed ||
-          !isPrivateName(key)) {
+        if (computed || !isPrivateName(key)) {
           return;
         }
 
@@ -195,28 +203,56 @@ module.exports = {
         declared.set(name, node);
       },
 
-      'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
-        if (shouldIgnoreFile() ||
-            !shouldCheckMember(node) ||
-            !isAssignment(node)) {
+      'MethodDefinition[kind="constructor"] MemberExpression': function (node) {
+        if (
+          shouldIgnoreFile() ||
+          !shouldCheckMember(node) ||
+          !isAssignment(node)
+        ) {
           return;
         }
 
         const {name} = node.property;
         const {declared} = current();
-        declared.set(name, node.parent);
+        if (!declared.has(name)) {
+          declared.set(name, node.parent);
+        }
       },
 
-      'ClassBody MemberExpression': function(node) {
-        if (shouldIgnoreFile() ||
-            !shouldCheckMember(node, false) ||
-            isAssignment(node)) {
+      'ClassBody MemberExpression': function (node) {
+        if (
+          shouldIgnoreFile() ||
+          !shouldCheckMember(node, false) ||
+          isAssignment(node)
+        ) {
           return;
         }
 
         const {name} = node.property;
         const {used} = current();
         used.add(name);
+      },
+
+      'ClassBody VariableDeclarator > ObjectPattern': function (node) {
+        if (shouldIgnoreFile()) {
+          return;
+        }
+
+        if (node.parent.init.type !== 'ThisExpression') {
+          return;
+        }
+
+        const {properties} = node;
+        for (let i = 0; i < properties.length; i++) {
+          const prop = properties[i];
+          if (prop.computed || !isPrivateName(prop.key)) {
+            continue;
+          }
+
+          const {name} = prop.key;
+          const {used} = current();
+          used.add(name);
+        }
       },
     };
   },

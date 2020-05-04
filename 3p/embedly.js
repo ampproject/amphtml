@@ -60,12 +60,12 @@ export const CardOptions = {
  * Loads embedly card SDK that is consumed by this 3p integration.
  *
  * @param {!Window} global
- * @param {function(!Object)} callback
+ * @param {function()} callback
  * @visibleForTesting
  */
 function getEmbedly(global, callback) {
-  loadScript(global, EMBEDLY_SDK_URL, function() {
-    callback(global);
+  loadScript(global, EMBEDLY_SDK_URL, function () {
+    callback();
   });
 }
 
@@ -84,10 +84,7 @@ export function embedly(global, data) {
   // Add whitelisted data attributes and values to card
   // when these are provided by component.
   for (const key in CardOptions) {
-    if (
-      hasOwn(CardOptions, key) &&
-      typeof data[key] !== 'undefined'
-    ) {
+    if (hasOwn(CardOptions, key) && typeof data[key] !== 'undefined') {
       card.setAttribute(`data-${CardOptions[key]}`, data[key]);
     }
   }
@@ -101,7 +98,7 @@ export function embedly(global, data) {
 
   container.appendChild(card);
 
-  getEmbedly(global, function() {
+  getEmbedly(global, function () {
     // Given by the parent frame.
     delete data.width;
     delete data.height;
@@ -109,10 +106,10 @@ export function embedly(global, data) {
     global.window['embedly']('card', card);
 
     // Use embedly SDK to listen to resize event from loaded card
-    global.window['embedly']('on', RESIZE_EVENT_NAME, function(iframe) {
+    global.window['embedly']('on', RESIZE_EVENT_NAME, function (iframe) {
       context.requestResize(
-          iframe./*OK*/width,
-          parseInt(iframe./*OK*/height, 10) + /* margin */ 5
+        iframe./*OK*/ width,
+        parseInt(iframe./*OK*/ height, 10) + /* margin */ 5
       );
     });
   });

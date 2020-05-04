@@ -1,3 +1,11 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays GL Transmission Format (gITF) 3D models.
+---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,28 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-date-countdown`"></a> `amp-date-countdown`
+# amp-date-countdown
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
+Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
 
 ## Behavior
 
@@ -45,7 +34,7 @@ limitations under the License.
   </noscript>
 </amp-img>
 
-The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the [ list below for each returned time parameter](#returned-time-parameters).
+The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering. Refer to the [ list below for each returned time parameter](#returned-time-parameters).
 
 ### Example
 
@@ -55,11 +44,12 @@ The `amp-date-countdown` provides countdown time data that you can render in you
   </noscript>
 </amp-img>
 
-
 ```html
-<amp-date-countdown timestamp-seconds="2147483648"
+<amp-date-countdown
+  timestamp-seconds="2147483648"
   layout="fixed-height"
-  height="50">
+  height="50"
+>
   <template type="amp-mustache">
     <p class="p1">
       {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until
@@ -73,35 +63,34 @@ The `amp-date-countdown` provides countdown time data that you can render in you
 
 This table lists the format you can specify in your Mustache template:
 
-Format | Meaning
--- | --
-d | day - 0, 1, 2,...12, 13..Infinity
-dd | day - 00, 01, 02, 03..Infinity
-h | hour - 0, 1, 2,...12, 13..Infinity
-hh | hour - 01, 02, 03..Infinity
-m | minute - 0, 1, 2,...12, 13..Infinity
-mm | minute - 01, 01, 02, 03..Infinity
-s | second - 0, 1, 2,...12, 13..Infinity
-ss | second - 00, 01, 02, 03..Infinity
-days | internationalization string for day or days
-hours | internationalization string for hour or hours
-minutes | internationalization string for minute or minutes
-seconds | internationalization string for second or seconds
+| Format  | Meaning                                           |
+| ------- | ------------------------------------------------- |
+| d       | day - 0, 1, 2,...12, 13..Infinity                 |
+| dd      | day - 00, 01, 02, 03..Infinity                    |
+| h       | hour - 0, 1, 2,...12, 13..Infinity                |
+| hh      | hour - 01, 02, 03..Infinity                       |
+| m       | minute - 0, 1, 2,...12, 13..Infinity              |
+| mm      | minute - 01, 01, 02, 03..Infinity                 |
+| s       | second - 0, 1, 2,...12, 13..Infinity              |
+| ss      | second - 00, 01, 02, 03..Infinity                 |
+| days    | internationalization string for day or days       |
+| hours   | internationalization string for hour or hours     |
+| minutes | internationalization string for minute or minutes |
+| seconds | internationalization string for second or seconds |
 
 #### Samples of formatted values
 
 This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 
-Format | Sample Output | Remarks
--- | -- | -
-{hh}:{mm}:{ss} | 04:24:06 | -
-{h} {hours} and {m} {minutes} and {s} {seconds} | 4 hours and 1 minutes and 45 seconds | -
-{d} {days} {h}:{mm} | 1 day 5:03 | -
-{d} {days} {h} {hours} {m} {minutes} | 50 days 5 hours 10 minutes | -
-{d} {days} {h} {hours} {m} {minutes} | 20 days 5 hours 10 minutes | -
-{h} {hours} {m} {minutes} | 240 hours 10 minutes | `biggest-unit='hours'`
-{d} {days} {h} {hours} {m} {minutes} | 50 天 5 小时 10 分钟 | `locale='zh-cn'`
-
+| Format                                          | Sample Output                        | Remarks                |
+| ----------------------------------------------- | ------------------------------------ | ---------------------- |
+| {hh}:{mm}:{ss}                                  | 04:24:06                             | -                      |
+| {h} {hours} and {m} {minutes} and {s} {seconds} | 4 hours and 1 minutes and 45 seconds | -                      |
+| {d} {days} {h}:{mm}                             | 1 day 5:03                           | -                      |
+| {d} {days} {h} {hours} {m} {minutes}            | 50 days 5 hours 10 minutes           | -                      |
+| {d} {days} {h} {hours} {m} {minutes}            | 20 days 5 hours 10 minutes           | -                      |
+| {h} {hours} {m} {minutes}                       | 240 hours 10 minutes                 | `biggest-unit='hours'` |
+| {d} {days} {h} {hours} {m} {minutes}            | 50 天 5 小时 10 分钟                 | `locale='zh-cn'`       |
 
 ## Attributes
 
@@ -136,41 +125,41 @@ Specifies whether to stop the timer when it reaches 0 seconds. The value can be 
 An internationalization language string for each timer unit. The default value is `en` (for English).
 Supported values:
 
-Code | Language
--- | --
-de | German
-en | English
-es | Spanish
-fr | French
-id | Indonesian
-it | Italian
-ja | Japanese
-ko | Korean
-nl | Dutch
-pt | Portuguese
-ru | Russian
-th | Thai
-tr | Turkish
-vi | Vietnamese
-zh-cn | Chinese Simplified
-zh-tw | Chinese Traditional
+| Code  | Language            |
+| ----- | ------------------- |
+| de    | German              |
+| en    | English             |
+| es    | Spanish             |
+| fr    | French              |
+| id    | Indonesian          |
+| it    | Italian             |
+| ja    | Japanese            |
+| ko    | Korean              |
+| nl    | Dutch               |
+| pt    | Portuguese          |
+| ru    | Russian             |
+| th    | Thai                |
+| tr    | Turkish             |
+| vi    | Vietnamese          |
+| zh-cn | Chinese Simplified  |
+| zh-tw | Chinese Traditional |
 
 ##### biggest-unit (optional)
 
 Allows the `amp-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
 
-* Supported values: `days`, `hours`, `minutes`, `seconds`
-* Default: `days`
+- Supported values: `days`, `hours`, `minutes`, `seconds`
+- Default: `days`
 
 ## Events
 
-The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
-Event | Description
--- | --
-`timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can only run low-trust actions such as `amp-animation` and `amp-video` actions when the timer times out. This is to enforce AMP's UX principle of not allowing page content to reflow without explicit user actions.
+| Event     | Description                                                                                                                                                                                                                                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `timeout` | When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can only run low-trust actions such as `amp-animation` and `amp-video` actions when the timer times out. This is to enforce AMP's UX principle of not allowing page content to reflow without explicit user actions. |
 
-*Example: Demonstrating usage of timeout event*
+_Example: Demonstrating usage of timeout event_
 
 ```html
 <h1 id="sample">
@@ -178,16 +167,24 @@ Event | Description
 </h1>
 
 <amp-animation id="hide-timeout-event" layout="nodisplay">
-<script type="application/json">
+  <script type="application/json">
     {
-        "duration": "1s",
-        "fill": "both",
-        "selector": "#ampdate, #sample",
-        "keyframes": { "visibility": "hidden"}
+      "duration": "1s",
+      "fill": "both",
+      "selector": "#ampdate, #sample",
+      "keyframes": {"visibility": "hidden"}
     }
-</script>
+  </script>
 </amp-animation>
-<amp-date-countdown id="ampdate" end-date="2018-07-17T06:19:40+08:00" on="timeout: hide-timeout-event.start" height="400" width="400" when-ended="stop" locale='en'>
+<amp-date-countdown
+  id="ampdate"
+  end-date="2018-07-17T06:19:40+08:00"
+  on="timeout: hide-timeout-event.start"
+  height="400"
+  width="400"
+  when-ended="stop"
+  locale="en"
+>
   <template type="amp-mustache">
     <h1>Countdown Clock</h1>
     <div>
@@ -206,4 +203,5 @@ Renders as:
 </amp-img>
 
 ## Validation
+
 See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.

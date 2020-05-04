@@ -29,21 +29,22 @@ import {urls} from './config';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) { // Should only happen in tests.
+  if (startsWith(filename, 'about:')) {
+    // Should only happen in tests.
     return;
   }
   let validator = false;
   if (getMode().development) {
-    const hash =
-        parseQueryString(win.location.originalHash || win.location.hash);
+    const hash = parseQueryString(
+      win.location.originalHash || win.location.hash
+    );
     validator = hash['validate'] !== '0';
   }
 
   if (validator) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
-      amp.validator.validateUrlAndLog(
-          filename, win.document, getMode().filter);
+      amp.validator.validateUrlAndLog(filename, win.document);
     });
   } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
@@ -57,12 +58,22 @@ export function maybeValidate(win) {
  * @param {string} url
  * @return {!Promise}
  */
-function loadScript(doc, url) {
+export function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;
-  const promise = loadPromise(script).then(() => {
-    doc.head.removeChild(script);
-  }, () => {});
+
+  // Propagate nonce to all generated script tags.
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+  }
+
+  const promise = loadPromise(script).then(
+    () => {
+      doc.head.removeChild(script);
+    },
+    () => {}
+  );
   doc.head.appendChild(script);
   return promise;
 }

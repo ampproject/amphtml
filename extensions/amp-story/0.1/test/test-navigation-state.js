@@ -17,100 +17,131 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {NavigationState, StateChangeType} from '../navigation-state';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
-describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
+describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, (env) => {
   let navigationState;
   let hasBookend = false;
   let storeService;
 
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
-    registerServiceBuilder(env.win, 'story-store', () => storeService);
+    registerServiceBuilder(env.win, 'story-store', function () {
+      return storeService;
+    });
     hasBookend = false;
-    navigationState = new NavigationState(env.win,
-        // Not using `Promise.resolve` since we need synchronicity.
-        () => ({then(fn) { fn(hasBookend); }}));
+    navigationState = new NavigationState(
+      env.win,
+      // Not using `Promise.resolve` since we need synchronicity.
+      () => ({
+        then(fn) {
+          fn(hasBookend);
+        },
+      })
+    );
   });
 
   it('should dispatch active page changes to all observers', () => {
-    const observers = Array(5).fill(undefined).map(() => sandbox.spy());
+    const observers = Array(5)
+      .fill(undefined)
+      .map(() => env.sandbox.spy());
 
-    observers.forEach(observer => navigationState.observe(observer));
+    observers.forEach((observer) => navigationState.observe(observer));
 
     navigationState.updateActivePage(0, 10, 'my-page-id-1');
 
-    observers.forEach(observer => {
-      expect(observer).to.have.been.calledWith(sandbox.match(e =>
-        e.type == StateChangeType.ACTIVE_PAGE
-              && e.value.pageIndex === 0
-              && e.value.totalPages === 10
-              && e.value.pageId == 'my-page-id-1'
-              && e.value.storyProgress === 0));
+    observers.forEach((observer) => {
+      expect(observer).to.have.been.calledWith(
+        env.sandbox.match(
+          (e) =>
+            e.type == StateChangeType.ACTIVE_PAGE &&
+            e.value.pageIndex === 0 &&
+            e.value.totalPages === 10 &&
+            e.value.pageId == 'my-page-id-1' &&
+            e.value.storyProgress === 0
+        )
+      );
     });
 
     navigationState.updateActivePage(5, 15, 'foo');
 
-    observers.forEach(observer => {
-      expect(observer).to.have.been.calledWith(sandbox.match(e =>
-        e.type == StateChangeType.ACTIVE_PAGE
-              && e.value.pageIndex === 5
-              && e.value.totalPages === 15
-              && e.value.pageId === 'foo'
-              && e.value.storyProgress === (1 / 3)));
+    observers.forEach((observer) => {
+      expect(observer).to.have.been.calledWith(
+        env.sandbox.match(
+          (e) =>
+            e.type == StateChangeType.ACTIVE_PAGE &&
+            e.value.pageIndex === 5 &&
+            e.value.totalPages === 15 &&
+            e.value.pageId === 'foo' &&
+            e.value.storyProgress === 1 / 3
+        )
+      );
     });
 
     navigationState.updateActivePage(2, 5, 'one-two-three');
 
-    observers.forEach(observer => {
-      expect(observer).to.have.been.calledWith(sandbox.match(e =>
-        e.type == StateChangeType.ACTIVE_PAGE
-              && e.value.pageIndex === 2
-              && e.value.totalPages === 5
-              && e.value.pageId == 'one-two-three'
-              && e.value.storyProgress === 0.4));
+    observers.forEach((observer) => {
+      expect(observer).to.have.been.calledWith(
+        env.sandbox.match(
+          (e) =>
+            e.type == StateChangeType.ACTIVE_PAGE &&
+            e.value.pageIndex === 2 &&
+            e.value.totalPages === 5 &&
+            e.value.pageId == 'one-two-three' &&
+            e.value.storyProgress === 0.4
+        )
+      );
     });
   });
 
   it('should dispatch END on last page if story does NOT have bookend', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event));
+    navigationState.observe((event) => observer(event));
 
     hasBookend = false;
 
     navigationState.updateActivePage(1, 2);
 
-    expect(observer).to.have.been.calledWith(sandbox.match(e =>
-      e.type == StateChangeType.ACTIVE_PAGE
-          && e.value.pageIndex === 1
-          && e.value.totalPages === 2));
+    expect(observer).to.have.been.calledWith(
+      env.sandbox.match(
+        (e) =>
+          e.type == StateChangeType.ACTIVE_PAGE &&
+          e.value.pageIndex === 1 &&
+          e.value.totalPages === 2
+      )
+    );
 
-    expect(observer).to.have.been.calledWith(sandbox.match(e =>
-      e.type == StateChangeType.END));
+    expect(observer).to.have.been.calledWith(
+      env.sandbox.match((e) => e.type == StateChangeType.END)
+    );
   });
 
   it('should NOT dispatch END on last page if story has bookend', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event));
+    navigationState.observe((event) => observer(event));
 
     hasBookend = true;
 
     navigationState.updateActivePage(1, 2);
 
-    expect(observer).to.have.been.calledWith(sandbox.match(e =>
-      e.type == StateChangeType.ACTIVE_PAGE
-          && e.value.pageIndex === 1
-          && e.value.totalPages === 2));
+    expect(observer).to.have.been.calledWith(
+      env.sandbox.match(
+        (e) =>
+          e.type == StateChangeType.ACTIVE_PAGE &&
+          e.value.pageIndex === 1 &&
+          e.value.totalPages === 2
+      )
+    );
 
-    expect(observer).to.not.have.been.calledWith(sandbox.match(e =>
-      e.type == StateChangeType.END));
+    expect(observer).to.not.have.been.calledWith(
+      env.sandbox.match((e) => e.type == StateChangeType.END)
+    );
   });
 
   it('should dispatch BOOKEND_ENTER/END and BOOKEND_EXIT', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
-    navigationState.observe(event => observer(event.type));
+    navigationState.observe((event) => observer(event.type));
 
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
 

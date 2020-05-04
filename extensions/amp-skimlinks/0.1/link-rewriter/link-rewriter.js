@@ -21,10 +21,8 @@ import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
 import {userAssert} from '../../../../src/log';
 
-
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
-
 
 /**
  * LinkRewriter works together with LinkRewriterManager to allow rewriting
@@ -150,18 +148,17 @@ export class LinkRewriter {
    * @public
    */
   onDomUpdated() {
-    return new Promise(resolve => {
-      const task = (() => {
+    return new Promise((resolve) => {
+      const task = () => {
         return this.scanLinksOnPage_().then(() => {
           this.events.fire({type: EVENTS.PAGE_SCANNED});
           resolve();
         });
-      });
-      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
-        (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
-          ? this.rootNode_.documentElement
-          : this.rootNode_
-      );
+      };
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (this
+        .rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_);
       chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }
@@ -193,23 +190,25 @@ export class LinkRewriter {
     // handlers. (Other anchors are assumed to be the ones exluded by
     // linkSelector_)
     this.anchorReplacementCache_.updateReplacementUrls(
-        unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
+      unknownAnchors.map((anchor) => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-    userAssert(twoStepsResponse instanceof TwoStepsResponse,
-        'Invalid response from provided "resolveUnknownLinks" function.' +
-        '"resolveUnknownLinks" should return an instance of TwoStepsResponse');
+    userAssert(
+      twoStepsResponse instanceof TwoStepsResponse,
+      'Invalid response from provided "resolveUnknownLinks" function.' +
+        '"resolveUnknownLinks" should return an instance of TwoStepsResponse'
+    );
 
     if (twoStepsResponse.syncResponse) {
       this.anchorReplacementCache_.updateReplacementUrls(
-          twoStepsResponse.syncResponse);
+        twoStepsResponse.syncResponse
+      );
     }
     // Anchors for which the status needs to be resolved asynchronously
     if (twoStepsResponse.asyncResponse) {
-      return twoStepsResponse.asyncResponse
-          .then(data => {
-            this.anchorReplacementCache_.updateReplacementUrls(data);
-          });
+      return twoStepsResponse.asyncResponse.then((data) => {
+        this.anchorReplacementCache_.updateReplacementUrls(data);
+      });
     }
 
     return Promise.resolve();
@@ -219,11 +218,12 @@ export class LinkRewriter {
    * Filter the list of anchors to returns only the ones
    * that were not in the page at the time of the last page scan.
    * @param {!Array<!HTMLElement>} anchorList
+   * @return {!Array<HTMLElement>}
    * @private
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
-    anchorList.forEach(anchor => {
+    anchorList.forEach((anchor) => {
       // If link is not already in cache
       if (!this.isWatchingLink(anchor)) {
         unknownAnchors.push(anchor);

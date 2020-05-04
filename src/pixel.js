@@ -29,6 +29,7 @@ const TAG = 'pixel';
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy) {
+  // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
@@ -50,12 +51,17 @@ function createNoReferrerPixel(win, src) {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (win.document), 'iframe', dict({
-          'src': 'about:blank',
-          'style': 'display:none',
-        }));
+      /** @type {!Document} */ (win.document),
+      'iframe',
+      dict({
+        'src': 'about:blank',
+        'style': 'display:none',
+      })
+    );
+    iframe.onload = () => {
+      createImagePixel(iframe.contentWindow, src);
+    };
     win.document.body.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
     return iframe;
   }
 }

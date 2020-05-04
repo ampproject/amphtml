@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {TransportSerializers} from '../transport-serializer';
 import {dict} from '../../../../src/utils/object';
 import {isArray} from '../../../../src/types';
@@ -36,59 +35,69 @@ import {isArray} from '../../../../src/types';
  * }
  */
 const defaultTestData = {
-  'in': [{
-    'baseUrl': 'https://base.com',
-    'batchSegments': [{
-      'trigger': 'click',
-      'timestamp': 0,
-      'extraUrlParams': {
-        a: 1,
-        b: 'xyz',
-      },
-    }],
-  }, {
-    'baseUrl': 'https://base.com?${extraUrlParams}&z=1',
-    'batchSegments': [{
-      'trigger': 'click',
-      'timestamp': 0,
-      'extraUrlParams': {
-        a: 1,
-        b: 'xyz',
-      },
-    }],
-  }],
+  'in': [
+    {
+      'baseUrl': 'https://base.com',
+      'batchSegments': [
+        {
+          'trigger': 'click',
+          'timestamp': 0,
+          'extraUrlParams': {
+            a: 1,
+            b: 'xyz',
+          },
+        },
+      ],
+    },
+    {
+      'baseUrl': 'https://base.com?${extraUrlParams}&z=1',
+      'batchSegments': [
+        {
+          'trigger': 'click',
+          'timestamp': 0,
+          'extraUrlParams': {
+            a: 1,
+            b: 'xyz',
+          },
+        },
+      ],
+    },
+  ],
 
-  'out': [{
-    generateRequest: {
-      url: 'https://base.com?a=1&b=xyz',
+  'out': [
+    {
+      generateRequest: {
+        url: 'https://base.com?a=1&b=xyz',
+      },
+      generateBatchRequest: {
+        url: 'https://base.com?a=1&b=xyz',
+      },
+      generateRequestWithPayload: {
+        url: 'https://base.com',
+        payload: '{"a":1,"b":"xyz"}',
+      },
+      generateBatchRequestWithPayload: {
+        url: 'https://base.com',
+        payload: '[{"a":1,"b":"xyz"}]',
+      },
     },
-    generateBatchRequest: {
-      url: 'https://base.com?a=1&b=xyz',
+    {
+      generateRequest: {
+        url: 'https://base.com?a=1&b=xyz&z=1',
+      },
+      generateBatchRequest: {
+        url: 'https://base.com?a=1&b=xyz&z=1',
+      },
+      generateRequestWithPayload: {
+        url: 'https://base.com?&z=1',
+        payload: '{"a":1,"b":"xyz"}',
+      },
+      generateBatchRequestWithPayload: {
+        url: 'https://base.com?&z=1',
+        payload: '[{"a":1,"b":"xyz"}]',
+      },
     },
-    generateRequestWithPayload: {
-      url: 'https://base.com',
-      payload: '{"a":1,"b":"xyz"}',
-    },
-    generateBatchRequestWithPayload: {
-      url: 'https://base.com',
-      payload: '[{"a":1,"b":"xyz"}]',
-    },
-  }, {
-    generateRequest: {
-      url: 'https://base.com?a=1&b=xyz&z=1',
-    },
-    generateBatchRequest: {
-      url: 'https://base.com?a=1&b=xyz&z=1',
-    },
-    generateRequestWithPayload: {
-      url: 'https://base.com?&z=1',
-      payload: '{"a":1,"b":"xyz"}',
-    },
-    generateBatchRequestWithPayload: {
-      url: 'https://base.com?&z=1',
-      payload: '[{"a":1,"b":"xyz"}]',
-    },
-  }],
+  ],
 };
 
 /**
@@ -127,8 +136,9 @@ describe('Transport serializers', () => {
           'extraUrlParams': null,
         });
         try {
-          const output =
-              serializer.generateBatchRequest('base', [batchSegment]);
+          const output = serializer.generateBatchRequest('base', [
+            batchSegment,
+          ]);
           expect(output.url).to.be.ok;
         } catch (e) {
           throw e;
@@ -142,8 +152,9 @@ describe('Transport serializers', () => {
           'extraUrlParams': '12?3',
         });
         try {
-          const output =
-              serializer.generateBatchRequest('base', [batchSegment]);
+          const output = serializer.generateBatchRequest('base', [
+            batchSegment,
+          ]);
           expect(output.url).to.not.contain('12?3');
         } catch (e) {
           throw e;
@@ -157,15 +168,15 @@ describe('Transport serializers', () => {
           'extraUrlParams': '123',
         });
         try {
-          const output =
-              serializer.generateBatchRequest('base', [batchSegment]);
+          const output = serializer.generateBatchRequest('base', [
+            batchSegment,
+          ]);
           expect(typeof output.url).to.equal('string');
         } catch (e) {
           throw e;
         }
       });
     });
-
 
     describe('custom test', () => {
       let testData;
@@ -197,14 +208,18 @@ describe('Transport serializers', () => {
           expect(batchSegments).to.be.ok;
           expect(isArray(batchSegments)).to.be.true;
           const request = output[i];
-          expect(serializer.generateRequest(baseUrl, batchSegments[0]))
-              .to.jsonEqual(request.generateRequest);
-          expect(serializer.generateRequest(baseUrl, batchSegments[0], true))
-              .to.jsonEqual(request.generateRequestWithPayload);
-          expect(serializer.generateBatchRequest(baseUrl, batchSegments))
-              .to.jsonEqual(request.generateRequest);
-          expect(serializer.generateBatchRequest(baseUrl, batchSegments, true))
-              .to.jsonEqual(request.generateBatchRequestWithPayload);
+          expect(
+            serializer.generateRequest(baseUrl, batchSegments[0])
+          ).to.jsonEqual(request.generateRequest);
+          expect(
+            serializer.generateRequest(baseUrl, batchSegments[0], true)
+          ).to.jsonEqual(request.generateRequestWithPayload);
+          expect(
+            serializer.generateBatchRequest(baseUrl, batchSegments)
+          ).to.jsonEqual(request.generateRequest);
+          expect(
+            serializer.generateBatchRequest(baseUrl, batchSegments, true)
+          ).to.jsonEqual(request.generateBatchRequestWithPayload);
         }
       });
     });

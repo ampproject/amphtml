@@ -16,10 +16,8 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {TextMask} from './text-mask';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;
@@ -29,10 +27,6 @@ export class AmpInputmaskService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    userAssert(
-        isExperimentOn(ampdoc.win, 'amp-inputmask'),
-        'Experiment amp-inputmask is disabled');
-
     this.ampdoc = ampdoc;
 
     /** @private {!Array<!TextMask>} */
@@ -40,7 +34,10 @@ export class AmpInputmaskService {
 
     /** @const */
     this.domUpdateUnlistener_ = listen(
-        this.ampdoc.getRootNode(), AmpEvents.DOM_UPDATE, () => this.install());
+      this.ampdoc.getRootNode(),
+      AmpEvents.DOM_UPDATE,
+      () => this.install()
+    );
   }
 
   /**
@@ -48,7 +45,7 @@ export class AmpInputmaskService {
    */
   install() {
     const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
-    iterateCursor(maskElements, element => {
+    iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {
         return;
       }
@@ -62,13 +59,13 @@ export class AmpInputmaskService {
    */
   uninstall() {
     this.domUpdateUnlistener_();
-    this.masks_.forEach(m => m.dispose());
+    this.masks_.forEach((m) => m.dispose());
     this.masks_ = [];
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(SERVICE, function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc(SERVICE, function (ampdoc) {
     return new AmpInputmaskService(ampdoc);
   });
 });

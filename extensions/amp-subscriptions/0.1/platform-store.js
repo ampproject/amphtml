@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
-  from './score-factors.js';
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
@@ -37,7 +35,9 @@ const TAG = 'amp-subscriptions';
  */
 let PlatformWeightDef;
 
-
+/**
+ * Manages platforms. Has a list of platforms it instantiates and manages.
+ */
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -45,9 +45,12 @@ export class PlatformStore {
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
    */
-  constructor(expectedServiceIds, scoreConfig,
-    fallbackEntitlement, opt_Platforms) {
-
+  constructor(
+    expectedServiceIds,
+    scoreConfig,
+    fallbackEntitlement,
+    opt_Platforms
+  ) {
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = opt_Platforms || dict();
 
@@ -62,7 +65,7 @@ export class PlatformStore {
      * {!Object<string, !Deferred<!./entitlement.Entitlement>>}
      */
     this.entitlementDeferredMap_ = {};
-    expectedServiceIds.forEach(serviceId => {
+    expectedServiceIds.forEach((serviceId) => {
       this.entitlementDeferredMap_[serviceId] = new Deferred();
     });
 
@@ -118,15 +121,15 @@ export class PlatformStore {
     }
     // Then create new platform store withe the newply reset platforms in it.
     return new PlatformStore(
-        this.serviceIds_,
-        this.scoreConfig_,
-        this.fallbackEntitlement_,
-        this.subscriptionPlatforms_
+      this.serviceIds_,
+      this.scoreConfig_,
+      this.fallbackEntitlement_,
+      this.subscriptionPlatforms_
     );
   }
 
   /**
-   *Calls a callback for when a platform is resolved.
+   * Calls a callback for when a platform is resolved.
    * @param {string} serviceId
    * @param {!Function} callback
    */
@@ -135,7 +138,7 @@ export class PlatformStore {
     if (platform) {
       callback(platform);
     } else {
-      this.onPlatformResolvedCallbacks_.add(e => {
+      this.onPlatformResolvedCallbacks_.add((e) => {
         if (e.serviceId === serviceId) {
           callback(this.getPlatform(serviceId));
         }
@@ -156,12 +159,12 @@ export class PlatformStore {
 
   /**
    * Returns the local platform
-   * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
   getLocalPlatform() {
     const localPlatform =
-        /** @type{!./local-subscription-platform.LocalSubscriptionPlatform} */
-        (this.getPlatform('local'));
+      /** @type {!./subscription-platform.SubscriptionPlatform} */
+      (this.getPlatform('local'));
     return localPlatform;
   }
 
@@ -173,8 +176,7 @@ export class PlatformStore {
   getAvailablePlatforms() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
-      const subscriptionPlatform =
-        this.subscriptionPlatforms_[platformKey];
+      const subscriptionPlatform = this.subscriptionPlatforms_[platformKey];
       platforms.push(subscriptionPlatform);
     }
     return platforms;
@@ -220,8 +222,10 @@ export class PlatformStore {
    * @return {!./entitlement.Entitlement} entitlement
    */
   getResolvedEntitlementFor(serviceId) {
-    devAssert(this.entitlements_[serviceId],
-        `Platform ${serviceId} has not yet resolved with entitlements`);
+    devAssert(
+      this.entitlements_[serviceId],
+      `Platform ${serviceId} has not yet resolved with entitlements`
+    );
     return this.entitlements_[serviceId];
   }
 
@@ -231,9 +235,61 @@ export class PlatformStore {
    * @return {!Promise<!./entitlement.Entitlement>} entitlement
    */
   getEntitlementPromiseFor(serviceId) {
-    devAssert(this.entitlementDeferredMap_[serviceId],
-        `Platform ${serviceId} is not declared`);
+    devAssert(
+      this.entitlementDeferredMap_[serviceId],
+      `Platform ${serviceId} is not declared`
+    );
     return this.entitlementDeferredMap_[serviceId].promise;
+  }
+
+  /**
+   * Get scoreFactor states for each platform
+   * @return {!Promise<!JsonObject>}
+   *
+   * return value looks somethinglike this
+   * {
+   *   'subscribe.google.com': {
+   *     isReadyToPay: 1,
+   *     supportsViewer: 1,
+   *   },
+   *   local: {
+   *     isReadyToPay: 0,
+   *     supportsViewer: 0,
+   *   },
+   * }
+   */
+  getScoreFactorStates() {
+    const states = dict({});
+    return Promise.all(
+      this.serviceIds_.map((platformId) => {
+        states[platformId] = dict();
+        return Promise.all(
+          Object.values(SubscriptionsScoreFactor).map((scoreFactor) =>
+            this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
+              (factorValue) => {
+                states[platformId][scoreFactor] = factorValue;
+              }
+            )
+          )
+        );
+      })
+    ).then(() => states);
+  }
+
+  /**
+   * Return a score factor for a platform once it's resolved
+   * @param {string} serviceId
+   * @param {string} scoreFactor
+   * @return {!Promise<number>}
+   * @private
+   */
+  getScoreFactorPromiseFor_(serviceId, scoreFactor) {
+    // Make sure the platform is ready
+    return this.getEntitlementPromiseFor(serviceId).then(() => {
+      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+        scoreFactor
+      );
+    });
   }
 
   /**
@@ -248,7 +304,7 @@ export class PlatformStore {
 
     // Check if current entitlements unblock the reader
     for (const key in this.entitlements_) {
-      const entitlement = (this.entitlements_[key]);
+      const entitlement = this.entitlements_[key];
       if (entitlement.granted) {
         this.saveGrantEntitlement_(entitlement);
         this.grantStatusPromise_.resolve(true);
@@ -260,7 +316,8 @@ export class PlatformStore {
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
-      this.onChange(({entitlement}) => {
+      this.onChange((e) => {
+        const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
@@ -280,10 +337,12 @@ export class PlatformStore {
   saveGrantEntitlement_(entitlement) {
     // The entitlement will be stored if either it is the first one to grant
     // or the new one has full subscription but the last one didn't.
-    if ((!this.grantStatusEntitlement_ && entitlement.granted)
-        || (this.grantStatusEntitlement_
-          && !this.grantStatusEntitlement_.isSubscriber()
-          && entitlement.isSubscriber())) {
+    if (
+      (!this.grantStatusEntitlement_ && entitlement.granted) ||
+      (this.grantStatusEntitlement_ &&
+        !this.grantStatusEntitlement_.isSubscriber() &&
+        entitlement.isSubscriber())
+    ) {
       this.grantStatusEntitlement_ = entitlement;
     }
   }
@@ -294,21 +353,26 @@ export class PlatformStore {
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return (this.grantStatusEntitlementPromise_.promise);
+      return this.grantStatusEntitlementPromise_.promise;
     }
     this.grantStatusEntitlementPromise_ = new Deferred();
-    if ((this.grantStatusEntitlement_
-        && this.grantStatusEntitlement_.isSubscriber())
-          || this.areAllPlatformsResolved_()) {
+    if (
+      (this.grantStatusEntitlement_ &&
+        this.grantStatusEntitlement_.isSubscriber()) ||
+      this.areAllPlatformsResolved_()
+    ) {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
       this.onEntitlementResolvedCallbacks_.add(() => {
         // Grant entitlement only if subscriber
-        if ((this.grantStatusEntitlement_
-             && this.grantStatusEntitlement_.isSubscriber())
-            || this.areAllPlatformsResolved_()) {
+        if (
+          (this.grantStatusEntitlement_ &&
+            this.grantStatusEntitlement_.isSubscriber()) ||
+          this.areAllPlatformsResolved_()
+        ) {
           this.grantStatusEntitlementPromise_.resolve(
-              this.grantStatusEntitlement_);
+            this.grantStatusEntitlement_
+          );
         }
       });
     }
@@ -324,10 +388,9 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @private
    * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
-  getAllPlatformsEntitlements_() {
+  getAllPlatformsEntitlements() {
     if (this.allResolvedPromise_) {
       return this.allResolvedPromise_.promise;
     }
@@ -335,13 +398,15 @@ export class PlatformStore {
     if (this.areAllPlatformsResolved_()) {
       // Resolve with null if none of the entitlements unblock the reader
       this.allResolvedPromise_.resolve(
-          this.getAvailablePlatformsEntitlements_());
+        this.getAvailablePlatformsEntitlements_()
+      );
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(() => {
         if (this.areAllPlatformsResolved_()) {
           this.allResolvedPromise_.resolve(
-              this.getAvailablePlatformsEntitlements_());
+            this.getAvailablePlatformsEntitlements_()
+          );
         }
       });
     }
@@ -368,8 +433,7 @@ export class PlatformStore {
    * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
-
-    return this.getAllPlatformsEntitlements_().then(() => {
+    return this.getAllPlatformsEntitlements().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
       // waiting for all entitlement.
       return this.selectApplicablePlatform_();
@@ -398,8 +462,9 @@ export class PlatformStore {
     if (typeof factorValue !== 'number') {
       return 0;
     }
-    return this.scoreConfig_[factorName] *
-      Math.min(1, Math.max(-1, factorValue));
+    return (
+      this.scoreConfig_[factorName] * Math.min(1, Math.max(-1, factorValue))
+    );
   }
 
   /**
@@ -415,15 +480,18 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatform_() {
-    devAssert(this.areAllPlatformsResolved_(),
-        'All platforms are not resolved yet');
+    devAssert(
+      this.areAllPlatformsResolved_(),
+      'All platforms are not resolved yet'
+    );
 
     // Subscriber wins immediately.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
-      const entitlement =
-          this.getResolvedEntitlementFor(platform.getServiceId());
+      const entitlement = this.getResolvedEntitlementFor(
+        platform.getServiceId()
+      );
       if (entitlement.isSubscriber()) {
         return platform;
       }
@@ -439,7 +507,7 @@ export class PlatformStore {
    */
   getAllPlatformWeights_() {
     // Get weights for all of the platforms.
-    return this.getAvailablePlatforms().map(platform => {
+    return this.getAvailablePlatforms().map((platform) => {
       return {
         platform,
         weight: this.calculatePlatformWeight_(platform),
@@ -466,7 +534,12 @@ export class PlatformStore {
       }
     }
 
-    return weight + factorWeights.reduce((a, b) => { return a + b; });
+    return (
+      weight +
+      factorWeights.reduce((a, b) => {
+        return a + b;
+      })
+    );
   }
 
   /**
@@ -478,8 +551,10 @@ export class PlatformStore {
     const localPlatform = this.getLocalPlatform();
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
-      if (platform2.weight == platform1.weight &&
-        platform1.platform == localPlatform) {
+      if (
+        platform2.weight == platform1.weight &&
+        platform1.platform == localPlatform
+      ) {
         return -1;
       }
       return platform2.weight - platform1.weight;
@@ -498,10 +573,9 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    /** @type {!Array<!PlatformWeightDef>} */
-    const platformWeights = this.getAvailablePlatforms().map(platform => {
+    const platformWeights = this.getAvailablePlatforms().map((platform) => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      const weight = typeof factorValue == 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);
@@ -514,12 +588,19 @@ export class PlatformStore {
    * @param {string} serviceId
    */
   reportPlatformFailureAndFallback(serviceId) {
-    if (serviceId === this.getLocalPlatform().getServiceId()
-      && this.fallbackEntitlement_) {
-      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
-          this.fallbackEntitlement_);
-      user().warn(TAG, 'Local platform has failed to resolve,  '
-        + 'using fallback entitlement.');
+    if (
+      serviceId === this.getLocalPlatform().getServiceId() &&
+      this.fallbackEntitlement_
+    ) {
+      this.resolveEntitlement(
+        this.getLocalPlatform().getServiceId(),
+        this.fallbackEntitlement_
+      );
+      user().warn(
+        TAG,
+        'Local platform has failed to resolve,  ' +
+          'using fallback entitlement.'
+      );
     } else if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       const entitlement = Entitlement.empty(serviceId);
       this.resolveEntitlement(serviceId, entitlement);
@@ -533,6 +614,7 @@ export class PlatformStore {
    */
   selectPlatformForLogin() {
     return this.selectApplicablePlatformForFactor_(
-        SubscriptionsScoreFactor.SUPPORTS_VIEWER);
+      SubscriptionsScoreFactor.SUPPORTS_VIEWER
+    );
   }
 }

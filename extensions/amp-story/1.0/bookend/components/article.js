@@ -15,11 +15,18 @@
  */
 
 import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -39,18 +46,18 @@ export let ArticleComponentDef;
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
-
   /** @override */
   assertValidity(articleJson, element) {
-
     const requiredFields = ['title', 'url'];
-    const hasAllRequiredFields =
-        !requiredFields.some(field => !(field in articleJson));
+    const hasAllRequiredFields = !requiredFields.some(
+      (field) => !(field in articleJson)
+    );
     userAssert(
-        hasAllRequiredFields,
-        'Small article component must contain ' +
-            requiredFields.map(field => '`' + field + '`').join(', ') +
-            ' fields, skipping invalid.');
+      hasAllRequiredFields,
+      'Small article component must contain ' +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.'
+    );
 
     userAssertValidProtocol(element, articleJson['url']);
 
@@ -84,39 +91,54 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildElement(articleData, doc) {
-    const html = htmlFor(doc);
+  buildElement(articleData, win, data) {
+    const html = htmlFor(win.document);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const el =
-        html`
-        <a class="i-amphtml-story-bookend-article
-          i-amphtml-story-bookend-component"
-          target="_top">
-          <div class="i-amphtml-story-bookend-article-text-content">
-            <h2
-              class="i-amphtml-story-bookend-article-heading" ref="heading">
-            </h2>
-            <div
-              class="i-amphtml-story-bookend-component-meta" ref="meta">
-            </div>
-          </div>
-        </a>`;
-    addAttributesToElement(el, dict({'href': articleData.url}));
+    const el = html`
+      <a
+        class="i-amphtml-story-bookend-article i-amphtml-story-bookend-component"
+        target="_top"
+      >
+        <div class="i-amphtml-story-bookend-article-text-content">
+          <h2
+            class="i-amphtml-story-bookend-article-heading"
+            ref="heading"
+          ></h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
+        </div>
+      </a>
+    `;
+
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(articleData.url, getSourceUrl(win.location)),
+      })
+    );
+
+    el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.SMALL,
+    };
 
     if (articleData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
     if (articleData.image) {
-      const imgEl =
-          html`
+      const imgEl = html`
           <div class="i-amphtml-story-bookend-article-image">
             <img ref="image">
             </img>
           </div>`;
 
       const {image} = htmlRefs(imgEl);
-      addAttributesToElement(image, dict({'src': articleData.image}));
+
+      addAttributesToElement(
+        image,
+        dict({'src': resolveImgSrc(win, articleData.image)})
+      );
+
       el.appendChild(imgEl);
     }
 

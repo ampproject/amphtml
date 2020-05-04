@@ -22,13 +22,11 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -87,12 +85,14 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     // Step size on keyboard action, 0.1 = 10%
     /** @private {number} */
-    this.stepSize_ = this.element.hasAttribute('step-size') ?
-      (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
+    this.stepSize_ = this.element.hasAttribute('step-size')
+      ? Number(this.element.getAttribute('step-size')) || 0.1
+      : 0.1;
 
     /** @private {boolean} */
-    this.shouldHintReappear_ =
-      !this.element.hasAttribute('disable-hint-reappear');
+    this.shouldHintReappear_ = !this.element.hasAttribute(
+      'disable-hint-reappear'
+    );
 
     /** @private {Gestures|null} */
     this.gestures_ = null;
@@ -118,8 +118,10 @@ export class AmpImageSlider extends AMP.BaseElement {
         } else if (!this.rightAmpImage_) {
           this.rightAmpImage_ = child;
         } else {
-          user().error('AMP-IMAGE-SLIDER',
-              'Should not contain more than 2 <amp-img>s.');
+          user().error(
+            'AMP-IMAGE-SLIDER',
+            'Should not contain more than 2 <amp-img>s.'
+          );
         }
       } else if (child.tagName.toLowerCase() === 'div') {
         if (child.hasAttribute('first')) {
@@ -127,23 +129,25 @@ export class AmpImageSlider extends AMP.BaseElement {
         } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         } else {
-          user().error('AMP-IMAGE-SLIDER',
-              'Should not contain <div>s without ' +
-              '"first" or "second" attributes.');
+          user().error(
+            'AMP-IMAGE-SLIDER',
+            'Should not contain <div>s without ' +
+              '"first" or "second" attributes.'
+          );
         }
       }
     }
 
-    userAssert(this.leftAmpImage_ && this.rightAmpImage_,
-        '2 <amp-img>s must be provided for comparison');
+    userAssert(
+      this.leftAmpImage_ && this.rightAmpImage_,
+      '2 <amp-img>s must be provided for comparison'
+    );
 
-    // TODO(kqian): remove this after layer launch
-    if (!isExperimentOn(this.win, 'layers')) {
-      // see comment in layoutCallback
-      // When layers not enabled
-      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
-      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
-    }
+    // see comment in layoutCallback
+    // When layers not enabled
+    const owners = Services.ownersForDoc(this.element);
+    owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+    owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
 
     this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
@@ -154,22 +158,26 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.buildHint_();
     this.checkARIA_();
 
-    this.registerAction('seekTo', invocation => {
-      const {args} = invocation;
-      if (args) {
-        if (args['percent'] !== undefined) {
-          const percent = args['percent'];
-          user().assertNumber(percent,
-              'value to seek to must be a number');
-          this.mutateElement(() => {
-            this.updatePositions_(percent);
-          });
+    this.registerAction(
+      'seekTo',
+      (invocation) => {
+        const {args} = invocation;
+        if (args) {
+          if (args['percent'] !== undefined) {
+            const percent = args['percent'];
+            user().assertNumber(percent, 'value to seek to must be a number');
+            this.mutateElement(() => {
+              this.updatePositions_(percent);
+            });
+          }
         }
-      }
-    }, ActionTrust.LOW);
+      },
+      ActionTrust.LOW
+    );
 
-    const initialPositionString =
-        this.element.getAttribute('initial-slider-position');
+    const initialPositionString = this.element.getAttribute(
+      'initial-slider-position'
+    );
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
@@ -205,8 +213,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
-      this.leftLabelWrapper_.classList
-          .add('i-amphtml-image-slider-label-wrapper');
+      this.leftLabelWrapper_.classList.add(
+        'i-amphtml-image-slider-label-wrapper'
+      );
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
@@ -216,10 +225,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
-      this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-label-wrapper');
-      this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-push-left');
+      this.rightLabelWrapper_.classList.add(
+        'i-amphtml-image-slider-label-wrapper'
+      );
+      this.rightLabelWrapper_.classList.add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -284,42 +293,58 @@ export class AmpImageSlider extends AMP.BaseElement {
   checkARIA_() {
     const leftAmpImage = dev().assertElement(this.leftAmpImage_);
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
-    leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-      if (leftAmpImage.childElementCount > 0) {
-        const img = leftAmpImage.querySelector('img');
-        let newAltText;
-        this.measureMutateElement(() => {
-          const ariaSuffix =
-            leftAmpImage.getAttribute('data-left-image-aria-suffix')
-              || 'left image';
-          if (leftAmpImage.hasAttribute('alt')) {
-            newAltText = `${leftAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
-          } else {
-            newAltText = ariaSuffix;
-          }
-        }, () => {
-          img.setAttribute('alt', newAltText);
-        });
-      }
-    });
-    rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-      if (rightAmpImage.childElementCount > 0) {
-        const img = rightAmpImage.querySelector('img');
-        let newAltText;
-        this.measureMutateElement(() => {
-          const ariaSuffix =
-            rightAmpImage.getAttribute('data-right-image-aria-suffix')
-              || 'right image';
-          if (rightAmpImage.hasAttribute('alt')) {
-            newAltText = `${rightAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
-          } else {
-            newAltText = ariaSuffix;
-          }
-        }, () => {
-          img.setAttribute('alt', newAltText);
-        });
-      }
-    });
+    leftAmpImage
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        if (leftAmpImage.childElementCount > 0) {
+          const img = leftAmpImage.querySelector('img');
+          let newAltText;
+          this.measureMutateElement(
+            () => {
+              const ariaSuffix =
+                leftAmpImage.getAttribute('data-left-image-aria-suffix') ||
+                'left image';
+              if (leftAmpImage.hasAttribute('alt')) {
+                newAltText = `${leftAmpImage.getAttribute(
+                  'alt'
+                )}, ${ariaSuffix}`;
+              } else {
+                newAltText = ariaSuffix;
+              }
+            },
+            () => {
+              img.setAttribute('alt', newAltText);
+            }
+          );
+        }
+      });
+    rightAmpImage
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        if (rightAmpImage.childElementCount > 0) {
+          const img = rightAmpImage.querySelector('img');
+          let newAltText;
+          this.measureMutateElement(
+            () => {
+              const ariaSuffix =
+                rightAmpImage.getAttribute('data-right-image-aria-suffix') ||
+                'right image';
+              if (rightAmpImage.hasAttribute('alt')) {
+                newAltText = `${rightAmpImage.getAttribute(
+                  'alt'
+                )}, ${ariaSuffix}`;
+              } else {
+                newAltText = ariaSuffix;
+              }
+            },
+            () => {
+              img.setAttribute('alt', newAltText);
+            }
+          );
+        }
+      });
   }
 
   /**
@@ -333,16 +358,15 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.gestures_ = Gestures.get(this.element);
 
-    this.gestures_.onGesture(SwipeXRecognizer, e => {
+    this.gestures_.onGesture(SwipeXRecognizer, (e) => {
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
       }
-      this.pointerMoveX_(
-          e.data.startX + e.data.deltaX);
+      this.pointerMoveX_(e.data.startX + e.data.deltaX);
     });
 
-    this.gestures_.onPointerDown(e => {
+    this.gestures_.onPointerDown((e) => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
       this.animateHideHint_();
@@ -367,10 +391,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   animateShowHint_() {
     this.mutateElement(() => {
-      this.hintLeftBody_.classList
-          .remove('i-amphtml-image-slider-hint-hidden');
-      this.hintRightBody_.classList
-          .remove('i-amphtml-image-slider-hint-hidden');
+      this.hintLeftBody_.classList.remove('i-amphtml-image-slider-hint-hidden');
+      this.hintRightBody_.classList.remove(
+        'i-amphtml-image-slider-hint-hidden'
+      );
     });
   }
 
@@ -399,10 +423,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
 
-    this.unlistenMouseMove_ =
-        listen(this.win, 'mousemove', this.onMouseMove_.bind(this));
-    this.unlistenMouseUp_ =
-        listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
+    this.unlistenMouseMove_ = listen(
+      this.win,
+      'mousemove',
+      this.onMouseMove_.bind(this)
+    );
+    this.unlistenMouseUp_ = listen(
+      this.win,
+      'mouseup',
+      this.onMouseUp_.bind(this)
+    );
 
     this.animateHideHint_();
   }
@@ -493,10 +523,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.isEventRegistered) {
       return;
     }
-    this.unlistenMouseDown_ =
-        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
-    this.unlistenKeyDown_ =
-        listen(this.element, 'keydown', this.onKeyDown_.bind(this));
+    this.unlistenMouseDown_ = listen(
+      this.element,
+      'mousedown',
+      this.onMouseDown_.bind(this)
+    );
+    this.unlistenKeyDown_ = listen(
+      this.element,
+      'keydown',
+      this.onKeyDown_.bind(this)
+    );
     this.registerTouchGestures_();
     this.isEventRegistered = true;
   }
@@ -518,10 +554,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Get current slider's percentage to the left
    * Should be wrapped inside measureElement
    * @private
+   * @return {number}
    */
   getCurrentSliderPercentage_() {
-    const {left: barLeft} =
-        this.bar_./*OK*/getBoundingClientRect();
+    const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
     const {left: boxLeft, width: boxWidth} = this.getLayoutBox();
     return (barLeft - boxLeft) / boxWidth;
   }
@@ -539,12 +575,16 @@ export class AmpImageSlider extends AMP.BaseElement {
       });
     } else {
       let newPercentage;
-      this.measureMutateElement(() => {
-        newPercentage = this.limitPercentage_(
-            this.getCurrentSliderPercentage_() - this.stepSize_);
-      }, () => {
-        this.updatePositions_(newPercentage);
-      });
+      this.measureMutateElement(
+        () => {
+          newPercentage = this.limitPercentage_(
+            this.getCurrentSliderPercentage_() - this.stepSize_
+          );
+        },
+        () => {
+          this.updatePositions_(newPercentage);
+        }
+      );
     }
   }
 
@@ -571,12 +611,16 @@ export class AmpImageSlider extends AMP.BaseElement {
       });
     } else {
       let newPercentage;
-      this.measureMutateElement(() => {
-        newPercentage = this.limitPercentage_(
-            this.getCurrentSliderPercentage_() + this.stepSize_);
-      }, () => {
-        this.updatePositions_(newPercentage);
-      });
+      this.measureMutateElement(
+        () => {
+          newPercentage = this.limitPercentage_(
+            this.getCurrentSliderPercentage_() + this.stepSize_
+          );
+        },
+        () => {
+          this.updatePositions_(newPercentage);
+        }
+      );
     }
   }
 
@@ -594,7 +638,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       width = layoutBox.width;
       left = layoutBox.left;
       right = layoutBox.right;
-      const newPos = Math.max(left, Math.min(pointerX, right));
+      const newPos = clamp(pointerX, left, right);
       const newPercentage = (newPos - left) / width;
       this.mutateElement(() => {
         this.updatePositions_(newPercentage);
@@ -604,16 +648,19 @@ export class AmpImageSlider extends AMP.BaseElement {
       // This is to address the "snap to leftmost" bug that occurs on
       // pointer down after scrolling away and back 3+ slides
       // layoutBox is not updated correctly when first landed on page
-      this.measureMutateElement(() => {
-        const rect = this.element./*OK*/getBoundingClientRect();
-        width = rect.width;
-        left = rect.left;
-        right = rect.right;
-      }, () => {
-        const newPos = Math.max(left, Math.min(pointerX, right));
-        const newPercentage = (newPos - left) / width;
-        this.updatePositions_(newPercentage);
-      });
+      this.measureMutateElement(
+        () => {
+          const rect = this.element./*OK*/ getBoundingClientRect();
+          width = rect.width;
+          left = rect.left;
+          right = rect.right;
+        },
+        () => {
+          const newPos = clamp(pointerX, left, right);
+          const newPercentage = (newPos - left) / width;
+          this.updatePositions_(newPercentage);
+        }
+      );
     }
   }
 
@@ -641,6 +688,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    * @private
+   * @return {number}
    */
   limitPercentage_(percentage) {
     return clamp(percentage, 0, 1);
@@ -666,31 +714,45 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Extensions such as amp-carousel still uses .setAsOwner()
+    // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.leftAmpImage_)
+    );
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.rightAmpImage_)
+    );
 
     this.registerEvents_();
 
     return Promise.all([
-      dev().assertElement(this.leftAmpImage_)
-          .signals().whenSignal(CommonSignals.LOAD_END),
-      dev().assertElement(this.rightAmpImage_)
-          .signals().whenSignal(CommonSignals.LOAD_END),
-    ]).then(() => {
-      // Notice: hints are attached after amp-img finished loading
-      this.container_.appendChild(this.hintLeftBody_);
-      this.container_.appendChild(this.hintRightBody_);
-    }, () => {
-      // Do the same thing when signal rejects
-      this.container_.appendChild(this.hintLeftBody_);
-      this.container_.appendChild(this.hintRightBody_);
-    });
+      dev()
+        .assertElement(this.leftAmpImage_)
+        .signals()
+        .whenSignal(CommonSignals.LOAD_END),
+      dev()
+        .assertElement(this.rightAmpImage_)
+        .signals()
+        .whenSignal(CommonSignals.LOAD_END),
+    ]).then(
+      () => {
+        // Notice: hints are attached after amp-img finished loading
+        this.container_.appendChild(this.hintLeftBody_);
+        this.container_.appendChild(this.hintRightBody_);
+      },
+      () => {
+        // Do the same thing when signal rejects
+        this.container_.appendChild(this.hintLeftBody_);
+        this.container_.appendChild(this.hintRightBody_);
+      }
+    );
   }
 
   /** @override */
@@ -719,6 +781,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-image-slider', '0.1', AMP => {
+AMP.extension('amp-image-slider', '0.1', (AMP) => {
   AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
 });

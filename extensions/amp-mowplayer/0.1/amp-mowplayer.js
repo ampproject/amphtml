@@ -17,7 +17,6 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -35,10 +34,10 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-mowplayer';
 
 /**
  * @enum {number}
@@ -53,7 +52,6 @@ const PlayerStates = {
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpMowplayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -85,10 +83,10 @@ class AmpMowplayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const {preconnect} = this;
-    preconnect.url(this.getVideoIframeSrc_());
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), this.getVideoIframeSrc_());
     // Host that mowplayer uses to serve JS needed by player.
-    preconnect.url('https://cdn.mowplayer.com', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://mowplayer.com', opt_onLayout);
   }
 
   /** @override */
@@ -104,9 +102,10 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.mediaid_ = userAssert(
-        (this.element.getAttribute('data-mediaid')),
-        '/The data-mediaid attribute is required for <amp-mowplayer> %s',
-        this.element);
+      this.element.getAttribute('data-mediaid'),
+      '/The data-mediaid attribute is required for <amp-mowplayer> %s',
+      this.element
+    );
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -125,7 +124,8 @@ class AmpMowplayer extends AMP.BaseElement {
       return this.videoIframeSrc_;
     }
 
-    return this.videoIframeSrc_ = 'https://mowplayer.com/watch/' + this.mediaid_;
+    return (this.videoIframeSrc_ =
+      'https://mowplayer.com/watch/' + this.mediaid_);
   }
 
   /** @override */
@@ -133,9 +133,9 @@ class AmpMowplayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
     this.iframe_ = iframe;
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleMowMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleMowMessage_.bind(this)
     );
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
@@ -188,12 +188,17 @@ class AmpMowplayer extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'event': 'command',
-          'func': command,
-          'args': opt_args || '',
-        }));
-        this.iframe_.contentWindow./*OK*/postMessage(message, 'https://mowplayer.com');
+        const message = JSON.stringify(
+          dict({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          message,
+          'https://mowplayer.com'
+        );
       }
     });
   }
@@ -247,7 +252,6 @@ class AmpMowplayer extends AMP.BaseElement {
       element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
       return;
     }
-
   }
 
   /**
@@ -265,7 +269,6 @@ class AmpMowplayer extends AMP.BaseElement {
       window.location.origin,
       true,
     ]);
-
   }
 
   /** @override */
@@ -364,8 +367,13 @@ class AmpMowplayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-AMP.extension('amp-mowplayer', '0.1', AMP => {
-  AMP.registerElement('amp-mowplayer', AmpMowplayer);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpMowplayer);
 });

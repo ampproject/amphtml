@@ -27,8 +27,7 @@ import {
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let moreInfoLinkUrl;
   let embedded;
   let parentEl;
@@ -42,23 +41,21 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
     embedded = true;
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
-    // Making sure resource tasks run synchronously.
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    // Making sure mutator tasks run synchronously.
+    env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();
       },
     });
 
-    sandbox.stub(Services, 'localizationServiceV01').returns({
-      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
-    });
-
-    sandbox.stub(Services, 'viewerForDoc').returns({
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
-      sendMessageAwaitResponse: eventType => {
+      sendMessageAwaitResponse: (eventType) => {
         if (eventType === 'moreInfoLinkUrl') {
           return Promise.resolve(moreInfoLinkUrl);
         }
@@ -82,8 +79,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   it('should hide more info link when there is no viewer messaging', () => {
     embedded = false;
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .not.to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(
+        infoDialog.element_.querySelector(MOREINFO_CLASS)
+      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
   });
 
@@ -91,8 +89,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     moreInfoLinkUrl = null;
 
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .not.to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(
+        infoDialog.element_.querySelector(MOREINFO_CLASS)
+      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
   });
 
@@ -100,8 +99,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).to.have.class(
+        MOREINFO_VISIBLE_CLASS
+      );
     });
   });
 

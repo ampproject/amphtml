@@ -22,15 +22,13 @@ import {
   setupInit,
   setupInput,
   setupJsonFetchInit,
-  verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
-import {
-  getCorsUrl,
-  parseUrlDeprecated,
-} from '../url';
+import {dev, user} from '../log';
+import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user} from '../log';
+import {parseJson} from '../json';
+import {startsWith} from '../string';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -39,7 +37,6 @@ import {user} from '../log';
  * @visibleForTesting
  */
 export class Xhr {
-
   /**
    * @param {!Window} win
    */
@@ -56,8 +53,9 @@ export class Xhr {
     // getAmpDoc.
     // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ =
-        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
+    this.ampdocSingle_ = ampdocService.isSingleDoc()
+      ? ampdocService.getSingleDoc()
+      : null;
   }
 
   /**
@@ -66,37 +64,36 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef} init
-   * @return {!Promise<!Response>|!Promise<!Response>}
+   * @return {!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
-    return getViewerInterceptResponse(this.win, this.ampdocSingle_, input, init)
-        .then(interceptorResponse => {
-          if (interceptorResponse) {
-            return interceptorResponse;
-          }
-          // After this point, both the native `fetch` and the `fetch` polyfill
-          // will expect a native `FormData` object in the `body` property, so
-          // the native `FormData` object needs to be unwrapped.
-          if (isFormDataWrapper(init.body)) {
-            const formDataWrapper =
-              /** @type {!FormDataWrapperInterface} */ (init.body);
-            init.body = formDataWrapper.getFormData();
-          }
-          return (this.win.fetch).apply(null, arguments);
-        });
+    return getViewerInterceptResponse(
+      this.win,
+      this.ampdocSingle_,
+      input,
+      init
+    ).then((interceptorResponse) => {
+      if (interceptorResponse) {
+        return interceptorResponse;
+      }
+      // After this point, both the native `fetch` and the `fetch` polyfill
+      // will expect a native `FormData` object in the `body` property, so
+      // the native `FormData` object needs to be unwrapped.
+      if (isFormDataWrapper(init.body)) {
+        const formDataWrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
+        init.body = formDataWrapper.getFormData();
+      }
+      return this.win.fetch.apply(null, arguments);
+    });
   }
 
   /**
    * Performs the final initialization and requests the fetch. It does two
    * main things:
    * - It adds "__amp_source_origin" URL parameter with source origin
-   * - It verifies "AMP-Access-Control-Allow-Source-Origin" in the response
    * USE WITH CAUTION: setting ampCors to false disables AMP source origin check
    * but allows for caching resources cross pages.
-   *
-   * Note: requireAmpResponseSourceOrigin is deprecated. It defaults to
-   *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
@@ -106,13 +103,17 @@ export class Xhr {
   fetchAmpCors_(input, init = {}) {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
-    return this.fetch_(input, init).then(response => {
-      return verifyAmpCORSHeaders(this.win, response, init);
-    }, reason => {
-      const targetOrigin = parseUrlDeprecated(input).origin;
-      throw user().createExpectedError('XHR', 'Failed fetching' +
-          ` (${targetOrigin}/...):`, reason && reason.message);
-    });
+    return this.fetch_(input, init).then(
+      (response) => response,
+      (reason) => {
+        const targetOrigin = parseUrlDeprecated(input).origin;
+        throw user().createExpectedError(
+          'XHR',
+          `Failed fetching (${targetOrigin}/...):`,
+          reason && reason.message
+        );
+      }
+    );
   }
 
   /**
@@ -125,10 +126,9 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!Response>}
    */
-  fetchJson(input, opt_init, opt_allowFailure) {
+  fetchJson(input, opt_init) {
     return this.fetch(input, setupJsonFetchInit(opt_init));
   }
 
@@ -149,14 +149,39 @@ export class Xhr {
   }
 
   /**
+   * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
+   *
+   * @param {!Response} res fetch response to convert to json.
+   * @param {string|undefined} prefix to strip away.
+   * @return {Promise<*>}
+   */
+  xssiJson(res, prefix) {
+    if (!prefix) {
+      return res.json();
+    }
+
+    return res.text().then((txt) => {
+      if (!startsWith(txt, dev().assertString(prefix))) {
+        user().warn(
+          'XHR',
+          `Failed to strip missing prefix "${prefix}" in fetch response.`
+        );
+        return parseJson(txt);
+      }
+      return parseJson(txt.slice(prefix.length));
+    });
+  }
+
+  /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
-      assertSuccess(response));
+    return this.fetchAmpCors_(input, init).then((response) =>
+      assertSuccess(response)
+    );
   }
 
   /**
@@ -171,8 +196,9 @@ export class Xhr {
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
-    return this.fetchAmpCors_(input, opt_init)
-        .then(response => assertSuccess(response));
+    return this.fetchAmpCors_(input, opt_init).then((response) =>
+      assertSuccess(response)
+    );
   }
 
   /**

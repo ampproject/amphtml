@@ -306,6 +306,24 @@ export function factory($, window, document, undefined) {
                 } else {
                     var maskdef = (opts.definitions ? opts.definitions[element] : undefined) || Inputmask.prototype.definitions[element];
                     if (maskdef && !escaped) {
+                        // This for-loop implements "cardinality"
+                        // Removed in 4.x for unknown reasons.
+                        // Backported from https://github.com/RobinHerbots/Inputmask/blob/8d0c60f8/js/inputmask.js#L371
+                        for (var prevalidators = maskdef.prevalidator, prevalidatorsL = prevalidators ? prevalidators.length : 0, i = 1; i < maskdef.cardinality; i++) {
+                            var prevalidator = prevalidatorsL >= i ? prevalidators[i - 1] : [], validator = prevalidator.validator, cardinality = prevalidator.cardinality;
+                            mtoken.matches.splice(position++, 0, {
+                                fn: validator ? "string" == typeof validator ? new RegExp(validator, opts.casing ? "i" : "") : new function() {
+                                    this.test = validator;
+                                }() : new RegExp("."),
+                                cardinality: cardinality || 1,
+                                optionality: mtoken.isOptional,
+                                newBlockMarker: prevMatch === undefined || prevMatch.def !== (maskdef.definitionSymbol || element),
+                                casing: maskdef.casing,
+                                def: maskdef.definitionSymbol || element,
+                                placeholder: maskdef.placeholder,
+                                nativeDef: element
+                            }), prevMatch = mtoken.matches[position - 1];
+                        }
                         mtoken.matches.splice(position++, 0, {
                             fn: maskdef.validator ? typeof maskdef.validator == "string" ? new RegExp(maskdef.validator, opts.casing ? "i" : "") : new function() {
                                 this.test = maskdef.validator;
@@ -1369,7 +1387,7 @@ export function factory($, window, document, undefined) {
                 }
             }
             if ($.isFunction(opts.postValidation) && result !== false && !strict && fromSetValid !== true && validateOnly !== true) {
-                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts);
+                var postResult = opts.postValidation(getBuffer(true), pos.begin !== undefined ? isRTL ? pos.end : pos.begin : pos, result, opts, getMaskSet());
                 if (postResult !== undefined) {
                     if (postResult.refreshFromBuffer && postResult.buffer) {
                         var refresh = postResult.refreshFromBuffer;
@@ -1681,9 +1699,23 @@ export function factory($, window, document, undefined) {
         var EventHandlers = {
             keydownEvent: function(e) {
                 var input = this, $input = $(input), k = e.keyCode, pos = caret(input);
-                if (k === Inputmask.keyCode.BACKSPACE || k === Inputmask.keyCode.DELETE || iphone && k === Inputmask.keyCode.BACKSPACE_SAFARI || e.ctrlKey && k === Inputmask.keyCode.X && !isInputEventSupported("cut")) {
+                const originalPos = {begin: input.selectionStart, end: input.selectionEnd};
+                const initial = input.value;
+                if (k === Inputmask.keyCode.BACKSPACE || k === Inputmask.keyCode.DELETE || iphone && k === Inputmask.keyCode.BACKSPACE_SAFARI || (e.ctrlKey || e.metaKey) && k === Inputmask.keyCode.X && !isInputEventSupported("cut")) {
                     e.preventDefault();
+
+                    // Handle META/CTRL+DELETE clear keyboard shortcut
+                    if (e.metaKey || e.ctrlKey) {
+                        pos.begin = 0;
+                    }
+
                     handleRemove(input, k, pos);
+
+                    // Handle SelectAll then Delete
+                    if (pos.end - pos.begin == input.value.length) {
+                        resetMaskSet(false);
+                    }
+
                     writeBuffer(input, getBuffer(true), getMaskSet().p, e, input.inputmask._valueGet() !== getBuffer().join(""));
                 } else if (k === Inputmask.keyCode.END || k === Inputmask.keyCode.PAGE_DOWN) {
                     e.preventDefault();
@@ -1715,7 +1747,7 @@ export function factory($, window, document, undefined) {
                         caret(input, pos.begin, pos.end);
                     }
                 }
-                opts.onKeyDown.call(this, e, getBuffer(), caret(input).begin, opts);
+                opts.onKeyDown.call(this, e, getBuffer(), caret(input).begin, opts, initial, originalPos);
                 ignorable = $.inArray(k, opts.ignorables) !== -1;
             },
             keypressEvent: function(e, checkval, writeOut, strict, ndx) {
@@ -1794,7 +1826,10 @@ export function factory($, window, document, undefined) {
                     }
                 }
                 checkVal(input, false, false, pasteValue.toString().split(""));
-                writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                // Use settimeout to make Safari paste work
+                setTimeout(() => {
+                    writeBuffer(input, getBuffer(), seekNext(getLastValidPosition()), e, undoValue !== getBuffer().join(""));
+                }, 0);
                 return e.preventDefault();
             },
             inputFallBackEvent: function(e) {
@@ -2008,7 +2043,19 @@ export function factory($, window, document, undefined) {
                 var clipboardData = window.clipboardData || ev.clipboardData, clipData = isRTL ? getBuffer().slice(pos.end, pos.begin) : getBuffer().slice(pos.begin, pos.end);
                 clipboardData.setData("text", isRTL ? clipData.reverse().join("") : clipData.join(""));
                 if (document.execCommand) document.execCommand("copy");
+
+                // Handle META/CTRL+DELETE clear keyboard shortcut
+                if (e.metaKey || e.ctrlKey) {
+                    pos.begin = 0;
+                }
+
                 handleRemove(input, Inputmask.keyCode.DELETE, pos);
+
+                // Handle SelectAll then Delete
+                if (pos.end - pos.begin == input.value.length) {
+                    resetMaskSet(false);
+                }
+
                 writeBuffer(input, getBuffer(), getMaskSet().p, e, undoValue !== getBuffer().join(""));
             },
             blurEvent: function(e) {

@@ -1,32 +1,36 @@
-# Settings for https://codecov.io integration
+# Overall settings for PR integration via codecov.io
+# See https://docs.codecov.io/docs/codecovyml-reference
+codecov:
+  bot: 'amp-coverage-bot'
+  ci:
+    - 'travis.org'
+  max_report_age: 24
+  require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
 
+# Pull request comments disabled because they were too noisy
 # See https://docs.codecov.io/docs/pull-request-comments
-comment: off
+comment: false
 
-# See https://docs.codecov.io/v4.3.0/docs/commit-status
+# Separate PR statuses for project-level and patch-level coverage
+# See https://docs.codecov.io/docs/commit-status
 coverage:
+  precision: 2
+  round: down
+  range: '80...100'
   status:
     project:
-      default: off
-      unit_tests:
-        flags: unit_tests
-        target: auto
-        threshold: 100 # Passing check no matter what the coverage is
+      default:
         base: auto
-      integration_tests:
-        flags: integration_tests
-        target: auto
-        threshold: 100 # Passing check no matter what the coverage is
-        base: auto
+        if_not_found: success
+        only_pulls: true
+        target: 80%
+        threshold: 1%
     patch:
-      default: off
-      unit_tests:
-        flags: unit_tests
-        target: 100 # Target 100% coverage for diffs
-        threshold: 100 # Passing check no matter what the coverage is
+      default:
         base: auto
-      integration_tests:
-        flags: integration_tests
-        target: 100 # Target 100% coverage for diffs
-        threshold: 100 # Passing check no matter what the coverage is
-        base: auto
+        if_not_found: success
+        only_pulls: true
+        target: 80%
+        threshold: 1%

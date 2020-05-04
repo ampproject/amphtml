@@ -16,6 +16,7 @@ limitations under the License.
 <!doctype html>
 <html>
   <head>
+    <script src="./bower_components/webcomponentsjs/CustomElements.min.js"></script>
     <link href="polymer.html" rel="import">
     <link href="polymer-extension-toolbar.html" rel="import">
     <script src="https://cdn.ampproject.org/v0/validator.js"></script>
@@ -233,7 +234,7 @@ limitations under the License.
           });
         }
         function processResult(validationResult, toolbar, content, url) {
-          const webuiDomain = 'validator.ampproject.org';
+          const webuiDomain = 'validator.amp.dev';
           const webuiUrl = 'https://' + webuiDomain + '/#url=' + encodeURI(url);
           const errors = validationResult.errors;
           var validationErrors = [];

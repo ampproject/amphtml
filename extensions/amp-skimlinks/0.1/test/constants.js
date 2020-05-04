@@ -13,5 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {DEFAULT_CONFIG, WAYPOINT_BASE_URL} from '../constants';
 
 export const pubcode = 'pubXcode';
+
+export const DEFAULT_SKIM_OPTIONS = {
+  pubcode,
+  tracking: true,
+  waypointBaseUrl: WAYPOINT_BASE_URL,
+  config: DEFAULT_CONFIG,
+};

@@ -72,7 +72,8 @@ describe('all-traffic-experiments-tests', () => {
       element.setAttribute(EXPERIMENT_ATTRIBUTE, '99,77,11,0122345');
       addExperimentIdToElement('3', element);
       expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          '99,77,11,0122345,3');
+        '99,77,11,0122345,3'
+      );
     });
 
     it('should should replace existing invalid experiments', () => {
