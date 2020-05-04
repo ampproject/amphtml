@@ -21,43 +21,22 @@
  * This is run during the CI stage = test; job = performance tests.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadDistOutput,
-  printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
-
 const FILENAME = 'performance-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp performance --nobuild --quiet');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadDistOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp performance --nobuild --quiet');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Performance Tests'),
-        'because this commit does not affect the runtime or flag configs'
-      );
-    }
-  }
+  downloadDistOutput(FILENAME);
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp performance --nobuild --quiet');
+
   stopTimer(FILENAME, FILENAME, startTime);
 }
 

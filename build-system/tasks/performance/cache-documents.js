@@ -37,7 +37,7 @@ async function cacheDocuments(urls) {
     ])
   );
 
-  stopServer();
+  await stopServer();
 }
 
 module.exports = cacheDocuments;
