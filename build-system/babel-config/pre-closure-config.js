@@ -25,6 +25,10 @@ const {getExperimentConstant, getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
+  const fixedLayerImport =
+    getExperimentConstant() == 'MOVE_FIXED_LAYER'
+      ? './../fixed-layer'
+      : '../../../src/service/fixed-layer';
   const filterImportsPlugin = [
     'filter-imports',
     {
@@ -43,20 +47,11 @@ function getPreClosureConfig() {
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+        // Used by move fixed layer experiment
+        [fixedLayerImport]: ['FixedLayer'],
       },
     },
   ];
-  const experimentConstant = getExperimentConstant();
-  // For FixedLayer experiment
-  if (experimentConstant === 'MOVE_FIXED_LAYER') {
-    // For experiment = true, remove import from viewport-impl.js
-    filterImportsPlugin[1]['imports']['./../fixed-layer'] = ['FixedLayer'];
-  } else {
-    // For experiment = false, remove import from amp-viewer-integration.js
-    filterImportsPlugin[1]['imports']['../../../src/service/fixed-layer'] = [
-      'FixedLayer',
-    ];
-  }
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {

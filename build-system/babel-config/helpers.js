@@ -19,17 +19,21 @@ const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
 
+/**
+ * Get experiment constant to define from command line arguments, if any
+ *
+ * @return {string|undefined}
+ */
 function getExperimentConstant() {
   const flag = argv['define_experiment_constant'];
-
   // add define flags from arguments
   if (Array.isArray(flag)) {
     if (flag.length > 1) {
       throw new Error('Only one define_experiment_constant flag is allowed');
-    } else {
-      return flag[0];
     }
-  } else if (flag) {
+    return flag[0];
+  }
+  if (flag) {
     return flag;
   }
 }
