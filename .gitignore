@@ -1,6 +1,7 @@
 .DS_Store
 .g4ignore
 build/
+.karma-cache
 .amp-build
 c
 /dist
@@ -24,7 +25,6 @@ yarn-error.log
 sc-*-linux*
 sc-*-osx*
 sauce_connect_*
-EXTENSIONS_CSS_MAP
 deps.txt
 firebase
 .firebaserc

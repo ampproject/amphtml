@@ -35,6 +35,7 @@ const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
+const {sanitize} = require('./sanitize');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
@@ -144,9 +145,6 @@ function compile(
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
-  }
-  if (argv.fortesting) {
-    define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
     const compilationOptions = {
@@ -395,6 +393,7 @@ function compile(
           )
         )
         .pipe(postClosureBabel())
+        .pipe(sanitize())
         .pipe(writeSourcemaps())
         .pipe(gulp.dest('.'))
         .on('end', resolve);

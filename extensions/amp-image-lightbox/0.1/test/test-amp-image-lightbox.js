@@ -17,6 +17,8 @@
 import '../amp-image-lightbox';
 import * as dom from '../../../../src/dom';
 import * as lolex from 'lolex';
+import {ActionService} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
@@ -28,6 +30,7 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-image-lightbox'],
+      runtimeOn: true,
     },
   },
   (env) => {
@@ -245,6 +248,48 @@ describes.realWin(
 
         expect(tryFocus).to.be.calledOnce;
       });
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = dom.createElementWithAttributes(
+        env.win.document,
+        'amp-image-lightbox',
+        {'layout': 'nodisplay'}
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await dom.whenUpgradedToCustomElement(element);
+
+      const impl = await element.getImpl();
+      impl.buildLightbox_();
+      env.sandbox.stub(impl, 'open_');
+      action.execute(
+        element,
+        'open',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'open',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+      expect(impl.open_).to.be.calledOnce;
     });
   }
 );

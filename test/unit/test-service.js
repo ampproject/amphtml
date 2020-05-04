@@ -178,7 +178,7 @@ describe('service', () => {
       registerServiceBuilder(window, 'a', Class);
       expect(count).to.equal(0);
       const p = getServicePromise(window, 'a');
-      expect(getService(window, 'a')).to.not.throw;
+      expect(() => getService(window, 'a')).to.not.throw();
       return p.then(() => {
         expect(count).to.equal(1);
       });
