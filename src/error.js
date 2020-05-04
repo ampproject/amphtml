@@ -377,7 +377,7 @@ export function reportErrorToServerOrViewer(win, data) {
   // below.
 
   // Throttle reports from Stable by 90%.
-  if (data['throttle'] && Math.random() < 0.9) {
+  if (data['pt'] && Math.random() < 0.9) {
     return Promise.resolve();
   }
 
@@ -443,6 +443,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'el': errorReportData['el'], // tagName
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
+    'pt': errorReportData['pt'], // is pre-throttled
     'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
@@ -642,7 +643,7 @@ export function getErrorReportData(
     // Setting this field allows the error reporting service to know that this
     // error has already been pre-throttled for Stable, so it doesn't need to
     // throttle again.
-    data['throttle'] = '1';
+    data['pt'] = '1';
   }
 
   pushLimit(accumulatedErrorMessages, message, 25);
