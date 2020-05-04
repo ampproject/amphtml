@@ -375,6 +375,12 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
+
+  // Throttle reports from Stable by 90%.
+  if (data['throttle'] && Math.random() < 0.9) {
+    return Promise.resolve();
+  }
+
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
@@ -629,6 +635,15 @@ export function getErrorReportData(
   data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
+
+  // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
+  // all clients are serving a version with pre-throttling.
+  if (data['v'].startsWith('01')) {
+    // Setting this field allows the error reporting service to know that this
+    // error has already been pre-throttled for Stable, so it doesn't need to
+    // throttle again.
+    data['throttle'] = '1';
+  }
 
   pushLimit(accumulatedErrorMessages, message, 25);
 
