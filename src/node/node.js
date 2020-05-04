@@ -17,11 +17,15 @@
 import {devAssert} from '../log';
 import {Observable} from '../observable';
 import {getMode} from '../mode';
+import {toKey} from './context-type';
 
 const NODE_PROP = '__ampNode';
 const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
-const KEY_PROP = '__ampKey';
 const PRIVATE_ONLY = {};
+
+const DOCUMENT_NODE = 9;
+// Includes shadow root, template, etc.
+const FRAGMENT_NODE = 11;
 
 /** @type {?Promise} */
 let microtaskPromise = null;
@@ -70,10 +74,10 @@ export class ContextNode {
     if (node[ASSIGNED_SLOT_PROP] != slot) {
       return;
     }
-    node[ASSIGNED_SLOT_PROP] = slot;
+    node[ASSIGNED_SLOT_PROP] = null;
     const closest = ContextNode.closest(node);
     if (closest) {
-      // QQQQQ: discoverFrom(node)
+      // QQQQ: discoverFrom(node)
     }
   }
 
@@ -88,10 +92,15 @@ export class ContextNode {
       if ((n != node || !excludeSelf) && n[NODE_PROP]) {
         return n[NODE_PROP];
       }
+      if (n.nodeType == DOCUMENT_NODE || n.nodeType == FRAGMENT_NODE) {
+        // QQQQ: controvercial: automatically includes a root.
+        return ((n != node || !excludeSelf)) ? ContextNode.get(n) : null;
+      }
       const assignedSlot = n[ASSIGNED_SLOT_PROP] || n.assignedSlot;
       if (assignedSlot) {
         n = assignedSlot;
-      } else if (n.nodeType == /* SHADOW_ROOT */ 11) {
+      // QQQQ
+      } else if (n.nodeType == FRAGMENT_NODE) {
         n = n.host;
       } else {
         n = n.parentNode;
@@ -102,7 +111,7 @@ export class ContextNode {
 
   /**
    * @param {?Node} node
-   * @param {!Object} contextType
+   * @param {!ContextTypeDef} contextType
    */
   static getContext(node, contextType) {
     const contextNode = ContextNode.closest(node);
@@ -122,6 +131,9 @@ export class ContextNode {
     /** @private {?Array<!ContextNode>} */
     this.children_ = null;
 
+    /** @private {boolean} */
+    this.discoverable_ = true;
+
     /** @private {?ContextNode} */
     this.parent_ = null;
 
@@ -134,8 +146,11 @@ export class ContextNode {
     /** @private {?Map} */
     this.subtreeContexts_ = null;
 
-    /** @private {?Map} */
+    /** @private {?Map<string, {value: *, observers: !Observable}>} */
     this.subscribers_ = null;
+
+    /** @private {?Observable<{contextNode: !ContextNode, keys: !Array<string>}>} */
+    this.observers_ = null;
 
     this.discover();
 
@@ -145,37 +160,53 @@ export class ContextNode {
   }
 
   /**
+   * @return {!Node}
+   */
+  getNode() {
+    return this.node_;
+  }
+
+  /**
+   * @package
+   */
+  addObserver(observer) {
+    // QQQQ: move to module-level and restricted.
+    if (!this.observers_) {
+      this.observers_ = new Observable();
+    }
+    this.observers_.add(observer);
+  }
+
+  /**
+   * @package
+   */
+  removeObserver(observer) {
+    // QQQQ: move to module-level and restricted.
+    if (this.observers_) {
+      this.observers_.remove(observer);
+      if (this.observers_.getHandlerCount() == 0) {
+        this.observers_ = null;
+      }
+    }
+  }
+
+  /**
    */
   discover() {
-    // QQQQ: implement.
+    if (!this.discoverable_) {
+      return;
+    }
     // QQQQ: decide when to call.
     microtask(() => this.discover_());
   }
 
-  /** @private */
-  discover_() {
-    const parent = ContextNode.closest(this.node_, /* excludeSelf */ true);
-    this.reparent_(parent);
-  }
-
   /**
-   * @param {!ContextNode} parent
-   * @private
+   * Sets the strict direct parent. The node will no longer try to discover.
+   * @param {!ContextNode|!Node} parent
    */
-  reparent_(parent) {
-    const oldParent = this.parent_;
-    if (oldParent == parent) {
-      return;
-    }
-    if (oldParent) {
-      oldParent.children_.splice(oldParent.children_.indexOf(this), 1);
-    }
-    if (!parent.children_) {
-      parent.children_ = [];
-    }
-    parent.children_.push(this);
-    this.parent_ = parent;
-    this.changed();
+  reparent(parent) {
+    parent = parent.nodeType ? ContextNode.get(parent) : parent;
+    this.reparent_(parent, /* stopDiscovery */ true);
   }
 
   /** */
@@ -183,51 +214,61 @@ export class ContextNode {
     if (!this.changedScheduled_) {
       this.changedScheduled_ = true;
       // QQQ: scheduling mechanism: vsync/chunk/etc.
-      macrotask(() => this.changed_());
-    }
-  }
-
-  /** @private */
-  changed_() {
-    console.log('ContextNode: changed:', this.node_);
-    this.changedScheduled_ = false;
-    if (this.subscribers_) {
-      // QQQ: optimize by knowing the reason for change. E.g. a particular
-      // context, vs the whole hierarchy.
-      this.subscribers_.forEach((subscriber, key) => {
-        const value = this.get(key);
-        if (value !== subscriber.value) {
-          subscriber.value = value;
-          microtask(() => subscriber.observers.fire(value));
-        }
-      });
-    }
-    if (this.children_) {
-      // Schedule children updates as well.
-      this.children_.forEach(child => child.changed());
+      macrotask(() => this.checkChanges_());
     }
   }
 
   /**
    * Set an outer provider.
-   * @param {!Object|string} contextType
-   * //QQQ: rename to provide?
+   * @param {!ContextTypeDef} contextType
    */
   setSelf(contextType, valueOrProvider) {
+    //QQQ: rename to provide?
+    //QQQQ: allow non-inheritied?
     if (!this.selfContexts_) {
       this.selfContexts_ = new Map();
     }
     const key = toKey(contextType);
     const oldValue = this.selfContexts_.get(key);
     if (valueOrProvider !== oldValue) {
-      this.selfContexts_.set(key, valueOrProvider);
+      if (valueOrProvider == null) {
+        this.selfContexts_.delete(key);
+      } else {
+        this.selfContexts_.set(key, valueOrProvider);
+      }
       this.changed();
     }
   }
 
   /**
+   * @param {!ContextTypeDef} contextType
+   * @return {*}
+   */
+  getSelf(contextType) {
+    if (!this.selfContexts_) {
+      return null;
+    }
+    const key = toKey(contextType);
+    return this.selfContexts_.get(key) || null;
+  }
+
+  /**
+   * @param {!ContextTypeDef} contextType
+   * @param {function(new: *, !ContextNode)} factory
+   * @return {*}
+   */
+  initSelf(contextType, factory) {
+    let context = this.getSelf(contextType);
+    if (!context) {
+      context = new factory(this);
+      this.setSelf(contextType, context);
+    }
+    return context;
+  }
+
+  /**
    * Set an inner provider.
-   * @param {!Object|string} contextType
+   * @param {!ContextTypeDef} contextType
    */
   setSubtree(contextType, valueOrProvider) {
     if (!this.subtreeContexts_) {
@@ -244,32 +285,23 @@ export class ContextNode {
   }
 
   /**
-   * @param {!Object|string} contextType
+   * @param {!ContextTypeDef} contextType
    * @return {*|null}
    */
   get(contextType) {
-    // QQQQ: use cache?
-    const key = toKey(contextType);
-    for (let node = this; node; node = node.parent_) {
-      if (node != this && node.subtreeContexts_) {
-        const value = node.subtreeContexts_.get(key);
-        if (value) {
-          return value;
-        }
-      }
-      if (node.selfContexts_) {
-        const value = node.selfContexts_.get(key);
-        if (value) {
-          return value;
-        }
-      }
+    // QQQQ: use/bust cache?
+    const valueOrProvider = this.getValueOrProvider_(contextType);
+    if (typeof valueOrProvider == 'function') {
+      // QQQQQ: function as a normal value?
+      // QQQQQ: pass prev value
+      return valueOrProvider(this.node_);
     }
-    return null;
+    return valueOrProvider;
   }
 
   /**
    * Set up subscriber.
-   * @param {!Object|string} contextType
+   * @param {!ContextTypeDef} contextType
    * @param {function(value: *, contextType: *)} callback
    * @return {!UnsubscribeDef}
    */
@@ -299,7 +331,7 @@ export class ContextNode {
 
   /**
    * Set up subscriber.
-   * @param {!Object|string} contextType
+   * @param {!ContextTypeDef} contextType
    * @param {function(value: *, contextType: *)} callback
    * @return {!UnsubscribeDef}
    */
@@ -318,14 +350,99 @@ export class ContextNode {
       this.subscribers_.delete(key);
     }
   }
-}
 
-/**
- * @param {!Object|string} contextType
- * @return {string}
- */
-function toKey(contextType) {
-  return typeof contextType == 'object' ? contextType[KEY_PROP] : contextType;
+  /** @private */
+  discover_() {
+    if (!this.discoverable_) {
+      return;
+    }
+    const parent = ContextNode.closest(this.node_, /* excludeSelf */ true);
+    this.reparent_(parent, /* stopDiscovery */ false);
+  }
+
+  /**
+   * @param {!ContextNode} parent
+   * @param {boolean} stopDiscovery
+   * @private
+   */
+  reparent_(parent, stopDiscovery) {
+    this.discoverable_ = !stopDiscovery;
+    const oldParent = this.parent_;
+    if (oldParent == parent) {
+      return;
+    }
+    if (oldParent) {
+      oldParent.children_.splice(oldParent.children_.indexOf(this), 1);
+    }
+    if (!parent.children_) {
+      parent.children_ = [];
+    }
+    parent.children_.push(this);
+    this.parent_ = parent;
+    this.changed();
+  }
+
+  /** @private */
+  checkChanges_() {
+    // console.log('ContextNode: check changes:', this);
+    this.changedScheduled_ = false;
+    if (this.subscribers_) {
+      // QQQ: optimize by knowing the reason for change. E.g. a particular
+      // context, vs the whole hierarchy.
+      this.subscribers_.forEach((subscriber, key) => {
+        const value = this.get(key);
+        if (value !== subscriber.value) {
+          console.log('ContextNode: changed:', this, key, '=', value);
+          subscriber.value = value;
+          microtask(() => subscriber.observers.fire(value));
+          // QQQ: collect all changed keys?
+          this.notifyChanged_([key]);
+        }
+      });
+    }
+    if (this.children_) {
+      // Schedule children updates as well.
+      this.children_.forEach(child => child.changed());
+    }
+  }
+
+  /**
+   * @param {!Array<string>} keys
+   * @private
+   */
+  notifyChanged_(keys) {
+    for (let n = this; n; n = n.parent_) {
+      if (n.observers_) {
+        n.observers_.fire({contextNode: this, keys});
+      }
+    }
+  }
+
+  /**
+   * @param {!ContextTypeDef} contextType
+   * @return {*|null}
+   * @private
+   */
+  getValueOrProvider_(contextType) {
+    // QQQQ: use cache?
+    const key = toKey(contextType);
+    let valueOrProvider = null;
+    for (let node = this; node; node = node.parent_) {
+      if (node != this && node.subtreeContexts_) {
+        const value = node.subtreeContexts_.get(key);
+        if (value != null) {
+          return value;
+        }
+      }
+      if (node.selfContexts_) {
+        const value = node.selfContexts_.get(key);
+        if (value != null) {
+          return value;
+        }
+      }
+    }
+    return null;
+  }
 }
 
 /**

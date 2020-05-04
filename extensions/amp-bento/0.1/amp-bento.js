@@ -20,6 +20,8 @@ import {BentoComponent, CustomContext} from './component';
 import {dict} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
+import {LoadingIndicatorService} from './loading-indicator';
+import {installRootServices} from './root-services';
 
 /** @const {string} */
 const TAG = 'amp-bento';
@@ -54,4 +56,6 @@ AmpBento['useContexts'] = [CustomContext];
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpBento);
+  AMP.registerServiceForDoc(`${TAG}-LI`, LoadingIndicatorService);
+  AMP.registerServiceForDoc(`${TAG}-RS`, installRootServices);
 });

@@ -22,6 +22,7 @@ import {devAssert} from '../log';
 import {matches} from '../dom';
 import {render} from './index';
 import {ContextNode} from '../node/node';
+import {measure} from './measure';
 
 /**
  * @typedef {{
@@ -99,9 +100,14 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const contextNode = ContextNode.get(this.element);
     const consumeContext = (value, contextType) => {
-      console.log('BaseElement: consumeContext:', contextType.__ampKey || contextType.__c, '=', value);
-      this.contexts_.set(contextType, value);
-      this.scheduleRender_();
+      console.log('BaseElement: consumeContext:',
+        contextType.__ampKey || contextType.__c || contextType,
+        '=',
+        value);
+      if (typeof contextType == 'object') {
+        this.contexts_.set(contextType, value);
+        this.scheduleRender_();
+      }
     };
 
     // Subscribe to the standard contexts.
@@ -115,6 +121,12 @@ export class PreactBaseElement extends AMP.BaseElement {
         contextNode.subscribe(contextType, contextConsumerCallback(contextType, consumeContext));
       });
     }
+
+    // QQQ: test contexts
+    // if (this.element.id == 'parent') {
+    //   contextNode.setSelf('measure', measure);
+    // }
+    // contextNode.subscribe('measure', contextConsumerCallback('measure', consumeContext));
 
     this.scheduleRender_();
 
@@ -206,6 +218,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         this.applyFillContent(container);
         this.element.appendChild(container);
       }
+      ContextNode.get(this.container_).reparent(this.element);
     }
 
     const props = collectProps(Ctor, this.element, this.defaultProps_);
