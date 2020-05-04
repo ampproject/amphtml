@@ -28,6 +28,11 @@ const {printReport} = require('./print-report');
  * @return {!Promise}
  */
 async function performance() {
+  let resolver;
+  const deferred = new Promise((resolverIn) => {
+    resolver = resolverIn;
+  });
+
   installPackages(__dirname);
   const config = new loadConfig();
   const urls = Object.keys(config.urlToHandlers);
@@ -37,8 +42,8 @@ async function performance() {
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
   printReport(urls);
-  const testFailures = runTests();
-  process.exitCode = testFailures ? 1 : 0;
+  await runTests(resolver);
+  return deferred;
 }
 
 performance.description = 'Runs web performance test on current branch';
