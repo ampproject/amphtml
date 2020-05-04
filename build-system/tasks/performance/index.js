@@ -36,8 +36,9 @@ async function performance() {
   await rewriteScriptTags(urls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
-  runTests();
   printReport(urls);
+  const testFailures = runTests();
+  process.exitCode = testFailures ? 1 : 0;
 }
 
 performance.description = 'Runs web performance test on current branch';

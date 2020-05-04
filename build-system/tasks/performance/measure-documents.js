@@ -28,7 +28,7 @@ const {
   getLocalPathFromExtension,
   localFileToCachePath,
 } = require('./helpers');
-const {green} = require('ansi-colors');
+const {cyan, green} = require('ansi-colors');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -400,7 +400,6 @@ async function measureDocument(url, version, config) {
  * @return {Promise} Fulfills when all URLs have been measured
  */
 async function measureDocuments(urls, config) {
-  log(green('Taking performance measurements...'));
   requirePuppeteer_();
 
   try {
@@ -422,11 +421,19 @@ async function measureDocuments(urls, config) {
     return Math.floor(secondsPerTask * (tasks.length - i));
   }
 
+  log(
+    green('Taking performance measurements'),
+    cyan(tasks.length),
+    green('times...')
+  );
+
   // Excecute the tasks serially
   let i = 0;
   for (const task of tasks) {
     if (!argv.quiet) {
       log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    } else {
+      process.stdout.write('.');
     }
     await task();
   }
