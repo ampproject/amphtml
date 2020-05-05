@@ -417,7 +417,7 @@ describes.fakeWin('Viewport', {}, (env) => {
     expect(viewport./*OK*/ scrollTop_).to.equal(100);
   });
 
-  it('should resize only after size has been initialed', () => {
+  it('should resize only after size has been initialized', () => {
     onVisibilityHandlers.length = 0;
     changeVisibilityState('visible');
     binding.connect = env.sandbox.spy();
