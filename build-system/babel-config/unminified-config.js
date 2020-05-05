@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {getReplacePlugin} = require('./helpers');
+const {getReplacePlugin} = require('./replace-plugin');
 
 /**
  * Gets the config for babel transforms run during `gulp build`.

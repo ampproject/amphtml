@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getExperimentConstant, getReplacePlugin} = require('./helpers');
+const {getReplacePlugin} = require('./replace-plugin');
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
@@ -25,12 +25,6 @@ const {getExperimentConstant, getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  // For experiment, remove FixedLayer import from v0.js, otherwise remove
-  // from amp-viewer-integration
-  const fixedLayerImport =
-    getExperimentConstant() == 'MOVE_FIXED_LAYER'
-      ? './../fixed-layer'
-      : '../../../src/service/fixed-layer';
   const filterImportsPlugin = [
     'filter-imports',
     {
@@ -49,8 +43,6 @@ function getPreClosureConfig() {
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-        // Used by experiment
-        [fixedLayerImport]: ['FixedLayer'],
       },
     },
   ];
