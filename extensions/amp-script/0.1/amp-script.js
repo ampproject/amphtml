@@ -337,19 +337,13 @@ export class AmpScript extends AMP.BaseElement {
               startsWith(contentType, 'text/javascript')
             )
           ) {
-            user().error(
+            // TODO(#24266): Refactor to %s interpolation when error string
+            // extraction is ready.
+            throw user().createError(
               TAG,
               'Same-origin "src" requires "Content-Type: text/javascript" or "Content-Type: application/javascript". ' +
-                'Fetched source for %s has "Content-Type: %s". ' +
-                'See https://amp.dev/documentation/components/amp-script/#security-features.',
-              debugId,
-              contentType
-            );
-            // TODO(#24266): user().createError() messages are not extracted and
-            // don't perform string substitution.
-            throw user().createError(
-              'Same-origin "src" requires "Content-Type: text/javascript" or ' +
-                '"Content-Type: application/javascript".'
+                `Fetched source for ${debugId} has "Content-Type: ${contentType}". ` +
+                'See https://amp.dev/documentation/components/amp-script/#security-features.'
             );
           }
           return response.text();
@@ -517,17 +511,12 @@ export class AmpScriptService {
     const bytes = utf8Encode(script);
     return this.crypto_.sha384Base64(bytes).then((hash) => {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
-        user().error(
-          TAG,
-          'Script hash not found. %s must have "sha384-%s" in meta[name="amp-script-src"].' +
-            ' See https://amp.dev/documentation/components/amp-script/#security-features.',
-          debugId,
-          hash
-        );
-        // TODO(#24266): user().createError() messages are not extracted and
-        // don't perform string substitution.
+        // TODO(#24266): Refactor to %s interpolation when error string
+        // extraction is ready.
         throw user().createError(
-          'Script hash not found; sha384 missing from meta tag.'
+          TAG,
+          `Script hash not found. ${debugId} must have "sha384-${hash}" in meta[name="amp-script-src"].` +
+            ' See https://amp.dev/documentation/components/amp-script/#security-features.'
         );
       }
     });
