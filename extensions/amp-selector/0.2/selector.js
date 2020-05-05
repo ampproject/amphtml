@@ -33,7 +33,7 @@ export function Selector(props) {
     'value': value,
     'multiple': multiple,
   } = props;
-  const [selectedState, setSelectedState] = useState(value ?? []);
+  const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
   const selected = /** @type {!Array} */ (value ? value : selectedState);
   const selectOption = (option) => {
