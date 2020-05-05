@@ -72,7 +72,7 @@ describe
           });
         });
 
-        it('should terminate without gesture', function* () {
+        it('should drop mutations without gesture', function* () {
           yield poll('<amp-script> to be hydrated', () =>
             element.classList.contains('i-amphtml-hydrated')
           );
@@ -86,11 +86,11 @@ describe
             .callsFake(() => false);
           browser.click('button#hello');
 
-          // Give mutations time to apply.
+          // Wait for mutations to be processed
           yield browser.wait(100);
-          yield poll('terminated', () => {
-            return element.classList.contains('i-amphtml-broken');
-          });
+
+          // Mutation was dropped, therefore no h1s were added.
+          expect(doc.querySelector('h1')).to.be.null;
         });
 
         it('should start long task', function* () {
