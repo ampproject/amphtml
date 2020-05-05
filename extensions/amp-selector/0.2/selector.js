@@ -16,7 +16,7 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {useContext, useState} from '../../../src/preact';
+import {useContext, useMemo, useState} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext({});
 
@@ -37,25 +37,31 @@ export function Selector(props) {
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
   const selected = /** @type {!Array} */ (value ? value : selectedState);
-  const selectOption = (option) => {
-    if (!option) {
-      return;
-    }
-    let newValue = null;
-    if (multiple) {
-      newValue = selected.includes(option)
-        ? selected.filter((v) => v != option)
-        : selected.concat(option);
-    } else if (!selected.includes(option)) {
-      newValue = [option];
-    }
-    if (newValue) {
-      setSelectedState(newValue);
-      if (onChange) {
-        onChange({value: newValue, option});
-      }
-    }
-  };
+  const context = useMemo(() => {
+    return {
+      selected,
+      selectOption: (option) => {
+        if (!option) {
+          return;
+        }
+        let newValue = null;
+        if (multiple) {
+          newValue = selected.includes(option)
+            ? selected.filter((v) => v != option)
+            : selected.concat(option);
+        } else if (!selected.includes(option)) {
+          newValue = [option];
+        }
+        if (newValue) {
+          setSelectedState(newValue);
+          if (onChange) {
+            onChange({value: newValue, option});
+          }
+        }
+      },
+      disabled,
+    };
+  }, [selected, disabled, multiple, onChange]);
 
   return (
     <Comp
@@ -64,13 +70,7 @@ export function Selector(props) {
       aria-disabled={disabled}
       aria-multiselectable={multiple}
     >
-      <SelectorContext.Provider
-        value={{
-          selected,
-          selectOption,
-          disabled,
-        }}
-      >
+      <SelectorContext.Provider value={context}>
         {children}
       </SelectorContext.Provider>
     </Comp>

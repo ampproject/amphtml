@@ -106,3 +106,13 @@ export function useLayoutEffect(effect, opt_deps) {
 export function useContext(context) {
   return hooks.useContext(context);
 }
+
+/**
+ * @param {function():T} cb
+ * @param {!Array<*>=} opt_deps
+ * @return {T}
+ * @template T
+ */
+export function useMemo(cb, opt_deps) {
+  return hooks.useMemo(cb, opt_deps);
+}
