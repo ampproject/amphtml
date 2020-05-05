@@ -955,18 +955,10 @@ export function devAssert(
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function userAssert(
   shouldBeTrueish,
