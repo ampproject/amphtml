@@ -21,10 +21,6 @@
     --correct-color-shaded: #00600f !important;
     --incorrect-color: #F34E4E !important;
     --incorrect-color-shaded: #B71C1C !important;
-    --option-1-percentage: 0%;
-    --option-2-percentage: 0%;
-    --option-3-percentage: 0%;
-    --option-4-percentage: 0%;
     font-family: 'Poppins-bold', sans-serif !important;
     background: var(--reaction-accent-color) !important;
     border-radius: 32px !important;
@@ -93,6 +89,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     line-height: 20px !important;
     overflow: hidden !important;
     z-index: 0 !important;
+    --option-1-percentage: 0%;
 }
 
 [dir=rtl] .i-amphtml-story-reaction-quiz-option {
@@ -219,37 +216,12 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     border: solid 1px !important;
 }
 
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option:nth-of-type(1)::before {
-    transform: translateX(var(--option-1-percentage)) !important;
+.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option::before {
+    transform: translateX(var(--option-percentage)) !important;
 }
 
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option:nth-of-type(2)::before {
-    transform: translateX(var(--option-2-percentage)) !important;
-}
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option:nth-of-type(3)::before {
-    transform: translateX(var(--option-3-percentage)) !important;
-}
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option:nth-of-type(4)::before {
-    transform: translateX(var(--option-4-percentage)) !important;
-}
-
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option:nth-of-type(1)::before {
-    transform: translateX(calc(-1 * var(--option-1-percentage))) !important;
-}
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option:nth-of-type(2)::before {
-    transform: translateX(calc(-1 * var(--option-2-percentage))) !important;
-}
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option:nth-of-type(3)::before {
-    transform: translateX(calc(-1 * var(--option-3-percentage))) !important;
-}
-
-.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option:nth-of-type(4)::before {
-    transform: translateX(calc(-1 * var(--option-4-percentage))) !important;
+.i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option::before {
+    transform: translateX(calc(-1 * var(--option-percentage))) !important;
 }
 
 .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option::before {

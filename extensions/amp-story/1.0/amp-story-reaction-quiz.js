@@ -182,16 +182,10 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       this.optionElements_[index].querySelector(
         '.i-amphtml-story-reaction-quiz-percentage-text'
       ).textContent = `${percentages[index]}%`;
+      this.optionElements_[index].setAttribute(
+        'style',
+        `--option-percentage: ${percentages[index]}%`
+      );
     });
-
-    this.rootEl_.setAttribute(
-      'style',
-      `
-      --option-1-percentage: ${percentages[0]}%;
-      --option-2-percentage: ${percentages[1]}%;
-      --option-3-percentage: ${percentages[2]}%;
-      --option-4-percentage: ${percentages[3]}%;
-    `
-    );
   }
 }
