@@ -16,6 +16,7 @@
 
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
+const {cyan} = require('ansi-colors');
 const {percent, trimmedMean} = require('./stats');
 
 const HEADER_COLUMN = 22;
@@ -30,7 +31,7 @@ const FULL_TABLE = 68;
  */
 const headerLines = (url) => [
   '\nPAGE LOAD METRICS\n',
-  `${url}\n\n`,
+  `${cyan(url)}\n\n`,
   [
     'METRIC'.padEnd(HEADER_COLUMN),
     'BRANCH'.padEnd(BODY_COLUMN),

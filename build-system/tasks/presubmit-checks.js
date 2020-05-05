@@ -118,6 +118,7 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
