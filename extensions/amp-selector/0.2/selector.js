@@ -16,7 +16,6 @@
 
 import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
-import {omit} from '../../../src/utils/object';
 import {useContext, useState} from '../../../src/preact';
 
 const SelectorContext = Preact.createContext({});
@@ -32,6 +31,7 @@ export function Selector(props) {
     'disabled': disabled,
     'value': value,
     'multiple': multiple,
+    'onChange': onChange,
   } = props;
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
@@ -40,7 +40,6 @@ export function Selector(props) {
     if (!option) {
       return;
     }
-    const {'onChange': onChange} = props;
     let newValue = null;
     if (multiple) {
       newValue = selected.includes(option)
@@ -95,7 +94,9 @@ export function Option(props) {
     if (selectorDisabled || disabled) {
       return;
     }
-    onClick ? onClick() : null;
+    if (onClick) {
+      onClick();
+    }
     selectOption(option);
   };
   const isSelected = /** @type {!Array} */ (selected).includes(option);
@@ -104,17 +105,8 @@ export function Option(props) {
     : isSelected
     ? CSS.SELECTED
     : CSS.OPTION;
-  const rest = omit(props, [
-    'as',
-    'disabled',
-    'getOption',
-    'onClick',
-    'option',
-    'role',
-    'style',
-  ]);
   const optionProps = {
-    ...rest,
+    ...props,
     'aria-disabled': disabled,
     onClick: clickHandler,
     option,
