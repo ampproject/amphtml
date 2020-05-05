@@ -213,6 +213,15 @@ describes.realWin(
       );
     });
 
+    it('should throw error if percentages are not correctly passed', () => {
+      const responseData = dict({'wrongKey': []});
+      allowConsoleError(() => {
+        expect(() =>
+          ampStoryReaction.handleSuccessfulDataRetrieval_(responseData)
+        ).to.throw();
+      });
+    });
+
     it('should preprocess percentages properly', () => {
       const responseData1 = getMockReactionData()['options'];
 

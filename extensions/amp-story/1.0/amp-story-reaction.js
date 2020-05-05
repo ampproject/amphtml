@@ -30,7 +30,7 @@ import {
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
@@ -477,13 +477,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    if (!(response && 'options' in response)) {
-      dev().error(
-        TAG,
-        `Invalid reaction response, expected { data: Array<ReactionOptionType>, ...} but received ${response}`
-      );
-      return;
-    }
+    devAssert(
+      response && 'options' in response,
+      `Invalid reaction response, expected { options: Array<ReactionOptionType>, ...} but received ${response}`
+    );
     this.updateComponentOnDataRetrieval_(
       response['options'].splice(0, this.optionElements_.length)
     );
