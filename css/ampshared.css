@@ -54,6 +54,11 @@
   /* Display is set/reset via the hidden attribute */
 }
 
+/**
+ * layout=fixed does not have a unresolved implicit style, due to conflicts
+ * with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-fixed,
 [layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
 {
@@ -87,6 +92,11 @@
   display: block !important;
 }
 
+/**
+ * layout=fixed-height does not have a unresolved implicit style, due to
+ * conflicts with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-fixed-height,
 [layout=fixed-height][height]:not(.i-amphtml-layout-fixed-height)
 {
@@ -94,6 +104,11 @@
   position: relative;
 }
 
+/**
+ * layout=container does not have a unresolved implicit style, due to conflicts
+ * with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-container,
 [layout=container]
 {
@@ -230,6 +245,10 @@ i-amphtml-sizer {
   /* For author styling. */
 }
 
+/**
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
 .i-amphtml-notbuilt,
 [layout]:not(.i-amphtml-element),
 [width][height][sizes]:not([layout]):not(.i-amphtml-element),
@@ -240,7 +259,11 @@ i-amphtml-sizer {
   color: transparent !important;
 }
 
-/* Hide all children of non-container elements. */
+/**
+ * Hide all children of non-container elements.
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
 .i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
 [layout]:not([layout=container]):not(.i-amphtml-element) > *,
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
@@ -261,6 +284,10 @@ i-amphtml-sizer {
   /* Just state. */
 }
 
+/**
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
