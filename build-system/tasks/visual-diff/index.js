@@ -799,7 +799,7 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  stopServer();
+  await stopServer();
   await exitPercyAgent_();
 }
 

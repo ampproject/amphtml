@@ -256,7 +256,7 @@ class RuntimeTestRunner {
   }
 
   async teardown() {
-    stopServer();
+    await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
     if (this.exitCode != 0) {
