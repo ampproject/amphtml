@@ -264,8 +264,6 @@ function:
       {$$ = $1;}
   | rect_function
       {$$ = $1;}
-  | pos_function
-      {$$ = $1;}
   | num_function
       {$$ = $1;}
   | rand_function
