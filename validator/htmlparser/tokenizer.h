@@ -261,6 +261,16 @@ class Tokenizer {
   bool eof_ = false;
   bool err_ = false;
 
+  // Tells if the token is manufactured.
+  // In a few cases, for example '<' followed by '?', is treated as comment and
+  // a comment token is manufactured.
+  // This is not same as manufactured html, head, body, tbody, thead etc,
+  // these are manufactured during parsing, not tokenization.
+  // This field accounts for only special cases where illegal characters leads
+  // to  manufacturing of comments token.
+  // Eg: https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-question-mark-instead-of-tag-name
+  bool is_token_manufactured_ = false;
+
   // Keeps track of all the lines and columns in HTML source.
   std::vector<LineCol> lines_cols_;
 
