@@ -22,21 +22,8 @@ describes.endtoend(
     environments: ['viewer-demo'],
   },
   async (env) => {
-    let controller;
-
-    beforeEach(async () => {
-      controller = env.controller;
-    });
-
     it('should send documentHeight once amp has completed init', async () => {
-      const messages = await controller.evaluate(() => {
-        // The viewer.html file will launch 7 test viewers, only one of which is the requested url.
-        // TODO(gh/amphtml/28200): only load the one viewer.
-        const viewer = window.parent.allViewers.find((v) =>
-          v.url.includes('document-height')
-        );
-        return viewer.receivedMessages;
-      });
+      const messages = env.receivedMessages;
       const documentHeights = messages.filter(
         (msg) => msg[0] === 'documentHeight'
       );
