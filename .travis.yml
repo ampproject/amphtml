@@ -47,6 +47,9 @@ addons:
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
+env:
+  jobs:
+    - CACHENAME=AMPHTMLJOB
 stages:
   - name: build
   - name: test
@@ -116,6 +119,15 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
       cache: false
+    - stage: experiment
+      name: 'Performance Tests'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js
+      env:
+        - CACHE_NAME=PERFORMANCEJOB
+  allow_failures:
+    - env: CACHE_NAME=PERFORMANCEJOB
+  fast_finish: true
 before_cache:
   # do not store cache for pr builds or experiment stage builds
   - if [[ $TRAVIS_EVENT_TYPE == pull_request ]] || [[ $TRAVIS_BUILD_STAGE_NAME == experiment ]]; then exit $TRAVIS_TEST_RESULT ; fi
@@ -123,6 +135,7 @@ cache:
   directories:
     - node_modules
     - build-system/tasks/e2e/node_modules
+    - build-system/tasks/performance/node_modules
     - build-system/tasks/visual-diff/node_modules
     - sauce_connect
     - validator/node_modules
