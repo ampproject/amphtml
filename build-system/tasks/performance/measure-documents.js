@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
 const {
@@ -27,6 +28,7 @@ const {
   getLocalPathFromExtension,
   localFileToCachePath,
 } = require('./helpers');
+const {cyan, green} = require('ansi-colors');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -419,10 +421,20 @@ async function measureDocuments(urls, config) {
     return Math.floor(secondsPerTask * (tasks.length - i));
   }
 
+  log(
+    green('Taking performance measurements'),
+    cyan(tasks.length),
+    green('times...')
+  );
+
   // Excecute the tasks serially
   let i = 0;
   for (const task of tasks) {
-    log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    if (!argv.quiet) {
+      log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    } else {
+      process.stdout.write('.');
+    }
     await task();
   }
 }
