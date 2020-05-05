@@ -1233,7 +1233,7 @@ describes.realWin(
       });
     });
 
-    it('should measure initial contentHeight and send it to the viewer', () => {
+    it('should measure initial contentHeight', () => {
       const contentHeight = resources.viewport_.getContentHeight();
       expect(resources.maybeChangeHeight_).to.equal(false);
       expect(resources.documentReady_).to.equal(true);
