@@ -40,7 +40,8 @@ describes.endtoend(
         (msg) => msg[0] === 'documentHeight'
       );
 
-      // TODO: make not a magic number.
+      // TODO: currently a magic number. Can we do better?
+      // Do I even have access to matchers here.
       await expect(documentHeights).deep.equal([
         ['documentHeight', {height: 447.875}],
       ]);
