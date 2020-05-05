@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin} = require('./replace-plugin');
+const {getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for babel transforms run during `gulp [unit|integration]`.
