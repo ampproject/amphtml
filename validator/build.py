@@ -334,10 +334,10 @@ def RunSmokeTest(out_dir):
     out_dir: output directory
   """
   logging.info('entering ...')
-  # Run index.js on the minimum valid amp and observe that it passes.
+  # Run cli.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
@@ -349,10 +349,10 @@ def RunSmokeTest(out_dir):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
-  # Run index.js on an empty file and observe that it fails.
+  # Run cli.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
