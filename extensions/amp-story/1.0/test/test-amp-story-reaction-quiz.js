@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import * as Service from '../../../../src/service';
 import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
@@ -130,6 +132,12 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
 
       env.sandbox
         .stub(Services, 'cidForDoc')

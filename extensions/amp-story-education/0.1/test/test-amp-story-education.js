@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Service from '../../../../src/service';
 import {
   Action,
   AmpStoryStoreService,
@@ -21,6 +22,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -34,6 +36,12 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {

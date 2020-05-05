@@ -361,12 +361,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = new LocalizationService(this.element);
-
     const localizationService = this.localizationService_;
-    registerServiceBuilderForDoc(this.element, 'localization', function () {
-      return localizationService;
-    });
-
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
@@ -399,6 +394,10 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
+
+    registerServiceBuilderForDoc(this.element, 'localization', function () {
+      return localizationService;
+    });
   }
 
   /** @override */

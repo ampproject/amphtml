@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import * as Service from '../../../../src/service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {
@@ -48,7 +50,8 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
       }),
     };
 
-    const localizationService = Services.localizationForDoc(win.document.body);
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);

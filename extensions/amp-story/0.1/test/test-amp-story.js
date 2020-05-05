@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as Service from '../../../../src/service';
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../../../../src/service/localization';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
 
@@ -88,9 +91,8 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

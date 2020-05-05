@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Service from '../../../../src/service';
 import * as storyEvents from '../../../amp-story/1.0/events';
 import {
   Action,
@@ -24,6 +25,7 @@ import {
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
 import {CommonSignals} from '../../../../src/common-signals';
+import {LocalizationService} from '../../../../src/service/localization';
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
@@ -58,9 +60,8 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
