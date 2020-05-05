@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @license
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -498,6 +497,4 @@ function main() {
       });
 }
 
-if (require.main === module) {
-  main();
-}
+exports.main = main
