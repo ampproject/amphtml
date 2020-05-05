@@ -217,6 +217,7 @@ declaration_list {
   declaration: { name: "text-decoration" }
   declaration: { name: "text-decoration-color" }
   declaration: { name: "text-decoration-line" }
+  declaration: { name: "text-decoration-skip-ink" }
   declaration: { name: "text-decoration-style" }
   declaration: { name: "text-fill-color" }
   declaration: { name: "text-indent" }
