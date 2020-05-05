@@ -23,8 +23,6 @@ import {validateData, writeScript} from '../3p/3p';
 export function iprom(global, data) {
   validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
 
-  window.ipromNS = {};
-
   function namespaceLoaded() {
     const {sitepath, zone} = data;
     const config = {
