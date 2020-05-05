@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-import {validateData, validateSrcPrefix, writeScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function iprom(global, data) {
-    validateData(data, ['zone', 'sitepath'], ["keywords", "channels"]);
-    
-    function namespaceLoaded() {
-        const {sitepath, zone} = data;
-        
-        const config = {
-            sitePath: JSON.parse(sitepath),
-            containerId: "c",
-            zoneId: zone,
-            prebid: true,
-            amp: true,
-            keywords: data.keywords ? data.keywords.split(',') : [],
-            channels: data.channels ? data.channels.split(',') : [],
-        };
-        
-        var tag = new ipromNS.AdTag(config);
-        tag.init();
-    }
-    
-    writeScript(global, 'https://cdn.ipromcloud.com/ipromNS.js', namespaceLoaded);
+  validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
+
+  window.ipromNS = {};
+
+  function namespaceLoaded() {
+    const {sitepath, zone} = data;
+    const config = {
+      sitePath: JSON.parse(sitepath),
+      containerId: 'c',
+      zoneId: zone,
+      prebid: true,
+      amp: true,
+      keywords: data.keywords ? data.keywords.split(',') : [],
+      channels: data.channels ? data.channels.split(',') : [],
+    };
+
+    let tag = new ipromNS.AdTag(config);
+    tag.init();
+  }
+
+  writeScript(global, 'https://cdn.ipromcloud.com/ipromNS.js', namespaceLoaded);
 }
