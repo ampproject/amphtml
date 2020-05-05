@@ -366,6 +366,9 @@ exports.rules = [
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-location.js',
+      // Experiment moving Fixed Layer to extension
+      'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js->' +
+        'src/service/fixed-layer.js',
     ],
   },
   {

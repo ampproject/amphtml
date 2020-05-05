@@ -44,7 +44,7 @@ function getConfig_() {
     return;
   }
 
-  if (new Date(config.expirationDateUTC) < Date.now) {
+  if (new Date(config['expiration_date_utc']) < Date.now) {
     return;
   }
 
