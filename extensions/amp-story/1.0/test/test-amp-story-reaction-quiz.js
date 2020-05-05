@@ -124,46 +124,35 @@ describes.realWin(
       ).to.have.length(4);
     });
 
-    it('should throw an error with fewer than one prompt', () => {
+    it('should not throw an error with fewer than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 0);
-      allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(
-          /The first child must be a heading element <h1>, <h2>, or <h3>/
-        );
-      });
+      expect(() => ampStoryQuiz.buildCallback()).to.not.throw();
     });
 
     it('should throw an error with more than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 2);
       allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(/Too many children/);
+        expect(() => ampStoryQuiz.buildCallback()).to.throw(
+          /Too many children/
+        );
       });
     });
 
     it('should throw an error with fewer than two options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 1);
       allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(/Improper number of options/);
+        expect(() => ampStoryQuiz.buildCallback()).to.throw(
+          /Improper number of options/
+        );
       });
-    });
-
-    it('should not throw an error with three options and one prompt', () => {
-      populateQuiz(win, ampStoryQuiz.element, 1, 3);
-      expect(() => ampStoryQuiz.buildCallback()).to.not.throw();
     });
 
     it('should throw an error with more than four options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 5);
       allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(/Improper number of options/);
+        expect(() => ampStoryQuiz.buildCallback()).to.throw(
+          /Improper number of options/
+        );
       });
     });
 

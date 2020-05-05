@@ -105,10 +105,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     // First child must be heading h1-h3
     if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
-      devAssert(
-        false,
-        'The first child must be a heading element <h1>, <h2>, or <h3>'
-      );
       this.rootEl_.removeChild(promptContainer);
     } else {
       const prompt = document.createElement(promptInput.tagName);
