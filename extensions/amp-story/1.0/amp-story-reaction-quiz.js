@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -122,9 +122,10 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     // Configure options.
     const options = toArray(this.element.querySelectorAll('option'));
-    if (options.length < 2 || options.length > 4) {
-      dev().error(TAG, 'Improper number of options');
-    }
+    userAssert(
+      options.length >= 2 && options.length <= 4,
+      'Improper number of options'
+    );
     const optionsContainer = root.querySelector(
       '.i-amphtml-story-reaction-quiz-option-container'
     );
@@ -132,9 +133,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       optionsContainer.appendChild(this.generateOption_(option, optionIndex))
     );
 
-    if (this.element.children.length !== 0) {
-      dev().error(TAG, 'Too many children');
-    }
+    userAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**
