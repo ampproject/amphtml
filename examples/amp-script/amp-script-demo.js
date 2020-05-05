@@ -37,6 +37,7 @@ if (hello) {
     const el = document.createElement('h1');
     el.textContent = 'Hello World!';
     document.body.appendChild(el);
+    prompt('hahah');
   });
 }
 
