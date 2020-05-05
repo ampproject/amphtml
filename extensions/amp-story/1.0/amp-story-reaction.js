@@ -23,12 +23,17 @@ import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-reaction-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {
+  addParamsToUrl,
+  appendPathToUrl,
+  assertAbsoluteHttpOrHttpsUrl,
+} from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
+import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction';
@@ -47,7 +52,7 @@ const ENDPOINT_INVALID_ERROR =
 
 /**
  * @typedef {{
- *    reactionValue: number,
+ *    optionIndex: number,
  *    totalCount: number,
  *    selectedByUser: boolean,
  * }}
@@ -56,9 +61,7 @@ export let ReactionOptionType;
 
 /**
  * @typedef {{
- *    totalResponseCount: number,
- *    hasUserResponded: boolean,
- *    responses: !Array<ReactionOptionType>,
+ *    options: !Array<ReactionOptionType>,
  * }}
  */
 export let ReactionResponseType;
@@ -107,8 +110,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {!Element} */
-    this.rootEl_;
+    /** @protected {Element} */
+    this.rootEl_ = null;
 
     /** @protected {?string} */
     this.reactionId_ = null;
@@ -119,7 +122,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
     this.responseDataPromise_ = null;
 
-    /** @protected {?ReactionResponseType} */
+    /** @protected {?Array<ReactionOptionType>} */
     this.responseData_ = null;
 
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
@@ -129,18 +132,43 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.variableService_ = getVariableService(this.win);
   }
 
+  /**
+   * Gets the root element.
+   * @visibleForTesting
+   * @return {Element}
+   */
+  getRootElement() {
+    return this.rootEl_;
+  }
+
+  /**
+   * Gets the options.
+   * @visibleForTesting
+   * @return {Array<Element>}
+   */
+  getOptionElements() {
+    return toArray(
+      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
+    );
+  }
+
   /** @override */
   buildCallback() {
-    this.buildComponent(this.element);
+    this.rootEl_ = this.buildComponent(this.element);
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(
+      this.element,
+      dev().assertElement(this.rootEl_),
+      CSS
+    );
   }
 
   /**
    * Generates the template in rootEl_ and fills up with options.
    * @param {!Element} unusedElement
+   * @return {Element} rootEl_
    * @protected @abstract
    */
   buildComponent(unusedElement) {
@@ -284,7 +312,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Called when user has responded (in this session or before).
    *
    * @protected @abstract
-   * @param {!ReactionResponseType} unusedResponseData
+   * @param {!Array<ReactionOptionType>} unusedResponseData
    */
   updateOptionPercentages_(unusedResponseData) {
     // Subclass must implement
@@ -293,26 +321,20 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Preprocess the percentages for display.
    *
-   * @param {ReactionResponseType} responseData
+   * @param {!Array<ReactionOptionType>} responseData
    * @return {Array<number>}
    * @protected
    */
   preprocessPercentages_(responseData) {
-    let percentages = [];
-
-    for (let i = 0; i < responseData['responses'].length; i++) {
-      percentages[i] = (
-        100 *
-        (responseData['responses'][i]['totalCount'] /
-          responseData['totalResponseCount'])
-      ).toFixed(2);
-    }
-
-    let total = percentages.reduce(
-      (currentTotal, currentValue) =>
-        (currentTotal += Math.round(currentValue)),
+    const totalResponseCount = responseData.reduce(
+      (acc, response) => acc + response['totalCount'],
       0
     );
+
+    let percentages = responseData.map((e) =>
+      ((100 * e['totalCount']) / totalResponseCount).toFixed(2)
+    );
+    let total = percentages.reduce((acc, x) => acc + Math.round(x), 0);
 
     // Special case: divide remainders by three if they break 100,
     // 3 is the maximum above 100 the remainders can add.
@@ -322,12 +344,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
           2
         )
       );
-
-      total = percentages.reduce(
-        (currentTotal, currentValue) =>
-          (currentTotal += Math.round(currentValue)),
-        0
-      );
+      total = percentages.reduce((acc, x) => (acc += Math.round(x)), 0);
     }
 
     if (total === 100) {
@@ -365,7 +382,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       const toRoundUp =
         ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
 
-      ties.forEach((percentageObj) => {
+      toArray(ties).forEach((percentageObj) => {
         finalPercentages[percentageObj.originalIndex] =
           Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
       });
@@ -374,15 +391,13 @@ export class AmpStoryReaction extends AMP.BaseElement {
       remainder -= toRoundUp ? ties.length : 0;
     }
 
-    preserveOriginal.forEach((percentageObj) => {
+    toArray(preserveOriginal).forEach((percentageObj) => {
       finalPercentages[percentageObj.originalIndex] = Math.floor(
         percentageObj.value
       );
     });
 
-    percentages = finalPercentages;
-
-    return percentages;
+    return finalPercentages;
   }
 
   /**
@@ -401,14 +416,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
       this.hasUserSelection_ = true;
 
       if (this.responseData_) {
-        this.responseData_['totalResponseCount']++;
-        /** @type {!Array} */ (this.responseData_['responses']).forEach(
-          (response) => {
-            if (Number(response['reactionValue']) === optionEl.optionIndex_) {
-              response['totalCount']++;
-            }
-          }
-        );
+        this.responseData_[optionEl.optionIndex_]['totalCount']++;
+        this.responseData_[optionEl.optionIndex_]['selectedByUser'] = true;
       }
 
       this.mutateElement(() => {
@@ -431,17 +440,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   retrieveReactionData_() {
-    return this.executeReactionRequest_(
-      dict({
-        'method': 'GET',
-      })
-    )
-      .then((response) => {
-        this.handleSuccessfulDataRetrieval_(response);
-      })
-      .catch((error) => {
-        dev().error(TAG, error);
-      });
+    return this.executeReactionRequest_('GET').then((response) => {
+      this.handleSuccessfulDataRetrieval_(response);
+    });
   }
 
   /**
@@ -451,52 +452,50 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   updateReactionData_(reactionValue) {
-    this.executeReactionRequest_(
-      dict({
-        'method': 'POST',
-      }),
-      reactionValue
-    ).catch((error) => {
-      dev().error(TAG, error);
-    });
+    this.executeReactionRequest_('POST', reactionValue);
   }
 
   /**
    * Executes a Reactions API call.
    *
-   * @param {Object} requestOptions
-   * @param {number=} reactionValue
-   * @return {Promise<ReactionResponseType|undefined>}
+   * @param {string} method GET or POST.
+   * @param {number=} optionSelected
+   * @return {Promise<ReactionResponseType>}
    * @private
    */
-  executeReactionRequest_(requestOptions, reactionValue) {
-    if (!assertAbsoluteHttpOrHttpsUrl(this.element.getAttribute('endpoint'))) {
+  executeReactionRequest_(method, optionSelected) {
+    let url = this.element.getAttribute('endpoint');
+    if (!assertAbsoluteHttpOrHttpsUrl(url)) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    if (this.reactionId_ === null) {
+    if (!this.reactionId_) {
       const pageId = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
-
-      this.reactionId_ = `CANONICAL_URL#page=${pageId}`;
+      this.reactionId_ = `CANONICAL_URL+${pageId}`;
+      if (this.element.hasAttribute('id')) {
+        this.reactionId_ += '+' + this.element.getAttribute('id');
+      }
     }
 
-    const requestVars = dict({
-      'reactionType': this.reactionType_,
-      'reactionId': this.reactionId_,
-    });
-
-    let url = this.element.getAttribute('endpoint');
-
     return this.getClientId_().then((clientId) => {
-      requestVars['clientId'] = clientId;
+      const requestOptions = {'method': method};
+      const requestParams = dict({
+        'reactionType': this.reactionType_,
+        'clientId': clientId,
+      });
+      url = appendPathToUrl(url, dev().assertString(this.reactionId_));
       if (requestOptions['method'] === 'POST') {
-        requestVars['reactionValue'] = reactionValue;
-        requestOptions['body'] = requestVars;
+        requestOptions['body'] = {'optionSelected': optionSelected};
+        requestOptions['headers'] = {'Content-Type': 'application/json'};
+        url = appendPathToUrl(url, '/vote');
       }
-      url = addParamsToUrl(url, requestVars);
-      return this.requestService_.executeRequest(url, requestOptions);
+      url = addParamsToUrl(url, requestParams);
+      return this.requestService_
+        .executeRequest(url, requestOptions)
+        .then((result) => Promise.resolve(result))
+        .catch((err) => dev().error(TAG, err));
     });
   }
 
@@ -505,11 +504,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
    *
    * RESPONSE FORMAT
    * {
-   *  totalResponseCount: <number>
-   *  hasUserResponded: <boolean>
    *  responses: [
    *    {
-   *      reactionValue:
+   *      optionIndex:
    *      totalCount:
    *      selectedByUser:
    *    },
@@ -520,47 +517,32 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    if (!(response && 'data' in response)) {
-      dev().error(
-        TAG,
-        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
-      );
-      return;
-    }
-
-    this.responseData_ = response.data;
-
-    this.hasUserSelection_ = this.responseData_.hasUserResponded;
-    if (this.hasUserSelection_) {
-      this.updateReactionOnDataRetrieval_(response.data);
-    }
+    devAssert(
+      response && 'options' in response,
+      `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+    );
+    this.updateReactionOnDataRetrieval_(response['options']);
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
-   * @param {!ReactionResponseType} data
+   * @param {!Array<ReactionOptionType>} data
    * @private
    */
   updateReactionOnDataRetrieval_(data) {
-    let selectedOptionKey;
-    /** @type {!Array} */ (data['responses']).forEach((response) => {
-      if (response.selectedByUser) {
-        selectedOptionKey = response.reactionValue;
-      }
-    });
-
-    if (selectedOptionKey === undefined) {
-      dev().error(TAG, `The user-selected reaction could not be found`);
-      return;
-    }
-
     const options = this.rootEl_.querySelectorAll(
       '.i-amphtml-story-reaction-option'
     );
 
-    this.mutateElement(() => {
-      this.updateOptionPercentages_(data);
-      this.updateToPostSelectionState_(options[selectedOptionKey]);
+    this.responseData_ = data;
+    data.forEach((response, index) => {
+      if (response.selectedByUser) {
+        this.hasUserSelection_ = true;
+        this.mutateElement(() => {
+          this.updateOptionPercentages_(data);
+          this.updateToPostSelectionState_(options[index]);
+        });
+      }
     });
   }
 
