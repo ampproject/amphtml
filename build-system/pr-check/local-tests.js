@@ -83,12 +83,7 @@ function main() {
       timedExecOrDie('gulp unit --nobuild --headless --coverage');
     }
 
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
+    if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp codecov-upload');
     }
   }
