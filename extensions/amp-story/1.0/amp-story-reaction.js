@@ -110,6 +110,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @private {?Array<!Element>>} */
+    this.optionElements_ = null;
+
     /** @protected {?Element} */
     this.rootEl_ = null;
 
@@ -125,8 +128,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Array<!ReactionOptionType>} */
     this.optionsData_ = null;
 
-    /** @protected {?Array<!Element>} */
-    this.optionElements_ = null;
+    /** @protected {?Array<ReactionOptionType>} */
+    this.responseData_ = null;
 
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
@@ -141,7 +144,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Gets the root element.
    * @visibleForTesting
-   * @return {?Element}
+   * @return {Element}
    */
   getRootElement() {
     return this.rootEl_;
@@ -176,11 +179,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Generates the template in rootEl_ and fills up with options.
-   * @param {!Element} unusedElement
    * @return {!Element} rootEl_
    * @protected @abstract
    */
-  buildComponent(unusedElement) {
+  buildComponent() {
     // Subclass must override.
   }
 
@@ -391,7 +393,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       const toRoundUp =
         ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
 
-      ties.forEach((percentageObj) => {
+      toArray(ties).forEach((percentageObj) => {
         finalPercentages[percentageObj.originalIndex] =
           Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
       });
@@ -400,7 +402,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       remainder -= toRoundUp ? ties.length : 0;
     }
 
-    preserveOriginal.forEach((percentageObj) => {
+    toArray(preserveOriginal).forEach((percentageObj) => {
       finalPercentages[percentageObj.originalIndex] = Math.floor(
         percentageObj.value
       );
