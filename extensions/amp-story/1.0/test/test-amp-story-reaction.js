@@ -33,22 +33,22 @@ export const getMockReactionData = () => {
   return {
     options: [
       {
-        reactionValue: 0,
+        optionIndex: 0,
         totalCount: 3,
         selectedByUser: true,
       },
       {
-        reactionValue: 1,
+        optionIndex: 1,
         totalCount: 3,
         selectedByUser: false,
       },
       {
-        reactionValue: 2,
+        optionIndex: 2,
         totalCount: 3,
         selectedByUser: false,
       },
       {
-        reactionValue: 3,
+        optionIndex: 3,
         totalCount: 1,
         selectedByUser: false,
       },
@@ -84,7 +84,7 @@ class ReactionTest extends AmpStoryReaction {
 export const generateResponseDataFor = (responseCounts) => {
   return responseCounts.map((count, index) =>
     dict({
-      'reactionValue': index,
+      'optionIndex': index,
       'totalCount': count,
       'selectedByUser': false,
     })
