@@ -55,6 +55,7 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
@@ -96,7 +97,10 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-import {registerServiceBuilder} from '../../../src/service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
@@ -211,7 +215,12 @@ export class AmpStory extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationForDoc(this.element);
+    this.localizationService_ = new LocalizationService(this.element);
+
+    const localizationService = this.localizationService_;
+    registerServiceBuilderForDoc(this.element, 'localization', function () {
+      return localizationService;
+    });
 
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
