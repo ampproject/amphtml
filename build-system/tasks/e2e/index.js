@@ -47,8 +47,8 @@ async function launchWebServer_() {
   );
 }
 
-function cleanUp_() {
-  stopServer();
+async function cleanUp_() {
+  await stopServer();
 }
 
 function createMocha_() {
@@ -113,7 +113,7 @@ async function e2e() {
     await reportTestStarted();
     mocha.run(async (failures) => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
