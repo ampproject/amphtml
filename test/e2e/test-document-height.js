@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ describes.endtoend(
     it('should send documentHeight once amp has completed init', async () => {
       const messages = await controller.evaluate(() => {
         // The viewer.html file will launch 7 test viewers, only one of which is the requested url.
+        // TODO(gh/amphtml/28200): only load the one viewer.
         const viewer = window.parent.allViewers.find((v) =>
           v.url.includes('document-height')
         );
@@ -39,12 +40,10 @@ describes.endtoend(
       const documentHeights = messages.filter(
         (msg) => msg[0] === 'documentHeight'
       );
+      const firstHeight = documentHeights[0][1].height;
 
-      // TODO: currently a magic number. Can we do better?
-      // Do I even have access to matchers here.
-      await expect(documentHeights).deep.equal([
-        ['documentHeight', {height: 447.875}],
-      ]);
+      await expect(documentHeights.length).equal(1);
+      await expect(Math.floor(firstHeight)).equal(447);
     });
   }
 );
