@@ -315,6 +315,8 @@ function compile(
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
+      compilerOptions.checks_only = true;
+
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
