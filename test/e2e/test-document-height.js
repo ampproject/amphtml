@@ -31,7 +31,7 @@ describes.endtoend(
     it('should send documentHeight once amp has completed init', async () => {
       const messages = await controller.evaluate(() => {
         // The viewer.html file will launch 7 test viewers, only one of which is the requested url.
-        let viewer = window.parent.allViewers.find((v) =>
+        const viewer = window.parent.allViewers.find((v) =>
           v.url.includes('document-height')
         );
         return viewer.receivedMessages;
