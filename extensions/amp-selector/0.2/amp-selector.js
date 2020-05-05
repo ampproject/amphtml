@@ -30,7 +30,7 @@ import {dict, omit} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
-import {useEffect} from '../../../src/preact';
+import {useLayoutEffect} from '../../../src/preact';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -272,7 +272,7 @@ function OptionShim(props) {
     'isDisabled': isDisabled,
     'role': role = 'option',
   } = props;
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (onClick) {
       domElement.addEventListener('click', onClick);
     }
@@ -283,16 +283,16 @@ function OptionShim(props) {
     };
   }, [domElement, onClick]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     toggleAttribute(domElement, 'selected', selected);
   }, [domElement, selected]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     toggleAttribute(domElement, 'disabled', isDisabled);
     toggleAttribute(domElement, 'aria-disabled', isDisabled);
   }, [domElement, isDisabled]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     domElement.setAttribute('role', role);
   }, [domElement, role]);
 }
@@ -309,17 +309,17 @@ function SelectorShim(props) {
     'disabled': disabled,
   } = props;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     toggleAttribute(domElement, 'multiple', multiple);
     toggleAttribute(domElement, 'aria-multiselectable', multiple);
   }, [domElement, multiple]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     toggleAttribute(domElement, 'disabled', disabled);
     toggleAttribute(domElement, 'aria-disabled', disabled);
   }, [domElement, disabled]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     domElement.setAttribute('role', role);
   }, [domElement, role]);
 
