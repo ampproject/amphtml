@@ -80,6 +80,11 @@ describes.realWin(
         return storeService;
       });
 
+      const localizationService = new LocalizationService(ampStoryQuizEl);
+      registerServiceBuilder(win, 'localization', function () {
+        return localizationService;
+      });
+
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
       const gridLayer = win.document.createElement('amp-story-grid-layer');
