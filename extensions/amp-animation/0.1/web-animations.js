@@ -853,19 +853,19 @@ class CssContextImpl {
    * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
   constructor(win, rootNode, baseUrl, options) {
+    const {scope = null, scaleByScope = false} = options;
+
     /** @const @private */
     this.win_ = win;
 
     /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
 
-    const {scope = null} = options;
     /** @const @private {?Element} */
     this.scope_ = scope;
 
-    const {scaleDimsByScope = false} = options;
     /** @const @private {boolean} */
-    this.scaleDimsByScope_ = scaleDimsByScope;
+    this.scaleByScope_ = scaleByScope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -894,17 +894,15 @@ class CssContextImpl {
     /** @private {?string} */
     this.dim_ = null;
 
-    /** @private {?{width: number, height: number}} */
-    this.viewportSize_ = null;
-
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
-    this.viewportRect_ = null;
-
-    /** @private {number} */
-    this.scaleFactorX_ = 1;
-
-    /** @private {number} */
-    this.scaleFactorY_ = 1;
+    /**
+     * @private {?{
+     *   size: {width: number, height: number},
+     *   offset: {x: number, y: number},
+     *   scaleFactorX: number,
+     *   scaleFactorY: number,
+     * }}
+     */
+    this.viewportParams_ = null;
   }
 
   /** @return {!Document|!ShadowRoot} */
@@ -1193,39 +1191,32 @@ class CssContextImpl {
 
   /** @override */
   getViewportSize() {
-    this.resolveViewportRect_();
-    if (!this.viewportSize_) {
-      const {width, height} = this.viewportRect_;
-      this.viewportSize_ = {
-        width: width * this.scaleFactorX_,
-        height: height * this.scaleFactorY_,
-      };
-    }
-    return this.viewportSize_;
+    return this.getViewportParams_().size;
   }
 
   /** @private */
-  resolveViewportRect_() {
-    if (this.viewportRect_) {
-      return;
+  getViewportParams_() {
+    if (!this.viewportParams_) {
+      if (!this.scope_ || !this.scaleByScope_) {
+        const {innerWidth, innerHeight} = this.win_;
+        this.viewportParams_ = {
+          offset: {x: 0, y: 0},
+          size: {width: innerWidth, height: innerHeight},
+          scaleFactorX: 1,
+          scaleFactorY: 1,
+        };
+      } else {
+        const rect = this.scope_./*OK*/ getBoundingClientRect();
+        const {offsetWidth, offsetHeight} = this.scope_;
+        this.viewportParams_ = {
+          offset: {x: rect.x, y: rect.y},
+          size: {width: offsetWidth, height: offsetHeight},
+          scaleFactorX: offsetWidth / (rect.width || 1),
+          scaleFactorY: offsetHeight / (rect.height || 1),
+        };
+      }
     }
-    if (!this.scope_) {
-      this.viewportRect_ = layoutRectLtwh(
-        0,
-        0,
-        this.win_./*OK*/ innerWidth,
-        this.win_./*OK*/ innerHeight
-      );
-      return;
-    }
-    this.viewportRect_ = this.scope_./*OK*/ getBoundingClientRect();
-
-    if (this.scaleDimsByScope_) {
-      this.scaleFactorX_ =
-        this.scope_./*OK*/ offsetWidth / (this.viewportRect_.width || 1);
-      this.scaleFactorY_ =
-        this.scope_./*OK*/ offsetHeight / (this.viewportRect_.height || 1);
-    }
+    return this.viewportParams_;
   }
 
   /** @override */
@@ -1260,25 +1251,13 @@ class CssContextImpl {
   }
 
   /** @override */
-  getCurrentElementSize() {
-    return this.getElementSize_(this.requireTarget_());
+  getCurrentElementRect() {
+    return this.getElementRect_(this.requireTarget_());
   }
 
   /** @override */
-  getElementSize(selector, selectionMethod) {
-    return this.getElementSize_(this.getElement_(selector, selectionMethod));
-  }
-
-  /** @override */
-  getCurrentElementPosition() {
-    return this.getElementPosition_(this.requireTarget_());
-  }
-
-  /** @override */
-  getElementPosition(selector, selectionMethod) {
-    return this.getElementPosition_(
-      this.getElement_(selector, selectionMethod)
-    );
+  getElementRect(selector, selectionMethod) {
+    return this.getElementRect_(this.getElement_(selector, selectionMethod));
   }
 
   /**
@@ -1317,33 +1296,20 @@ class CssContextImpl {
 
   /**
    * @param {!Element} target
-   * @return {!{width: number, height: number}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
-  getElementSize_(target) {
-    this.resolveViewportRect_();
-    const {width, height} = target./*OK*/ getBoundingClientRect();
-    return {
-      width: width * this.scaleFactorX_,
-      height: height * this.scaleFactorY_,
-    };
-  }
-
-  /**
-   * @param {!Element} target
-   * @return {!{x: number, y: number}}
-   * @private
-   */
-  getElementPosition_(target) {
-    this.resolveViewportRect_();
-    const {x, y} = target./*OK*/ getBoundingClientRect();
-    const {x: offsetX, y: offsetY} = this.viewportRect_;
+  getElementRect_(target) {
+    const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
+    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
 
     // This assumes default `transform-origin: center center`
-    return {
-      x: (x - offsetX) * this.scaleFactorX_,
-      y: (y - offsetY) * this.scaleFactorY_,
-    };
+    return layoutRectLtwh(
+      (x - offset.x) * scaleFactorX,
+      (y - offset.y) * scaleFactorY,
+      width * scaleFactorX,
+      height * scaleFactorY
+    );
   }
 
   /** @override */

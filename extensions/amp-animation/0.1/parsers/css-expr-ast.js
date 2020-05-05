@@ -87,32 +87,18 @@ export class CssContext {
   getViewportSize() {}
 
   /**
-   * Returns the current element's size.
-   * @return {!{width: number, height: number}}
+   * Returns the current element's rectangle.
+   * @return {!../../../src/layout-rect.LayoutRect}
    */
-  getCurrentElementSize() {}
+  getCurrentElementRect() {}
 
   /**
-   * Returns the specified element's size.
+   * Returns the specified element's rectangle.
    * @param {string} unusedSelector
    * @param {?string} unusedSelectionMethod
-   * @return {!{width: number, height: number}}
+   * @return {!../../../src/layout-rect.LayoutRect}
    */
-  getElementSize(unusedSelector, unusedSelectionMethod) {}
-
-  /**
-   * Returns the current element's position.
-   * @return {!{x: number, y: number}}
-   */
-  getCurrentElementPosition() {}
-
-  /**
-   * Returns the specified element's position.
-   * @param {string} unusedSelector
-   * @param {?string} unusedSelectionMethod
-   * @return {!{x: number, y: number}}
-   */
-  getElementPosition(unusedSelector, unusedSelectionMethod) {}
+  getElementRect(unusedSelector, unusedSelectionMethod) {}
 
   /**
    * Returns the dimension: "w" for width or "h" for height.
@@ -501,8 +487,8 @@ export class CssLengthNode extends CssNumericNode {
   /** @override */
   calcPercent(percent, context) {
     const dim = context.getDimension();
-    const size = context.getCurrentElementSize();
-    const side = getDimSide(dim, size);
+    const size = context.getCurrentElementRect();
+    const side = getRectField(dim, size);
     return new CssLengthNode((side * percent) / 100, 'px');
   }
 }
@@ -861,16 +847,16 @@ export class CssTranslateNode extends CssFuncNode {
 /**
  * AMP-specific `width()` and `height()` functions.
  */
-export class CssDimSizeNode extends CssNode {
+export class CssRectNode extends CssNode {
   /**
-   * @param {string} dim
+   * @param {string} field x, y, width or height
    * @param {?string=} opt_selector
    * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
    */
-  constructor(dim, opt_selector, opt_selectionMethod) {
+  constructor(field, opt_selector, opt_selectionMethod) {
     super();
     /** @const @private */
-    this.dim_ = dim;
+    this.field_ = field;
     /** @const @private */
     this.selector_ = opt_selector || null;
     /** @const @private */
@@ -889,48 +875,10 @@ export class CssDimSizeNode extends CssNode {
 
   /** @override */
   calc(context) {
-    const size = this.selector_
-      ? context.getElementSize(this.selector_, this.selectionMethod_)
-      : context.getCurrentElementSize();
-    return new CssLengthNode(getDimSide(this.dim_, size), 'px');
-  }
-}
-
-/**
- * AMP-specific `x()` and `y()` functions.
- */
-export class CssDimPosNode extends CssNode {
-  /**
-   * @param {string} dim
-   * @param {?string=} opt_selector
-   * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
-   */
-  constructor(dim, opt_selector, opt_selectionMethod) {
-    super();
-    /** @const @private */
-    this.dim_ = dim;
-    /** @const @private */
-    this.selector_ = opt_selector || null;
-    /** @const @private */
-    this.selectionMethod_ = opt_selectionMethod || null;
-  }
-
-  /** @override */
-  css() {
-    throw noCss();
-  }
-
-  /** @override */
-  isConst() {
-    return false;
-  }
-
-  /** @override */
-  calc(context) {
-    const position = this.selector_
-      ? context.getElementPosition(this.selector_, this.selectionMethod_)
-      : context.getCurrentElementPosition();
-    return new CssLengthNode(position[this.dim_], 'px');
+    const rect = this.selector_
+      ? context.getElementRect(this.selector_, this.selectionMethod_)
+      : context.getCurrentElementRect();
+    return new CssLengthNode(getRectField(this.field_, rect), 'px');
   }
 }
 
@@ -1433,12 +1381,16 @@ function noCss() {
 }
 
 /**
- * @param {?string} dim
- * @param {!{width: number, height: number}} size
+ * @param {?string} field
+ * @param {!../../../src/layout-rect.LayoutRect} rect
  * @return {number}
  */
-function getDimSide(dim, size) {
-  return dim == 'w' ? size.width : dim == 'h' ? size.height : 0;
+function getRectField(field, rect) {
+  return field == 'w'
+    ? rect.width
+    : field == 'h'
+    ? rect.height
+    : rect[field] ?? 0;
 }
 
 /**

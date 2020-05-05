@@ -1548,13 +1548,13 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       target1.style.width = '11px';
       target1.style.height = '12px';
       allowConsoleError(() => {
-        expect(() => css.getCurrentElementSize()).to.throw(
+        expect(() => css.getCurrentElementRect()).to.throw(
           /target is specified/
         );
       });
       expect(
-        css.withTarget(target1, 0, () => css.getCurrentElementSize())
-      ).to.deep.equal({width: 11, height: 12});
+        css.withTarget(target1, 0, () => css.getCurrentElementRect())
+      ).to.include({width: 11, height: 12});
     });
 
     it('should resolve the selected element size', () => {
@@ -1565,23 +1565,23 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       target1.appendChild(child);
 
       // Normal selectors search whole DOM and don't need context.
-      expect(css.getElementSize('#target1', null)).to.deep.equal({
+      expect(css.getElementRect('#target1', null)).to.include({
         width: 11,
         height: 12,
       });
       expect(
-        css.withTarget(target2, 0, () => css.getElementSize('#target1', null))
-      ).to.deep.equal({width: 11, height: 12});
+        css.withTarget(target2, 0, () => css.getElementRect('#target1', null))
+      ).to.include({width: 11, height: 12});
 
       // Closest selectors always need a context node.
       allowConsoleError(() => {
-        expect(() => css.getElementSize('#target1', 'closest')).to.throw(
+        expect(() => css.getElementRect('#target1', 'closest')).to.throw(
           /target is specified/
         );
       });
       expect(
-        css.withTarget(child, 0, () => css.getElementSize('.parent', 'closest'))
-      ).to.deep.equal({width: 11, height: 12});
+        css.withTarget(child, 0, () => css.getElementRect('.parent', 'closest'))
+      ).to.include({width: 11, height: 12});
     });
 
     it("should resolve current element's position", () => {
@@ -1589,13 +1589,13 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       target1.style.left = '11px';
       target1.style.top = '12px';
       allowConsoleError(() => {
-        expect(() => css.getCurrentElementPosition()).to.throw(
+        expect(() => css.getCurrentElementRect()).to.throw(
           /target is specified/
         );
       });
       expect(
-        css.withTarget(target1, 0, () => css.getCurrentElementPosition())
-      ).to.deep.equal({x: 11, y: 12});
+        css.withTarget(target1, 0, () => css.getCurrentElementRect())
+      ).to.include({x: 11, y: 12});
     });
 
     it("should resolve the selected element's position", () => {
@@ -1607,27 +1607,23 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
       target1.appendChild(child);
 
       // Normal selectors search whole DOM and don't need context.
-      expect(css.getElementPosition('#target1', null)).to.deep.equal({
+      expect(css.getElementRect('#target1', null)).to.include({
         x: 11,
         y: 12,
       });
       expect(
-        css.withTarget(target2, 0, () =>
-          css.getElementPosition('#target1', null)
-        )
-      ).to.deep.equal({x: 11, y: 12});
+        css.withTarget(target2, 0, () => css.getElementRect('#target1', null))
+      ).to.include({x: 11, y: 12});
 
       // Closest selectors always need a context node.
       allowConsoleError(() => {
-        expect(() => css.getElementPosition('#target1', 'closest')).to.throw(
+        expect(() => css.getElementRect('#target1', 'closest')).to.throw(
           /target is specified/
         );
       });
       expect(
-        css.withTarget(child, 0, () =>
-          css.getElementPosition('.parent', 'closest')
-        )
-      ).to.deep.equal({x: 11, y: 12});
+        css.withTarget(child, 0, () => css.getElementRect('.parent', 'closest'))
+      ).to.include({x: 11, y: 12});
     });
 
     it('should resolve a valid URL', () => {
@@ -1851,16 +1847,43 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
     const css = builder.css_;
 
     expect(() =>
-      css.withTarget(target1, 0, () => css.getElementSize('.parent', 'closest'))
+      css.withTarget(target1, 0, () => css.getElementRect('.parent', 'closest'))
     ).to.not.throw();
 
     allowConsoleError(() => {
       expect(() =>
         css.withTarget(target2, 0, () =>
-          css.getElementSize('.parent', 'closest')
+          css.getElementRect('.parent', 'closest')
         )
       ).to.throw(/Element not found/);
     });
+  });
+
+  it("should not resolve viewport size as scope element's size", () => {
+    const scope = html`<div></div>`;
+
+    scope.style.width = '200px';
+    scope.style.height = '300px';
+
+    env.win.document.body.appendChild(scope);
+
+    const builder = new Builder(
+      env.win,
+      env.win.document,
+      'https://acme.org/',
+      /* vsync */ null,
+      /* owners */ null,
+      {scope, scaleByScope: false}
+    );
+
+    const css = builder.css_;
+
+    const size = css.getViewportSize();
+    expect(size.width).to.equal(env.win.innerWidth);
+    expect(size.height).to.equal(env.win.innerHeight);
+
+    // cached:
+    expect(css.getViewportSize()).to.equal(size);
   });
 
   it("should resolve viewport size as scope element's size", () => {
@@ -1877,7 +1900,7 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
       'https://acme.org/',
       /* vsync */ null,
       /* owners */ null,
-      {scope}
+      {scope, scaleByScope: true}
     );
 
     const css = builder.css_;
@@ -1899,8 +1922,11 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
     const {target1, target2} = htmlRefs(scope);
 
     scope.style.position = 'absolute';
-    scope.style.top = '20px';
     scope.style.left = '10px';
+    scope.style.top = '20px';
+
+    scope.style.width = '1000px';
+    scope.style.height = '1000px';
 
     target1.style.position = 'absolute';
     target1.style.left = '40px';
@@ -1918,16 +1944,16 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
       'https://acme.org/',
       /* vsync */ null,
       /* owners */ null,
-      {scope}
+      {scope, scaleByScope: true}
     );
 
     const css = builder.css_;
 
-    const pos1 = css.getElementPosition('#target1', null);
+    const pos1 = css.getElementRect('#target1', null);
     expect(pos1.x).to.equal(40);
     expect(pos1.y).to.equal(30);
 
-    const pos2 = css.getElementPosition('#target2', null);
+    const pos2 = css.getElementRect('#target2', null);
     expect(pos2.x).to.equal(30);
     expect(pos2.y).to.equal(20);
   });
@@ -1969,24 +1995,24 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
       'https://acme.org/',
       /* vsync */ null,
       /* owners */ null,
-      {scope, scaleDimsByScope: true}
+      {scope, scaleByScope: true}
     );
 
     const css = builder.css_;
 
-    const pos1 = css.getElementPosition('#target1', null);
+    const pos1 = css.getElementRect('#target1', null);
     expect(pos1.x).to.equal(40);
     expect(pos1.y).to.equal(30);
 
-    const size1 = css.getElementSize('#target1', null);
+    const size1 = css.getElementRect('#target1', null);
     expect(size1.width).to.equal(200);
     expect(size1.height).to.equal(100);
 
-    const pos2 = css.getElementPosition('#target2', null);
+    const pos2 = css.getElementRect('#target2', null);
     expect(pos2.x).to.equal(30);
     expect(pos2.y).to.equal(20);
 
-    const size2 = css.getElementSize('#target2', null);
+    const size2 = css.getElementRect('#target2', null);
     expect(size2.width).to.equal(300);
     expect(size2.height).to.equal(200);
   });
@@ -2028,24 +2054,26 @@ describes.realWin('MeasureScanner (scoped)', {amp: 1}, (env) => {
       'https://acme.org/',
       /* vsync */ null,
       /* owners */ null,
-      {scope, scaleDimsByScope: false}
+      {scope, scaleByScope: false}
     );
 
     const css = builder.css_;
 
-    const pos1 = css.getElementPosition('#target1', null);
-    expect(pos1.x).to.equal(40 * 0.5);
-    expect(pos1.y).to.equal(30 * 0.5);
+    const pos1 = css.getElementRect('#target1', null);
+    const rect1 = target1.getBoundingClientRect();
+    expect(pos1.x).to.equal(rect1.x);
+    expect(pos1.y).to.equal(rect1.y);
 
-    const size1 = css.getElementSize('#target1', null);
+    const size1 = css.getElementRect('#target1', null);
     expect(size1.width).to.equal(200 * 0.5);
     expect(size1.height).to.equal(100 * 0.5);
 
-    const pos2 = css.getElementPosition('#target2', null);
-    expect(pos2.x).to.equal(30 * 0.5);
-    expect(pos2.y).to.equal(20 * 0.5);
+    const pos2 = css.getElementRect('#target2', null);
+    const rect2 = target2.getBoundingClientRect();
+    expect(pos2.x).to.equal(rect2.x);
+    expect(pos2.y).to.equal(rect2.y);
 
-    const size2 = css.getElementSize('#target2', null);
+    const size2 = css.getElementRect('#target2', null);
     expect(size2.width).to.equal(300 * 0.5);
     expect(size2.height).to.equal(200 * 0.5);
   });
