@@ -86,8 +86,8 @@ export const multiselect = () => {
       <Option as="li" option="1">
         Option 1
       </Option>
-      <Option as="li" option="2">
-        Option 2
+      <Option as="li" disabled option="2">
+        Option 2 (disabled)
       </Option>
       <Option as="li" option="3">
         Option 3
