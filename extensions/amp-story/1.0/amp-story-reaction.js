@@ -427,9 +427,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         this.updateToPostSelectionState_(optionEl);
       });
 
-      if (this.element.hasAttribute('endpoint')) {
-        this.updateReactionData_(optionEl.optionIndex_);
-      }
+      this.executeReactionRequest_('POST', optionEl.optionIndex_);
     });
   }
 
@@ -443,16 +441,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
     return this.executeReactionRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(response);
     });
-  }
-
-  /**
-   * Update the Reaction data in the datastore
-   *
-   * @param {number} reactionValue
-   * @private
-   */
-  updateReactionData_(reactionValue) {
-    this.executeReactionRequest_('POST', reactionValue);
   }
 
   /**
@@ -521,7 +509,12 @@ export class AmpStoryReaction extends AMP.BaseElement {
       response && 'options' in response,
       `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
     );
-    this.updateReactionOnDataRetrieval_(response['options']);
+    const numOptions = this.rootEl_.querySelectorAll(
+      '.i-amphtml-story-reaction-option'
+    ).length;
+    this.updateReactionOnDataRetrieval_(
+      response['options'].splice(0, numOptions)
+    );
   }
 
   /**
