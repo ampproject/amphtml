@@ -1197,15 +1197,7 @@ class CssContextImpl {
   /** @private */
   getViewportParams_() {
     if (!this.viewportParams_) {
-      if (!this.scope_ || !this.scaleByScope_) {
-        const {innerWidth, innerHeight} = this.win_;
-        this.viewportParams_ = {
-          offset: {x: 0, y: 0},
-          size: {width: innerWidth, height: innerHeight},
-          scaleFactorX: 1,
-          scaleFactorY: 1,
-        };
-      } else {
+      if (this.scope_ && this.scaleByScope_) {
         const rect = this.scope_./*OK*/ getBoundingClientRect();
         const {offsetWidth, offsetHeight} = this.scope_;
         this.viewportParams_ = {
@@ -1213,6 +1205,14 @@ class CssContextImpl {
           size: {width: offsetWidth, height: offsetHeight},
           scaleFactorX: offsetWidth / (rect.width || 1),
           scaleFactorY: offsetHeight / (rect.height || 1),
+        };
+      } else {
+        const {innerWidth, innerHeight} = this.win_;
+        this.viewportParams_ = {
+          offset: {x: 0, y: 0},
+          size: {width: innerWidth, height: innerHeight},
+          scaleFactorX: 1,
+          scaleFactorY: 1,
         };
       }
     }
