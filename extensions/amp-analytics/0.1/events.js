@@ -1112,7 +1112,7 @@ export class TimerEventTracker extends EventTracker {
     }
 
     const timerHandler = new TimerEventHandler(
-      timerSpec,
+      /** @type {!JsonObject} */ (timerSpec),
       startBuilder,
       stopBuilder
     );
