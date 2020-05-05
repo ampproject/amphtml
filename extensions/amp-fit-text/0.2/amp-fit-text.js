@@ -39,8 +39,6 @@ class AmpFitText extends PreactBaseElement {
       'maxFontSize': getLengthNumeral(
         this.element.getAttribute('min-font-size')
       ),
-      'width': this.element.getAttribute('width'),
-      'height': this.element.getAttribute('height'),
       'children': (
         <div dangerouslySetInnerHTML={{__html: `${innerHTML}`}}></div>
       ),
@@ -59,6 +57,12 @@ class AmpFitText extends PreactBaseElement {
 
 /** @override */
 AmpFitText['Component'] = FitText;
+
+/** @override */
+AmpFitText['props'] = {
+  'width': {attr: 'width'},
+  'height': {attr: 'height'},
+};
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpFitText, CSS);
