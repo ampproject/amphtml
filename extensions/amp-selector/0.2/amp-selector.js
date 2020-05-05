@@ -40,23 +40,41 @@ class AmpSelector extends PreactBaseElement {
   init() {
     const {element} = this;
     const action = Services.actionServiceForDoc(this.element);
+
+    // TODO(wg-bento): This hack is in place to prevent doubly rendering.
+    // See https://github.com/ampproject/amp-react-prototype/issues/40.
     let isExpectedMutation = false;
+    const handleSelect = (value, option, trust) => {
+      fireSelectEvent(this.win, action, element, option, value, trust);
+      isExpectedMutation = true;
+      this.mutateProps(dict({'value': value}));
+    };
 
     this.registerAction('clear', () => {
       isExpectedMutation = true;
-      this.mutateProps(dict({'value': value}));
+      this.mutateProps(dict({'value': []}));
     });
 
     this.registerAction('selectUp', (invocation) => {
       const {args, trust} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-      select(delta, trust);
+      const initialValue = /** @type {!Array<string>} */ (this.getProp(
+        'value',
+        []
+      ));
+      const {value, option} = select(delta, initialValue, options);
+      handleSelect(value, option, trust);
     });
 
     this.registerAction('selectDown', (invocation) => {
       const {args, trust} = invocation;
       const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-      select(delta, trust);
+      const initialValue = /** @type {!Array<string>} */ (this.getProp(
+        'value',
+        []
+      ));
+      const {value, option} = select(delta, initialValue, options);
+      handleSelect(value, option, trust);
     });
 
     this.registerAction(
@@ -64,131 +82,43 @@ class AmpSelector extends PreactBaseElement {
       (invocation) => {
         const {args, trust} = invocation;
         const {'index': index, 'value': opt_select} = args;
-        toggle(index, trust, opt_select);
+        const initialValue = /** @type {!Array<string>} */ (this.getProp(
+          'value',
+          []
+        ));
+        const toggleValue = toggle(index, initialValue, options, opt_select);
+        if (!toggleValue) {
+          return;
+        }
+        const {'value': value, 'option': option} = toggleValue;
+        handleSelect(value, option, trust);
       },
       ActionTrust.LOW
     );
 
-    const getOptionState = () => {
-      const children = [];
-      const options = [];
-      const optionChildren = toArray(element.querySelectorAll('[option]'));
-
-      const value = [];
-      optionChildren
-        // Skip options that are themselves within an option
-        .filter(
-          (el) =>
-            !closestAncestorElementBySelector(
-              dev().assertElement(el.parentElement),
-              '[option]'
-            )
-        )
-        .forEach((child) => {
-          const option = child.getAttribute('option');
-          const selected = child.hasAttribute('selected');
-          const disabled = child.hasAttribute('disabled');
-          const props = {
-            as: OptionShim,
-            option,
-            // TODO: `disabled` is always undefined for OptionShim
-            isDisabled: disabled,
-            disabled,
-            role: child.getAttribute('role') || 'option',
-            domElement: child,
-            // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
-            // See https://github.com/ampproject/amp-react-prototype/issues/40.
-            postRender: () => {
-              // Skip mutations to avoid cycles.
-              mu.takeRecords();
-            },
-            selected,
-          };
-          if (selected && option) {
-            value.push(option);
-          }
-          const optionChild = <Option {...props} />;
-          options.push(option);
-          children.push(optionChild);
-        });
-      return {value, children, options};
-    };
-
-    const rebuild = () => {
+    const mu = new MutationObserver(() => {
       if (isExpectedMutation) {
         isExpectedMutation = false;
         return;
       }
-      this.mutateProps(getOptionState());
-    };
-
-    const mu = new MutationObserver(rebuild);
+      this.mutateProps(getOptionState(element, mu));
+    });
     mu.observe(element, {
-      attributeFilter: ['option', 'selected'],
+      attributeFilter: ['option', 'selected', 'disabled'],
       subtree: true,
     });
 
-    const {value, children, options} = getOptionState();
-
-    const select = (delta, trust) => {
-      const value = /** @type {!Array<string>} */ (this.getProp('value', []));
-      const previous = options.indexOf(value.shift());
-      // If previousIndex === -1 is true, then a negative delta will be offset
-      // one more than is wanted when looping back around in the options.
-      // This occurs when no options are selected and "selectUp" is called.
-      const selectUpWhenNoneSelected = previous === -1 && delta < 0;
-      const index = selectUpWhenNoneSelected ? delta : previous + delta;
-      const option = options[mod(index, children.length)];
-      value.push(option);
-      fireSelectEvent(this.win, action, element, option, value, trust);
-      isExpectedMutation = true;
-      this.mutateProps(dict({'value': value}));
-    };
-
-    const toggle = (index, trust, opt_select) => {
-      userAssert(index, "'index' must be specified");
-      userAssert(index >= 0, "'index' must be greater than 0");
-      userAssert(
-        index < options.length,
-        "'index' must " +
-          'be less than the length of options in the <amp-selector>'
-      );
-      const value = /** @type {!Array<string>} */ (this.getProp('value', []));
-
-      const option = options[index];
-      const target = value.indexOf(option);
-      if (target === -1) {
-        if (opt_select == false) {
-          return;
-        }
-        value.push(option);
-      } else {
-        if (opt_select == true) {
-          return;
-        }
-        value.splice(target, 1);
-      }
-      fireSelectEvent(this.win, action, element, option, value, trust);
-      isExpectedMutation = true;
-      this.mutateProps(dict({'value': value}));
-    };
-
+    const {
+      'value': value,
+      'children': children,
+      'options': options,
+    } = getOptionState(element, mu);
     return dict({
       'domElement': element,
       'children': children,
       'value': value,
       'onChange': (e) => {
-        const {value, option} = e;
-        fireSelectEvent(
-          this.win,
-          action,
-          element,
-          option,
-          value,
-          ActionTrust.HIGH
-        );
-        isExpectedMutation = true;
-        this.mutateProps(dict({'value': value}));
+        handleSelect(e['value'], e['option'], ActionTrust.HIGH);
       },
     });
   }
@@ -201,6 +131,56 @@ class AmpSelector extends PreactBaseElement {
     );
     return true;
   }
+}
+
+/**
+ * @param {!Element} element
+ * @param {MutationObserver} mu
+ * @return {!JsonObject}
+ */
+function getOptionState(element, mu) {
+  const children = [];
+  const options = [];
+  const optionChildren = toArray(element.querySelectorAll('[option]'));
+
+  const value = [];
+  optionChildren
+    // Skip options that are themselves within an option
+    .filter(
+      (el) =>
+        !closestAncestorElementBySelector(
+          dev().assertElement(el.parentElement),
+          '[option]'
+        )
+    )
+    .forEach((child) => {
+      const option = child.getAttribute('option');
+      const selected = child.hasAttribute('selected');
+      const disabled = child.hasAttribute('disabled');
+      const props = {
+        as: OptionShim,
+        option,
+        // TODO: `disabled` is always undefined for OptionShim
+        isDisabled: disabled,
+        disabled,
+        role: child.getAttribute('role') || 'option',
+        domElement: child,
+        // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
+        // See https://github.com/ampproject/amp-react-prototype/issues/40.
+        postRender: () => {
+          // Skip mutations to avoid cycles.
+          mu.takeRecords();
+        },
+        selected,
+      };
+      if (selected && option) {
+        value.push(option);
+      }
+      const optionChild = <Option {...props} />;
+      options.push(option);
+      children.push(optionChild);
+    });
+  return dict({'value': value, 'children': children, 'options': options});
 }
 
 /**
@@ -224,6 +204,60 @@ function fireSelectEvent(win, action, el, option, value, trust) {
     dict({'targetOption': option, 'selectedOptions': value})
   );
   action.trigger(el, name, selectEvent, trust);
+}
+
+/**
+ * @param {number} index
+ * @param {!Array<string>} value
+ * @param {Array<string>} options
+ * @param {boolean=} opt_select
+ * @return {JsonObject|undefined}
+ */
+function toggle(index, value, options, opt_select) {
+  userAssert(index, "'index' must be specified");
+  userAssert(index >= 0, "'index' must be greater than 0");
+  userAssert(
+    index < options.length,
+    "'index' must be less than the length of options in the <amp-selector>"
+  );
+  const option = options[index];
+  const target = value.indexOf(option);
+  if (target === -1) {
+    if (opt_select == false) {
+      return;
+    }
+    value.push(option);
+  } else {
+    if (opt_select == true) {
+      return;
+    }
+    value.splice(target, 1);
+  }
+  return dict({'value': value, 'option': option});
+}
+
+/**
+ * @param {number} delta
+ * @param {!Array<string>} value
+ * @param {Array<string>} options
+ * @return {{value: Array<string>, option: string}|undefined}
+ */
+function select(delta, value, options) {
+  const previous = options.indexOf(value.shift());
+
+  // If previousIndex === -1 is true, then a negative delta will be offset
+  // one more than is wanted when looping back around in the options.
+  // This occurs when no options are selected and "selectUp" is called.
+  const selectUpWhenNoneSelected = previous === -1 && delta < 0;
+  const index = selectUpWhenNoneSelected ? delta : previous + delta;
+  const option = options[mod(index, options.length)];
+
+  // Only add option if it is not already selected.
+  if (value.indexOf(option) === -1) {
+    value.push(option);
+  }
+
+  return {value, option};
 }
 
 /**
