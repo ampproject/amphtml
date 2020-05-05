@@ -32,6 +32,7 @@ export function Selector(props) {
     'value': value,
     'multiple': multiple,
     'onChange': onChange,
+    'role': role = 'listbox',
   } = props;
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
@@ -57,7 +58,12 @@ export function Selector(props) {
   };
 
   return (
-    <Comp {...props} aria-disabled={disabled} aria-multiselectable={multiple}>
+    <Comp
+      {...props}
+      role={role}
+      aria-disabled={disabled}
+      aria-multiselectable={multiple}
+    >
       <SelectorContext.Provider
         value={{
           selected,
@@ -81,7 +87,7 @@ export function Option(props) {
     'disabled': disabled,
     'onClick': onClick,
     'option': option,
-    'role': role,
+    'role': role = 'option',
     'style': style,
   } = props;
   const selectorContext = useContext(SelectorContext);
@@ -110,7 +116,7 @@ export function Option(props) {
     'aria-disabled': disabled,
     onClick: clickHandler,
     option,
-    role: role || 'option',
+    role,
     selected: isSelected,
     style: {...statusStyle, ...style},
   };
