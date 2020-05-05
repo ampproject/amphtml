@@ -427,7 +427,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         this.updateToPostSelectionState_(optionEl);
       });
 
-      if (this.element.getAttribute('endpoint')) {
+      if (this.element.hasAttribute('endpoint')) {
         this.executeReactionRequest_('POST', optionEl.optionIndex_);
       }
     });
