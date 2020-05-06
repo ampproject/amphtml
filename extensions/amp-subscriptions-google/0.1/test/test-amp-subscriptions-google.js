@@ -673,6 +673,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     });
   });
 
+  it('should use message number', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-number', 1);
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      theme: 'light',
+      messageNumber: '1', // Message is 'Subscribe with just a few taps' on smartbox button.
+    });
+  });
+
   it('should throw if smartButton language is missing', () => {
     //expectAsyncConsoleError(/must have a language attrbiute​​​/);
     const elem = env.win.document.createElement('div');
