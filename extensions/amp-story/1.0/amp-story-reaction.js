@@ -128,9 +128,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Array<!ReactionOptionType>} */
     this.optionsData_ = null;
 
-    /** @protected {?Array<ReactionOptionType>} */
-    this.responseData_ = null;
-
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
@@ -144,7 +141,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Gets the root element.
    * @visibleForTesting
-   * @return {Element}
+   * @return {?Element}
    */
   getRootElement() {
     return this.rootEl_;
@@ -393,7 +390,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       const toRoundUp =
         ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
 
-      toArray(ties).forEach((percentageObj) => {
+      ties.forEach((percentageObj) => {
         finalPercentages[percentageObj.originalIndex] =
           Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
       });
@@ -402,7 +399,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       remainder -= toRoundUp ? ties.length : 0;
     }
 
-    toArray(preserveOriginal).forEach((percentageObj) => {
+    preserveOriginal.forEach((percentageObj) => {
       finalPercentages[percentageObj.originalIndex] = Math.floor(
         percentageObj.value
       );
@@ -453,7 +450,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   retrieveReactionData_() {
     return this.executeReactionRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(
-        /** @type {ReactionResponseType} */ (response)
+        /** @type {!ReactionResponseType} */ (response)
       );
     });
   }
