@@ -236,7 +236,7 @@ class AmpMowplayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
 
-    if(!data.mowplayer){
+    if (data.mowplayer === undefined) {
       return;
     }
 
