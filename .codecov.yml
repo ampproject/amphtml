@@ -5,9 +5,9 @@ codecov:
   ci:
     - 'travis.org'
   max_report_age: 24
-  require_ci_to_pass: yes
+  require_ci_to_pass: no
   notify:
-    wait_for_ci: yes
+    wait_for_ci: no
 
 # Pull request comments disabled because they were too noisy
 # See https://docs.codecov.io/docs/pull-request-comments
@@ -18,19 +18,19 @@ comment: false
 coverage:
   precision: 2
   round: down
-  range: '80...100'
+  range: '75...100'
   status:
     project:
       default:
         base: auto
         if_not_found: success
         only_pulls: true
-        target: 80%
+        target: 75%
         threshold: 1%
     patch:
       default:
         base: auto
         if_not_found: success
         only_pulls: true
-        target: 80%
+        target: 75%
         threshold: 1%
