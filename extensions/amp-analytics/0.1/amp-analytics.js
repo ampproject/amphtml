@@ -113,7 +113,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
+    return ANALYTICS_AD ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -128,6 +128,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    if (ANALYTICS_AD) {
+      return this.ensureInitialized_();
+    }
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -231,7 +234,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+        if (isExperimentOn(this.win, 'analytics-chunks') && !ANALYTICS_AD) {
           chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
         } else {
           loadConfigTask();
@@ -239,6 +242,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         return loadConfigDeferred.promise;
       })
       .then((config) => {
+        if (ANALYTICS_AD) {
+          return Promise.resolve();
+        }
         this.config_ = /** @type {!JsonObject} */ (config);
         // CookieWriter not enabled on proxy origin, do not chunk
         return new CookieWriter(this.win, this.element, this.config_).write();
@@ -262,13 +268,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   allowParentPostMessage_() {
-    if (this.isInabox_) {
+    if (ANALYTICS_AD) {
       return true;
+    } else {
+      if (this.isInFie_ == null) {
+        this.isInFie_ = isInFie(this.element);
+      }
+      return this.isInFie_;
     }
-    if (this.isInFie_ == null) {
-      this.isInFie_ = isInFie(this.element);
-    }
-    return this.isInFie_;
   }
 
   /**
@@ -573,6 +580,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   initializeLinker_() {
+    if (ANALYTICS_AD) {
+      return;
+    }
     const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(
       this.getAmpDoc(),

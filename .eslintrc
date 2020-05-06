@@ -26,6 +26,7 @@
     "MOVE_FIXED_LAYER": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
     "IS_ESM": "readonly",
+    "ANALYTICS_AD": "readonly",
     "AMP": "readonly",
     "context": "readonly",
     "global": "readonly"

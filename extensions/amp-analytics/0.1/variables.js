@@ -255,7 +255,7 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
-    const elementMacros = {
+    const elementMacros = ANALYTICS_AD ? {} : {
       'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),

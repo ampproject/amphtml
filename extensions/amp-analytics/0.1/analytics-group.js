@@ -17,7 +17,6 @@
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {dev, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -107,7 +106,7 @@ export class AnalyticsGroup {
     if (
       this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
       !isExperimentOn(this.win_, 'analytics-chunks') ||
-      getMode(this.win_).runtime == 'inabox'
+      ANALYTICS_AD
     ) {
       task();
     } else {

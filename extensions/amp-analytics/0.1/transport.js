@@ -150,6 +150,9 @@ export class Transport {
    * @param {!Element} element
    */
   maybeInitIframeTransport(element) {
+    if (ANALYTICS_AD) {
+      return;
+    }
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }

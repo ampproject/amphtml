@@ -66,7 +66,67 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *     klass: typeof ./events.EventTracker
  *   }>}
  */
-const TRACKER_TYPE = Object.freeze({
+const TRACKER_TYPE = ANALYTICS_AD ?
+Object.freeze({
+  [AnalyticsEventType.CLICK]: {
+    name: AnalyticsEventType.CLICK,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function (root) {
+      return new ClickEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.CUSTOM]: {
+    name: AnalyticsEventType.CUSTOM,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function (root) {
+      return new CustomEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.HIDDEN]: {
+    name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function (root) {
+      return new VisibilityTracker(root);
+    },
+  },
+  [AnalyticsEventType.INI_LOAD]: {
+    name: AnalyticsEventType.INI_LOAD,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function (root) {
+      return new IniLoadTracker(root);
+    },
+  },
+  [AnalyticsEventType.RENDER_START]: {
+    name: AnalyticsEventType.RENDER_START,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function (root) {
+      return new SignalTracker(root);
+    },
+  },
+  [AnalyticsEventType.TIMER]: {
+    name: AnalyticsEventType.TIMER,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
+    klass: function (root) {
+      return new TimerEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.VIDEO]: {
+    name: AnalyticsEventType.VIDEO,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function (root) {
+      return new VideoEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.VISIBLE]: {
+    name: AnalyticsEventType.VISIBLE,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function (root) {
+      return new VisibilityTracker(root);
+    },
+  },
+}) :
+Object.freeze({
   [AnalyticsEventType.CLICK]: {
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
