@@ -1392,10 +1392,7 @@ function getRectField(field, rect) {
   if (field == 'h') {
     return rect.height;
   }
-  if (rect[field] != null) {
-    return rect[field];
-  }
-  return 0;
+  return rect[field] ?? 0;
 }
 
 /**

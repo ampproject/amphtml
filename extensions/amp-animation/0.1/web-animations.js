@@ -1215,6 +1215,7 @@ class CssContextImpl {
           scaleFactorY: 1,
         };
       }
+      console.log(this.viewportParams_);
     }
     return this.viewportParams_;
   }
