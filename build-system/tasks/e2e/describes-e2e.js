@@ -515,7 +515,7 @@ class EndToEndFixture {
           // The viewer.html file will launch 7 test viewers, only one of which is the requested url.
           // TODO(gh/amphtml/28200): only load the one viewer.
           const viewer = window.parent.allViewers.find((v) =>
-            v.url.includes('document-height')
+            v.id.includes('container-dynamic')
           );
           return viewer.receivedMessages;
         });
