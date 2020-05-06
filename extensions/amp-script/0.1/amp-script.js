@@ -247,6 +247,13 @@ export class AmpScript extends AMP.BaseElement {
       config
     ).then((workerDom) => {
       this.workerDom_ = workerDom;
+      this.workerDom_.onerror = (errorEvent) => {
+        errorEvent.preventDefault();
+        user().error(
+          TAG,
+          `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+        );
+      };
     });
     return workerAndAuthorScripts;
   }
