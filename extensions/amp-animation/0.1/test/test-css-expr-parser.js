@@ -59,7 +59,7 @@ describes.sandboxed('CSS parse', {}, () => {
     }
     if (n instanceof ast.CssRectNode) {
       return (
-        `RECT<${n.dim_}` +
+        `RECT<${n.field_}` +
         `, ${n.selector_ ? '"' + n.selector_ + '"' : null}` +
         `, ${n.selectionMethod_}>`
       );
