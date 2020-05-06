@@ -23,9 +23,9 @@
     "sourceType": "module"
   },
   "globals": {
+    "MOVE_FIXED_LAYER": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
     "IS_ESM": "readonly",
-
     "AMP": "readonly",
     "context": "readonly",
     "global": "readonly"
@@ -233,6 +233,7 @@
       ],
       "rules": {
         "require-jsdoc": 0,
+        "local/always-call-chai-methods": 2,
         "local/no-bigint": 0,
         "local/no-dynamic-import": 0,
         "local/no-function-async": 0,

@@ -35,6 +35,7 @@ const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
+const {sanitize} = require('./sanitize');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
@@ -144,9 +145,6 @@ function compile(
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
-  }
-  if (argv.fortesting) {
-    define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
     const compilationOptions = {
@@ -268,7 +266,7 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      language_in: 'ECMASCRIPT_2018',
+      language_in: 'ECMASCRIPT_2020',
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
@@ -317,6 +315,8 @@ function compile(
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
+      compilerOptions.checks_only = true;
+
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
@@ -395,6 +395,7 @@ function compile(
           )
         )
         .pipe(postClosureBabel())
+        .pipe(sanitize())
         .pipe(writeSourcemaps())
         .pipe(gulp.dest('.'))
         .on('end', resolve);
