@@ -136,9 +136,9 @@ export function Slot(props) {
   // useEffect, because it must only be run once while the previous needs to
   // run every render.
   useMountEffect(() => {
+    const slot = dev().assertElement(ref.current);
+
     return () => {
-      const {current} = dev().assertElement(ref);
-      const slot = dev().assertElement(current);
       const affectedNodes = [];
       getAssignedElements(props, slot).forEach((node) => {
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));
