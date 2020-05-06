@@ -579,6 +579,12 @@ export class GoogleSubscriptionsPlatform {
         if (messageTextColor) {
           opts.messageTextColor = messageTextColor;
         }
+        const messageNumber = element.getAttribute(
+          'subscriptions-message-number'
+        );
+        if (messageNumber) {
+          opts.messageNumber = messageNumber;
+        }
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
       default:
