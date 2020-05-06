@@ -404,6 +404,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         this.responseData_[reactionValue]['totalCount']++;
         this.responseData_[reactionValue]['selectedByUser'] = true;
       }
+      console.log(this.responseData_);
 
       this.mutateElement(() => {
         if (this.responseData_) {

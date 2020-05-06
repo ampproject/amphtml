@@ -59,12 +59,17 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    */
   constructor(element) {
     super(element, ReactionType.POLL);
+
+    /** @private {boolean} */
+    this.fakeBackend_ = false;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
     createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+
+    this.fakeBackend_ = this.element.hasAttribute('fake-backend');
   }
 
   /** @override */
@@ -72,6 +77,25 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
     this.rootEl_ = buildBinaryPollTemplate(element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.fakeBackend_) {
+      this.responseData_ = [
+        {
+          'optionIndex': 0,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+        {
+          'optionIndex': 1,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+      ];
+    }
+    return super.layoutCallback();
   }
 
   /**
