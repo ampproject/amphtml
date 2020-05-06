@@ -456,12 +456,11 @@ export class AmpStoryPlayer {
    */
   getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
     const {location} = this.win_;
-    const url = parseUrlWithA(this.cachedA_, location.href);
 
     const params = dict({
       'amp_js_v': '0.1',
       'visibilityState': visibilityState,
-      'origin': url.origin,
+      'origin': location.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
