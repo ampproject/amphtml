@@ -7,13 +7,6 @@
     "expirationDateUTC": "2020-05-31",
     "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL"
   },
-  "experimentB": {
-    "name": "MOVE_FIXED_LAYER",
-    "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
-    "issue": "",
-    "expiration_date_utc": "2020-12-31",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
-  },
+  "experimentB": {},
   "experimentC": {}
 }
