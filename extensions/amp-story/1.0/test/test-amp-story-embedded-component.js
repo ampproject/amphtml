@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../src/service';
 import * as analyticsApi from '../../../../src/analytics';
 import {
   Action,
@@ -44,7 +43,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     win = env.win;
 
     const localizationService = new LocalizationService(win.document.body);
-    env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);

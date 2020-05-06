@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../src/service';
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {
@@ -120,7 +119,6 @@ describes.realWin(
       env.ampdoc.defaultView = env.win;
 
       const localizationService = new LocalizationService(win.document.body);
-      env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

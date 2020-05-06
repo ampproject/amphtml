@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../src/service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
@@ -51,7 +50,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     };
 
     const localizationService = new LocalizationService(win.document.body);
-    env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);

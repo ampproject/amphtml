@@ -544,11 +544,11 @@ export class Services {
   }
 
   /**
-   * @return {!./service/localization.LocalizationService}
    * @param {!Element} element
+   * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    return /** @type {!./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
       element,
       'localization'
     ));

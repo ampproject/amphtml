@@ -18,7 +18,6 @@
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */
 
-import * as Service from '../../../../src/service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
@@ -28,10 +27,7 @@ import {
   targetFitsWithinPage,
 } from '../animation-presets-utils';
 import {presets} from '../animation-presets';
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-full-bleed-animations',
@@ -64,7 +60,6 @@ describes.realWin(
       });
 
       const localizationService = new LocalizationService(win.document.body);
-      env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

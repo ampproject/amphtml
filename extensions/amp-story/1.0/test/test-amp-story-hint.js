@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Service from '../../../../src/service';
 import {AmpStoryHint} from '../amp-story-hint';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
@@ -32,7 +31,6 @@ describes.fakeWin('amp-story hint layer', {amp: true}, (env) => {
     win = env.win;
 
     const localizationService = new LocalizationService(win.document.body);
-    env.sandbox.stub(Service, 'registerServiceBuilderForDoc');
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
