@@ -189,21 +189,21 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /**
    * @override
    */
-  updateOptionPercentages_(responseData) {
-    if (!responseData) {
+  updateOptionPercentages_(optionsData) {
+    if (!optionsData) {
       return;
     }
 
-    const options = toArray(
+    const optionElements = toArray(
       this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
     );
 
-    const percentages = this.preprocessPercentages_(responseData);
+    const percentages = this.preprocessPercentages_(optionsData);
 
-    toArray(responseData).forEach((response, index) => {
+    toArray(optionsData).forEach((optionData, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      if (options[index]) {
-        options[index].querySelector(
+      if (optionElements[index]) {
+        optionElements[index].querySelector(
           '.i-amphtml-story-reaction-quiz-percentage-text'
         ).textContent = `${percentages[index]}%`;
       }

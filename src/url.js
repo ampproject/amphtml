@@ -658,11 +658,10 @@ export function tryDecodeUriComponent(component, opt_fallback) {
  * @return {string}
  */
 export function appendPathToUrl(url, path) {
-  const mainAndFragment = url.split('#', 2);
-  const mainAndQuery = mainAndFragment[0].split('?', 2);
-  let newUrl =
-    mainAndQuery[0].replace(/\/$/, '') + '/' + path.replace(/^\//, '');
-  newUrl += mainAndQuery[1] ? '?' + mainAndQuery[1] : '';
-  newUrl += mainAndFragment[1] ? '#' + mainAndFragment[1] : '';
-  return newUrl;
+  if (!a) {
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+  }
+  a.href = url;
+  a.pathname += path.replace(/^\//, '');
+  return a.href;
 }
