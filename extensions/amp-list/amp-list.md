@@ -220,6 +220,8 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
+[filter formats="websites, stories"]
+
 ### Initialization from amp-state
 
 In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
@@ -248,6 +250,8 @@ See below for a full example,
   </template>
 </amp-list>
 ```
+
+[/filter]<!-- formats="websites, stories" -->
 
 ## Attributes
 
