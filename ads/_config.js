@@ -633,7 +633,10 @@ const adConfig = jsonConfiguration({
       'https://resize.mantisadnetwork.com',
     ],
   },
-
+  'marfeel': {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: 'https://live.mrf.io',
+  },
   'mantis-recommend': {
     prefetch: 'https://assets.mantisadnetwork.com/recommend.min.js',
     preconnect: [
