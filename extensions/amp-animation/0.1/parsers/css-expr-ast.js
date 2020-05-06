@@ -1386,13 +1386,16 @@ function noCss() {
  * @return {number}
  */
 function getRectField(field, rect) {
-  return field == 'w'
-    ? rect.width
-    : field == 'h'
-    ? rect.height
-    : rect[field] != null
-    ? rect[field]
-    : 0;
+  if (field == 'w') {
+    return rect.width;
+  }
+  if (field == 'h') {
+    return rect.height;
+  }
+  if (rect[field] != null) {
+    return rect[field];
+  }
+  return 0;
 }
 
 /**
