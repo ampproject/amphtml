@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
 import {omit} from '../../../src/utils/object';
 import {px, setStyle} from '../../../src/style';
-import {useEffect, useRef, useState} from '../../../src/preact';
+import {useCallback, useEffect, useRef, useState} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
 
@@ -29,7 +29,6 @@ const {LINE_HEIGHT_EM_} = styles;
 export function FitText(props) {
   const {
     'children': children,
-    'measurerChildren': measurerChildren = children,
     'minFontSize': minFontSize = 6,
     'maxFontSize': maxFontSize = 72,
     'width': width = props['style']['width'] || '100%',
@@ -46,15 +45,15 @@ export function FitText(props) {
   const measurerRef = useRef(null);
   const [wrapperStyle, setWrapperStyle] = useState(/** @type {Object} */ ({}));
 
-  useEffect(() => {
-    const node = contentRef.current;
-    const observer = new ResizeObserver((entries) => {
-      const last = entries[entries.length - 1];
-      const {height: maxHeight, width: maxWidth} = last['contentRect'];
+  const resizer = useCallback(() => {
+    return (maxHeight, maxWidth) => {
+      if (!measurerRef.current) {
+        return {};
+      }
       const fontSize = calculateFontSize(
         measurerRef.current,
-        maxHeight,
-        maxWidth,
+        Number(maxHeight),
+        Number(maxWidth),
         minFontSize,
         maxFontSize
       );
@@ -63,13 +62,28 @@ export function FitText(props) {
         maxHeight,
         fontSize
       );
-      setWrapperStyle({...overflownStyle, fontSize: px(fontSize)});
+      return {...overflownStyle, fontSize: px(fontSize)};
+    };
+  }, [maxFontSize, minFontSize]);
+
+  // Font size should readjust when container resizes.
+  useEffect(() => {
+    const node = contentRef.current;
+    const observer = new ResizeObserver((entries) => {
+      const last = entries[entries.length - 1];
+      const {height: maxHeight, width: maxWidth} = last['contentRect'];
+      setWrapperStyle(resizer()(maxHeight, maxWidth));
     });
     if (node) {
       observer.observe(node);
     }
     return () => observer.unobserve(node);
-  }, [maxFontSize, minFontSize]);
+  }, [resizer]);
+
+  // Font size should readjust when content changes.
+  useEffect(() => {
+    resizer()(height, width);
+  }, [children, resizer, height, width]);
 
   return (
     <div {...rest}>
@@ -83,6 +97,7 @@ export function FitText(props) {
         }}
       >
         <div
+          ref={measurerRef}
           style={{
             ...styles.fitTextContentWrapper,
             ...wrapperStyle,
@@ -90,9 +105,6 @@ export function FitText(props) {
         >
           {children}
         </div>
-      </div>
-      <div ref={measurerRef} style={{...styles.measurer, maxWidth: px(width)}}>
-        {measurerChildren}
       </div>
     </div>
   );
@@ -137,7 +149,7 @@ function calculateFontSize(
  * @return {Object}
  */
 function getOverflowStyle(measurer, maxHeight, fontSize) {
-  const overflown = measurer./*OK*/ offsetHeight > maxHeight;
+  const overflown = measurer./*OK*/ scrollHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
   return overflown

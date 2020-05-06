@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
 import {FitText} from './fit-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
@@ -29,13 +28,15 @@ const TAG = 'amp-fit-text';
 class AmpFitText extends PreactBaseElement {
   /** @override */
   init() {
-    const {innerHTML} = this.element;
-
     const attributeOb = new MutationObserver(() => {
       this.mutateProps(
         dict({
-          'maxFontSize': this.element.getAttribute('max-font-size'),
-          'minFontSize': this.element.getAttribute('min-font-size'),
+          'maxFontSize': getLengthNumeral(
+            this.element.getAttribute('max-font-size')
+          ),
+          'minFontSize': getLengthNumeral(
+            this.element.getAttribute('min-font-size')
+          ),
         })
       );
     });
@@ -44,14 +45,7 @@ class AmpFitText extends PreactBaseElement {
     });
 
     const childOb = new MutationObserver(() => {
-      const {innerHTML} = this.element;
-      this.mutateProps(
-        dict({
-          'measurerChildren': (
-            <div dangerouslySetInnerHTML={{__html: `${innerHTML}`}}></div>
-          ),
-        })
-      );
+      this.mutateProps(dict({}));
     });
     childOb.observe(this.element, {childList: true});
 
@@ -61,9 +55,6 @@ class AmpFitText extends PreactBaseElement {
       ),
       'maxFontSize': getLengthNumeral(
         this.element.getAttribute('max-font-size')
-      ),
-      'measurerChildren': (
-        <div dangerouslySetInnerHTML={{__html: `${innerHTML}`}}></div>
       ),
     });
   }
