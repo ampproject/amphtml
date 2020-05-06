@@ -42,7 +42,7 @@ export function createSlot(element, name, props) {
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());
-  const ref = useRef(null);
+  const ref = useRef(/** @type {?Element} */ (null));
   const slotProps = {...props, ref};
   useEffect(() => {
     const {current} = dev().assertElement(ref);
