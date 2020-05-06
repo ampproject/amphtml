@@ -109,6 +109,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-reaction-quiz
+                fake-backend
                 id="city-light-disconnected"
                 chip-corner="sharp">
               <h1>What is the best city ever?</h1>
@@ -130,9 +131,9 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="http://localhost:3000/reactions"
+                fake-backend
                 id="movie-light-connected"
-                chip-corner="sharp">
+                style="--reaction-answer-choice-background: #fff!important; --reaction-main-color: #005af0; --reaction-main-color-transparent: rgba(0,90,240,0.09);">
                 <option>Doctor Strange</option>
                 <option>Black Panther</option>
               </amp-story-reaction-poll-binary>
@@ -157,6 +158,73 @@
                 theme="dark">
                 <option>Doctor Strange</option>
                 <option>Black Panther</option>
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                fake-backend
+                id="movie-light-connected"
+                style="--reaction-main-color: #FFC700; --reaction-main-color-transparent: rgba(255, 199, 0, 0.2);">
+                <option>🧛</option>
+                <option>🐆</option>
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                fake-backend
+                id="movie-light-connected"
+                style="--reaction-main-color: rgb(0, 0, 0); --reaction-main-color-transparent: rgba(154, 160, 166, 0.2);">
+                <option>Doctor</option>
+                <option>Panther</option>
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                fake-backend
+                id="movie-light-connected"
+                theme="dark"
+                style="--reaction-theme-background: #005AF0 !important;">
+                <option>Doctor</option>
+                <option>Panther</option>
               </amp-story-reaction-poll-binary>
             </div>
           </amp-story-grid-layer>

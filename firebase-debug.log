@@ -1,0 +1,37 @@
+[debug] [2020-05-06T15:45:26.417Z] ----------------------------------------------------------------------
+[debug] [2020-05-06T15:45:26.419Z] Command:       /usr/local/Cellar/node/13.12.0/bin/node /usr/local/bin/firebase deploy
+[debug] [2020-05-06T15:45:26.419Z] CLI Version:   8.1.1
+[debug] [2020-05-06T15:45:26.419Z] Platform:      darwin
+[debug] [2020-05-06T15:45:26.419Z] Node Version:  v13.12.0
+[debug] [2020-05-06T15:45:26.420Z] Time:          Wed May 06 2020 11:45:26 GMT-0400 (Eastern Daylight Time)
+[debug] [2020-05-06T15:45:26.420Z] ----------------------------------------------------------------------
+[debug] [2020-05-06T15:45:26.420Z] 
+[debug] [2020-05-06T15:45:26.432Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-05-06T15:45:26.433Z] > authorizing via signed-in user
+[debug] [2020-05-06T15:45:26.433Z] [iam] checking project amp-story-playbutton for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2020-05-06T15:45:26.435Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2020-05-06T15:45:26.435Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2020-05-06T15:45:26.545Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Wed, 06 May 2020 15:45:26 GMT","server":"scaffolding on HTTPServer2","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-27=\":443\"; ma=2592000,h3-25=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2020-05-06T15:45:26.555Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/amp-story-playbutton:testIamPermissions  
+ {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2020-05-06T15:45:26.733Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=UTF-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Wed, 06 May 2020 15:45:26 GMT","server":"ESF","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","server-timing":"gfet4t7; dur=147","alt-svc":"h3-27=\":443\"; ma=2592000,h3-25=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2020-05-06T15:45:26.734Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/amp-story-playbutton  
+ 
+[debug] [2020-05-06T15:45:26.870Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=UTF-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Wed, 06 May 2020 15:45:26 GMT","server":"ESF","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[info] 
+[info] === Deploying to 'amp-story-playbutton'...
+[info] 
+[info] i  deploying hosting
+[debug] [2020-05-06T15:45:26.872Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/amp-story-playbutton/versions  
+ {"config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2020-05-06T15:45:27.823Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=UTF-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Wed, 06 May 2020 15:45:27 GMT","server":"ESF","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-27=\":443\"; ma=2592000,h3-25=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[info] i  hosting[amp-story-playbutton]: beginning deploy...
+[info] i  hosting[amp-story-playbutton]: found 1340 files in firebase
+[debug] [2020-05-06T15:45:34.115Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/amp-story-playbutton/versions/c40fd38b2b33dce3:populateFiles  
+ <request body omitted>
+[debug] [2020-05-06T15:45:34.858Z] [hosting] hash cache [ZmlyZWJhc2U] stored for 1340 files
+[debug] [2020-05-06T15:45:34.860Z] [hosting][hash queue][FINAL] {"max":3846,"min":9,"avg":244.3716417910444,"active":0,"complete":1340,"success":1340,"errored":0,"retried":0,"total":1340,"elapsed":6894}
+[debug] [2020-05-06T15:45:34.860Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/amp-story-playbutton/versions/c40fd38b2b33dce3:populateFiles  
+ <request body omitted>
+[debug] [2020-05-06T15:45:36.442Z] <<< HTTP RESPONSE 200 {"content-type":"application/json; charset=UTF-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","date":"Wed, 06 May 2020 15:45:36 GMT","server":"ESF","cache-control":"private","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3-27=\":443\"; ma=2592000,h3-25=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q049=\":443\"; ma=2592000,h3-Q048=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}

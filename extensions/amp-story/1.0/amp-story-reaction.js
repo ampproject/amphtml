@@ -160,6 +160,31 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.adjustGridLayer_();
     this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+
+    if (this.element.hasAttribute('fake-backend')) {
+      this.responseData_ = [
+        {
+          'optionIndex': 0,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+        {
+          'optionIndex': 1,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+        {
+          'optionIndex': 2,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+        {
+          'optionIndex': 3,
+          'totalCount': Math.random() * 100,
+          'selectedByUser': false,
+        },
+      ].slice(0, this.getOptionElements().length);
+    }
   }
 
   /**
@@ -404,7 +429,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
         this.responseData_[reactionValue]['totalCount']++;
         this.responseData_[reactionValue]['selectedByUser'] = true;
       }
-      console.log(this.responseData_);
 
       this.mutateElement(() => {
         if (this.responseData_) {
