@@ -458,7 +458,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         webAnimationService.createBuilder.withArgs(
           env.sandbox.match({
             scope: page,
-            scopeAsViewport: true,
+            scaleByScope: true,
           })
         )
       ).to.have.been.calledOnce;
