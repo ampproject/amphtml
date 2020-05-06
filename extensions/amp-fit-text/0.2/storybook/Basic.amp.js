@@ -25,7 +25,7 @@ storiesOf('amp-fit-text', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-fit-text', version: 0.1}]})
+  .addParameters({extensions: [{name: 'amp-fit-text', version: 0.2}]})
   .add('Scale up to cover', () => {
     return (
       <amp-fit-text
