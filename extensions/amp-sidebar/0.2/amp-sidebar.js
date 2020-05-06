@@ -138,6 +138,11 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     // TODO(#25022): remove this assert when cleaning up experiment post launch.
     userAssert(

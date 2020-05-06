@@ -86,6 +86,11 @@ class AmpInlineGallery extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.CONTAINER;
   }

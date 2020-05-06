@@ -83,6 +83,11 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
