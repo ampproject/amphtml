@@ -662,6 +662,6 @@ export function appendPathToUrl(url, path) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
   }
   a.href = url;
-  a.pathname += path.replace(/^\//, '');
+  a.pathname = a.pathname.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
   return a.href;
 }

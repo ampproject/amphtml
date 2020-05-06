@@ -442,7 +442,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   retrieveReactionData_() {
     return this.executeReactionRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(
-        /** @type {!ReactionResponseType} */ (response)
+        /** @type {ReactionResponseType} */ (response)
       );
     });
   }
@@ -505,9 +505,13 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    if (response && 'options' in response) {
+    if (response && response['óptions']) {
       devAssert(
         response && 'options' in response,
+        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+      );
+      dev().error(
+        TAG,
         `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
       );
       return;

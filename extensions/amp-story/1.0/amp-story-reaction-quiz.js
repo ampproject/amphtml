@@ -200,7 +200,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     const percentages = this.preprocessPercentages_(optionsData);
 
-    toArray(optionsData).forEach((optionData, index) => {
+    optionsData.forEach((optionData, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       if (optionElements[index]) {
         optionElements[index].querySelector(
