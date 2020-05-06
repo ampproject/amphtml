@@ -1390,7 +1390,9 @@ function getRectField(field, rect) {
     ? rect.width
     : field == 'h'
     ? rect.height
-    : rect[field] ?? 0;
+    : rect[field] != null
+    ? rect[field]
+    : 0;
 }
 
 /**
