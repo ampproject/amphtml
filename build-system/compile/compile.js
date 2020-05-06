@@ -266,7 +266,7 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      language_in: 'ECMASCRIPT_2018',
+      language_in: 'ECMASCRIPT_2020',
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
