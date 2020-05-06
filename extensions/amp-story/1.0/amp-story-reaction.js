@@ -450,7 +450,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   retrieveReactionData_() {
     return this.executeReactionRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(
-        /** @type {!ReactionResponseType} */ (response)
+        /** @type {ReactionResponseType} */ (response)
       );
     });
   }
