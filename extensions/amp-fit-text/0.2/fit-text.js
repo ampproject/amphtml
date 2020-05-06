@@ -77,7 +77,7 @@ export function FitText(props) {
     if (node) {
       observer.observe(node);
     }
-    return () => observer.unobserve(node);
+    return () => observer.disconnect();
   }, [resizer]);
 
   // Font size should readjust when content changes.
