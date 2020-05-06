@@ -29,6 +29,7 @@ const {LINE_HEIGHT_EM_} = styles;
 export function FitText(props) {
   const {
     'children': children,
+    'measurerChildren': measurerChildren = children,
     'minFontSize': minFontSize = 6,
     'maxFontSize': maxFontSize = 72,
     'width': width = props['style']['width'] || '100%',
@@ -90,14 +91,8 @@ export function FitText(props) {
           {children}
         </div>
       </div>
-      <div
-        ref={measurerRef}
-        style={{
-          ...styles.measurer,
-          maxWidth: px(width),
-        }}
-      >
-        {children}
+      <div ref={measurerRef} style={{...styles.measurer, maxWidth: px(width)}}>
+        {measurerChildren}
       </div>
     </div>
   );

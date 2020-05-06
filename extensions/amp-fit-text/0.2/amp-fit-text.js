@@ -30,16 +30,39 @@ class AmpFitText extends PreactBaseElement {
   /** @override */
   init() {
     const {innerHTML} = this.element;
-    this.element.innerHTML = '';
+
+    const attributeOb = new MutationObserver(() => {
+      this.mutateProps(
+        dict({
+          'maxFontSize': this.element.getAttribute('max-font-size'),
+          'minFontSize': this.element.getAttribute('min-font-size'),
+        })
+      );
+    });
+    attributeOb.observe(this.element, {
+      attributeFilter: ['min-font-size', 'max-font-size'],
+    });
+
+    const childOb = new MutationObserver(() => {
+      const {innerHTML} = this.element;
+      this.mutateProps(
+        dict({
+          'measurerChildren': (
+            <div dangerouslySetInnerHTML={{__html: `${innerHTML}`}}></div>
+          ),
+        })
+      );
+    });
+    childOb.observe(this.element, {childList: true});
 
     return dict({
       'minFontSize': getLengthNumeral(
         this.element.getAttribute('min-font-size')
       ),
       'maxFontSize': getLengthNumeral(
-        this.element.getAttribute('min-font-size')
+        this.element.getAttribute('max-font-size')
       ),
-      'children': (
+      'measurerChildren': (
         <div dangerouslySetInnerHTML={{__html: `${innerHTML}`}}></div>
       ),
     });
@@ -57,6 +80,9 @@ class AmpFitText extends PreactBaseElement {
 
 /** @override */
 AmpFitText['Component'] = FitText;
+
+/** @override */
+AmpFitText['passthrough'] = true;
 
 /** @override */
 AmpFitText['props'] = {
