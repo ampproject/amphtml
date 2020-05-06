@@ -88,7 +88,7 @@ export class CssContext {
 
   /**
    * Returns the current element's rectangle.
-   * @return {!../../../src/layout-rect.LayoutRect}
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
   getCurrentElementRect() {}
 
@@ -96,7 +96,7 @@ export class CssContext {
    * Returns the specified element's rectangle.
    * @param {string} unusedSelector
    * @param {?string} unusedSelectionMethod
-   * @return {!../../../src/layout-rect.LayoutRect}
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
   getElementRect(unusedSelector, unusedSelectionMethod) {}
 
@@ -1382,7 +1382,7 @@ function noCss() {
 
 /**
  * @param {?string} field
- * @param {!../../../src/layout-rect.LayoutRect} rect
+ * @param {!../../../../src/layout-rect.LayoutRectDef} rect
  * @return {number}
  */
 function getRectField(field, rect) {
