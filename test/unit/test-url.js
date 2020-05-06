@@ -1132,7 +1132,7 @@ describe('getProxyServingType', () => {
 
     it('should add path before fragment', () => {
       expect(
-        appendPathToUrl('https://cdn.ampproject.org#hello', '/foo')
+        appendPathToUrl('https://cdn.ampproject.org/#hello', '/foo')
       ).to.be.equal('https://cdn.ampproject.org/foo#hello');
     });
 
