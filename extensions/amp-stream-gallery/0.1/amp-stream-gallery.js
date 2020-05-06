@@ -269,6 +269,11 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     userAssert(
       isExperimentOn(this.win, 'amp-stream-gallery'),
