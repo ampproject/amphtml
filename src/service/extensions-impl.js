@@ -243,7 +243,7 @@ export class Extensions {
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
-    const els = this.getExtensionScript_(
+    const els = this.getExtensionScripts_(
       extensionId,
       /* includeInserted */ false
     );
@@ -275,7 +275,7 @@ export class Extensions {
    * @return {!Array<!Element>}
    * @private
    */
-  getExtensionScript_(extensionId, includeInserted = true) {
+  getExtensionScripts_(extensionId, includeInserted = true) {
     // Always ignore <script> elements that have a mismatched RTV.
     const modifier =
       ':not([i-amphtml-loaded-new-version])' +
@@ -552,7 +552,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptsInHead = this.getExtensionScript_(extensionId);
+      const scriptsInHead = this.getExtensionScripts_(extensionId);
       holder.scriptPresent = scriptsInHead.length > 0;
     }
     return !holder.scriptPresent;
