@@ -1,0 +1,373 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
+const argv = require('minimist')(process.argv.slice(2));
+const experimentsConfig = require('../../global-configs/experiments-config.json');
+const fetch = require('node-fetch');
+const fs = require('fs-extra');
+const log = require('fancy-log');
+const path = require('path');
+const tar = require('tar');
+const {cyan, green, yellow} = require('ansi-colors');
+const {execOrDie} = require('../../common/exec');
+const {MINIFIED_TARGETS} = require('../helpers');
+const {VERSION} = require('../../compile/internal-version');
+
+// Deep map from [environment][flavorType] to RTV prefix.
+const EXPERIMENTAL_RTV_PREFIXES = {
+  AMP: {
+    experimentA: '10',
+    experimentB: '11',
+    experimentC: '12',
+  },
+  INABOX: {
+    experimentA: '20',
+    experimentB: '22',
+    experimentC: '24',
+  },
+};
+
+// Directory containing multiple static files to dist/.
+const STATIC_FILES_DIR = path.resolve(__dirname, 'static');
+
+// List of individual files to copy directly from the Git workspace to dist/.
+const STATIC_FILE_PATHS = ['build-system/global-configs/caches.json'];
+
+// List of individual files to copy from post-build files, key-values as the
+// from-to of the copy operations.
+const POST_BUILD_MOVES = {
+  'dist.tools/experiments/experiments.cdn.html': 'dist/experiments.html',
+  'dist.tools/experiments/experiments.js': 'dist/v0/experiments.js',
+  'dist.tools/experiments/experiments.js.map': 'dist/v0/experiments.js.map',
+};
+
+// List of directories to keep in the temp directory from each flavor's build.
+const DIST_DIRS = ['dist', 'dist.3p', 'dist.tools'];
+
+// Mapping from a channel's RTV prefix, to an object with channel configuration
+// data based on the spec/amp-framework-hosting.md document. The fields are:
+// - type: machine name of the channel (Some of these are the same as their name
+//   in spec/amp-framework-hosting.md, but some are different. Those that have a
+//   different machine name are marked in a comment.)
+// - configBase: name of the config JSON file to prepend as the AMP_CONFIG to
+//   all the entry files in this channel. Either `canary` or `prod` (these files
+//   are located in build-system/global-configs/${configBase}-config.json).
+const CHANNEL_CONFIGS = {
+  '00': {type: 'experimental', configBase: 'canary'},
+  '01': {type: 'production', configBase: 'prod'}, // Spec name: 'stable'
+  '02': {type: 'control', configBase: 'prod'},
+  '03': {type: 'rc', configBase: 'prod'}, // Spec name: 'beta'
+  '04': {type: 'nightly', configBase: 'prod'},
+  '05': {type: 'nightly-control', configBase: 'prod'},
+  '10': {type: 'experimentA', configBase: 'prod'},
+  '11': {type: 'experimentB', configBase: 'prod'},
+  '12': {type: 'experimentC', configBase: 'prod'},
+  '20': {type: 'experimentA-control', configBase: 'prod'}, // Spec name: 'inabox-experimentA-control'
+  '21': {type: 'experimentA', configBase: 'prod'}, // Spec name: 'inabox-experimentA'
+  '22': {type: 'experimentB-control', configBase: 'prod'}, // Spec name: 'inabox-experimentB-control'
+  '23': {type: 'experimentB', configBase: 'prod'}, // Spec name: 'inabox-experimentB'
+  '24': {type: 'experimentC-control', configBase: 'prod'}, // Spec name: 'inabox-experimentC-control'
+  '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
+};
+
+// Mapping of entry file names to a dictionary of AMP_CONFIG additions.
+const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
+  {file: `${minifiedTarget}.js`, config: {}},
+  {file: `${minifiedTarget}.mjs`, config: {esm: 1}},
+]);
+
+function logSeparator_() {
+  log('---\n\n');
+}
+
+async function prepareEnvironment_(outputDir, outputTempDir) {
+  await fs.emptyDir(outputDir);
+  await fs.emptyDir(outputTempDir);
+  logSeparator_();
+
+  execOrDie('gulp update-packages');
+  logSeparator_();
+}
+
+function discoverDistFlavors_() {
+  const distFlavors = [
+    {
+      flavorType: 'base',
+      name: 'base',
+      rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
+      // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
+      command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
+      environment: 'AMP',
+    },
+    ...Object.entries(experimentsConfig)
+      .filter(([, experimentConfig]) => experimentConfig.command)
+      .map(([flavorType, experimentConfig]) => ({
+        flavorType,
+        rtvPrefixes: [
+          EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
+        ],
+        ...experimentConfig,
+      })),
+  ];
+
+  log(
+    'The following',
+    cyan('gulp dist'),
+    'commands will be executed to compile each',
+    `${green('flavor')}:`
+  );
+  distFlavors.forEach(({flavorType, name, command}) => {
+    log('-', `(${green(flavorType)}, ${green(name)})`, cyan(command));
+  });
+
+  logSeparator_();
+
+  return distFlavors;
+}
+
+async function compileDistFlavors_(distFlavors, outputTempDir) {
+  for (const {flavorType, command} of distFlavors) {
+    log('Compiling flavor', `${green(flavorType)}:`);
+
+    execOrDie('gulp clean');
+    execOrDie(command);
+
+    const flavorTempDistDir = path.join(outputTempDir, flavorType);
+    log('Moving build artifacts to', `${cyan(flavorTempDistDir)}...`);
+    await fs.ensureDir(flavorTempDistDir);
+
+    await Promise.all(
+      DIST_DIRS.map((distDir) =>
+        fs.move(distDir, path.join(flavorTempDistDir, distDir))
+      )
+    );
+
+    log('Copying static files...');
+    await Promise.all([
+      // Directory-to-directory copy from the ./static sub-directory.
+      fs.copy(STATIC_FILES_DIR, path.join(flavorTempDistDir, 'dist')),
+      // Individual files to copy from the Git repository.
+      ...STATIC_FILE_PATHS.map((staticFilePath) =>
+        fs.copy(
+          staticFilePath,
+          path.join(flavorTempDistDir, 'dist', path.basename(staticFilePath))
+        )
+      ),
+      // Individual files to copy from the resulting build artifacts.
+      ...Object.entries(POST_BUILD_MOVES).map(([from, to]) =>
+        fs.copy(
+          path.join(flavorTempDistDir, from),
+          path.join(flavorTempDistDir, to)
+        )
+      ),
+    ]);
+
+    logSeparator_();
+  }
+}
+
+async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
+  for (const flavorType of distFlavorTypes) {
+    await fs.ensureDir(path.join(outputTempDir, flavorType, 'dist/sw'));
+  }
+
+  const ampSwBaseTempDir = path.join(outputTempDir, 'base/dist/sw');
+
+  const ampSwTarballUrl = await fetch(
+    'https://registry.npmjs.org/@ampproject/amp-sw'
+  )
+    .then((res) => res.json())
+    .then((json) => {
+      const {latest} = json['dist-tags'];
+      return json.versions[latest].dist.tarball;
+    });
+  await fetch(ampSwTarballUrl).then(
+    (res) =>
+      new Promise((resolve) => {
+        const tarWritableStream = tar.extract({
+          cwd: ampSwBaseTempDir,
+          filter: (path) => path.startsWith('package/dist'),
+          strip: 2, // to strip "package/dist/".
+        });
+        res.body.pipe(tarWritableStream);
+        tarWritableStream.on('end', resolve);
+      })
+  );
+
+  await Promise.all(
+    distFlavorTypes
+      .filter((flavorType) => flavorType != 'base')
+      .map((flavorType) =>
+        fs.copy(
+          ampSwBaseTempDir,
+          path.join(outputTempDir, flavorType, 'dist/sw')
+        )
+      )
+  );
+
+  logSeparator_();
+}
+
+async function populateOrgCdn_(distFlavors, outputTempDir, outputDir) {
+  for (const {flavorType, rtvPrefixes} of distFlavors) {
+    await Promise.all(
+      rtvPrefixes.map((rtvPrefix) => {
+        const rtvNumber = `${rtvPrefix}${VERSION}`;
+        const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
+        return fs
+          .ensureDir(rtvPath)
+          .then(() =>
+            fs.copy(path.join(outputTempDir, flavorType, 'dist'), rtvPath)
+          );
+      })
+    );
+  }
+
+  logSeparator_();
+}
+
+async function prependConfig_(distFlavors, outputDir) {
+  const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
+    ([rtvPrefix]) => {
+      const rtvNumber = `${rtvPrefix}${VERSION}`;
+      const rtvPath = path.join(outputDir, 'org-cdn', rtvNumber);
+      return fs.pathExistsSync(path.join(rtvPath));
+    }
+  );
+
+  const allPrependPromises = [];
+  for (const [rtvPrefix, channelConfig] of activeChannels) {
+    const rtvNumber = `${rtvPrefix}${VERSION}`;
+    const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
+    const channelPartialConfig = {
+      v: rtvNumber,
+      type: channelConfig.type,
+      ...require(`../../global-configs/${channelConfig.configBase}-config.json`),
+    };
+
+    allPrependPromises.push(
+      ...TARGETS_TO_CONFIG.map((target) => {
+        const targetPath = path.join(rtvPath, target.file);
+        const channelConfig = JSON.stringify({
+          ...channelPartialConfig,
+          ...target.config,
+        });
+
+        fs.readFile(targetPath, 'utf-8').then((contents) =>
+          fs.writeFile(
+            targetPath,
+            `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
+          )
+        );
+      })
+    );
+  }
+
+  logSeparator_();
+}
+
+async function populateNetWildcard_(outputTempDir, outputDir) {
+  const netWildcardDir = path.join(outputDir, 'net-wildcard', VERSION);
+  await fs.ensureDir(netWildcardDir);
+  await fs.copy(
+    path.join(outputTempDir, 'base/dist.3p', VERSION),
+    netWildcardDir
+  );
+
+  logSeparator_();
+}
+
+async function cleanup_(outputTempDir) {
+  await fs.rmdir(outputTempDir, {recursive: true});
+
+  logSeparator_();
+}
+
+async function release() {
+  // TODO(#28168, danielrozenberg): remove when this is no longer
+  log.warn(Array(55).fill('*').join(''));
+  log.warn(
+    '* Work on the',
+    cyan('gulp release'),
+    'task is still',
+    `${yellow('in progress')}!`,
+    '*'
+  );
+  log.warn(Array(55).fill('*').join(''));
+  logSeparator_();
+
+  const outputDir = path.resolve(argv.output_dir || './release');
+  const outputTempDir = path.join(outputDir, 'tmp');
+
+  log('Preparing environment for release build in', `${cyan(outputDir)}...`);
+  await prepareEnvironment_(outputDir, outputTempDir);
+
+  log('Discovering release', `${green('flavors')}...`);
+  const distFlavors = await discoverDistFlavors_();
+  const distFlavorTypes = distFlavors.map(({flavorType}) => flavorType);
+
+  log('Compiling all', `${green('flavors')}...`);
+  await compileDistFlavors_(distFlavors, outputTempDir);
+
+  // TODO(#28168, erwinmombay): this is a temporary hack, and should be removed
+  // once the '--module --nomodule' flags exist.
+  log(
+    'Copying any files missing in',
+    `non-${green('base')}`,
+    'flavors from',
+    cyan('base/dist')
+  );
+  await Promise.all(
+    distFlavorTypes
+      .filter((flavorType) => flavorType != 'base')
+      .map((flavorType) =>
+        fs.copy(
+          path.join(outputTempDir, 'base/dist'),
+          path.join(outputTempDir, flavorType, 'dist'),
+          {overwrite: false}
+        )
+      )
+  );
+
+  log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
+  await fetchAmpSw_(distFlavorTypes, outputTempDir);
+
+  log('Copying from temporary directory to', cyan('org-cdn'));
+  await populateOrgCdn_(distFlavors, outputTempDir, outputDir);
+
+  log('Prepending config to entry files...');
+  await prependConfig_(distFlavors, outputDir);
+
+  log('Copying from temporary directory to', cyan('net-wildcard'));
+  await populateNetWildcard_(outputTempDir, outputDir);
+
+  log('Cleaning up temp dir...');
+  await cleanup_(outputTempDir);
+
+  log('Release build is done!');
+  log('  See:', cyan(outputDir));
+}
+
+module.exports = {
+  release,
+};
+
+release.description = 'Generates a release build';
+release.flags = {
+  'output_dir':
+    '  Directory path to emplace release files (defaults to "./release")',
+};
