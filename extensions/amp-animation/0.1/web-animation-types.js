@@ -152,7 +152,18 @@ export let WebAnimationSubtargetDef;
 /**
  * @typedef {{
  *   scope: (!Element|undefined),
+ *   scaleByScope: (boolean|undefined),
  * }}
+ *
+ * - scope delimits selectors.
+ * - scaleByScope determines that CSS resolution should treat the scope
+ *   element as a virtual viewport, so that:
+ *   1. vw/vh units are relative to the scope's size
+ *   2. element's x() and y() coords are relative to the scope's top-left corner
+ *   3. element's size and position (width()/height()/x()/y()) are inversely
+ *      relative to the scope's transformed scale, e.g. if the scope is scaled
+ *      to 90%, the element's dimensions will be returned as if it was unscaled
+ *      to 100%.
  */
 export let WebAnimationBuilderOptionsDef;
 
