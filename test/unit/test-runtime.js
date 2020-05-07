@@ -1086,7 +1086,10 @@ describes.realWin(
 
         const script = win.document.createElement('script');
         script.setAttribute('custom-element', 'amp-ext');
-        script.setAttribute('src', '');
+        script.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+        );
         importDoc.head.appendChild(script);
 
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
@@ -1218,11 +1221,20 @@ describes.realWin(
         ).to.contain('.keyframes');
       });
 
-      it('should ignore runtime extension', () => {
+      it('should ignore runtime', () => {
         extensionsMock.expects('preloadExtension').never();
 
         const scriptEl = win.document.createElement('script');
         scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.js');
+        importDoc.head.appendChild(scriptEl);
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      });
+
+      it('should ignore mjs runtime', () => {
+        extensionsMock.expects('preloadExtension').never();
+
+        const scriptEl = win.document.createElement('script');
+        scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.mjs');
         importDoc.head.appendChild(scriptEl);
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       });
@@ -1261,6 +1273,41 @@ describes.realWin(
         scriptEl.setAttribute('custom-element', 'amp-ext1');
         scriptEl.setAttribute('src', '');
         importDoc.head.appendChild(scriptEl);
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+      });
+
+      it('should import module/nomodule extension element', () => {
+        extensionsMock
+          .expects('preloadExtension')
+          .withExactArgs('amp-ext1', '0.1')
+          .returns(
+            Promise.resolve({
+              elements: {
+                'amp-ext1': function () {},
+              },
+            })
+          )
+          .once();
+
+        const mod = win.document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-ext1');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        const nomod = win.document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-ext1');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+
+        importDoc.head.appendChild(mod);
+        importDoc.head.appendChild(nomod);
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
           .to.not.exist;
