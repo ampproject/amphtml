@@ -717,6 +717,7 @@ export class AnimationManager {
       .then((webAnimationService) =>
         webAnimationService.createBuilder({
           scope: this.page_,
+          scaleByScope: true,
         })
       );
   }
