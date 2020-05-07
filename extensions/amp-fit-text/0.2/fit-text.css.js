@@ -26,21 +26,10 @@ export const fitTextContent = {
 
 /* Legacy comment: We have to use the old-style flex box with line clamping. It will only
     work in WebKit, but unfortunately there's no alternative. */
-export const fitTextContentOverflown = {
+export const fitTextContentWrapper = {
+  lineHeight: `${LINE_HEIGHT_EM_}em`,
   'display': '-webkit-box',
   '-webkit-box-orient': 'vertical',
   'overflow': 'hidden',
   'textOverflow': 'ellipsis',
-};
-
-export const fitTextContentWrapper = {lineHeight: `${LINE_HEIGHT_EM_}em`};
-
-/* Note that "measurer" cannot be styled with "bottom:0" */
-export const measurer = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  zIndex: 1,
-  visibility: 'hidden',
-  lineHeight: `${LINE_HEIGHT_EM_}em`,
 };

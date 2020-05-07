@@ -47,7 +47,7 @@ export function FitText(props) {
   const resize = useCallback(
     (maxHeight, maxWidth) => {
       if (!measurerRef.current) {
-        return {};
+        return;
       }
       const fontSize = calculateFontSize(
         measurerRef.current,
@@ -56,7 +56,7 @@ export function FitText(props) {
         minFontSize,
         maxFontSize
       );
-      getOverflowStyle(measurerRef.current, maxHeight, fontSize);
+      getOverflowStyle(measurerRef.current, Number(maxHeight), fontSize);
     },
     [maxFontSize, minFontSize]
   );
@@ -142,7 +142,6 @@ function calculateFontSize(
  * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
- * @return {Object}
  */
 function getOverflowStyle(measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/ scrollHeight > maxHeight;
@@ -150,10 +149,9 @@ function getOverflowStyle(measurer, maxHeight, fontSize) {
   const numberOfLines = Math.floor(maxHeight / lineHeight);
   if (overflown) {
     setStyles(measurer, {
-      ...styles.fitTextContentOverflown,
-      lineClamp: numberOfLines,
+      'lineClamp': numberOfLines,
       '-webkit-line-clamp': numberOfLines,
-      maxHeight: px(lineHeight * numberOfLines),
+      'maxHeight': px(lineHeight * numberOfLines),
     });
   } else {
     setStyles(measurer, {});
