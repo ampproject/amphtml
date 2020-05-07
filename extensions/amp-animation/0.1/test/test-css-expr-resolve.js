@@ -144,7 +144,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
   it('should resolve a percent node w/dimension', () => {
     contextMock.expects('getDimension').returns('w').twice();
     contextMock
-      .expects('getCurrentElementSize')
+      .expects('getCurrentElementRect')
       .returns({width: 110, height: 220});
     expect(ast.isVarCss('11.5%', false)).to.be.false;
     const node = new ast.CssPercentNode(11.5);
@@ -359,7 +359,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
     it('should resolve a percent-length in w-direction', () => {
       contextMock.expects('getDimension').returns('w');
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssLengthNode(11.5, 'px');
@@ -370,7 +370,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
     it('should resolve a percent-length in h-direction', () => {
       contextMock.expects('getDimension').returns('h');
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssLengthNode(11.5, 'px');
@@ -380,7 +380,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
 
     it('should resolve a percent-length in unknown direction', () => {
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssLengthNode(11.5, 'px');
@@ -520,7 +520,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
       contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock.expects('getCurrentFontSize').returns(10).atLeast(1);
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .atLeast(1);
       const node = new ast.CssFuncNode('xyz', [
@@ -688,62 +688,96 @@ describes.sandboxed('CSS resolve', {}, (env) => {
   });
 
   describe('dimension', () => {
-    let sizes;
+    let rects;
 
     beforeEach(() => {
-      sizes = {
-        'null(.class)': {width: 111, height: 222},
-        'closest(.class > div)': {width: 112, height: 224},
+      rects = {
+        'null(.class)': {x: 10, y: 20, width: 111, height: 222},
+        'closest(.class > div)': {x: 11, y: 12, width: 112, height: 224},
       };
-      context.getCurrentElementSize = function () {
-        return {width: 110, height: 220};
+      context.getCurrentElementRect = function () {
+        return {x: 13, y: 14, width: 110, height: 220};
       };
-      context.getElementSize = function (selector, selectionMethod) {
-        return sizes[`${selectionMethod}(${selector})`];
+      context.getElementRect = function (selector, selectionMethod) {
+        return rects[`${selectionMethod}(${selector})`];
       };
     });
 
     it('should always consider as non-const', () => {
       expect(ast.isVarCss('width()', false)).to.be.true;
       expect(ast.isVarCss('height()', false)).to.be.true;
+      expect(ast.isVarCss('x()', false)).to.be.true;
+      expect(ast.isVarCss('y()', false)).to.be.true;
       expect(ast.isVarCss('width("")')).to.be.true;
       expect(ast.isVarCss('height("")')).to.be.true;
+      expect(ast.isVarCss('x("")')).to.be.true;
+      expect(ast.isVarCss('y("")')).to.be.true;
     });
 
     it('should be always a non-const and no css', () => {
-      const node = new ast.CssDimSizeNode('?');
+      const node = new ast.CssRectNode('?');
       expect(node.isConst()).to.be.false;
       expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve width on the current node', () => {
-      const node = new ast.CssDimSizeNode('w');
+      const node = new ast.CssRectNode('w');
       expect(node.calc(context).css()).to.equal('110px');
     });
 
     it('should resolve height on the current node', () => {
-      const node = new ast.CssDimSizeNode('h');
+      const node = new ast.CssRectNode('h');
       expect(node.calc(context).css()).to.equal('220px');
     });
 
     it('should resolve width on the selected node', () => {
-      const node = new ast.CssDimSizeNode('w', '.class');
+      const node = new ast.CssRectNode('w', '.class');
       expect(node.calc(context).css()).to.equal('111px');
     });
 
     it('should resolve height on the selected node', () => {
-      const node = new ast.CssDimSizeNode('h', '.class');
+      const node = new ast.CssRectNode('h', '.class');
       expect(node.calc(context).css()).to.equal('222px');
     });
 
     it('should resolve width on the selected closest node', () => {
-      const node = new ast.CssDimSizeNode('w', '.class > div', 'closest');
+      const node = new ast.CssRectNode('w', '.class > div', 'closest');
       expect(node.calc(context).css()).to.equal('112px');
     });
 
     it('should resolve height on the selected closest node', () => {
-      const node = new ast.CssDimSizeNode('h', '.class > div', 'closest');
+      const node = new ast.CssRectNode('h', '.class > div', 'closest');
       expect(node.calc(context).css()).to.equal('224px');
+    });
+
+    it('should resolve x coord on the current node', () => {
+      const node = new ast.CssRectNode('x');
+      expect(node.calc(context).css()).to.equal('13px');
+    });
+
+    it('should resolve y coord on the current node', () => {
+      const node = new ast.CssRectNode('y');
+      expect(node.calc(context).css()).to.equal('14px');
+    });
+
+    it('should resolve x coord on the selected node', () => {
+      const node = new ast.CssRectNode('x', '.class');
+      expect(node.calc(context).css()).to.equal('10px');
+    });
+
+    it('should resolve y coord on the selected node', () => {
+      const node = new ast.CssRectNode('y', '.class');
+      expect(node.calc(context).css()).to.equal('20px');
+    });
+
+    it('should resolve x coord on the selected closest node', () => {
+      const node = new ast.CssRectNode('x', '.class > div', 'closest');
+      expect(node.calc(context).css()).to.equal('11px');
+    });
+
+    it('should resolve y coord on the selected closest node', () => {
+      const node = new ast.CssRectNode('y', '.class > div', 'closest');
+      expect(node.calc(context).css()).to.equal('12px');
     });
   });
 
@@ -791,7 +825,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
 
       contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .atLeast(1);
       expect(resolvedCss(node, normalize)).to.equal('11');
@@ -893,7 +927,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
 
       contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .atLeast(1);
       expect(resolvedCss(node, normalize)).to.equal('13.75px');
@@ -1051,7 +1085,7 @@ describes.sandboxed('CSS resolve', {}, (env) => {
     it('should resolve a var node and normalize', () => {
       contextMock.expects('getDimension').returns('w').atLeast(1);
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .atLeast(1);
       contextMock
