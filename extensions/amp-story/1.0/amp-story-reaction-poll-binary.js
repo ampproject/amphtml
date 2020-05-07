@@ -19,10 +19,18 @@ import {CSS} from '../../../build/amp-story-reaction-poll-binary-1.0.css';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction-poll-binary';
+
+/** @const @enum {number} */
+export const FontSize = {
+  EMOJI: 28,
+  SINGLE_LINE: 16,
+  DOUBLE_LINE: 14,
+};
 
 /**
  * Generates the template for the binary poll.
@@ -47,7 +55,7 @@ const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-reaction-option">
-      <span class="i-amphtml-story-reaction-option-title"></span>
+      <span class="i-amphtml-story-reaction-option-title"><span></span></span>
       <span class="i-amphtml-story-reaction-option-percentage-text">0%</span>
     </div>
   `;
@@ -105,11 +113,28 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    */
   adaptFontSize_(root) {
     this.mutateElement(() => {
-      root
-        .querySelectorAll('.i-amphtml-story-reaction-option-title')
-        .forEach((e) => {
-          console.log(e, e.clientWidth, e.clientHeight);
-        });
+      let largestFontSize = FontSize.EMOJI;
+      scopedQuerySelectorAll(
+        root,
+        '.i-amphtml-story-reaction-option-title > span'
+      ).forEach((e) => {
+        if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
+          largestFontSize = FontSize.EMOJI;
+        } else if (
+          e./*OK*/ clientHeight <= 30 &&
+          largestFontSize >= FontSize.SINGLE_LINE
+        ) {
+          largestFontSize = FontSize.SINGLE_LINE;
+        } else if (e./*OK*/ clientHeight > 30) {
+          largestFontSize = FontSize.DOUBLE_LINE;
+        }
+      });
+      root.setAttribute(
+        'style',
+        `--post-select-scale-variable: ${
+          largestFontSize / FontSize.DOUBLE_LINE
+        } !important;`
+      );
     });
   }
 
@@ -122,8 +147,9 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
   generateOption_(option) {
     const convertedOption = buildOptionTemplate(dev().assertElement(option));
 
-    const optionText = convertedOption.querySelector(
-      '.i-amphtml-story-reaction-option-title'
+    const optionText = scopedQuerySelector(
+      convertedOption,
+      '.i-amphtml-story-reaction-option-title > span'
     );
     optionText.textContent = option.textContent;
     return convertedOption;

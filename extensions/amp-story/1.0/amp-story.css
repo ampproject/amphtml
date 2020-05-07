@@ -882,7 +882,7 @@ amp-story .amp-video-eq,
   --reaction-answer-choice-border: var(--reaction-accent-color) !important;
   --reaction-answer-choice-background: white !important;
   --reaction-main-color: #005AF0;
-  --reaction-main-color-transparent: #005AF016;
+  --reaction-main-color-transparent: rgba(0, 88, 240, 0.2);
 }
 
 .i-amphtml-story-reaction[theme="dark"] {

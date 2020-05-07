@@ -61,5 +61,6 @@ amp-story-grid-layer.i-amphtml-story-has-page-attachment.i-amphtml-story-has-rea
 }
 
 amp-story-grid-layer.i-amphtml-story-has-CTA-layer.i-amphtml-story-has-reaction {
-  padding-bottom: 20%;
+  height: auto !important;
+  bottom: 20% !important;
 }

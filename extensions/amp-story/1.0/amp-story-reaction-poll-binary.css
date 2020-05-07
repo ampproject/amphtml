@@ -24,13 +24,16 @@
     display: flex !important;
     align-items: stretch !important;
     justify-content: center !important;
-    width: 296px !important;
     height: 90px !important;
+    max-width: 296px !important;
     border-radius: 16px !important;
     box-shadow: 0px 2px 4px #000000aa !important;
     color: var(--reaction-main-color) !important;
     background: var(--reaction-theme-background) !important;
     overflow: hidden !important;
+
+    --post-select-scale: 0.5 !important;
+    --post-select-scale-variable: 1;
 }
 
 .i-amphtml-story-reaction-poll-binary-container:not(.i-amphtml-story-reaction-post-selection) {
@@ -72,14 +75,22 @@
     margin: 0 !important;
     line-height: 28px !important;
     transition: transform var(--transition-type) var(--transition-time) !important;
-    max-width: 140px !important;
-    height: 56px !important;
+    width: 124px;
+    height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title {
-    transform: scale(0.5) !important;
+    transform: scale(var(--post-select-scale)) !important;
     margin-bottom: -14px !important;
     margin-top: -14px !important;
+}
+
+.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title > span {
+    transform: scale(var(--post-select-scale-variable)) !important;
+    transition: transform var(--transition-type) var(--transition-time) !important;
 }
 
 .i-amphtml-story-reaction-option-percentage-text {

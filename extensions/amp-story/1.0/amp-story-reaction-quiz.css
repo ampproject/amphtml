@@ -93,10 +93,15 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     line-height: 20px !important;
     overflow: hidden !important;
     z-index: 0 !important;
+    cursor: pointer !important;
 }
 
 [dir=rtl] .i-amphtml-story-reaction-quiz-option {
     padding: 8px 8px 8px 16px !important;
+}
+
+.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-quiz-option {
+    cursor: auto !important;
 }
 
 /* Truncate option text and add an ellipsis after 2 lines. */
@@ -108,6 +113,15 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     visibility: visible !important;
+    transition: transform ease-in-out 0.2s;
+}
+
+[dir=rtl] .i-amphtml-story-reaction-quiz-container:not(.i-amphtml-story-reaction-post-selection) .i-amphtml-story-reaction-quiz-option:hover .i-amphtml-story-reaction-quiz-option-text {
+    transform: translateX(-2px);
+}
+
+.i-amphtml-story-reaction-quiz-container:not(.i-amphtml-story-reaction-post-selection) .i-amphtml-story-reaction-quiz-option:hover .i-amphtml-story-reaction-quiz-option-text {
+    transform: translateX(2px);
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected {
