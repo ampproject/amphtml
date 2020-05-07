@@ -25,20 +25,17 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
+const getFontSizeAttrs = (element) =>
+  dict({
+    'maxFontSize': getLengthNumeral(element.getAttribute('max-font-size')),
+    'minFontSize': getLengthNumeral(element.getAttribute('min-font-size')),
+  });
+
 class AmpFitText extends PreactBaseElement {
   /** @override */
   init() {
     const attributeOb = new MutationObserver(() => {
-      this.mutateProps(
-        dict({
-          'maxFontSize': getLengthNumeral(
-            this.element.getAttribute('max-font-size')
-          ),
-          'minFontSize': getLengthNumeral(
-            this.element.getAttribute('min-font-size')
-          ),
-        })
-      );
+      this.mutateProps(getFontSizeAttrs(this.element));
     });
     attributeOb.observe(this.element, {
       attributeFilter: ['min-font-size', 'max-font-size'],
@@ -50,14 +47,7 @@ class AmpFitText extends PreactBaseElement {
     });
     childOb.observe(this.element, {childList: true});
 
-    return dict({
-      'minFontSize': getLengthNumeral(
-        this.element.getAttribute('min-font-size')
-      ),
-      'maxFontSize': getLengthNumeral(
-        this.element.getAttribute('max-font-size')
-      ),
-    });
+    return getFontSizeAttrs(this.element);
   }
 
   /** @override */
