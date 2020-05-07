@@ -29,6 +29,8 @@ const getFontSizeAttrs = (element) =>
   dict({
     'maxFontSize': getLengthNumeral(element.getAttribute('max-font-size')),
     'minFontSize': getLengthNumeral(element.getAttribute('min-font-size')),
+    'width': element./* OK */ offsetWidth,
+    'height': element./* OK */ offsetHeight,
   });
 
 class AmpFitText extends PreactBaseElement {
@@ -65,12 +67,6 @@ AmpFitText['Component'] = FitText;
 
 /** @override */
 AmpFitText['passthrough'] = true;
-
-/** @override */
-AmpFitText['props'] = {
-  'width': {attr: 'width'},
-  'height': {attr: 'height'},
-};
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpFitText, CSS);
