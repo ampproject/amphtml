@@ -41,7 +41,7 @@
     "@jest/core": "26.0.1",
     "@types/minimist": "1.2.0",
     "acorn-globals": "6.0.0",
-    "amphtml-validator": "1.0.30",
+    "amphtml-validator": "1.0.31",
     "ansi-colors": "4.1.1",
     "ast-replace": "1.1.3",
     "atob": "2.1.2",
