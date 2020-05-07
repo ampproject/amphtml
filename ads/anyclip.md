@@ -19,15 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
-  <amp-ad
-    width="480"
-    height="300"
-    layout="responsive"
-    type="anyclip"
-    data-pubName="lre_qa_temp"
-    data-widgetName="amp_test_autoplay"
-  >
-  </amp-ad>
+<amp-ad
+  width="480"
+  height="300"
+  layout="responsive"
+  type="anyclip"
+  data-pubName="lre_qa_temp"
+  data-widgetName="amp_test_autoplay"
+>
+</amp-ad>
 ```
 
 ## Configuration
