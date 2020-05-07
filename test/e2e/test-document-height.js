@@ -24,12 +24,14 @@ describes.endtoend(
   async (env) => {
     it('should send documentHeight once amp has completed init', async () => {
       const messages = env.receivedMessages;
-      const documentHeights = messages.filter(
-        (msg) => msg[0] === 'documentHeight'
+      const documentHeightMessages = messages.filter(
+        ([type, _heightObj]) => type === 'documentHeight'
       );
-      const firstHeight = documentHeights[0][1].height;
 
-      await expect(documentHeights.length).equal(1);
+      await expect(documentHeightMessages.length).equal(1);
+
+      // Example message: ['documentHeight, { height: 200 }]
+      const firstHeight = documentHeights[0][1].height;
       await expect(Math.floor(firstHeight)).equal(447);
     });
   }
