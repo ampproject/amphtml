@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
 import {omit} from '../../../src/utils/object';
+import {px, setStyle, setStyles} from '../../../src/style';
 import {px, setStyle} from '../../../src/style';
 import {useCallback, useEffect, useRef, useState} from '../../../src/preact';
 
@@ -43,10 +44,9 @@ export function FitText(props) {
   ]);
   const contentRef = useRef(null);
   const measurerRef = useRef(null);
-  const [wrapperStyle, setWrapperStyle] = useState(/** @type {Object} */ ({}));
 
-  const resizer = useCallback(() => {
-    return (maxHeight, maxWidth) => {
+  const resize = useCallback(
+    (maxHeight, maxWidth) => {
       if (!measurerRef.current) {
         return {};
       }
@@ -57,14 +57,10 @@ export function FitText(props) {
         minFontSize,
         maxFontSize
       );
-      const overflownStyle = getOverflowStyle(
-        measurerRef.current,
-        maxHeight,
-        fontSize
-      );
-      return {...overflownStyle, fontSize: px(fontSize)};
-    };
-  }, [maxFontSize, minFontSize]);
+      getOverflowStyle(measurerRef.current, maxHeight, fontSize);
+    },
+    [maxFontSize, minFontSize]
+  );
 
   // Font size should readjust when container resizes.
   useEffect(() => {
@@ -72,13 +68,13 @@ export function FitText(props) {
     const observer = new ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
       const {height: maxHeight, width: maxWidth} = last['contentRect'];
-      setWrapperStyle(resizer()(maxHeight, maxWidth));
+      resize(maxHeight, maxWidth);
     });
     if (node) {
       observer.observe(node);
     }
     return () => observer.disconnect();
-  }, [resizer]);
+  }, [resize]);
 
   // Font size should readjust when content changes.
   useEffect(() => {
@@ -93,14 +89,12 @@ export function FitText(props) {
           ...styles.fitTextContent,
           'width': px(width),
           'height': px(height),
-          'visibility': !!wrapperStyle['fontSize'] ? '' : 'hidden',
         }}
       >
         <div
           ref={measurerRef}
           style={{
             ...styles.fitTextContentWrapper,
-            ...wrapperStyle,
           }}
         >
           {children}
@@ -152,12 +146,14 @@ function getOverflowStyle(measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/ scrollHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
-  return overflown
-    ? {
-        ...styles.fitTextContentOverflown,
-        lineClamp: numberOfLines,
-        '-webkit-line-clamp': numberOfLines,
-        maxHeight: px(lineHeight * numberOfLines),
-      }
-    : {};
+  if (overflown) {
+    setStyles(measurer, {
+      ...styles.fitTextContentOverflown,
+      lineClamp: numberOfLines,
+      '-webkit-line-clamp': numberOfLines,
+      maxHeight: px(lineHeight * numberOfLines),
+    });
+  } else {
+    setStyles(measurer, {});
+  }
 }
