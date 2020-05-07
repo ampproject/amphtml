@@ -18,8 +18,7 @@ import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
 import {omit} from '../../../src/utils/object';
 import {px, setStyle, setStyles} from '../../../src/style';
-import {px, setStyle} from '../../../src/style';
-import {useCallback, useEffect, useRef, useState} from '../../../src/preact';
+import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
 
@@ -62,8 +61,10 @@ export function FitText(props) {
     [maxFontSize, minFontSize]
   );
 
+  // Here and below, useLayoutEffect is used so intermediary font sizes
+  // during resizing are resolved before the component visually updates.
   // Font size should readjust when container resizes.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = contentRef.current;
     const observer = new ResizeObserver((entries) => {
       const last = entries[entries.length - 1];
@@ -77,9 +78,9 @@ export function FitText(props) {
   }, [resize]);
 
   // Font size should readjust when content changes.
-  useEffect(() => {
-    resizer()(height, width);
-  }, [children, resizer, height, width]);
+  useLayoutEffect(() => {
+    resize(height, width);
+  }, [children, resize, height, width]);
 
   return (
     <div {...rest}>
