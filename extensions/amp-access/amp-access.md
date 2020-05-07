@@ -200,7 +200,7 @@ It is possible to specify multiple access providers using an array instead of a 
       "namespace": value
     },
     ...
-  [
+  ]
 </script>
 ```
 
