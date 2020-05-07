@@ -15,11 +15,8 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
-import {getData} from '../src/event-helper';
-import {tryParseJson} from '../src/json';
 
 const requiredParams = ['pubname', 'widgetname'];
-const aclreMessagePrefix = 'lre:playerReady://';
 
 const scriptHost = 'player.anyclip.com';
 const scriptPath = 'anyclip-widget/lre-widget/prod/v1/src';
@@ -33,24 +30,12 @@ const scriptUrl = `https://${scriptHost}/${scriptPath}/${scriptName}`;
 export function anyclip(global, data) {
   validateData(data, requiredParams);
 
-  global.addEventListener('message', (event) => {
-    const message = /** @type {string} */ (getData(event));
-    if (message.indexOf(aclreMessagePrefix) !== 0) {
-      return
-    }
-    const data = tryParseJson(message.replace(aclreMessagePrefix, ''));
-    if (!data) {
-      return;
-    }
-    const widget = global.anyclip.getWidget(null, data['sessionId']);
-    if (widget) {
-      global.context.renderStart();
-    }
+  global.addEventListener('message', () => {
+    global.context.renderStart();
   });
 
-  loadScript(global, scriptUrl, () => 
-  {
+  loadScript(global, scriptUrl, () => {
     global.anyclip = global.anyclip || {};
-    global.anyclip.getWidget = global.anyclip.getWidget || function(){};
+    global.anyclip.getWidget = global.anyclip.getWidget || function () {};
   });
 }
