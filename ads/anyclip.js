@@ -15,6 +15,8 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {getData} from '../src/event-helper';
+import {tryParseJson} from '../src/json';
 
 const requiredParams = ['pubname', 'widgetname'];
 const aclreMessagePrefix = 'lre:playerReady://';
@@ -22,6 +24,7 @@ const aclreMessagePrefix = 'lre:playerReady://';
 const scriptHost = 'player.anyclip.com';
 const scriptPath = 'anyclip-widget/lre-widget/prod/v1/src';
 const scriptName = 'aclre-amp-loader.js';
+const scriptUrl = `https://${scriptHost}/${scriptPath}/${scriptName}`;
 
 /**
  * @param {!Window} global
@@ -31,14 +34,23 @@ export function anyclip(global, data) {
   validateData(data, requiredParams);
 
   global.addEventListener('message', (event) => {
-    if (event.data && event.data.indexOf(aclreMessagePrefix) === 0) {
-      const data = JSON.parse(event.data.replace(aclreMessagePrefix, ''));
-      const widget = global.anyclip.getWidget(null, data.sessionId);
-      if (widget) {
-        global.context.renderStart();
-      }
+    const message = /** @type {string} */ (getData(event));
+    if (message.indexOf(aclreMessagePrefix) !== 0) {
+      return
+    }
+    const data = tryParseJson(message.replace(aclreMessagePrefix, ''));
+    if (!data) {
+      return;
+    }
+    const widget = global.anyclip.getWidget(null, data['sessionId']);
+    if (widget) {
+      global.context.renderStart();
     }
   });
 
-  loadScript(global, `https://${scriptHost}/${scriptPath}/${scriptName}`);
+  loadScript(global, scriptUrl, () => 
+  {
+    global.anyclip = global.anyclip || {};
+    global.anyclip.getWidget = global.anyclip.getWidget || function(){};
+  });
 }
