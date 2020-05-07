@@ -16,8 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {FitText} from '../fit-text';
+import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'FitText',
@@ -33,8 +33,16 @@ const fitTextStyle = {
 };
 
 export const _default = () => {
+  const minFontSize = number('minFontSize', 6);
+  const maxFontSize = number('maxFontSize', 72);
   return (
-    <FitText width="300" height="200" style={fitTextStyle}>
+    <FitText
+      minFontSize={minFontSize}
+      maxFontSize={maxFontSize}
+      width="300"
+      height="200"
+      style={fitTextStyle}
+    >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
     </FitText>
@@ -42,8 +50,16 @@ export const _default = () => {
 };
 
 export const scaleUpOverflowEllipsis = () => {
+  const minFontSize = number('minFontSize', 42);
+  const maxFontSize = number('maxFontSize', 72);
   return (
-    <FitText width="300" height="200" style={fitTextStyle} minFontSize={42}>
+    <FitText
+      minFontSize={minFontSize}
+      maxFontSize={maxFontSize}
+      width="300"
+      height="200"
+      style={fitTextStyle}
+    >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
     </FitText>
@@ -51,8 +67,16 @@ export const scaleUpOverflowEllipsis = () => {
 };
 
 export const scaleDown = () => {
+  const minFontSize = number('minFontSize', 6);
+  const maxFontSize = number('maxFontSize', 72);
   return (
-    <FitText width="300" height="200" style={fitTextStyle}>
+    <FitText
+      minFontSize={minFontSize}
+      maxFontSize={maxFontSize}
+      width="300"
+      height="200"
+      style={fitTextStyle}
+    >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te
       mea, ius noster platonem in. Mea an idque minim, sit sale deleniti
@@ -64,8 +88,12 @@ export const scaleDown = () => {
 };
 
 export const scaleDownMore = () => {
+  const minFontSize = number('minFontSize', 6);
+  const maxFontSize = number('maxFontSize', 72);
   return (
     <FitText
+      minFontSize={minFontSize}
+      maxFontSize={maxFontSize}
       style={{
         border: '1px solid black',
         display: 'block',
@@ -74,6 +102,26 @@ export const scaleDownMore = () => {
       }}
     >
       Superlongword text
+    </FitText>
+  );
+};
+
+export const configureContent = () => {
+  const minFontSize = number('minFontSize', 6);
+  const maxFontSize = number('maxFontSize', 200);
+  const content = text('Content', 'hello world');
+  return (
+    <FitText
+      minFontSize={minFontSize}
+      maxFontSize={maxFontSize}
+      style={{
+        border: '1px solid black',
+        display: 'block',
+        width: 400,
+        height: 400,
+      }}
+    >
+      {content}
     </FitText>
   );
 };
