@@ -44,6 +44,7 @@ class AmpFitText extends PreactBaseElement {
       attributeFilter: ['min-font-size', 'max-font-size'],
     });
 
+    // Force render to resize to new contents.
     const childOb = new MutationObserver(() => {
       this.mutateProps(dict({}));
     });
