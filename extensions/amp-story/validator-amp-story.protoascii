@@ -833,7 +833,6 @@ tags: {  # <amp-story-animation>
   requires_extension: "amp-animation"
   requires: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-PAGE"
-  satisfies: "amp-story-animation"
   attrs: { name: "animate-in-after" }
   attr_lists: "extended-amp-global"
   child_tags: {
