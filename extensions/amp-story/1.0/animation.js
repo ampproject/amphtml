@@ -638,7 +638,7 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            childElementsByTag(this.page_, 'amp-story-animation'),
+            this.page_.querySelectorAll('amp-story-animation[trigger=in]'),
             (el) =>
               this.createRunner_({
                 source: el,
