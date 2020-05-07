@@ -505,7 +505,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    if (response && response['óptions']) {
+    if (response && response['options']) {
       devAssert(
         response && 'options' in response,
         `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
