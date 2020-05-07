@@ -167,6 +167,13 @@ export class ContextNode {
   }
 
   /**
+   * @return {!ContextNode}
+   */
+  getParent() {
+    return this.parent_;
+  }
+
+  /**
    * @package
    */
   addObserver(observer) {
@@ -443,6 +450,35 @@ export class ContextNode {
     }
     return null;
   }
+}
+
+/**
+ * @param {!ContextNode} node
+ * @param {!ContextType} contextType
+ * @param {function(acc: *, value: *, currentNode: !ContextNode):*}
+ * @param {*} ini
+ */
+export function reducePath(node, contextType, reducer, ini) {
+  const key = toKey(contextType);
+  let acc = ini;
+  for (let n = node; n; n = n.parent_) {
+    for (let j = 0; j < 2; j++) {
+      const contexts = j == 0 ? n.subtreeContexts_ : n.selfContexts_;
+      if (!contexts || !contexts.has(key)) {
+        continue;
+      }
+      const value = contexts.get(key);
+      if (acc === undefined) {
+        acc = value;
+      } else {
+        acc = reducer(acc, value, n);
+      }
+      if (acc == null) {
+        break;
+      }
+    }
+  }
+  return acc;
 }
 
 /**
