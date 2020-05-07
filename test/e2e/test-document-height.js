@@ -25,13 +25,13 @@ describes.endtoend(
     it('should send documentHeight once amp has completed init', async () => {
       const messages = env.receivedMessages;
       const documentHeightMessages = messages.filter(
-        ([type, _heightObj]) => type === 'documentHeight'
+        ({name}) => name === 'documentHeight'
       );
 
       await expect(documentHeightMessages.length).equal(1);
 
       // Example message: ['documentHeight, { height: 200 }]
-      const firstHeight = documentHeights[0][1].height;
+      const firstHeight = documentHeightMessages[0].data.height;
       await expect(Math.floor(firstHeight)).equal(447);
     });
   }

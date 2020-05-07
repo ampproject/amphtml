@@ -439,7 +439,7 @@
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
-      this.receivedMessages.push([name, data]); 
+      this.receivedMessages.push({name, data});
       switch(name) {
         case 'bindReady':
           return Promise.resolve();
