@@ -795,7 +795,6 @@ describes.sandboxed('Extensions', {}, () => {
           'src',
           'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
         );
-        mod.setAttribute('i-amphtml-inserted', '');
         mod.setAttribute('type', 'module');
         win.document.head.appendChild(mod);
 
@@ -805,7 +804,6 @@ describes.sandboxed('Extensions', {}, () => {
           'src',
           'https://cdn.ampproject.org/v0/amp-list-0.1.js'
         );
-        nomod.setAttribute('i-amphtml-inserted', '');
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
@@ -828,7 +826,6 @@ describes.sandboxed('Extensions', {}, () => {
           'src',
           'https://cdn.ampproject.org/v0/amp-list-latest.mjs'
         );
-        mod.setAttribute('i-amphtml-inserted', '');
         mod.setAttribute('type', 'module');
         win.document.head.appendChild(mod);
 
@@ -838,7 +835,6 @@ describes.sandboxed('Extensions', {}, () => {
           'src',
           'https://cdn.ampproject.org/v0/amp-list-latest.js'
         );
-        nomod.setAttribute('i-amphtml-inserted', '');
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
