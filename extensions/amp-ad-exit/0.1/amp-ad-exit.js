@@ -440,7 +440,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * extensions/amp-analytics/0.1/vendors/* who have transport/iframe defined.
    * This is limited to MRC-accreddited vendors. The frame is removed in
    * amp-analytics, and the listener is destroyed here, if the user
    * navigates/swipes away from the page. Both are recreated if the user
