@@ -234,7 +234,7 @@ The properties in the "local" service are (remote mode):
 - "pingbackUrl" - the pingback endpoint URL.
 - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
 
-In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
+In iframe mode the `authorizationUrl` and `pingbackUrl` are deleted
 and replaced by:
 
 - "iframeSrc" - publisher supplied iframe
