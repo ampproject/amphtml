@@ -32,7 +32,15 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  */
 function buildMinifiedRuntime() {
   execOrDie('gulp clean');
-  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+
+  let command = `gulp dist --fortesting --config ${argv.config}`;
+  if (argv.core_runtime_only) {
+    command += ` --core_runtime_only`;
+  } else if (argv.extensions) {
+    command += ` --extensions=${argv.extensions}`;
+  }
+
+  execOrDie(command);
 }
 
 /**
