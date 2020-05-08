@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  includeJsonLiteral,
-  jsonConfiguration,
-  jsonLiteral,
-} from '../../../src/json';
+import {jsonConfiguration} from '../../../src/json';
 
 // TODO(zhouyx@: Rename file and object name)
-const DEFAULT_CONFIG = jsonLiteral({
+const defaultConfig = jsonConfiguration({
   'transport': {'beacon': true, 'xhrpost': true, 'image': true},
   'vars': {
     'accessReaderId': 'ACCESS_READER_ID',
@@ -91,11 +87,7 @@ const DEFAULT_CONFIG = jsonLiteral({
   },
 });
 
-const analyticsConfig = jsonConfiguration({
-  'default': includeJsonLiteral(DEFAULT_CONFIG),
-});
-
 /**
  * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = analyticsConfig;
+export const DEFAULT_CONFIG = defaultConfig;
