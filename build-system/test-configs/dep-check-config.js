@@ -369,6 +369,11 @@ exports.rules = [
       // Experiment moving Fixed Layer to extension
       'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js->' +
         'src/service/fixed-layer.js',
+      // Accessing AMPDOC_SINGLETON_NAME
+      'extensions/amp-iframe/0.1/amp-iframe.js->' +
+        'src/service/ampdoc-impl.js',
+      'extensions/amp-analytics/0.1/linker-manager.js->' +
+        'src/service/ampdoc-impl.js',
     ],
   },
   {
