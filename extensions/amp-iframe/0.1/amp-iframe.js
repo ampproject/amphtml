@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/service/ampdoc-impl';
 import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -56,9 +57,6 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'tabindex',
   'title',
 ];
-
-/** @const {string} */
-const TRACKING_IFRAME = 'tracking_iframe';
 
 /** @type {number}  */
 let count = 0;
@@ -398,7 +396,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      if (!this.getAmpDoc().registerService(TRACKING_IFRAME)) {
+      if (
+        !this.getAmpDoc().registerSingleton(
+          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+        )
+      ) {
         console /*OK*/
           .error(
             'Only 1 analytics/tracking iframe allowed per ' +

@@ -59,6 +59,15 @@ const AmpDocSignals = {
 };
 
 /**
+ * Registred singleton on AMP doc.
+ * @enum {number}
+ */
+export const AMPDOC_SINGLETON_NAME = {
+  TRACKING_IFRAME: 1,
+  LINKER: 2,
+};
+
+/**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
  * either in the single-doc or shadow-doc environments.
  *
@@ -308,8 +317,8 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private {!Object<string, boolean>} */
-    this.registeredService_ = map();
+    /** @private {!Object<AMPDOC_SINGLETON_NAME, boolean>} */
+    this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
@@ -754,19 +763,14 @@ export class AmpDoc {
   }
 
   /**
-   * Attempt to register a service that is allowed/required one for each ampdoc.
+   * Attempt to register a singleton for each ampdoc.
    * Caller need to handle user error when registration returns false.
-   *
-   * Please list your service name below:
-   * 'tracking_iframe',
-   * 'linker-created',
-   *
-   * @param {string} name
+   * @param {AMPDOC_SINGLETON_NAME} name
    * @return {boolean}
    */
-  registerService(name) {
-    if (!this.registeredService_[name]) {
-      this.registeredService_[name] = true;
+  registerSingleton(name) {
+    if (!this.registeredSingleton_[name]) {
+      this.registeredSingleton_[name] = true;
       return true;
     }
     return false;

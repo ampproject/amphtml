@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/service/ampdoc-impl';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -28,9 +29,6 @@ import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
-
-/** @const {string} */
-const LINKER_CREATED = 'linker-created';
 
 export class LinkerManager {
   /**
@@ -232,11 +230,7 @@ export class LinkerManager {
       return false;
     }
 
-    if (!this.ampdoc_.registerService(LINKER_CREATED)) {
-      return false;
-    }
-
-    return true;
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
   }
 
   /**
