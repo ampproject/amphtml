@@ -108,9 +108,10 @@ export function useContext(context) {
 }
 
 /**
- * @param {function(...*):undefined} cb
+ * @param {function(...*):T|undefined} cb
  * @param {!Array<*>=} opt_deps
- * @return {function(...*):undefined}
+ * @return {function(...*):T|undefined}
+ * @template T
  */
 export function useCallback(cb, opt_deps) {
   return hooks.useCallback(cb, opt_deps);
