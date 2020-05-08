@@ -61,4 +61,5 @@ tags: {  # <amp-jwplayer>
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
+  spec_url: "https://amp.dev/documentation/components/amp-jwplayer"
 }
