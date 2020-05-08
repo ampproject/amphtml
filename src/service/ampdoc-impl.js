@@ -308,8 +308,8 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private */
-    this.hasTrackingIframe_ = false;
+    /** @private {!Object<string, boolean>} */
+    this.registeredService_ = map();
 
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
@@ -754,16 +754,22 @@ export class AmpDoc {
   }
 
   /**
-   * Allow one tracking iframe for each amp doc. Caller need to handle user
-   * error when registeration returns false
+   * Attempt to register a service that is allowed/required one for each ampdoc.
+   * Caller need to handle user error when registration returns false.
+   *
+   * Please list your service name below:
+   * 'tracking_iframe',
+   * 'linker-created',
+   *
+   * @param {string} name
    * @return {boolean}
    */
-  registerTrackingIframe() {
-    if (this.hasTrackingIframe_) {
-      return false;
+  registerService(name) {
+    if (!this.registeredService_[name]) {
+      this.registeredService_[name] = true;
+      return true;
     }
-    this.hasTrackingIframe_ = true;
-    return true;
+    return false;
   }
 }
 

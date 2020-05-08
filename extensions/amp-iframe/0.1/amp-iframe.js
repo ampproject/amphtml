@@ -57,6 +57,9 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'title',
 ];
 
+/** @const {string} */
+const TRACKING_IFRAME = 'tracking_iframe';
+
 /** @type {number}  */
 let count = 0;
 
@@ -395,7 +398,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      if (!this.getAmpDoc().registerTrackingIframe()) {
+      if (!this.getAmpDoc().registerService(TRACKING_IFRAME)) {
         console /*OK*/
           .error(
             'Only 1 analytics/tracking iframe allowed per ' +

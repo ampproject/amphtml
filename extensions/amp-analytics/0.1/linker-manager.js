@@ -30,7 +30,7 @@ import {user} from '../../../src/log';
 const TAG = 'amp-analytics/linker-manager';
 
 /** @const {string} */
-const LINKER_CREATED = 'i-amphtml-linker-created';
+const LINKER_CREATED = 'linker-created';
 
 export class LinkerManager {
   /**
@@ -232,11 +232,10 @@ export class LinkerManager {
       return false;
     }
 
-    if (this.ampdoc_.getBody().hasAttribute(LINKER_CREATED)) {
+    if (!this.ampdoc_.registerService(LINKER_CREATED)) {
       return false;
     }
 
-    this.ampdoc_.getBody().setAttribute(LINKER_CREATED, '');
     return true;
   }
 
