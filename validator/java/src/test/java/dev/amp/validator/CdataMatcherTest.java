@@ -410,7 +410,6 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getLineCol()).thenReturn(locator);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
-        Mockito.when(mockTagStack.isStyleAmpCustomChild()).thenReturn(true);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);

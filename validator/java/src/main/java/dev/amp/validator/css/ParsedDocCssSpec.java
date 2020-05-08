@@ -23,13 +23,19 @@ package dev.amp.validator.css;
 
 import dev.amp.validator.ParsedUrlSpec;
 import dev.amp.validator.ValidatorProtos;
+import dev.amp.validator.utils.CssSpecUtils;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static dev.amp.validator.utils.CssSpecUtils.stripVendorPrefix;
+/**
+ * Wrapper around DocCssSpec.
+ *
+ * @author nhant01
+ * @author GeorgeLuo
+ */
 
 public class ParsedDocCssSpec {
   /**
@@ -41,48 +47,51 @@ public class ParsedDocCssSpec {
   public ParsedDocCssSpec(final ValidatorProtos.DocCssSpec spec,
                           final List<ValidatorProtos.DeclarationList> declLists) {
     this.spec = spec;
-
     this.cssDeclarationByName = new HashMap<>();
-
     this.cssDeclarationSvgByName = new HashMap<>();
 
-    for (final ValidatorProtos.CssDeclaration declaration : spec.getDeclarationList()){
-      if (!declaration.hasName()) continue;
-      this.cssDeclarationByName.put(declaration.getName(), declaration);
-      this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+    for (final ValidatorProtos.CssDeclaration declaration : spec.getDeclarationList()) {
+      if (declaration.hasName()) {
+        this.cssDeclarationByName.put(declaration.getName(), declaration);
+        this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+      }
     }
-    for (final ValidatorProtos.CssDeclaration declaration : spec.getDeclarationSvgList()){
-      if (!declaration.hasName()) continue;
-      this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+    for (final ValidatorProtos.CssDeclaration declaration : spec.getDeclarationSvgList()) {
+      if (declaration.hasName()) {
+        this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+      }
     }
 
-    // TODO
     // Expand the list of declarations tracked by this spec by merging in any
     // declarations mentioned in declaration_lists referenced by this spec. This
     // mechanism reduces redundancy in the lists themselves, making rules more
     // readable.
-//    for (final String declListName : spec.getDeclarationListList()){
-//      for (const declList : declLists){
-//        if (declList.name == = declListName) {
-//          for (const declaration of declList.declaration){
-//            if (declaration.name != = null) {
-//              this.cssDeclarationByName_[declaration.name] = declaration;
-//              this.cssDeclarationSvgByName_[declaration.name] = declaration;
-//            }
-//          }
-//        }
-//      }
-//    }
-//    for (const declListName of spec.declarationListSvg){
-//      for (const declList of declLists){
-//        if (declList.name == = declListName) {
-//          for (const declaration of declList.declaration){
-//            if (declaration.name != = null)
-//              this.cssDeclarationSvgByName_[declaration.name] = declaration;
-//          }
-//        }
-//      }
-//    }
+    for (final String declListName : spec.getDeclarationListList()) {
+      for (final ValidatorProtos.DeclarationList declList : declLists){
+        if (declList.hasName() && declList.getName().equals(declListName)) {
+          for (final ValidatorProtos.CssDeclaration declaration : declList.getDeclarationList()) {
+            if (declaration.hasName()) {
+              this.cssDeclarationByName.put(declaration.getName(), declaration);
+              this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+            }
+          }
+        }
+      }
+    }
+    for (final String declListName : spec.getDeclarationListSvgList()){
+      for (final ValidatorProtos.DeclarationList declList : declLists){
+        if (declList.hasName() && declList.getName().equals(declListName)) {
+          for (final ValidatorProtos.CssDeclaration declaration : declList.getDeclarationList()) {
+            if (declaration.hasName()) {
+              this.cssDeclarationSvgByName.put(declaration.getName(), declaration);
+            }
+          }
+        }
+      }
+    }
+
+    this.parsedImageUrlSpec = new ParsedUrlSpec(spec.getImageUrlSpec());
+    this.parsedFontUrlSpec = new ParsedUrlSpec(spec.getFontUrlSpec());
   }
 
   /**
@@ -93,7 +102,7 @@ public class ParsedDocCssSpec {
   public ValidatorProtos.CssDeclaration getCssDeclarationSvgByName(@Nonnull final String candidate) {
     String key = candidate.toLowerCase();
     if (this.getSpec().getExpandVendorPrefixes()) {
-      key = stripVendorPrefix(key);
+      key = CssSpecUtils.stripVendorPrefix(key);
     }
     ValidatorProtos.CssDeclaration cssDeclaration = this.cssDeclarationSvgByName.get(key);
     if (cssDeclaration != null) {
@@ -112,7 +121,7 @@ public class ParsedDocCssSpec {
   public ValidatorProtos.CssDeclaration getCssDeclarationByName(@Nonnull final String candidate) {
     String key = candidate.toLowerCase();
     if (this.getSpec().getExpandVendorPrefixes()) {
-      key = stripVendorPrefix(key);
+      key = CssSpecUtils.stripVendorPrefix(key);
     }
     ValidatorProtos.CssDeclaration cssDeclaration = this.cssDeclarationByName.get(key);
     if (cssDeclaration != null) {
@@ -123,6 +132,7 @@ public class ParsedDocCssSpec {
 
   /**
    * getter for cssDeclarationByName
+   *
    * @return this cssDeclarationByName
    */
   public Map<String, ValidatorProtos.CssDeclaration> getCssDeclarationByName() {
@@ -147,45 +157,44 @@ public class ParsedDocCssSpec {
     return this.spec.getDisabledByList();
   }
 
-  // TODO where is this set
   /**
    * return this doc css fontUrlSpec
+   *
    * @return this doc css fontUrlSpec
    */
   public ParsedUrlSpec getFontUrlSpec() {
-    return this.fontUrlSpec;
+    return this.parsedFontUrlSpec;
   }
 
   /**
-   *
    * @return this doc css imageUrlSpec
    */
   public ParsedUrlSpec getImageUrlSpec() {
-    return this.imageUrlSpec;
+    return this.parsedImageUrlSpec;
   }
 
   /**
-   *
+   * The DocCssSpec.
    */
   private final ValidatorProtos.DocCssSpec spec;
 
   /**
-   *
+   * Map to store CssDeclaration by declaration name.
    */
   private final Map<String, ValidatorProtos.CssDeclaration> cssDeclarationByName;
 
   /**
-   *
+   * Map to store CssDeclaration by declaration Svg name.
    */
   private final HashMap<String, ValidatorProtos.CssDeclaration> cssDeclarationSvgByName;
 
   /**
-   *
+   * The ParsedUrlSpec for image url.
    */
-  private ParsedUrlSpec imageUrlSpec;
+  private ParsedUrlSpec parsedImageUrlSpec;
 
   /**
-   *
+   * The ParsedUrlSpec for font url.
    */
-  private ParsedUrlSpec fontUrlSpec;
+  private ParsedUrlSpec parsedFontUrlSpec;
 }

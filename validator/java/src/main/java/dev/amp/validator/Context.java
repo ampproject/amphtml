@@ -548,15 +548,17 @@ public class Context {
   }
 
   /**
-   *
-   * @return
+   * Returns the first (there should be at most one) DocCssSpec which matches
+   * both the html format and type identifiers recorded so far in this
+   * context. If called before identifiers have been recorded, it may return
+   * an incorrect selection.
+   * @return ParsedDocCssSpec
    */
   public ParsedDocCssSpec matchingDocCssSpec() {
     // The specs are usually already filtered by HTML format, so this loop
     // should be very short, often 1:
     for (ParsedDocCssSpec spec : this.rules.getCss()) {
-      if (this.rules.isDocCssSpecCorrectHtmlFormat(spec.getSpec()) &&
-        this.isDocCssSpecValidForTypeIdentifiers(spec)) {
+      if (this.rules.isDocCssSpecCorrectHtmlFormat(spec.getSpec()) && this.isDocCssSpecValidForTypeIdentifiers(spec)) {
         return spec;
       }
     }

@@ -131,13 +131,6 @@ public class ParsedValidatorRulesTest {
         rulesBuilder.setStylesSpecUrl(STYLES_SPEC_URL);
         rulesBuilder.setScriptSpecUrl(SCRIPT_SPEC_URL);
         rulesBuilder.setTemplateSpecUrl(TEMPLATE_SPEC_URL);
-        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
-                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
-                .setMaxBytes(MAX_BYTES)
-                .build());
-        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
-                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP)
-                .build());
 
         Mockito.when(mockValidationManager.getRules()).thenReturn(rulesBuilder);
     }
@@ -585,7 +578,7 @@ public class ParsedValidatorRulesTest {
     public void testCssLengthSpec() {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Assert.assertEquals(rules.getCssLengthSpec().get(0).getHtmlFormat(), ValidatorProtos.HtmlFormat.Code.AMP4EMAIL);
+        Assert.assertEquals(rules.getCss().get(0).getSpec().getHtmlFormat(0), ValidatorProtos.HtmlFormat.Code.AMP4EMAIL);
     }
 
     @Test
@@ -641,7 +634,6 @@ public class ParsedValidatorRulesTest {
         Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(MAX_BYTES);
-        Mockito.when(mockContext.getStyleAmpCustomByteSize()).thenReturn(MAX_BYTES);
 
         final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 

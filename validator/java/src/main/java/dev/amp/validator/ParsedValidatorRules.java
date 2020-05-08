@@ -707,8 +707,31 @@ public class ParsedValidatorRules {
     final int bytesUsed =
       context.getInlineStyleByteSize() + context.getStyleTagByteSize();
 
-//      }
-//    }
+    final ParsedDocCssSpec parsedCssSpec = context.matchingDocCssSpec();
+    if (parsedCssSpec != null) {
+      /** @type {!generated.DocCssSpec} */
+      final ValidatorProtos.DocCssSpec cssSpec = parsedCssSpec.getSpec();
+      if (cssSpec.getMaxBytes() != -2 && bytesUsed > cssSpec.getMaxBytes()) {
+        final List<String> params = new ArrayList<>();
+        params.add(String.valueOf(bytesUsed));
+        params.add(String.valueOf(cssSpec.getMaxBytes()));
+        if (cssSpec.hasMaxBytesIsWarning()) {
+          context.addWarning(
+            ValidatorProtos.ValidationError.Code
+              .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), /* params */
+            params,
+            /* specUrl */ cssSpec.getMaxBytesSpecUrl(), validationResult);
+        } else {
+          context.addError(
+            ValidatorProtos.ValidationError.Code
+              .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+            context.getLineCol(), /* params */
+            params,
+            /* specUrl */ cssSpec.getMaxBytesSpecUrl(), validationResult);
+        }
+      }
+    }
   }
 
   /**
@@ -868,12 +891,13 @@ public class ParsedValidatorRules {
    * built for.
    */
   public boolean isDocCssSpecCorrectHtmlFormat(@Nonnull final ValidatorProtos.DocCssSpec docCssSpec) {
-//    castedHtmlFormat =
-//      /** @type {!generated.HtmlFormat.Code} */ (
-//      /** @type {*} */ (htmlFormat));
-//    return docCssSpec.html() ? cssLengthSpec.getHtmlFormat() == htmlFormat : false;
-    // TODO
-    return true;
+    for (final ValidatorProtos.HtmlFormat.Code htmlFormatCode : docCssSpec.getHtmlFormatList()) {
+      if (htmlFormatCode == htmlFormat) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
