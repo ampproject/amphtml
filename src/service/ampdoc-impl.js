@@ -533,7 +533,7 @@ export class AmpDoc {
    * @return {!Element}
    */
   getBody() {
-    return dev().assertElement(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -570,7 +570,7 @@ export class AmpDoc {
    * @return {string}
    */
   getUrl() {
-    return dev().assertString(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**

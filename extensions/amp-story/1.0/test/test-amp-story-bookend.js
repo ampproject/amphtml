@@ -21,13 +21,11 @@ import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
-import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
 const location =
@@ -138,11 +136,6 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
 
     requestService = new AmpStoryRequestService(win, storyElem);
     env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
 
     bookend = new AmpStoryBookend(bookendElem);
     bookend.buildCallback();
