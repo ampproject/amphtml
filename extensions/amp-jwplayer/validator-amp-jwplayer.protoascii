@@ -31,6 +31,10 @@ tags: {  # <amp-jwplayer>
   tag_name: "AMP-JWPLAYER"
   requires_extension: "amp-jwplayer"
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "data-media-id"
     mandatory_oneof: "['data-media-id', 'data-playlist-id']"
     value_regex_casei: "[0-9a-z]{8}"
