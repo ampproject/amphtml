@@ -24,7 +24,7 @@ describes.endtoend(
   'amp-fit-text',
   {
     testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-fit-text/0.2/amp-fit-text.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-fit-text/1.0/amp-fit-text.html',
     environments: 'ampdoc-preset',
     experiments: ['amp-fit-text-v2'],
   },
