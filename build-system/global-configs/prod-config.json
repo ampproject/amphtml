@@ -1,9 +1,5 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "inabox-viewport-friendly",
-    "analytics-chunks"
-  ],
+  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks"],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
   "a4aProfilingRate": 0.01,
