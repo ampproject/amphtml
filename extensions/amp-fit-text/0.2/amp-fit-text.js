@@ -41,13 +41,18 @@ class AmpFitText extends PreactBaseElement {
     });
     attributeOb.observe(this.element, {
       attributeFilter: ['min-font-size', 'max-font-size'],
+      attributes: true,
     });
 
     // Force render to resize to new contents.
     const childOb = new MutationObserver(() => {
       this.mutateProps(dict({}));
     });
-    childOb.observe(this.element, {childList: true});
+    childOb.observe(this.element, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
 
     return getFontSizeAttrs(this.element);
   }
