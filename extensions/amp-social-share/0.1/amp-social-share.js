@@ -125,6 +125,10 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.shareEndpoint_) {
+      return Promise.resolve();
+    }
+
     const hrefWithVars = addParamsToUrl(
       dev().assertString(this.shareEndpoint_),
       this.params_
