@@ -45,6 +45,10 @@ tags: {  # <amp-jwplayer>
     mandatory_oneof: "['data-media-id', 'data-playlist-id']"
     value_regex_casei: "[0-9a-z]{8}"
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
