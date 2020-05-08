@@ -26,28 +26,13 @@ limitations under the License.
 
 ## Usage
 
-The `amp-subscriptions` extension implements subscription-style access/paywall rules.
+The `amp-subscriptions` component implements subscription-style access/paywall rules.
 
-The solution comprises the following components:
+### How it works
 
-1. [**AMP Reader ID**][1]: provided by the AMP ecosystem, this is a unique identifier of the Reader as seen by AMP.
-2. [**Local service**][2]: provided by the Publisher to control and monitor access to documents.
-   1. [**Authorization endpoint**][3]: provided by the Publisher, returns the response that explains which part of a document the Reader can consume.
-   2. [**Login page**][4]: provided by the publisher, allows the Publisher to authenticate the Reader and connect their identity with AMP Reader ID.
-   3. [**Subscribe page**][5]: provided by the publisher, allows the Reader to purchase a subscription from the Publisher.
-   4. [**Pingback endpoint**][6]: provided by the Publisher, is used to send the “view” impression for a document.
-3. [**Vendor services**][7]: registered AMP extensions that cooperate with the main `amp-subscriptions` extension.
-4. [**Fallback entitlement**][8]: provided by the Publisher, determines what the Reader can see in the event that all services fail to respond to the calls made to the Authorization endpoints.
-5. [**Service score factors**][9]: provided by the Publisher, used if no service returns a valid entitlement to determine which service is used as the default service.
-6. [**Structured data markup**][10]: Schema.org page-level configuration, provided by the Publisher.
-7. [**Attributes**][11]: authored by the Publisher, defines which parts of a document are visible in which circumstances.
-8. [**Actions**][12]: fulfilled by a particular service to present the Reader with a specific experience.
-
-### Flow
-
-1. Google AMP Cache returns the document to the Reader with some sections obscured using [Attributes][11].
+1. The AMP Page is loaded in the AMP viewer with some sections obscured using [attributes][11].
 2. The AMP Runtime calls the [Authorization endpoint][3] of all configured services.
-   1. If all services fail to respond, the [Fallback Entitlement][8] will be used.
+   1. If all services fail to respond, the [fallback entitlement][8] will be used.
 3. The AMP Runtime uses the response to either hide or show different sections as defined by the [Attributes][11].
 4. After the document has been shown to the Reader, AMP Runtime calls the Pingback endpoint that can be used by the Publisher to update the countdown meter (number of free views used).
 5. The Publisher can place specific [Actions][12] in the AMP document in order to:
@@ -57,13 +42,13 @@ The solution comprises the following components:
 
 ### Relationship to `amp-access`
 
-The `amp-subscriptions` extension is similar to [`amp-access`](../amp-access/amp-access.md)
+The `amp-subscriptions` component is similar to [`amp-access`](../amp-access/amp-access.md)
 and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
    authorization, but it's strictly defined and standardized.
-2. The `amp-subscriptions` extension allows multiple services to be configured
+2. The `amp-subscriptions` component allows multiple services to be configured
    for the page to participate in access/paywall decisions. Services are executed
    concurrently and prioritized based on which service returns the positive response.
 3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
@@ -78,7 +63,9 @@ use `amp-subscriptions`.
 
 To assist access services and use cases, AMP Access introduced the concept of _Reader ID_.
 
-The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each Reader/Publisher pair - a Reader is identified differently to two different Publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications and has very high entropy. Publishers can use the Reader ID to identify the Reader and map it to their own identity systems.
+The Reader ID provides a solution for Publishers to identify Readers without revealing any personal information. This allows Publishers to track article views and implement metering, paywalls and other subscription services.
+
+The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each Reader/Publisher pair - a Reader is identified differently to two different Publishers. It is a non-reversible ID. It is intended to be random in nature and uses a number of factors to achieve that unpredictability. The Reader ID is included in all AMP/Publisher communications and can be used by Publishers to identify the Reader and map it to their own identity systems.
 
 The Reader ID is constructed on the user device and intended to be long-lived. However, it follows the normal browser storage rules, including those for incognito windows. The intended lifecycle of a Reader ID is 1 year between uses or until the user clears their cookies. The Reader IDs are not currently shared between devices.
 
@@ -86,7 +73,7 @@ The Reader ID is constructed similarly to the mechanism used to build ExternalCI
 
 ### Configuration
 
-The `amp-subscriptions` extension must be configured using JSON configuration:
+The `amp-subscriptions` component must be configured using JSON configuration:
 
 <table>
   <tr>
@@ -111,7 +98,7 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   </tr>
 </table>
 
-Here is an example of a configuration:
+Below is an example of a configuration:
 
 ```html
 <script type="application/json" id="amp-subscriptions">
@@ -149,7 +136,9 @@ Here is an example of a configuration:
 
 ### Local service
 
-The following properties are defined in this configuration:
+The local service is provided by the Publisher to control and monitor access to documents.
+
+It is configured using the following properties:
 
 <table>
   <tr>
@@ -191,7 +180,7 @@ The following properties are defined in this configuration:
 
 _&lt;URL&gt;_ values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [URL Variables][13] section below.
 
-Here’s an example of a "local" service configuration:
+Below is an example of a "local" service configuration:
 
 ```html
 <script type="application/json" id="amp-subscriptions">
@@ -214,9 +203,9 @@ Here’s an example of a "local" service configuration:
 
 #### URL variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few subscriptions-specific variables such as `READER_ID` and `AUTHDATA`.
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [HTML URL Variable Substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
 
-Some of the most relevant variables are described in the table below:
+[`amp-access`](../amp-access/amp-access.md) added the following subscriptions-specific variables:
 
 <table>
   <tr>
@@ -229,12 +218,16 @@ Some of the most relevant variables are described in the table below:
   </tr>
   <tr>
     <td class="col-thirty"><code>AUTHDATA(field)</code></td>
-    <td>The value of the field in the authorization response.</td>
+    <td>Available to Pingback and Login URLs. It allows passing any field in the authorization response as an URL parameter. For example, <code>AUTHDATA(data.isLoggedIn)`</code></td>
   </tr>
   <tr>
     <td class="col-thirty"><code>RETURN_URL</code></td>
     <td>The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.</td>
   </tr>
+</table>
+
+In addition to those, the following standard URL substitutions are useful in the context of this component:
+<table>
   <tr>
     <td class="col-thirty"><code>SOURCE_URL</code></td>
     <td>The Source URL of this AMP document. If the document is served from a CDN, the AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL.</td>
@@ -261,7 +254,7 @@ Some of the most relevant variables are described in the table below:
   </tr>
 </table>
 
-Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
+Below is an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cache-buster:
 
 ```http
 https://pub.com/amp-authorization?
@@ -271,19 +264,16 @@ https://pub.com/amp-authorization?
   &_=RANDOM
 ```
 
-`AUTHDATA` variable is available to Pingback and Login URLs. It allows passing any field in the authorization
-response as an URL parameter. E.g. `AUTHDATA(data.isLoggedIn)`.
-
 #### Authorization endpoint
 
 Authorization is an endpoint provided by the Publisher and called by the AMP Runtime. It is a credentialed CORS GET endpoint.
 
-**Note:** The Authorization endpoint must implement the security protocol described in the
-[AMP CORS Security Spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
+The Authorization endpoint must implement the security protocol described in
+[CORS security in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 
-This endpoint returns the Entitlements object that can be used by the [Attributes][11] to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
+The authorization endpoint returns the Entitlements object that can be used by the [Attributes][11] to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
 
-The Entitlement response returned by the authorization endpoint must conform to the predefined format:
+The Entitlement response returned by the authorization endpoint must conform to the predefined specification:
 <table>
   <tr>
     <th>Property</th>
@@ -307,7 +297,7 @@ The Entitlement response returned by the authorization endpoint must conform to 
   </tr>
 </table>
 
-Example response for a Reader who is a subscriber and is logged into their account:
+Below is an example response for a Reader who is a subscriber and is logged into their account:
 
 ```js
 {
@@ -319,7 +309,7 @@ Example response for a Reader who is a subscriber and is logged into their accou
 }
 ```
 
-Example response for an anonymous Reader who has read 4 out of 5 free articles:
+Below is an example response for an anonymous Reader who has read 4 out of 5 free articles:
 
 ```js
 {
@@ -334,7 +324,7 @@ Example response for an anonymous Reader who has read 4 out of 5 free articles:
 }
 ```
 
-Example response for an anonymous Reader who does not have access because they have read 5 out of 5 free articles:
+Below is an example response for an anonymous Reader who does not have access because they have read 5 out of 5 free articles:
 
 ```js
 {
@@ -348,13 +338,13 @@ Example response for an anonymous Reader who does not have access because they h
 }
 ```
 
-Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
+All vendor services must implement authorization endpoint of their own and conform to the amp-subscriptions [response format][3].
 
 #### Login page
 
-This flow will be triggered as a result of a `"login"` action as described in the [Actions][12] section.
+The login page allows the Publisher to authenticate the Reader and connect their identity with AMP Reader ID. The login page will open as a result of a `"login"` action as described in the [Actions][12] section.
 
-An example of a Login page URL:
+Below is an example of a login page URL:
 
 ```json
 {
@@ -369,9 +359,9 @@ The URL can take any parameters as defined in the [URL Variables][13] section.
 
 #### Subscribe page
 
-This flow will be triggered as a result of a `"subscribe"` action as described in the [Actions][12] section.
+The subscribe page allows the Reader to purchase a subscription from the Publisher. The subscribe page will open as a result of a `"subscribe"` action as described in the [Actions][12] section.
 
-An example of a Subscribe URL:
+An example of a subscribe page URL:
 
 ```json
 {
@@ -389,7 +379,7 @@ The URL can take any parameters as defined in the [URL Variables][13] section.
 Pingback is an endpoint provided by in the "local" service configuration and called by the AMP Runtime. It is a credentialed CORS POST endpoint.
 
 **Note:** The Pingback endpoint must implement the security protocol described in the
-[AMP CORS Security Spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
+[CORS security in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 
 AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. One of the main goals of the Pingback is for the Publisher to update metering information.
 
@@ -526,16 +516,23 @@ Example fallback entitlement:
 
 `amp-subscriptions` relies on the Schema.org page-level configuration for two main properties:
 
-1.  The product ID that the user must be granted to view the content.
-2.  Whether this content requires this product at this time.
+1.  The product ID that the user must be granted to view the content: `productID`.
+2.  Whether this content requires this product at this time: `isAccessibleForFree`.
+
+A usable configuration will provide `NewsArticle` typed item with `isAccessibleForFree` property and a subitem of type `Product` that specifies the `productID`. The configuration is resolved as soon as `productID` and `isAccessibleForFree` are found. It is, therefore, advised to place the configuration as high up in the DOM tree as possible.
 
 The JSON-LD and Microdata formats are supported.
 
 More detail on the markup is available [here](https://developers.google.com/search/docs/data-types/paywalled-content).
 
-#### JSON-LD markup
+#### Example
 
-Using JSON-LD, the markup would look like:
+In these examples:
+
+1.  The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
+2.  This document is currently locked (`"isAccessibleForFree": false`).
+
+Below is an example of the markup using JSON-LD:
 
 ```html
 <script type="application/ld+json">
@@ -557,14 +554,7 @@ Using JSON-LD, the markup would look like:
 </script>
 ```
 
-Thus, notice that:
-
-1.  The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
-2.  This document is currently locked (`"isAccessibleForFree": false`).
-
-#### Microdata markup
-
-Using Microdata, the markup could look like this:
+Below is an example of the markup using Microdata:
 
 ```html
 <div itemscope itemtype="http://schema.org/NewsArticle">
@@ -579,26 +569,16 @@ Using Microdata, the markup could look like this:
 </div>
 ```
 
-A usable configuration will provide `NewsArticle` typed item with `isAccessibleForFree` property and a subitem of type `Product` that specifies the `productID`.
-
-In this example:
-
-1.  The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
-2.  This document is currently locked (`"isAccessibleForFree": false`).
-
-The configuration is resolved as soon as `productID` and `isAccessibleForFree` are found. It is, therefore, advised to place the configuration as high up in the DOM tree as possible.
-
-
 ## Attributes
 ### `subscription-action`
 
-An action declared in the "actions" configuration can be marked up using `subscriptions-action` attribute.
+In order to present the Reader with specific experiences, the Publisher provides specific actions which are declared in the "actions" configuration and can be marked up using `subscriptions-action` attribute.
 
 Available values:
 - `login`: this will trigger the [Login page][4] of the selected service.
 - `subscribe`: this will trigger the [Subscribe page][5] of the selected service.
 
-For instance, this button will execute the "subscribe" action:
+For example, this button will execute the "subscribe" action:
 
 ```html
 <button subscriptions-action="subscribe" subscriptions-display="EXPR">
@@ -616,7 +596,7 @@ Available values:
 - `local`: this will force the `local` service to be used for a particular action.
 - `{serviceId}` (e.g. `subscribe.google.com`): this will force the service with ID `serviceId` to be used for a particular action.
 
-For instance, this button will the `subscribe.google.com` service to perform the `subscribe` action even when `local` service is selected:
+For example, this button will surface the subscribe page from the `subscribe.google.com`  service, regardless of the [service score factors][9]:
 
 ```html
 <button
@@ -814,7 +794,7 @@ The `subscribe` flow is as follows:
 
 ## Analytics
 
-The `amp-subscriptions` extension triggers the following analytics signals:
+The `amp-subscriptions` component triggers the following analytics signals:
 
 1. `subscriptions-started`
 
