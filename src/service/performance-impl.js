@@ -742,10 +742,10 @@ export class Performance {
   /**
    * Tick time delta since the document has become visible.
    * @param {Ticks} label The variable name as it will be reported.
-   * @param {number=} opt_value If present, use this value instead of now for comparison
+   * @param {number=} opt_end If present, use this value for end time instead of now()
    */
-  tickSinceVisible(label, opt_value) {
-    const end = opt_value || this.timeOrigin_ + this.win.performance.now();
+  tickSinceVisible(label, opt_end) {
+    const end = opt_end || this.timeOrigin_ + this.win.performance.now();
     const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
