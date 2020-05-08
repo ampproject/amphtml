@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = (2 * Math.PI) / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|min|max|clamp|var|url|rand|index|width|height|num|length)\(/i;
+const VAR_CSS_RE = /\b(calc|min|max|clamp|var|url|rand|index|width|height|num|length|x|y)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 const BOX_DIMENSIONS = ['h', 'w', 'h', 'w'];
@@ -87,18 +87,18 @@ export class CssContext {
   getViewportSize() {}
 
   /**
-   * Returns the current element's size.
-   * @return {!{width: number, height: number}}
+   * Returns the current element's rectangle.
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
-  getCurrentElementSize() {}
+  getCurrentElementRect() {}
 
   /**
-   * Returns the specified element's size.
+   * Returns the specified element's rectangle.
    * @param {string} unusedSelector
    * @param {?string} unusedSelectionMethod
-   * @return {!{width: number, height: number}}
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
-  getElementSize(unusedSelector, unusedSelectionMethod) {}
+  getElementRect(unusedSelector, unusedSelectionMethod) {}
 
   /**
    * Returns the dimension: "w" for width or "h" for height.
@@ -487,8 +487,8 @@ export class CssLengthNode extends CssNumericNode {
   /** @override */
   calcPercent(percent, context) {
     const dim = context.getDimension();
-    const size = context.getCurrentElementSize();
-    const side = getDimSide(dim, size);
+    const size = context.getCurrentElementRect();
+    const side = getRectField(dim, size);
     return new CssLengthNode((side * percent) / 100, 'px');
   }
 }
@@ -847,16 +847,16 @@ export class CssTranslateNode extends CssFuncNode {
 /**
  * AMP-specific `width()` and `height()` functions.
  */
-export class CssDimSizeNode extends CssNode {
+export class CssRectNode extends CssNode {
   /**
-   * @param {string} dim
+   * @param {string} field x, y, width or height
    * @param {?string=} opt_selector
    * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
    */
-  constructor(dim, opt_selector, opt_selectionMethod) {
+  constructor(field, opt_selector, opt_selectionMethod) {
     super();
     /** @const @private */
-    this.dim_ = dim;
+    this.field_ = field;
     /** @const @private */
     this.selector_ = opt_selector || null;
     /** @const @private */
@@ -875,10 +875,10 @@ export class CssDimSizeNode extends CssNode {
 
   /** @override */
   calc(context) {
-    const size = this.selector_
-      ? context.getElementSize(this.selector_, this.selectionMethod_)
-      : context.getCurrentElementSize();
-    return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+    const rect = this.selector_
+      ? context.getElementRect(this.selector_, this.selectionMethod_)
+      : context.getCurrentElementRect();
+    return new CssLengthNode(getRectField(this.field_, rect), 'px');
   }
 }
 
@@ -1381,12 +1381,18 @@ function noCss() {
 }
 
 /**
- * @param {?string} dim
- * @param {!{width: number, height: number}} size
+ * @param {?string} field
+ * @param {!../../../../src/layout-rect.LayoutRectDef} rect
  * @return {number}
  */
-function getDimSide(dim, size) {
-  return dim == 'w' ? size.width : dim == 'h' ? size.height : 0;
+function getRectField(field, rect) {
+  if (field == 'w') {
+    return rect.width;
+  }
+  if (field == 'h') {
+    return rect.height;
+  }
+  return rect[field] ?? 0;
 }
 
 /**

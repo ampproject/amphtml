@@ -45,7 +45,8 @@ export function Slot(props) {
   const ref = useRef(null);
   const slotProps = {...props, ref};
   useEffect(() => {
-    const slot = dev().assertElement(ref.current);
+    const {current} = dev().assertElement(ref);
+    const slot = dev().assertElement(current);
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
 
@@ -136,7 +137,8 @@ export function Slot(props) {
   // run every render.
   useMountEffect(() => {
     return () => {
-      const slot = dev().assertElement(ref.current);
+      const {current} = dev().assertElement(ref);
+      const slot = dev().assertElement(current);
       const affectedNodes = [];
       getAssignedElements(props, slot).forEach((node) => {
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));

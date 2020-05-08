@@ -23,9 +23,9 @@
     "sourceType": "module"
   },
   "globals": {
+    "MOVE_FIXED_LAYER": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
     "IS_ESM": "readonly",
-
     "AMP": "readonly",
     "context": "readonly",
     "global": "readonly"
@@ -89,6 +89,7 @@
     "local/await-expect": 2,
     "local/closure-type-primitives": 2,
     "local/dict-string-keys": 2,
+    "local/get-mode-usage": 2,
     "local/html-template": 2,
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
@@ -232,6 +233,7 @@
       ],
       "rules": {
         "require-jsdoc": 0,
+        "local/always-call-chai-methods": 2,
         "local/no-bigint": 0,
         "local/no-dynamic-import": 0,
         "local/no-function-async": 0,

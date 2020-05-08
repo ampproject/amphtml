@@ -25,7 +25,7 @@ import {setStyles} from '../src/style';
  * @param {!Window} global
  */
 function getBeOpinion(global) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', function () {});
+  loadScript(global, 'https://widget.beop.io/sdk.js', function () {});
 }
 
 /**
