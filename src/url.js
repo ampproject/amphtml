@@ -653,15 +653,12 @@ export function tryDecodeUriComponent(component, opt_fallback) {
 
 /**
  * Adds the path to the given url.
- * @param {string} url
+ * @param {!Location} url
  * @param {string} path
  * @return {string}
  */
 export function appendPathToUrl(url, path) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-  }
-  a.href = url;
-  a.pathname = a.pathname.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
-  return a.href;
+  const pathname =
+    url.pathname.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
+  return url.protocol + '//' + url.host + pathname + url.search + url.hash;
 }

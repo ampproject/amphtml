@@ -23,6 +23,7 @@ import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-reaction-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {Url} from '../../../src/service/url-impl';
 import {
   addParamsToUrl,
   appendPathToUrl,
@@ -478,9 +479,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(url, '/react');
+        url = appendPathToUrl(new Url(document).parse(url), '/react');
       }
       url = addParamsToUrl(url, requestParams);
+      url = this.buildUrlForRequest_(url, method, requestOptions);
       return this.requestService_
         .executeRequest(url, requestOptions)
         .catch((err) => dev().error(TAG, err));

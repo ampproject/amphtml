@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Url} from '../../src/service/url-impl';
 import {
   addMissingParamsToUrl,
   addParamToUrl,
@@ -1112,32 +1113,47 @@ describe('getProxyServingType', () => {
 
   describe('appendPathToUrl', () => {
     it('should properly join url and path', () => {
-      expect(appendPathToUrl('https://cdn.ampproject.org', '/foo')).to.be.equal(
-        'https://cdn.ampproject.org/foo'
-      );
+      expect(
+        appendPathToUrl(
+          new Url(document).parse('https://cdn.ampproject.org'),
+          '/foo'
+        )
+      ).to.be.equal('https://cdn.ampproject.org/foo');
     });
 
     it('should properly join url with path and path', () => {
       expect(
-        appendPathToUrl('https://cdn.ampproject.org/bar/', '/foo')
+        appendPathToUrl(
+          new Url(document).parse('https://cdn.ampproject.org/bar/'),
+          '/foo'
+        )
       ).to.be.equal('https://cdn.ampproject.org/bar/foo');
     });
 
     it('should add path before query params', () => {
       expect(
-        appendPathToUrl('https://cdn.ampproject.org?a=b', '/foo')
+        appendPathToUrl(
+          new Url(document).parse('https://cdn.ampproject.org?a=b'),
+          '/foo'
+        )
       ).to.be.equal('https://cdn.ampproject.org/foo?a=b');
     });
 
     it('should add path before fragment', () => {
       expect(
-        appendPathToUrl('https://cdn.ampproject.org/#hello', '/foo')
+        appendPathToUrl(
+          new Url(document).parse('https://cdn.ampproject.org/#hello'),
+          '/foo'
+        )
       ).to.be.equal('https://cdn.ampproject.org/foo#hello');
     });
 
     it('should add path before query params and fragment', () => {
       expect(
-        appendPathToUrl('https://cdn.ampproject.org?a=b#hello', '/foo')
+        appendPathToUrl(
+          new Url(document).parse('https://cdn.ampproject.org?a=b#hello'),
+          '/foo'
+        )
       ).to.be.equal('https://cdn.ampproject.org/foo?a=b#hello');
     });
   });
