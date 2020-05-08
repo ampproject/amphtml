@@ -933,7 +933,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
           delta: 15,
         },
         {
-          label: 'fcp-v',
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -995,7 +995,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
           delta: 15,
         },
         {
-          label: 'fcp-v',
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -1301,10 +1301,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     });
 
     describe('when API not supported', () => {
-      it('returns null', async () => {
+      it('throws an error', async () => {
         const perf = getPerformance();
-        const value = await perf.getMetric('lcp-v');
-        expect(value).to.eq(null);
+        try {
+          await perf.getMetric('lcpv');
+        } catch (error) {
+          expect(error.message).to.equal(
+            'Largest Contentful Paint not supported'
+          );
+        }
       });
     });
   });

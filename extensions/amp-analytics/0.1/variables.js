@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {Ticks} from '../../../src/service/performance-impl';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -237,22 +238,34 @@ export class VariableService {
 
     // Call performance-impl.js to get promise returning value for metric
     this.register_('FIRST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('fcp-v')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.FIRST_CONTENTFUL_PAINT_VISIBLE
+      )
     );
     this.register_('FIRST_VIEWPORT_READY', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('pc')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.FIRST_VIEWPORT_READY
+      )
     );
     this.register_('MAKE_BODY_VISIBLE', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('mbv')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.MAKE_BODY_VISIBLE
+      )
     );
     this.register_('LARGEST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('lcp-v')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.LARGEST_CONTENTFUL_PAINT_VISIBLE
+      )
     );
     this.register_('FIRST_INPUT_DELAY', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('fid-v')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.FIRST_INPUT_DELAY_VISIBLE
+      )
     );
     this.register_('CUMULATIVE_LAYOUT_SHIFT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric('cls')
+      Services.performanceFor(this.ampdoc_.win).getMetric(
+        Ticks.CUMULATIVE_LAYOUT_SHIFT
+      )
     );
   }
 

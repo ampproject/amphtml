@@ -19,6 +19,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {Services} from '../../../src/services';
+import {Ticks} from '../../../src/service/performance-impl';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';
@@ -221,11 +222,14 @@ export class MediaPerformanceMetricsService {
         ? CacheState.ORIGIN_CACHE_MISS
         : CacheState.ORIGIN;
     }
-    this.performanceService_.tickDelta('vcs', videoCacheState);
+    this.performanceService_.tickDelta(
+      Ticks.VIDEO_CACHE_STATE,
+      videoCacheState
+    );
 
     // If the media errored.
     if (metrics.error !== null) {
-      this.performanceService_.tickDelta('verr', metrics.error || 0);
+      this.performanceService_.tickDelta(Ticks.VIDEO_ERROR, metrics.error || 0);
       this.performanceService_.flush();
       return;
     }
@@ -241,7 +245,10 @@ export class MediaPerformanceMetricsService {
 
     // If the playback did not start.
     if (!metrics.jointLatency) {
-      this.performanceService_.tickDelta('verr', 5 /* Custom error code */);
+      this.performanceService_.tickDelta(
+        Ticks.VIDEO_ERROR,
+        5 /* Custom error code */
+      );
       this.performanceService_.flush();
       return;
     }
@@ -250,13 +257,22 @@ export class MediaPerformanceMetricsService {
       (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) * 100
     );
 
-    this.performanceService_.tickDelta('vjl', metrics.jointLatency);
-    this.performanceService_.tickDelta('vwt', metrics.watchTime);
-    this.performanceService_.tickDelta('vrb', metrics.rebuffers);
-    this.performanceService_.tickDelta('vrbr', rebufferRate);
+    this.performanceService_.tickDelta(
+      Ticks.VIDEO_JOINT_LATENCY,
+      metrics.jointLatency
+    );
+    this.performanceService_.tickDelta(
+      Ticks.VIDEO_WATCH_TIME,
+      metrics.watchTime
+    );
+    this.performanceService_.tickDelta(
+      Ticks.VIDEO_REBUFFERS,
+      metrics.rebuffers
+    );
+    this.performanceService_.tickDelta(Ticks.VIDEO_REBUFFER_RATE, rebufferRate);
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        'vmtbrb',
+        Ticks.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }
