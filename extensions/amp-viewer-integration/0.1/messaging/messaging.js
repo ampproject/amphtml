@@ -63,7 +63,7 @@ export class WindowPortEmulator {
    * @param {!Window} win
    * @param {string} origin
    * @param {!Window} target
-   * @param {string} opt_token
+   * @param {?string=} opt_token
    */
   constructor(win, origin, target, opt_token) {
     /** @const @private {!Window} */
@@ -72,8 +72,8 @@ export class WindowPortEmulator {
     this.origin_ = origin;
     /** @const @private {!Window} */
     this.target_ = target;
-    /** @const @private {string} */
-    this.token_ = opt_token;
+    /** @const @private {?string} */
+    this.token_ = opt_token || null;
   }
 
   /**
