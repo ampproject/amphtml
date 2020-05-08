@@ -40,8 +40,8 @@
     cursor: pointer !important;
 }
 
-.i-amphtml-story-reaction-poll-binary-container.emoji .i-amphtml-story-reaction-title {
-    font-size: 28px !important;
+[dir="rtl"] .i-amphtml-story-reaction-poll-binary-container {
+    flex-direction: row-reverse;
 }
 
 .i-amphtml-story-reaction-option {
