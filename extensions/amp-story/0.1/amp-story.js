@@ -55,7 +55,6 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
@@ -93,14 +92,12 @@ import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
@@ -181,26 +178,6 @@ const SHARE_WIDGET_PILL_CONTAINER = {
  */
 const HIDE_ON_BOOKEND_SELECTOR =
   'amp-story-page, .i-amphtml-story-system-layer';
-
-/**
- * Util function to retrieve the localization service. Ensures we can retrieve
- * the service synchronously from the amp-story codebase without running into
- * race conditions.
- * @param {!Element} element
- * @return {!../../../src/service/localization.LocalizationService}
- */
-export const getLocalizationService = (element) => {
-  let localizationService = Services.localizationForDoc(element);
-
-  if (!localizationService) {
-    localizationService = new LocalizationService(element);
-    registerServiceBuilderForDoc(element, 'localization', function () {
-      return localizationService;
-    });
-  }
-
-  return localizationService;
-};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}

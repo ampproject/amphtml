@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
-import {getLocalizationService} from './amp-story';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 

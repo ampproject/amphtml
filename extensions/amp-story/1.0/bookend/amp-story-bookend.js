@@ -42,7 +42,7 @@ import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
-import {getLocalizationService} from '../amp-story';
+import {getLocalizationService} from '../amp-story-localization-service';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';

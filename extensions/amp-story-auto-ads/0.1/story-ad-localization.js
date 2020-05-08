@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story';
+import {Services} from '../../../src/services';
+import {registerServiceBuilderForDoc} from '../../../src/service';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsEn from './_locales/en';
@@ -67,6 +69,25 @@ export const CtaTypes = {
   WATCH: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH,
   WATCH_EPISODE:
     LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE,
+};
+
+/**
+ * Util function to retrieve the localization service. Ensures we can retrieve
+ * the service synchronously without running into race conditions.
+ * @param {!Element} element
+ * @return {!../../../src/service/localization.LocalizationService}
+ */
+const getLocalizationService = (element) => {
+  let localizationService = Services.localizationForDoc(element);
+
+  if (!localizationService) {
+    localizationService = new LocalizationService(element);
+    registerServiceBuilderForDoc(element, 'localization', function () {
+      return localizationService;
+    });
+  }
+
+  return localizationService;
 };
 
 export class StoryAdLocalization {

@@ -22,7 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
-import {getLocalizationService} from './amp-story';
+import {getLocalizationService} from './amp-story-localization-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';

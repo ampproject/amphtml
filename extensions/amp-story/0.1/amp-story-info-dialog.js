@@ -23,7 +23,7 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
-import {getLocalizationService} from './amp-story';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} Class to toggle the info dialog. */

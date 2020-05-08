@@ -69,7 +69,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getLocalizationService} from './amp-story';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';

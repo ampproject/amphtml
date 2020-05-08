@@ -72,7 +72,6 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
-import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -108,12 +107,12 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
-import {registerServiceBuilderForDoc} from '../../../src/service';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
@@ -228,26 +227,6 @@ const DEFAULT_THEME_COLOR = '#202125';
 const SIDEBAR_OBSERVER_OPTIONS = {
   attributes: true,
   attributeFilter: ['open'],
-};
-
-/**
- * Util function to retrieve the localization service. Ensures we can retrieve
- * the service synchronously from the amp-story codebase without running into
- * race conditions.
- * @param {!Element} element
- * @return {!../../../src/service/localization.LocalizationService}
- */
-export const getLocalizationService = (element) => {
-  let localizationService = Services.localizationForDoc(element);
-
-  if (!localizationService) {
-    localizationService = new LocalizationService(element);
-    registerServiceBuilderForDoc(element, 'localization', function () {
-      return localizationService;
-    });
-  }
-
-  return localizationService;
 };
 
 /**
