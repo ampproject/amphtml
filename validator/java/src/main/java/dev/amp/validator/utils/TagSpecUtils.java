@@ -311,6 +311,9 @@ public final class TagSpecUtils {
             @Nonnull final ParsedHtmlTag encounteredTag)
             throws TagValidationException, IOException, CssValidationException {
         final ValidatorProtos.ValidationResult.Builder resultForAttempt = ValidatorProtos.ValidationResult.newBuilder();
+        ValidateTagResult wrapperResult =
+            new ValidateTagResult(resultForAttempt, null);
+
         resultForAttempt.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
         validateParentTag(parsedTagSpec, context, resultForAttempt);
         validateAncestorTags(parsedTagSpec, context, resultForAttempt);
@@ -319,12 +322,6 @@ public final class TagSpecUtils {
         // rules either.
         context.getTagStack().matchChildTagName(
                 encounteredTag, context, resultForAttempt);
-
-        // TODO (GeorgeLuo) : resultForAttempt as a builder is not sufficient with inlineStyleCssBytes,
-        //  wrapping with ValidateTagResult (5/3/2020)
-
-      ValidateTagResult wrapperResult =
-        new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
 
       // Only validate attributes if we haven't yet found any errors. The
         // Parent/Ancestor errors are informative without adding additional errors
