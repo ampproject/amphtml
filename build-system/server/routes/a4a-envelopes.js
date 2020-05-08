@@ -48,14 +48,12 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   fs.promises
     .readFile(process.cwd() + templatePath, 'utf8')
     .then((template) => {
-      let url;
+      const url = getInaboxUrl(req);
       if (req.baseUrl == '/inabox-friendly') {
-        url = getInaboxUrl(req, 'inabox-viewport-friendly');
         template = template
           .replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"')
           .replace('INABOX_ADS_TAG_INTEGRATION', '');
       } else {
-        url = getInaboxUrl(req);
         template = template
           .replace(
             /NAME/g,
