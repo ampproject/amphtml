@@ -116,7 +116,8 @@ export class AmpViewerIntegration {
     const port = new WindowPortEmulator(
       this.win,
       origin,
-      this.win.parent /* target */
+      this.win.parent /* target */,
+      messagingToken
     );
     return this.openChannelAndStart_(
       viewer,

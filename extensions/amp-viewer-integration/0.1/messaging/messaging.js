@@ -63,14 +63,17 @@ export class WindowPortEmulator {
    * @param {!Window} win
    * @param {string} origin
    * @param {!Window} target
+   * @param {string} opt_token
    */
-  constructor(win, origin, target) {
+  constructor(win, origin, target, opt_token) {
     /** @const @private {!Window} */
     this.win_ = win;
     /** @const @private {string} */
     this.origin_ = origin;
     /** @const @private {!Window} */
     this.target_ = target;
+    /** @const @private {string} */
+    this.token_ = opt_token;
   }
 
   /**
@@ -79,7 +82,11 @@ export class WindowPortEmulator {
    */
   addEventListener(eventType, handler) {
     this.win_.addEventListener('message', (event) => {
-      if (event.origin == this.origin_ && event.source == this.target_) {
+      if (
+        (event.data.messagingToken === this.token_ ||
+          event.origin == this.origin_) &&
+        event.source == this.target_
+      ) {
         handler(event);
       }
     });
@@ -161,9 +168,16 @@ export class Messaging {
    * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
    * @param {string} origin - origin of target window (use "null" if opaque)
    * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @param {string=} verifyToken - if true, token above is verified on incoming messages rather than attached in outgoing messages
    * @return {!Promise<!Messaging>}
    */
-  static waitForHandshakeFromDocument(source, target, origin, opt_token) {
+  static waitForHandshakeFromDocument(
+    source,
+    target,
+    origin,
+    opt_token,
+    verifyToken = true
+  ) {
     return new Promise((resolve) => {
       const listener = (event) => {
         const message = parseMessage(event.data);
@@ -183,7 +197,7 @@ export class Messaging {
             port,
             /* opt_isWebview */ false,
             opt_token,
-            /* opt_verifyToken */ true
+            verifyToken
           );
           messaging.sendResponse_(message.requestid, CHANNEL_OPEN_MSG, null);
           resolve(messaging);
