@@ -100,6 +100,9 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchVendorConfig_() {
+    if (ANALYTICS_AD) {
+      return Promise.resolve();
+    }
     const type = this.element_.getAttribute('type');
     if (!type) {
       return Promise.resolve();
@@ -131,6 +134,9 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchRemoteConfig_() {
+    if (ANALYTICS_AD) {
+      return Promise.resolve();
+    }
     let remoteConfigUrl = this.element_.getAttribute('config');
     if (!remoteConfigUrl || this.isSandbox_) {
       return Promise.resolve();
@@ -186,7 +192,7 @@ export class AnalyticsConfig {
     mergeObjects(inlineConfig, config);
     mergeObjects(this.remoteConfig_, config);
 
-    if (!configRewriterUrl || this.isSandbox_) {
+    if (ANALYTICS_AD || !configRewriterUrl || this.isSandbox_) {
       this.config_ = this.mergeConfigs_(config);
       // use default configuration merge.
       return Promise.resolve();
@@ -251,6 +257,9 @@ export class AnalyticsConfig {
    * @private
    */
   checkWarningMessage_() {
+    if (ANALYTICS_AD) {
+      return;
+    }
     if (this.config_['warningMessage']) {
       const TAG = this.getName_();
       const type = this.element_.getAttribute('type');
@@ -412,6 +421,9 @@ export class AnalyticsConfig {
    * @param {!JsonObject} inlineConfig
    */
   validateTransport_(inlineConfig) {
+    if (ANALYTICS_AD) {
+      return;
+    }
     const type = this.element_.getAttribute('type');
     if (this.predefinedConfig_[type]) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport

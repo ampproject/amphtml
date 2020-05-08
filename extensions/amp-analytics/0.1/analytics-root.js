@@ -62,45 +62,6 @@ export class AnalyticsRoot {
 
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
-
-    /** @private {?Promise} */
-    this.usingHostAPIPromise_ = null;
-
-    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
-    this.hostVisibilityService_ = null;
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  isUsingHostAPI() {
-    if (this.usingHostAPIPromise_) {
-      return this.usingHostAPIPromise_;
-    }
-    if (!HostServices.isAvailable(this.ampdoc)) {
-      this.usingHostAPIPromise_ = Promise.resolve(false);
-    } else {
-      // TODO: Using the visibility service and apply it for all tracking types
-      const promise = HostServices.visibilityForDoc(this.ampdoc);
-      this.usingHostAPIPromise_ = promise
-        .then((visibilityService) => {
-          this.hostVisibilityService_ = visibilityService;
-          return true;
-        })
-        .catch((error) => {
-          dev().fine(
-            TAG,
-            'VisibilityServiceError - fallback=' + error.fallback
-          );
-          if (error.fallback) {
-            // Do not use HostAPI, fallback to original implementation.
-            return false;
-          }
-          // Cannot fallback, service error. Throw user error.
-          throw user().createError('Host Visibility Service Error');
-        });
-    }
-    return this.usingHostAPIPromise_;
   }
 
   /** @override */
@@ -499,15 +460,7 @@ export class AnalyticsRoot {
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
-      if (this.hostVisibilityService_) {
-        // If there is hostAPI (hostAPI never exist with the FIE case)
-        this.visibilityManager_ = new VisibilityManagerForMApp(
-          this.ampdoc,
-          this.hostVisibilityService_
-        );
-      } else {
-        this.visibilityManager_ = provideVisibilityManager(this.getRoot());
-      }
+      this.visibilityManager_ = provideVisibilityManager(this.getRoot());
     }
     return this.visibilityManager_;
   }

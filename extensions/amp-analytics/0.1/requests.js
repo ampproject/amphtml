@@ -87,7 +87,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.whiteList_ = !ANALYTICS_AD && isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
