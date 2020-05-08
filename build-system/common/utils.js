@@ -30,10 +30,10 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * Cleans and builds binaries with --fortesting flag and
  * overriden config.
  */
-function buildMinifiedRuntime() {
+function buildRuntime(minified = true) {
   execOrDie('gulp clean');
 
-  let command = `gulp dist --fortesting --config ${argv.config}`;
+  let command = minified ? `gulp dist --fortesting` : `gulp build --fortesting`;
   if (argv.core_runtime_only) {
     command += ` --core_runtime_only`;
   } else if (argv.extensions) {
@@ -165,7 +165,7 @@ function installPackages(dir) {
 }
 
 module.exports = {
-  buildMinifiedRuntime,
+  buildRuntime,
   getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,

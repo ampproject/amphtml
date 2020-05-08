@@ -24,7 +24,7 @@ const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildMinifiedRuntime,
+  buildRuntime,
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
@@ -39,12 +39,8 @@ const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-async function launchWebServer_() {
-  await startServer(
-    {host: HOST, port: PORT},
-    {quiet: !argv.debug},
-    {compiled: true}
-  );
+async function launchWebServer_(compiled) {
+  await startServer({host: HOST, port: PORT}, {quiet: !argv.debug}, {compiled});
 }
 
 async function cleanUp_() {
@@ -82,13 +78,14 @@ async function e2e() {
     headless: argv.headless,
   });
 
+
   // build runtime
   if (!argv.nobuild) {
-    buildMinifiedRuntime();
+    buildRuntime(/* minified */ !argv.fast);
   }
 
   // start up web server
-  await launchWebServer_();
+  await launchWebServer_(/* compiled */ !argv.fast);
 
   // run tests
   if (!argv.watch) {
@@ -153,6 +150,7 @@ e2e.flags = {
   'core_runtime_only': '  Builds only the core runtime.',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'extensions': '  Builds only the listed extensions.',
+  'fast': '  Runs the tests using unminified js',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
