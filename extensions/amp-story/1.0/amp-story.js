@@ -2783,7 +2783,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   static isBrowserSupported(win) {
     return Boolean(
-      win.CSS && win.CSS.supports && win.CSS.supports('display', 'grid')
+      win.CSS &&
+        win.CSS.supports &&
+        win.CSS.supports('display', 'grid') &&
+        win.CSS.supports('color', 'var(--test)')
     );
   }
 }
