@@ -189,17 +189,18 @@ class PuppeteerController {
 
   /**
    * @param {string} selector
+   * @param {number=} timeout
    * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
    */
-  async findElement(selector) {
+  async findElement(selector, timeout = DEFAULT_WAIT_TIMEOUT) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
     const jsHandle = await frame.waitForFunction(
       (root, selector) => {
         return root./*OK*/ querySelector(selector);
       },
-      {timeout: DEFAULT_WAIT_TIMEOUT},
+      {timeout},
       root,
       selector
     );
