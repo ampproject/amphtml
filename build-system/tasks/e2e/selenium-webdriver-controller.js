@@ -117,10 +117,11 @@ class SeleniumWebDriverController {
    * until.js#elementLocated
    * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L237}
    * @param {string} selector
+   * @param {number=} timeout
    * @return {!Promise<!ElementHandle<!WebElement>>}
    * @override
    */
-  async findElement(selector) {
+  async findElement(selector, timeout = ELEMENT_WAIT_TIMEOUT) {
     const bySelector = By.css(selector);
 
     const label = 'for element to be located ' + selector;
@@ -139,7 +140,7 @@ class SeleniumWebDriverController {
         throw e;
       }
     });
-    const webElement = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
+    const webElement = await this.driver.wait(condition, timeout);
     return new ElementHandle(webElement, this);
   }
 
