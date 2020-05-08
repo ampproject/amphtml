@@ -49,4 +49,4 @@ In order to retrieve your settings id, please use the [Usercentrics Admin Interf
 
 ## Support
 
-Please get in contact with [Usercentrics](<(https://usercentrics.com/)>) if you need further support.
+Please get in contact with [Usercentrics](https://usercentrics.com/) if you need further support.
