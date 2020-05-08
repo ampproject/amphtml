@@ -658,7 +658,7 @@ export function tryDecodeUriComponent(component, opt_fallback) {
  * @return {string}
  */
 export function appendPathToUrl(url, path) {
-  const pathname =
-    url.pathname.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
+  const pathname = url.pathname + path.replace(/^\//, '');
+  console.log(url, pathname);
   return url.protocol + '//' + url.host + pathname + url.search + url.hash;
 }
