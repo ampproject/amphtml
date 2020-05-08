@@ -25,23 +25,16 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-const fitTextStyle = {
-  border: '1px solid black',
-  display: 'block',
-  width: 300,
-  height: 200,
-};
-
 export const _default = () => {
   const minFontSize = number('minFontSize', 6);
   const maxFontSize = number('maxFontSize', 72);
+  const width = number('width', 300);
+  const height = number('height', 200);
   return (
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      width="300"
-      height="200"
-      style={fitTextStyle}
+      style={{display: 'block', border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
@@ -52,13 +45,13 @@ export const _default = () => {
 export const scaleUpOverflowEllipsis = () => {
   const minFontSize = number('minFontSize', 42);
   const maxFontSize = number('maxFontSize', 72);
+  const width = number('width', 300);
+  const height = number('height', 200);
   return (
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      width="300"
-      height="200"
-      style={fitTextStyle}
+      style={{display: 'block', border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
@@ -69,13 +62,13 @@ export const scaleUpOverflowEllipsis = () => {
 export const scaleDown = () => {
   const minFontSize = number('minFontSize', 6);
   const maxFontSize = number('maxFontSize', 72);
+  const width = number('width', 300);
+  const height = number('height', 200);
   return (
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      width="300"
-      height="200"
-      style={fitTextStyle}
+      style={{display: 'block', border: '1px solid black', width, height}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te
@@ -90,16 +83,13 @@ export const scaleDown = () => {
 export const scaleDownMore = () => {
   const minFontSize = number('minFontSize', 6);
   const maxFontSize = number('maxFontSize', 72);
+  const width = number('width', 108);
+  const height = number('height', 78);
   return (
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{
-        border: '1px solid black',
-        display: 'block',
-        width: 108,
-        height: 78,
-      }}
+      style={{display: 'block', border: '1px solid black', width, height}}
     >
       Superlongword text
     </FitText>
@@ -107,19 +97,16 @@ export const scaleDownMore = () => {
 };
 
 export const configureContent = () => {
+  const content = text('Content', 'hello world');
   const minFontSize = number('minFontSize', 6);
   const maxFontSize = number('maxFontSize', 200);
-  const content = text('Content', 'hello world');
+  const width = number('width', 400);
+  const height = number('height', 400);
   return (
     <FitText
       minFontSize={minFontSize}
       maxFontSize={maxFontSize}
-      style={{
-        border: '1px solid black',
-        display: 'block',
-        width: 400,
-        height: 400,
-      }}
+      style={{display: 'block', border: '1px solid black', width, height}}
     >
       {content}
     </FitText>
