@@ -232,19 +232,11 @@ export class LinkerManager {
       return false;
     }
 
-    const headNode = this.ampdoc_.getHeadNode();
-    const linkerCreatedEl =
-      headNode instanceof ShadowRoot
-        ? this.ampdoc_.getBody()
-        : headNode.querySelector(
-            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-          );
-
-    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
+    if (this.ampdoc_.getBody().hasAttribute(LINKER_CREATED)) {
       return false;
     }
 
-    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
+    this.ampdoc_.getBody().setAttribute(LINKER_CREATED, '');
     return true;
   }
 
