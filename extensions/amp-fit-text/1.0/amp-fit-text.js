@@ -29,8 +29,6 @@ const getFontSizeAttrs = (element) =>
   dict({
     'maxFontSize': getLengthNumeral(element.getAttribute('max-font-size')),
     'minFontSize': getLengthNumeral(element.getAttribute('min-font-size')),
-    'width': element./* OK */ offsetWidth,
-    'height': element./* OK */ offsetHeight,
   });
 
 class AmpFitText extends PreactBaseElement {
@@ -54,7 +52,11 @@ class AmpFitText extends PreactBaseElement {
       attributes: true,
     });
 
-    return getFontSizeAttrs(this.element);
+    const props = getFontSizeAttrs(this.element);
+    props['width'] = this.element./* OK */ offsetWidth;
+    props['height'] = this.element./* OK */ offsetHeight;
+
+    return props;
   }
 
   /** @override */
