@@ -140,10 +140,8 @@ export class LocalizationService {
    *     one exists, or the default otherwise.
    * @return {string|null}
    */
-  getLocalizedString(localizedStringId, elementToUse = undefined) {
-    const languageCodes = this.getLanguageCodesForElement_(
-      elementToUse || this.element_
-    );
+  getLocalizedString(localizedStringId, elementToUse = this.element_) {
+    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,
