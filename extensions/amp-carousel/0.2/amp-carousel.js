@@ -123,6 +123,11 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
@@ -165,7 +170,7 @@ class AmpCarousel extends AMP.BaseElement {
     const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
-      intersectionElement: this.scrollContainer_,
+      intersectionElement: dev().assertElement(this.scrollContainer_),
       // For iOS, we queue changes until scrolling stops, which we detect
       // ~200ms after it actually stops. Load items earlier so they have time
       // to load.

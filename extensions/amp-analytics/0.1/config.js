@@ -57,6 +57,9 @@ export class AnalyticsConfig {
 
     /** @private {boolean} */
     this.isSandbox_ = false;
+
+    /** @private {!./variables.VariableService} */
+    this.variableService_ = variableServiceForDoc(element);
   }
 
   /**
@@ -140,7 +143,10 @@ export class AnalyticsConfig {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }
     return Services.urlReplacementsForDoc(this.element_)
-      .expandUrlAsync(remoteConfigUrl)
+      .expandUrlAsync(
+        remoteConfigUrl,
+        this.variableService_.getMacros(this.element_)
+      )
       .then((expandedUrl) => {
         remoteConfigUrl = expandedUrl;
         return Services.xhrFor(toWin(this.win_)).fetchJson(
@@ -210,29 +216,32 @@ export class AnalyticsConfig {
           'data-credentials'
         );
       }
-      return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(configRewriterUrl)
-        .then((expandedUrl) => {
-          return Services.xhrFor(toWin(this.win_)).fetchJson(
-            expandedUrl,
-            fetchConfig
-          );
-        })
-        .then((res) => res.json())
-        .then(
-          (jsonValue) => {
-            this.config_ = this.mergeConfigs_(jsonValue);
-            dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-          },
-          (err) => {
-            user().error(
-              TAG,
-              'Error rewriting configuration: ',
-              configRewriterUrl,
-              err
+      return (
+        Services.urlReplacementsForDoc(this.element_)
+          // Pass bindings if requested
+          .expandUrlAsync(configRewriterUrl)
+          .then((expandedUrl) => {
+            return Services.xhrFor(toWin(this.win_)).fetchJson(
+              expandedUrl,
+              fetchConfig
             );
-          }
-        );
+          })
+          .then((res) => res.json())
+          .then(
+            (jsonValue) => {
+              this.config_ = this.mergeConfigs_(jsonValue);
+              dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
+            },
+            (err) => {
+              user().error(
+                TAG,
+                'Error rewriting configuration: ',
+                configRewriterUrl,
+                err
+              );
+            }
+          )
+      );
     });
   }
 

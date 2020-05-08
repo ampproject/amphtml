@@ -359,6 +359,9 @@ class InaboxViewportImpl {
   /** @override */
   removeFromFixedLayer(unusedElement) {}
 
+  /** @override */
+  createFixedLayer(unusedConstructor) {}
+
   /**
    * @private
    */

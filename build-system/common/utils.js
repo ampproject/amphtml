@@ -80,6 +80,17 @@ function logFiles(files) {
 }
 
 /**
+ * Extracts the list of files from argv.files.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromArgv() {
+  return argv.files
+    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    : [];
+}
+
+/**
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, check-links, etc.
  *
@@ -89,7 +100,7 @@ function logFiles(files) {
  */
 function getFilesToCheck(globs, options = {}) {
   if (argv.files) {
-    return logFiles(globby.sync(argv.files.split(',')));
+    return logFiles(getFilesFromArgv());
   }
   if (argv.local_changes) {
     const filesChanged = getFilesChanged(globs);
@@ -148,6 +159,7 @@ function installPackages(dir) {
 module.exports = {
   buildMinifiedRuntime,
   getFilesChanged,
+  getFilesFromArgv,
   getFilesToCheck,
   installPackages,
   logOnSameLine,

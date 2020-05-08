@@ -53,10 +53,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       },
     });
 
-    env.sandbox.stub(Services, 'localizationServiceV01').returns({
-      getLocalizedString: (localizedStringId) => `string(${localizedStringId})`,
-    });
-
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
       sendMessageAwaitResponse: (eventType) => {
