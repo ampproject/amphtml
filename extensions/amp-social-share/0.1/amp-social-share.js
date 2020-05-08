@@ -125,6 +125,8 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Do not layout if the component returns before
+    // this.shareEndpoint_ is resolved from buildCallback.
     if (!this.shareEndpoint_) {
       return Promise.resolve();
     }
