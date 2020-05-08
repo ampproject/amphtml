@@ -99,17 +99,14 @@ describes.realWin(
       };
 
       function createExpanderWithWhitelist(whitelist, mockBindings) {
-        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
-          'amp-allowed-url-macros': whitelist,
-        });
-
         variableSource = new GlobalVariableSource(env.ampdoc);
+        variableSource.variableWhitelist_ = whitelist;
         return new Expander(variableSource, mockBindings);
       }
 
       it('should not replace unwhitelisted RANDOM', () => {
         const expander = createExpanderWithWhitelist(
-          'ABC,ABCD,CANONICAL',
+          ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
         const url = 'http://www.google.com/?test=RANDOM';
@@ -119,7 +116,7 @@ describes.realWin(
 
       it('should replace whitelisted ABCD', () => {
         const expander = createExpanderWithWhitelist(
-          'ABC,ABCD,CANONICAL',
+          ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
         const url = 'http://www.google.com/?test=ABCD';
@@ -128,7 +125,7 @@ describes.realWin(
       });
 
       it('should not replace anything with empty whitelist', () => {
-        const expander = createExpanderWithWhitelist('', mockBindings);
+        const expander = createExpanderWithWhitelist([''], mockBindings);
         const url = 'http://www.google.com/?test=ABCD';
         const expected = 'http://www.google.com/?test=ABCD';
         return expect(expander.expand(url)).to.eventually.equal(expected);

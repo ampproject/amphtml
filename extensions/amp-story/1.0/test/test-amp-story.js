@@ -29,7 +29,6 @@ import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
@@ -118,6 +117,13 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
         .stub(viewer, 'hasCapability')
@@ -137,11 +143,6 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
-
       AmpStory.isBrowserSupported = () => true;
     });
 
@@ -152,7 +153,6 @@ describes.realWin(
     it('should build with the expected number of pages', async () => {
       const pagesCount = 2;
       await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-
       await story.layoutCallback();
       expect(story.getPageCount()).to.equal(pagesCount);
     });

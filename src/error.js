@@ -357,6 +357,7 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
+ * If changing this URL, keep `/spec/amp-errors.md` in sync.
  * @return {string} error reporting endpoint URL.
  */
 function chooseReportingUrl_() {
@@ -375,6 +376,12 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
+
+  // Throttle reports from Stable by 90%.
+  if (data['pt'] && Math.random() < 0.9) {
+    return Promise.resolve();
+  }
+
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
@@ -437,6 +444,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'el': errorReportData['el'], // tagName
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
+    'pt': errorReportData['pt'], // is pre-throttled
     'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
@@ -629,6 +637,15 @@ export function getErrorReportData(
   data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
+
+  // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
+  // all clients are serving a version with pre-throttling.
+  if (data['rt'] === 'production') {
+    // Setting this field allows the error reporting service to know that this
+    // error has already been pre-throttled for Stable, so it doesn't need to
+    // throttle again.
+    data['pt'] = '1';
+  }
 
   pushLimit(accumulatedErrorMessages, message, 25);
 

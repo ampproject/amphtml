@@ -33,22 +33,22 @@ export const getMockReactionData = () => {
   return {
     options: [
       {
-        reactionValue: 0,
+        optionIndex: 0,
         totalCount: 3,
         selectedByUser: true,
       },
       {
-        reactionValue: 1,
+        optionIndex: 1,
         totalCount: 3,
         selectedByUser: false,
       },
       {
-        reactionValue: 2,
+        optionIndex: 2,
         totalCount: 3,
         selectedByUser: false,
       },
       {
-        reactionValue: 3,
+        optionIndex: 3,
         totalCount: 1,
         selectedByUser: false,
       },
@@ -68,7 +68,9 @@ class ReactionTest extends AmpStoryReaction {
     const root = html`<div class="container"></div>`;
     const option = html`<span class="i-amphtml-story-reaction-option">1</span>`;
     for (let i = 0; i < this.options; i++) {
-      root.appendChild(option.cloneNode());
+      const newOption = option.cloneNode();
+      newOption.optionIndex_ = i;
+      root.appendChild(newOption);
     }
     return root;
   }
@@ -82,7 +84,7 @@ class ReactionTest extends AmpStoryReaction {
 export const generateResponseDataFor = (responseCounts) => {
   return responseCounts.map((count, index) =>
     dict({
-      'reactionValue': index,
+      'optionIndex': index,
       'totalCount': count,
       'selectedByUser': false,
     })
@@ -139,20 +141,6 @@ describes.realWin(
         .callsFake((fn) => fn());
     });
 
-    it('should add listeners to clicks on options', async () => {
-      const trigger = env.sandbox.stub(
-        ampStoryReaction,
-        'handleOptionSelection_'
-      );
-      ampStoryReaction.buildCallback();
-      await ampStoryReaction.layoutCallback();
-      ampStoryReaction.getOptionElements()[0].click();
-      expect(trigger).to.have.been.calledWith(
-        ampStoryReaction.getOptionElements()[0],
-        0
-      );
-    });
-
     it('should enter post-interaction state on option click', async () => {
       ampStoryReaction.buildCallback();
       await ampStoryReaction.layoutCallback();
@@ -168,7 +156,7 @@ describes.realWin(
     it('should only record first option selected', async () => {
       ampStoryReaction.buildCallback();
       await ampStoryReaction.layoutCallback();
-      await ampStoryReaction.optionElements_[0].click();
+      await ampStoryReaction.getOptionElements()[0].click();
       await ampStoryReaction.getOptionElements()[1].click();
       expect(ampStoryReaction.getOptionElements()[0]).to.have.class(
         'i-amphtml-story-reaction-option-selected'
@@ -211,6 +199,15 @@ describes.realWin(
       expect(ampStoryReaction.getOptionElements()[0]).to.have.class(
         'i-amphtml-story-reaction-option-selected'
       );
+    });
+
+    it('should throw error if percentages are not correctly passed', () => {
+      const responseData = dict({'wrongKey': []});
+      allowConsoleError(() => {
+        expect(() =>
+          ampStoryReaction.handleSuccessfulDataRetrieval_(responseData)
+        ).to.throw();
+      });
     });
 
     it('should preprocess percentages properly', () => {

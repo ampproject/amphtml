@@ -113,15 +113,6 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     visibility: visible !important;
-    transition: transform ease-in-out 0.2s;
-}
-
-[dir=rtl] .i-amphtml-story-reaction-quiz-container:not(.i-amphtml-story-reaction-post-selection) .i-amphtml-story-reaction-quiz-option:hover .i-amphtml-story-reaction-quiz-option-text {
-    transform: translateX(-2px);
-}
-
-.i-amphtml-story-reaction-quiz-container:not(.i-amphtml-story-reaction-post-selection) .i-amphtml-story-reaction-quiz-option:hover .i-amphtml-story-reaction-quiz-option-text {
-    transform: translateX(2px);
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected {

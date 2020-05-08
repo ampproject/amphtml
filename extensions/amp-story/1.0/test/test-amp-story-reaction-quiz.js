@@ -46,16 +46,6 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
   quizElement.setAttribute('id', 'TEST_quizId');
 };
 
-/**
- * Populates the quiz with a prompt and three options.
- *
- * @param {Window} win
- * @param {AmpStoryQuiz} quiz
- */
-const populateStandardQuizContent = (win, quizElement) => {
-  populateQuiz(win, quizElement);
-};
-
 describes.realWin(
   'amp-story-reaction-quiz',
   {
@@ -85,7 +75,7 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win);
+      const localizationService = new LocalizationService(ampStoryQuizEl);
       registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
@@ -104,13 +94,13 @@ describes.realWin(
     });
 
     it('should take the html and reformat it', () => {
-      populateStandardQuizContent(win, ampStoryQuiz.element);
+      populateQuiz(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(2);
     });
 
     it('should structure the content in the quiz element', () => {
-      populateStandardQuizContent(win, ampStoryQuiz.element);
+      populateQuiz(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
 
       const quizContent = ampStoryQuiz.getRootElement().children;
@@ -136,26 +126,49 @@ describes.realWin(
 
     it('should throw an error with fewer than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 0);
-      expect(ampStoryQuiz.buildCallback).to.throw();
+      allowConsoleError(() => {
+        expect(() => {
+          ampStoryQuiz.buildCallback();
+        }).to.throw(
+          /The first child must be a heading element <h1>, <h2>, or <h3>/
+        );
+      });
     });
 
     it('should throw an error with more than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 2);
-      expect(ampStoryQuiz.buildCallback).to.throw();
+      allowConsoleError(() => {
+        expect(() => {
+          ampStoryQuiz.buildCallback();
+        }).to.throw(/Too many children/);
+      });
     });
 
     it('should throw an error with fewer than two options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 1);
-      expect(ampStoryQuiz.buildCallback).to.throw();
+      allowConsoleError(() => {
+        expect(() => {
+          ampStoryQuiz.buildCallback();
+        }).to.throw(/Improper number of options/);
+      });
+    });
+
+    it('should not throw an error with three options and one prompt', () => {
+      populateQuiz(win, ampStoryQuiz.element, 1, 3);
+      expect(() => ampStoryQuiz.buildCallback()).to.not.throw();
     });
 
     it('should throw an error with more than four options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 5);
-      expect(ampStoryQuiz.buildCallback).to.throw();
+      allowConsoleError(() => {
+        expect(() => {
+          ampStoryQuiz.buildCallback();
+        }).to.throw(/Improper number of options/);
+      });
     });
 
     it('should enter the post-interaction state on option click', async () => {
-      populateStandardQuizContent(win, ampStoryQuiz.element);
+      populateQuiz(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
@@ -181,7 +194,7 @@ describes.realWin(
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
-      populateStandardQuizContent(win, ampStoryQuiz.element);
+      populateQuiz(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 

@@ -20,7 +20,6 @@
 
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   calculateTargetScalingFactor,
@@ -59,6 +58,13 @@ describes.realWin(
         };
       });
 
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
@@ -66,11 +72,6 @@ describes.realWin(
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
 
       AmpStory.isBrowserSupported = () => true;
 

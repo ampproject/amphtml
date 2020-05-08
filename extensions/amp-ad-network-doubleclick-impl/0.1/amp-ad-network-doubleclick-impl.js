@@ -52,6 +52,7 @@ import {
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -395,6 +396,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [AMP_AD_NO_CENTER_CSS_EXP.experiment],
         ],
       },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -492,6 +500,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
+    const {consentString, gdprApplies} = consentTuple;
+
     return {
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -503,7 +513,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
-      'gdpr_consent': consentTuple.consentString,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
     };
   }
 
@@ -1118,7 +1129,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
         AMP_AD_NO_CENTER_CSS_EXP.control
     ) {
-      setStyles(this.iframe, {
+      setStyles(dev().assertElement(this.iframe), {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',

@@ -1179,7 +1179,7 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
-];
+].sort((a, b) => a.name.localeCompare(b.name));
 
 /**
  * Used to alias a version of an extension to an older deprecated version.
