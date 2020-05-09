@@ -308,8 +308,8 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private */
-    this.hasTrackingIframe_ = false;
+    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME, boolean>} */
+    this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
@@ -754,16 +754,17 @@ export class AmpDoc {
   }
 
   /**
-   * Allow one tracking iframe for each amp doc. Caller need to handle user
-   * error when registeration returns false
+   * Attempt to register a singleton for each ampdoc.
+   * Caller need to handle user error when registration returns false.
+   * @param {!../enums.AMPDOC_SINGLETON_NAME} name
    * @return {boolean}
    */
-  registerTrackingIframe() {
-    if (this.hasTrackingIframe_) {
-      return false;
+  registerSingleton(name) {
+    if (!this.registeredSingleton_[name]) {
+      this.registeredSingleton_[name] = true;
+      return true;
     }
-    this.hasTrackingIframe_ = true;
-    return true;
+    return false;
   }
 }
 

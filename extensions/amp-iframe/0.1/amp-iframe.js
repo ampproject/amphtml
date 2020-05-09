@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -395,7 +396,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      if (!this.getAmpDoc().registerTrackingIframe()) {
+      if (
+        !this.getAmpDoc().registerSingleton(
+          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+        )
+      ) {
         console /*OK*/
           .error(
             'Only 1 analytics/tracking iframe allowed per ' +
