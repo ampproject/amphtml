@@ -86,6 +86,7 @@ public class ValidateTagResult {
 
     /**
      * Getter for inlineStyleCssBytes
+     * @return the allowed byte length for css
      */
     public int getInlineStyleCssBytes() {
       return inlineStyleCssBytes;

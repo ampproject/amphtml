@@ -114,25 +114,27 @@ public class Declaration extends Rule {
         return name;
     }
 
-  /**
-   * getter for important value
-   */
-  public boolean getImportant() {
-    return this.important;
-  }
+    /**
+     * Getter for important value
+     *
+     * @return the target value of important flag
+     */
+    public boolean getImportant() {
+        return this.important;
+    }
 
-  /**
+    /**
      * @param important the target value of important
-     * Setter for importance of declaration
+     *                  Setter for importance of declaration
      */
     public void setImportant(final boolean important) {
         this.important = important;
     }
 
-  /**
-   * if this is an "important" element
-   */
-  private boolean important;
+    /**
+     * if this is an "important" element
+     */
+    private boolean important;
 
     @Nonnull
     private final String name;
