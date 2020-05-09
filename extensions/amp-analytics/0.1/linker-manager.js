@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/service/ampdoc-impl';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
