@@ -80,6 +80,7 @@ is allowed here.
 
 <button on="tap:refresh-amp-list"></button>
 ```
+
 ### arguments
 
 Used to define arguments that can be used in the called invocation and
