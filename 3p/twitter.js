@@ -102,7 +102,7 @@ export function twitter(global, data) {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
       if (el === event.target) {
-        resize(el);
+        resize(/** @type {!Element} */ (el));
       }
     });
   }
