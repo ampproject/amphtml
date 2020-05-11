@@ -844,6 +844,15 @@ export class Resource {
   }
 
   /**
+   * Whether this is allowed to render when scheduler is idle but not in
+   * viewport.
+   * @return {boolean}
+   */
+  idleRenderOutsideViewport() {
+    return this.isWithinViewportRatio(this.element.idleRenderOutsideViewport());
+  }
+
+  /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
    * @param {number} scheduleTime The time at which layout was scheduled.
    */
