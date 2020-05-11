@@ -32,6 +32,8 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  *
  * @param {boolean} minified
  */
+// TODO(gh/amphtml/28312): Directly call dist() or build()
+// instead of spwaning a new process.
 function buildRuntime(minified = true) {
   execOrDie('gulp clean');
 
