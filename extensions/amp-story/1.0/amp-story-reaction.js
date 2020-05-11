@@ -23,11 +23,11 @@ import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-reaction-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {Url} from '../../../src/service/url-impl';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
+  parseUrlWithA,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
