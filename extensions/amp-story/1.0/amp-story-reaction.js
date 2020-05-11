@@ -493,7 +493,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
         url = appendPathToUrl(this.urlService_.parse(url), '/react');
       }
       url = addParamsToUrl(url, requestParams);
-      url = this.buildUrlForRequest_(url, method, requestOptions);
       return this.requestService_
         .executeRequest(url, requestOptions)
         .catch((err) => dev().error(TAG, err));
