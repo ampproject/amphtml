@@ -97,12 +97,12 @@ export function twitter(global, data) {
       return;
     }
 
-    resize(el);
+    resize(/** @type {!Element} */ (el));
     twttr.events.bind('resize', (event) => {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
       if (el === event.target) {
-        resize(el);
+        resize(/** @type {!Element} */ (el));
       }
     });
   }
