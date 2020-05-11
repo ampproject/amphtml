@@ -16,7 +16,6 @@
 
 import {ActionSource} from './action-source';
 import {CarouselEvents} from './carousel-events';
-import {VisibilityState} from '../../../src/visibility-state';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 
@@ -85,12 +84,6 @@ export class AutoAdvance {
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = element.getAmpDoc();
-
-    /** @private {?VisibilityState} */
-    this.visibilityState_ = this.ampdoc_.getVisibilityState();
-    this.ampdoc_.onVisibilityChanged(
-      () => (this.visibilityState_ = this.ampdoc_.getVisibilityState())
-    );
 
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
@@ -224,7 +217,7 @@ export class AutoAdvance {
   shouldAutoAdvance_() {
     return (
       this.autoAdvance_ &&
-      this.visibilityState_ == VisibilityState.VISIBLE &&
+      this.ampdoc_.isVisible() &&
       !this.paused_ &&
       !this.stopped_ &&
       this.advances_ < this.maxAdvances_
