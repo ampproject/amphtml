@@ -101,20 +101,18 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       '.i-amphtml-story-reaction-quiz-prompt-container'
     );
 
-    // First child must be heading h1-h3
-    if (!this.configs_['prompt-text']) {
+    if (!this.element.hasAttribute('prompt-text')) {
       this.rootEl_.removeChild(promptContainer);
     } else {
-      const prompt = document.createElement('h3');
+      const prompt = document.createElement('h1');
 
-      prompt.textContent = this.configs_['prompt-text'];
+      prompt.textContent = this.element.getAttribute('prompt-text');
       prompt.classList.add('i-amphtml-story-reaction-quiz-prompt');
       promptContainer.appendChild(prompt);
     }
 
-    const options = this.configs_['options'];
     devAssert(
-      options && options.length >= 2 && options.length <= 4,
+      this.options_ && this.options_.length >= 2 && this.options_.length <= 4,
       'Improper number of options'
     );
 
@@ -124,7 +122,9 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
         LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
       );
     });
-    options.forEach((option, index) => this.configureOption_(option, index));
+    this.options_.forEach((option, index) =>
+      this.configureOption_(option, index)
+    );
 
     devAssert(this.element.children.length == 0, 'Too many children');
   }
@@ -134,7 +134,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
    * adds styling and answer choices,
    * and adds it to the quiz element.
    *
-   * @param {Map<string, object>} option
+   * @param {!Map<string, object>} option
    * @param {number} index
    * @private
    */
@@ -145,12 +145,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     convertedOption.querySelector(
       '.i-amphtml-story-reaction-quiz-answer-choice'
     ).textContent = this.answerChoiceOptions_[index];
-    convertedOption.optionIndex_ = option['optionIndex'];
+    convertedOption.optionIndex_ = option.get('optionIndex');
 
     // Extract and structure the option information
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-reaction-quiz-option-text');
-    optionText.textContent = option['text'];
+    optionText.textContent = option.get('text');
     convertedOption.appendChild(optionText);
 
     // Add text container for percentage display
@@ -160,7 +160,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     );
     convertedOption.appendChild(percentageText);
 
-    if (option['correct']) {
+    if (option.get('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
 

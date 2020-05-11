@@ -107,9 +107,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
-    /** @protected {Map<string, object>} */
-    this.configs_ = this.parseAttributes_(this.element);
-
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
@@ -166,7 +163,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.rootEl_ = this.buildComponent(this.element);
+    this.rootEl_ = this.buildComponent();
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
@@ -178,40 +175,35 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Reads the element attributes and returns them as a map.
-   * eg: {
-   *    id: 'koala-quiz',
-   *    prompt-text: 'Who sleeps more?'
-   *    options: [
-   *      {optionIndex: 1, text: 'Koala'},
-   *      {optionIndex: 2, text: 'Developers', correct: 'correct'}
-   *    ],
-   *    ...
-   * }
-   * @private
-   * @return {Map<string, object>}
+   * Reads the element attributes prefixed with option- and returns them as a list.
+   * eg: [
+   *      {optionIndex: 0, text: 'Koala'},
+   *      {optionIndex: 1, text: 'Developers', correct: 'correct'}
+   *    ]
+   * @protected
+   * @return {!Array<Map<string,?>>}
    */
-  parseAttributes_() {
-    const attrs = toArray(this.element.attributes);
-    const config = {'options': []};
-    attrs.forEach((a) => {
+  parseOptions_() {
+    const options = [];
+    toArray(this.element.attributes).forEach((attr) => {
       // Match 'option-#-type' (eg: option-1-text, option-2-image, option-3-correct...)
-      if (a.name.match(/^option-\d+-\w+$/)) {
-        const splitParts = a.name.split('-');
+      if (attr.name.match(/^option-\d+-\w+$/)) {
+        const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
-        while (config['options'].length < optionNumber) {
-          config['options'].push({'optionIndex': config['options'].length + 1});
+        while (options.length < optionNumber) {
+          options.push(
+            new Map(Object.entries({'optionIndex': options.length}))
+          );
         }
-        config['options'][optionNumber - 1][splitParts[2]] = a.value;
-      } else {
-        config[a.name] = a.value;
+        options[optionNumber - 1].set(splitParts[2], attr.value);
       }
     });
-    return config;
+    return options;
   }
 
   /**
    * Generates the template from the config_ Map.
+   *
    * @return {!Element} rootEl_
    * @protected @abstract
    */
@@ -522,7 +514,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
         this.urlService_.parse(url),
         dev().assertString(this.reactionId_)
       );
-      console.log(url);
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
