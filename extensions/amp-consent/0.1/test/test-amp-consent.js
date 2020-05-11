@@ -604,7 +604,7 @@ describes.realWin(
             'consentState': 2,
             'consentString': 'mystring',
             'isDirty': undefined,
-            'consentMetadata': {},
+            'consentMetadata': undefined,
           });
         });
       });
@@ -680,7 +680,7 @@ describes.realWin(
             'consentState': 2,
             'consentString': 'mystring',
             'isDirty': true,
-            'consentMetadata': {},
+            'consentMetadata': undefined,
           });
         });
       });

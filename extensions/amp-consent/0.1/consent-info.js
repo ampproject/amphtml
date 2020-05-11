@@ -38,8 +38,8 @@ export const STORAGE_KEY = {
 /**
  * Key values for retriving/storing metadata values within consent info
  * TODO(micajuineho)
- * GDPR_APPLIES:
- * CONSENT_STRING_TYPE:
+ * GDPR_APPLIES: 'ga'
+ * CONSENT_STRING_TYPE: 'cst'
  * @enum {string}
  */
 export const METADATA_STORAGE_KEY = {};
@@ -336,44 +336,19 @@ export function getConsentStateValue(enumState) {
  * @return {Object}
  */
 function composeMetadataStoreValue(unused) {
-  const storageMetadata = {};
+  const storageMetadata = map();
   // TODO(micajuineho) if (metadata['gdprApplies']) {...}
   return storageMetadata;
 }
 
 /**
- * Converts stroage metadata to human readable object:
+ * TODO(micajuineho) Converts stroage metadata to human readable object:
  * {'ga': true, 'cst': 'tcf-v2'} =>
  * {'gdprApplies': true, 'consentStringType': 'tcf-v2'}
  *
- * @param {Object=} storageMetadata
+ * @param {Object=} unused
  * @return {Object=}
  */
-function convertStorageMetadata(storageMetadata) {
-  if (!storageMetadata) {
-    return undefined;
-  }
-  const metadata = {};
-  const keys = Object.keys(storageMetadata);
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (METADATA_STORAGE_KEY[key]) {
-      metadata[METADATA_STORAGE_KEY[key]] = storageMetadata[key];
-    }
-  }
-  return metadata;
-}
-
-/**
- * If consentString is undefined or invalid, don't
- * include any metadata in update.
- * @param {*} metadata
- * @param {string=} consentString
- * @return {Object=}
- */
-export function configureMetadataByConsentString(metadata, consentString) {
-  if (!metadata || typeof metadata != 'object' || !consentString) {
-    return undefined;
-  }
-  return metadata;
+function convertStorageMetadata(unused) {
+  return undefined;
 }

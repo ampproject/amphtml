@@ -16,7 +16,6 @@
 
 import {
   CONSENT_ITEM_STATE,
-  configureMetadataByConsentString,
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
@@ -41,7 +40,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -289,7 +288,7 @@ export class AmpConsent extends AMP.BaseElement {
           data['info'] = undefined;
         }
         consentString = data['info'];
-        metadata = configureMetadataByConsentString(
+        metadata = this.configureMetadataByConsentString(
           data['consentMetadata'],
           consentString
         );
@@ -566,7 +565,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        configureMetadataByConsentString(
+        this.configureMetadataByConsentString(
           opt_responseMetadata,
           responseConsentString
         )
@@ -705,6 +704,26 @@ export class AmpConsent extends AMP.BaseElement {
    */
   getIsPromptUiOnForTesting() {
     return this.isPromptUIOn_;
+  }
+
+  /**
+   * If consentString is undefined or invalid, don't
+   * include any metadata in update.
+   * @param {*} metadata
+   * @param {string=} consentString
+   * @return {Object=}
+   */
+  configureMetadataByConsentString(metadata, consentString) {
+    if (!isObject(metadata) || !consentString) {
+      if (metadata) {
+        user().error(
+          TAG,
+          'metadata sent by CMP is invalid and will not update.'
+        );
+      }
+      return undefined;
+    }
+    return metadata;
   }
 }
 

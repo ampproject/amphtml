@@ -93,7 +93,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': 'test',
           'isDirty': undefined,
-          'consentMetadata': {},
+          'consentMetadata': undefined,
         })
       );
       expect(
@@ -108,7 +108,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
           'consentState': CONSENT_ITEM_STATE.UNKNOWN,
           'consentString': 'test',
           'isDirty': true,
-          'consentMetadata': {},
+          'consentMetadata': undefined,
         })
       );
     });
@@ -131,7 +131,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
       consentInfo
     );
 
-    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test', {});
+    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );
@@ -139,7 +139,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
     consentInfo = constructConsentInfo(
       CONSENT_ITEM_STATE.ACCEPTED,
       'test',
-      {},
+      undefined,
       true
     );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
