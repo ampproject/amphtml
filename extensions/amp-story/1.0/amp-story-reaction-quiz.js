@@ -194,9 +194,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       return;
     }
 
-    const optionElements = toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
-    );
+    const optionElements = this.getOptionElements();
 
     const percentages = this.preprocessPercentages_(optionsData);
 

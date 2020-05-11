@@ -125,6 +125,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Array<!ReactionOptionType>} */
     this.optionsData_ = null;
 
+    /** @protected {?Array<!Element>} */
+    this.optionElements_ = null;
+
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
@@ -143,13 +146,16 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Gets the options.
-   * @visibleForTesting
+   * @protected
    * @return {!Array<!Element>}
    */
   getOptionElements() {
-    return toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
-    );
+    if (!this.optionElements_) {
+      this.optionElements_ = toArray(
+        this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
+      );
+    }
+    return this.optionElements_;
   }
 
   /** @override */
