@@ -274,6 +274,11 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
       analyticsElement = doc.createElement('amp-analytics');
       doc.body.appendChild(analyticsElement);
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
     });
 
     function check(input, output, opt_bindings) {
@@ -469,56 +474,26 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('FIRST_CONTENTFUL_PAINT', '1');
     });
 
     it('should replace FIRST_VIEWPORT_READY', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('FIRST_VIEWPORT_READY', '1');
     });
 
     it('should replace MAKE_BODY_VISIBLE', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('MAKE_BODY_VISIBLE', '1');
     });
 
     it('should replace LARGEST_CONTENTFUL_PAINT', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('LARGEST_CONTENTFUL_PAINT', '1');
     });
 
     it('should replace FIRST_INPUT_DELAY', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('FIRST_INPUT_DELAY', '1');
     });
 
     it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMetric(unused) {
-          return Promise.resolve(1);
-        },
-      });
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
     });
 

@@ -28,6 +28,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
@@ -237,36 +238,36 @@ export class VariableService {
     );
 
     // Call performance-impl.js to get promise returning value for metric
-    this.register_('FIRST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+    this.registerFieDisallowed_('FIRST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.FIRST_CONTENTFUL_PAINT_VISIBLE
-      )
-    );
-    this.register_('FIRST_VIEWPORT_READY', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+      );
+    });
+    this.registerFieDisallowed_('FIRST_VIEWPORT_READY', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.FIRST_VIEWPORT_READY
-      )
-    );
-    this.register_('MAKE_BODY_VISIBLE', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+      );
+    });
+    this.registerFieDisallowed_('MAKE_BODY_VISIBLE', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.MAKE_BODY_VISIBLE
-      )
-    );
-    this.register_('LARGEST_CONTENTFUL_PAINT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+      );
+    });
+    this.registerFieDisallowed_('LARGEST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.LARGEST_CONTENTFUL_PAINT_VISIBLE
-      )
-    );
-    this.register_('FIRST_INPUT_DELAY', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+      );
+    });
+    this.registerFieDisallowed_('FIRST_INPUT_DELAY', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.FIRST_INPUT_DELAY_VISIBLE
-      )
-    );
-    this.register_('CUMULATIVE_LAYOUT_SHIFT', () =>
-      Services.performanceFor(this.ampdoc_.win).getMetric(
+      );
+    });
+    this.registerFieDisallowed_('CUMULATIVE_LAYOUT_SHIFT', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMetric(
         Ticks.CUMULATIVE_LAYOUT_SHIFT
-      )
-    );
+      );
+    });
   }
 
   /**
@@ -293,6 +294,21 @@ export class VariableService {
   register_(name, macro) {
     devAssert(!this.macros_[name], 'Macro "' + name + '" already registered.');
     this.macros_[name] = macro;
+  }
+
+  /**
+   * Registers a macro, but disallows access in FIEs
+   * @param {string} name
+   * @param {*} macro
+   */
+  registerFieDisallowed_(name, macro) {
+    const element = this.ampdoc_.win.document.documentElement;
+    const wrapped = function () {
+      if (!isInFie(element)) {
+        return macro();
+      }
+    };
+    this.register_(name, wrapped);
   }
 
   /**
