@@ -34,11 +34,6 @@
       custom-element="amp-story"
       src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
     ></script>
-    <script
-      async
-      custom-element="amp-animation"
-      src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"
-    ></script>
   </head>
   <body>
     <amp-story
@@ -53,26 +48,45 @@
       <amp-story-page id="1">
         <amp-story-grid-layer template="fill">
           <!-- Invalid: not a child of amp-story-page -->
-          <amp-story-animation>
+          <amp-story-animation layout="nodisplay" trigger="visibility">
             <script type="application/json">
               {}
             </script>
           </amp-story-animation>
         </amp-story-grid-layer>
         <!-- Valid -->
-        <amp-story-animation>
+        <amp-story-animation layout="nodisplay" trigger="visibility">
           <script type="application/json">
             {}
           </script>
         </amp-story-animation>
         <!-- Valid: with animate-in-after -->
-        <amp-story-animation animate-in-after="another-animation">
+        <amp-story-animation
+          layout="nodisplay"
+          trigger="visibility"
+          animate-in-after="another-animation"
+        >
           <script type="application/json">
             {}
           </script>
         </amp-story-animation>
         <!-- Invalid: no child <script> tag -->
-        <amp-story-animation></amp-story-animation>
+        <amp-story-animation
+          layout="nodisplay"
+          trigger="visibility"
+        ></amp-story-animation>
+        <!-- Invalid: no layout -->
+        <amp-story-animation trigger="visibility">
+          <script type="application/json">
+            {}
+          </script>
+        </amp-story-animation>
+        <!-- Invalid: no trigger="visibility" -->
+        <amp-story-animation layout="nodisplay">
+          <script type="application/json">
+            {}
+          </script>
+        </amp-story-animation>
       </amp-story-page>
     </amp-story>
   </body>

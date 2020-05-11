@@ -809,7 +809,6 @@ tags: {  # <amp-story-animation> <script>
   tag_name: "SCRIPT"
   spec_name: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-ANIMATION"
-  requires_extension: "amp-animation"
   satisfies: "amp-story-animation json script"
   attrs: {
     name: "type"
@@ -830,14 +829,21 @@ tags: {  # <amp-story-animation>
   html_format: AMP
   tag_name: "AMP-STORY-ANIMATION"
   requires_extension: "amp-story"
-  requires_extension: "amp-animation"
   requires: "amp-story-animation json script"
   mandatory_parent: "AMP-STORY-PAGE"
   attrs: { name: "animate-in-after" }
+  attrs: {
+    name: "trigger"
+    value: "visibility"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
   }
 }
 descendant_tag_list {

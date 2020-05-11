@@ -35,11 +35,6 @@ FAIL
 |        custom-element="amp-story"
 |        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
 |      ></script>
-|      <script
-|        async
-|        custom-element="amp-animation"
-|        src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"
-|      ></script>
 |    </head>
 |    <body>
 |      <amp-story
@@ -54,30 +49,53 @@ FAIL
 |        <amp-story-page id="1">
 |          <amp-story-grid-layer template="fill">
 |            <!-- Invalid: not a child of amp-story-page -->
-|            <amp-story-animation>
+|            <amp-story-animation layout="nodisplay" trigger="visibility">
 >>           ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-animation.html:56:10 The parent tag of tag 'amp-story-animation' is 'amp-story-grid-layer', but it can only be 'amp-story-page'. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-animation.html:51:10 The parent tag of tag 'amp-story-animation' is 'amp-story-grid-layer', but it can only be 'amp-story-page'. (see https://amp.dev/documentation/components/amp-story)
 |              <script type="application/json">
 |                {}
 |              </script>
 |            </amp-story-animation>
 |          </amp-story-grid-layer>
 |          <!-- Valid -->
-|          <amp-story-animation>
+|          <amp-story-animation layout="nodisplay" trigger="visibility">
 |            <script type="application/json">
 |              {}
 |            </script>
 |          </amp-story-animation>
 |          <!-- Valid: with animate-in-after -->
-|          <amp-story-animation animate-in-after="another-animation">
+|          <amp-story-animation
+|            layout="nodisplay"
+|            trigger="visibility"
+|            animate-in-after="another-animation"
+|          >
 |            <script type="application/json">
 |              {}
 |            </script>
 |          </amp-story-animation>
 |          <!-- Invalid: no child <script> tag -->
-|          <amp-story-animation></amp-story-animation>
+|          <amp-story-animation
 >>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-animation.html:75:8 Tag 'amp-story-animation' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-animation.html:74:8 Tag 'amp-story-animation' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-story)
+|            layout="nodisplay"
+|            trigger="visibility"
+|          ></amp-story-animation>
+|          <!-- Invalid: no layout -->
+|          <amp-story-animation trigger="visibility">
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animation.html:79:8 The implied layout 'CONTAINER' is not supported by tag 'amp-story-animation'. (see https://amp.dev/documentation/components/amp-story)
+|            <script type="application/json">
+|              {}
+|            </script>
+|          </amp-story-animation>
+|          <!-- Invalid: no trigger="visibility" -->
+|          <amp-story-animation layout="nodisplay">
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-animation.html:85:8 The mandatory attribute 'trigger' is missing in tag 'amp-story-animation'. (see https://amp.dev/documentation/components/amp-story)
+|            <script type="application/json">
+|              {}
+|            </script>
+|          </amp-story-animation>
 |        </amp-story-page>
 |      </amp-story>
 |    </body>
