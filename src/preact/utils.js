@@ -21,6 +21,7 @@ import {useContext, useEffect, useLayoutEffect} from './index';
  * @param {function()} callback
  */
 export function useMountEffect(callback) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(callback, [
     /* mount-only effect*/
   ]);
@@ -30,6 +31,7 @@ export function useMountEffect(callback) {
  * @param {function()} callback
  */
 export function useMountLayoutEffect(callback) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(callback, [
     /* mount-only effect*/
   ]);
