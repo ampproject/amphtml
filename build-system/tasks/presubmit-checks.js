@@ -364,7 +364,6 @@ const forbiddenTerms = {
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
       'src/amp-story-player/amp-story-player-impl.js',
-      'extensions/amp-story/1.0/amp-story-reaction.js',
     ],
   },
   '\\.sendMessage\\(': {

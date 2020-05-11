@@ -25,9 +25,8 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
-  appendPathToUrl,
+  appendPathToUrlWithA,
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrlWithA,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';

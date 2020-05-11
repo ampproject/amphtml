@@ -653,7 +653,9 @@ export function tryDecodeUriComponent(component, opt_fallback) {
 
 /**
  * Adds the path to the given url.
- * @param {!Location} url
+ *
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
  * @param {string} path
  * @return {string}
  */
