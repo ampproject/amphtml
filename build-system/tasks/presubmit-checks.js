@@ -625,6 +625,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
   'startupChunk\\(': {
