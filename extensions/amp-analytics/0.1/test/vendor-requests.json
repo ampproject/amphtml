@@ -39,8 +39,8 @@
   },
   "blueconic": {
     "event": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo_&userAgent=_user_agent_!extraTrackingValues",
-    "trackingIdentifier": "property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_",
-    "defaultTrackingValues": "&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo_&userAgent=_user_agent_"
+    "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_",
+    "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo_&userAgent=_user_agent_"
   },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
