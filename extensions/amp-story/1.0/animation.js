@@ -634,7 +634,9 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            this.page_.querySelectorAll('amp-story-animation[trigger=in]'),
+            this.page_.querySelectorAll(
+              'amp-story-animation[trigger=visibility]'
+            ),
             (el) =>
               this.createRunner_({
                 source: el,
