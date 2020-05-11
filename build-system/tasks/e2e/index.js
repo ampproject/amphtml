@@ -39,8 +39,12 @@ const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-async function launchWebServer_(compiled) {
-  await startServer({host: HOST, port: PORT}, {quiet: !argv.debug}, {compiled});
+async function launchWebServer_(minified) {
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: minified}
+  );
 }
 
 async function cleanUp_() {
@@ -78,14 +82,13 @@ async function e2e() {
     headless: argv.headless,
   });
 
-
   // build runtime
   if (!argv.nobuild) {
     buildRuntime(/* minified */ !argv.fast);
   }
 
   // start up web server
-  await launchWebServer_(/* compiled */ !argv.fast);
+  await launchWebServer_(/* minified */ !argv.fast);
 
   // run tests
   if (!argv.watch) {
