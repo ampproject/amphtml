@@ -70,3 +70,9 @@ CMP_CONFIG['SourcePoint'] = {
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
+
+CMP_CONFIG['Usercentrics'] = {
+  'consentInstanceId': 'Usercentrics',
+  'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
+  'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
+};

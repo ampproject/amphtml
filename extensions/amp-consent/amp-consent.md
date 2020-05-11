@@ -637,5 +637,6 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+- Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
 
 - Your Integrated platform here!
