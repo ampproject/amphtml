@@ -84,7 +84,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime(/* minified */ !argv.fast);
+    buildRuntime(/* minified */ !!argv.compiled);
   }
 
   // start up web server
@@ -151,9 +151,9 @@ e2e.flags = {
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'core_runtime_only': '  Builds only the core runtime.',
-  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
+  'nobuild': '  Skips building the runtime via `gulp (build|dist) --fortesting`',
   'extensions': '  Builds only the listed extensions.',
-  'fast': '  Runs the tests using unminified js',
+  'compiled': '  Runs the tests using minified js',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
