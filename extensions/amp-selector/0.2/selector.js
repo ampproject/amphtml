@@ -60,6 +60,7 @@ export function Selector(props) {
         }
       },
       disabled,
+      multiple,
     }),
     [selected, disabled, multiple, onChange]
   );
@@ -96,6 +97,7 @@ export function Option(props) {
     'selected': selected,
     'selectOption': selectOption,
     'disabled': selectorDisabled,
+    'multiple': selectorMultiple,
   } = selectorContext;
   const clickHandler = () => {
     if (selectorDisabled || disabled) {
@@ -107,11 +109,14 @@ export function Option(props) {
     selectOption(option);
   };
   const isSelected = /** @type {!Array} */ (selected).includes(option);
-  const statusStyle = disabled
-    ? CSS.DISABLED
-    : isSelected
-    ? CSS.SELECTED
-    : CSS.OPTION;
+  const statusStyle =
+    disabled || selectorDisabled
+      ? CSS.DISABLED
+      : isSelected
+      ? selectorMultiple
+        ? CSS.MULTI_SELECTED
+        : CSS.SELECTED
+      : CSS.OPTION;
   const optionProps = {
     ...props,
     'aria-disabled': disabled,
