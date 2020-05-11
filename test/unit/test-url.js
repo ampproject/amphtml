@@ -19,7 +19,7 @@ import {
   addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
-  appendPathToUrl,
+  appendPathToUrlWithA,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getCorsUrl,
@@ -33,7 +33,6 @@ import {
   isSecureUrlDeprecated,
   parseQueryString,
   parseUrlDeprecated,
-  parseUrlWithA,
   removeAmpJsParamsFromUrl,
   removeFragment,
   removeParamsFromSearch,
@@ -1115,11 +1114,9 @@ describe('getProxyServingType', () => {
   describe('appendPathToUrl', () => {
     it('should properly join url and path', () => {
       expect(
-        appendPathToUrl(
-          parseUrlWithA(
-            document.createElement('a'),
-            'https://cdn.ampproject.org'
-          ),
+        appendPathToUrlWithA(
+          document.createElement('a'),
+          'https://cdn.ampproject.org',
           '/foo'
         )
       ).to.be.equal('https://cdn.ampproject.org/foo');
@@ -1127,11 +1124,9 @@ describe('getProxyServingType', () => {
 
     it('should properly join url with path and path', () => {
       expect(
-        appendPathToUrl(
-          parseUrlWithA(
-            document.createElement('a'),
-            'https://cdn.ampproject.org/bar/'
-          ),
+        appendPathToUrlWithA(
+          document.createElement('a'),
+          'https://cdn.ampproject.org/bar/',
           '/foo'
         )
       ).to.be.equal('https://cdn.ampproject.org/bar/foo');
@@ -1139,11 +1134,9 @@ describe('getProxyServingType', () => {
 
     it('should add path before query params', () => {
       expect(
-        appendPathToUrl(
-          parseUrlWithA(
-            document.createElement('a'),
-            'https://cdn.ampproject.org?a=b'
-          ),
+        appendPathToUrlWithA(
+          document.createElement('a'),
+          'https://cdn.ampproject.org?a=b',
           '/foo'
         )
       ).to.be.equal('https://cdn.ampproject.org/foo?a=b');
@@ -1151,11 +1144,9 @@ describe('getProxyServingType', () => {
 
     it('should add path before fragment', () => {
       expect(
-        appendPathToUrl(
-          parseUrlWithA(
-            document.createElement('a'),
-            'https://cdn.ampproject.org/#hello'
-          ),
+        appendPathToUrlWithA(
+          document.createElement('a'),
+          'https://cdn.ampproject.org/#hello',
           '/foo'
         )
       ).to.be.equal('https://cdn.ampproject.org/foo#hello');
@@ -1163,11 +1154,9 @@ describe('getProxyServingType', () => {
 
     it('should add path before query params and fragment', () => {
       expect(
-        appendPathToUrl(
-          parseUrlWithA(
-            document.createElement('a'),
-            'https://cdn.ampproject.org?a=b#hello'
-          ),
+        appendPathToUrlWithA(
+          document.createElement('a'),
+          'https://cdn.ampproject.org?a=b#hello',
           '/foo'
         )
       ).to.be.equal('https://cdn.ampproject.org/foo?a=b#hello');
