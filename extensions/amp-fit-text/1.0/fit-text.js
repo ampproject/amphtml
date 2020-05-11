@@ -16,7 +16,6 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
-import {omit} from '../../../src/utils/object';
 import {px, setStyle, setStyles} from '../../../src/style';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -33,14 +32,8 @@ export function FitText(props) {
     'maxFontSize': maxFontSize = 72,
     'width': width = props['style']['width'] || '100%',
     'height': height = props['style']['height'] || '100%',
+    ...rest
   } = props;
-  const rest = omit(props, [
-    'children',
-    'minFontSize',
-    'maxFontSize',
-    'width',
-    'height',
-  ]);
   const contentRef = useRef(null);
   const measurerRef = useRef(null);
 
