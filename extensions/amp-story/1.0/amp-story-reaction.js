@@ -25,9 +25,8 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
-  appendPathToUrl,
+  appendPathToUrlWithA,
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrlWithA,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
@@ -478,14 +477,15 @@ export class AmpStoryReaction extends AMP.BaseElement {
       const aTag = /** @type {!HTMLAnchorElement} */ (document.createElement(
         'a'
       ));
-      url = appendPathToUrl(
-        parseUrlWithA(aTag, url),
+      url = appendPathToUrlWithA(
+        aTag,
+        url,
         dev().assertString(this.reactionId_)
       );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(parseUrlWithA(aTag, url), '/react');
+        url = appendPathToUrlWithA(aTag, url, '/react');
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_
