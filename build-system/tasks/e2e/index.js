@@ -88,7 +88,7 @@ async function e2e() {
   }
 
   // start up web server
-  await launchWebServer_(/* minified */ !argv.fast);
+  await launchWebServer_(/* minified */ argv.compiled);
 
   // run tests
   if (!argv.watch) {
