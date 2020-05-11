@@ -37,8 +37,8 @@ export function Selector(props) {
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
   const selected = /** @type {!Array} */ (value ? value : selectedState);
-  const context = useMemo(() => {
-    return {
+  const context = useMemo(
+    () => ({
       selected,
       selectOption: (option) => {
         if (!option) {
@@ -60,8 +60,9 @@ export function Selector(props) {
         }
       },
       disabled,
-    };
-  }, [selected, disabled, multiple, onChange]);
+    }),
+    [selected, disabled, multiple, onChange]
+  );
 
   return (
     <Comp
