@@ -15,11 +15,11 @@
  */
 
 import {Services} from './services';
-import {Ticks} from './service/performance-impl';
+import {TickLabel} from './enums';
 
 const LABEL_MAP = {
-  0: Ticks.CONTENT_LAYOUT_DELAY,
-  2: Ticks.ADS_LAYOUT_DELAY,
+  0: TickLabel.CONTENT_LAYOUT_DELAY,
+  2: TickLabel.ADS_LAYOUT_DELAY,
 };
 
 /**
@@ -42,7 +42,7 @@ export class LayoutDelayMeter {
     this.firstLayoutTime_ = null;
     /** @private {boolean} */
     this.done_ = false;
-    /** @private {?Ticks} */
+    /** @private {?TickLabel} */
     this.label_ = LABEL_MAP[priority];
   }
 

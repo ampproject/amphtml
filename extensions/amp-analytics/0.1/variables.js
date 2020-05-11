@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {Ticks} from '../../../src/service/performance-impl';
+import {TickLabel} from '../../../src/enums';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -240,32 +240,32 @@ export class VariableService {
     // Call performance-impl.js to get promise returning value for metric
     this.registerFieDisallowed_('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.FIRST_CONTENTFUL_PAINT_VISIBLE
+        TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
       );
     });
     this.registerFieDisallowed_('FIRST_VIEWPORT_READY', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.FIRST_VIEWPORT_READY
+        TickLabel.FIRST_VIEWPORT_READY
       );
     });
     this.registerFieDisallowed_('MAKE_BODY_VISIBLE', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.MAKE_BODY_VISIBLE
+        TickLabel.MAKE_BODY_VISIBLE
       );
     });
     this.registerFieDisallowed_('LARGEST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.LARGEST_CONTENTFUL_PAINT_VISIBLE
+        TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
       );
     });
     this.registerFieDisallowed_('FIRST_INPUT_DELAY', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.FIRST_INPUT_DELAY_VISIBLE
+        TickLabel.FIRST_INPUT_DELAY_VISIBLE
       );
     });
     this.registerFieDisallowed_('CUMULATIVE_LAYOUT_SHIFT', () => {
       return Services.performanceFor(this.ampdoc_.win).getMetric(
-        Ticks.CUMULATIVE_LAYOUT_SHIFT
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT
       );
     });
   }

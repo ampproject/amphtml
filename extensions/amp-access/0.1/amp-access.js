@@ -22,7 +22,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {Ticks} from '../../../src/service/performance-impl';
+import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -135,8 +135,10 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick(Ticks.ACCESS_AUTHORIZATION);
-        this.performance_.tickSinceVisible(Ticks.ACCESS_AUTHORIZATION_VISIBLE);
+        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tickSinceVisible(
+          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+        );
         this.performance_.flush();
       }
     });

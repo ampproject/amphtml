@@ -22,7 +22,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {Ticks, installPerformanceService} from './service/performance-impl';
+import {TickLabel} from './enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -36,6 +36,7 @@ import {
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
+import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installStandaloneExtension} from './standalone';
@@ -102,7 +103,7 @@ function bootstrap(ampdoc, perf) {
     /* makes the body visible */ true
   );
   startupChunk(self.document, function finalTick() {
-    perf.tick(Ticks.END_INSTALL_STYLES);
+    perf.tick(TickLabel.END_INSTALL_STYLES);
     Services.resourcesForDoc(ampdoc).ampInitComplete();
     // TODO(erwinm): move invocation of the `flush` method when we have the
     // new ticks in place to batch the ticks properly.
@@ -151,7 +152,7 @@ if (shouldMainBootstrapRun) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
-    perf.tick(Ticks.INSTALL_STYLES);
+    perf.tick(TickLabel.INSTALL_STYLES);
     if (IS_ESM) {
       bootstrap(ampdoc, perf);
     } else {

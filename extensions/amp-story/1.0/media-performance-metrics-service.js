@@ -19,7 +19,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {Services} from '../../../src/services';
-import {Ticks} from '../../../src/service/performance-impl';
+import {TickLabel} from '../../../src/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';
@@ -223,13 +223,16 @@ export class MediaPerformanceMetricsService {
         : CacheState.ORIGIN;
     }
     this.performanceService_.tickDelta(
-      Ticks.VIDEO_CACHE_STATE,
+      TickLabel.VIDEO_CACHE_STATE,
       videoCacheState
     );
 
     // If the media errored.
     if (metrics.error !== null) {
-      this.performanceService_.tickDelta(Ticks.VIDEO_ERROR, metrics.error || 0);
+      this.performanceService_.tickDelta(
+        TickLabel.VIDEO_ERROR,
+        metrics.error || 0
+      );
       this.performanceService_.flush();
       return;
     }
@@ -246,7 +249,7 @@ export class MediaPerformanceMetricsService {
     // If the playback did not start.
     if (!metrics.jointLatency) {
       this.performanceService_.tickDelta(
-        Ticks.VIDEO_ERROR,
+        TickLabel.VIDEO_ERROR,
         5 /* Custom error code */
       );
       this.performanceService_.flush();
@@ -258,21 +261,24 @@ export class MediaPerformanceMetricsService {
     );
 
     this.performanceService_.tickDelta(
-      Ticks.VIDEO_JOINT_LATENCY,
+      TickLabel.VIDEO_JOINT_LATENCY,
       metrics.jointLatency
     );
     this.performanceService_.tickDelta(
-      Ticks.VIDEO_WATCH_TIME,
+      TickLabel.VIDEO_WATCH_TIME,
       metrics.watchTime
     );
     this.performanceService_.tickDelta(
-      Ticks.VIDEO_REBUFFERS,
+      TickLabel.VIDEO_REBUFFERS,
       metrics.rebuffers
     );
-    this.performanceService_.tickDelta(Ticks.VIDEO_REBUFFER_RATE, rebufferRate);
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_REBUFFER_RATE,
+      rebufferRate
+    );
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        Ticks.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
+        TickLabel.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }

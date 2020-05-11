@@ -16,7 +16,7 @@
 
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
-import {Ticks} from './service/performance-impl';
+import {TickLabel} from './enums';
 import {dev, devAssert, rethrowAsync} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
@@ -273,7 +273,7 @@ export function makeBodyVisible(doc) {
       }
       try {
         const perf = Services.performanceFor(win);
-        perf.tick(Ticks.MAKE_BODY_VISIBLE);
+        perf.tick(TickLabel.MAKE_BODY_VISIBLE);
         perf.flush();
       } catch (e) {}
     });
