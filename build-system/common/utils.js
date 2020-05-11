@@ -29,6 +29,8 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 /**
  * Cleans and builds binaries with --fortesting flag and
  * overriden config.
+ *
+ * @param {boolean} minified
  */
 function buildRuntime(minified = true) {
   execOrDie('gulp clean');
