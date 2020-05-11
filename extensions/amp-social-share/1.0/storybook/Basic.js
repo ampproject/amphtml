@@ -16,8 +16,6 @@
 
 import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
-import {addParamsToUrl} from '../../../../src/url';
-import {getSocialConfig} from '../amp-social-share-config';
 import {object, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -44,21 +42,11 @@ export const _default = () => {
     '',
     'random',
   ];
-  const type = select(
-    'Provider Type',
-    knobConfigurations,
-    knobConfigurations[0]
-  );
-  let href = text('shareEndpoint', 'Not Specified');
-
-  const config = getSocialConfig(type);
-  if (type !== 'custom endpoint' && type !== 'random' && type) {
-    href = addParamsToUrl(config.shareEndpoint, config.defaultParams);
-  }
-  const params = object('params', {cat: 1, 'subject': 'test'});
+  const type = select('type', knobConfigurations, knobConfigurations[0]);
+  const href = text('shareEndpoint', 'Not Specified');
+  const params = object('params', {'subject': 'test'});
   const bindings = object('bindings', {
-    cat: 1,
-    'subject': 'test',
+    'canonical_url': 'test2',
     'recipient': 'email recipient',
   });
   const width = text('width', undefined);

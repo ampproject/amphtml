@@ -17,6 +17,7 @@ import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
+import {SocialShare2} from './social-share2';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -162,7 +163,7 @@ class AmpSocialShare extends PreactBaseElement {
 }
 
 /** @override */
-AmpSocialShare['Component'] = SocialShare;
+AmpSocialShare['Component'] = SocialShare2;
 
 /** @override */
 AmpSocialShare['props'] = {

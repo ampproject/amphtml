@@ -81,7 +81,9 @@ export function SocialShare(props) {
    * @private
    */
   function handleActivation() {
-    if (finalEndpoint.split(':', 1)[0] === 'navigator-share') {
+    const protocol = finalEndpoint.split(':', 1)[0];
+    const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+    if (protocol === 'navigator-share') {
       if (window && window.navigator && window.navigator.share) {
         const dataStr = finalEndpoint.substr(finalEndpoint.indexOf('?'));
         const data = parseQueryString(dataStr);
@@ -93,8 +95,14 @@ export function SocialShare(props) {
           `Could not complete system share.  Navigator unavailable. ${name}`
         );
       }
+    } else if (protocol === 'sms') {
+      openWindowDialog(
+        window,
+        finalEndpoint.replace('?', '?&'),
+        '_blank',
+        windowFeatures
+      );
     } else {
-      const windowFeatures = 'resizable,scrollbars,width=640,height=480';
       openWindowDialog(window, finalEndpoint, '_blank', windowFeatures);
     }
   }
@@ -107,7 +115,7 @@ export function SocialShare(props) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
-      handleActivation());
+      handleActivation();
     }
   }
 
@@ -167,15 +175,20 @@ function checkProps(props, name) {
   }
 
   // Verify width and height are valid integers
-  let checkedWidth = Math.floor(width || DEFAULT_WIDTH);
-  let checkedHeight = Math.floor(height || DEFAULT_HEIGHT);
-  if (!(checkedWidth > 0)) {
+  // Silently assigns default for undefined, null
+  // Throws Warning for booleans, strings, 0, negative numbers
+  // No errors when positive integer or equivalent string
+  let checkedWidth =
+    width === null || width === undefined ? DEFAULT_WIDTH : width;
+  let checkedHeight =
+    height === null || height === undefined ? DEFAULT_HEIGHT : height;
+  if (typeof checkedWidth === 'boolean' || !(Math.floor(checkedWidth) > 0)) {
     throwWarning(
       `The width property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_WIDTH}. ${name}`
     );
     checkedWidth = DEFAULT_WIDTH;
   }
-  if (!(checkedHeight > 0)) {
+  if (typeof checkedHeight === 'boolean' || !(Math.floor(checkedHeight) > 0)) {
     throwWarning(
       `The height property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_HEIGHT}. ${name}`
     );
