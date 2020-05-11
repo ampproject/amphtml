@@ -107,6 +107,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
+    /** @protected {Map<string, object>} */
+    this.configs_ = this.parseAttributes_(this.element);
+
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
@@ -166,12 +169,44 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Generates the template in rootEl_ and fills up with options.
-   * @param {!Element} unusedElement
+   * Reads the element attributes and returns them as a map.
+   * eg: {
+   *    id: 'koala-quiz',
+   *    prompt-text: 'Who sleeps more?'
+   *    options: [
+   *      {optionIndex: 1, text: 'Koala'},
+   *      {optionIndex: 2, text: 'Developers', correct: 'correct'}
+   *    ],
+   *    ...
+   * }
+   * @private
+   * @return {Map<string, object>}
+   */
+  parseAttributes_() {
+    const attrs = toArray(this.element.attributes);
+    const config = {'options': []};
+    attrs.forEach((a) => {
+      // Match 'option-#-type' (eg: option-1-text, option-2-image, option-3-correct...)
+      if (a.name.match(/^option-\d+-\w+$/)) {
+        const splitParts = a.name.split('-');
+        const optionNumber = parseInt(splitParts[1], 10);
+        while (config['options'].length < optionNumber) {
+          config['options'].push({'optionIndex': config['options'].length + 1});
+        }
+        config['options'][optionNumber - 1][splitParts[2]] = a.value;
+      } else {
+        config[a.name] = a.value;
+      }
+    });
+    return config;
+  }
+
+  /**
+   * Generates the template from the config_ Map.
    * @return {!Element} rootEl_
    * @protected @abstract
    */
-  buildComponent(unusedElement) {
+  buildComponent() {
     // Subclass must override.
   }
 
@@ -482,10 +517,12 @@ export class AmpStoryReaction extends AMP.BaseElement {
         url,
         dev().assertString(this.reactionId_)
       );
+      console.log(url);
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
         url = appendPathToUrlWithA(aTag, url, '/react');
+        console.log(url);
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_
