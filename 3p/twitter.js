@@ -16,6 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
+import {dev} from '../src/log';
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
 import {startsWith} from '../src/string';
@@ -97,7 +98,7 @@ export function twitter(global, data) {
       return;
     }
 
-    resize(el);
+    resize(dev().assertElement(el));
     twttr.events.bind('resize', (event) => {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
