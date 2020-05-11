@@ -114,7 +114,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     it('should always yield the single document', () => {
-      expect(() => service.getAmpDoc(null)).to.throw;
+      expect(() => service.getAmpDoc(null)).to.throw();
       expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());
       const div = document.createElement('div');
       document.body.appendChild(div);

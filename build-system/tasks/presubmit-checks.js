@@ -118,6 +118,7 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
@@ -144,21 +145,11 @@ const forbiddenTerms = {
     ],
     checkInTestFolder: true,
   },
-  // Match `getMode` that is not followed by a "()." and is assigned
-  // as a variable.
-  '\\bgetMode\\([^)]*\\)(?!\\.)': {
-    message: realiasGetMode,
-    whitelist: ['src/mode.js', 'dist.3p/current/integration.js'],
-  },
-  'import[^}]*\\bgetMode as': {
-    message: realiasGetMode,
-  },
   '\\bgetModeObject\\(': {
     message: realiasGetMode,
     whitelist: [
       'src/mode-object.js',
       'src/iframe-attributes.js',
-      'src/log.js',
       'dist.3p/current/integration.js',
     ],
   },

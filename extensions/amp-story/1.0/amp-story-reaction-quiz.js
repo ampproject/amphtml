@@ -72,7 +72,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
 
     /** @private {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win);
+    this.localizationService_ = Services.localizationForDoc(element);
   }
 
   /** @override */

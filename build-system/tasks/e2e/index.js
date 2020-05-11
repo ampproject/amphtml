@@ -23,7 +23,11 @@ const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
-const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {
+  buildMinifiedRuntime,
+  getFilesFromArgv,
+  installPackages,
+} = require('../../common/utils');
 const {cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
@@ -43,8 +47,8 @@ async function launchWebServer_() {
   );
 }
 
-function cleanUp_() {
-  stopServer();
+async function cleanUp_() {
+  await stopServer();
 }
 
 function createMocha_() {
@@ -93,7 +97,7 @@ async function e2e() {
 
     // specify tests to run
     if (argv.files) {
-      glob.sync(argv.files).forEach((file) => {
+      getFilesFromArgv().forEach((file) => {
         delete require.cache[file];
         mocha.addFile(file);
       });
@@ -109,14 +113,16 @@ async function e2e() {
     await reportTestStarted();
     mocha.run(async (failures) => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
       await resolver();
     });
   } else {
-    const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
+    const filesToWatch = argv.files
+      ? getFilesFromArgv()
+      : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');
     watcher.on('change', (file) => {
@@ -144,7 +150,9 @@ e2e.flags = {
     '`chrome`, `firefox`, `safari`.',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'core_runtime_only': '  Builds only the core runtime.',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
+  'extensions': '  Builds only the listed extensions.',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

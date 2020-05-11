@@ -1023,6 +1023,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
       }));
 
+    it('should include gdpr=1, if gdprApplies is true', () =>
+      impl.getAdUrl({gdprApplies: true}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+      }));
+
+    it('should include gdpr=0, if gdprApplies is false', () =>
+      impl.getAdUrl({gdprApplies: false}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+      }));
+
+    it('should not include gdpr, if gdprApplies is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+      }));
+
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
@@ -1707,6 +1722,100 @@ describes.realWin(
               )
             ).to.be.ok
         );
+      });
+    });
+
+    describe('#idleRenderOutsideViewport', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        env.sandbox
+          .stub(impl, 'getResource')
+          .returns({whenWithinViewport: () => Promise.resolve()});
+      });
+
+      it('should use experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        expect(impl.isIdleRender_).to.be.true;
+      });
+
+      it('should return false if using loading strategy', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.element.setAttribute(
+          'data-loading-strategy',
+          'prefer-viewability-over-views'
+        );
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+        expect(impl.isIdleRender_).to.be.false;
+      });
+
+      it('should return false if invalid experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+
+      it('should return 12 if no experiment header', () => {
+        expect(impl.idleRenderOutsideViewport()).to.equal(12);
+      });
+
+      it('should return renderOutsideViewport boolean', () => {
+        env.sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+    });
+
+    describe('idle renderNonAmpCreative', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.postAdResponseExperimentFeatures['render-idle-throttle'] = 'true';
+        env.sandbox
+          .stub(AmpA4A.prototype, 'renderNonAmpCreative')
+          .returns(Promise.resolve());
+      });
+
+      // TODO(jeffkaufman, #13422): this test was silently failing
+      it.skip('should throttle if idle render and non-AMP creative', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.least(1000);
+        });
+      });
+
+      it('should NOT throttle if idle experiment not enabled', () => {
+        impl.win['3pla'] = 1;
+        delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if experiment throttle not enabled', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if idle render and no previous', () => {
+        impl.win['3pla'] = 0;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
       });
     });
 
