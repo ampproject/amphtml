@@ -171,7 +171,14 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
+    this.signalReady_();
     this.isBuilt_ = true;
+  }
+
+  /** @private */
+  signalReady_() {
+    this.element_.dispatchEvent(new CustomEvent('onReady', {}));
+    this.element_.isReady = true;
   }
 
   /** @private */
