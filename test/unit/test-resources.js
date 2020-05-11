@@ -336,6 +336,7 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => false,
         startLayout: () => {},
         applySizesAndMediaQuery: () => {},
       };
@@ -355,6 +356,7 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => false,
         getLayoutPriority: () => LayoutPriority.METADATA,
         startLayout: () => {},
         layoutScheduled: () => {},
@@ -383,6 +385,31 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => true,
+        idleRenderOutsideViewport: () => false,
+        getLayoutPriority: () => LayoutPriority.METADATA,
+        startLayout: () => {},
+        layoutScheduled: () => {},
+        getTaskId: () => 'resource#L',
+        applySizesAndMediaQuery: () => {},
+      };
+      resources.scheduleLayoutOrPreload(resource, true);
+      expect(resources.queue_.getSize()).to.equal(1);
+      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
+    }
+  );
+
+  it(
+    'should schedule idleRenderOutsideViewport resource when' +
+      ' resource is not visible',
+    () => {
+      const resource = {
+        getState: () => ResourceState.READY_FOR_LAYOUT,
+        isDisplayed: () => true,
+        isFixed: () => false,
+        isInViewport: () => false,
+        prerenderAllowed: () => true,
+        renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => true,
         getLayoutPriority: () => LayoutPriority.METADATA,
         startLayout: () => {},
         layoutScheduled: () => {},
@@ -585,6 +612,8 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
     element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
+
+    element.idleRenderOutsideViewport = () => true;
     element.isInViewport = () => false;
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
@@ -973,6 +1002,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     sandbox.stub(resource1, 'isInViewport').returns(false);
     sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
     expect(measureSpy).to.be.calledOnce;
@@ -993,6 +1023,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const measureSpy = sandbox.spy(resource1, 'measure');
     sandbox.stub(resource1, 'isInViewport').returns(false);
     sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
     expect(measureSpy).to.be.calledOnce;
@@ -1083,6 +1114,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(true)
       .onSecondCall()
       .returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1106,6 +1138,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(false)
       .onSecondCall()
       .returns(true);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1126,6 +1159,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resource1.prerenderAllowed = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
+    resource2.element.idleRenderOutsideViewport = () => false;
 
     resources.discoverWork_();
 
@@ -1139,6 +1173,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.buildAttemptsCount_ = 21; // quota is 20
 
     resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
     resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
@@ -1155,6 +1190,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.buildAttemptsCount_ = 21; // quota is 20
 
     resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
     resource1.isBuildRenderBlocking = () => true;
     resource1.state_ = ResourceState.NOT_BUILT;
@@ -1164,12 +1200,29 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.build).to.be.called;
   });
 
+  it('should layout resource if outside viewport but idle', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    resources.documentReady_ = true;
+    sandbox.stub(resource1.element, 'nextSibling').returns({});
+    resource1.element.isBuilt = () => true;
+    resource1.element.renderOutsideViewport = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource2.element.renderOutsideViewport = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.READY_FOR_LAYOUT;
+
+    resources.discoverWork_();
+
+    expect(schedulePassStub).to.be.calledOnce;
+  });
+
   it('should force build resources during discoverWork layout phase', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     // Emulates a resource not building.
     resource1.element.isBuilt = sandbox.stub().returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
