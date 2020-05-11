@@ -15,7 +15,6 @@
  */
 
 import {LruCache} from './utils/lru-cache';
-import {Url} from './service/url-impl';
 import {dict, hasOwn} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';

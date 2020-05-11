@@ -483,9 +483,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      const aTag = /** @type {!HTMLAnchorElement} */ (document.createElement(
-        'a'
-      ));
       url = appendPathToUrl(
         this.urlService_.parse(url),
         dev().assertString(this.reactionId_)
