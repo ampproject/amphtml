@@ -151,7 +151,8 @@ e2e.flags = {
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'core_runtime_only': '  Builds only the core runtime.',
-  'nobuild': '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'nobuild':
+    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
   'extensions': '  Builds only the listed extensions.',
   'compiled': '  Runs the tests using minified js',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
