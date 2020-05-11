@@ -1124,7 +1124,13 @@ describes.realWin('appendPathToUrl', {'amp': true}, (env) => {
     ).to.be.equal('https://cdn.ampproject.org/foo');
   });
 
-  it('should properly join url with path and path', () => {
+  it('should join url and path if none contain /', () => {
+    expect(
+      appendPathToUrl(urlService.parse('https://cdn.ampproject.org'), 'foo')
+    ).to.be.equal('https://cdn.ampproject.org/foo');
+  });
+
+  it('should properly join url with path, and path', () => {
     expect(
       appendPathToUrl(
         urlService.parse('https://cdn.ampproject.org/bar/'),
@@ -1155,7 +1161,7 @@ describes.realWin('appendPathToUrl', {'amp': true}, (env) => {
     expect(
       appendPathToUrl(
         urlService.parse('https://cdn.ampproject.org?a=b#hello'),
-        '/foo'
+        'foo'
       )
     ).to.be.equal('https://cdn.ampproject.org/foo?a=b#hello');
   });
