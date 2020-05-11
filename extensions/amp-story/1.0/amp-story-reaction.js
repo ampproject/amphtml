@@ -475,17 +475,19 @@ export class AmpStoryReaction extends AMP.BaseElement {
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(url, dev().assertString(this.reactionId_));
+      const aTag = /** @type {!HTMLAnchorElement} */ (document.createElement(
+        'a'
+      ));
+      url = appendPathToUrl(
+        parseUrlWithA(aTag, url),
+        dev().assertString(this.reactionId_)
+      );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(
-          parseUrlWithA(document.createElement('a'), url),
-          '/react'
-        );
+        url = appendPathToUrl(parseUrlWithA(aTag, url), '/react');
       }
       url = addParamsToUrl(url, requestParams);
-      url = this.buildUrlForRequest_(url, method, requestOptions);
       return this.requestService_
         .executeRequest(url, requestOptions)
         .catch((err) => dev().error(TAG, err));
