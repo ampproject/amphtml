@@ -273,13 +273,12 @@ function OptionShim(props) {
     'role': role = 'option',
   } = props;
   useLayoutEffect(() => {
-    if (onClick) {
-      domElement.addEventListener('click', onClick);
+    if (!onClick) {
+      return;
     }
+    domElement.addEventListener('click', onClick);
     return () => {
-      if (onClick) {
-        domElement.removeEventListener('click', onClick);
-      }
+      domElement.removeEventListener('click', onClick);
     };
   }, [domElement, onClick]);
 
