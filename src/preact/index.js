@@ -63,7 +63,7 @@ export function createContext(value) {
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
-// TODO: useReducer, useImperativeHandle, useMemo, useCallback, useDebugValue, useErrorBoundary
+// TODO: useReducer, useImperativeHandle, useCallback, useDebugValue, useErrorBoundary
 
 /**
  * @param {S|function():S} initial
