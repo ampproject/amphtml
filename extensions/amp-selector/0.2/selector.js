@@ -33,6 +33,7 @@ export function Selector(props) {
     'multiple': multiple,
     'onChange': onChange,
     'role': role = 'listbox',
+    ...rest
   } = props;
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
@@ -67,10 +68,11 @@ export function Selector(props) {
 
   return (
     <Comp
-      {...props}
+      {...rest}
       role={role}
       aria-disabled={disabled}
       aria-multiselectable={multiple}
+      disabled={disabled}
     >
       <SelectorContext.Provider value={context}>
         {children}
