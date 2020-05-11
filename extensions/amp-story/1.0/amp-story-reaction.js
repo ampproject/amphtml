@@ -185,9 +185,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
         while (options.length < optionNumber) {
-          options.push(
-            new Map(Object.entries({'optionIndex': options.length}))
-          );
+          options.push(new Map([['optionIndex', options.length]]));
         }
         options[optionNumber - 1].set(splitParts[2], attr.value);
       }
