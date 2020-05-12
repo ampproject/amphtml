@@ -336,7 +336,6 @@ AmpSelector.detached = true;
 
 /** @override */
 AmpSelector.props = {
-  // TODO: Add 'forms' attribute when form integrations are supported.
   'disabled': {attr: 'disabled', type: 'boolean'},
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
