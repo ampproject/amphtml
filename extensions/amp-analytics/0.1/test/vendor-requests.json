@@ -84,8 +84,8 @@
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
-    "base": "https://sb.scorecardresearch.com/b?",
-    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
+    "base": "https://sb.scorecardresearch.com/p?",
+    "pageview": "https://sb.scorecardresearch.com/p?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
   "cxense": {
     "host": "https://scomcluster.cxense.com",
