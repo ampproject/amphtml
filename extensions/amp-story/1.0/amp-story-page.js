@@ -69,6 +69,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -1645,7 +1646,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
-    labelEl.textContent = Services.localizationForDoc(
+    labelEl.textContent = getLocalizationService(
       this.element
     ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
 
@@ -1692,7 +1693,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = Services.localizationForDoc(
+    labelEl.textContent = getLocalizationService(
       this.element
     ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO);
 
@@ -1747,7 +1748,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
         (openLabelAttr && openLabelAttr.trim()) ||
-        Services.localizationForDoc(this.element).getLocalizedString(
+        getLocalizationService(this.element).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 

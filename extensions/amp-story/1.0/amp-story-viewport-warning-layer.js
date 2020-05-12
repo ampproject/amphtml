@@ -23,6 +23,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -114,7 +115,7 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-    this.localizationService_ = Services.localizationForDoc(this.storyElement_);
+    this.localizationService_ = getLocalizationService(this.storyElement_);
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
