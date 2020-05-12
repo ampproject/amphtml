@@ -19,6 +19,7 @@
     "Key": false
   },
   "rules": {
+    "local/imports-need-file-extension": 0,
     "local/no-array-destructuring": 0,
     "local/no-bigint": 0,
     "local/no-dynamic-import": 0,

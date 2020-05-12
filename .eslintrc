@@ -91,6 +91,7 @@
     "local/dict-string-keys": 2,
     "local/get-mode-usage": 2,
     "local/html-template": 2,
+    "local/imports-need-file-extension": 2,
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
@@ -234,6 +235,7 @@
       "rules": {
         "require-jsdoc": 0,
         "local/always-call-chai-methods": 2,
+        "local/imports-need-file-extension": 0,
         "local/no-bigint": 0,
         "local/no-dynamic-import": 0,
         "local/no-function-async": 0,
@@ -274,6 +276,7 @@
         "require": false
       },
       "rules": {
+        "local/imports-need-file-extension": 0,
         "local/no-module-exports": 0
       }
     },
