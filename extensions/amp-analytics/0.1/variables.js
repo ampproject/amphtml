@@ -236,38 +236,6 @@ export class VariableService {
     this.register_('SCROLL_LEFT', () =>
       Services.viewportForDoc(this.ampdoc_).getScrollLeft()
     );
-
-    // Call performance-impl.js to get promise returning value for metric
-    this.registerFieDisallowed_('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
-      );
-    });
-    this.registerFieDisallowed_('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.FIRST_VIEWPORT_READY
-      );
-    });
-    this.registerFieDisallowed_('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.MAKE_BODY_VISIBLE
-      );
-    });
-    this.registerFieDisallowed_('LARGEST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
-      );
-    });
-    this.registerFieDisallowed_('FIRST_INPUT_DELAY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.FIRST_INPUT_DELAY_VISIBLE
-      );
-    });
-    this.registerFieDisallowed_('CUMULATIVE_LAYOUT_SHIFT', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMetric(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT
-      );
-    });
   }
 
   /**
@@ -280,7 +248,35 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = {...this.macros_, ...elementMacros};
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 
@@ -294,21 +290,6 @@ export class VariableService {
   register_(name, macro) {
     devAssert(!this.macros_[name], 'Macro "' + name + '" already registered.');
     this.macros_[name] = macro;
-  }
-
-  /**
-   * Registers a macro, but disallows access in FIEs
-   * @param {string} name
-   * @param {*} macro
-   */
-  registerFieDisallowed_(name, macro) {
-    const element = this.ampdoc_.win.document.documentElement;
-    const wrapped = function () {
-      if (!isInFie(element)) {
-        return macro();
-      }
-    };
-    this.register_(name, wrapped);
   }
 
   /**
