@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as ampCaches from '../../build-system/global-configs/caches.json';
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
@@ -48,7 +47,7 @@ const IframePosition = {
 };
 
 /** @const @type {!Array<string>} */
-const SUPPORTED_CACHES = ampCaches.caches.map((cache) => cache.cacheDomain);
+const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 
 /**
  * @enum {number}
