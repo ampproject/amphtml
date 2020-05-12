@@ -25,7 +25,7 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
-  appendPathToUrl,
+  appendPathToUrlWithA,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
@@ -65,6 +65,15 @@ export let ReactionOptionType;
  * }}
  */
 export let ReactionResponseType;
+
+/**
+ * @typedef {{
+ *    optionIndex: number,
+ *    text: string,
+ *    correct: ?string
+ * }}
+ */
+export let OptionConfigType;
 
 /**
  * Reaction abstract class with shared functionality for interactive components.
@@ -110,11 +119,14 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @protected {?Array<!OptionConfigType>} */
+    this.options_ = null;
+
     /** @protected {?Element} */
     this.rootEl_ = null;
 
-    /** @protected {string} */
-    this.reactionId_;
+    /** @protected {?string} */
+    this.reactionId_ = null;
 
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
@@ -130,27 +142,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    /** @protected {!Array<!Element>} */
-    this.optionElements_ = [];
-  }
-
-  /**
-   * Get the root element
-   * @visibleForTesting
-   * @return {Element}
-   */
-  getRootElement() {
-    return this.rootEl_;
-  }
-
-  /**
-   * Get the options
-   * @visibleForTesting
-   * @return {Array<Element>}
-   */
-  getOptionElements() {
-    return this.optionElements_;
   }
 
   /**
@@ -175,7 +166,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.rootEl_ = this.buildComponent(this.element);
+    this.options_ = this.parseOptions_();
+    this.rootEl_ = this.buildComponent();
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
@@ -184,41 +176,40 @@ export class AmpStoryReaction extends AMP.BaseElement {
       dev().assertElement(this.rootEl_),
       CSS
     );
-
-    if (this.element.hasAttribute('fake-backend')) {
-      this.responseData_ = [
-        {
-          'optionIndex': 0,
-          'totalCount': Math.random() * 100,
-          'selectedByUser': false,
-        },
-        {
-          'optionIndex': 1,
-          'totalCount': Math.random() * 100,
-          'selectedByUser': false,
-        },
-        {
-          'optionIndex': 2,
-          'totalCount': Math.random() * 100,
-          'selectedByUser': false,
-        },
-        {
-          'optionIndex': 3,
-          'totalCount': Math.random() * 100,
-          'selectedByUser': false,
-        },
-      ].slice(0, this.getOptionElements().length);
-    }
   }
 
   /**
-   * Generates the template in this.rootEl_ and fills up with options.
-   * @param {!Element} unusedElement
+   * Reads the element attributes prefixed with option- and returns them as a list.
+   * eg: [
+   *      {optionIndex: 0, text: 'Koala'},
+   *      {optionIndex: 1, text: 'Developers', correct: 'correct'}
+   *    ]
+   * @protected
+   * @return {!Array<!OptionConfigType>}
+   */
+  parseOptions_() {
+    const options = [];
+    toArray(this.element.attributes).forEach((attr) => {
+      // Match 'option-#-type' (eg: option-1-text, option-2-image, option-3-correct...)
+      if (attr.name.match(/^option-\d+-\w+$/)) {
+        const splitParts = attr.name.split('-');
+        const optionNumber = parseInt(splitParts[1], 10);
+        while (options.length < optionNumber) {
+          options.push({'optionIndex': options.length});
+        }
+        options[optionNumber - 1][splitParts[2]] = attr.value;
+      }
+    });
+    return options;
+  }
+
+  /**
+   * Generates the template from the config_ Map.
+   *
    * @return {!Element} rootEl_
    * @protected @abstract
-   * @return {!Element}
    */
-  buildComponent(unusedElement) {
+  buildComponent() {
     // Subclass must override.
   }
 
@@ -300,30 +291,47 @@ export class AmpStoryReaction extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.optionElements_ = toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
+    // Add a click listener to the element to trigger the class change
+    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
+  }
+
+  /**
+   * Handles a tap event on the quiz element.
+   * @param {Event} e
+   * @private
+   */
+  handleTap_(e) {
+    if (this.hasUserSelection_) {
+      return;
+    }
+
+    const optionEl = closest(
+      dev().assertElement(e.target),
+      (element) => {
+        return element.classList.contains('i-amphtml-story-reaction-option');
+      },
+      this.rootEl_
     );
 
-    this.optionElements_.forEach((element, reactionValue) => {
-      element.addEventListener('click', (unusedEvent) =>
-        this.handleOptionSelection_(element, reactionValue)
-      );
-    });
+    if (optionEl) {
+      this.handleOptionSelection_(optionEl);
+    }
   }
+
   /**
    * Triggers the analytics event for quiz response.
    *
-   * @param {number} reactionValue
+   * @param {!Element} optionEl
    * @private
    */
-  triggerAnalytics_(reactionValue) {
+  triggerAnalytics_(optionEl) {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_REACTION_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_REACTION_RESPONSE,
-      reactionValue
+      optionEl.optionIndex_
     );
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_REACTION_TYPE,
@@ -434,7 +442,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Triggers changes to component state on response interaction.
    *
    * @param {!Element} optionEl
-   * @param {number} reactionValue
    * @private
    */
   handleOptionSelection_(optionEl) {
@@ -443,7 +450,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         return;
       }
 
-      this.triggerAnalytics_(reactionValue);
+      this.triggerAnalytics_(optionEl);
       this.hasUserSelection_ = true;
 
       if (this.optionsData_) {
@@ -505,11 +512,18 @@ export class AmpStoryReaction extends AMP.BaseElement {
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(url, dev().assertString(this.reactionId_));
+      const aTag = /** @type {!HTMLAnchorElement} */ (document.createElement(
+        'a'
+      ));
+      url = appendPathToUrlWithA(
+        aTag,
+        url,
+        dev().assertString(this.reactionId_)
+      );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(url, '/react');
+        url = appendPathToUrlWithA(aTag, url, '/react');
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_
@@ -532,7 +546,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    *    ...
    *  ]
    * }
-   * @param {ReactionResponseType} response
+   * @param {ReactionResponseType|undefined} response
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
@@ -543,7 +557,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       );
       dev().error(
         TAG,
-        `Invalid reaction response, expected { data: Array<ReactionOptionType>, ...} but received ${response}`
+        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
       );
       return;
     }
@@ -581,7 +595,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Updates the selected classes on option selected.
    * @param {!Element} selectedOption
-   * @protected
+   * @private
    */
   updateToPostSelectionState_(selectedOption) {
     this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');

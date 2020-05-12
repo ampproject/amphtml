@@ -56,20 +56,33 @@ export const getMockReactionData = () => {
   };
 };
 
+export const addConfigToReaction = (
+  reaction,
+  options = 4,
+  correct = undefined
+) => {
+  for (let i = 0; i < options; i++) {
+    reaction.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
+  }
+  if (correct) {
+    reaction.element.setAttribute(`option-${correct}-correct`, 'correct');
+  }
+};
+
 class ReactionTest extends AmpStoryReaction {
-  constructor(element, options = 4) {
+  constructor(element) {
     super(element, ReactionType.QUIZ);
-    this.options = options;
   }
 
   /** @override */
-  buildComponent(element) {
-    const html = htmlFor(element);
+  buildComponent() {
+    const html = htmlFor(this.element);
     const root = html`<div class="container"></div>`;
-    const option = html`<span class="i-amphtml-story-reaction-option">1</span>`;
-    for (let i = 0; i < this.options; i++) {
+    const option = html`<span class="i-amphtml-story-reaction-option"></span>`;
+    for (let i = 0; i < this.options_.length; i++) {
       const newOption = option.cloneNode();
-      newOption.optionIndex_ = i;
+      newOption.optionIndex_ = this.options_[i]['optionIndex'];
+      newOption.textContent = this.options_[i]['text'];
       root.appendChild(newOption);
     }
     return root;
@@ -134,14 +147,26 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryReaction = new ReactionTest(ampStoryReactionEl, 4);
+      ampStoryReaction = new ReactionTest(ampStoryReactionEl);
 
       env.sandbox
         .stub(ampStoryReaction, 'mutateElement')
         .callsFake((fn) => fn());
     });
 
+    it('should parse the attributes properly into an options list', async () => {
+      addConfigToReaction(ampStoryReaction, /* options */ 3, /* correct */ 1);
+      const optionsList = ampStoryReaction.parseOptions_();
+      expect(optionsList).to.have.length(3);
+      for (let i = 0; i < 3; i++) {
+        expect(optionsList[i]).to.haveOwnProperty('text');
+        expect(optionsList[i]).to.haveOwnProperty('optionIndex');
+      }
+      expect(optionsList[0]).to.haveOwnProperty('correct', 'correct');
+    });
+
     it('should enter post-interaction state on option click', async () => {
+      addConfigToReaction(ampStoryReaction);
       ampStoryReaction.buildCallback();
       await ampStoryReaction.layoutCallback();
       await ampStoryReaction.getOptionElements()[0].click();
@@ -154,6 +179,7 @@ describes.realWin(
     });
 
     it('should only record first option selected', async () => {
+      addConfigToReaction(ampStoryReaction);
       ampStoryReaction.buildCallback();
       await ampStoryReaction.layoutCallback();
       await ampStoryReaction.getOptionElements()[0].click();
@@ -168,6 +194,7 @@ describes.realWin(
 
     it('should trigger an analytics event with the right variables on selection', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      addConfigToReaction(ampStoryReaction);
       ampStoryReaction.buildCallback();
       await ampStoryReaction.layoutCallback();
       await ampStoryReaction.getOptionElements()[1].click();
@@ -186,6 +213,7 @@ describes.realWin(
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getMockReactionData());
+      addConfigToReaction(ampStoryReaction);
       ampStoryReaction.element.setAttribute(
         'endpoint',
         'http://localhost:8000'
@@ -202,6 +230,7 @@ describes.realWin(
     });
 
     it('should throw error if percentages are not correctly passed', () => {
+      addConfigToReaction(ampStoryReaction);
       const responseData = dict({'wrongKey': []});
       allowConsoleError(() => {
         expect(() =>

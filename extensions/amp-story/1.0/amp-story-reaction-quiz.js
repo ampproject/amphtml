@@ -17,9 +17,9 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -66,7 +66,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     super(element, ReactionType.QUIZ);
 
     /** @private {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationForDoc(element);
+    this.localizationService_ = getLocalizationService(element);
   }
 
   /** @override */
@@ -80,8 +80,8 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   }
 
   /** @override */
-  buildComponent(element) {
-    this.rootEl_ = buildQuizTemplate(element);
+  buildComponent() {
+    this.rootEl_ = buildQuizTemplate(this.element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
   }
@@ -94,32 +94,22 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
    * @param {Element} root
    */
   attachContent_(root) {
-    // Configure header.
-    const promptInput = this.element.children[0];
     const promptContainer = root.querySelector(
       '.i-amphtml-story-reaction-quiz-prompt-container'
     );
 
-    // First child must be heading h1-h3
-    if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
-      devAssert(
-        false,
-        'The first child must be a heading element <h1>, <h2>, or <h3>'
-      );
+    if (!this.element.hasAttribute('prompt-text')) {
       this.rootEl_.removeChild(promptContainer);
     } else {
-      const prompt = document.createElement(promptInput.tagName);
-      prompt.textContent = promptInput.textContent;
-      prompt.classList.add('i-amphtml-story-reaction-quiz-prompt');
+      const prompt = document.createElement('h1');
 
-      this.element.removeChild(promptInput);
+      prompt.textContent = this.element.getAttribute('prompt-text');
+      prompt.classList.add('i-amphtml-story-reaction-quiz-prompt');
       promptContainer.appendChild(prompt);
     }
 
-    // Configure options.
-    const options = toArray(this.element.querySelectorAll('option'));
     devAssert(
-      options.length >= 2 && options.length <= 4,
+      this.options_ && this.options_.length >= 2 && this.options_.length <= 4,
       'Improper number of options'
     );
 
@@ -129,6 +119,9 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
         LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
       );
     });
+    this.options_.forEach((option, index) =>
+      this.configureOption_(option, index)
+    );
 
     devAssert(this.element.children.length == 0, 'Too many children');
   }
@@ -156,22 +149,47 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /**
    * Creates an option template filled with the details from the <option> element.
    *
-   * @param {Element} option
-   * @return {Element} option element
+   * @param {!./amp-story-reaction.OptionConfigType} option
+   * @param {number} index
    * @private
    */
-  generateOption_(option) {
-    const convertedOption = buildOptionTemplate(dev().assertElement(option));
+  configureOption_(option, index) {
+    const convertedOption = buildOptionTemplate(this.element);
 
-    const optionText = convertedOption.querySelector(
-      '.i-amphtml-story-reaction-quiz-option-text'
+    // Fill in the answer choice and set the option ID
+    convertedOption.querySelector(
+      '.i-amphtml-story-reaction-quiz-answer-choice'
+    ).textContent = this.answerChoiceOptions_[index];
+    convertedOption.optionIndex_ = option['optionIndex'];
+
+    // Extract and structure the option information
+    const optionText = document.createElement('span');
+    optionText.classList.add('i-amphtml-story-reaction-quiz-option-text');
+    optionText.textContent = option['text'];
+    convertedOption.appendChild(optionText);
+
+    // Add text container for percentage display
+    const percentageText = document.createElement('span');
+    percentageText.classList.add(
+      'i-amphtml-story-reaction-quiz-percentage-text'
     );
     optionText.textContent = option.textContent;
 
-    if (option.hasAttribute('correct')) {
+    if (option['correct']) {
       convertedOption.setAttribute('correct', 'correct');
     }
-    return convertedOption;
+
+    this.rootEl_
+      .querySelector('.i-amphtml-story-reaction-quiz-option-container')
+      .appendChild(convertedOption);
+  }
+
+  /**
+   * Get the quiz element
+   * @return {Element}
+   */
+  getQuizElement() {
+    return this.rootEl_;
   }
 
   /**
@@ -188,12 +206,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     const percentages = this.preprocessPercentages_(optionsData);
 
-    optionsData.forEach((optionData, index) => {
+    percentages.forEach((percentage, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       if (optionElements[index]) {
         optionElements[index].querySelector(
           '.i-amphtml-story-reaction-quiz-percentage-text'
-        ).textContent = `${percentages[index]}%`;
+        ).textContent = `${percentage}%`;
       }
     });
 

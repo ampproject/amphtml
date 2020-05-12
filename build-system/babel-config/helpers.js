@@ -20,6 +20,25 @@ const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
 
 /**
+ * Get experiment constant to define from command line arguments, if any
+ *
+ * @return {string|undefined}
+ */
+function getExperimentConstant() {
+  const flag = argv['define_experiment_constant'];
+  // add define flags from arguments
+  if (Array.isArray(flag)) {
+    if (flag.length > 1) {
+      throw new Error('Only one define_experiment_constant flag is allowed');
+    }
+    return flag[0];
+  }
+  if (flag) {
+    return flag;
+  }
+}
+
+/**
  * Computes options for the minify-replace plugin
  *
  * @return {Array<string|Object>}
@@ -38,17 +57,10 @@ function getReplacePlugin() {
   }
 
   const replacements = [createReplacement('IS_ESM', argv.esm)];
-  const defineFlag = argv.define_experiment_constant;
 
-  // add define flags from arguments
-  if (Array.isArray(defineFlag)) {
-    if (defineFlag.length > 1) {
-      throw new Error('Only one define_experiment_constant flag is allowed');
-    } else {
-      replacements.push(createReplacement(defineFlag[0], true));
-    }
-  } else if (defineFlag) {
-    replacements.push(createReplacement(defineFlag, true));
+  const experimentConstant = getExperimentConstant();
+  if (experimentConstant) {
+    replacements.push(createReplacement(experimentConstant, true));
   }
 
   // default each experiment flag constant to false
@@ -80,5 +92,6 @@ function getReplacePlugin() {
 }
 
 module.exports = {
+  getExperimentConstant,
   getReplacePlugin,
 };
