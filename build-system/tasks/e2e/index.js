@@ -47,8 +47,8 @@ async function launchWebServer_() {
   );
 }
 
-function cleanUp_() {
-  stopServer();
+async function cleanUp_() {
+  await stopServer();
 }
 
 function createMocha_() {
@@ -113,7 +113,7 @@ async function e2e() {
     await reportTestStarted();
     mocha.run(async (failures) => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
@@ -150,7 +150,9 @@ e2e.flags = {
     '`chrome`, `firefox`, `safari`.',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'core_runtime_only': '  Builds only the core runtime.',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
+  'extensions': '  Builds only the listed extensions.',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

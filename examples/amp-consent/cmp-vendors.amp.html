@@ -102,6 +102,7 @@
           <option>Ogury</option>
           <option>SourcePoint</option>
           <option>opencmp</option>
+          <option>Usercentrics</option>
         </select>
         <input type="submit" value="Go">
         <button type="button" class="clearLocalStorage" onclick="localStorage.clear(); alert('localStorage Cleared!')">Clear localStorage</button>
@@ -271,6 +272,7 @@
       </amp-consent>
       <!-- End SourcePoint example -->
 
+
       <!-- opencmp example -->
       <amp-consent id='consent' layout='nodisplay' type='opencmp'>
         <script type="application/json">
@@ -285,6 +287,24 @@
         </div>
       </amp-consent>
       <!-- End opencmp example -->
+
+      <!-- Usercentrics example -->
+      <amp-consent id='consent' layout='nodisplay' type='Usercentrics'>
+        <script type="application/json">
+          {
+            "postPromptUI": "my-consent-prompt-ui",
+            "clientConfig": {
+              "id": "i3_E5TN2b"
+            }
+          }
+        </script>
+        <div id="my-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=Usercentrics)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End Usercentrics example -->
+
     </div>
   </body>
 </html>

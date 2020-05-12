@@ -75,4 +75,9 @@ CMP_CONFIG['opencmp'] = {
   'consentInstanceId': 'opencmp',
   'checkConsentHref': 'https://amp.opencmp.net/consent/check',
   'promptUISrc': 'https://cmp.opencmp.net/tcf-v2/amp/cmp.html',
+
+CMP_CONFIG['Usercentrics'] = {
+  'consentInstanceId': 'Usercentrics',
+  'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
+  'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
 };
