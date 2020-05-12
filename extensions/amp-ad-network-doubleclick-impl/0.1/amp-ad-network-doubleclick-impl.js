@@ -428,7 +428,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
-        ifTrafficEligible: () => true,
+        isTrafficEligible: () => true,
         branches: [
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
