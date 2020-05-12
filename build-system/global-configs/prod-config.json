@@ -34,5 +34,6 @@
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "version-locking": 1,
-  "amp-ad-no-center-css": 0.05
+  "amp-ad-no-center-css": 0.05,
+  "analytics-chunks": 1
 }
