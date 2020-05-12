@@ -24,7 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {execOrDie} = require('../common/exec');
+const {buildRuntime} = require('../common/utils');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -36,12 +36,7 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    execOrDie('gulp clean');
-    if (argv.compiled) {
-      execOrDie(`gulp dist --fortesting --config ${argv.config}`);
-    } else {
-      execOrDie(`gulp build --config ${argv.config}`);
-    }
+    await buildRuntime();
   }
 }
 
@@ -68,8 +63,7 @@ integration.description = 'Runs integration tests';
 integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
-  'compiled':
-    '  Changes integration tests to use production JS binaries for execution',
+  'compiled': '  Runs tests against minified JS',
   'single_pass': '  Run tests in Single Pass mode',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',

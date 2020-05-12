@@ -44,7 +44,7 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --nobuild --master');
+    timedExecOrDie('gulp visual-diff --compiled --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -56,9 +56,9 @@ function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --nobuild');
+      timedExecOrDie('gulp visual-diff --compiled --nobuild');
     } else {
-      timedExecOrDie('gulp visual-diff --nobuild --empty');
+      timedExecOrDie('gulp visual-diff --empty');
       console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Visual Diff Tests'),

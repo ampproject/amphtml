@@ -157,7 +157,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {compiled: argv.compiled}
   );
 }
 
@@ -683,7 +683,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
-  ensureOrBuildAmpRuntimeInTestMode_();
+  await ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
@@ -753,14 +753,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp dist --fortesting'),
+        colors.cyan('gulp build|dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    buildRuntime();
+    await buildRuntime();
   }
 }
 
@@ -825,4 +825,5 @@ visualDiff.flags = {
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
   'noyarn': '  Skip calling yarn to install dependencies',
+  'compiled': '  Runs tests against minified JS',
 };
