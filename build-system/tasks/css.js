@@ -76,11 +76,12 @@ const cssEntryPoints = [
 
 /**
  * Compile all the css and drop in the build folder
- * @param {boolean} watch
+ *
+ * @param {Object=} options
  * @return {!Promise}
  */
-function compileCss(watch) {
-  if (watch) {
+function compileCss(options = {}) {
+  if (options.watch) {
     const watchFunc = () => {
       compileCss();
     };
