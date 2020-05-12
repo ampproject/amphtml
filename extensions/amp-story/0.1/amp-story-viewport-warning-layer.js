@@ -15,12 +15,12 @@
  */
 
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-0.1.css.js';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {StateProperty} from './amp-story-store-service.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dict} from './../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 /**
  * CSS class indicating the format is landscape.

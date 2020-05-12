@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import './access-vendor';
-import {Deferred} from '../../../src/utils/promise';
-import {dev, userAssert} from '../../../src/log';
+import './access-vendor.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {dev, userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';

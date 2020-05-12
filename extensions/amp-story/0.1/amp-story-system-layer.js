@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {Action, StateProperty} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-system-layer-0.1.css.js';
 import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
-} from './development-ui';
-import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
-import {renderAsElement} from './simple-template';
+} from './development-ui.js';
+import {ProgressBar} from './progress-bar.js';
+import {Services} from '../../../src/services.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {matches} from '../../../src/dom.js';
+import {renderAsElement} from './simple-template.js';
 
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';

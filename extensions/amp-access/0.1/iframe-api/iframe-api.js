@@ -20,8 +20,8 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
-import {AccessController} from './access-controller';
-import {Messenger} from './messenger';
+import {AccessController} from './access-controller.js';
+import {Messenger} from './messenger.js';
 
 /**
  * Connects to the parent AMP document and executes authorization, pingback,

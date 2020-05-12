@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
 import {CSS} from '../../../build/amp-next-page-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {NextPageService} from './next-page-service.js';
+import {Services} from '../../../src/services.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {assertConfig} from './config';
+} from '../../../src/batched-json.js';
+import {assertConfig} from './config.js';
 import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
   isJsonScriptTag,
   removeElement,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson, tryParseJson} from '../../../src/json';
+} from '../../../src/dom.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {fetchDocument} from '../../../src/document-fetcher.js';
+import {getConsentPolicyState} from '../../../src/consent.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {parseJson, tryParseJson} from '../../../src/json.js';
 
 const TAG = 'amp-next-page';
 

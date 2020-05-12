@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-0.1.css.js';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dict} from './../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 /**
  * Full viewport black layer indicating browser is not supported.

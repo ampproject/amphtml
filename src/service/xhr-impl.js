@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../services.js';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -22,13 +22,13 @@ import {
   setupInit,
   setupInput,
   setupJsonFetchInit,
-} from '../utils/xhr-utils';
-import {dev, user} from '../log';
-import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {getService, registerServiceBuilder} from '../service';
-import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {startsWith} from '../string';
+} from '../utils/xhr-utils.js';
+import {dev, user} from '../log.js';
+import {getCorsUrl, parseUrlDeprecated} from '../url.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {isFormDataWrapper} from '../form-data-wrapper.js';
+import {parseJson} from '../json.js';
+import {startsWith} from '../string.js';
 
 /**
  * A service that polyfills Fetch API for use within AMP.

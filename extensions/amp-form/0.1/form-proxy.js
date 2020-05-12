@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
-import {toWin} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {startsWith} from '../../../src/string.js';
+import {toWin} from '../../../src/types.js';
 
 /**
  * Blacklisted properties. Used mainly fot testing.

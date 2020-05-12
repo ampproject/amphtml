@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {ImaPlayerData} from '../../../ads/google/ima-player-data';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
-import {assertHttpsUrl} from '../../../src/url';
+import {Deferred} from '../../../src/utils/promise.js';
+import {ImaPlayerData} from '../../../ads/google/ima-player-data.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {addUnsafeAllowAutoplay} from '../../../src/iframe-video.js';
+import {assertHttpsUrl} from '../../../src/url.js';
 import {
   childElementsByTag,
   isJsonScriptTag,
   removeElement,
-} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isEnumValue, isObject, toArray} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
+} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {getConsentPolicyState} from '../../../src/consent.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isEnumValue, isObject, toArray} from '../../../src/types.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 /** @const */
 const TAG = 'amp-ima-video';

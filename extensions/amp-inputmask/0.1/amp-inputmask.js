@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {TextMask} from './text-mask';
-import {iterateCursor} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {TextMask} from './text-mask.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {listen} from '../../../src/event-helper.js';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './services.js';
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.

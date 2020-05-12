@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {Services} from '../../../src/services.js';
+import {createElementWithAttributes, removeElement} from '../../../src/dom.js';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';

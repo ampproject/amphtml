@@ -18,11 +18,11 @@ import {
   Action,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service';
-import {AnalyticsVariable, getVariableService} from './variable-service';
-import {HistoryState, getHistoryState} from './utils';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from './amp-story-store-service.js';
+import {AnalyticsVariable, getVariableService} from './variable-service.js';
+import {HistoryState, getHistoryState} from './utils.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';

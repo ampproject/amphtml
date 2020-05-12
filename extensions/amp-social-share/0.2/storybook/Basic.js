@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {SocialShare} from '../social-share';
-import {addParamsToUrl} from '../../../../src/url';
-import {getSocialConfig} from '../amp-social-share-config';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '../../../../src/preact.js';
+import {SocialShare} from '../social-share.js';
+import {addParamsToUrl} from '../../../../src/url.js';
+import {getSocialConfig} from '../amp-social-share-config.js';
+import {select, text, withKnobs} from '@storybook/addon-knobs.js';
+import {withA11y} from '@storybook/addon-a11y.js';
 
 export default {
   title: 'Social Share',

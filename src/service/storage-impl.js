@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
-import {getSourceOrigin} from '../url';
-import {parseJson, recreateNonProtoObject} from '../json';
-import {registerServiceBuilderForDoc} from '../service';
+import {Services} from '../services.js';
+import {dev, devAssert} from '../log.js';
+import {dict} from '../utils/object.js';
+import {getSourceOrigin} from '../url.js';
+import {parseJson, recreateNonProtoObject} from '../json.js';
+import {registerServiceBuilderForDoc} from '../service.js';
 
 /** @const */
 const TAG = 'Storage';

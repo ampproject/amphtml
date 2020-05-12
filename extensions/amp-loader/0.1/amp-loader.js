@@ -15,11 +15,11 @@
  */
 
 import {CSS} from '../../../build/amp-loader-0.1.css.js';
-import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isIframeVideoPlayerComponent} from '../../../src/layout';
-import {setImportantStyles, setStyle} from '../../../src/style';
+import {Services} from '../../../src/services.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isIframeVideoPlayerComponent} from '../../../src/layout.js';
+import {setImportantStyles, setStyle} from '../../../src/style.js';
 
 /**
  * @fileoverview This file implements the new AMP loader as an extension. This

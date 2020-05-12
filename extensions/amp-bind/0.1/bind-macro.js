@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BindExpression} from './bind-expression';
+import {BindExpression} from './bind-expression.js';
 
 /**
  * A single parsed Bind macro.

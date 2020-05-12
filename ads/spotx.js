@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
-import {startsWith} from '../src/string';
-import {validateData} from '../3p/3p';
+import {hasOwn} from '../src/utils/object.js';
+import {startsWith} from '../src/string.js';
+import {validateData} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

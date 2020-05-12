@@ -17,14 +17,14 @@ import {
   LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
-} from '../../src/layout-rect';
+} from '../../src/layout-rect.js';
 import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
-} from '../../src/full-overlay-frame-helper';
-import {resetStyles, setImportantStyles} from '../../src/style';
-import {restrictedVsync, timer} from './util';
+} from '../../src/full-overlay-frame-helper.js';
+import {resetStyles, setImportantStyles} from '../../src/style.js';
+import {restrictedVsync, timer} from './util.js';
 
 const CENTER_TRANSITION_TIME_MS = 150;
 const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;

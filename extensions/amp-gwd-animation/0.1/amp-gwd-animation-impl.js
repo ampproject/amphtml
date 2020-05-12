@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {installServiceInEmbedScope} from '../../../src/service';
-import {scopedQuerySelector, waitForChild} from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {installServiceInEmbedScope} from '../../../src/service.js';
+import {scopedQuerySelector, waitForChild} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
+import {whenDocumentReady} from '../../../src/document-ready.js';
 
 /**
  * CSS class used to deactivate animations.

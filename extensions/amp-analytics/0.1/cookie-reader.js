@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {getCookie} from '../../../src/cookies';
-import {getMode} from '../../../src/mode';
-import {isInFie} from '../../../src/iframe-helper';
-import {isProxyOrigin} from '../../../src/url';
+import {getCookie} from '../../../src/cookies.js';
+import {getMode} from '../../../src/mode.js';
+import {isInFie} from '../../../src/iframe-helper.js';
+import {isProxyOrigin} from '../../../src/url.js';
 
 /**
  * COOKIE macro resolver

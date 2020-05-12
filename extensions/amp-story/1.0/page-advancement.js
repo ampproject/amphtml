@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
+import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link.js';
 import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/services';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getAmpdoc} from '../../../src/service';
-import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
-import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listen, listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {toArray} from '../../../src/types';
+} from './amp-story-store-service.js';
+import {AdvancementMode} from './story-analytics.js';
+import {Services} from '../../../src/services.js';
+import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {closest, matches} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils.js';
+import {interactiveElementsSelectors} from './amp-story-embedded-component.js';
+import {listen, listenOnce} from '../../../src/event-helper.js';
+import {startsWith} from '../../../src/string.js';
+import {toArray} from '../../../src/types.js';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;

@@ -17,13 +17,13 @@ import {
   Action,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
-import {CommonSignals} from '../../../src/common-signals';
-import {EventType, dispatch} from './events';
-import {devAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+} from './amp-story-store-service.js';
+import {AdvancementMode} from './story-analytics.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {EventType, dispatch} from './events.js';
+import {devAssert} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

@@ -20,24 +20,24 @@ import {
   TransportSerializerDef,
   TransportSerializers,
   defaultSerializer,
-} from './transport-serializer';
-import {IframeTransport} from './iframe-transport';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
+} from './transport-serializer.js';
+import {IframeTransport} from './iframe-transport.js';
+import {Services} from '../../../src/services.js';
+import {WindowInterface} from '../../../src/window-interface.js';
 import {
   assertHttpsUrl,
   checkCorsUrl,
   parseUrlDeprecated,
-} from '../../../src/url';
-import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
+} from '../../../src/url.js';
+import {createPixel} from '../../../src/pixel.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {getAmpAdResourceId} from '../../../src/ad-helper.js';
+import {getMode} from '../../../src/mode.js';
+import {getTopWindow} from '../../../src/service.js';
+import {loadPromise} from '../../../src/event-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {toWin} from '../../../src/types.js';
+import {toggle} from '../../../src/style.js';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';

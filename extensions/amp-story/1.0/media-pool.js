@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
+import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media.js';
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
@@ -27,17 +27,17 @@ import {
   SwapOutOfDomTask,
   UnmuteTask,
   UpdateSourcesTask,
-} from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {Sources} from './sources';
-import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
-import {isConnectedNode, matches} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
-import {userInteractedWith} from '../../../src/video-interface';
+} from './media-tasks.js';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper.js';
+import {Services} from '../../../src/services.js';
+import {Sources} from './sources.js';
+import {ampMediaElementFor} from './utils.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {findIndex} from '../../../src/utils/array.js';
+import {isConnectedNode, matches} from '../../../src/dom.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {toWin} from '../../../src/types.js';
+import {userInteractedWith} from '../../../src/video-interface.js';
 
 /** @const @enum {string} */
 export const MediaType = {

@@ -36,11 +36,11 @@
  *
  */
 
-import {HostServices} from '../../../src/inabox/host-services';
-import {MraidService} from './mraid-service';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config';
+import {HostServices} from '../../../src/inabox/host-services.js';
+import {MraidService} from './mraid-service.js';
+import {dev} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {urls} from '../../../src/config.js';
 
 const TAG = 'amp-mraid';
 const NO_FALLBACK = 'no-fallback';

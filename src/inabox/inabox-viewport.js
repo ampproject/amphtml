@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportInterface} from '../service/viewport/viewport-interface';
-import {canInspectWindow} from '../iframe-helper';
-import {dev, devAssert} from '../log';
+import {MessageType} from '../../src/3p-frame-messaging.js';
+import {Observable} from '../observable.js';
+import {Services} from '../services.js';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def.js';
+import {ViewportInterface} from '../service/viewport/viewport-interface.js';
+import {canInspectWindow} from '../iframe-helper.js';
+import {dev, devAssert} from '../log.js';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
-import {getPositionObserver} from '../../ads/inabox/position-observer';
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../dom';
+import {getPositionObserver} from '../../ads/inabox/position-observer.js';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client.js';
+import {isIframed} from '../dom.js';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
-import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../utils/rate-limit';
+} from '../layout-rect.js';
+import {px, resetStyles, setImportantStyles} from '../style.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {throttle} from '../utils/rate-limit.js';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';

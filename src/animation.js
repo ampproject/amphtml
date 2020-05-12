@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {Services} from './services';
-import {dev} from './log';
-import {getCurve} from './curve';
+import {Deferred} from './utils/promise.js';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {getCurve} from './curve.js';
 
 const TAG_ = 'Animation';
 

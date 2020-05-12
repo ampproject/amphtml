@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
-import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
-import {getData} from '../../src/event-helper';
-import {isObject} from '../../src/types';
-import {loadScript} from '../../3p/3p';
-import {throttle} from '../../src/utils/rate-limit';
-import {tryParseJson} from '../../src/json';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state.js';
+import {ImaPlayerData} from './ima-player-data.js';
+import {
+  camelCaseToTitleCase,
+  px,
+  setStyle,
+  setStyles,
+} from '../../src/style.js';
+import {getData} from '../../src/event-helper.js';
+import {isObject} from '../../src/types.js';
+import {loadScript} from '../../3p/3p.js';
+import {throttle} from '../../src/utils/rate-limit.js';
+import {tryParseJson} from '../../src/json.js';
 
 /**
  * Possible player states.

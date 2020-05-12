@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-lightbox-0.1.css.js';
-import {Deferred} from '../../../src/utils/promise';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers.js';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -31,16 +31,16 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../../../src/style';
-import {createCustomEvent, listenOnce} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {isInFie} from '../../../src/iframe-helper';
-import {removeElement, tryFocus} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+} from '../../../src/style.js';
+import {createCustomEvent, listenOnce} from '../../../src/event-helper.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isInFie} from '../../../src/iframe-helper.js';
+import {removeElement, tryFocus} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';

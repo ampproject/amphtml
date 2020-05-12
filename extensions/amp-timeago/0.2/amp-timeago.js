@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Timeago} from './timeago';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {PreactBaseElement} from '../../../src/preact/base-element.js';
+import {Timeago} from './timeago.js';
+import {dict} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-timeago';

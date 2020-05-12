@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
-import {parseUrlDeprecated} from '../../../src/url';
-import {toWin} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {buildUrl} from '../../../ads/google/a4a/shared/url-builder.js';
+import {dict} from '../../../src/utils/object.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {toWin} from '../../../src/types.js';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

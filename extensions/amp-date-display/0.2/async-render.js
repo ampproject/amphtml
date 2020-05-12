@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+import {useResourcesNotify} from '../../../src/preact/utils.js';
+import {useState} from '../../../src/preact.js';
 
 /**
  * Renders the children prop, waiting for it to resolve if it is a promise.

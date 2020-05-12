@@ -19,11 +19,11 @@
  * presets.
  */
 
-import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
-import {mapRange} from '../../../../src/utils/math';
-import {startsWith} from '../../../../src/string';
-import {userAssert} from '../../../../src/log';
+import {FxType} from '../fx-type.js';
+import {Services} from '../../../../src/services.js';
+import {mapRange} from '../../../../src/utils/math.js';
+import {startsWith} from '../../../../src/string.js';
+import {userAssert} from '../../../../src/log.js';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;

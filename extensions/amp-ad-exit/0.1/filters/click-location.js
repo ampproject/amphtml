@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Filter, FilterType} from './filter';
-import {userAssert} from '../../../../src/log';
+import {Filter, FilterType} from './filter.js';
+import {userAssert} from '../../../../src/log.js';
 
 export class ClickLocationFilter extends Filter {
   /**

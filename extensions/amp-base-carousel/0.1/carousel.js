@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionSource} from './action-source';
+import {ActionSource} from './action-source.js';
 import {
   Alignment,
   Axis,
@@ -26,21 +26,28 @@ import {
   updateLengthStyle,
   updateScrollPosition,
 } from './dimensions.js';
-import {AutoAdvance} from './auto-advance';
-import {CarouselAccessibility} from './carousel-accessibility';
-import {CarouselEvents} from './carousel-events';
-import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '../../../src/utils/math';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
+import {AutoAdvance} from './auto-advance.js';
+import {CarouselAccessibility} from './carousel-accessibility.js';
+import {CarouselEvents} from './carousel-events.js';
+import {
+  backwardWrappingDistance,
+  forwardWrappingDistance,
+} from './array-util.js';
+import {clamp, mod} from '../../../src/utils/math.js';
+import {
+  createCustomEvent,
+  listen,
+  listenOnce,
+} from '../../../src/event-helper.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   getStyle,
   setImportantStyles,
   setStyle,
   setStyles,
-} from '../../../src/style';
-import {iterateCursor} from '../../../src/dom';
+} from '../../../src/style.js';
+import {iterateCursor} from '../../../src/dom.js';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

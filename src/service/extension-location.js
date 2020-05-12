@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
-import {urls} from '../config';
+import {getMode} from '../mode.js';
+import {urls} from '../config.js';
 
 /**
  * Internal structure that maintains the state of an extension through loading.

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Services} from '../../../src/services.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeChildren} from '../../../src/dom.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

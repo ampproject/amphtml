@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services.js';
+import {buildUrl} from '../../../ads/google/a4a/shared/url-builder.js';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

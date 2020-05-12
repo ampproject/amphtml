@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {setIsMediaComponent} from '../../../src/video-interface.js';
+import {userAssert} from '../../../src/log.js';
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */

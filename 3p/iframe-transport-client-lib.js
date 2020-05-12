@@ -15,10 +15,10 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills.js'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {IframeTransportClient} from './iframe-transport-client.js';
-import {initLogConstructor, setReportError} from '../src/log';
+import {initLogConstructor, setReportError} from '../src/log.js';
 
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big

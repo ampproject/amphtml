@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from '../../../src/log';
-import {isProxyOrigin} from '../../../src/url';
+import {dev, devAssert} from '../../../src/log.js';
+import {isProxyOrigin} from '../../../src/url.js';
 
 /** @const {string} */
 const TAG = 'amp-access-other';

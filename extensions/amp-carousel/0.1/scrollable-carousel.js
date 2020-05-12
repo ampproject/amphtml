@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {isLayoutSizeFixed} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
-import {numeric} from '../../../src/transition';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Animation} from '../../../src/animation.js';
+import {BaseCarousel} from './base-carousel.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {isLayoutSizeFixed} from '../../../src/layout.js';
+import {listen} from '../../../src/event-helper.js';
+import {numeric} from '../../../src/transition.js';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';

@@ -29,10 +29,14 @@
  * ...
  */
 
-import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {AmpStoryBaseLayer} from './amp-story-base-layer.js';
+import {
+  addAttributesToElement,
+  matches,
+  removeElement,
+} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {user} from '../../../src/log.js';
 
 /**
  * @type {string}

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '../../../src/services';
-import {deepMerge, hasOwn, map} from '../../../src/utils/object';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
+import {CMP_CONFIG} from './cmps.js';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group.js';
+import {Services} from '../../../src/services.js';
+import {deepMerge, hasOwn, map} from '../../../src/utils/object.js';
+import {devAssert, user, userAssert} from '../../../src/log.js';
+import {getChildJsonConfig} from '../../../src/json.js';
 
 const TAG = 'amp-consent/consent-config';
 

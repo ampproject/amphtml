@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {jsonConfiguration} from '../../../src/json';
+import {jsonConfiguration} from '../../../src/json.js';
 
 // TODO(zhouyx@: Rename file and object name)
 const defaultConfig = jsonConfiguration({

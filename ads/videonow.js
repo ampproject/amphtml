@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {parseJson} from '../src/json';
-import {tryDecodeUriComponent} from '../src/url';
+import {loadScript, validateData} from '../3p/3p.js';
+import {parseJson} from '../src/json.js';
+import {tryDecodeUriComponent} from '../src/url.js';
 
 /**
  * @param {!Window} global

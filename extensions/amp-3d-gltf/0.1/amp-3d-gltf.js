@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor, postMessage} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
 
 const TAG = 'amp-3d-gltf';
 

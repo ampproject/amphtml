@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventType} from './events';
-import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/services';
+import {EventType} from './events.js';
+import {POLL_INTERVAL_MS} from './page-advancement.js';
+import {Services} from '../../../src/services.js';
 import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/css';
-import {hasOwn, map} from '../../../src/utils/object';
-import {removeChildren, scopedQuerySelector} from '../../../src/dom';
-import {scale, setImportantStyles} from '../../../src/style';
+} from './amp-story-store-service.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {escapeCssSelectorNth} from '../../../src/css.js';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {removeChildren, scopedQuerySelector} from '../../../src/dom.js';
+import {scale, setImportantStyles} from '../../../src/style.js';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

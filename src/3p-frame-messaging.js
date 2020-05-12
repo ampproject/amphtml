@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {internalListenImplementation} from './event-helper-listen';
-import {parseJson} from './json';
+import {dev, devAssert} from './log.js';
+import {dict} from './utils/object.js';
+import {internalListenImplementation} from './event-helper-listen.js';
+import {parseJson} from './json.js';
 
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';

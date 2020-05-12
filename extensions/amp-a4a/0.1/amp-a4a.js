@@ -14,58 +14,62 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from './a4a-variable-source';
+import {A4AVariableSource} from './a4a-variable-source.js';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+} from '../../../src/consent-state.js';
+import {
+  Layout,
+  LayoutPriority,
+  isLayoutSizeDefined,
+} from '../../../src/layout.js';
 import {
   SINGLE_PASS_EXPERIMENT_IDS,
   addExperimentIdToElement,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {Services} from '../../../src/services';
-import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+} from '../../../ads/google/a4a/traffic-experiments.js';
+import {Services} from '../../../src/services.js';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier.js';
 import {
   applySandbox,
   generateSentinel,
   getDefaultBootstrapBaseUrl,
-} from '../../../src/3p-frame';
-import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error';
-import {createElementWithAttributes} from '../../../src/dom';
+} from '../../../src/3p-frame.js';
+import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url.js';
+import {cancellation, isCancellation} from '../../../src/error.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
 import {
   dev,
   devAssert,
   duplicateErrorIfNecessary,
   user,
-} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
-} from '../../amp-ad/0.1/concurrent-load';
+} from '../../amp-ad/0.1/concurrent-load.js';
 import {
   getConsentPolicyGdprApplies,
   getConsentPolicyInfo,
   getConsentPolicyState,
-} from '../../../src/consent';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getMode} from '../../../src/mode';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+} from '../../../src/consent.js';
+import {getContextMetadata} from '../../../src/iframe-attributes.js';
+import {getMode} from '../../../src/mode.js';
+import {insertAnalyticsElement} from '../../../src/extension-analytics.js';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {setStyle} from '../../../src/style';
-import {signingServerURLs} from '../../../ads/_a4a-config';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+} from '../../../src/friendly-iframe-embed.js';
+import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl.js';
+import {isAdPositionAllowed} from '../../../src/ad-helper.js';
+import {isArray, isEnumValue, isObject} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {setStyle} from '../../../src/style.js';
+import {signingServerURLs} from '../../../ads/_a4a-config.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {utf8Decode} from '../../../src/utils/bytes.js';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [

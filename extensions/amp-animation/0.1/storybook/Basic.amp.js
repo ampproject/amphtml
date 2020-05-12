@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {AnimationTemplate} from './template';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
+import * as Preact from '../../../../src/preact.js';
+import {AnimationTemplate} from './template.js';
+import {select, text, withKnobs} from '@storybook/addon-knobs.js';
+import {storiesOf} from '@storybook/preact.js';
 import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const KEYFRAMES_OPTIONS = {

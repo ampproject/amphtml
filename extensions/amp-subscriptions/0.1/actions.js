@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionStatus} from './analytics';
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
+import {ActionStatus} from './analytics.js';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {openLoginDialog} from '../../amp-access/0.1/login-dialog.js';
 
 const TAG = 'amp-subscriptions';
 const LOCAL = 'local';

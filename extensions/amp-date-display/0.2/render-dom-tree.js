@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {removeChildren} from '../../../src/dom';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {removeChildren} from '../../../src/dom.js';
+import {useResourcesNotify} from '../../../src/preact/utils.js';
 
 /**
  * Clears the host element and appends the DOM tree into it.

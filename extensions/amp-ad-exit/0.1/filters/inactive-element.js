@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Filter, FilterType} from './filter';
-import {dev, userAssert} from '../../../../src/log';
-import {matches} from '../../../../src/dom';
+import {Filter, FilterType} from './filter.js';
+import {dev, userAssert} from '../../../../src/log.js';
+import {matches} from '../../../../src/dom.js';
 
 /**
  * A Filter that ignores events originating from elements that match a specified

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {asyncStringReplace} from '../../../src/string';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getConsentPolicyState} from '../../../src/consent';
+import {Services} from '../../../src/services.js';
+import {asyncStringReplace} from '../../../src/string.js';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64.js';
+import {cookieReader} from './cookie-reader.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getConsentPolicyState} from '../../../src/consent.js';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
-import {linkerReaderServiceFor} from './linker-reader';
+} from '../../../src/service.js';
+import {isArray, isFiniteNumber} from '../../../src/types.js';
+import {linkerReaderServiceFor} from './linker-reader.js';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';

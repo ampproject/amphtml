@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css.js';
-import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   extractTags,
   getPlatform,
   registerEvent,
   setFullscreenOff,
   setFullscreenOn,
-} from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {handleCompanionAds} from './monetization';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+} from './utils.js';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout.js';
+import {handleCompanionAds} from './monetization.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
 /** @const */
 const TAG = 'amp-apester-media';
 /**

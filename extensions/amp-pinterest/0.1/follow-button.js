@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Util} from './util';
-import {assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {Util} from './util.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {openWindowDialog} from '../../../src/dom.js';
+import {tryResolve} from '../../../src/utils/promise.js';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log.js';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,

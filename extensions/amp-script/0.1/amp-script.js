@@ -16,21 +16,21 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css.js';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Purifier} from '../../../src/purifier/purifier';
-import {Services} from '../../../src/services';
-import {UserActivationTracker} from './user-activation-tracker';
-import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
-import {cancellation} from '../../../src/error';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {getElementServiceForDoc} from '../../../src/element-service';
-import {getMode} from '../../../src/mode';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Purifier} from '../../../src/purifier/purifier.js';
+import {Services} from '../../../src/services.js';
+import {UserActivationTracker} from './user-activation-tracker.js';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-location.js';
+import {cancellation} from '../../../src/error.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {getElementServiceForDoc} from '../../../src/element-service.js';
+import {getMode} from '../../../src/mode.js';
+import {getService, registerServiceBuilder} from '../../../src/service.js';
+import {rewriteAttributeValue} from '../../../src/url-rewrite.js';
+import {startsWith} from '../../../src/string.js';
+import {tryParseJson} from '../../../src/json.js';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
 const TAG = 'amp-script';

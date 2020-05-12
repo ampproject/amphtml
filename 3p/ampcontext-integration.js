@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AbstractAmpContext} from './ampcontext';
-import {adConfig} from '../ads/_config';
-import {computeInMasterFrame} from './3p';
-import {dev, user, userAssert} from '../src/log';
-import {dict} from '../src/utils/object';
+import {AbstractAmpContext} from './ampcontext.js';
+import {adConfig} from '../ads/_config.js';
+import {computeInMasterFrame} from './3p.js';
+import {dev, user, userAssert} from '../src/log.js';
+import {dict} from '../src/utils/object.js';
 
 /**
  * Returns the "master frame" for all widgets of a given type.

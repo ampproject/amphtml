@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {dev} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 /** @const {string} */
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';

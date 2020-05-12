@@ -22,13 +22,16 @@ const EmbedType = {
   POLL: 'poll',
 };
 
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {
+  addParamsToUrl,
+  appendEncodedParamStringToUrl,
+} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {user, userAssert} from '../../../src/log.js';
 
 export class AmpVk extends AMP.BaseElement {
   /** @param {!AmpElement} element */

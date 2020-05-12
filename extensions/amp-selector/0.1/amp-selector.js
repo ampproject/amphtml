@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-selector-0.1.css.js';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {areEqualOrdered} from '../../../src/utils/array';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {areEqualOrdered} from '../../../src/utils/array.js';
 import {
   closestAncestorElementBySelector,
   isRTL,
   tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {mod} from '../../../src/utils/math';
-import {toArray} from '../../../src/types';
+} from '../../../src/dom.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {mod} from '../../../src/utils/math.js';
+import {toArray} from '../../../src/types.js';
 
 const TAG = 'amp-selector';
 

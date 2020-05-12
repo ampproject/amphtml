@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {hasOwn} from '../../../src/utils/object';
-import {parseLinker} from './linker';
+import {getService, registerServiceBuilder} from '../../../src/service.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {parseLinker} from './linker.js';
 import {
   parseQueryString,
   parseUrlDeprecated,
   removeParamsFromSearch,
-} from '../../../src/url';
+} from '../../../src/url.js';
 
-import {user} from '../../../src/log';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-analytics/linker-reader';
 

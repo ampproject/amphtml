@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from './amp-events';
-import {Services} from './services';
+import {AmpEvents} from './amp-events.js';
+import {Services} from './services.js';
 import {
   USER_ERROR_SENTINEL,
   dev,
   duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
-} from './log';
-import {dict} from './utils/object';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
-import {exponentialBackoff} from './exponential-backoff';
-import {getMode} from './mode';
-import {isLoadErrorMessage} from './event-helper';
-import {isProxyOrigin} from './url';
-import {makeBodyVisibleRecovery} from './style-installer';
-import {startsWith} from './string';
-import {triggerAnalyticsEvent} from './analytics';
-import {urls} from './config';
+} from './log.js';
+import {dict} from './utils/object.js';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+} from './experiments.js';
+import {exponentialBackoff} from './exponential-backoff.js';
+import {getMode} from './mode.js';
+import {isLoadErrorMessage} from './event-helper.js';
+import {isProxyOrigin} from './url.js';
+import {makeBodyVisibleRecovery} from './style-installer.js';
+import {startsWith} from './string.js';
+import {triggerAnalyticsEvent} from './analytics.js';
+import {urls} from './config.js';
 
 /**
  * @const {string}

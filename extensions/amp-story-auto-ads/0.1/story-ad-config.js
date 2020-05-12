@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag} from '../../../src/dom';
-import {isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
+import {isJsonScriptTag} from '../../../src/dom.js';
+import {isObject} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {startsWith} from '../../../src/string.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:config';

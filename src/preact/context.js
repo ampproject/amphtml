@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
-import {createContext, useContext} from './index';
+import * as Preact from './index.js';
+import {createContext, useContext} from './index.js';
 
 /** @type {PreactDef.Context} */
 let context;

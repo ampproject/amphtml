@@ -15,23 +15,23 @@
  */
 
 import * as ampCaches from '../../build-system/global-configs/caches.json';
-import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {IframePool} from './amp-story-player-iframe-pool';
-import {Messaging} from '@ampproject/viewer-messaging';
-import {VisibilityState} from '../visibility-state';
+import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url.js';
+import {IframePool} from './amp-story-player-iframe-pool.js';
+import {Messaging} from '@ampproject/viewer-messaging.js';
+import {VisibilityState} from '../visibility-state.js';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
   parseUrlWithA,
   removeFragment,
-} from '../url';
-import {applySandbox} from '../3p-frame';
-import {dict, map} from '../utils/object';
+} from '../url.js';
+import {applySandbox} from '../3p-frame.js';
+import {dict, map} from '../utils/object.js';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css.js';
-import {resetStyles, setStyle, setStyles} from '../style';
-import {toArray} from '../types';
+import {resetStyles, setStyle, setStyles} from '../style.js';
+import {toArray} from '../types.js';
 
 /** @enum {string} */
 const LoadStateClass = {

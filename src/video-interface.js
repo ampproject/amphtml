@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-import {whenUpgradedToCustomElement} from './dom';
+import {dev} from './log.js';
+import {whenUpgradedToCustomElement} from './dom.js';
 
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 

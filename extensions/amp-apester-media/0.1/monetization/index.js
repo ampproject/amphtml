@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getConsentData} from './consent-util';
-import {handleCompanionDisplay} from './companion/display';
-import {handleCompanionVideo} from './companion/video';
+import {getConsentData} from './consent-util.js';
+import {handleCompanionDisplay} from './companion/display.js';
+import {handleCompanionVideo} from './companion/video.js';
 
 /**
  * @param {!JsonObject} media

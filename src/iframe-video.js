@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
-import {VideoEvents} from './video-interface';
-import {dev} from './log';
-import {htmlFor} from './static-template';
-import {isArray, isObject} from './types';
-import {startsWith} from './string';
-import {tryParseJson} from './json';
+import {Services} from './services.js';
+import {VideoEvents} from './video-interface.js';
+import {dev} from './log.js';
+import {htmlFor} from './static-template.js';
+import {isArray, isObject} from './types.js';
+import {startsWith} from './string.js';
+import {tryParseJson} from './json.js';
 
 /** @enum {string} */
 export const SandboxOptions = {

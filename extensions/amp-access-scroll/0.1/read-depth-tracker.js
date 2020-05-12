@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {debounce} from '../../../src/utils/rate-limit';
+import {Services} from '../../../src/services.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
 
 export class ReadDepthTracker {
   /**

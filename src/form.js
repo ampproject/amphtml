@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag, iterateCursor} from './dom';
+import {ancestorElementsByTag, iterateCursor} from './dom.js';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';

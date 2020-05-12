@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '../../../src/css';
-import {hasOwn, map} from '../../../src/utils/object';
-import {scale, setImportantStyles} from '../../../src/style';
-import {scopedQuerySelector} from '../../../src/dom';
+import {POLL_INTERVAL_MS} from './page-advancement.js';
+import {Services} from '../../../src/services.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {escapeCssSelectorNth} from '../../../src/css.js';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {scale, setImportantStyles} from '../../../src/style.js';
+import {scopedQuerySelector} from '../../../src/dom.js';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

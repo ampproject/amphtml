@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import {Action} from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {Action} from './amp-story-store-service.js';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-story-consent-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {Layout} from '../../../src/layout.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url.js';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
   isJsonScriptTag,
-} from '../../../src/dom';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+} from '../../../src/dom.js';
+import {computedStyle, setImportantStyles} from '../../../src/style.js';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
-} from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {renderAsElement} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
+} from './utils.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {isArray} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {renderAsElement} from './simple-template.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';

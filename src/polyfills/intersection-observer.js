@@ -19,7 +19,7 @@
  * See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver.
  */
 
-import {IntersectionObserverStub} from '../polyfillstub/intersection-observer-stub';
+import {IntersectionObserverStub} from '../polyfillstub/intersection-observer-stub.js';
 
 /**
  * @param {!Window} win

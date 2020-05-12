@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object.js';
+import {startsWith} from '../../../src/string.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Installs an alias used by amp-inputmask that fixes a problem where

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {computedStyle} from '../style.js';
+import {dev, devAssert} from '../log.js';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *

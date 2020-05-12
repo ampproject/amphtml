@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ActionSource} from './action-source';
-import {CarouselEvents} from './carousel-events';
-import {debounce} from '../../../src/utils/rate-limit';
-import {getDetail, listen, listenOnce} from '../../../src/event-helper';
+import {ActionSource} from './action-source.js';
+import {CarouselEvents} from './carousel-events.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {getDetail, listen, listenOnce} from '../../../src/event-helper.js';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 

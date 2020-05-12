@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {useResourcesNotify} from '../../../src/preact/utils.js';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';

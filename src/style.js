@@ -15,9 +15,9 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
-import {dev, devAssert} from './log';
+import {dev, devAssert} from './log.js';
 import {map} from './utils/object.js';
-import {startsWith} from './string';
+import {startsWith} from './string.js';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;

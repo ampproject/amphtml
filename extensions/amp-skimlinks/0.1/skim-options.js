@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {getChildJsonConfig} from '../../../src/json';
-import {getNormalizedHostnameFromUrl} from './utils';
-import {userAssert} from '../../../src/log';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {getNormalizedHostnameFromUrl} from './utils.js';
+import {userAssert} from '../../../src/log.js';
 
 import {
   DEFAULT_CONFIG,
   GLOBAL_DOMAIN_BLACKLIST,
   OPTIONS_ERRORS,
   WAYPOINT_BASE_URL,
-} from './constants';
+} from './constants.js';
 
 /**
  *

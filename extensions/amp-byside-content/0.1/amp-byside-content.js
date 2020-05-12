@@ -33,15 +33,15 @@
  */
 
 import {CSS} from '../../../build/amp-byside-content-0.1.css.js';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {setStyles} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url.js';
+import {createElementWithAttributes, removeElement} from '../../../src/dom.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dict} from '../../../src/utils/object.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {setStyles} from '../../../src/style.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';

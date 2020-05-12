@@ -27,17 +27,17 @@
  * </amp-megaphone>
  */
 
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeFixed} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {removeElement} from '../../../src/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {isLayoutSizeFixed} from '../../../src/layout.js';
+import {isObject} from '../../../src/types.js';
+import {removeElement} from '../../../src/dom.js';
+import {setIsMediaComponent} from '../../../src/video-interface.js';
+import {startsWith} from '../../../src/string.js';
+import {tryParseJson} from '../../../src/json.js';
+import {userAssert} from '../../../src/log.js';
 
 class AmpMegaphone extends AMP.BaseElement {
   /** @param {!AmpElement} element */

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
-import {dev} from '../log';
-import {dict} from '../utils/object';
-import {getCookie, setCookie} from '../cookies';
-import {isProxyOrigin, parseUrlDeprecated} from '../url';
+import {Services} from '../services.js';
+import {WindowInterface} from '../window-interface.js';
+import {dev} from '../log.js';
+import {dict} from '../utils/object.js';
+import {getCookie, setCookie} from '../cookies.js';
+import {isProxyOrigin, parseUrlDeprecated} from '../url.js';
 
 const GOOGLE_API_URL =
   'https://ampcid.google.com/v1/publisher:getClientId?key=';

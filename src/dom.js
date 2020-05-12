@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from './utils/promise.js';
 import {
   assertIsName,
   isScopeSelectorSupported,
   prependSelectorsWith,
-} from './css';
-import {dev, devAssert} from './log';
-import {dict} from './utils/object';
-import {includes, startsWith} from './string';
-import {toWin} from './types';
+} from './css.js';
+import {dev, devAssert} from './log.js';
+import {dict} from './utils/object.js';
+import {includes, startsWith} from './string.js';
+import {toWin} from './types.js';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

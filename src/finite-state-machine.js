@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from './log';
+import {devAssert} from './log.js';
 
 /**
  * @template STATE

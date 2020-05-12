@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {LruCache} from './utils/lru-cache';
-import {dict, hasOwn} from './utils/object';
-import {endsWith, startsWith} from './string';
-import {getMode} from './mode';
-import {isArray} from './types';
-import {parseQueryString_} from './url-parse-query-string';
-import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
-import {urls} from './config';
-import {userAssert} from './log';
+import {LruCache} from './utils/lru-cache.js';
+import {dict, hasOwn} from './utils/object.js';
+import {endsWith, startsWith} from './string.js';
+import {getMode} from './mode.js';
+import {isArray} from './types.js';
+import {parseQueryString_} from './url-parse-query-string.js';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component.js';
+import {urls} from './config.js';
+import {userAssert} from './log.js';
 
 /**
  * @type {!JsonObject}

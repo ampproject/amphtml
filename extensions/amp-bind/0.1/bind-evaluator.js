@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {BindExpression} from './bind-expression';
-import {BindMacro} from './bind-macro';
-import {BindValidator} from './bind-validator';
-import {remove} from '../../../src/utils/array';
+import {BindExpression} from './bind-expression.js';
+import {BindMacro} from './bind-macro.js';
+import {BindValidator} from './bind-validator.js';
+import {remove} from '../../../src/utils/array.js';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.

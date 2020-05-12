@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {API_SERVER} from '../constants';
-import {callPixelEndpoint} from './pixel';
+import {API_SERVER} from '../constants.js';
+import {callPixelEndpoint} from './pixel.js';
 
 import {
   classifyPage,
   classifyReferrer,
   getKeywordsString,
   isProductPage,
-} from './classify';
+} from './classify.js';
 import {
   clearOurFragment,
   getFragmentId,
   getServiceFromUrlFragment,
-} from './fragment';
-import {dict} from '../../../../src/utils/object';
-import {getMetaElements} from './meta';
-import {getSessionId} from './session';
-import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+} from './fragment.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getMetaElements} from './meta.js';
+import {getSessionId} from './session.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
+import {toArray} from '../../../../src/types.js';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;

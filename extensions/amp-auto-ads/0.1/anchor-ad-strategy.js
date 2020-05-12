@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
-import {dev} from './log';
-import {isAmphtml} from './format';
-import {isStoryDocument} from './utils/story';
+import {ChunkPriority, chunk} from './chunk.js';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {isAmphtml} from './format.js';
+import {isStoryDocument} from './utils/story.js';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {

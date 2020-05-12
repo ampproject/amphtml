@@ -14,49 +14,52 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {FIE_EMBED_PROP} from './iframe-helper';
-import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
-import {Observable} from './observable';
-import {Services} from './services';
-import {Signals} from './utils/signals';
+import {CommonSignals} from './common-signals.js';
+import {FIE_EMBED_PROP} from './iframe-helper.js';
+import {
+  LEGACY_ELEMENTS,
+  stubLegacyElements,
+} from './service/extensions-impl.js';
+import {Observable} from './observable.js';
+import {Services} from './services.js';
+import {Signals} from './utils/signals.js';
 import {cssText as ampSharedCss} from '../build/ampshared.css.js';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
-} from './service/custom-element-registry';
-import {dev, rethrowAsync, userAssert} from './log';
+} from './service/custom-element-registry.js';
+import {dev, rethrowAsync, userAssert} from './log.js';
 import {
   disposeServicesForEmbed,
   getAmpdoc,
   getTopWindow,
   installServiceInEmbedIfEmbeddable,
   setParentWindow,
-} from './service';
-import {escapeHtml} from './dom';
-import {getExperimentBranch, isExperimentOn} from './experiments';
-import {getMode} from './mode';
-import {installAmpdocServices} from './service/core-services';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {install as installDocContains} from './polyfills/document-contains';
-import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
-import {installStylesForDoc, installStylesLegacy} from './style-installer';
-import {installTimerInEmbedWindow} from './service/timer-impl';
-import {isDocumentReady} from './document-ready';
-import {isInAmpdocFieExperiment} from './ampdoc-fie';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
-import {loadPromise} from './event-helper';
+} from './service.js';
+import {escapeHtml} from './dom.js';
+import {getExperimentBranch, isExperimentOn} from './experiments.js';
+import {getMode} from './mode.js';
+import {installAmpdocServices} from './service/core-services.js';
+import {install as installCustomElements} from './polyfills/custom-elements.js';
+import {install as installDOMTokenList} from './polyfills/domtokenlist.js';
+import {install as installDocContains} from './polyfills/document-contains.js';
+import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer.js';
+import {installStylesForDoc, installStylesLegacy} from './style-installer.js';
+import {installTimerInEmbedWindow} from './service/timer-impl.js';
+import {isDocumentReady} from './document-ready.js';
+import {isInAmpdocFieExperiment} from './ampdoc-fie.js';
+import {layoutRectLtwh, moveLayoutRect} from './layout-rect.js';
+import {loadPromise} from './event-helper.js';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
-import {toWin} from './types';
-import {whenContentIniLoad} from './ini-load';
+} from './style.js';
+import {toWin} from './types.js';
+import {whenContentIniLoad} from './ini-load.js';
 
 /**
  * Parameters used to create the new "friendly iframe" embed.

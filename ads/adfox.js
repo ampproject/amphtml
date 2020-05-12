@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {yandex} from './yandex';
+import {loadScript, validateData} from '../3p/3p.js';
+import {yandex} from './yandex.js';
 
 /**
  * @param {!Window} global

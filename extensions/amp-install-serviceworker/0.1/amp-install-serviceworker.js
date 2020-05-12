@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   closestAncestorElementBySelector,
   removeElement,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
-import {removeFragment} from '../../../src/url';
-import {startsWith} from '../../../src/string';
-import {toggle} from '../../../src/style';
-import {urls} from '../../../src/config';
+} from '../../../src/dom.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {listen} from '../../../src/event-helper.js';
+import {removeFragment} from '../../../src/url.js';
+import {startsWith} from '../../../src/string.js';
+import {toggle} from '../../../src/style.js';
+import {urls} from '../../../src/config.js';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';

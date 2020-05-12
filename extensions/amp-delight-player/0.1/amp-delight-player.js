@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-delight-player-0.1.css.js';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface.js';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
-} from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+} from '../../../src/iframe-video.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen, listenOncePromise} from '../../../src/event-helper.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyle} from '../../../src/style.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-delight-player';

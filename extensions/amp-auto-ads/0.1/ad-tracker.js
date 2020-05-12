@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {endsWith} from '../../../src/string';
-import {getElementLayoutBox} from './utils';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {endsWith} from '../../../src/string.js';
+import {getElementLayoutBox} from './utils.js';
+import {user} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

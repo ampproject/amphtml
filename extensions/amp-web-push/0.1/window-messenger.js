@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {TAG} from './vars';
-import {dev} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../src/url';
+import {TAG} from './vars.js';
+import {dev} from '../../../src/log.js';
+import {getData} from '../../../src/event-helper.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
 
 /** @typedef {{
  *    CONNECT_HANDSHAKE: string,

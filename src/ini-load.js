@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {READY_SCAN_SIGNAL} from './service/resources-interface';
-import {Services} from './services';
+import {READY_SCAN_SIGNAL} from './service/resources-interface.js';
+import {Services} from './services.js';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AnimationRunner} from './animation-runner';
-import {Observable} from '../../../../src/observable';
+import {AnimationRunner} from './animation-runner.js';
+import {Observable} from '../../../../src/observable.js';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -27,10 +27,10 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-} from '../web-animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {devAssert} from '../../../../src/log';
-import {getTotalDuration} from './utils';
+} from '../web-animation-types.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style.js';
+import {devAssert} from '../../../../src/log.js';
+import {getTotalDuration} from './utils.js';
 
 /**
  */

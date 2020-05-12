@@ -14,8 +14,8 @@
  * the License.
  */
 
-import {loadPromise} from '../../../src/event-helper';
-import {toggle} from '../../../src/style';
+import {loadPromise} from '../../../src/event-helper.js';
+import {toggle} from '../../../src/style.js';
 
 /** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method

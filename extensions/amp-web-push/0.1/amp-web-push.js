@@ -24,11 +24,11 @@
  * check for an existing web push subscription.
  */
 
-import {CONFIG_TAG, SERVICE_TAG, TAG, WIDGET_TAG} from './vars';
+import {CONFIG_TAG, SERVICE_TAG, TAG, WIDGET_TAG} from './vars.js';
 import {CSS} from '../../../build/amp-web-push-0.1.css.js';
-import {WebPushConfig} from './amp-web-push-config';
-import {WebPushService} from './web-push-service';
-import {WebPushWidget} from './amp-web-push-widget';
+import {WebPushConfig} from './amp-web-push-config.js';
+import {WebPushService} from './web-push-service.js';
+import {WebPushWidget} from './amp-web-push-widget.js';
 
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc(SERVICE_TAG, WebPushService);

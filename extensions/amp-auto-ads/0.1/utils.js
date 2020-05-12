@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {toWin} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {toWin} from '../../../src/types.js';
 
 /**
  * Returns a promise to the layoutBox for the element. If the element is

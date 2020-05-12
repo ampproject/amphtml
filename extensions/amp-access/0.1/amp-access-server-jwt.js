@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from './amp-access-client';
-import {JwtHelper} from './jwt';
-import {Services} from '../../../src/services';
+import {AccessClientAdapter} from './amp-access-client.js';
+import {JwtHelper} from './jwt.js';
+import {Services} from '../../../src/services.js';
 import {
   assertHttpsUrl,
   isProxyOrigin,
   removeFragment,
   serializeQueryString,
-} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
+} from '../../../src/url.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {fetchDocument} from '../../../src/document-fetcher.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray} from '../../../src/types.js';
+import {isExperimentOn} from '../../../src/experiments.js';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

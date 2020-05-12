@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {Util} from './util';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
-import {openWindowDialog} from '../../../src/dom';
-import {toWin} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {Util} from './util.js';
+import {
+  assertAbsoluteHttpOrHttpsUrl,
+  assertHttpsUrl,
+} from '../../../src/url.js';
+import {openWindowDialog} from '../../../src/dom.js';
+import {toWin} from '../../../src/types.js';
+import {user, userAssert} from '../../../src/log.js';
 
 // Popup options
 const POP =

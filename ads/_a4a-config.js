@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../src/utils/object';
+import {map} from '../src/utils/object.js';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.

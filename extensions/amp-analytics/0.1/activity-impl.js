@@ -19,10 +19,10 @@
  * has performed on the page.
  */
 
-import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
-import {registerServiceBuilderForDoc} from '../../../src/service';
+import {Services} from '../../../src/services.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {listen} from '../../../src/event-helper.js';
+import {registerServiceBuilderForDoc} from '../../../src/service.js';
 
 /**
  * The amount of time after an activity the user is considered engaged.

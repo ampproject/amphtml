@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {batchFetchJsonFor} from '../../../src/batched-json';
-import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
-import {userAssert} from '../../../src/log';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {batchFetchJsonFor} from '../../../src/batched-json.js';
+import {clamp} from '../../../src/utils/math.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {isFiniteNumber, isObject} from '../../../src/types.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {parseJson} from '../../../src/json.js';
+import {removeElement} from '../../../src/dom.js';
+import {startsWith} from '../../../src/string.js';
+import {userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-bodymovin-animation';
 

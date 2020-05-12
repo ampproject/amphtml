@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {DateDisplay} from '../date-display';
-import {date, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '../../../../src/preact.js';
+import {DateDisplay} from '../date-display.js';
+import {date, withKnobs} from '@storybook/addon-knobs.js';
+import {withA11y} from '@storybook/addon-a11y.js';
 
 export default {
   title: 'DateDisplay',

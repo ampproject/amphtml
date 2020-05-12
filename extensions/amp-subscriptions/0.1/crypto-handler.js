@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {decryptAesGcm} from '../../../third_party/subscriptions-project/aes_gcm';
-import {iterateCursor} from '../../../src/dom';
-import {padStart} from '../../../src/string';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {decryptAesGcm} from '../../../third_party/subscriptions-project/aes_gcm.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {padStart} from '../../../src/string.js';
+import {toArray} from '../../../src/types.js';
+import {tryParseJson} from '../../../src/json.js';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 export class CryptoHandler {
   /**

@@ -27,11 +27,11 @@
  * </amp-soundcloud>
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {setIsMediaComponent} from '../../../src/video-interface.js';
+import {userAssert} from '../../../src/log.js';
 
 class AmpSoundcloud extends AMP.BaseElement {
   /** @param {!AmpElement} element */

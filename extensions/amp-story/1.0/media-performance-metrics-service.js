@@ -17,14 +17,14 @@
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   listen,
-} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {lastChildElement} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
-import {urls} from '../../../src/config';
+} from '../../../src/event-helper.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {lastChildElement} from '../../../src/dom.js';
+import {map} from '../../../src/utils/object.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {urls} from '../../../src/config.js';
 
 /**
  * Media status.

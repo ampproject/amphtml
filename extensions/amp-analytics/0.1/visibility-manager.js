@@ -18,21 +18,21 @@ import {
   DEFAULT_THRESHOLD,
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../src/utils/intersection-observer-polyfill';
-import {Services} from '../../../src/services';
-import {VisibilityModel} from './visibility-model';
-import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getMinOpacity} from './opacity';
-import {getMode} from '../../../src/mode';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+} from '../../../src/utils/intersection-observer-polyfill.js';
+import {Services} from '../../../src/services.js';
+import {VisibilityModel} from './visibility-model.js';
+import {dev, user} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper.js';
+import {getMinOpacity} from './opacity.js';
+import {getMode} from '../../../src/mode.js';
+import {getParentWindowFrameElement} from '../../../src/service.js';
+import {isArray, isFiniteNumber} from '../../../src/types.js';
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
-} from '../../../src/layout-rect';
-import {rootNodeFor} from '../../../src/dom';
+} from '../../../src/layout-rect.js';
+import {rootNodeFor} from '../../../src/dom.js';
 
 const TAG = 'amp-analytics/visibility-manager';
 

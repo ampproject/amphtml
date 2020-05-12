@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
-import {canInspectWindow} from '../iframe-helper';
-import {getExistingServiceOrNull, registerServiceBuilder} from '../service';
-import {tryParseJson} from '../json';
+import {IframeMessagingClient} from '../../3p/iframe-messaging-client.js';
+import {canInspectWindow} from '../iframe-helper.js';
+import {getExistingServiceOrNull, registerServiceBuilder} from '../service.js';
+import {tryParseJson} from '../json.js';
 
 /**
  * @param {!Window} win

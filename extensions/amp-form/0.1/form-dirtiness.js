@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {createCustomEvent} from '../../../src/event-helper';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {dev} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper.js';
+import {dev} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form.js';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 

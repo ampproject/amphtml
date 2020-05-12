@@ -15,20 +15,20 @@
  */
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css.js';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
   LightboxThumbnailDataDef,
   VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '../../../src/services';
-import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {SwipeToDismiss} from './swipe-to-dismiss';
+} from './service/lightbox-manager-impl.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {LightboxCaption, OverflowState} from './lightbox-caption.js';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls.js';
+import {Services} from '../../../src/services.js';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers.js';
+import {SwipeToDismiss} from './swipe-to-dismiss.js';
 import {
   childElementByTag,
   closest,
@@ -37,24 +37,29 @@ import {
   getVerticalScrollbarWidth,
   scopedQuerySelectorAll,
   toggleAttribute,
-} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+} from '../../../src/dom.js';
+import {clamp} from '../../../src/utils/math.js';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
-} from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
-import {getElementServiceForDoc} from '../../../src/element-service';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations';
-import {reportError} from '../../../src/error';
-import {setStyle, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+} from './utils.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {
+  getData,
+  getDetail,
+  isLoaded,
+  listen,
+} from '../../../src/event-helper.js';
+import {getElementServiceForDoc} from '../../../src/element-service.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {prepareImageAnimation} from '@ampproject/animations.js';
+import {reportError} from '../../../src/error.js';
+import {setStyle, setStyles, toggle} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';

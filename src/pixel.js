@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../src/window-interface';
-import {createElementWithAttributes} from '../src/dom';
-import {dict} from '../src/utils/object';
-import {user} from '../src/log';
+import {WindowInterface} from '../src/window-interface.js';
+import {createElementWithAttributes} from '../src/dom.js';
+import {dict} from '../src/utils/object.js';
+import {user} from '../src/log.js';
 
 /** @const {string} */
 const TAG = 'pixel';

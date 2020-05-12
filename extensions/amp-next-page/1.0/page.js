@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ViewportRelativePos} from './visibility-observer';
-import {VisibilityState} from '../../../src/visibility-state';
-import {devAssert} from '../../../src/log';
+import {ViewportRelativePos} from './visibility-observer.js';
+import {VisibilityState} from '../../../src/visibility-state.js';
+import {devAssert} from '../../../src/log.js';
 
 /** @enum {number} */
 export const PageState = {

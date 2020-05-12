@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
+import {AmpStoryReaction, ReactionType} from './amp-story-reaction.js';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css.js';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {toArray} from '../../../src/types.js';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction-quiz';

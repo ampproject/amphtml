@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {LinkRewriter} from './link-rewriter';
-import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {LinkRewriter} from './link-rewriter.js';
+import {Priority} from '../../../src/service/navigation.js';
+import {Services} from '../../../src/services.js';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
   /** @param {!AmpElement} element */

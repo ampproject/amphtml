@@ -27,11 +27,11 @@
  * </code>
  */
 
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {Services} from '../../../src/services.js';
+import {addParamToUrl} from '../../../src/url.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
 
 export const TAG = 'amp-google-document-embed';
 

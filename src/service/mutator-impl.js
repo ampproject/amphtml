@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {FocusHistory} from '../focus-history';
-import {MutatorInterface} from './mutator-interface';
-import {Resource} from './resource';
-import {Services} from '../services';
-import {areMarginsChanged} from '../layout-rect';
-import {closest} from '../dom';
-import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
-import {isExperimentOn} from '../experiments';
-import {registerServiceBuilderForDoc} from '../service';
+import {FocusHistory} from '../focus-history.js';
+import {MutatorInterface} from './mutator-interface.js';
+import {Resource} from './resource.js';
+import {Services} from '../services.js';
+import {areMarginsChanged} from '../layout-rect.js';
+import {closest} from '../dom.js';
+import {computedStyle} from '../style.js';
+import {dev, devAssert} from '../log.js';
+import {isExperimentOn} from '../experiments.js';
+import {registerServiceBuilderForDoc} from '../service.js';
 
 const FOUR_FRAME_DELAY_ = 70;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min

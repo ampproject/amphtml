@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement, GrantReason} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
-import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants.js';
+import {Entitlement, GrantReason} from './entitlement.js';
+import {JwtHelper} from '../../amp-access/0.1/jwt.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
+import {devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getSourceOrigin, getWinOrigin} from '../../../src/url.js';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform.js';
 
 /**
  * This implements the methods to interact with viewer subscription platform.

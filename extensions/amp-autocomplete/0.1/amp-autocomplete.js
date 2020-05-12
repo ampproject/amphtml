@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AutocompleteBindingDef} from './autocomplete-binding-def';
-import {AutocompleteBindingInline} from './autocomplete-binding-inline';
-import {AutocompleteBindingSingle} from './autocomplete-binding-single';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AutocompleteBindingDef} from './autocomplete-binding-def.js';
+import {AutocompleteBindingInline} from './autocomplete-binding-inline.js';
+import {AutocompleteBindingSingle} from './autocomplete-binding-single.js';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css.js';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
   requestForBatchFetch,
-} from '../../../src/batched-json';
-import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {includes, startsWith} from '../../../src/string';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue, toArray} from '../../../src/types';
-import {mod} from '../../../src/utils/math';
-import {once} from '../../../src/utils/function';
-import {removeChildren, tryFocus} from '../../../src/dom';
+} from '../../../src/batched-json.js';
+import {addParamToUrl} from '../../../src/url.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object.js';
+import {getValueForExpr, tryParseJson} from '../../../src/json.js';
+import {includes, startsWith} from '../../../src/string.js';
+import {isAmp4Email} from '../../../src/format.js';
+import {isArray, isEnumValue, toArray} from '../../../src/types.js';
+import {mod} from '../../../src/utils/math.js';
+import {once} from '../../../src/utils/function.js';
+import {removeChildren, tryFocus} from '../../../src/dom.js';
 import {
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
-import {toggle} from '../../../src/style';
-import fuzzysearch from '../../../third_party/fuzzysearch/index';
+} from '../../../src/utils/xhr-utils.js';
+import {toggle} from '../../../src/style.js';
+import fuzzysearch from '../../../third_party/fuzzysearch/index.js';
 
 const TAG = 'amp-autocomplete';
 

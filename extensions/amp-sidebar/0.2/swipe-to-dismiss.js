@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {SwipeDef} from '../../../src/gesture-recognizers';
-import {delayAfterDeferringToEventLoop} from './utils';
-import {dev} from '../../../src/log';
-import {setStyles} from '../../../src/style';
+import {SwipeDef} from '../../../src/gesture-recognizers.js';
+import {delayAfterDeferringToEventLoop} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {setStyles} from '../../../src/style.js';
 
 /**
  * The distance needed to dismiss the swipe element, as fraction of its length.

@@ -22,17 +22,17 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {AutoLightboxEvents} from '../../../src/auto-lightbox.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Services} from '../../../src/services.js';
 import {
   closestAncestorElementBySelector,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+} from '../../../src/dom.js';
+import {dev} from '../../../src/log.js';
+import {toArray} from '../../../src/types.js';
+import {tryParseJson} from '../../../src/json.js';
 
 const TAG = 'amp-auto-lightbox';
 

@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-sidebar-0.2.css.js';
-import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {Toolbar} from './toolbar';
+import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers.js';
+import {Toolbar} from './toolbar.js';
 import {
   closestAncestorElementBySelector,
   isRTL,
   tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {handleAutoscroll} from './autoscroll';
-import {isExperimentOn} from '../../../src/experiments';
-import {removeFragment} from '../../../src/url';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+} from '../../../src/dom.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {descendsFromStory} from '../../../src/utils/story.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {handleAutoscroll} from './autoscroll.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {removeFragment} from '../../../src/url.js';
+import {setModalAsClosed, setModalAsOpen} from '../../../src/modal.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';

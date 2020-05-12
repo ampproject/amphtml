@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
+import {Services} from '../../../../../src/services.js';
 const ALLOWED_AD_PROVIDER = 'sr';
-import {createElementWithAttributes} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {getValueForExpr} from '../../../../../src/json';
+import {createElementWithAttributes} from '../../../../../src/dom.js';
+import {dict} from '../../../../../src/utils/object.js';
+import {getValueForExpr} from '../../../../../src/json.js';
 
 /**
  * @param {!JsonObject} media

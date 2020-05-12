@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {childElementByTag, createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services.js';
+import {
+  childElementByTag,
+  createElementWithAttributes,
+} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
 
 const CSS_PREFIX = 'i-amphtml-subs';
 

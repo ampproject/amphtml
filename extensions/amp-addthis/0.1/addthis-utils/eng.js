@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {API_SERVER} from '../constants.js';
+import {Services} from '../../../../src/services.js';
 
-import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '../../../../src/utils/object';
-import {getSessionId} from './session';
-import {pixelDrop} from './pixel';
+import {addParamsToUrl} from '../../../../src/url.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getSessionId} from './session.js';
+import {pixelDrop} from './pixel.js';
 
 /**
  * Gets data to be passed along in request via params

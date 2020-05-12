@@ -25,11 +25,11 @@ import {
   hasDirtyBit,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
-} from './consent-info';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
+} from './consent-info.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {dev, devAssert, user} from '../../../src/log.js';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';

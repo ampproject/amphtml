@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {Action, getStoreService} from './amp-story-store-service.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Services} from '../../../src/services.js';
+import {
+  createElementWithAttributes,
+  lastChildElement,
+} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {userAssert} from '../../../src/log.js';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

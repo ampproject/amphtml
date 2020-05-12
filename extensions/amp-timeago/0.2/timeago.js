@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {createElement, useEffect, useRef, useState} from '../../../src/preact';
-import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {
+  createElement,
+  useEffect,
+  useRef,
+  useState,
+} from '../../../src/preact.js';
+import {timeago} from '../../../third_party/timeagojs/timeago.js';
+import {useResourcesNotify} from '../../../src/preact/utils.js';
 
 /**
  * @param {!JsonObject} props

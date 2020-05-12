@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
-import {isArray} from './types';
-import {toStructuredCloneable} from './utils/xhr-utils';
-import {userAssert} from './log';
+import {dict} from './utils/object.js';
+import {isArray} from './types.js';
+import {toStructuredCloneable} from './utils/xhr-utils.js';
+import {userAssert} from './log.js';
 
 /**
  * @typedef {{

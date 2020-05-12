@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
+import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast.js';
 import {
   InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
   WebAnimationDef,
@@ -29,28 +29,28 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
   isWhitelistedProp,
-} from './web-animation-types';
-import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
-import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
+} from './web-animation-types.js';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner.js';
+import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner.js';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url.js';
 import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
-import {dashToCamelCase, startsWith} from '../../../src/string';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {extractKeyframes} from './parsers/keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {isInFie} from '../../../src/iframe-helper';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
-import {parseCss} from './parsers/css-expr';
+} from '../../../src/dom.js';
+import {computedStyle, getVendorJsPropertyName} from '../../../src/style.js';
+import {dashToCamelCase, startsWith} from '../../../src/string.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {extractKeyframes} from './parsers/keyframes-extractor.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject, toArray} from '../../../src/types.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isInFie} from '../../../src/iframe-helper.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {map} from '../../../src/utils/object.js';
+import {parseCss} from './parsers/css-expr.js';
 
 /** @const {string} */
 const TAG = 'amp-animation';

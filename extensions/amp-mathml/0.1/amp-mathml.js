@@ -15,12 +15,12 @@
  */
 
 import {CSS} from '../../../build/amp-mathml-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {getIframe} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
 
 export class AmpMathml extends AMP.BaseElement {
   /** @param {!AmpElement} element */

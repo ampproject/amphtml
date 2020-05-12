@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url.js';
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
-} from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/iframe-video.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/utils/function';
+} from '../../../src/dom.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {once} from '../../../src/utils/function.js';
 
 const TAG = 'amp-nexxtv-player';
 

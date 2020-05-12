@@ -15,8 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-fit-text-0.1.css.js';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {px, setStyle, setStyles} from '../../../src/style';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout.js';
+import {px, setStyle, setStyles} from '../../../src/style.js';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;

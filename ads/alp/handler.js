@@ -20,12 +20,12 @@ import {
   isProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
-} from '../../src/url';
-import {closest, openWindowDialog} from '../../src/dom';
-import {dev} from '../../src/log';
-import {dict} from '../../src/utils/object';
-import {startsWith} from '../../src/string';
-import {urls} from '../../src/config';
+} from '../../src/url.js';
+import {closest, openWindowDialog} from '../../src/dom.js';
+import {dev} from '../../src/log.js';
+import {dict} from '../../src/utils/object.js';
+import {startsWith} from '../../src/string.js';
+import {urls} from '../../src/config.js';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache

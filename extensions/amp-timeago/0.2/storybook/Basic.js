@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {Timeago} from '../timeago';
-import {date, number, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '../../../../src/preact.js';
+import {Timeago} from '../timeago.js';
+import {date, number, text, withKnobs} from '@storybook/addon-knobs.js';
+import {withA11y} from '@storybook/addon-a11y.js';
 
 export default {
   title: 'Timeago',

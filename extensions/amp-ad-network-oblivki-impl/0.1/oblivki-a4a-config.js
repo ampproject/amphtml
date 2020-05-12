@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {startsWith} from '../../../src/string';
+import {startsWith} from '../../../src/string.js';
 
 /** @const @private {string} */
 const OBLIVKI_SRC_PREFIX_ = 'https://oblivki.biz/amp/';

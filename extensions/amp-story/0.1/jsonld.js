@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isJsonLdScriptTag} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {isJsonLdScriptTag} from '../../../src/dom.js';
+import {tryParseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'getJsonLd';
 

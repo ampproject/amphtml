@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpEvents} from '../src/amp-events';
-import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert} from '../src/log';
-import {dict} from '../src/utils/object';
-import {isObject} from '../src/types';
-import {parseUrlDeprecated} from '../src/url';
-import {tryParseJson} from '../src/json';
+import {AmpEvents} from '../src/amp-events.js';
+import {IframeMessagingClient} from './iframe-messaging-client.js';
+import {MessageType} from '../src/3p-frame-messaging.js';
+import {dev, devAssert} from '../src/log.js';
+import {dict} from '../src/utils/object.js';
+import {isObject} from '../src/types.js';
+import {parseUrlDeprecated} from '../src/url.js';
+import {tryParseJson} from '../src/json.js';
 
 export class AbstractAmpContext {
   /**

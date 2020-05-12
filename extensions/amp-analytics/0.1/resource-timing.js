@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {findIndex} from '../../../src/utils/array';
-import {isObject} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
-import {user} from '../../../src/log';
+import {ExpansionOptions, variableServiceForDoc} from './variables.js';
+import {findIndex} from '../../../src/utils/array.js';
+import {isObject} from '../../../src/types.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {user} from '../../../src/log.js';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is

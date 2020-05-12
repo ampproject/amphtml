@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
-import {AmpFormTextarea} from './amp-form-textarea';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {AmpFormTextarea} from './amp-form-textarea.js';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
+} from '../../../src/async-input.js';
 import {CSS} from '../../../build/amp-form-0.1.css.js';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/utils/promise.js';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
   getFormVerifier,
-} from './form-verifiers';
-import {FormDirtiness} from './form-dirtiness';
-import {FormEvents} from './form-events';
-import {FormSubmitService} from './form-submit-service';
-import {Keys} from '../../../src/utils/key-codes';
+} from './form-verifiers.js';
+import {FormDirtiness} from './form-dirtiness.js';
+import {FormEvents} from './form-events.js';
+import {FormSubmitService} from './form-submit-service.js';
+import {Keys} from '../../../src/utils/key-codes.js';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
   serializeQueryString,
-} from '../../../src/url';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+} from '../../../src/url.js';
+import {Services} from '../../../src/services.js';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper.js';
 import {
   ancestorElementsByTag,
   childElementByAttr,
@@ -48,31 +48,31 @@ import {
   iterateCursor,
   removeElement,
   tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+} from '../../../src/dom.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper.js';
+import {deepMerge, dict} from '../../../src/utils/object.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
 import {
   formOrNullForElement,
   getFormAsObject,
   setFormForElement,
-} from '../../../src/form';
-import {getFormValidator, isCheckValiditySupported} from './form-validators';
-import {getMode} from '../../../src/mode';
+} from '../../../src/form.js';
+import {getFormValidator, isCheckValiditySupported} from './form-validators.js';
+import {getMode} from '../../../src/mode.js';
 import {
   getViewerAuthTokenIfAvailable,
   setupAMPCors,
   setupInit,
   setupInput,
-} from '../../../src/utils/xhr-utils';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray, toWin} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
+} from '../../../src/utils/xhr-utils.js';
+import {installFormProxy} from './form-proxy.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isAmp4Email} from '../../../src/format.js';
+import {isArray, toArray, toWin} from '../../../src/types.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /** @const {string} */
 const TAG = 'amp-form';

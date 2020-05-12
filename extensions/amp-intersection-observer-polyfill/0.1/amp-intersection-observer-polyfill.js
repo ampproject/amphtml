@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install';
-import {maybeSetupCrossOriginObserver} from './cross-origin-observer';
-import {registerServiceBuilder} from '../../../src/service';
-import {upgradePolyfill} from '../../../src/polyfillstub/intersection-observer-stub';
+import {installIntersectionObserver} from 'intersection-observer/intersection-observer.install.js';
+import {maybeSetupCrossOriginObserver} from './cross-origin-observer.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {upgradePolyfill} from '../../../src/polyfillstub/intersection-observer-stub.js';
 
 const TAG = 'amp-intersection-observer-polyfill';
 

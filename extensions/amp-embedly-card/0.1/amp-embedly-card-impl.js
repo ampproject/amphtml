@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {TAG as KEY_TAG} from './amp-embedly-key';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {getIframe} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {TAG as KEY_TAG} from './amp-embedly-key.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {userAssert} from '../../../src/log.js';
 
 /**
  * Component tag identifier.

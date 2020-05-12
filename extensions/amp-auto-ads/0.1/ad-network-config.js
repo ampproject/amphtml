@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AdSenseNetworkConfig} from './adsense-network-config';
-import {DenakopNetworkConfig} from './denakop-network-config';
-import {DoubleclickNetworkConfig} from './doubleclick-network-config';
-import {PingNetworkConfig} from './ping-network-config';
-import {getMode} from '../../../src/mode';
+import {AdSenseNetworkConfig} from './adsense-network-config.js';
+import {DenakopNetworkConfig} from './denakop-network-config.js';
+import {DoubleclickNetworkConfig} from './doubleclick-network-config.js';
+import {PingNetworkConfig} from './ping-network-config.js';
+import {getMode} from '../../../src/mode.js';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
 export let SizeInfoDef;

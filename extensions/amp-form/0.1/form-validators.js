@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FormEvents} from './form-events';
-import {Services} from '../../../src/services';
-import {ValidationBubble} from './validation-bubble';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
-import {iterateCursor} from '../../../src/dom';
-import {toWin} from '../../../src/types';
+import {FormEvents} from './form-events.js';
+import {Services} from '../../../src/services.js';
+import {ValidationBubble} from './validation-bubble.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev} from '../../../src/log.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {toWin} from '../../../src/types.js';
 
 /** @const @private {string} */
 const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';

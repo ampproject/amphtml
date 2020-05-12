@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {assertAttributeMutationFormat} from './mutation';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {dev, user} from '../../../../src/log';
-import {dict, hasOwn} from '../../../../src/utils/object';
-import {isAmpElement} from '../../../../src/dom';
+import {assertAttributeMutationFormat} from './mutation.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style.js';
+import {dev, user} from '../../../../src/log.js';
+import {dict, hasOwn} from '../../../../src/utils/object.js';
+import {isAmpElement} from '../../../../src/dom.js';
 
 /** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;

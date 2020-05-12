@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill} from '../../../src/utils/intersection-observer-polyfill';
-import {devAssert} from '../../../src/log';
+import {IntersectionObserverPolyfill} from '../../../src/utils/intersection-observer-polyfill.js';
+import {devAssert} from '../../../src/log.js';
 
 // TODO(#27807): Remove once InOb polyfill has been launched.
 export class RefreshIntersectionObserverPolyfillWrapper {

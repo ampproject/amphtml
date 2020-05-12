@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Services} from '../../../src/services.js';
+import {StateChangeType} from './navigation-state.js';
+import {dev} from '../../../src/log.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @enum {string} */
 const Events = {

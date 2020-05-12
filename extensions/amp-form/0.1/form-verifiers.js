@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {LastAddedResolver} from '../../../src/utils/promise';
-import {isFieldDefault} from '../../../src/form';
-import {iterateCursor} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {LastAddedResolver} from '../../../src/utils/promise.js';
+import {isFieldDefault} from '../../../src/form.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {user} from '../../../src/log.js';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 

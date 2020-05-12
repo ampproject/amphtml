@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
-import {text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '../../../../src/preact.js';
+import {storiesOf} from '@storybook/preact.js';
+import {text, withKnobs} from '@storybook/addon-knobs.js';
+import {withA11y} from '@storybook/addon-a11y.js';
 import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line

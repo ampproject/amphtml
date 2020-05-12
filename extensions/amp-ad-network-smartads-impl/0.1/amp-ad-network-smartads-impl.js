@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {startsWith} from '../../../src/string.js';
 
 /**
  * Base URL

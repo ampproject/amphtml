@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from './css';
-import {onDocumentReady} from './document-ready';
-import {urls} from './config';
+import {escapeCssSelectorIdent} from './css.js';
+import {onDocumentReady} from './document-ready.js';
+import {urls} from './config.js';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,

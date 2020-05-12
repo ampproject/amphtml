@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/utils/lru-cache';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
+import {LruCache} from '../../../src/utils/lru-cache.js';
+import {Services} from '../../../src/services.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray} from '../../../src/types.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {urls} from '../../../src/config.js';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getData} from '../src/event-helper';
-import {loadScript} from './3p';
-import {tryDecodeUriComponent} from '../src/url';
+import {getData} from '../src/event-helper.js';
+import {loadScript} from './3p.js';
+import {tryDecodeUriComponent} from '../src/url.js';
 
 /**
  * @param {Window} global

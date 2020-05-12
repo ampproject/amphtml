@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {endsWith} from './string.js';
 import {
   getSourceOrigin,
   isProxyOrigin,
   parseUrlDeprecated,
   tryDecodeUriComponent,
-} from './url';
-import {urls} from './config';
-import {userAssert} from './log';
+} from './url.js';
+import {urls} from './config.js';
+import {userAssert} from './log.js';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 

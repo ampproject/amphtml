@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {parseJson} from '../../../src/json';
+import {Layout} from '../../../src/layout.js';
+import {Variants, allocateVariant} from './variant.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {parseJson} from '../../../src/json.js';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';

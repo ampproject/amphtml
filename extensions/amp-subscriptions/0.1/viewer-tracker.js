@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {cancellation} from '../../../src/error';
-import {dev} from '../../../src/log';
-import {listenOnce} from '../../../src/event-helper';
+import {Services} from '../../../src/services.js';
+import {cancellation} from '../../../src/error.js';
+import {dev} from '../../../src/log.js';
+import {listenOnce} from '../../../src/event-helper.js';
 
 const TAG = 'local-viewer';
 

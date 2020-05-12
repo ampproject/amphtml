@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {installActionServiceForDoc} from '../service/action-impl';
-import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
-import {installGlobalNavigationHandlerForDoc} from '../service/navigation';
-import {installGlobalSubmitListenerForDoc} from '../document-submit';
-import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
-import {installHistoryServiceForDoc} from '../service/history-impl';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installInaboxCidService} from './inabox-cid';
-import {installInaboxMutatorServiceForDoc} from './inabox-mutator';
-import {installInaboxResourcesServiceForDoc} from './inabox-resources';
-import {installInaboxViewerServiceForDoc} from './inabox-viewer';
-import {installInaboxViewportService} from './inabox-viewport';
-import {installOwnersServiceForDoc} from '../service/owners-impl';
-import {installStandardActionsForDoc} from '../service/standard-actions-impl';
-import {installUrlForDoc} from '../service/url-impl';
-import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {rejectServicePromiseForDoc} from '../service';
+import {installActionServiceForDoc} from '../service/action-impl.js';
+import {installDocumentInfoServiceForDoc} from '../service/document-info-impl.js';
+import {installGlobalNavigationHandlerForDoc} from '../service/navigation.js';
+import {installGlobalSubmitListenerForDoc} from '../document-submit.js';
+import {installHiddenObserverForDoc} from '../service/hidden-observer-impl.js';
+import {installHistoryServiceForDoc} from '../service/history-impl.js';
+import {installIframeMessagingClient} from './inabox-iframe-messaging-client.js';
+import {installInaboxCidService} from './inabox-cid.js';
+import {installInaboxMutatorServiceForDoc} from './inabox-mutator.js';
+import {installInaboxResourcesServiceForDoc} from './inabox-resources.js';
+import {installInaboxViewerServiceForDoc} from './inabox-viewer.js';
+import {installInaboxViewportService} from './inabox-viewport.js';
+import {installOwnersServiceForDoc} from '../service/owners-impl.js';
+import {installStandardActionsForDoc} from '../service/standard-actions-impl.js';
+import {installUrlForDoc} from '../service/url-impl.js';
+import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl.js';
+import {rejectServicePromiseForDoc} from '../service.js';
 
 /**
  * Install ampdoc-level services.

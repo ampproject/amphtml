@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AnalyticsEventType} from './events';
-import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
-import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber, isObject} from '../../../src/types';
+import {AnalyticsEventType} from './events.js';
+import {BatchSegmentDef, defaultSerializer} from './transport-serializer.js';
+import {ExpansionOptions, variableServiceForDoc} from './variables.js';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist.js';
+import {Services} from '../../../src/services.js';
+import {devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getResourceTiming} from './resource-timing.js';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types.js';
 
 const BATCH_INTERVAL_MIN = 200;
 

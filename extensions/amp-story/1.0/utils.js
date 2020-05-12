@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {getMode} from '../../../src/mode';
+} from '../../../src/dom.js';
+import {createShadowRoot} from '../../../src/shadow-embed.js';
+import {getMode} from '../../../src/mode.js';
 import {
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
-} from '../../../src/url';
-import {getState} from '../../../src/history';
-import {setStyle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+} from '../../../src/url.js';
+import {getState} from '../../../src/history.js';
+import {setStyle} from '../../../src/style.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

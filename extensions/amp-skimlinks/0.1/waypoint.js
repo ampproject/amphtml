@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * The waypoint class is responsible for building the URL to

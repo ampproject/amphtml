@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {pemToBytes} from '../../../src/utils/pem';
-import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
-import {tryParseJson} from '../../../src/json';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64.js';
+import {pemToBytes} from '../../../src/utils/pem.js';
+import {stringToBytes, utf8Decode} from '../../../src/utils/bytes.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /**
  * @typedef {{

@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie.js';
 import {
   AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
@@ -37,34 +37,34 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-} from '../../../ads/google/a4a/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
-import {Navigation} from '../../../src/service/navigation';
-import {ResponsiveState} from './responsive-state';
-import {Services} from '../../../src/services';
+} from '../../../ads/google/a4a/utils.js';
+import {AdsenseSharedState} from './adsense-shared-state.js';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed.js';
+import {Navigation} from '../../../src/service/navigation.js';
+import {ResponsiveState} from './responsive-state.js';
+import {Services} from '../../../src/services.js';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {computedStyle, setStyles} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
-import {getData} from '../../../src/event-helper';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+} from '../../../ads/google/a4a/traffic-experiments.js';
+import {computedStyle, setStyles} from '../../../src/style.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint.js';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load.js';
+import {getData} from '../../../src/event-helper.js';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame.js';
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
-import {utf8Decode} from '../../../src/utils/bytes';
+} from '../../../src/experiments.js';
+import {getMode} from '../../../src/mode.js';
+import {insertAnalyticsElement} from '../../../src/extension-analytics.js';
+import {removeElement} from '../../../src/dom.js';
+import {stringHash32} from '../../../src/string.js';
+import {utf8Decode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';

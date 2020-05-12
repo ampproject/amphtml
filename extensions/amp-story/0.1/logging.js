@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LogLevel, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {scopedQuerySelectorAll} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {LogLevel, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {scopedQuerySelectorAll} from '../../../src/dom.js';
+import {tryResolve} from '../../../src/utils/promise.js';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicate_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase

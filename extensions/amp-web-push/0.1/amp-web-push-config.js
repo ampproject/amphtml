@@ -14,11 +14,11 @@
  * the License.
  */
 
-import {CONFIG_TAG, TAG} from './vars';
-import {dev, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {parseUrlDeprecated} from '../../../src/url';
-import {webPushServiceForDoc} from './web-push-service';
+import {CONFIG_TAG, TAG} from './vars.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {webPushServiceForDoc} from './web-push-service.js';
 
 /** @enum {string} */
 export const WebPushConfigAttributes = {

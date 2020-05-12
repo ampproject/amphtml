@@ -15,19 +15,19 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css.js';
-import {MultidocManager} from '../../../src/multidoc-manager';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/visibility-state';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {removeElement} from '../../../src/dom';
-import {setStyle, toggle} from '../../../src/style';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {MultidocManager} from '../../../src/multidoc-manager.js';
+import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker.js';
+import {Services} from '../../../src/services.js';
+import {VisibilityState} from '../../../src/visibility-state.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyle, toggle} from '../../../src/style.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;

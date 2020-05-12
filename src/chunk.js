@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {dev} from './log';
-import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {makeBodyVisibleRecovery} from './style-installer';
-import PriorityQueue from './utils/priority-queue';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {getData} from './event-helper.js';
+import {getServiceForDoc, registerServiceBuilderForDoc} from './service.js';
+import {makeBodyVisibleRecovery} from './style-installer.js';
+import PriorityQueue from './utils/priority-queue.js';
 
 /**
  * @const {string}

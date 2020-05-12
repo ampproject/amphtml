@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
+import {Action, getStoreService} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css.js';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from './../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
-import {renderAsElement} from './simple-template';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dict} from './../../../src/utils/object.js';
+import {removeElement} from '../../../src/dom.js';
+import {renderAsElement} from './simple-template.js';
 
 /** @const {string} Class for the continue anyway button */
 const CONTINUE_ANYWAY_BUTTON_CLASS = 'i-amphtml-continue-button';

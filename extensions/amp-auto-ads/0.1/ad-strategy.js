@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {PlacementState} from './placement';
-import {SizeInfoDef} from './ad-network-config';
-import {tryResolve} from '../../../src/utils/promise';
-import {user} from '../../../src/log';
+import {PlacementState} from './placement.js';
+import {SizeInfoDef} from './ad-network-config.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {user} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

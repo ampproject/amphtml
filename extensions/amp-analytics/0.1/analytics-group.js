@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {dev, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+import {ChunkPriority, chunk} from '../../../src/chunk.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {getTrackerKeyName, getTrackerTypesForParentType} from './events.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {toWin} from '../../../src/types.js';
 
 /**
  * @const {number}

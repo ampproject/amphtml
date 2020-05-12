@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {whenUpgradedToCustomElement} from '../../../src/dom.js';
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {

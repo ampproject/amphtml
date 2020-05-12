@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from './laterpay-impl';
-import {Services} from '../../../src/services';
+import {LaterpayVendor} from './laterpay-impl.js';
+import {Services} from '../../../src/services.js';
 
 AMP.extension('amp-access-laterpay', '0.1', function (AMP) {
   AMP.registerServiceForDoc(

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-} from './amp-gwd-animation-impl';
+} from './amp-gwd-animation-impl.js';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css.js';
-import {Services} from '../../../src/services';
-import {getDetail} from '../../../src/event-helper';
+import {Services} from '../../../src/services.js';
+import {getDetail} from '../../../src/event-helper.js';
 import {
   getExistingServiceForDocInEmbedScope,
   getParentWindowFrameElement,
-} from '../../../src/service';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+} from '../../../src/service.js';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper.js';
+import {userAssert} from '../../../src/log.js';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation

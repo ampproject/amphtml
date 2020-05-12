@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../../../../src/log';
+import {userAssert} from '../../../../src/log.js';
 
 /**
  * Interface for amp-experiment mutations.

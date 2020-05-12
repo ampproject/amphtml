@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
-import {Services} from '../services';
-import {dev, devAssert} from '../log';
-import {removeNoScriptElements} from './dom-writer';
+import {Deferred} from './promise.js';
+import {Services} from '../services.js';
+import {dev, devAssert} from '../log.js';
+import {removeNoScriptElements} from './dom-writer.js';
 
 export class DomTransformStream {
   /**

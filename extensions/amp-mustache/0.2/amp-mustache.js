@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Purifier} from '../../../src/purifier/purifier';
-import {dict} from '../../../src/utils/object';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
+import {Purifier} from '../../../src/purifier/purifier.js';
+import {dict} from '../../../src/utils/object.js';
+import {getService, registerServiceBuilder} from '../../../src/service.js';
+import {iterateCursor, templateContentClone} from '../../../src/dom.js';
+import {rewriteAttributeValue} from '../../../src/url-rewrite.js';
+import {user} from '../../../src/log.js';
+import mustache from '../../../third_party/mustache/mustache.js';
 
 const TAG = 'amp-mustache';
 

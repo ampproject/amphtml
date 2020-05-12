@@ -18,32 +18,32 @@ import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
-} from './analytics';
+} from './analytics.js';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css.js';
-import {CryptoHandler} from './crypto-handler';
-import {Dialog} from './dialog';
-import {DocImpl} from './doc-impl';
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement, GrantReason} from './entitlement';
+import {CryptoHandler} from './crypto-handler.js';
+import {Dialog} from './dialog.js';
+import {DocImpl} from './doc-impl.js';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants.js';
+import {Entitlement, GrantReason} from './entitlement.js';
 import {
   PageConfig,
   PageConfigResolver,
-} from '../../../third_party/subscriptions-project/config';
-import {PlatformStore} from './platform-store';
-import {Renderer} from './renderer';
-import {ServiceAdapter} from './service-adapter';
-import {Services} from '../../../src/services';
-import {SubscriptionPlatform} from './subscription-platform';
-import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
-import {ViewerTracker} from './viewer-tracker';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {getWinOrigin} from '../../../src/url';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isStoryDocument} from '../../../src/utils/story';
-import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+} from '../../../third_party/subscriptions-project/config.js';
+import {PlatformStore} from './platform-store.js';
+import {Renderer} from './renderer.js';
+import {ServiceAdapter} from './service-adapter.js';
+import {Services} from '../../../src/services.js';
+import {SubscriptionPlatform} from './subscription-platform.js';
+import {ViewerSubscriptionPlatform} from './viewer-subscription-platform.js';
+import {ViewerTracker} from './viewer-tracker.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {getValueForExpr, tryParseJson} from '../../../src/json.js';
+import {getWinOrigin} from '../../../src/url.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isStoryDocument} from '../../../src/utils/story.js';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform.js';
 
 /** @const */
 const TAG = 'amp-subscriptions';

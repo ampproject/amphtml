@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {Services} from './services';
+import {Deferred} from './utils/promise.js';
+import {Services} from './services.js';
 import {
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
   parseUrlDeprecated,
-} from './url';
-import {dev, user, userAssert} from './log';
-import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
+} from './url.js';
+import {dev, user, userAssert} from './log.js';
+import {getMode} from './mode.js';
+import {isExperimentOn} from './experiments.js';
 
 const TIMEOUT_VALUE = 8000;
 

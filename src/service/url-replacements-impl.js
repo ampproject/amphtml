@@ -22,7 +22,7 @@ import {
   getNavigationData,
   getTimingDataAsync,
   getTimingDataSync,
-} from './variable-source';
+} from './variable-source.js';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -32,19 +32,19 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-} from '../url';
-import {dev, devAssert, user, userAssert} from '../log';
+} from '../url.js';
+import {dev, devAssert, user, userAssert} from '../log.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service.js';
 
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
+import {Expander} from './url-expander/expander.js';
+import {Services} from '../services.js';
+import {WindowInterface} from '../window-interface.js';
 import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
-import {internalRuntimeVersion} from '../internal-version';
+import {hasOwn} from '../utils/object.js';
+import {internalRuntimeVersion} from '../internal-version.js';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

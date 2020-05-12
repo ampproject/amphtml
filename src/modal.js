@@ -1,6 +1,6 @@
-import {devAssert} from './log';
-import {isConnectedNode, rootNodeFor} from './dom';
-import {toArray} from './types';
+import {devAssert} from './log.js';
+import {isConnectedNode, rootNodeFor} from './dom.js';
+import {toArray} from './types.js';
 
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.

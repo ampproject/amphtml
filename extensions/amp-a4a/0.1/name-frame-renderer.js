@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Renderer} from './amp-ad-type-defs';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {Renderer} from './amp-ad-type-defs.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {getContextMetadata} from '../../../src/iframe-attributes.js';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame.js';
+import {utf8Decode} from '../../../src/utils/bytes.js';
 
 /**
  * Render a non-AMP creative into a NameFrame.

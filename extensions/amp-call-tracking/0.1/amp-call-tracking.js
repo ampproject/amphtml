@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-call-tracking';
 

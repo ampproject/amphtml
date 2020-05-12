@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
-import {Layout, getLayoutClass} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
-import {dev, user, userAssert} from '../log';
+import {ActionTrust} from '../action-constants.js';
+import {Layout, getLayoutClass} from '../layout.js';
+import {Services} from '../services.js';
+import {computedStyle, toggle} from '../style.js';
+import {dev, user, userAssert} from '../log.js';
 import {
   getAmpdoc,
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
-import {isFiniteNumber, toWin} from '../types';
-import {startsWith} from '../string';
-import {tryFocus} from '../dom';
+} from '../service.js';
+import {isFiniteNumber, toWin} from '../types.js';
+import {startsWith} from '../string.js';
+import {tryFocus} from '../dom.js';
 
 /**
  * @param {!Element} element

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
+import {parseUrlDeprecated, serializeQueryString} from '../../../src/url.js';
 
 const APP = '__AMPHTML__';
 

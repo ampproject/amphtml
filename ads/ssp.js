@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
-import {parseJson} from '../src/json';
+import {computeInMasterFrame, loadScript, validateData} from '../3p/3p.js';
+import {parseJson} from '../src/json.js';
 
 /*
  * How to develop:

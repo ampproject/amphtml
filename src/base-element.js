@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
-import {Layout, LayoutPriority} from './layout';
-import {Services} from './services';
-import {devAssert, user, userAssert} from './log';
-import {getData, listen, loadPromise} from './event-helper';
-import {getMode} from './mode';
-import {isArray, toWin} from './types';
+import {ActionTrust, DEFAULT_ACTION} from './action-constants.js';
+import {Layout, LayoutPriority} from './layout.js';
+import {Services} from './services.js';
+import {devAssert, user, userAssert} from './log.js';
+import {getData, listen, loadPromise} from './event-helper.js';
+import {getMode} from './mode.js';
+import {isArray, toWin} from './types.js';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

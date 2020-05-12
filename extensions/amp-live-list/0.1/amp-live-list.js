@@ -18,12 +18,12 @@ import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
   SERVICE_ID,
-} from './live-list-manager';
-import {AmpEvents} from '../../../src/amp-events';
+} from './live-list-manager.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-live-list-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {childElementByAttr} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {childElementByAttr} from '../../../src/dom.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /**
  * @enum {string}

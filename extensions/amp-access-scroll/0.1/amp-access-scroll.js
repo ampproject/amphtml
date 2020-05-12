@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ScrollAccessVendor} from './scroll-impl';
-import {Services} from '../../../src/services';
+import {ScrollAccessVendor} from './scroll-impl.js';
+import {Services} from '../../../src/services.js';
 
 AMP.extension('amp-access-scroll', '0.1', function (AMP) {
   AMP.registerServiceForDoc(

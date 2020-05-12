@@ -15,24 +15,24 @@
  */
 
 import {CSS} from '../../../build/amp-web-push-0.1.css.js';
-import {IFrameHost} from './iframehost';
+import {IFrameHost} from './iframehost.js';
 import {
   NotificationPermission,
   SERVICE_TAG,
   StorageKeys,
   TAG,
   WIDGET_TAG,
-} from './vars';
-import {Services} from '../../../src/services';
-import {WebPushWidgetVisibilities} from './amp-web-push-widget';
-import {WindowMessenger} from './window-messenger';
-import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+} from './vars.js';
+import {Services} from '../../../src/services.js';
+import {WebPushWidgetVisibilities} from './amp-web-push-widget.js';
+import {WindowMessenger} from './window-messenger.js';
+import {dev, user} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {getMode} from '../../../src/mode.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {openWindowDialog} from '../../../src/dom.js';
+import {parseQueryString, parseUrlDeprecated} from '../../../src/url.js';
 
 /** @typedef {{
  *    isControllingFrame: boolean,

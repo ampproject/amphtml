@@ -20,10 +20,10 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-import {Deferred} from './utils/promise';
-import {dev, devAssert} from './log';
-import {isInAmpdocFieExperiment} from './ampdoc-fie';
-import {toWin} from './types';
+import {Deferred} from './utils/promise.js';
+import {dev, devAssert} from './log.js';
+import {isInAmpdocFieExperiment} from './ampdoc-fie.js';
+import {toWin} from './types.js';
 
 /**
  * Holds info about a service.

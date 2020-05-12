@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {
   FxBindings,
   FxObservesSignal,
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
-} from './fx-type';
-import {devAssert, rethrowAsync} from '../../../src/log';
+} from './fx-type.js';
+import {devAssert, rethrowAsync} from '../../../src/log.js';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
-} from './providers/fx-provider';
-import {iterateCursor} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+} from './providers/fx-provider.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {listen} from '../../../src/event-helper.js';
 
 const TAG = 'amp-fx-collection';
 

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {HtmlLiteralTagDef} from './html';
-import {PlayingStates, VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
-import {Timeout} from './timeout';
-import {VideoDockingEvents, pointerCoords} from './events';
-import {applyBreakpointClassname} from './breakpoints';
+import {HtmlLiteralTagDef} from './html.js';
+import {PlayingStates, VideoEvents} from '../../../src/video-interface.js';
+import {Services} from '../../../src/services.js';
+import {Timeout} from './timeout.js';
+import {VideoDockingEvents, pointerCoords} from './events.js';
+import {applyBreakpointClassname} from './breakpoints.js';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
-} from '../../../src/dom';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
+} from '../../../src/dom.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {htmlFor, htmlRefs} from '../../../src/static-template.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {once} from '../../../src/utils/function.js';
 import {
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
-} from '../../../src/style';
+} from '../../../src/style.js';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.

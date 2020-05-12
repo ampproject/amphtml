@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
-import {isCookieAllowed} from './cookie-reader';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
-import {setCookie} from '../../../src/cookies';
-import {user} from '../../../src/log';
-import {variableServiceForDoc} from './variables';
+import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl.js';
+import {ChunkPriority, chunk} from '../../../src/chunk.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {getMode} from '../../../src/mode.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isCookieAllowed} from './cookie-reader.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isObject} from '../../../src/types.js';
+import {setCookie} from '../../../src/cookies.js';
+import {user} from '../../../src/log.js';
+import {variableServiceForDoc} from './variables.js';
 
 const TAG = 'amp-analytics/cookie-writer';
 

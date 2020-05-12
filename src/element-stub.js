@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {devAssert} from './log';
+import {BaseElement} from './base-element.js';
+import {devAssert} from './log.js';
 
 /** @type {!Array} */
 export const stubbedElements = [];

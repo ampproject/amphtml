@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {RefreshIntersectionObserverPolyfillWrapper} from './refresh-intersection-observer-polyfill-wrapper';
-import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {RefreshIntersectionObserverPolyfillWrapper} from './refresh-intersection-observer-polyfill-wrapper.js';
+import {Services} from '../../../src/services.js';
+import {devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen

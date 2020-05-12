@@ -20,11 +20,11 @@ import {
   isProxyOrigin,
   parseUrlDeprecated,
   resolveRelativeUrl,
-} from './url';
-import {parseSrcset} from './srcset';
-import {startsWith} from './string';
-import {urls} from './config';
-import {user} from './log';
+} from './url.js';
+import {parseSrcset} from './srcset.js';
+import {startsWith} from './string.js';
+import {urls} from './config.js';
+import {user} from './log.js';
 
 const TAG = 'URL-REWRITE';
 

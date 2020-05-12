@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {FiniteStateMachine} from '../finite-state-machine';
-import {FocusHistory} from '../focus-history';
-import {Pass} from '../pass';
-import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
-import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
-import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
-import {dev, devAssert} from '../log';
-import {dict} from '../utils/object';
-import {expandLayoutRect} from '../layout-rect';
-import {getMode} from '../mode';
-import {getSourceUrl} from '../url';
-import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
-import {listen, loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
-import {startupChunk} from '../chunk';
-import {throttle} from '../utils/rate-limit';
+import {Deferred} from '../utils/promise.js';
+import {FiniteStateMachine} from '../finite-state-machine.js';
+import {FocusHistory} from '../focus-history.js';
+import {Pass} from '../pass.js';
+import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface.js';
+import {Resource, ResourceState} from './resource.js';
+import {Services} from '../services.js';
+import {TaskQueue} from './task-queue.js';
+import {VisibilityState} from '../visibility-state.js';
+import {dev, devAssert} from '../log.js';
+import {dict} from '../utils/object.js';
+import {expandLayoutRect} from '../layout-rect.js';
+import {getMode} from '../mode.js';
+import {getSourceUrl} from '../url.js';
+import {hasNextNodeInDocumentOrder, isIframed} from '../dom.js';
+import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug.js';
+import {isBlockedByConsent, reportError} from '../error.js';
+import {isExperimentOn} from '../experiments.js';
+import {listen, loadPromise} from '../event-helper.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {remove} from '../utils/array.js';
+import {startupChunk} from '../chunk.js';
+import {throttle} from '../utils/rate-limit.js';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as st from './style';
-import {assertNotDisplay, setStyle} from './style';
-import {getCurve} from './curve';
+import * as st from './style.js';
+import {assertNotDisplay, setStyle} from './style.js';
+import {getCurve} from './curve.js';
 
 export const NOOP = function (unusedTime) {
   return null;

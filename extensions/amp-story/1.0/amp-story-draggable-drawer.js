@@ -19,16 +19,16 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css.js';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {closest, isAmpElement} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {listen} from '../../../src/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {closest, isAmpElement} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {listen} from '../../../src/event-helper.js';
+import {resetStyles, setImportantStyles, toggle} from '../../../src/style.js';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;

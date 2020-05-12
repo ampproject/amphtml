@@ -24,9 +24,9 @@
  * </amp-story>
  * </code>
  */
-import './amp-story-cta-layer';
-import './amp-story-grid-layer';
-import './amp-story-page';
+import './amp-story-cta-layer.js';
+import './amp-story-grid-layer.js';
+import './amp-story-page.js';
 import {
   Action,
   EmbeddedComponentState,
@@ -34,32 +34,36 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
-import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+} from './amp-story-store-service.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement.js';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
-} from './story-analytics';
-import {AmpEvents} from '../../../src/amp-events';
-import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryBookend} from './bookend/amp-story-bookend';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
-import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {AnalyticsVariable, getVariableService} from './variable-service';
+} from './story-analytics.js';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {AmpStoryAccess} from './amp-story-access.js';
+import {AmpStoryBookend} from './bookend/amp-story-bookend.js';
+import {AmpStoryConsent} from './amp-story-consent.js';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer.js';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component.js';
+import {AmpStoryGridLayer} from './amp-story-grid-layer.js';
+import {AmpStoryHint} from './amp-story-hint.js';
+import {
+  AmpStoryPage,
+  NavigationDirection,
+  PageState,
+} from './amp-story-page.js';
+import {AmpStoryPageAttachment} from './amp-story-page-attachment.js';
+import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz.js';
+import {AmpStoryRenderService} from './amp-story-render-service.js';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler.js';
+import {AnalyticsVariable, getVariableService} from './variable-service.js';
 import {CSS} from '../../../build/amp-story-1.0.css.js';
-import {CommonSignals} from '../../../src/common-signals';
-import {EventType, dispatch} from './events';
-import {Gestures} from '../../../src/gesture';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {EventType, dispatch} from './events.js';
+import {Gestures} from '../../../src/gesture.js';
 import {
   HistoryState,
   getHistoryState,
@@ -67,19 +71,19 @@ import {
   setAttributeInMutate,
   setHistoryState,
   shouldShowStoryUrlInfo,
-} from './utils';
-import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {LiveStoryManager} from './live-story-manager';
-import {MediaPool, MediaType} from './media-pool';
-import {PaginationButtons} from './pagination-buttons';
-import {Services} from '../../../src/services';
-import {ShareMenu} from './amp-story-share-menu';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {SystemLayer} from './amp-story-system-layer';
-import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
+} from './utils.js';
+import {InfoDialog} from './amp-story-info-dialog.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Layout} from '../../../src/layout.js';
+import {LiveStoryManager} from './live-story-manager.js';
+import {MediaPool, MediaType} from './media-pool.js';
+import {PaginationButtons} from './pagination-buttons.js';
+import {Services} from '../../../src/services.js';
+import {ShareMenu} from './amp-story-share-menu.js';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers.js';
+import {SystemLayer} from './amp-story-system-layer.js';
+import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer.js';
+import {ViewportWarningLayer} from './amp-story-viewport-warning-layer.js';
 import {
   childElement,
   childElementByTag,
@@ -91,52 +95,52 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
+} from '../../../src/dom.js';
 import {
   computedStyle,
   resetStyles,
   setImportantStyles,
   toggle,
-} from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, lastItem} from '../../../src/utils/array';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
-import {getLocalizationService} from './amp-story-localization-service';
-import {getMediaQueryService} from './amp-story-media-query-service';
-import {getMode} from '../../../src/mode';
-import {getState} from '../../../src/history';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseQueryString} from '../../../src/url';
-import {toArray} from '../../../src/types';
-import {upgradeBackgroundAudio} from './audio';
-import LocalizedStringsAr from './_locales/ar';
-import LocalizedStringsDe from './_locales/de';
-import LocalizedStringsDefault from './_locales/default';
-import LocalizedStringsEn from './_locales/en';
-import LocalizedStringsEnGb from './_locales/en-GB';
-import LocalizedStringsEs from './_locales/es';
-import LocalizedStringsEs419 from './_locales/es-419';
-import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsHi from './_locales/hi';
-import LocalizedStringsId from './_locales/id';
-import LocalizedStringsIt from './_locales/it';
-import LocalizedStringsJa from './_locales/ja';
-import LocalizedStringsKo from './_locales/ko';
-import LocalizedStringsNl from './_locales/nl';
-import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPtBr from './_locales/pt-BR';
-import LocalizedStringsPtPt from './_locales/pt-PT';
-import LocalizedStringsRu from './_locales/ru';
-import LocalizedStringsTr from './_locales/tr';
-import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZhCn from './_locales/zh-CN';
-import LocalizedStringsZhTw from './_locales/zh-TW';
+} from '../../../src/style.js';
+import {createPseudoLocale} from '../../../src/localized-strings.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {endsWith} from '../../../src/string.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {findIndex, lastItem} from '../../../src/utils/array.js';
+import {getConsentPolicyState} from '../../../src/consent.js';
+import {getDetail} from '../../../src/event-helper.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {getMediaQueryService} from './amp-story-media-query-service.js';
+import {getMode} from '../../../src/mode.js';
+import {getState} from '../../../src/history.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {parseQueryString} from '../../../src/url.js';
+import {toArray} from '../../../src/types.js';
+import {upgradeBackgroundAudio} from './audio.js';
+import LocalizedStringsAr from './_locales/ar.js';
+import LocalizedStringsDe from './_locales/de.js';
+import LocalizedStringsDefault from './_locales/default.js';
+import LocalizedStringsEn from './_locales/en.js';
+import LocalizedStringsEnGb from './_locales/en-GB.js';
+import LocalizedStringsEs from './_locales/es.js';
+import LocalizedStringsEs419 from './_locales/es-419.js';
+import LocalizedStringsFr from './_locales/fr.js';
+import LocalizedStringsHi from './_locales/hi.js';
+import LocalizedStringsId from './_locales/id.js';
+import LocalizedStringsIt from './_locales/it.js';
+import LocalizedStringsJa from './_locales/ja.js';
+import LocalizedStringsKo from './_locales/ko.js';
+import LocalizedStringsNl from './_locales/nl.js';
+import LocalizedStringsNo from './_locales/no.js';
+import LocalizedStringsPtBr from './_locales/pt-BR.js';
+import LocalizedStringsPtPt from './_locales/pt-PT.js';
+import LocalizedStringsRu from './_locales/ru.js';
+import LocalizedStringsTr from './_locales/tr.js';
+import LocalizedStringsVi from './_locales/vi.js';
+import LocalizedStringsZhCn from './_locales/zh-CN.js';
+import LocalizedStringsZhTw from './_locales/zh-TW.js';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;

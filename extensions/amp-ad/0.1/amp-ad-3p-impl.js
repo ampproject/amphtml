@@ -17,38 +17,38 @@
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {AmpAdUIHandler} from './amp-ad-ui';
-import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+} from '../../../ads/google/utils.js';
+import {AmpAdUIHandler} from './amp-ad-ui.js';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler.js';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+} from '../../../src/consent-state.js';
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
   isLayoutSizeDefined,
-} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAdCid} from '../../../src/ad-cid';
-import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
+} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {adConfig} from '../../../ads/_config.js';
+import {clamp} from '../../../src/utils/math.js';
+import {computedStyle, setStyle} from '../../../src/style.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAdCid} from '../../../src/ad-cid.js';
+import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper.js';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
-} from './concurrent-load';
+} from './concurrent-load.js';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
-} from '../../../src/consent';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {toWin} from '../../../src/types';
+} from '../../../src/consent.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {moveLayoutRect} from '../../../src/layout-rect.js';
+import {toWin} from '../../../src/types.js';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';

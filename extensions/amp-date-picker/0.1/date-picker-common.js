@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dict, omit} from '../../../src/utils/object';
-import {requireExternal} from '../../../src/module';
+import {dict, omit} from '../../../src/utils/object.js';
+import {requireExternal} from '../../../src/module.js';
 
 /**
  * A higher-order component that wraps a specific date-picker implmentation

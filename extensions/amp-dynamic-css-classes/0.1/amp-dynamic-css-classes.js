@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 
 /**
  * Strips everything but the domain from referrer string.

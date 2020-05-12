@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../src/consent-state';
-import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
-import {parseJson} from '../src/json';
+import {CONSENT_POLICY_STATE} from '../src/consent-state.js';
+import {computeInMasterFrame, validateData, writeScript} from '../3p/3p.js';
+import {parseJson} from '../src/json.js';
 
 /**
  * @const {Object<string, string>}

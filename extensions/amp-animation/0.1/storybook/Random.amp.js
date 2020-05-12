@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {AnimationTemplate} from './template';
-import {storiesOf} from '@storybook/preact';
-import {withKnobs} from '@storybook/addon-knobs';
+import * as Preact from '../../../../src/preact.js';
+import {AnimationTemplate} from './template.js';
+import {storiesOf} from '@storybook/preact.js';
+import {withKnobs} from '@storybook/addon-knobs.js';
 import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const CONTAINER_STYLE = {

@@ -18,8 +18,8 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
   parseQueryString,
   tryDecodeUriComponent,
-} from '../../../src/url';
-import {listen} from '../../../src/event-helper';
+} from '../../../src/url.js';
+import {listen} from '../../../src/event-helper.js';
 
 /**
  * @private Visible for testing.

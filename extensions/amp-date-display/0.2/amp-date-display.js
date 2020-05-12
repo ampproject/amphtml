@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {AsyncRender} from './async-render';
-import {DateDisplay} from './date-display';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {RenderDomTree} from './render-dom-tree';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import * as Preact from '../../../src/preact.js';
+import {AsyncRender} from './async-render.js';
+import {DateDisplay} from './date-display.js';
+import {PreactBaseElement} from '../../../src/preact/base-element.js';
+import {RenderDomTree} from './render-dom-tree.js';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

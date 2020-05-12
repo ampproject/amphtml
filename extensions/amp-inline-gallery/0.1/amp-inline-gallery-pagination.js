@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
-import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {InlineGalleryEvents} from './inline-gallery-events.js';
+import {Layout} from '../../../src/layout.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {scopedQuerySelectorAll} from '../../../src/dom.js';
 import {setImportantStyles} from '../../../src/style.js';
-import {toArray} from '../../../src/types';
+import {toArray} from '../../../src/types.js';
 
 /**
  * The maximum number of dots to show before converting to a count.

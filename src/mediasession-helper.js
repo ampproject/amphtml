@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
-import {devAssert, userAssert} from './log';
-import {isArray, isObject} from './types';
-import {tryParseJson} from './json';
+import {Services} from './services.js';
+import {devAssert, userAssert} from './log.js';
+import {isArray, isObject} from './types.js';
+import {tryParseJson} from './json.js';
 
 /**
  * @typedef {{

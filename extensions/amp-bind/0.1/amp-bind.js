@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpBindMacro} from './amp-bind-macro';
-import {AmpState} from './amp-state';
-import {Bind} from './bind-impl';
+import {AmpBindMacro} from './amp-bind-macro.js';
+import {AmpState} from './amp-state.js';
+import {Bind} from './bind-impl.js';
 
 /** @const {string} */
 const TAG = 'amp-bind';

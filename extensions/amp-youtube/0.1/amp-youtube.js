@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {addParamsToUrl} from '../../../src/url.js';
 import {
   addUnsafeAllowAutoplay,
   createFrameFor,
@@ -26,21 +26,21 @@ import {
   objOrParseJson,
   originMatches,
   redispatch,
-} from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/iframe-video.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
+} from '../../../src/dom.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {setStyles} from '../../../src/style.js';
 
 const TAG = 'amp-youtube';
 

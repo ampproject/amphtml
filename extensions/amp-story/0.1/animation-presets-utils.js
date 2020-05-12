@@ -19,8 +19,8 @@
  * presets.
  */
 
-import {KeyframesDef, StoryAnimationDimsDef} from './animation-types';
-import {rotate, scale, translate} from '../../../src/style';
+import {KeyframesDef, StoryAnimationDimsDef} from './animation-types.js';
+import {rotate, scale, translate} from '../../../src/style.js';
 
 /**
  * Translates the element on the 2d plane according to the given points.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertCharacterDataMutationFormat} from './mutation';
+import {assertCharacterDataMutationFormat} from './mutation.js';
 
 /**
  * Mutation for characterData (textContent) mutations

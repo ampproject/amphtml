@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-constants';
+import {ActionTrust} from './action-constants.js';
 import {
   SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
   checkCorsUrl,
   isProxyOrigin,
-} from './url';
-import {Services} from './services';
-import {dev, user, userAssert} from './log';
-import {isExtensionScriptInNode} from './element-service';
+} from './url.js';
+import {Services} from './services.js';
+import {dev, user, userAssert} from './log.js';
+import {isExtensionScriptInNode} from './element-service.js';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

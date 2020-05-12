@@ -16,8 +16,8 @@
 
 /* global THREE */
 
-import {setStyle} from '../../src/style';
-import AnimationLoop from './animation-loop';
+import {setStyle} from '../../src/style.js';
+import AnimationLoop from './animation-loop.js';
 
 const CAMERA_DISTANCE_FACTOR = 1;
 const CAMERA_FAR_FACTOR = 50;

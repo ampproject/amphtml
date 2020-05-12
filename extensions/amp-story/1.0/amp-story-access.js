@@ -18,20 +18,20 @@ import {
   Action,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service';
-import {Layout} from '../../../src/layout';
-import {assertHttpsUrl} from '../../../src/url';
+} from './amp-story-store-service.js';
+import {Layout} from '../../../src/layout.js';
+import {assertHttpsUrl} from '../../../src/url.js';
 import {
   closest,
   closestAncestorElementBySelector,
   copyChildren,
   removeChildren,
-} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isArray, isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {setImportantStyles} from '../../../src/style';
+} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {setImportantStyles} from '../../../src/style.js';
 
 /** @const {string} */
 const TAG = 'amp-story-access';

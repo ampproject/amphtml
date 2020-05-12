@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getStyle, setStyles} from '../../../src/style';
-import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/utils/rate-limit';
-import {tryParseJson} from '../../../src/json';
+import {Services} from '../../../src/services.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
+import {getStyle, setStyles} from '../../../src/style.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /**
  * Used to manage messages for different Safeframe ad slots.

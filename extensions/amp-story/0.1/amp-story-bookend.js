@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {Action, StateProperty} from './amp-story-store-service.js';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css.js';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,
   ScrollableShareWidget,
-} from './amp-story-share';
-import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/utils/key-codes';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getJsonLd} from './jsonld';
-import {isArray} from '../../../src/types';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+} from './amp-story-share.js';
+import {EventType, dispatch} from './events.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {closest} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {getJsonLd} from './jsonld.js';
+import {isArray} from '../../../src/types.js';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url.js';
 import {
   parseArticlesToClassicApi,
   relatedArticlesFromJson,
-} from './related-articles';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
+} from './related-articles.js';
+import {renderAsElement, renderSimpleTemplate} from './simple-template.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
 
 /**
  * Key for omponents in bookend config.

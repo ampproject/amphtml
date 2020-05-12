@@ -15,7 +15,7 @@
  */
 
 import * as path from 'path';
-import alias from '@rollup/plugin-alias';
+import alias from '@rollup/plugin-alias.js';
 
 // eslint-disable-next-line no-undef
 const projectRootDir = path.resolve(__dirname);

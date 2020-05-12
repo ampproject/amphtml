@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
-import {Services} from './services';
-import {dev} from './log';
-import {listenOnce, listenOncePromise} from './event-helper';
-import {registerServiceBuilder} from './service';
+import {Observable} from './observable.js';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {listenOnce, listenOncePromise} from './event-helper.js';
+import {registerServiceBuilder} from './service.js';
 
 const TAG_ = 'Input';
 

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Services} from '../../../src/services';
-import {once} from '../../../src/utils/function';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Services} from '../../../src/services.js';
+import {once} from '../../../src/utils/function.js';
 
-import {Tracking} from './tracking';
+import {Tracking} from './tracking.js';
 
-import {AffiliateLinkResolver} from './affiliate-link-resolver';
-import {SKIMLINKS_REWRITER_ID} from './constants';
-import {EVENTS as linkRewriterEvents} from './link-rewriter/constants';
+import {AffiliateLinkResolver} from './affiliate-link-resolver.js';
+import {SKIMLINKS_REWRITER_ID} from './constants.js';
+import {EVENTS as linkRewriterEvents} from './link-rewriter/constants.js';
 
-import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
-import {Waypoint} from './waypoint';
-import {getAmpSkimlinksOptions} from './skim-options';
+import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager.js';
+import {Waypoint} from './waypoint.js';
+import {getAmpSkimlinksOptions} from './skim-options.js';
 
 export class AmpSkimlinks extends AMP.BaseElement {
   /**

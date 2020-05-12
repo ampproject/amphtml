@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {matches, scopedQuerySelector} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events.js';
+import {InlineGalleryEvents} from './inline-gallery-events.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dict} from '../../../src/utils/object.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {matches, scopedQuerySelector} from '../../../src/dom.js';
+import {setStyle} from '../../../src/style.js';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.

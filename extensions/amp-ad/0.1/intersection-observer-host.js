@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {SubscriptionApi} from '../../../src/iframe-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services.js';
+import {SubscriptionApi} from '../../../src/iframe-helper.js';
+import {devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-} from '../../../src/layout-rect';
+} from '../../../src/layout-rect.js';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

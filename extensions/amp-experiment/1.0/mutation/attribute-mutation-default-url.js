@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {assertAttributeMutationFormat} from './mutation';
-import {assertHttpsUrl} from '../../../../src/url';
-import {map} from '../../../../src/utils/object';
-import {user} from '../../../../src/log';
+import {assertAttributeMutationFormat} from './mutation.js';
+import {assertHttpsUrl} from '../../../../src/url.js';
+import {map} from '../../../../src/utils/object.js';
+import {user} from '../../../../src/log.js';
 
 const TAG = 'amp-experiment attribute-mutation-default-url';
 

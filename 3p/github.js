@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../src/log';
-import {writeScript} from './3p';
+import {userAssert} from '../src/log.js';
+import {writeScript} from './3p.js';
 
 /**
  * Get the correct script for the gist.

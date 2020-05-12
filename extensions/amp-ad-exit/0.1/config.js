@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {FilterType} from './filters/filter';
-import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
-import {user, userAssert} from '../../../src/log';
+import {FilterType} from './filters/filter.js';
+import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /**
  * @typedef {{

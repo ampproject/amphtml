@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
-import {SocialShare} from './social-share';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getSocialConfig} from './amp-social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {PreactBaseElement} from '../../../src/preact/base-element.js';
+import {Services} from '../../../src/services.js';
+import {SocialShare} from './social-share.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {getSocialConfig} from './amp-social-share-config.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {toggle} from '../../../src/style.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-social-share';

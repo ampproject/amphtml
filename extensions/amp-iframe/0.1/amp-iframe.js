@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
-import {ActionTrust} from '../../../src/action-constants';
-import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill.js';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {endsWith, startsWith} from '../../../src/string';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper.js';
+import {devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {endsWith, startsWith} from '../../../src/string.js';
 import {
   isAdLike,
   isPausable,
@@ -31,15 +31,15 @@ import {
   looksLikeTrackingIframe,
   makePausable,
   setPaused,
-} from '../../../src/iframe-helper';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isExperimentOn} from '../../../src/experiments';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
-import {removeFragment} from '../../../src/url';
-import {setStyle} from '../../../src/style';
-import {urls} from '../../../src/config';
+} from '../../../src/iframe-helper.js';
+import {isAdPositionAllowed} from '../../../src/ad-helper.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {moveLayoutRect} from '../../../src/layout-rect.js';
+import {parseJson} from '../../../src/json.js';
+import {removeElement} from '../../../src/dom.js';
+import {removeFragment} from '../../../src/url.js';
+import {setStyle} from '../../../src/style.js';
+import {urls} from '../../../src/config.js';
 import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */

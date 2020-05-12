@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {timeago} from '../../../third_party/timeagojs/timeago';
-import {userAssert} from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {timeago} from '../../../third_party/timeagojs/timeago.js';
+import {userAssert} from '../../../src/log.js';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

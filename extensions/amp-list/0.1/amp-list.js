@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-list-0.1.css.js';
 import {
   DIFFABLE_AMP_ELEMENTS,
   DIFF_IGNORE,
   DIFF_KEY,
   markElementForDiffing,
-} from '../../../src/purifier/sanitation';
-import {Deferred} from '../../../src/utils/promise';
+} from '../../../src/purifier/sanitation.js';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   Layout,
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
-} from '../../../src/layout';
-import {LoadMoreService} from './service/load-more-service';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+} from '../../../src/layout.js';
+import {LoadMoreService} from './service/load-more-service.js';
+import {Pass} from '../../../src/pass.js';
+import {Services} from '../../../src/services.js';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
   requestForBatchFetch,
-} from '../../../src/batched-json';
+} from '../../../src/batched-json.js';
 import {
   childElementByAttr,
   matches,
@@ -46,25 +46,25 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
   tryFocus,
-} from '../../../src/dom';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr} from '../../../src/json';
+} from '../../../src/dom.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {getValueForExpr} from '../../../src/json.js';
 import {
   getViewerAuthTokenIfAvailable,
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
-import {setDOM} from '../../../third_party/set-dom/set-dom';
-import {startsWith} from '../../../src/string';
+} from '../../../src/utils/xhr-utils.js';
+import {isAmp4Email} from '../../../src/format.js';
+import {isArray, toArray} from '../../../src/types.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {px, setImportantStyles, setStyles, toggle} from '../../../src/style.js';
+import {setDOM} from '../../../third_party/set-dom/set-dom.js';
+import {startsWith} from '../../../src/string.js';
 
 /** @const {string} */
 const TAG = 'amp-list';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object.js';
 
 const calendarLabel = 'Calendar';
 const jumpToPrevMonth = 'Move backward to switch to the previous month.';

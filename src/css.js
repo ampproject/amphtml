@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {cssEscape} from '../third_party/css-escape/css-escape';
-import {devAssert} from './log';
+import {cssEscape} from '../third_party/css-escape/css-escape.js';
+import {devAssert} from './log.js';
 
 /**
  * Asserts that name is just an alphanumeric word, and does not contain

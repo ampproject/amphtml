@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from './navigation-state';
-import {dict} from '../../../src/utils/object';
+import {StateChangeType} from './navigation-state.js';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * @typedef {!JsonObject}

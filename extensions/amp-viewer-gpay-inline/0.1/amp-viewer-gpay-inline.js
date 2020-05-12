@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/layout.js';
 
 export class AmpViewerGpayInline extends AMP.BaseElement {
   /** @param {!AmpElement} element */

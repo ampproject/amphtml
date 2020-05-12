@@ -16,7 +16,7 @@
 import {
   LocalizedStringBundleDef,
   LocalizedStringId,
-} from '../../../../src/localized-strings';
+} from '../../../../src/localized-strings.js';
 
 /**
  * Localized string bundle used for de strings.

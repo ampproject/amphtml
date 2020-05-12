@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 const TAG = 'amp-gfycat';
 

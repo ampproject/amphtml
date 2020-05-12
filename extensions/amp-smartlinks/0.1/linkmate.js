@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {deepEquals} from '../../../src/json';
-import {dict} from '../../../src/utils/object';
+import {deepEquals} from '../../../src/json.js';
+import {dict} from '../../../src/utils/object.js';
 
-import {ENDPOINTS} from './constants';
-import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
-import {getData} from '../../../src/event-helper';
+import {ENDPOINTS} from './constants.js';
+import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response.js';
+import {getData} from '../../../src/event-helper.js';
 
 export class Linkmate {
   /**

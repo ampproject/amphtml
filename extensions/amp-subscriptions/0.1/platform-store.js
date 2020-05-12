@@ -15,11 +15,11 @@
  */
 
 import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants.js';
-import {Deferred} from '../../../src/utils/promise';
-import {Entitlement} from './entitlement';
-import {Observable} from '../../../src/observable';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Entitlement} from './entitlement.js';
+import {Observable} from '../../../src/observable.js';
+import {devAssert, user} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;

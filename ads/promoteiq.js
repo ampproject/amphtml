@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {parseJson} from '../src/json';
-import {user} from '../src/log';
+import {loadScript, validateData} from '../3p/3p.js';
+import {parseJson} from '../src/json.js';
+import {user} from '../src/log.js';
 
 const TAG = 'PROMOTEIQ';
 const mandatoryDataFields = ['src', 'params', 'sfcallback'];

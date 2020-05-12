@@ -23,13 +23,13 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-} from './purifier/sanitation';
-import {dict} from './utils/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {isAmp4Email} from './format';
-import {rewriteAttributeValue} from './url-rewrite';
-import {startsWith} from './string';
-import {user} from './log';
+} from './purifier/sanitation.js';
+import {dict} from './utils/object.js';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer.js';
+import {isAmp4Email} from './format.js';
+import {rewriteAttributeValue} from './url-rewrite.js';
+import {startsWith} from './string.js';
+import {user} from './log.js';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';

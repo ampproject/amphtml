@@ -19,17 +19,17 @@ import {
   isJsonOrObj,
   objOrParseJson,
   originMatches,
-} from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+} from '../../../src/iframe-video.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {disableScrollingOnIframe} from '../../../src/iframe-helper.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';

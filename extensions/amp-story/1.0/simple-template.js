@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert} from '../../../src/log';
-import {getLocalizationService} from './amp-story-localization-service';
-import {hasOwn} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {LocalizedStringId} from '../../../src/localized-strings.js'; // eslint-disable-line no-unused-vars
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {devAssert} from '../../../src/log.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isArray} from '../../../src/types.js';
 
 /**
  * @typedef {{

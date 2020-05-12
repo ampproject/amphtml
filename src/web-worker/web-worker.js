@@ -21,12 +21,12 @@
  *   "lib" JS files and loaded at runtime via `importScripts()`.
  */
 
-import './web-worker-polyfills';
-import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {dev, initLogConstructor, setReportError} from '../log';
-import {exponentialBackoff} from '../exponential-backoff';
-import {reportError} from '../error';
-import {urls} from '../config';
+import './web-worker-polyfills.js';
+import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator.js';
+import {dev, initLogConstructor, setReportError} from '../log.js';
+import {exponentialBackoff} from '../exponential-backoff.js';
+import {reportError} from '../error.js';
+import {urls} from '../config.js';
 
 initLogConstructor();
 setReportError(reportError);

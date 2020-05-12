@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import {dev} from '../../../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {propagateObjectFitStyles} from '../../../src/style';
+import * as st from '../../../src/style.js';
+import {dev} from '../../../src/log.js';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {propagateObjectFitStyles} from '../../../src/style.js';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [

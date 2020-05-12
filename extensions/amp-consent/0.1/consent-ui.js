@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   elementByTag,
   insertAtStart,
@@ -26,13 +26,13 @@ import {
   removeElement,
   tryFocus,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
+} from '../../../src/dom.js';
+import {getConsentStateValue} from './consent-info.js';
+import {getData} from '../../../src/event-helper.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {setImportantStyles, setStyles, toggle} from '../../../src/style.js';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';

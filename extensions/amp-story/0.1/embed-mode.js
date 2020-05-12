@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isEnumValue} from '../../../src/types';
-import {parseQueryString} from '../../../src/url';
+import {isEnumValue} from '../../../src/types.js';
+import {parseQueryString} from '../../../src/url.js';
 
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.

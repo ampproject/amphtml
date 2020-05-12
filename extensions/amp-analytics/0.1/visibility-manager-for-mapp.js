@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {VisibilityManager} from './visibility-manager';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMinOpacity} from './opacity';
+import {VisibilityManager} from './visibility-manager.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMinOpacity} from './opacity.js';
 
 const TAG = 'amp-analytics/visibility-manager';
 

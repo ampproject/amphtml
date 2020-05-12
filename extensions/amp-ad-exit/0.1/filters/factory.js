@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ClickDelayFilter} from './click-delay';
-import {ClickLocationFilter} from './click-location';
-import {FilterType} from './filter';
-import {InactiveElementFilter} from './inactive-element';
+import {ClickDelayFilter} from './click-delay.js';
+import {ClickLocationFilter} from './click-location.js';
+import {FilterType} from './filter.js';
+import {InactiveElementFilter} from './inactive-element.js';
 
 /**
  * @param {string} name

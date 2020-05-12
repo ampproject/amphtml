@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Services} from '../services';
+import {Deferred} from '../utils/promise.js';
+import {Services} from '../services.js';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
-} from './extension-location';
-import {dev, devAssert, rethrowAsync} from '../log';
-import {getMode} from '../mode';
-import {installStylesForDoc} from '../style-installer';
-import {map} from '../utils/object';
-import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
-import {startsWith} from '../string';
+} from './extension-location.js';
+import {dev, devAssert, rethrowAsync} from '../log.js';
+import {getMode} from '../mode.js';
+import {installStylesForDoc} from '../style-installer.js';
+import {map} from '../utils/object.js';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service.js';
+import {startsWith} from '../string.js';
 import {
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
-} from './custom-element-registry';
+} from './custom-element-registry.js';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';

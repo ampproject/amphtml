@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
-import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker';
-import {Presets} from './amp-fx-presets';
+import {FxType} from '../fx-type.js'; // eslint-disable-line no-unused-vars
+import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker.js';
+import {Presets} from './amp-fx-presets.js';
 import {
   ScrollToggleDispatch,
   ScrollTogglePosition, // eslint-disable-line no-unused-vars
@@ -25,13 +25,13 @@ import {
   getScrollTogglePosition,
   installScrollToggleStyles,
   scrollToggleFloatIn,
-} from '../scroll-toggle';
-import {Services} from '../../../../src/services';
+} from '../scroll-toggle.js';
+import {Services} from '../../../../src/services.js';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
   setStyles,
-} from '../../../../src/style';
+} from '../../../../src/style.js';
 import {
   convertEasingKeyword,
   defaultDurationValues,
@@ -40,13 +40,13 @@ import {
   defaultMarginValues,
   installStyles,
   resolvePercentageToNumber,
-} from './amp-fx-presets-utils';
-import {devAssert} from '../../../../src/log';
+} from './amp-fx-presets-utils.js';
+import {devAssert} from '../../../../src/log.js';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../../src/service';
-import {installPositionObserverServiceForDoc} from '../../../../src/service/position-observer/position-observer-impl';
+} from '../../../../src/service.js';
+import {installPositionObserverServiceForDoc} from '../../../../src/service/position-observer/position-observer-impl.js';
 
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc

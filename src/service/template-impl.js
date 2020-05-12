@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Services} from '../services';
-import {dev, userAssert} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {rootNodeFor, scopedQuerySelector} from '../dom';
+import {Deferred} from '../utils/promise.js';
+import {Services} from '../services.js';
+import {dev, userAssert} from '../log.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {rootNodeFor, scopedQuerySelector} from '../dom.js';
 
 /**
  * @fileoverview

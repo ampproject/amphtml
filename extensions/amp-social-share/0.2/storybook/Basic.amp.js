@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
-import {storiesOf} from '@storybook/preact';
-import {toggleExperiment} from '../../../../src/experiments';
-import {withA11y} from '@storybook/addon-a11y';
+import * as Preact from '../../../../src/preact.js';
+import {select, text, withKnobs} from '@storybook/addon-knobs.js';
+import {storiesOf} from '@storybook/preact.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
+import {withA11y} from '@storybook/addon-a11y.js';
 import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line

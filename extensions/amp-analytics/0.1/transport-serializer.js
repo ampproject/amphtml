@@ -17,7 +17,7 @@
 import {
   appendEncodedParamStringToUrl,
   serializeQueryString,
-} from '../../../src/url';
+} from '../../../src/url.js';
 
 const EXTRA_URL_PARAM_VAR = '${extraUrlParams}';
 

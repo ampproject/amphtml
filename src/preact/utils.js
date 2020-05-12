@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from './index';
+import {getAmpContext} from './context.js';
+import {useContext, useEffect, useLayoutEffect} from './index.js';
 
 /**
  * @param {function()} callback

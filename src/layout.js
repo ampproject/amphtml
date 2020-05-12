@@ -19,11 +19,11 @@
  * details.
  */
 
-import {dev, devAssert, userAssert} from './log';
-import {htmlFor} from './static-template';
-import {isFiniteNumber} from './types';
-import {setStyle, setStyles, toggle} from './style';
-import {startsWith} from './string';
+import {dev, devAssert, userAssert} from './log.js';
+import {htmlFor} from './static-template.js';
+import {isFiniteNumber} from './types.js';
+import {setStyle, setStyles, toggle} from './style.js';
+import {startsWith} from './string.js';
 
 /**
  * @enum {string}

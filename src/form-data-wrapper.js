@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {getFormAsObject, getSubmitButtonUsed} from './form';
-import {iterateCursor} from './dom';
-import {map} from './utils/object';
+import {Services} from './services.js';
+import {getFormAsObject, getSubmitButtonUsed} from './form.js';
+import {iterateCursor} from './dom.js';
+import {map} from './utils/object.js';
 
 /**
  * Create a form data wrapper. The wrapper is necessary to provide a common

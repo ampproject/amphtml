@@ -19,8 +19,8 @@ import {
   getSourceUrl,
   parseUrlDeprecated,
   resolveRelativeUrl,
-} from '../../../src/url';
-import {user, userAssert} from '../../../src/log';
+} from '../../../src/url.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /**
  * @param {string} url

@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {redispatch} from '../../../src/iframe-video';
-import {startsWith} from '../../../src/string';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface.js';
+import {redispatch} from '../../../src/iframe-video.js';
+import {startsWith} from '../../../src/string.js';
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log.js';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+} from '../../../src/dom.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
 
 const TAG = 'amp-viqeo-player';
 

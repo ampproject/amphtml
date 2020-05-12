@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../services.js';
 import {createCustomEvent} from '../event-helper.js';
-import {whenContentIniLoad} from '../ini-load';
+import {whenContentIniLoad} from '../ini-load.js';
 
 /**
  * Registers ini-load listener that will fire custom 'amp-ini-load' event

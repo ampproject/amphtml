@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getData, listen} from './../../../src/event-helper';
-import {isFiniteNumber, isObject} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from './../../../src/event-helper.js';
+import {isFiniteNumber, isObject} from '../../../src/types.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {userAssert} from '../../../src/log.js';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

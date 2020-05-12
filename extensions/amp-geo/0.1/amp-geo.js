@@ -35,8 +35,8 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
 
 /**
  * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
@@ -45,16 +45,16 @@ import {Services} from '../../../src/services';
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
+import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets.js';
 
-import {GEO_IN_GROUP} from './amp-geo-in-group';
-import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {urls} from '../../../src/config';
+import {GEO_IN_GROUP} from './amp-geo-in-group.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {isCanary} from '../../../src/experiments.js';
+import {isJsonScriptTag} from '../../../src/dom.js';
+import {tryParseJson} from '../../../src/json.js';
+import {urls} from '../../../src/config.js';
 
 /** @const */
 const TAG = 'amp-geo';

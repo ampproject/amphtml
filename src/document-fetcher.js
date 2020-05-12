@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
+import {Services} from './services.js';
 import {
   assertSuccess,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
   setupInput,
-} from './utils/xhr-utils';
-import {dict} from './utils/object';
-import {user} from './log';
+} from './utils/xhr-utils.js';
+import {dict} from './utils/object.js';
+import {user} from './log.js';
 
 /**
  *

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {clamp, sum} from '../../../src/utils/math';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Services} from '../../../src/services.js';
+import {clamp, sum} from '../../../src/utils/math.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dict} from '../../../src/utils/object.js';
+import {userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-orientation-observer';
 /**

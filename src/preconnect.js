@@ -19,13 +19,13 @@
  * connection before the real request can be made.
  */
 
-import {Services} from './services';
-import {dev} from './log';
-import {htmlFor} from './static-template';
-import {parseUrlDeprecated} from './url';
-import {registerServiceBuilder} from './service';
-import {startsWith} from './string';
-import {whenDocumentComplete} from './document-ready';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {htmlFor} from './static-template.js';
+import {parseUrlDeprecated} from './url.js';
+import {registerServiceBuilder} from './service.js';
+import {startsWith} from './string.js';
+import {whenDocumentComplete} from './document-ready.js';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;

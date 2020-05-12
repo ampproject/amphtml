@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {TwoStepsResponse} from './link-rewriter/two-steps-response';
-import {dict} from '../../../src/utils/object';
-import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
+import {TwoStepsResponse} from './link-rewriter/two-steps-response.js';
+import {dict} from '../../../src/utils/object.js';
+import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils.js';
 
 /**
  * @enum {string}

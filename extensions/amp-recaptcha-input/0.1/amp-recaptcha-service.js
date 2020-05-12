@@ -19,21 +19,21 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js';
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {internalRuntimeVersion} from '../../../src/internal-version';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {urls} from '../../../src/config';
+import {Deferred, tryResolve} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {internalRuntimeVersion} from '../../../src/internal-version.js';
+import {listenFor, postMessage} from '../../../src/iframe-helper.js';
+import {loadPromise} from '../../../src/event-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyle} from '../../../src/style.js';
+import {urls} from '../../../src/config.js';
 
 /**
  * @fileoverview

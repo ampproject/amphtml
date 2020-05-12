@@ -16,8 +16,8 @@
 
 import {addParamsToUrl, assertHttpsUrl} from '../src/url.js';
 import {dev} from '../src/log.js';
-import {dict} from '../src/utils/object';
-import {loadScript, validateData, writeScript} from '../3p/3p';
+import {dict} from '../src/utils/object.js';
+import {loadScript, validateData, writeScript} from '../3p/3p.js';
 import {startsWith} from '../src/string.js';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';

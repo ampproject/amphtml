@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
-import {Signals} from '../utils/signals';
-import {VisibilityState} from '../visibility-state';
+import {Deferred} from '../utils/promise.js';
+import {Observable} from '../observable.js';
+import {Signals} from '../utils/signals.js';
+import {VisibilityState} from '../visibility-state.js';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '../utils/document-visibility';
-import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
-import {getShadowRootNode} from '../shadow-embed';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isInAmpdocFieExperiment} from '../ampdoc-fie';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {map} from '../utils/object';
-import {parseQueryString} from '../url';
+} from '../utils/document-visibility.js';
+import {dev, devAssert} from '../log.js';
+import {
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service.js';
+import {getShadowRootNode} from '../shadow-embed.js';
+import {isDocumentReady, whenDocumentReady} from '../document-ready.js';
+import {isInAmpdocFieExperiment} from '../ampdoc-fie.js';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom.js';
+import {map} from '../utils/object.js';
+import {parseQueryString} from '../url.js';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';

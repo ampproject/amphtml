@@ -20,12 +20,12 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+} from './amp-story-store-service.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dict} from '../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {

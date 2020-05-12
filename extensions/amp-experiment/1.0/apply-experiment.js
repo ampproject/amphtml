@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class';
-import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
-import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
-import {CharacterDataMutation} from './mutation/character-data-mutation';
+import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-default-class.js';
+import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style.js';
+import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url.js';
+import {CharacterDataMutation} from './mutation/character-data-mutation.js';
 import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
-} from './mutation-record';
-import {user, userAssert} from '../../../src/log';
+} from './mutation-record.js';
+import {user, userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-experiment apply-experiment';
 

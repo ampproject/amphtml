@@ -15,9 +15,9 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-1.0.css.js';
-import {Layout} from '../../../src/layout';
-import {NextPageService} from './service';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {NextPageService} from './service.js';
+import {Services} from '../../../src/services.js';
 
 const TAG = 'amp-next-page';
 const SERVICE = 'next-page';

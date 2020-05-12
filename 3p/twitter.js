@@ -16,9 +16,9 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {loadScript} from './3p';
-import {setStyles} from '../src/style';
-import {startsWith} from '../src/string';
+import {loadScript} from './3p.js';
+import {setStyles} from '../src/style.js';
+import {startsWith} from '../src/string.js';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current

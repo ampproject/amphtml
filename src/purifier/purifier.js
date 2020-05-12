@@ -24,11 +24,11 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
   markElementForDiffing,
-} from './sanitation';
-import {dev, user} from '../log';
-import {isAmp4Email} from '../format';
-import {removeElement} from '../dom';
-import {startsWith} from '../string';
+} from './sanitation.js';
+import {dev, user} from '../log.js';
+import {isAmp4Email} from '../format.js';
+import {removeElement} from '../dom.js';
+import {startsWith} from '../string.js';
 import purify from 'dompurify';
 
 /** @private @const {string} */

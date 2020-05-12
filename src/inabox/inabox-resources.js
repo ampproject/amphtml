@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Observable} from '../observable';
-import {Pass} from '../pass';
-import {READY_SCAN_SIGNAL} from '../service/resources-interface';
-import {Resource, ResourceState} from '../service/resource';
-import {Services} from '../services';
-import {dev} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
+import {Deferred} from '../utils/promise.js';
+import {Observable} from '../observable.js';
+import {Pass} from '../pass.js';
+import {READY_SCAN_SIGNAL} from '../service/resources-interface.js';
+import {Resource, ResourceState} from '../service/resource.js';
+import {Services} from '../services.js';
+import {dev} from '../log.js';
+import {registerServiceBuilderForDoc} from '../service.js';
 
 const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;

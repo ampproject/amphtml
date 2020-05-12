@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {SwipeDef} from '../../../src/gesture-recognizers';
-import {delayAfterDeferringToEventLoop} from './utils';
-import {dev} from '../../../src/log';
-import {listen} from '../../../src/event-helper';
-import {setStyle, setStyles} from '../../../src/style';
+import {SwipeDef} from '../../../src/gesture-recognizers.js';
+import {delayAfterDeferringToEventLoop} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {listen} from '../../../src/event-helper.js';
+import {setStyle, setStyles} from '../../../src/style.js';
 
 /**
  * The number of pixels of movement to go from the darkest to lightest overlay

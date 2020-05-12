@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {once} from '../../../src/utils/function';
-import {user, userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {once} from '../../../src/utils/function.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';

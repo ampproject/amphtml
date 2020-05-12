@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../../../../src/log';
+import {userAssert} from '../../../../src/log.js';
 
 /**
  * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests

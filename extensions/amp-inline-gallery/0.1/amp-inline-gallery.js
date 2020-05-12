@@ -15,20 +15,20 @@
  */
 
 import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css.js';
-import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination';
+import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination.js';
 import {CSS as AmpInlineGalleryPaginationCSS} from '../../../build/amp-inline-gallery-pagination-0.1.css.js';
-import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
+import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails.js';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css.js';
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
-import {getDetail} from '../../../src/event-helper';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events.js';
+import {InlineGalleryEvents} from './inline-gallery-events.js';
+import {Layout} from '../../../src/layout.js';
+import {getDetail} from '../../../src/event-helper.js';
 import {
   iterateCursor,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel

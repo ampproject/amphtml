@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {parseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object.js';
+import {parseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 export class AmpAdMetadataTransformer {
   /** constructor */

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../src/style';
-import {devAssert} from '../../../src/log';
+import {computedStyle} from '../../../src/style.js';
+import {devAssert} from '../../../src/log.js';
 
 /**
  * Simple implementation of CircularBuffer.

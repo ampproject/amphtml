@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {dev} from '../log.js';
 
 /** @const {string} */
 const TAG = 'lru-cache';

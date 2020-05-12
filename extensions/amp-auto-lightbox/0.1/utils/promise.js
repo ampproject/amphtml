@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {tryResolve} from '../../../../src/utils/promise';
+import {tryResolve} from '../../../../src/utils/promise.js';
 
 export const resolveFalse = () => tryResolve(() => false);
 export const resolveTrue = () => tryResolve(() => true);

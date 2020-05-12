@@ -15,18 +15,18 @@
  */
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css.js';
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css.js';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
-} from '../../../src/dom';
-import {createShadowRoot} from './shadow-utils';
-import {dev} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
-import {truncateText} from './truncate-text';
+} from '../../../src/dom.js';
+import {createShadowRoot} from './shadow-utils.js';
+import {dev} from '../../../src/log.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {toArray} from '../../../src/types.js';
+import {truncateText} from './truncate-text.js';
 
 /**
  * TODO(sparhami) List of stuff to do / consider:

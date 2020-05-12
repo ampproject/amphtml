@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
-import {dev} from '../log';
-import {getAmpContext} from './context';
-import {matches, toggleAttribute} from '../dom';
-import {objectsEqualShallow} from '../utils/object';
-import {toArray} from '../types';
-import {useContext, useEffect, useRef} from './index';
-import {useMountEffect} from './utils';
+import * as Preact from './index.js';
+import {dev} from '../log.js';
+import {getAmpContext} from './context.js';
+import {matches, toggleAttribute} from '../dom.js';
+import {objectsEqualShallow} from '../utils/object.js';
+import {toArray} from '../types.js';
+import {useContext, useEffect, useRef} from './index.js';
+import {useMountEffect} from './utils.js';
 
 /**
  * @param {!Element} element

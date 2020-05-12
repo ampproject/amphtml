@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {ancestorElementsByTag} from '../../../src/dom';
-import {getAdContainer} from '../../../src/ad-helper';
+import {Services} from '../../../src/services.js';
+import {ancestorElementsByTag} from '../../../src/dom.js';
+import {getAdContainer} from '../../../src/ad-helper.js';
 
 export class AmpAdUIHandler {
   /**

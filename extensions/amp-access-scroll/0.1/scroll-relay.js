@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getData} from '../../../src/event-helper';
-import {listen} from '../../../src/3p-frame-messaging';
+import {getData} from '../../../src/event-helper.js';
+import {listen} from '../../../src/3p-frame-messaging.js';
 
 /**
  * Provides cross-frame postMessage for scroll frames.

@@ -20,17 +20,17 @@ import {
   AnalyticsEventType,
   CustomEventTracker,
   getTrackerKeyName,
-} from './events';
-import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsGroup} from './analytics-group';
-import {Services} from '../../../src/services';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+} from './events.js';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root.js';
+import {AnalyticsGroup} from './analytics-group.js';
+import {Services} from '../../../src/services.js';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper.js';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service.js';
 
 const PROP = '__AMP_AN_ROOT';
 

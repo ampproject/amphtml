@@ -18,17 +18,17 @@ import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
-} from './bookend-component-interface';
-import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
+} from './bookend-component-interface.js';
+import {addAttributesToElement} from '../../../../../src/dom.js';
+import {dict} from '../../../../../src/utils/object.js';
 import {
   getSourceOriginForElement,
   resolveImgSrc,
   userAssertValidProtocol,
-} from '../../utils';
-import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
-import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {userAssert} from '../../../../../src/log';
+} from '../../utils.js';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url.js';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template.js';
+import {userAssert} from '../../../../../src/log.js';
 
 /**
  * @typedef {{

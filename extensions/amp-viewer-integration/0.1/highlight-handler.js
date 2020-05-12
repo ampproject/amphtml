@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {findSentences, markTextRangeList} from './findtext';
-import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {once} from '../../../src/utils/function';
-import {parseJson} from '../../../src/json';
-import {parseQueryString} from '../../../src/url';
-import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {findSentences, markTextRangeList} from './findtext.js';
+import {listenOnce} from '../../../src/event-helper.js';
+import {moveLayoutRect} from '../../../src/layout-rect.js';
+import {once} from '../../../src/utils/function.js';
+import {parseJson} from '../../../src/json.js';
+import {parseQueryString} from '../../../src/url.js';
+import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style.js';
+import {whenDocumentReady} from '../../../src/document-ready.js';
 
 /**
  * The message name sent by viewers to dismiss highlights.

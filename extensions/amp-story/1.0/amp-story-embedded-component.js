@@ -21,26 +21,31 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
-} from './story-analytics';
+} from './story-analytics.js';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css.js';
-import {EventType, dispatch} from './events';
-import {Keys} from '../../../src/utils/key-codes';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {addAttributesToElement, closest, matches} from '../../../src/dom';
-import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
+import {EventType, dispatch} from './events.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {addAttributesToElement, closest, matches} from '../../../src/dom.js';
+import {createShadowRootWithStyle, getSourceOriginForElement} from './utils.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {htmlFor, htmlRefs} from '../../../src/static-template.js';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url.js';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+} from '../../../src/style.js';
 
 /**
  * Action icons to be placed in tooltip.

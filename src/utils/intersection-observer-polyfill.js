@@ -17,14 +17,18 @@
 // TODO(#27807): Remove polyfill part InOb polyfill has been launched. But the
 // host part has to stay.
 
-import {Pass} from '../pass';
-import {Services} from '../services';
-import {SubscriptionApi} from '../iframe-helper';
-import {dev, devAssert} from '../log';
-import {dict} from './object';
-import {getMode} from '../mode';
-import {isArray, isFiniteNumber} from '../types';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
+import {Pass} from '../pass.js';
+import {Services} from '../services.js';
+import {SubscriptionApi} from '../iframe-helper.js';
+import {dev, devAssert} from '../log.js';
+import {dict} from './object.js';
+import {getMode} from '../mode.js';
+import {isArray, isFiniteNumber} from '../types.js';
+import {
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '../layout-rect.js';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {computedStyle} from '../../../src/style';
-import {scopedQuerySelector} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {computedStyle} from '../../../src/style.js';
+import {scopedQuerySelector} from '../../../src/dom.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Given a container, find the first descendant element with the `autoscroll`

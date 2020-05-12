@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
-import {isArray, isEnumValue} from './types';
-import {once} from './utils/function';
-import {urls} from './config';
+import {getMode} from './mode.js';
+import {internalRuntimeVersion} from './internal-version.js';
+import {isArray, isEnumValue} from './types.js';
+import {once} from './utils/function.js';
+import {urls} from './config.js';
 
 const noop = () => {};
 

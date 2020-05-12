@@ -18,22 +18,22 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css.js';
 import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
-} from './development-ui';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
-import {renderAsElement} from './simple-template';
-import {toArray} from '../../../src/types';
+} from './development-ui.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {ProgressBar} from './progress-bar.js';
+import {Services} from '../../../src/services.js';
+import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {matches} from '../../../src/dom.js';
+import {renderAsElement} from './simple-template.js';
+import {toArray} from '../../../src/types.js';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {getUniqueId} from './utils';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {dict} from '../../../src/utils/object.js';
+import {getUniqueId} from './utils.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const {string} */
 export const STORY_AD_ANALYTICS = 'story-ad-analytics';

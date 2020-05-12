@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dev} from '../log';
-import {dict} from '../utils/object';
-import {getSourceOrigin} from '../url';
+import {Services} from '../services.js';
+import {dev} from '../log.js';
+import {dict} from '../utils/object.js';
+import {getSourceOrigin} from '../url.js';
 
 /**
  * The Client ID service key.

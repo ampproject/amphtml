@@ -22,12 +22,12 @@
  * impacts on click-throughs.
  */
 
-import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
+import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils.js';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
-} from '../../../src/experiments';
-import {Services} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+} from '../../../src/experiments.js';
+import {Services} from '../../../src/services.js';
+import {parseQueryString} from '../../../src/url.js';
 
 /** @typedef {{
  *    control: string,

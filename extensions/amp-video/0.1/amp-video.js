@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '../../../src/visibility-state';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {VisibilityState} from '../../../src/visibility-state.js';
 import {
   childElement,
   childElementByTag,
@@ -27,23 +27,23 @@ import {
   insertAfterOrAtStart,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
-import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+} from '../../../src/dom.js';
+import {descendsFromStory} from '../../../src/utils/story.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listen} from '../../../src/event-helper.js';
+import {mutedOrUnmutedEvent} from '../../../src/iframe-video.js';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '../../../src/style';
-import {toArray} from '../../../src/types';
+} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
 
 const TAG = 'amp-video';
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {DEFAULT_CONFIG} from './default-config';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
-import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, user, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, toWin} from '../../../src/types';
-import {isCanary} from '../../../src/experiments';
-import {variableServiceForDoc} from './variables';
+import {DEFAULT_CONFIG} from './default-config.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {calculateScriptBaseUrl} from '../../../src/service/extension-location.js';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject, toWin} from '../../../src/types.js';
+import {isCanary} from '../../../src/experiments.js';
+import {variableServiceForDoc} from './variables.js';
 
 const TAG = 'amp-analytics/config';
 

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
-import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Services} from '../../../src/services';
-import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
+import {Entitlement} from './entitlement.js';
+import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base.js';
+import {Services} from '../../../src/services.js';
+import {addParamToUrl, assertHttpsUrl} from '../../../src/url.js';
+import {devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {isArray} from '../../../src/types.js';
 
 /**
  * Implments the remotel local subscriptions platform which uses

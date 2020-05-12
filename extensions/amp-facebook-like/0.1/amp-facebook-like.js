@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dashToUnderline} from '../../../src/string';
-import {getData, listen} from '../../../src/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
+import {Services} from '../../../src/services.js';
+import {dashToUnderline} from '../../../src/string.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {isObject} from '../../../src/types.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {tryParseJson} from '../../../src/json.js';
 
 class AmpFacebookLike extends AMP.BaseElement {
   /** @param {!AmpElement} element */

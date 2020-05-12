@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../services.js';
 import {
   closestAncestorElementBySelector,
   isIframed,
   openWindowDialog,
   tryFocus,
-} from '../dom';
-import {dev, user, userAssert} from '../log';
-import {dict} from '../utils/object';
-import {escapeCssSelectorIdent} from '../css';
-import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
-import {getMode} from '../mode';
+} from '../dom.js';
+import {dev, user, userAssert} from '../log.js';
+import {dict} from '../utils/object.js';
+import {escapeCssSelectorIdent} from '../css.js';
+import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression.js';
+import {getMode} from '../mode.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
-import {isLocalhostOrigin} from '../url';
-import {toWin} from '../types';
-import PriorityQueue from '../utils/priority-queue';
+} from '../service.js';
+import {isLocalhostOrigin} from '../url.js';
+import {toWin} from '../types.js';
+import PriorityQueue from '../utils/priority-queue.js';
 
 const TAG = 'navigation';
 

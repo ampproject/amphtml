@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../services';
-import {dev} from '../../log';
-import {htmlFor} from '../../static-template';
-import {removeElement} from '../../dom';
+import {Services} from '../../services.js';
+import {dev} from '../../log.js';
+import {htmlFor} from '../../static-template.js';
+import {removeElement} from '../../dom.js';
 
 /**
  * @param {!Element} node

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from './amp-story-player-impl';
-import {initLogConstructor} from '../log';
-import {throttle} from '../utils/rate-limit';
+import {AmpStoryPlayer} from './amp-story-player-impl.js';
+import {initLogConstructor} from '../log.js';
+import {throttle} from '../utils/rate-limit.js';
 
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;

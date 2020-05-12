@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {API_SERVER} from '../constants';
-import {callPixelEndpoint} from './pixel';
+import {API_SERVER} from '../constants.js';
+import {callPixelEndpoint} from './pixel.js';
 
-import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
-import {getMetaElements} from './meta';
-import {getSessionId} from './session';
-import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+import {classifyPage, classifyReferrer, getKeywordsString} from './classify.js';
+import {getMetaElements} from './meta.js';
+import {getSessionId} from './session.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
+import {toArray} from '../../../../src/types.js';
 
 // "gen" value for shares
 const SHARE = 300;

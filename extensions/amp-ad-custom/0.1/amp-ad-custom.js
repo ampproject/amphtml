@@ -17,15 +17,15 @@
 import {
   AdResponseType,
   ValidatorResult,
-} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
-import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
-import {Services} from '../../../src/services';
-import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
-import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
-import {addParamToUrl} from '../../../src/url';
-import {devAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
+} from '../../amp-a4a/0.1/amp-ad-type-defs.js';
+import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base.js';
+import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer.js';
+import {Services} from '../../../src/services.js';
+import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer.js';
+import {TemplateValidator} from '../../amp-a4a/0.1/template-validator.js';
+import {addParamToUrl} from '../../../src/url.js';
+import {devAssert} from '../../../src/log.js';
+import {startsWith} from '../../../src/string.js';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();

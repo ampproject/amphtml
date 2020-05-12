@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-video-docking-0.1.css.js';
-import {Controls} from './controls';
+import {Controls} from './controls.js';
 import {DirectionX, DirectionY, FLOAT_TOLERANCE} from './def.js';
-import {HtmlLiteralTagDef} from './html';
+import {HtmlLiteralTagDef} from './html.js';
 import {
   LayoutRectDef,
   layoutRectEquals,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '../../../src/layout-rect.js';
 import {
   PlayingStates,
   VideoAttributes,
@@ -30,15 +30,15 @@ import {
   VideoInterface,
   VideoOrBaseElementDef,
   isDockable,
-} from '../../../src/video-interface';
+} from '../../../src/video-interface.js';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
-import {VideoDockingEvents, pointerCoords} from './events';
-import {applyBreakpointClassname} from './breakpoints';
+} from '../../../src/service/position-observer/position-observer-impl.js';
+import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker.js';
+import {Services} from '../../../src/services.js';
+import {VideoDockingEvents, pointerCoords} from './events.js';
+import {applyBreakpointClassname} from './breakpoints.js';
 import {
   calculateLeftJustifiedX,
   calculateRightJustifiedX,
@@ -47,24 +47,28 @@ import {
   isVisibleBySize,
   letterboxRect,
   topCornerRect,
-} from './math';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {createViewportRect} from './viewport-rect';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
-import {once} from '../../../src/utils/function';
+} from './math.js';
+import {
+  createCustomEvent,
+  listen,
+  listenOnce,
+} from '../../../src/event-helper.js';
+import {createViewportRect} from './viewport-rect.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {getInternalVideoElementFor} from '../../../src/utils/video.js';
+import {htmlFor, htmlRefs} from '../../../src/static-template.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom.js';
+import {once} from '../../../src/utils/function.js';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyles,
   toggle,
-} from '../../../src/style';
+} from '../../../src/style.js';
 
 const TAG = 'amp-video-docking';
 

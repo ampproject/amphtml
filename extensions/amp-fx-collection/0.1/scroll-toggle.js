@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {devAssert, user} from '../../../src/log';
-import {once} from '../../../src/utils/function';
-import {px, setImportantStyles} from '../../../src/style';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {devAssert, user} from '../../../src/log.js';
+import {once} from '../../../src/utils/function.js';
+import {px, setImportantStyles} from '../../../src/style.js';
 
 const TAG = 'amp-fx';
 

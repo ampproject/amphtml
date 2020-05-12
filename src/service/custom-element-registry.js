@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ElementStub, stubbedElements} from '../element-stub';
-import {createCustomElementClass} from '../custom-element';
-import {extensionScriptsInNode} from '../element-service';
-import {reportError} from '../error';
-import {userAssert} from '../log';
+import {ElementStub, stubbedElements} from '../element-stub.js';
+import {createCustomElementClass} from '../custom-element.js';
+import {extensionScriptsInNode} from '../element-service.js';
+import {reportError} from '../error.js';
+import {userAssert} from '../log.js';
 
 /**
  * @param {!Window} win

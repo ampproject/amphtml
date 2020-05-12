@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object.js';
+import {listen} from '../../../src/event-helper.js';
 
 /**
  * The list of touch event properites to copy.

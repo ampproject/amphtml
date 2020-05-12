@@ -17,12 +17,12 @@
 // TODO(powerivq)
 // Resource.setOwner, Resource.getOwner should be moved here.
 // ResourceState.NOT_BUILT might not be needed here.
-import {OwnersInterface} from './owners-interface';
-import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
-import {devAssert} from '../log';
-import {isArray} from '../types';
-import {registerServiceBuilderForDoc} from '../service';
+import {OwnersInterface} from './owners-interface.js';
+import {Resource, ResourceState} from './resource.js';
+import {Services} from '../services.js';
+import {devAssert} from '../log.js';
+import {isArray} from '../types.js';
+import {registerServiceBuilderForDoc} from '../service.js';
 
 /**
  * @param {!Element|!Array<!Element>} elements

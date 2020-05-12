@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {assertLength, assertLengthOrPercent} from './layout';
-import {userAssert} from './log';
+import {assertLength, assertLengthOrPercent} from './layout.js';
+import {userAssert} from './log.js';
 
 /**
  * A single option within a SizeList.

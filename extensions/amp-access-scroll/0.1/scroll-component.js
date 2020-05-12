@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
+import {Services} from '../../../src/services.js';
+import {
+  assertDoesNotContainDisplay,
+  px,
+  setStyles,
+} from '../../../src/style.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {devAssert} from '../../../src/log.js';
+import {hasOwn} from '../../../src/utils/object.js';
 
 /** @abstract */
 export class ScrollComponent {

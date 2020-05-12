@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LogLevel, dev} from '../../../src/log';
-import {Services} from '../../../src/services';
-import {isArray} from '../../../src/types';
-import {removeChildren} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {LogLevel, dev} from '../../../src/log.js';
+import {Services} from '../../../src/services.js';
+import {isArray} from '../../../src/types.js';
+import {removeChildren} from '../../../src/dom.js';
+import {toggle} from '../../../src/style.js';
 
 /**
  * @param {!../../../src/service/vsync-impl.Vsync} vsync

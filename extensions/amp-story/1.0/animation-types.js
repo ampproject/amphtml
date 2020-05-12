@@ -21,7 +21,7 @@ import {
   WebAnimationSelectorDef,
   WebAnimationTimingDef,
   WebKeyframesDef,
-} from '../../amp-animation/0.1/web-animation-types';
+} from '../../amp-animation/0.1/web-animation-types.js';
 
 export {
   WebAnimationBuilderOptionsDef,

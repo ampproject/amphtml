@@ -18,14 +18,14 @@ import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
-} from './bookend-component-interface';
-import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
-import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isArray} from '../../../../../src/types';
-import {userAssert} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+} from './bookend-component-interface.js';
+import {addAttributesToElement} from '../../../../../src/dom.js';
+import {dict} from '../../../../../src/utils/object.js';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url.js';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template.js';
+import {isArray} from '../../../../../src/types.js';
+import {userAssert} from '../../../../../src/log.js';
+import {userAssertValidProtocol} from '../../utils.js';
 
 /**
  * @typedef {{

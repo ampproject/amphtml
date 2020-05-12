@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayerManager} from './amp-story-player-manager';
+import {AmpStoryPlayerManager} from './amp-story-player-manager.js';
 
 self.onload = () => {
   const manager = new AmpStoryPlayerManager(self);

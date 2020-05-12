@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Mask} from './mask-impl';
-import {OutputMode} from './constants';
-import {Services} from '../../../src/services';
-import {iterateCursor, removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {Mask} from './mask-impl.js';
+import {OutputMode} from './constants.js';
+import {Services} from '../../../src/services.js';
+import {iterateCursor, removeElement} from '../../../src/dom.js';
+import {userAssert} from '../../../src/log.js';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 const ELEMENT_MASK_OUTPUT_PROPERTY = '__amp_inputmask_hidden';

@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbedDoc} from '../service';
-import {installActionServiceForDoc} from './action-impl';
-import {installBatchedXhrService} from './batched-xhr-impl';
-import {installCidService} from './cid-impl';
-import {installCryptoService} from './crypto-impl';
-import {installDocumentInfoServiceForDoc} from './document-info-impl';
-import {installGlobalNavigationHandlerForDoc} from './navigation';
-import {installGlobalSubmitListenerForDoc} from '../document-submit';
-import {installHiddenObserverForDoc} from './hidden-observer-impl';
-import {installHistoryServiceForDoc} from './history-impl';
-import {installImg} from '../../builtins/amp-img';
-import {installInputService} from '../input';
-import {installLayout} from '../../builtins/amp-layout';
-import {installMutatorServiceForDoc} from './mutator-impl';
-import {installOwnersServiceForDoc} from './owners-impl';
-import {installPixel} from '../../builtins/amp-pixel';
-import {installPlatformService} from './platform-impl';
-import {installPreconnectService} from '../preconnect';
-import {installResourcesServiceForDoc} from './resources-impl';
-import {installStandardActionsForDoc} from './standard-actions-impl';
-import {installStorageServiceForDoc} from './storage-impl';
-import {installTemplatesService} from './template-impl';
-import {installTimerService} from './timer-impl';
-import {installUrlForDoc} from './url-impl';
-import {installUrlReplacementsServiceForDoc} from './url-replacements-impl';
-import {installViewerServiceForDoc} from './viewer-impl';
-import {installViewportServiceForDoc} from './viewport/viewport-impl';
-import {installVsyncService} from './vsync-impl';
-import {installXhrService} from './xhr-impl';
+import {adoptServiceForEmbedDoc} from '../service.js';
+import {installActionServiceForDoc} from './action-impl.js';
+import {installBatchedXhrService} from './batched-xhr-impl.js';
+import {installCidService} from './cid-impl.js';
+import {installCryptoService} from './crypto-impl.js';
+import {installDocumentInfoServiceForDoc} from './document-info-impl.js';
+import {installGlobalNavigationHandlerForDoc} from './navigation.js';
+import {installGlobalSubmitListenerForDoc} from '../document-submit.js';
+import {installHiddenObserverForDoc} from './hidden-observer-impl.js';
+import {installHistoryServiceForDoc} from './history-impl.js';
+import {installImg} from '../../builtins/amp-img.js';
+import {installInputService} from '../input.js';
+import {installLayout} from '../../builtins/amp-layout.js';
+import {installMutatorServiceForDoc} from './mutator-impl.js';
+import {installOwnersServiceForDoc} from './owners-impl.js';
+import {installPixel} from '../../builtins/amp-pixel.js';
+import {installPlatformService} from './platform-impl.js';
+import {installPreconnectService} from '../preconnect.js';
+import {installResourcesServiceForDoc} from './resources-impl.js';
+import {installStandardActionsForDoc} from './standard-actions-impl.js';
+import {installStorageServiceForDoc} from './storage-impl.js';
+import {installTemplatesService} from './template-impl.js';
+import {installTimerService} from './timer-impl.js';
+import {installUrlForDoc} from './url-impl.js';
+import {installUrlReplacementsServiceForDoc} from './url-replacements-impl.js';
+import {installViewerServiceForDoc} from './viewer-impl.js';
+import {installViewportServiceForDoc} from './viewport/viewport-impl.js';
+import {installVsyncService} from './vsync-impl.js';
+import {installXhrService} from './xhr-impl.js';
 
 /**
  * Install builtins.

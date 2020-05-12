@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LogLevel, devAssert} from '../../../src/log';
-import {scopedQuerySelectorAll} from '../../../src/dom';
-import {tryResolve} from '../../../src/utils/promise';
+import {LogLevel, devAssert} from '../../../src/log.js';
+import {scopedQuerySelectorAll} from '../../../src/dom.js';
+import {tryResolve} from '../../../src/utils/promise.js';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase

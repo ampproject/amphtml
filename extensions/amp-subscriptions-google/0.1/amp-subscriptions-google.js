@@ -18,7 +18,7 @@ import {
   Action,
   ActionStatus,
   SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
+} from '../../amp-subscriptions/0.1/analytics.js';
 import {
   AnalyticsEvent,
   ConfiguredRuntime,
@@ -26,23 +26,23 @@ import {
   Fetcher,
   FilterResult,
   SubscribeResponse,
-} from '../../../third_party/subscriptions-project/swg';
+} from '../../../third_party/subscriptions-project/swg.js';
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css.js';
-import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
+import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl.js';
 import {
   Entitlement,
   GrantReason,
-} from '../../amp-subscriptions/0.1/entitlement';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
+} from '../../amp-subscriptions/0.1/entitlement.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
-import {WindowInterface} from '../../../src/window-interface';
-import {experimentToggles, isExperimentOn} from '../../../src/experiments';
-import {getData} from '../../../src/event-helper';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {parseUrlDeprecated} from '../../../src/url';
-import {startsWith} from '../../../src/string';
-import {userAssert} from '../../../src/log';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {experimentToggles, isExperimentOn} from '../../../src/experiments.js';
+import {getData} from '../../../src/event-helper.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {startsWith} from '../../../src/string.js';
+import {userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';

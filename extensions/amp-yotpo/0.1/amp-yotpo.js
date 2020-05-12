@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {userAssert} from '../../../src/log.js';
 
 export class AmpYotpo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {endsWith, startsWith} from '../../../src/string';
-import {urls} from '../../../src/config';
+import {endsWith, startsWith} from '../../../src/string.js';
+import {urls} from '../../../src/config.js';
 
 export class ExternalReorderHeadTransformer {
   /** constructor */

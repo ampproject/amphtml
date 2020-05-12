@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {Services} from '../../../src/services.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeChildren} from '../../../src/dom.js';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {dict} from '../../../src/utils/object.js';
+import {iterateCursor, templateContentClone} from '../../../src/dom.js';
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
-} from '../../../src/sanitizer';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
+} from '../../../src/sanitizer.js';
+import {user} from '../../../src/log.js';
+import mustache from '../../../third_party/mustache/mustache.js';
 
 const TAG = 'amp-mustache';
 

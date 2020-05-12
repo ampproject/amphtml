@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
+import {LocalizationService} from '../../../src/service/localization.js';
 import {
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {registerServiceBuilderForDoc} from '../../../src/service';
-import LocalizedStringsAr from './_locales/ar';
-import LocalizedStringsDe from './_locales/de';
-import LocalizedStringsEn from './_locales/en';
-import LocalizedStringsEnGb from './_locales/en-GB';
-import LocalizedStringsEs from './_locales/es';
-import LocalizedStringsEs419 from './_locales/es-419';
-import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsHi from './_locales/hi';
-import LocalizedStringsId from './_locales/id';
-import LocalizedStringsIt from './_locales/it';
-import LocalizedStringsJa from './_locales/ja';
-import LocalizedStringsKo from './_locales/ko';
-import LocalizedStringsNl from './_locales/nl';
-import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPtBr from './_locales/pt-BR';
-import LocalizedStringsPtPt from './_locales/pt-PT';
-import LocalizedStringsRu from './_locales/ru';
-import LocalizedStringsTr from './_locales/tr';
-import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZhCn from './_locales/zh-CN';
-import LocalizedStringsZhTw from './_locales/zh-TW';
+} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {registerServiceBuilderForDoc} from '../../../src/service.js';
+import LocalizedStringsAr from './_locales/ar.js';
+import LocalizedStringsDe from './_locales/de.js';
+import LocalizedStringsEn from './_locales/en.js';
+import LocalizedStringsEnGb from './_locales/en-GB.js';
+import LocalizedStringsEs from './_locales/es.js';
+import LocalizedStringsEs419 from './_locales/es-419.js';
+import LocalizedStringsFr from './_locales/fr.js';
+import LocalizedStringsHi from './_locales/hi.js';
+import LocalizedStringsId from './_locales/id.js';
+import LocalizedStringsIt from './_locales/it.js';
+import LocalizedStringsJa from './_locales/ja.js';
+import LocalizedStringsKo from './_locales/ko.js';
+import LocalizedStringsNl from './_locales/nl.js';
+import LocalizedStringsNo from './_locales/no.js';
+import LocalizedStringsPtBr from './_locales/pt-BR.js';
+import LocalizedStringsPtPt from './_locales/pt-PT.js';
+import LocalizedStringsRu from './_locales/ru.js';
+import LocalizedStringsTr from './_locales/tr.js';
+import LocalizedStringsVi from './_locales/vi.js';
+import LocalizedStringsZhCn from './_locales/zh-CN.js';
+import LocalizedStringsZhTw from './_locales/zh-TW.js';
 
 /** @const */
 export const CtaTypes = {

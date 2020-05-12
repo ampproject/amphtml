@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {assertHttpsUrl} from './url';
-import {getValueForExpr} from './json';
-import {user} from './log';
+import {Services} from './services.js';
+import {assertHttpsUrl} from './url.js';
+import {getValueForExpr} from './json.js';
+import {user} from './log.js';
 
 /**
  * @enum {number}

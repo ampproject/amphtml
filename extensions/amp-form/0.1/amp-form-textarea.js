@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {Services} from '../../../src/services';
-import {computedStyle, px, setStyle} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {iterateCursor, removeElement} from '../../../src/dom';
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {Services} from '../../../src/services.js';
+import {computedStyle, px, setStyle} from '../../../src/style.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {iterateCursor, removeElement} from '../../../src/dom.js';
+import {listen, listenOncePromise} from '../../../src/event-helper.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
+import {toArray} from '../../../src/types.js';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 

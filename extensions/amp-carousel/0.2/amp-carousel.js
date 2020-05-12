@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionSource} from '../../amp-base-carousel/0.1/action-source.js';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-carousel-0.2.css.js';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
-import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events.js';
+import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager.js';
+import {Services} from '../../../src/services.js';
+import {closestAncestorElementBySelector} from '../../../src/dom.js';
+import {computedStyle} from '../../../src/style.js';
+import {createCustomEvent, getDetail} from '../../../src/event-helper.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /**
  * @enum {string}

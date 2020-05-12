@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {installWebAnimations} from 'web-animations-js/web-animations.install';
+import {Services} from '../../../src/services.js';
+import {installWebAnimations} from 'web-animations-js/web-animations.install.js';
 
 const POLYFILLED = '__AMP_WA';
 

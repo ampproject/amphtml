@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getVariableService} from './variable-service';
-import {map} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Services} from '../../../src/services.js';
+import {StateProperty, getStoreService} from './amp-story-store-service.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {getVariableService} from './variable-service.js';
+import {map} from '../../../src/utils/object.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @package @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';

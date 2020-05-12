@@ -18,23 +18,23 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
   getAnalyticsService,
-} from './story-analytics';
+} from './story-analytics.js';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css.js';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {ShareWidget} from './amp-story-share';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
-import {setStyles} from '../../../src/style';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {ShareWidget} from './amp-story-share.js';
+import {closest} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {setStyles} from '../../../src/style.js';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';

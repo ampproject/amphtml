@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../src/3p-frame-messaging';
-import {WindowInterface} from '../../../src/window-interface';
-import {getMode} from '../../../src/mode';
-import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {MessageType} from '../../../src/3p-frame-messaging.js';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {getMode} from '../../../src/mode.js';
+import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
 
 /**
  * Setup cross-origin iframe polyfill for AMP iframes, such as inabox.

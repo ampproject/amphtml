@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-subscriptions';
 

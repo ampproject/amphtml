@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Observable} from '../observable';
-import {devAssert} from '../log';
+import {Observable} from '../observable.js';
+import {devAssert} from '../log.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service.js';
 
 /**
  * MutationObserverInit options to listen for mutations to the `hidden`

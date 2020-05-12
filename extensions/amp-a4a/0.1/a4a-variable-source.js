@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   VariableSource,
   getNavigationData,
   getTimingDataAsync,
   getTimingDataSync,
-} from '../../../src/service/variable-source';
-import {user, userAssert} from '../../../src/log';
+} from '../../../src/service/variable-source.js';
+import {user, userAssert} from '../../../src/log.js';
 
 const WHITELISTED_VARIABLES = [
   'AMPDOC_HOST',

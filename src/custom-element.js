@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
-import {AmpEvents} from './amp-events';
-import {CommonSignals} from './common-signals';
-import {ElementStub} from './element-stub';
+import * as dom from './dom.js';
+import {AmpEvents} from './amp-events.js';
+import {CommonSignals} from './common-signals.js';
+import {ElementStub} from './element-stub.js';
 import {
   Layout,
   applyStaticLayout,
   isInternalElement,
   isLayoutSizeDefined,
   isLoadingAllowed,
-} from './layout';
-import {LayoutDelayMeter} from './layout-delay-meter';
-import {ResourceState} from './service/resource';
-import {Services} from './services';
-import {Signals} from './utils/signals';
-import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
+} from './layout.js';
+import {LayoutDelayMeter} from './layout-delay-meter.js';
+import {ResourceState} from './service/resource.js';
+import {Services} from './services.js';
+import {Signals} from './utils/signals.js';
+import {
+  blockedByConsentError,
+  isBlockedByConsent,
+  reportError,
+} from './error.js';
 import {createLoaderElement} from '../src/loader.js';
-import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill';
-import {getMode} from './mode';
-import {htmlFor} from './static-template';
-import {parseSizeList} from './size-list';
-import {setStyle} from './style';
-import {shouldBlockOnConsentByMeta} from '../src/consent';
-import {startupChunk} from './chunk';
-import {toWin} from './types';
-import {tryResolve} from '../src/utils/promise';
+import {dev, devAssert, rethrowAsync, user, userAssert} from './log.js';
+import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill.js';
+import {getMode} from './mode.js';
+import {htmlFor} from './static-template.js';
+import {parseSizeList} from './size-list.js';
+import {setStyle} from './style.js';
+import {shouldBlockOnConsentByMeta} from '../src/consent.js';
+import {startupChunk} from './chunk.js';
+import {toWin} from './types.js';
+import {tryResolve} from '../src/utils/promise.js';
 
 const TAG = 'CustomElement';
 

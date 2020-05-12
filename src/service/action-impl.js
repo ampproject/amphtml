@@ -19,23 +19,23 @@ import {
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../action-constants';
-import {Keys} from '../utils/key-codes';
-import {Services} from '../services';
-import {debounce, throttle} from '../utils/rate-limit';
-import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
-import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
+} from '../action-constants.js';
+import {Keys} from '../utils/key-codes.js';
+import {Services} from '../services.js';
+import {debounce, throttle} from '../utils/rate-limit.js';
+import {dev, devAssert, user, userAssert} from '../log.js';
+import {dict, hasOwn, map} from '../utils/object.js';
+import {getDetail} from '../event-helper.js';
+import {getMode} from '../mode.js';
+import {getValueForExpr} from '../json.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
-import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toWin} from '../types';
-import {isEnabled} from '../dom';
-import {reportError} from '../error';
+} from '../service.js';
+import {isAmp4Email} from '../format.js';
+import {isArray, isFiniteNumber, toWin} from '../types.js';
+import {isEnabled} from '../dom.js';
+import {reportError} from '../error.js';
 
 /** @const {string} */
 const TAG_ = 'Action';

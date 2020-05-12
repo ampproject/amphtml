@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
-import {loadScript} from './3p';
-import {setStyle} from '../src/style';
+import {hasOwn} from '../src/utils/object.js';
+import {loadScript} from './3p.js';
+import {setStyle} from '../src/style.js';
 
 /**
  * Embedly platform library url to create cards.

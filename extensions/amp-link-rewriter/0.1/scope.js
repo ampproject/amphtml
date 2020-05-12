@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from '../../../src/dom.js';
 
 /**
  *

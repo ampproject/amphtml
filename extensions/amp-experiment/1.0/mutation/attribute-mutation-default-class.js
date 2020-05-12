@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertAttributeMutationFormat} from './mutation';
+import {assertAttributeMutationFormat} from './mutation.js';
 
 /**
  * Mutation for attribute (style) mutations on unspecified elements.

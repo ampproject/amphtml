@@ -14,39 +14,42 @@
  * limitations under the License.
  */
 
-import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
-import {Action, StateProperty, UIType} from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
-import {BookendComponent} from './bookend-component';
+import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface.js';
+import {Action, StateProperty, UIType} from '../amp-story-store-service.js';
+import {ActionTrust} from '../../../../src/action-constants.js';
+import {AnalyticsVariable, getVariableService} from '../variable-service.js';
+import {BookendComponent} from './bookend-component.js';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css.js';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,
   ScrollableShareWidget,
-} from '../amp-story-share';
-import {DraggableDrawer} from '../amp-story-draggable-drawer';
-import {EventType, dispatch} from '../events';
+} from '../amp-story-share.js';
+import {DraggableDrawer} from '../amp-story-draggable-drawer.js';
+import {EventType, dispatch} from '../events.js';
 import {
   HistoryState,
   createShadowRootWithStyle,
   getHistoryState,
   setHistoryState,
-} from '../utils';
-import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizedStringId} from '../../../../src/localized-strings';
-import {Services} from '../../../../src/services';
-import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
-import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../../src/log';
-import {dict} from '../../../../src/utils/object';
-import {getAmpdoc} from '../../../../src/service';
-import {getJsonLd} from '../jsonld';
-import {getLocalizationService} from '../amp-story-localization-service';
-import {getRequestService} from '../amp-story-request-service';
-import {isArray} from '../../../../src/types';
-import {renderAsElement} from '../simple-template';
-import {toggle} from '../../../../src/style';
+} from '../utils.js';
+import {Keys} from '../../../../src/utils/key-codes.js';
+import {LocalizedStringId} from '../../../../src/localized-strings.js';
+import {Services} from '../../../../src/services.js';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics.js';
+import {
+  closest,
+  closestAncestorElementBySelector,
+} from '../../../../src/dom.js';
+import {dev, devAssert, user, userAssert} from '../../../../src/log.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getAmpdoc} from '../../../../src/service.js';
+import {getJsonLd} from '../jsonld.js';
+import {getLocalizationService} from '../amp-story-localization-service.js';
+import {getRequestService} from '../amp-story-request-service.js';
+import {isArray} from '../../../../src/types.js';
+import {renderAsElement} from '../simple-template.js';
+import {toggle} from '../../../../src/style.js';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';

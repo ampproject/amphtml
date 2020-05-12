@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
-import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
-import {reportError} from '../error';
-import {user} from '../log';
+import {getMode} from '../mode.js';
+import {
+  installServiceInEmbedScope,
+  registerServiceBuilder,
+} from '../service.js';
+import {reportError} from '../error.js';
+import {user} from '../log.js';
 
 const TAG = 'timer';
 let timersForTesting;

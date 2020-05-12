@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {Services} from '../../../src/services.js';
+import {StateProperty, getStoreService} from './amp-story-store-service.js';
+import {dict} from '../../../src/utils/object.js';
+import {registerServiceBuilder} from '../../../src/service.js';
 
 /**
  * @typedef {!JsonObject}

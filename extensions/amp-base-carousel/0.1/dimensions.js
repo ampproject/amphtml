@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {mod} from '../../../src/utils/math';
-import {setImportantStyles, setStyle} from '../../../src/style';
+import {mod} from '../../../src/utils/math.js';
+import {setImportantStyles, setStyle} from '../../../src/style.js';
 
 /**
  * @enum {number}

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {PooolVendor} from './poool-impl';
-import {Services} from '../../../src/services';
+import {PooolVendor} from './poool-impl.js';
+import {Services} from '../../../src/services.js';
 
 AMP.extension('amp-access-poool', '0.1', function (AMP) {
   AMP.registerServiceForDoc(

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
-import {getDetailsForMeta} from './meta';
-import {rot13Array} from './rot13';
-import {startsWith} from '../../../../src/string';
+import {RE_NONALPHA, RE_WHITESPACE} from '../constants.js';
+import {getDetailsForMeta} from './meta.js';
+import {rot13Array} from './rot13.js';
+import {startsWith} from '../../../../src/string.js';
 
 const MAX_KEYWORD_LENGTH = 200;
 const PORN_BIT = 0x1;

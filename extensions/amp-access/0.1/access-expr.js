@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn, map} from '../../../src/utils/object';
-import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {accessParser as parser} from '../../../build/parsers/access-expr-impl.js';
 
 /**
  * Evaluates access expressions.

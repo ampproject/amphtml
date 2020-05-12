@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONFIGURATION_EVENT, ORIGIN} from './constants';
-import {getAddThisMode} from './addthis-utils/mode';
+import {CONFIGURATION_EVENT, ORIGIN} from './constants.js';
+import {getAddThisMode} from './addthis-utils/mode.js';
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * Configuration request status enum.

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
-import {Services} from '../../../src/services';
-import {getAmpAdMetadata} from './amp-ad-utils';
-import {pushIfNotExist} from '../../../src/utils/array';
-import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {
+  AdResponseType,
+  Validator,
+  ValidatorResult,
+} from './amp-ad-type-defs.js';
+import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper.js';
+import {Services} from '../../../src/services.js';
+import {getAmpAdMetadata} from './amp-ad-utils.js';
+import {pushIfNotExist} from '../../../src/utils/array.js';
+import {tryParseJson} from '../../../src/json.js';
+import {utf8Decode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';

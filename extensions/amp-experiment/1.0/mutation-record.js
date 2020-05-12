@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isObject, toArray} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {isObject, toArray} from '../../../src/types.js';
+import {userAssert} from '../../../src/log.js';
 
 /**
  * Types of possibile mutations

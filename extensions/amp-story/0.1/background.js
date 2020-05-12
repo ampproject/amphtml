@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {listenOncePromise} from '../../../src/event-helper';
-import {setStyle} from '../../../src/style';
+import {Services} from '../../../src/services.js';
+import {listenOncePromise} from '../../../src/event-helper.js';
+import {setStyle} from '../../../src/style.js';
 
 /** @const {number} */
 const SWAP_TIMEOUT_MS = 500;

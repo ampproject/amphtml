@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ampMediaElementFor} from './utils';
-import {removeElement} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+import {ampMediaElementFor} from './utils.js';
+import {removeElement} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
 
 /**
  * Class handling HTMLMediaElements sources.

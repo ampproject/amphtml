@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../../src/module';
+import {requireExternal} from '../../../../src/module.js';
 
 /**
  * Implements the `maximum-nights` attribute on the date range picker.

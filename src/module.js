@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev} from './log.js';
 const TAG = 'AMP.require';
 
 /**

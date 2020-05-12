@@ -19,29 +19,29 @@ import {
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
-} from './consent-info';
+} from './consent-info.js';
 import {CSS} from '../../../build/amp-consent-0.1.css.js';
-import {ConsentConfig, expandPolicyConfig} from './consent-config';
-import {ConsentPolicyManager} from './consent-policy-manager';
-import {ConsentStateManager} from './consent-state-manager';
-import {ConsentUI} from './consent-ui';
-import {Deferred} from '../../../src/utils/promise';
+import {ConsentConfig, expandPolicyConfig} from './consent-config.js';
+import {ConsentPolicyManager} from './consent-policy-manager.js';
+import {ConsentStateManager} from './consent-state-manager.js';
+import {ConsentUI} from './consent-ui.js';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
+} from '../../../src/service/notification-ui-manager.js';
+import {Services} from '../../../src/services.js';
 import {
   assertHttpsUrl,
   getSourceUrl,
   resolveRelativeUrl,
-} from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {toggle} from '../../../src/style';
+} from '../../../src/url.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {isEnumValue} from '../../../src/types.js';
+import {toggle} from '../../../src/style.js';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';

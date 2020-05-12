@@ -23,15 +23,15 @@
 import {
   AmpRecaptchaService,
   recaptchaServiceForDoc,
-} from './amp-recaptcha-service';
+} from './amp-recaptcha-service.js';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-} from '../../../src/async-input';
+} from '../../../src/async-input.js';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {setStyles, toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';

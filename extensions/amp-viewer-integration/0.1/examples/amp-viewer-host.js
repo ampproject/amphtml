@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging/messaging';
+import {Messaging} from '../messaging/messaging.js';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented

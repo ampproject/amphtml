@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {dict} from '../../src/utils/object';
-import {listenParent, nonSensitiveDataPostMessage} from '../messaging';
-import {loadScript} from '../3p';
-import {parseJson} from '../../src/json';
-import {user} from '../../src/log';
+import {dict} from '../../src/utils/object.js';
+import {listenParent, nonSensitiveDataPostMessage} from '../messaging.js';
+import {loadScript} from '../3p.js';
+import {parseJson} from '../../src/json.js';
+import {user} from '../../src/log.js';
 
-import GltfViewer from './viewer';
+import GltfViewer from './viewer.js';
 
 const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => (cb) => {

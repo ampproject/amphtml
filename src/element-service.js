@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
+import * as dom from './dom.js';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -24,9 +24,9 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
-} from './service';
-import {toWin} from './types';
-import {userAssert} from './log';
+} from './service.js';
+import {toWin} from './types.js';
+import {userAssert} from './log.js';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects an

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript} from './3p';
-import {setStyles} from '../src/style';
+import {loadScript} from './3p.js';
+import {setStyles} from '../src/style.js';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current

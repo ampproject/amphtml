@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {listenParent} from './messaging';
+import {listenParent} from './messaging.js';
 
 /**
  * Info about the current document/iframe.

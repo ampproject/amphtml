@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   exponentialBackoffClock,
   getJitter,
-} from '../../../src/exponential-backoff';
+} from '../../../src/exponential-backoff.js';
 
 /**
  * Poller with backoff functionality.

@@ -15,10 +15,10 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {dict} from '../../../src/utils/object';
-import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
+import {dict} from '../../../src/utils/object.js';
+import {generatePageImpressionId, isExcludedAnchorUrl} from './utils.js';
 
-import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants.js';
 
 const PAGE_IMPRESSIONS = 'page-impressions';
 const LINK_IMPRESSIONS = 'link-impressions';

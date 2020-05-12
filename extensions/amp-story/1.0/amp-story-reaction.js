@@ -18,17 +18,20 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
   getAnalyticsService,
-} from './story-analytics';
-import {AnalyticsVariable, getVariableService} from './variable-service';
+} from './story-analytics.js';
+import {AnalyticsVariable, getVariableService} from './variable-service.js';
 import {CSS} from '../../../build/amp-story-reaction-1.0.css.js';
-import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getRequestService} from './amp-story-request-service';
+import {Services} from '../../../src/services.js';
+import {StateProperty, getStoreService} from './amp-story-store-service.js';
+import {
+  addParamsToUrl,
+  assertAbsoluteHttpOrHttpsUrl,
+} from '../../../src/url.js';
+import {closest} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getRequestService} from './amp-story-request-service.js';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction';

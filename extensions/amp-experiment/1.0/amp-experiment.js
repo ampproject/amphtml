@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {applyExperimentToVariant} from './apply-experiment';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {applyExperimentToVariant} from './apply-experiment.js';
+import {devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
 import {
   installOriginExperimentsForDoc,
   originExperimentsForDoc,
-} from '../../../src/service/origin-experiments-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson} from '../../../src/json';
+} from '../../../src/service/origin-experiments-impl.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {parseJson} from '../../../src/json.js';
 
 const TAG = 'amp-experiment';
 

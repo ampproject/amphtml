@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {LayoutPriority} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';

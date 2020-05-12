@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Deferred} from '../../../src/utils/promise';
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {LayoutPriority} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {getSourceOrigin} from '../../../src/url';
-import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
-import {isJsonScriptTag} from '../../../src/dom';
-import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+} from '../../../src/batched-json.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils.js';
+import {isJsonScriptTag} from '../../../src/dom.js';
+import {toggle} from '../../../src/style.js';
+import {tryParseJson} from '../../../src/json.js';
 
 export class AmpState extends AMP.BaseElement {
   /**

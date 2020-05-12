@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {serializeQueryString} from '../src/url';
+import {loadScript, validateData} from '../3p/3p.js';
+import {serializeQueryString} from '../src/url.js';
 
 /**
  * @param {!Window} global

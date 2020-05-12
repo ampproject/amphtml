@@ -27,13 +27,13 @@
  * </code>
  */
 
-import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '../../../src/event-helper.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {isObject} from '../../../src/types.js';
+import {removeElement} from '../../../src/dom.js';
+import {startsWith} from '../../../src/string.js';
+import {tryParseJson} from '../../../src/json.js';
+import {userAssert} from '../../../src/log.js';
 
 export class AmpImgur extends AMP.BaseElement {
   /** @param {!AmpElement} element */

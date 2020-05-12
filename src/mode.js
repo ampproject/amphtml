@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {internalRuntimeVersion} from './internal-version';
-import {parseQueryString_} from './url-parse-query-string';
+import {internalRuntimeVersion} from './internal-version.js';
+import {parseQueryString_} from './url-parse-query-string.js';
 
 /**
  * @typedef {{

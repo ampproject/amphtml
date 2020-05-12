@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '../../../src/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+import {AmpAdUIHandler} from './amp-ad-ui.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {addParamToUrl} from '../../../src/url.js';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
   removeChildren,
-} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+} from '../../../src/dom.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';

@@ -18,13 +18,13 @@ import {
   MessageType,
   deserializeMessage,
   serializeMessage,
-} from '../../src/3p-frame-messaging';
-import {canInspectWindow} from '../../src/iframe-helper';
-import {dev, devAssert} from '../../src/log';
-import {dict} from '../../src/utils/object';
-import {getData} from '../../src/event-helper';
-import {getFrameOverlayManager} from './frame-overlay-manager';
-import {getPositionObserver} from './position-observer';
+} from '../../src/3p-frame-messaging.js';
+import {canInspectWindow} from '../../src/iframe-helper.js';
+import {dev, devAssert} from '../../src/log.js';
+import {dict} from '../../src/utils/object.js';
+import {getData} from '../../src/event-helper.js';
+import {getFrameOverlayManager} from './frame-overlay-manager.js';
+import {getPositionObserver} from './position-observer.js';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';

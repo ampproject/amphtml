@@ -20,7 +20,7 @@ import {
   getAutoConfig,
   getPubControlConfig,
 } from './a4a/shared/content-recommendation.js';
-import {user} from '../../src/log';
+import {user} from '../../src/log.js';
 
 /**
  * Approved height for AdSense full-width responsive ads.

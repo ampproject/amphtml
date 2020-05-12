@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '../../../src/amp-events';
+import {AccessSource, AccessType} from './amp-access-source.js';
+import {AccessVars} from './access-vars.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpAccessEvaluator} from './access-expr.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-access-0.1.css.js';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {cancellation} from '../../../src/error';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {cancellation} from '../../../src/error.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {getValueForExpr, tryParseJson} from '../../../src/json.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isArray} from '../../../src/types.js';
+import {isJsonScriptTag} from '../../../src/dom.js';
+import {listenOnce} from '../../../src/event-helper.js';
+import {startsWith} from '../../../src/string.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const */
 const TAG = 'amp-access';

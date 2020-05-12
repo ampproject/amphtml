@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {HostServices} from '../../../src/inabox/host-services';
-import {ScrollManager} from './scroll-manager';
-import {Services} from '../../../src/services';
-import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
+import {HostServices} from '../../../src/inabox/host-services.js';
+import {ScrollManager} from './scroll-manager.js';
+import {Services} from '../../../src/services.js';
+import {VisibilityManagerForMApp} from './visibility-manager-for-mapp.js';
 import {
   closestAncestorElementBySelector,
   getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
-import {provideVisibilityManager} from './visibility-manager';
-import {tryResolve} from '../../../src/utils/promise';
-import {whenContentIniLoad} from '../../../src/ini-load';
+} from '../../../src/dom.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray} from '../../../src/types.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {map} from '../../../src/utils/object.js';
+import {provideVisibilityManager} from './visibility-manager.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {whenContentIniLoad} from '../../../src/ini-load.js';
 
 const TAG = 'amp-analytics/analytics-root';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;

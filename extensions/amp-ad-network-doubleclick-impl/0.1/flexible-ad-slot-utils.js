@@ -16,10 +16,10 @@
 import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
-} from '../../../src/utils/dom-ancestor-visitor';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+} from '../../../src/utils/dom-ancestor-visitor.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {

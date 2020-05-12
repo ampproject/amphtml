@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Keys} from '../../../src/utils/key-codes';
-import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {dict} from '../../../src/utils/object.js';
+import {listen} from '../../../src/event-helper.js';
 
 /**
  * The list of keyboard event properites to forward to the viewer. This should

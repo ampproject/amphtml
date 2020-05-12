@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {ViewerInterface} from './viewer-interface';
-import {VisibilityState} from '../visibility-state';
+import {Deferred, tryResolve} from '../utils/promise.js';
+import {Observable} from '../observable.js';
+import {Services} from '../services.js';
+import {ViewerInterface} from './viewer-interface.js';
+import {VisibilityState} from '../visibility-state.js';
 import {
   dev,
   devAssert,
   duplicateErrorIfNecessary,
   stripUserError,
-} from '../log';
-import {endsWith, startsWith} from '../string';
-import {findIndex} from '../utils/array';
+} from '../log.js';
+import {endsWith, startsWith} from '../string.js';
+import {findIndex} from '../utils/array.js';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -34,12 +34,12 @@ import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
-} from '../url';
-import {isIframed} from '../dom';
-import {map} from '../utils/object';
-import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
-import {urls} from '../config';
+} from '../url.js';
+import {isIframed} from '../dom.js';
+import {map} from '../utils/object.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {reportError} from '../error.js';
+import {urls} from '../config.js';
 
 const TAG_ = 'Viewer';
 

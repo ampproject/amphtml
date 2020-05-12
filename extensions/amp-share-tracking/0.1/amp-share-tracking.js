@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
-import {isExperimentOn} from '../../../src/experiments';
-import {registerServiceBuilder} from '../../../src/service';
-import {tryResolve} from '../../../src/utils/promise';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {base64UrlEncodeFromBytes} from '../../../src/utils/base64.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {tryResolve} from '../../../src/utils/promise.js';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';

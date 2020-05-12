@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
-import {Services} from './services';
-import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
+import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer.js';
+import {Services} from './services.js';
+import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS.js';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
   isShadowDomSupported,
-} from './web-components';
-import {closestNode, isShadowRoot, iterateCursor} from './dom';
-import {dev, devAssert} from './log';
-import {escapeCssSelectorIdent} from './css';
-import {installCssTransformer} from './style-installer';
-import {setInitialDisplay, setStyle} from './style';
-import {toArray, toWin} from './types';
+} from './web-components.js';
+import {closestNode, isShadowRoot, iterateCursor} from './dom.js';
+import {dev, devAssert} from './log.js';
+import {escapeCssSelectorIdent} from './css.js';
+import {installCssTransformer} from './style-installer.js';
+import {setInitialDisplay, setStyle} from './style.js';
+import {toArray, toWin} from './types.js';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.

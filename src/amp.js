@@ -19,37 +19,37 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills.js'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {Services} from './services';
-import {adoptWithMultidocDeps} from './runtime';
+import {Services} from './services.js';
+import {adoptWithMultidocDeps} from './runtime.js';
 import {cssText as ampDocCss} from '../build/ampdoc.css.js';
 import {cssText as ampSharedCss} from '../build/ampshared.css.js';
-import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {getMode} from './mode';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout.js';
+import {getMode} from './mode.js';
 import {
   installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
-} from './service/core-services';
-import {installAutoLightboxExtension} from './auto-lightbox';
-import {installDocService} from './service/ampdoc-impl';
-import {installErrorReporting} from './error';
-import {installPerformanceService} from './service/performance-impl';
-import {installPlatformService} from './service/platform-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installStandaloneExtension} from './standalone';
+} from './service/core-services.js';
+import {installAutoLightboxExtension} from './auto-lightbox.js';
+import {installDocService} from './service/ampdoc-impl.js';
+import {installErrorReporting} from './error.js';
+import {installPerformanceService} from './service/performance-impl.js';
+import {installPlatformService} from './service/platform-impl.js';
+import {installPullToRefreshBlocker} from './pull-to-refresh.js';
+import {installStandaloneExtension} from './standalone.js';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
-} from './style-installer';
-import {internalRuntimeVersion} from './internal-version';
-import {maybeTrackImpression} from './impression';
-import {maybeValidate} from './validator-integration';
-import {preconnectToOrigin} from './preconnect';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
+} from './style-installer.js';
+import {internalRuntimeVersion} from './internal-version.js';
+import {maybeTrackImpression} from './impression.js';
+import {maybeValidate} from './validator-integration.js';
+import {preconnectToOrigin} from './preconnect.js';
+import {startupChunk} from './chunk.js';
+import {stubElementsForDoc} from './service/custom-element-registry.js';
 
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the

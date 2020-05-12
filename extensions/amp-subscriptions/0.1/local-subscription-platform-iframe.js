@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Entitlement} from './entitlement';
-import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {toggle} from '../../../src/style';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Entitlement} from './entitlement.js';
+import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base.js';
+import {Messenger} from '../../amp-access/0.1/iframe-api/messenger.js';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url.js';
+import {devAssert, userAssert} from '../../../src/log.js';
+import {isArray} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {toggle} from '../../../src/style.js';
 
 /**
  * Implments the iframe local subscriptions platform which provides

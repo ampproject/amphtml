@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {devAssert} from '../../../src/log.js';
 
 /**
  * @typedef {{

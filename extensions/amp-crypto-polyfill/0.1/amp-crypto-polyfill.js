@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder} from '../../../src/service';
-import {sha384} from '../../../third_party/closure-library/sha384-generated';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {sha384} from '../../../third_party/closure-library/sha384-generated.js';
 
 /**
  * Registers crypto polyfill.

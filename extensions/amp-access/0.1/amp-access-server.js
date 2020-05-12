@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from './amp-access-client';
-import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
-import {parseJson} from '../../../src/json';
+import {AccessClientAdapter} from './amp-access-client.js';
+import {Services} from '../../../src/services.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {fetchDocument} from '../../../src/document-fetcher.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isProxyOrigin, removeFragment} from '../../../src/url.js';
+import {parseJson} from '../../../src/json.js';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

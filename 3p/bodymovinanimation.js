@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {dict} from '../src/utils/object';
-import {getData} from '../src/event-helper';
-import {loadScript} from './3p';
-import {parseJson} from '../src/json';
-import {setStyles} from '../src/style';
+import {dict} from '../src/utils/object.js';
+import {getData} from '../src/event-helper.js';
+import {loadScript} from './3p.js';
+import {parseJson} from '../src/json.js';
+import {setStyles} from '../src/style.js';
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.

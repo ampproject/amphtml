@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
+import {AmpEvents} from '../../../../src/amp-events.js';
 import {
   AutoLightboxEvents,
   isActionableByTap,
-} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/common-signals';
+} from '../../../../src/auto-lightbox.js';
+import {CommonSignals} from '../../../../src/common-signals.js';
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
-} from './lightbox-placeholders';
-import {Services} from '../../../../src/services';
+} from './lightbox-placeholders.js';
+import {Services} from '../../../../src/services.js';
 import {
   childElement,
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
   iterateCursor,
-} from '../../../../src/dom';
-import {dev, devAssert, userAssert} from '../../../../src/log';
-import {map} from '../../../../src/utils/object';
-import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
-import {toArray} from '../../../../src/types';
+} from '../../../../src/dom.js';
+import {dev, devAssert, userAssert} from '../../../../src/log.js';
+import {map} from '../../../../src/utils/object.js';
+import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset.js';
+import {toArray} from '../../../../src/types.js';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-IMG': true,

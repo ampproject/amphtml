@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
-import {Services} from '../../../src/services';
-import {registerServiceBuilderForDoc} from '../../../src/service';
+import {LocalizationService} from '../../../src/service/localization.js';
+import {Services} from '../../../src/services.js';
+import {registerServiceBuilderForDoc} from '../../../src/service.js';
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve

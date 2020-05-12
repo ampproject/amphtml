@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict, map} from '../utils/object';
-import {isAmp4Email} from '../format';
-import {isUrlAttribute} from '../url-rewrite';
-import {startsWith} from '../string';
+import {dict, map} from '../utils/object.js';
+import {isAmp4Email} from '../format.js';
+import {isUrlAttribute} from '../url-rewrite.js';
+import {startsWith} from '../string.js';
 
 /** @const {string} */
 export const BIND_PREFIX = 'data-amp-bind-';

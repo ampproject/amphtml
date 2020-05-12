@@ -18,9 +18,9 @@ import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
-} from './bookend-component-interface';
-import {htmlFor} from '../../../../../src/static-template';
-import {userAssert} from '../../../../../src/log';
+} from './bookend-component-interface.js';
+import {htmlFor} from '../../../../../src/static-template.js';
+import {userAssert} from '../../../../../src/log.js';
 
 /**
  * @typedef {{

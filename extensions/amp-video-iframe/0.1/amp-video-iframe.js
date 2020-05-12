@@ -13,36 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
-} from '../../../src/video-interface';
+} from '../../../src/video-interface.js';
 import {
   SandboxOptions,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
-} from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
+} from '../../../src/iframe-video.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
 import {
   createElementWithAttributes,
   getDataParamsFromAttributes,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/dom.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/utils/function';
+} from '../../../src/iframe-helper.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {once} from '../../../src/utils/function.js';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';

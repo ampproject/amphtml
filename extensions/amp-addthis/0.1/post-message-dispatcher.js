@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
-import {getData} from '../../../src/event-helper';
-import {isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
+import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants.js';
+import {getData} from '../../../src/event-helper.js';
+import {isObject} from '../../../src/types.js';
+import {startsWith} from '../../../src/string.js';
 
-import {tryParseJson} from '../../../src/json';
+import {tryParseJson} from '../../../src/json.js';
 
 export class PostMessageDispatcher {
   /**

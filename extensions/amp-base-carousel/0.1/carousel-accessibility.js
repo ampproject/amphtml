@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CarouselEvents} from './carousel-events';
-import {getDetail} from '../../../src/event-helper';
+import {CarouselEvents} from './carousel-events.js';
+import {getDetail} from '../../../src/event-helper.js';
 
 /**
  * @typedef {{

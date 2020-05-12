@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /**
  * Standard key for CRC32

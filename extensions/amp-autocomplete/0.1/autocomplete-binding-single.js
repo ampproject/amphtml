@@ -1,4 +1,4 @@
-import {userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log.js';
 
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.

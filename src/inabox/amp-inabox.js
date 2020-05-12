@@ -18,33 +18,33 @@
  * The entry point for AMP inabox runtime (inabox-v0.js).
  */
 
-import '../polyfills';
-import {Navigation} from '../service/navigation';
-import {Services} from '../services';
-import {adopt} from '../runtime';
-import {allowLongTasksInChunking, startupChunk} from '../chunk';
+import '../polyfills.js';
+import {Navigation} from '../service/navigation.js';
+import {Services} from '../services.js';
+import {adopt} from '../runtime.js';
+import {allowLongTasksInChunking, startupChunk} from '../chunk.js';
 import {cssText as ampSharedCss} from '../../build/ampshared.css.js';
-import {doNotTrackImpression} from '../impression';
-import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
-import {getA4AId, registerIniLoadListener} from './utils';
-import {getMode} from '../mode';
-import {installAmpdocServicesForInabox} from './inabox-services';
+import {doNotTrackImpression} from '../impression.js';
+import {fontStylesheetTimeout} from '../font-stylesheet-timeout.js';
+import {getA4AId, registerIniLoadListener} from './utils.js';
+import {getMode} from '../mode.js';
+import {installAmpdocServicesForInabox} from './inabox-services.js';
 import {
   installBuiltinElements,
   installRuntimeServices,
-} from '../service/core-services';
-import {installDocService} from '../service/ampdoc-impl';
-import {installErrorReporting} from '../error';
-import {installPerformanceService} from '../service/performance-impl';
-import {installPlatformService} from '../service/platform-impl';
+} from '../service/core-services.js';
+import {installDocService} from '../service/ampdoc-impl.js';
+import {installErrorReporting} from '../error.js';
+import {installPerformanceService} from '../service/performance-impl.js';
+import {installPlatformService} from '../service/platform-impl.js';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
-} from '../style-installer';
-import {internalRuntimeVersion} from '../internal-version';
-import {maybeValidate} from '../validator-integration';
-import {stubElementsForDoc} from '../service/custom-element-registry';
+} from '../style-installer.js';
+import {internalRuntimeVersion} from '../internal-version.js';
+import {maybeValidate} from '../validator-integration.js';
+import {stubElementsForDoc} from '../service/custom-element-registry.js';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../src/base-element';
-import {Services} from '../src/services';
-import {createPixel} from '../src/pixel';
-import {dev, userAssert} from '../src/log';
-import {registerElement} from '../src/service/custom-element-registry';
+import {BaseElement} from '../src/base-element.js';
+import {Services} from '../src/services.js';
+import {createPixel} from '../src/pixel.js';
+import {dev, userAssert} from '../src/log.js';
+import {registerElement} from '../src/service/custom-element-registry.js';
 
 const TAG = 'amp-pixel';
 

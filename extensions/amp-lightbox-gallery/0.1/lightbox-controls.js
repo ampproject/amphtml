@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {toArray} from '../../../src/types.js';
 
 /**
  * @enum {string}

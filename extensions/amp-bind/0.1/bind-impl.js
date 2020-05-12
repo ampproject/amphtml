@@ -14,35 +14,40 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {BindEvents} from './bind-events';
-import {BindValidator} from './bind-validator';
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {Signals} from '../../../src/utils/signals';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {BindEvents} from './bind-events.js';
+import {BindValidator} from './bind-validator.js';
+import {ChunkPriority, chunk} from '../../../src/chunk.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants.js';
+import {Services} from '../../../src/services.js';
+import {Signals} from '../../../src/utils/signals.js';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
-import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, devAssert, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, remove} from '../../../src/utils/array';
-import {getMode} from '../../../src/mode';
-import {installServiceInEmbedScope} from '../../../src/service';
-import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isAmp4Email} from '../../../src/format';
-import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/url-rewrite';
-import {startsWith} from '../../../src/string';
-import {whenDocumentReady} from '../../../src/document-ready';
+} from '../../../src/dom.js';
+import {createCustomEvent, getDetail} from '../../../src/event-helper.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {deepEquals, getValueForExpr, parseJson} from '../../../src/json.js';
+import {deepMerge, dict, map} from '../../../src/utils/object.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {findIndex, remove} from '../../../src/utils/array.js';
+import {getMode} from '../../../src/mode.js';
+import {installServiceInEmbedScope} from '../../../src/service.js';
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker.js';
+import {isAmp4Email} from '../../../src/format.js';
+import {
+  isArray,
+  isFiniteNumber,
+  isObject,
+  toArray,
+} from '../../../src/types.js';
+import {reportError} from '../../../src/error.js';
+import {rewriteAttributesForElement} from '../../../src/url-rewrite.js';
+import {startsWith} from '../../../src/string.js';
+import {whenDocumentReady} from '../../../src/document-ready.js';
 
 /** @const {string} */
 const TAG = 'amp-bind';

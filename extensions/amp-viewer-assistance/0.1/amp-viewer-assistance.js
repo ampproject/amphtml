@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {tryParseJson} from '../../../src/json';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Services} from '../../../src/services.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /** @const {string} */
 const TAG = 'amp-viewer-assistance';

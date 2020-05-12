@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from './chunk';
-import {Services} from './services';
-import {isAmphtml} from './format';
+import {ChunkPriority, chunk} from './chunk.js';
+import {Services} from './services.js';
+import {isAmphtml} from './format.js';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

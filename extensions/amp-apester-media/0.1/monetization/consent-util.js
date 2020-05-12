@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../../src/utils/object';
+import {dict} from '../../../../src/utils/object.js';
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
-} from '../../../../src/consent';
+} from '../../../../src/consent.js';
 
-import {dev} from '../../../../src/log';
+import {dev} from '../../../../src/log.js';
 
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
 
 const TAG = 'amp-apester-media';
 

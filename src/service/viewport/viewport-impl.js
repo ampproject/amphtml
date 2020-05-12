@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../animation';
-import {FixedLayer} from './../fixed-layer';
-import {Observable} from '../../observable';
-import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {ViewportInterface} from './viewport-interface';
-import {VisibilityState} from '../../visibility-state';
-import {clamp} from '../../utils/math';
+import {Animation} from '../../animation.js';
+import {FixedLayer} from './../fixed-layer.js';
+import {Observable} from '../../observable.js';
+import {Services} from '../../services.js';
+import {ViewportBindingDef} from './viewport-binding-def.js';
+import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper.js';
+import {ViewportBindingNatural_} from './viewport-binding-natural.js';
+import {ViewportInterface} from './viewport-interface.js';
+import {VisibilityState} from '../../visibility-state.js';
+import {clamp} from '../../utils/math.js';
 import {
   closestAncestorElementBySelector,
   getVerticalScrollbarWidth,
   isIframed,
-} from '../../dom';
-import {computedStyle, setStyle} from '../../style';
-import {dev, devAssert} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {getMode} from '../../mode';
+} from '../../dom.js';
+import {computedStyle, setStyle} from '../../style.js';
+import {dev, devAssert} from '../../log.js';
+import {dict} from '../../utils/object.js';
+import {getFriendlyIframeEmbedOptional} from '../../iframe-helper.js';
+import {getMode} from '../../mode.js';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
-} from '../../service';
-import {isExperimentOn} from '../../experiments';
+} from '../../service.js';
+import {isExperimentOn} from '../../experiments.js';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../layout-rect';
-import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
+} from '../../layout-rect.js';
+import {numeric} from '../../transition.js';
+import {tryResolve} from '../../utils/promise.js';
 
 const TAG_ = 'Viewport';
 

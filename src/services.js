@@ -21,13 +21,13 @@ import {
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-} from './service';
+} from './service.js';
 import {
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
-} from './element-service';
+} from './element-service.js';
 
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;

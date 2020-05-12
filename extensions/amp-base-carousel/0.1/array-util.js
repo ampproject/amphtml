@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {mod} from '../../../src/utils/math';
+import {mod} from '../../../src/utils/math.js';
 
 /**
  * Calculates the forwards distance between two indicies in an Array, treating

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '../../../src/dom';
-import {createLinker} from './linker';
-import {dict} from '../../../src/utils/object';
-import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '../../../src/types';
-import {user} from '../../../src/log';
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums.js';
+import {ExpansionOptions, variableServiceForDoc} from './variables.js';
+import {Priority} from '../../../src/service/navigation.js';
+import {Services} from '../../../src/services.js';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {createLinker} from './linker.js';
+import {dict} from '../../../src/utils/object.js';
+import {getHighestAvailableDomain} from '../../../src/cookies.js';
+import {isObject} from '../../../src/types.js';
+import {user} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';

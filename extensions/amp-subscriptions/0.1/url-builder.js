@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {getValueForExpr} from '../../../src/json';
+import {Services} from '../../../src/services.js';
+import {getValueForExpr} from '../../../src/json.js';
 
 export class UrlBuilder {
   /**

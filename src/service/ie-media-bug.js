@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dev} from '../log';
+import {Services} from '../services.js';
+import {dev} from '../log.js';
 
 const TAG = 'ie-media-bug';
 

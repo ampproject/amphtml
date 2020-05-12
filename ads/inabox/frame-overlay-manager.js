@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {collapseFrame, expandFrame} from './frame-overlay-helper';
+import {collapseFrame, expandFrame} from './frame-overlay-helper.js';
 
 /** @const */
 const AMP_INABOX_FRAME_OVERLAY_MANAGER = 'ampInaboxFrameOverlayManager';

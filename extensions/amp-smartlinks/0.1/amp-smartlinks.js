@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {getData} from './../../../src/event-helper';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData} from './../../../src/event-helper.js';
 
-import {ENDPOINTS} from './constants';
-import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
-import {Linkmate} from './linkmate';
-import {getConfigOptions} from './linkmate-options';
+import {ENDPOINTS} from './constants.js';
+import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js';
+import {Linkmate} from './linkmate.js';
+import {getConfigOptions} from './linkmate-options.js';
 
 const TAG = 'amp-smartlinks';
 

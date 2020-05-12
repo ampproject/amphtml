@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
-import {internalRuntimeVersion} from '../../../src/internal-version';
-import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
-import {toggle} from '../../../src/style';
-import {urls} from '../../../src/config';
+import {IframeTransportMessageQueue} from './iframe-transport-message-queue.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {devAssert, user} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {internalRuntimeVersion} from '../../../src/internal-version.js';
+import {isLongTaskApiSupported} from '../../../src/service/jank-meter.js';
+import {toggle} from '../../../src/style.js';
+import {urls} from '../../../src/config.js';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';

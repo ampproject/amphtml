@@ -19,10 +19,10 @@
  *     can be used in top-level scope in module dependencies.
  */
 
-import {install as installArrayIncludes} from '../polyfills/array-includes';
-import {install as installMathSign} from '../polyfills/math-sign';
-import {install as installObjectAssign} from '../polyfills/object-assign';
-import {install as installObjectValues} from '../polyfills/object-values';
+import {install as installArrayIncludes} from '../polyfills/array-includes.js';
+import {install as installMathSign} from '../polyfills/math-sign.js';
+import {install as installObjectAssign} from '../polyfills/object-assign.js';
+import {install as installObjectValues} from '../polyfills/object-values.js';
 
 installArrayIncludes(self);
 installObjectAssign(self);

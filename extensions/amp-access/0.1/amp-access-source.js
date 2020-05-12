@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from './amp-access-client';
-import {AccessIframeAdapter} from './amp-access-iframe';
-import {AccessOtherAdapter} from './amp-access-other';
-import {AccessServerAdapter} from './amp-access-server';
-import {AccessServerJwtAdapter} from './amp-access-server-jwt';
-import {AccessVendorAdapter} from './amp-access-vendor';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getLoginUrl, openLoginDialog} from './login-dialog';
-import {getValueForExpr} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {AccessClientAdapter} from './amp-access-client.js';
+import {AccessIframeAdapter} from './amp-access-iframe.js';
+import {AccessOtherAdapter} from './amp-access-other.js';
+import {AccessServerAdapter} from './amp-access-server.js';
+import {AccessServerJwtAdapter} from './amp-access-server-jwt.js';
+import {AccessVendorAdapter} from './amp-access-vendor.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getLoginUrl, openLoginDialog} from './login-dialog.js';
+import {getValueForExpr} from '../../../src/json.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isObject} from '../../../src/types.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const */
 const TAG = 'amp-access';

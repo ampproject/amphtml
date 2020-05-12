@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {childElementByTag} from '../../../src/dom';
-import {getChildJsonConfig} from '../../../src/json';
-import {isProtocolValid} from '../../../src/url';
-import {once} from '../../../src/utils/function';
-import {registerServiceBuilder} from '../../../src/service';
-import {user, userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {childElementByTag} from '../../../src/dom.js';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {isProtocolValid} from '../../../src/url.js';
+import {once} from '../../../src/utils/function.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';

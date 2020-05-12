@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
-import {tryFocus} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
+import {ownProperty} from '../../../src/utils/object.js';
+import {tryFocus} from '../../../src/dom.js';
+import {userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-autocomplete';
 

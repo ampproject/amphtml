@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {dashToUnderline} from '../src/string';
-import {dict} from '../src/utils/object';
-import {loadScript} from './3p';
-import {setStyle} from '../src/style';
-import {userAssert} from '../src/log';
+import {dashToUnderline} from '../src/string.js';
+import {dict} from '../src/utils/object.js';
+import {loadScript} from './3p.js';
+import {setStyle} from '../src/style.js';
+import {userAssert} from '../src/log.js';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.

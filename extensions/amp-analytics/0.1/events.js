@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Observable} from '../../../src/observable.js';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
-} from '../../../src/video-interface';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
-import {startsWith} from '../../../src/string';
+} from '../../../src/video-interface.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types.js';
+import {startsWith} from '../../../src/string.js';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';

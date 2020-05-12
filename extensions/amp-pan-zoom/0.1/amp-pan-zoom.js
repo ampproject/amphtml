@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Animation} from '../../../src/animation.js';
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css.js';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
-import {numeric} from '../../../src/transition';
-import {px, scale, setStyles, translate} from '../../../src/style';
+} from '../../../src/gesture-recognizers.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {boundValue, distance, magnitude} from '../../../src/utils/math.js';
+import {continueMotion} from '../../../src/motion.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+} from '../../../src/layout-rect.js';
+import {numeric} from '../../../src/transition.js';
+import {px, scale, setStyles, translate} from '../../../src/style.js';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as Preact from './index';
-import {Deferred} from '../utils/promise';
-import {Slot, createSlot} from './slot';
-import {WithAmpContext} from './context';
-import {devAssert} from '../log';
-import {matches} from '../dom';
-import {render} from './index';
+import * as Preact from './index.js';
+import {Deferred} from '../utils/promise.js';
+import {Slot, createSlot} from './slot.js';
+import {WithAmpContext} from './context.js';
+import {devAssert} from '../log.js';
+import {matches} from '../dom.js';
+import {render} from './index.js';
 
 /**
  * @typedef {{

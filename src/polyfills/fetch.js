@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, devAssert, user} from '../log';
-import {hasOwn, map} from '../utils/object';
-import {isArray, isObject} from '../types';
-import {parseJson} from '../json';
-import {utf8Encode} from '../utils/bytes';
+import {dev, devAssert, user} from '../log.js';
+import {hasOwn, map} from '../utils/object.js';
+import {isArray, isObject} from '../types.js';
+import {parseJson} from '../json.js';
+import {utf8Encode} from '../utils/bytes.js';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {

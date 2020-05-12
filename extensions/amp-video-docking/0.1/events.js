@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev} from '../../../src/log.js';
 
 /** @enum {string} */
 export const VideoDockingEvents = {

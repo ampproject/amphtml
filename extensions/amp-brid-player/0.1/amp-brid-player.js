@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url.js';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
   originMatches,
   redispatch,
-} from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
+} from '../../../src/iframe-video.js';
+import {dev, userAssert} from '../../../src/log.js';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
   removeElement,
-} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
+} from '../../../src/dom.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 const TAG = 'amp-brid-player';
 

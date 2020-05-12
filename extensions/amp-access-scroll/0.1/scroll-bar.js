@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PROTOCOL_VERSION} from './scroll-protocol';
-import {ScrollComponent} from './scroll-component';
-import {dict} from '../../../src/utils/object';
+import {PROTOCOL_VERSION} from './scroll-protocol.js';
+import {ScrollComponent} from './scroll-component.js';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * UI for Scroll users.

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {getWinOrigin} from '../../../src/url';
-import {listen} from '../../../src/event-helper';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {getWinOrigin} from '../../../src/url.js';
+import {listen} from '../../../src/event-helper.js';
 
 /**
  * Safari and Chrome PWAs have undesirable behaviors in standalone mode,

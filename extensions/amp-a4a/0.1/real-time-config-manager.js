@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {RTC_VENDORS} from './callout-vendors';
-import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {isCancellation} from '../../../src/error';
-import {tryParseJson} from '../../../src/json';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {RTC_VENDORS} from './callout-vendors.js';
+import {Services} from '../../../src/services.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {isCancellation} from '../../../src/error.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /** @type {string} */
 const TAG = 'real-time-config';

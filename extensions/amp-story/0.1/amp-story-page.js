@@ -23,28 +23,28 @@
  * </amp-story>
  * </code>
  */
-import {AdvancementConfig} from './page-advancement';
-import {AnimationManager, hasAnimations} from './animation';
-import {Deferred} from '../../../src/utils/promise';
-import {EventType, dispatch, dispatchCustom} from './events';
-import {Layout} from '../../../src/layout';
-import {LoadingSpinner} from './loading-spinner';
-import {MediaPool} from './media-pool';
-import {Services} from '../../../src/services';
+import {AdvancementConfig} from './page-advancement.js';
+import {AnimationManager, hasAnimations} from './animation.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {EventType, dispatch, dispatchCustom} from './events.js';
+import {Layout} from '../../../src/layout.js';
+import {LoadingSpinner} from './loading-spinner.js';
+import {MediaPool} from './media-pool.js';
+import {Services} from '../../../src/services.js';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
-import {delegateAutoplay} from '../../../src/video-interface';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getLogEntries} from './logging';
-import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
-import {upgradeBackgroundAudio} from './audio';
+} from '../../../src/dom.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {delegateAutoplay} from '../../../src/video-interface.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getLogEntries} from './logging.js';
+import {getMode} from '../../../src/mode.js';
+import {listen} from '../../../src/event-helper.js';
+import {upgradeBackgroundAudio} from './audio.js';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.

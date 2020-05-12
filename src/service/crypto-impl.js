@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, devAssert, user} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {stringToBytes, utf8Encode} from '../utils/bytes';
+import {Services} from '../services.js';
+import {base64UrlEncodeFromBytes} from '../utils/base64.js';
+import {dev, devAssert, user} from '../log.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {stringToBytes, utf8Encode} from '../utils/bytes.js';
 
 /** @const {string} */
 const TAG = 'Crypto';

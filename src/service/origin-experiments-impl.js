@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {bytesToString, stringToBytes} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin} from '../url';
-import {parseJson} from '../json';
-import {user} from '../log';
+import {Services} from '../services.js';
+import {bytesToString, stringToBytes} from '../utils/bytes.js';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service.js';
+import {getSourceOrigin} from '../url.js';
+import {parseJson} from '../json.js';
+import {user} from '../log.js';
 
 /** @const {string} */
 const TAG = 'OriginExperiments';

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../log';
-import {once} from './function';
-import {setStyles} from '../style';
+import {dev} from '../log.js';
+import {once} from './function.js';
+import {setStyles} from '../style.js';
 
 /**
  * @param {!Window} win

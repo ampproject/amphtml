@@ -15,14 +15,17 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css.js';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
-import {getSocialConfig} from './amp-social-share-config';
-import {toggle} from '../../../src/style';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl, parseQueryString} from '../../../src/url.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {
+  getDataParamsFromAttributes,
+  openWindowDialog,
+} from '../../../src/dom.js';
+import {getSocialConfig} from './amp-social-share-config.js';
+import {toggle} from '../../../src/style.js';
 
 const TAG = 'amp-social-share';
 

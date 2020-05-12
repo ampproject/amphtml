@@ -27,32 +27,32 @@
 import {
   AFFILIATE_LINK_SELECTOR,
   AmpStoryAffiliateLink,
-} from './amp-story-affiliate-link';
+} from './amp-story-affiliate-link.js';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '../../../src/amp-events';
+} from './amp-story-store-service.js';
+import {AdvancementConfig} from './page-advancement.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
-} from './amp-story-embedded-component';
-import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {EventType, dispatch} from './events';
-import {Layout} from '../../../src/layout';
-import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {MediaPool} from './media-pool';
-import {Services} from '../../../src/services';
-import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {VideoUtils} from '../../../src/utils/video';
+} from './amp-story-embedded-component.js';
+import {AnimationManager, hasAnimations} from './animation.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {EventType, dispatch} from './events.js';
+import {Layout} from '../../../src/layout.js';
+import {LoadingSpinner} from './loading-spinner.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {MediaPool} from './media-pool.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents, delegateAutoplay} from '../../../src/video-interface.js';
+import {VideoUtils} from '../../../src/utils/video.js';
 import {
   addAttributesToElement,
   childElement,
@@ -62,24 +62,24 @@ import {
   matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getData, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getLocalizationService} from './amp-story-localization-service';
-import {getLogEntries} from './logging';
-import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {isMediaDisplayed, setTextBackgroundColor} from './utils';
-import {px, toggle} from '../../../src/style';
-import {renderPageDescription} from './semantic-render';
-import {toArray} from '../../../src/types';
-import {upgradeBackgroundAudio} from './audio';
+} from '../../../src/dom.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {getLogEntries} from './logging.js';
+import {getMediaPerformanceMetricsService} from './media-performance-metrics-service.js';
+import {getMode} from '../../../src/mode.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isMediaDisplayed, setTextBackgroundColor} from './utils.js';
+import {px, toggle} from '../../../src/style.js';
+import {renderPageDescription} from './semantic-render.js';
+import {toArray} from '../../../src/types.js';
+import {upgradeBackgroundAudio} from './audio.js';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.

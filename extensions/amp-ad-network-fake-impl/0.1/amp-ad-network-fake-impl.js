@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
-import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer.js';
+import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer.js';
+import {startsWith} from '../../../src/string.js';
+import {user, userAssert} from '../../../src/log.js';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 

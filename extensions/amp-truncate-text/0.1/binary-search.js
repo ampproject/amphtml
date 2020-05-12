@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '../../../src/log.js';
 
 /**
  * When no matching index is found, whether to stop on the next or previous

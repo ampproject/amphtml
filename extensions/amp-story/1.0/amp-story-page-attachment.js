@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
-import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
-import {HistoryState, setHistoryState} from './utils';
-import {Services} from '../../../src/services';
-import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {closest, removeElement} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {getState} from '../../../src/history';
-import {htmlFor} from '../../../src/static-template';
-import {toggle} from '../../../src/style';
+import {Action, StateProperty} from './amp-story-store-service.js';
+import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer.js';
+import {HistoryState, setHistoryState} from './utils.js';
+import {Services} from '../../../src/services.js';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics.js';
+import {closest, removeElement} from '../../../src/dom.js';
+import {dev} from '../../../src/log.js';
+import {getState} from '../../../src/history.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {toggle} from '../../../src/style.js';
 
 /** @const {string} */
 const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';

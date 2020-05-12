@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {addParamToUrl, assertHttpsUrl} from '../../../src/url.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {userAssert} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';

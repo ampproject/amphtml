@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AnimationRunner} from './animation-runner';
-import {Services} from '../../../../src/services';
+import {AnimationRunner} from './animation-runner.js';
+import {Services} from '../../../../src/services.js';
 import {
   assertDoesNotContainDisplay,
   px,
   setStyles,
-} from '../../../../src/style';
-import {dev} from '../../../../src/log';
-import {getTotalDuration} from './utils';
+} from '../../../../src/style.js';
+import {dev} from '../../../../src/log.js';
+import {getTotalDuration} from './utils.js';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;

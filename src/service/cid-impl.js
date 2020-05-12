@@ -22,21 +22,21 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {GoogleCidApi, TokenStatus} from './cid-api';
-import {dev, rethrowAsync, user, userAssert} from '../log';
-import {getCookie, setCookie} from '../cookies';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
-import {parseJson, tryParseJson} from '../json';
+import {GoogleCidApi, TokenStatus} from './cid-api.js';
+import {dev, rethrowAsync, user, userAssert} from '../log.js';
+import {getCookie, setCookie} from '../cookies.js';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service.js';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url.js';
+import {parseJson, tryParseJson} from '../json.js';
 
-import {CacheCidApi} from './cache-cid-api';
-import {Services} from '../services';
-import {ViewerCidApi} from './viewer-cid-api';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dict} from '../utils/object';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {isIframed} from '../dom';
-import {tryResolve} from '../utils/promise';
+import {CacheCidApi} from './cache-cid-api.js';
+import {Services} from '../services.js';
+import {ViewerCidApi} from './viewer-cid-api.js';
+import {base64UrlEncodeFromBytes} from '../utils/base64.js';
+import {dict} from '../utils/object.js';
+import {getCryptoRandomBytesArray} from '../utils/bytes.js';
+import {isIframed} from '../dom.js';
+import {tryResolve} from '../utils/promise.js';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Renderer} from './amp-ad-type-defs';
-import {devAssert} from '../../../src/log';
-import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
+import {Renderer} from './amp-ad-type-defs.js';
+import {devAssert} from '../../../src/log.js';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util.js';
 
 /**
  * @typedef {{

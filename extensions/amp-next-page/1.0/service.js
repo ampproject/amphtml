@@ -15,14 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-1.0.css.js';
-import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
-import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page.js';
+import {MultidocManager} from '../../../src/multidoc-manager.js';
+import {Services} from '../../../src/services.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
+} from '../../../src/batched-json.js';
+import {VisibilityState} from '../../../src/visibility-state.js';
 import {
   childElementByAttr,
   childElementsByTag,
@@ -31,23 +31,25 @@ import {
   removeChildren,
   removeElement,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
+} from '../../../src/dom.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {findIndex} from '../../../src/utils/array.js';
+import {htmlFor, htmlRefs} from '../../../src/static-template.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
-} from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
-import {validatePage, validateUrl} from './utils';
-import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+} from '../../../src/mediasession-helper.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
+import {tryParseJson} from '../../../src/json.js';
+import {validatePage, validateUrl} from './utils.js';
+import VisibilityObserver, {
+  ViewportRelativePos,
+} from './visibility-observer.js';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;

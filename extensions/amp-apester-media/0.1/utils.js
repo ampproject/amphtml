@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as events from '../../../src/event-helper';
-import {isJsonLdScriptTag} from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import * as events from '../../../src/event-helper.js';
+import {isJsonLdScriptTag} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
+import {tryParseJson} from '../../../src/json.js';
 
 const rules = [
   // if it says it's a webview, let's go with that

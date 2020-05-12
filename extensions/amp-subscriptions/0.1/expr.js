@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {evaluateAccessExpr} from '../../amp-access/0.1/access-expr';
+import {evaluateAccessExpr} from '../../amp-access/0.1/access-expr.js';
 
 /**
  * @param {string} expr

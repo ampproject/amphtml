@@ -14,34 +14,39 @@
  * limitations under the License.
  */
 
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import * as dom from '../../../src/dom.js';
+import * as st from '../../../src/style.js';
+import * as tr from '../../../src/transition.js';
+import {Animation} from '../../../src/animation.js';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css.js';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
-import {continueMotion} from '../../../src/motion';
-import {dev, userAssert} from '../../../src/log';
-import {isLoaded} from '../../../src/event-helper';
+} from '../../../src/gesture-recognizers.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {
+  boundValue,
+  clamp,
+  distance,
+  magnitude,
+} from '../../../src/utils/math.js';
+import {continueMotion} from '../../../src/motion.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {isLoaded} from '../../../src/event-helper.js';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
-import {setStyles, toggle} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
+} from '../../../src/layout-rect.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {srcsetFromElement} from '../../../src/srcset.js';
+import {startsWith} from '../../../src/string.js';
 
 const TAG = 'amp-image-lightbox';
 

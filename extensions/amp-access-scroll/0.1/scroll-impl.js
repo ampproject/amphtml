@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
+import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client.js';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css.js';
-import {PROTOCOL_VERSION} from './scroll-protocol';
+import {PROTOCOL_VERSION} from './scroll-protocol.js';
 import {ReadDepthTracker} from './read-depth-tracker.js';
-import {Relay} from './scroll-relay';
-import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
-import {Sheet} from './scroll-sheet';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/url';
+import {Relay} from './scroll-relay.js';
+import {ScrollBar} from './scroll-bar.js';
+import {Services} from '../../../src/services.js';
+import {Sheet} from './scroll-sheet.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {parseQueryString} from '../../../src/url.js';
 
 const TAG = 'amp-access-scroll-elt';
 /**

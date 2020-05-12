@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Builder} from './web-animations';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {WebAnimationPlayState} from './web-animation-types';
-import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
-import {getChildJsonConfig} from '../../../src/json';
-import {getDetail, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
-import {isFiniteNumber} from '../../../src/types';
-import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Builder} from './web-animations.js';
+import {Pass} from '../../../src/pass.js';
+import {Services} from '../../../src/services.js';
+import {WebAnimationPlayState} from './web-animation-types.js';
+import {WebAnimationService} from './web-animation-service.js';
+import {clamp} from '../../../src/utils/math.js';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {getDetail, listen} from '../../../src/event-helper.js';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper.js';
+import {getParentWindowFrameElement} from '../../../src/service.js';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill.js';
+import {isFiniteNumber} from '../../../src/types.js';
+import {setInitialDisplay, setStyles, toggle} from '../../../src/style.js';
+import {userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-animation';
 

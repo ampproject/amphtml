@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Messenger} from './iframe-api/messenger';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {toggle} from '../../../src/style';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Messenger} from './iframe-api/messenger.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray} from '../../../src/types.js';
+import {parseJson} from '../../../src/json.js';
+import {toggle} from '../../../src/style.js';
 
 const AUTHORIZATION_TIMEOUT = 3000;
 const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days

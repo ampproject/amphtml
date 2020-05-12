@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Pass} from '../pass';
-import {Services} from '../services';
+import {Pass} from '../pass.js';
+import {Services} from '../services.js';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -26,13 +26,13 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
-import {dev, user} from '../log';
-import {endsWith} from '../string';
-import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
-import {remove} from '../utils/array';
+} from '../style.js';
+import {closest, domOrderComparator, matches} from '../dom.js';
+import {dev, user} from '../log.js';
+import {endsWith} from '../string.js';
+import {getMode} from '../mode.js';
+import {isExperimentOn} from '../experiments.js';
+import {remove} from '../utils/array.js';
 
 const TAG = 'FixedLayer';
 

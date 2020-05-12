@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Services} from '../services';
-import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
-import {getMode} from '../mode';
+import {Deferred, tryResolve} from '../utils/promise.js';
+import {Services} from '../services.js';
+import {dev, devAssert} from '../log.js';
+import {dict, map} from '../utils/object.js';
+import {getMode} from '../mode.js';
 import {
   getService,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
-} from '../service';
-import {getState} from '../history';
+} from '../service.js';
+import {getState} from '../history.js';
 
 /** @private @const {string} */
 const TAG_ = 'History';

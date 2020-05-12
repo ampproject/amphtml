@@ -14,36 +14,39 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import * as st from '../../../src/style.js';
+import * as tr from '../../../src/transition.js';
+import {Animation} from '../../../src/animation.js';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css.js';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
-import {continueMotion} from '../../../src/motion';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+} from '../../../src/gesture-recognizers.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {boundValue, distance, magnitude} from '../../../src/utils/math.js';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+} from '../../../src/dom.js';
+import {continueMotion} from '../../../src/motion.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, userAssert} from '../../../src/log.js';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
-import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+} from '../../../src/layout-rect.js';
+import {setStyles} from '../../../src/style.js';
+import {srcsetFromElement} from '../../../src/srcset.js';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

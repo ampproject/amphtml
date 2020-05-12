@@ -14,38 +14,41 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {BaseElement} from './base-element.js';
+import {
+  BaseTemplate,
+  registerExtendedTemplate,
+} from './service/template-impl.js';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
-} from './log';
-import {MultidocManager} from './multidoc-manager';
-import {Services} from './services';
+} from './log.js';
+import {MultidocManager} from './multidoc-manager.js';
+import {Services} from './services.js';
 import {cssText as ampDocCss} from '../build/ampdoc.css.js';
 import {cssText as ampSharedCss} from '../build/ampshared.css.js';
-import {config} from './config';
-import {getMode} from './mode';
-import {hasRenderDelayingServices} from './render-delaying-services';
+import {config} from './config.js';
+import {getMode} from './mode.js';
+import {hasRenderDelayingServices} from './render-delaying-services.js';
 import {
   installAmpdocServices,
   installRuntimeServices,
-} from './service/core-services';
+} from './service/core-services.js';
 import {
   installExtensionsService,
   stubLegacyElements,
-} from './service/extensions-impl';
-import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn, toggleExperiment} from './experiments';
-import {reportErrorForWin} from './error';
-import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
-import {setStyle} from './style';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyOpenPromise} from './dom';
+} from './service/extensions-impl.js';
+import {internalRuntimeVersion} from './internal-version.js';
+import {isExperimentOn, toggleExperiment} from './experiments.js';
+import {reportErrorForWin} from './error.js';
+import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub.js';
+import {setStyle} from './style.js';
+import {startupChunk} from './chunk.js';
+import {stubElementsForDoc} from './service/custom-element-registry.js';
+import {waitForBodyOpenPromise} from './dom.js';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));

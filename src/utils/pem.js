@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {base64DecodeToBytes} from './base64';
+import {base64DecodeToBytes} from './base64.js';
 
 /**
  * Converts a text in PEM format into a binary array buffer.

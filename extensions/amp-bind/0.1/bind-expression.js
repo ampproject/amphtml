@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AstNodeType} from './bind-expr-defines';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
+import {AstNodeType} from './bind-expr-defines.js';
+import {devAssert, user} from '../../../src/log.js';
+import {dict, hasOwn, map} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {bindParser as parser} from '../../../build/parsers/bind-expr-impl.js';
 
 const TAG = 'amp-bind';
 

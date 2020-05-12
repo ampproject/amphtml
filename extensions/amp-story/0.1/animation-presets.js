@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
-import {StoryAnimationPresetDef} from './animation-types';
+import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer.js';
+import {StoryAnimationPresetDef} from './animation-types.js';
 import {
   calculateTargetScalingFactor,
   rotateAndTranslate,
   scaleAndTranslate,
   translate2d,
   whooshIn,
-} from './animation-presets-utils';
-import {px} from '../../../src/style';
+} from './animation-presets-utils.js';
+import {px} from '../../../src/style.js';
 
 const FULL_BLEED_CATEGORY = 'full-bleed';
 const FILL_TEMPLATE_LAYOUT = 'fill';

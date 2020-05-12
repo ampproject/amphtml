@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserverHostForAd} from './intersection-observer-host';
-import {Services} from '../../../src/services';
+import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {IntersectionObserverHostForAd} from './intersection-observer-host.js';
+import {Services} from '../../../src/services.js';
 import {
   SubscriptionApi,
   isPausable,
@@ -27,17 +27,17 @@ import {
   makePausable,
   postMessageToWindows,
   setPaused,
-} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getHtml} from '../../../src/get-html';
-import {isExperimentOn} from '../../../src/experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {removeElement} from '../../../src/dom';
-import {reportErrorToAnalytics} from '../../../src/error';
-import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
+} from '../../../src/iframe-helper.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
+import {getHtml} from '../../../src/get-html.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils.js';
+import {removeElement} from '../../../src/dom.js';
+import {reportErrorToAnalytics} from '../../../src/error.js';
+import {setStyle} from '../../../src/style.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
 
 const VISIBILITY_TIMEOUT = 10000;
 

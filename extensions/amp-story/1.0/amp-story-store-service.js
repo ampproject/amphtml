@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {EmbedMode, parseEmbedMode} from './embed-mode';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
-import {registerServiceBuilder} from '../../../src/service';
+import {EmbedMode, parseEmbedMode} from './embed-mode.js';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {registerServiceBuilder} from '../../../src/service.js';
 
 /** @type {string} */
 const TAG = 'amp-story';

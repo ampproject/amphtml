@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from '../src/json';
-import {validateData, writeScript} from '../3p/3p';
+import {tryParseJson} from '../src/json.js';
+import {validateData, writeScript} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

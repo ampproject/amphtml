@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {childElementByAttr} from '../../../../src/dom';
-import {dev} from '../../../../src/log';
-import {htmlFor} from '../../../../src/static-template';
-import {setStyles} from '../../../../src/style';
+import {childElementByAttr} from '../../../../src/dom.js';
+import {dev} from '../../../../src/log.js';
+import {htmlFor} from '../../../../src/static-template.js';
+import {setStyles} from '../../../../src/style.js';
 
 export class LoadMoreService {
   /**

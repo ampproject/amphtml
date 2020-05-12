@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DirectionX} from './def';
-import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
+import {DirectionX} from './def.js';
+import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect.js';
 import {mapRange} from '../../../src/utils/math.js';
 
 /**

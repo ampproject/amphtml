@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Xhr} from './xhr-impl';
-import {getService, registerServiceBuilder} from '../service';
-import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url';
-import {map} from '../utils/object';
+import {Xhr} from './xhr-impl.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {getSourceOrigin, removeFragment, resolveRelativeUrl} from '../url.js';
+import {map} from '../utils/object.js';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests

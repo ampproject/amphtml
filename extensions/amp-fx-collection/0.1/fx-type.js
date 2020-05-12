@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log.js';
 
 const TAG = 'amp-fx-collection';
 

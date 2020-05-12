@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as hooks from /*OK*/ 'preact/hooks';
+import * as hooks from /*OK*/ 'preact/hooks.js';
 import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.

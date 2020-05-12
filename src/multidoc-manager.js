@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
-import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {CommonSignals} from './common-signals.js';
+import {Services} from './services.js';
+import {VisibilityState} from './visibility-state.js';
+import {childElementsByTag, isConnectedNode} from './dom.js';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
-} from './shadow-embed';
-import {dev, user} from './log';
-import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
-import {getMode} from './mode';
-import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
-import {parseExtensionUrl} from './service/extension-location';
-import {parseUrlDeprecated} from './url';
-import {setStyle} from './style';
+} from './shadow-embed.js';
+import {dev, user} from './log.js';
+import {
+  disposeServicesForDoc,
+  getServicePromiseOrNullForDoc,
+} from './service.js';
+import {getMode} from './mode.js';
+import {installStylesForDoc} from './style-installer.js';
+import {isArray, isObject} from './types.js';
+import {parseExtensionUrl} from './service/extension-location.js';
+import {parseUrlDeprecated} from './url.js';
+import {setStyle} from './style.js';
 
 /** @const @private {string} */
 const TAG = 'multidoc-manager';

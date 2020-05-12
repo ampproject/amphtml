@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
-import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
-import {LinkRewriter} from './link-rewriter';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
+import {AmpEvents} from '../../../../src/amp-events.js';
+import {EVENTS, PRIORITY_META_TAG_NAME} from './constants.js';
+import {LinkRewriter} from './link-rewriter.js';
+import {Priority} from '../../../../src/service/navigation.js';
+import {Services} from '../../../../src/services.js';
 
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
+import {requireExternal} from '../../../src/module.js';
 
 /**
  * Create a React component that can render Promises.

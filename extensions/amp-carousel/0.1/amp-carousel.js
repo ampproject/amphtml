@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpScrollableCarousel} from './scrollable-carousel';
-import {AmpSlideScroll} from './slidescroll';
+import {AmpScrollableCarousel} from './scrollable-carousel.js';
+import {AmpSlideScroll} from './slidescroll.js';
 import {CSS} from '../../../build/amp-carousel-0.1.css.js';
 
 class CarouselSelector extends AMP.BaseElement {

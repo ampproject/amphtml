@@ -19,7 +19,7 @@ import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
-} from './experiments';
+} from './experiments.js';
 
 // TODO(#22733): Remove this file once "ampdoc-fie" is cleaned up.
 

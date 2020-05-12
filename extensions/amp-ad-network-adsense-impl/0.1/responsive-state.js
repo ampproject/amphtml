@@ -19,16 +19,16 @@ import {
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
-import {hasOwn} from '../../../src/utils/object';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+} from '../../../ads/google/utils.js';
+import {Services} from '../../../src/services.js';
+import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments.js';
+import {clamp} from '../../../src/utils/math.js';
+import {computedStyle, setStyle} from '../../../src/style.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {getData} from '../../../src/event-helper.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments.js';
+import {toWin} from '../../../src/types.js';
 
 const TAG = 'amp-ad-network-adsense-impl';
 

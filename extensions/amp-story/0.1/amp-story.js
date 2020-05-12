@@ -24,52 +24,52 @@
  * </amp-story>
  * </code>
  */
-import './amp-story-cta-layer';
-import './amp-story-grid-layer';
-import './amp-story-page';
+import './amp-story-cta-layer.js';
+import './amp-story-grid-layer.js';
+import './amp-story-page.js';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpStoryAnalytics} from './analytics';
-import {AmpStoryBackground} from './background';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryRequestService} from './amp-story-request-service';
-import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './amp-story-bookend';
+} from './amp-story-store-service.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpStoryAnalytics} from './analytics.js';
+import {AmpStoryBackground} from './background.js';
+import {AmpStoryConsent} from './amp-story-consent.js';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer.js';
+import {AmpStoryGridLayer} from './amp-story-grid-layer.js';
+import {AmpStoryHint} from './amp-story-hint.js';
+import {AmpStoryPage} from './amp-story-page.js';
+import {AmpStoryRenderService} from './amp-story-render-service.js';
+import {AmpStoryRequestService} from './amp-story-request-service.js';
+import {AmpStoryVariableService} from './variable-service.js';
+import {Bookend} from './amp-story-bookend.js';
 import {CSS} from '../../../build/amp-story-0.1.css.js';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
-} from '../../../src/gesture-recognizers';
-import {EventType, dispatch} from './events';
-import {Gestures} from '../../../src/gesture';
-import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
+} from '../../../src/gesture-recognizers.js';
+import {EventType, dispatch} from './events.js';
+import {Gestures} from '../../../src/gesture.js';
+import {InfoDialog} from './amp-story-info-dialog.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Layout} from '../../../src/layout.js';
 import {
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../src/localized-strings';
-import {MediaPool, MediaType} from './media-pool';
-import {NavigationState} from './navigation-state';
-import {ORIGIN_WHITELIST} from './origin-whitelist';
-import {PaginationButtons} from './pagination-buttons';
-import {Services} from '../../../src/services';
-import {ShareMenu} from './amp-story-share-menu';
-import {ShareWidget} from './amp-story-share';
-import {SystemLayer} from './amp-story-system-layer';
-import {TapNavigationDirection} from './page-advancement';
-import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
+} from '../../../src/localized-strings.js';
+import {MediaPool, MediaType} from './media-pool.js';
+import {NavigationState} from './navigation-state.js';
+import {ORIGIN_WHITELIST} from './origin-whitelist.js';
+import {PaginationButtons} from './pagination-buttons.js';
+import {Services} from '../../../src/services.js';
+import {ShareMenu} from './amp-story-share-menu.js';
+import {ShareWidget} from './amp-story-share.js';
+import {SystemLayer} from './amp-story-system-layer.js';
+import {TapNavigationDirection} from './page-advancement.js';
+import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer.js';
+import {ViewportWarningLayer} from './amp-story-viewport-warning-layer.js';
 import {
   childElement,
   childElementByTag,
@@ -79,30 +79,30 @@ import {
   removeElement,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
+} from '../../../src/dom.js';
 import {
   computedStyle,
   resetStyles,
   setImportantStyles,
   toggle,
-} from '../../../src/style';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
-import {getLocalizationService} from './amp-story-localization-service';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
-import {getState} from '../../../src/history';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-import {registerServiceBuilder} from '../../../src/service';
-import {renderSimpleTemplate} from './simple-template';
-import {stringHash32} from '../../../src/string';
-import {upgradeBackgroundAudio} from './audio';
-import LocalizedStringsDefault from './_locales/default';
-import LocalizedStringsEn from './_locales/en';
+} from '../../../src/style.js';
+import {debounce} from '../../../src/utils/rate-limit.js';
+import {dev, devAssert, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {findIndex} from '../../../src/utils/array.js';
+import {getDetail} from '../../../src/event-helper.js';
+import {getLocalizationService} from './amp-story-localization-service.js';
+import {getMode} from '../../../src/mode.js';
+import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url.js';
+import {getState} from '../../../src/history.js';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments.js';
+import {registerServiceBuilder} from '../../../src/service.js';
+import {renderSimpleTemplate} from './simple-template.js';
+import {stringHash32} from '../../../src/string.js';
+import {upgradeBackgroundAudio} from './audio.js';
+import LocalizedStringsDefault from './_locales/default.js';
+import LocalizedStringsEn from './_locales/en.js';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';

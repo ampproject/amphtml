@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
-import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
-import {isStoryDocument} from '../utils/story';
-import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../utils/rate-limit';
-import {whenContentIniLoad} from '../ini-load';
-import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
+import {Deferred} from '../utils/promise.js';
+import {Services} from '../services.js';
+import {VisibilityState} from '../visibility-state.js';
+import {dev, devAssert} from '../log.js';
+import {dict, map} from '../utils/object.js';
+import {getMode} from '../mode.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {isStoryDocument} from '../utils/story.js';
+import {layoutRectLtwh} from '../layout-rect.js';
+import {throttle} from '../utils/rate-limit.js';
+import {whenContentIniLoad} from '../ini-load.js';
+import {whenDocumentComplete, whenDocumentReady} from '../document-ready.js';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

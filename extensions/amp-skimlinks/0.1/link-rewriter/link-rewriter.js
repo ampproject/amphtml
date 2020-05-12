@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {ChunkPriority, chunk} from '../../../../src/chunk';
-import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
-import {LinkReplacementCache} from './link-replacement-cache';
-import {Observable} from '../../../../src/observable';
-import {TwoStepsResponse} from './two-steps-response';
-import {userAssert} from '../../../../src/log';
+import {ChunkPriority, chunk} from '../../../../src/chunk.js';
+import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants.js';
+import {LinkReplacementCache} from './link-replacement-cache.js';
+import {Observable} from '../../../../src/observable.js';
+import {TwoStepsResponse} from './two-steps-response.js';
+import {userAssert} from '../../../../src/log.js';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;

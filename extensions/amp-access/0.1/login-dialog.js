@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {openWindowDialog} from '../../../src/dom';
-import {parseUrlDeprecated} from '../../../src/url';
-import {urls} from '../../../src/config';
+import {Services} from '../../../src/services.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getMode} from '../../../src/mode.js';
+import {openWindowDialog} from '../../../src/dom.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {urls} from '../../../src/config.js';
 
 /** @const */
 const TAG = 'amp-access-login';

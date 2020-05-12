@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {Attributes, getAttributesFromConfigObj} from './attributes.js';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
+} from '../../../src/layout-rect.js';
+import {Services} from '../../../src/services.js';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getElementLayoutBox} from './utils';
+} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getElementLayoutBox} from './utils.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

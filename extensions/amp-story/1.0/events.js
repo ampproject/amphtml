@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper.js';
 
 /** @const {!Object<string, string>} */
 export const EventType = {

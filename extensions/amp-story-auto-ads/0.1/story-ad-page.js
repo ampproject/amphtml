@@ -18,15 +18,15 @@ import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
-} from './story-ad-analytics';
-import {CommonSignals} from '../../../src/common-signals';
-import {CtaTypes} from './story-ad-localization';
+} from './story-ad-analytics.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {CtaTypes} from './story-ad-localization.js';
 import {
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {assertConfig} from '../../amp-ad-exit/0.1/config';
-import {assertHttpsUrl} from '../../../src/url';
+} from '../../amp-story/1.0/amp-story-store-service.js';
+import {assertConfig} from '../../amp-ad-exit/0.1/config.js';
+import {assertHttpsUrl} from '../../../src/url.js';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css.js';
 import {
   createElementWithAttributes,
@@ -35,14 +35,14 @@ import {
   iterateCursor,
   openWindowDialog,
   toggleAttribute,
-} from '../../../src/dom';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getA4AMetaTags, getFrameDoc} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {parseJson} from '../../../src/json';
-import {setStyle} from '../../../src/style';
+} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils.js';
+import {dev, user, userAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getA4AMetaTags, getFrameDoc} from './utils.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {parseJson} from '../../../src/json.js';
+import {setStyle} from '../../../src/style.js';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';

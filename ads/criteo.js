@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
-import {loadScript} from '../3p/3p';
+import {dev} from '../src/log.js';
+import {loadScript} from '../3p/3p.js';
 
 /* global Criteo: false */
 

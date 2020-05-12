@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, devAssert} from '../../../src/log';
-import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
-import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {
+  RENDERING_TYPE_HEADER,
+  XORIGIN_MODE,
+} from '../../amp-a4a/0.1/amp-a4a.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils.js';
+import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments.js';
+import {isObject} from '../../../src/types.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

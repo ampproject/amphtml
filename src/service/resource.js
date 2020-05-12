@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Layout} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
-import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
+import {Deferred, tryResolve} from '../utils/promise.js';
+import {Layout} from '../layout.js';
+import {Services} from '../services.js';
+import {computedStyle, toggle} from '../style.js';
+import {dev, devAssert} from '../log.js';
+import {isBlockedByConsent} from '../error.js';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   moveLayoutRect,
   rectsOverlap,
-} from '../layout-rect';
-import {startsWith} from '../string';
-import {toWin} from '../types';
+} from '../layout-rect.js';
+import {startsWith} from '../string.js';
+import {toWin} from '../types.js';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

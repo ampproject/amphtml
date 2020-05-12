@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {setIsMediaComponent} from '../../../src/video-interface';
+import {Services} from '../../../src/services.js';
+import {devAssert, userAssert} from '../../../src/log.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {setIsMediaComponent} from '../../../src/video-interface.js';
 
 class AmpHulu extends AMP.BaseElement {
   /** @param {!AmpElement} element */

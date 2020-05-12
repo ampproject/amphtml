@@ -18,18 +18,18 @@ import {
   Action,
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
+} from '../../amp-story/1.0/amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-education-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
-import {htmlFor} from '../../../src/static-template';
-import {removeChildren} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+import {Layout} from '../../../src/layout.js';
+import {LocalizedStringId} from '../../../src/localized-strings.js';
+import {Services} from '../../../src/services.js';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {removeChildren} from '../../../src/dom.js';
+import {toggle} from '../../../src/style.js';
 
 /** @type {string} */
 const TAG = 'amp-story-education';

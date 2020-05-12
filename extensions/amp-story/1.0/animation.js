@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
   setStyleForPreset,
-} from './animation-presets';
-import {Services} from '../../../src/services';
+} from './animation-presets.js';
+import {Services} from '../../../src/services.js';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
@@ -31,14 +31,14 @@ import {
   WebAnimationTimingDef,
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
-} from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getChildJsonConfig} from '../../../src/json';
-import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {timeStrToMillis, unscaledClientRect} from './utils';
+} from './animation-types.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {map, omit} from '../../../src/utils/object.js';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom.js';
+import {timeStrToMillis, unscaledClientRect} from './utils.js';
 
 /** @const {string} */
 export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';

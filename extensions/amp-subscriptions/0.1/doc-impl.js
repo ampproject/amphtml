@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Doc} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {Doc} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
 
 /**
  * Adopts config document to ampdoc.

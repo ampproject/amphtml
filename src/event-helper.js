@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {internalListenImplementation} from './event-helper-listen';
-import {lastChildElement} from './dom';
-import {user} from './log';
+import {internalListenImplementation} from './event-helper-listen.js';
+import {lastChildElement} from './dom.js';
+import {user} from './log.js';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {FilterType} from './filters/filter';
-import {HostServices} from '../../../src/inabox/host-services';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {FilterType} from './filters/filter.js';
+import {HostServices} from '../../../src/inabox/host-services.js';
 import {
   MessageType,
   deserializeMessage,
   listen,
-} from '../../../src/3p-frame-messaging';
-import {Services} from '../../../src/services';
-import {TransportMode, assertConfig, assertVendor} from './config';
-import {createFilter} from './filters/factory';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {isObject} from '../../../src/types';
-import {makeClickDelaySpec} from './filters/click-delay';
-import {makeInactiveElementSpec} from './filters/inactive-element';
-import {parseJson} from '../../../src/json';
-import {parseUrlDeprecated} from '../../../src/url';
+} from '../../../src/3p-frame-messaging.js';
+import {Services} from '../../../src/services.js';
+import {TransportMode, assertConfig, assertVendor} from './config.js';
+import {createFilter} from './filters/factory.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {getAmpAdResourceId} from '../../../src/ad-helper.js';
+import {getData} from '../../../src/event-helper.js';
+import {getMode} from '../../../src/mode.js';
+import {getTopWindow} from '../../../src/service.js';
+import {isJsonScriptTag, openWindowDialog} from '../../../src/dom.js';
+import {isObject} from '../../../src/types.js';
+import {makeClickDelaySpec} from './filters/click-delay.js';
+import {makeInactiveElementSpec} from './filters/inactive-element.js';
+import {parseJson} from '../../../src/json.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
 
 const TAG = 'amp-ad-exit';
 

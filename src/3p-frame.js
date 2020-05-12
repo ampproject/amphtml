@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user, userAssert} from './log';
-import {dict} from './utils/object';
-import {getContextMetadata} from '../src/iframe-attributes';
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
-import {setStyle} from './style';
-import {startsWith} from './string';
-import {tryParseJson} from './json';
-import {urls} from './config';
+import {assertHttpsUrl, parseUrlDeprecated} from './url.js';
+import {dev, devAssert, user, userAssert} from './log.js';
+import {dict} from './utils/object.js';
+import {getContextMetadata} from '../src/iframe-attributes.js';
+import {getMode} from './mode.js';
+import {internalRuntimeVersion} from './internal-version.js';
+import {setStyle} from './style.js';
+import {startsWith} from './string.js';
+import {tryParseJson} from './json.js';
+import {urls} from './config.js';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};

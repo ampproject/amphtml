@@ -16,18 +16,18 @@
 
 /** @fileoverview */
 
-import {getMode} from './mode';
-import {install as installArrayIncludes} from './polyfills/array-includes';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {install as installDocContains} from './polyfills/document-contains';
-import {install as installFetch} from './polyfills/fetch';
-import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
-import {install as installIntersectionObserver} from './polyfills/intersection-observer';
-import {install as installMathSign} from './polyfills/math-sign';
-import {install as installObjectAssign} from './polyfills/object-assign';
-import {install as installObjectValues} from './polyfills/object-values';
-import {install as installPromise} from './polyfills/promise';
+import {getMode} from './mode.js';
+import {install as installArrayIncludes} from './polyfills/array-includes.js';
+import {install as installCustomElements} from './polyfills/custom-elements.js';
+import {install as installDOMTokenList} from './polyfills/domtokenlist.js';
+import {install as installDocContains} from './polyfills/document-contains.js';
+import {install as installFetch} from './polyfills/fetch.js';
+import {install as installGetBoundingClientRect} from './get-bounding-client-rect.js';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer.js';
+import {install as installMathSign} from './polyfills/math-sign.js';
+import {install as installObjectAssign} from './polyfills/object-assign.js';
+import {install as installObjectValues} from './polyfills/object-values.js';
+import {install as installPromise} from './polyfills/promise.js';
 
 installFetch(self);
 installMathSign(self);

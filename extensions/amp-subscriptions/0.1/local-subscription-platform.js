@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
-import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe.js';
+import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
 
 /**
  * Local subscription platform factory method.

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated} from '../src/url';
-import {setStyles} from '../src/style';
-import {validateData} from '../3p/3p';
+import {parseUrlDeprecated} from '../src/url.js';
+import {setStyles} from '../src/style.js';
+import {validateData} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

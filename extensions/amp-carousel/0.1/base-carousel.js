@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {isAmp4Email} from '../../../src/format';
-import {toggleAttribute} from '../../../src/dom';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {isAmp4Email} from '../../../src/format.js';
+import {toggleAttribute} from '../../../src/dom.js';
 
 /**
  * @abstract

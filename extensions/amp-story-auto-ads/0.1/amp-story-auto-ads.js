@@ -19,25 +19,25 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
-} from './story-ad-analytics';
-import {ButtonTextFitter} from './story-ad-button-text-fitter';
+} from './story-ad-analytics.js';
+import {ButtonTextFitter} from './story-ad-button-text-fitter.js';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css.js';
-import {CommonSignals} from '../../../src/common-signals';
-import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {Services} from '../../../src/services';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {EventType, dispatch} from '../../amp-story/1.0/events.js';
+import {Services} from '../../../src/services.js';
 import {
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAdConfig} from './story-ad-config';
-import {StoryAdLocalization} from './story-ad-localization';
-import {StoryAdPage} from './story-ad-page';
+} from '../../amp-story/1.0/amp-story-store-service.js';
+import {StoryAdConfig} from './story-ad-config.js';
+import {StoryAdLocalization} from './story-ad-localization.js';
+import {StoryAdPage} from './story-ad-page.js';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css.js';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {lastItem} from '../../../src/utils/array';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils.js';
+import {dev, devAssert, userAssert} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {lastItem} from '../../../src/utils/array.js';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;

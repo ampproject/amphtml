@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Action} from './analytics';
-import {Actions} from './actions';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
-import {UrlBuilder} from './url-builder';
-import {closestAncestorElementBySelector} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {Action} from './analytics.js';
+import {Actions} from './actions.js';
+import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer.js';
+import {UrlBuilder} from './url-builder.js';
+import {closestAncestorElementBySelector} from '../../../src/dom.js';
+import {dev, userAssert} from '../../../src/log.js';
 
 /**
  * Surrogate property added to click events marking them as handled by the

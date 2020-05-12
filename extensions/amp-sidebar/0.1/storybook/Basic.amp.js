@@ -16,10 +16,10 @@
 
 // To do: how to add CSS
 //import '!style-loader!css-loader!./Basic-styles.css';
-import * as Preact from '../../../../src/preact';
-import {storiesOf} from '@storybook/preact';
-import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
+import * as Preact from '../../../../src/preact.js';
+import {storiesOf} from '@storybook/preact.js';
+import {withA11y} from '@storybook/addon-a11y.js';
+import {withKnobs} from '@storybook/addon-knobs.js';
 import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line

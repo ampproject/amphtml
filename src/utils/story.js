@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {closestAncestorElementBySelector, waitForChildPromise} from '../dom';
+import {Services} from '../services.js';
+import {closestAncestorElementBySelector, waitForChildPromise} from '../dom.js';
 
 /**
  * Checks if an element descends from `amp-story` in order to configure

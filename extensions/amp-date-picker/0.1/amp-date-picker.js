@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-date-picker-0.1.css.js';
-import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
-import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
+import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants.js';
+import {DatesList} from './dates-list.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {FiniteStateMachine} from '../../../src/finite-state-machine.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {batchFetchJsonFor} from '../../../src/batched-json.js';
 import {
   closestAncestorElementBySelector,
   isRTL,
   iterateCursor,
   scopedQuerySelector,
   tryFocus,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {createDateRangePicker} from './date-range-picker';
-import {createDeferred} from './react-utils';
-import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '../../../src/string';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {once} from '../../../src/utils/function';
-import {requireExternal} from '../../../src/module';
+} from '../../../src/dom.js';
+import {computedStyle} from '../../../src/style.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {createDateRangePicker} from './date-range-picker.js';
+import {createDeferred} from './react-utils.js';
+import {createSingleDatePicker} from './single-date-picker.js';
+import {dashToCamelCase} from '../../../src/string.js';
+import {dev, devAssert, user, userAssert} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/css.js';
+import {once} from '../../../src/utils/function.js';
+import {requireExternal} from '../../../src/module.js';
 
 /**
  * @typedef {{

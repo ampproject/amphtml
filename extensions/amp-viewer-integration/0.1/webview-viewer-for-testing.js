@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Messaging} from './messaging/messaging';
-import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
+import {Messaging} from './messaging/messaging.js';
+import {parseUrlDeprecated, serializeQueryString} from '../../../src/url.js';
 
 const APP = '__AMPHTML__';
 const MessageType = {

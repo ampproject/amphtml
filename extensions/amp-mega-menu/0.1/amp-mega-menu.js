@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css.js';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {
   closest,
   closestAncestorElementBySelector,
@@ -27,11 +27,11 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
   tryFocus,
-} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
-import {mod} from '../../../src/utils/math';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {toArray} from '../../../src/types';
+} from '../../../src/dom.js';
+import {dev, userAssert} from '../../../src/log.js';
+import {mod} from '../../../src/utils/math.js';
+import {setModalAsClosed, setModalAsOpen} from '../../../src/modal.js';
+import {toArray} from '../../../src/types.js';
 
 /** @const {string} */
 const TAG = 'amp-mega-menu';

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as CSS from './social-share.css';
-import * as Preact from '../../../src/preact';
-import {Keys} from '../../../src/utils/key-codes';
-import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
-import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString} from '../../../src/url';
-import {startsWith} from '../../../src/string';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import * as CSS from './social-share.css.js';
+import * as Preact from '../../../src/preact.js';
+import {Keys} from '../../../src/utils/key-codes.js';
+import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs.js';
+import {openWindowDialog} from '../../../src/dom.js';
+import {parseQueryString} from '../../../src/url.js';
+import {startsWith} from '../../../src/string.js';
+import {useResourcesNotify} from '../../../src/preact/utils.js';
 
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;

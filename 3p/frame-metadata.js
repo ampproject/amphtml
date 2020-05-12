@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
+import {dev} from '../src/log.js';
 import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
+import {getMode} from '../src/mode.js';
 import {once} from '../src/utils/function.js';
-import {parseJson} from '../src/json';
-import {parseUrlDeprecated} from '../src/url';
+import {parseJson} from '../src/json.js';
+import {parseUrlDeprecated} from '../src/url.js';
 
 /**
  * @typedef {{

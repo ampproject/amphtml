@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getChildJsonConfig} from '../../../src/json';
-import {hasOwn} from '../../../src/utils/object';
-import {user, userAssert} from '../../../src/log';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {user, userAssert} from '../../../src/log.js';
 
 /**
  * @typedef {{output: string, section:Array, attribute:Object, vars:Object}}

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {hasOwn, map} from '../../../src/utils/object';
-import {isEnumValue, isObject} from '../../../src/types';
+import {dev} from '../../../src/log.js';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {isEnumValue, isObject} from '../../../src/types.js';
 
 /**
  * Key values for retriving/storing consent info object.

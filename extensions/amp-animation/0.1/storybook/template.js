@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {button, number, select, text} from '@storybook/addon-knobs';
+import * as Preact from '../../../../src/preact.js';
+import {button, number, select, text} from '@storybook/addon-knobs.js';
 
 const FILL_OPTIONS = {
   none: 'none',

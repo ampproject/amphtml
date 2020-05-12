@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {SignatureVerifier, VerificationStatus} from './signature-verifier';
-import {getAmpAdMetadata} from './amp-ad-utils';
-import {signingServerURLs} from '../../../ads/_a4a-config';
-import {user} from '../../../src/log';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {
+  AdResponseType,
+  Validator,
+  ValidatorResult,
+} from './amp-ad-type-defs.js';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier.js';
+import {getAmpAdMetadata} from './amp-ad-utils.js';
+import {signingServerURLs} from '../../../ads/_a4a-config.js';
+import {user} from '../../../src/log.js';
+import {utf8Decode} from '../../../src/utils/bytes.js';
 
 export const SIGNATURE_VERIFIER_PROPERTY_NAME =
   'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';

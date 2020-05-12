@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {getConfigOpts} from './config-options';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getScopeElements} from './scope';
+import {Services} from '../../../src/services.js';
+import {getConfigOpts} from './config-options.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {getScopeElements} from './scope.js';
 
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;

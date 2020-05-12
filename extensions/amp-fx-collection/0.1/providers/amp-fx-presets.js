@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {FxType} from '../fx-type';
-import {Services} from '../../../../src/services';
+import {FxType} from '../fx-type.js';
+import {Services} from '../../../../src/services.js';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
   setStyles,
-} from '../../../../src/style';
-import {dev, devAssert, userAssert} from '../../../../src/log';
+} from '../../../../src/style.js';
+import {dev, devAssert, userAssert} from '../../../../src/log.js';
 
 /**
  * These fully qualified names, my goodness.

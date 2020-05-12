@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import {ActionSource} from './action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionSource} from './action-source.js';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css.js';
 import {Carousel} from './carousel.js';
-import {CarouselEvents} from './carousel-events';
-import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '../../../src/utils/key-codes';
+import {CarouselEvents} from './carousel-events.js';
+import {ChildLayoutManager} from './child-layout-manager.js';
+import {Keys} from '../../../src/utils/key-codes.js';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
-} from './responsive-attributes';
-import {Services} from '../../../src/services';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
+} from './responsive-attributes.js';
+import {Services} from '../../../src/services.js';
+import {createCustomEvent, getDetail} from '../../../src/event-helper.js';
+import {dev, devAssert} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 import {
   isRTL,
   iterateCursor,
   scopedQuerySelectorAll,
   toggleAttribute,
-} from '../../../src/dom';
-import {toArray} from '../../../src/types';
+} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
 
 /**
  * @enum {number}
