@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {CSS} from '../../../build/amp-image-slider-0.1.css.js';
 import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';

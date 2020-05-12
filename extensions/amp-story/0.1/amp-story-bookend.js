@@ -15,7 +15,7 @@
  */
 import {Action, StateProperty} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from '../../../build/amp-story-bookend-0.1.css';
+import {CSS} from '../../../build/amp-story-bookend-0.1.css.js';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,

@@ -32,7 +32,7 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-byside-content-0.1.css';
+import {CSS} from '../../../build/amp-byside-content-0.1.css.js';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
+import {CSS} from '../../../../build/amp-subscriptions-0.1.css.js';
 import {Dialog} from '../dialog';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';

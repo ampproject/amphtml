@@ -27,7 +27,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
-import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
+import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css.js';
 import {
   createElementWithAttributes,
   elementByTag,

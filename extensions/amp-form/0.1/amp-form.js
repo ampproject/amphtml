@@ -21,7 +21,7 @@ import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../src/async-input';
-import {CSS} from '../../../build/amp-form-0.1.css';
+import {CSS} from '../../../build/amp-form-0.1.css.js';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_OPTOUT,

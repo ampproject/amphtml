@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-system-layer-0.1.css';
+import {CSS} from '../../../build/amp-story-system-layer-0.1.css.js';
 import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,

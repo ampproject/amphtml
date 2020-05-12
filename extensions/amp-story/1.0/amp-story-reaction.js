@@ -20,7 +20,7 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {CSS} from '../../../build/amp-story-reaction-1.0.css';
+import {CSS} from '../../../build/amp-story-reaction-1.0.css.js';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';

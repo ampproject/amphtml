@@ -16,7 +16,7 @@
 
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from '../../../build/amp-carousel-0.2.css';
+import {CSS} from '../../../build/amp-carousel-0.2.css.js';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';

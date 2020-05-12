@@ -15,7 +15,7 @@
  */
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
-import {CSS} from '../../../build/amp-script-0.1.css';
+import {CSS} from '../../../build/amp-script-0.1.css.js';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';

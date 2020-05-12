@@ -19,7 +19,7 @@ import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-access-0.1.css';
+import {CSS} from '../../../build/amp-access-0.1.css.js';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';

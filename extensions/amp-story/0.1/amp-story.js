@@ -44,7 +44,7 @@ import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
-import {CSS} from '../../../build/amp-story-0.1.css';
+import {CSS} from '../../../build/amp-story-0.1.css.js';
 import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,

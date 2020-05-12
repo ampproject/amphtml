@@ -18,7 +18,7 @@ import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
+import {CSS} from '../../../build/amp-image-lightbox-0.1.css.js';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,

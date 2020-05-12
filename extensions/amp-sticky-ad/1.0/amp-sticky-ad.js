@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
+import {CSS} from '../../../build/amp-sticky-ad-1.0.css.js';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {

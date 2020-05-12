@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
-import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
+import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css.js';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';

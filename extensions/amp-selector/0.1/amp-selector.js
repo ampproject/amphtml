@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-selector-0.1.css';
+import {CSS} from '../../../build/amp-selector-0.1.css.js';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';

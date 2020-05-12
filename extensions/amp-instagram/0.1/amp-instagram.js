@@ -35,7 +35,7 @@
  * style without changing the layout/size.
  */
 
-import {CSS} from '../../../build/amp-instagram-0.1.css';
+import {CSS} from '../../../build/amp-instagram-0.1.css.js';
 import {Services} from '../../../src/services';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';

@@ -15,7 +15,7 @@
  */
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {CSS} from '../../../build/amp-access-scroll-0.1.css.js';
 import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';

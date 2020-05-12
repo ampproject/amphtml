@@ -19,7 +19,7 @@ import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
-import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
+import {CSS} from '../../../../build/amp-story-bookend-1.0.css.js';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,

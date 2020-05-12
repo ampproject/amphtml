@@ -15,7 +15,7 @@
  */
 
 import {Action} from '../analytics';
-import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
+import {CSS} from '../../../../build/amp-subscriptions-0.1.css.js';
 import {Renderer} from '../renderer';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';

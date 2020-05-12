@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
+import {CSS} from '../../../build/amp-access-laterpay-0.1.css.js';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
