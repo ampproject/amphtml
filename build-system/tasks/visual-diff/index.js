@@ -38,7 +38,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {buildRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
@@ -760,7 +760,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    buildMinifiedRuntime();
+    buildRuntime();
   }
 }
 
