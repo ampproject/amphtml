@@ -28,7 +28,7 @@
       "services": [
         {
           "type": "iframe",
-          "iframeSrc": "//localhost:8000/examples/amp-subscriptions-iframe.provider.html",
+          "iframeSrc": "//localhost:8000/examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html",
           "iframeVars": [
             "READER_ID",
             "CANONICAL_URL",
@@ -167,6 +167,15 @@
       padding: 16px;
       background: #ffc;
     }
+    
+    amp-subscriptions-dialog {
+      text-align: center;
+      padding: 5px;
+    }
+
+    #subscribebutton {
+      display: inline-block;
+    }
 
   </style>
 </head>
@@ -217,8 +226,8 @@
     <article>
       <figure>
         <amp-img
-            src="img/hero@1x.jpg"
-            srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+            src="../img/hero@1x.jpg"
+            srcset="../img/hero@1x.jpg 1x, ../img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
             height="216">
@@ -236,7 +245,7 @@
         </header>
 
         <div class="author">
-          <amp-img src="img/sample.jpg" id="author-avatar" placeholder
+          <amp-img src="../img/sample.jpg" id="author-avatar" placeholder
               height="50" width="50">
           </amp-img>
           <div class="byline">
@@ -311,8 +320,8 @@
 
           <figure>
             <amp-img class="full-bleed" placeholder
-                src="img/sea@1x.jpg"
-                srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
+                src="../img/sea@1x.jpg"
+                srcset="../img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
                 layout="responsive" width="360"
                 alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
                 height="216">
@@ -362,7 +371,7 @@
   </template>
   <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT data.loggedIn">
     <div>Dialog for non logged in users<div>
-    <div subscriptions-display="NOT data.loggedIn"
+    <div id="subscribebutton" subscriptions-display="NOT data.loggedIn"
       subscriptions-action="subscribe"
       subscriptions-service="subscribe.google.com"
       subscriptions-decorate>Login</div>
