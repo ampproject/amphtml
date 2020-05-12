@@ -27,6 +27,16 @@ const {execOrDie} = require('../../common/exec');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 
+// Flavor config for the base flavor type.
+const BASE_FLAVOR_CONFIG = {
+  flavorType: 'base',
+  name: 'base',
+  rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
+  // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
+  command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
+  environment: 'AMP',
+};
+
 // Deep map from [environment][flavorType] to RTV prefix.
 const EXPERIMENTAL_RTV_PREFIXES = {
   AMP: {
@@ -54,6 +64,9 @@ const POST_BUILD_MOVES = {
   'dist.tools/experiments/experiments.js': 'dist/v0/experiments.js',
   'dist.tools/experiments/experiments.js.map': 'dist/v0/experiments.js.map',
 };
+
+// URL to the JSON info API for the amp-sw package on the npm registry.
+const AMP_SW_NPM_PACKAGE_URL = 'https://registry.npmjs.org/@ampproject/amp-sw';
 
 // List of directories to keep in the temp directory from each flavor's build.
 const DIST_DIRS = ['dist', 'dist.3p', 'dist.tools'];
@@ -105,14 +118,7 @@ async function prepareEnvironment_(outputDir, outputTempDir) {
 
 function discoverDistFlavors_() {
   const distFlavors = [
-    {
-      flavorType: 'base',
-      name: 'base',
-      rtvPrefixes: ['00', '01', '02', '03', '04', '05'],
-      // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
-      command: 'gulp dist --noconfig --esm && gulp dist --noconfig',
-      environment: 'AMP',
-    },
+    BASE_FLAVOR_CONFIG,
     ...Object.entries(experimentsConfig)
       .filter(([, experimentConfig]) => experimentConfig.command)
       .map(([flavorType, experimentConfig]) => ({
@@ -187,26 +193,20 @@ async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
 
   const ampSwBaseTempDir = path.join(outputTempDir, 'base/dist/sw');
 
-  const ampSwTarballUrl = await fetch(
-    'https://registry.npmjs.org/@ampproject/amp-sw'
-  )
-    .then((res) => res.json())
-    .then((json) => {
-      const {latest} = json['dist-tags'];
-      return json.versions[latest].dist.tarball;
+  const ampSwNpmPackageJson = await fetch(AMP_SW_NPM_PACKAGE_URL).json();
+  const {latest} = ampSwNpmPackageJson['dist-tags'];
+  const ampSwTarballUrl = ampSwNpmPackageJson.versions[latest].dist.tarball;
+
+  const ampSwTarballResponse = await fetch(ampSwTarballUrl);
+  await new Promise((resolve) => {
+    const tarWritableStream = tar.extract({
+      cwd: ampSwBaseTempDir,
+      filter: (path) => path.startsWith('package/dist'),
+      strip: 2, // to strip "package/dist/".
     });
-  await fetch(ampSwTarballUrl).then(
-    (res) =>
-      new Promise((resolve) => {
-        const tarWritableStream = tar.extract({
-          cwd: ampSwBaseTempDir,
-          filter: (path) => path.startsWith('package/dist'),
-          strip: 2, // to strip "package/dist/".
-        });
-        res.body.pipe(tarWritableStream);
-        tarWritableStream.on('end', resolve);
-      })
-  );
+    ampSwTarballResponse.body.pipe(tarWritableStream);
+    tarWritableStream.on('end', resolve);
+  });
 
   await Promise.all(
     distFlavorTypes
@@ -225,14 +225,11 @@ async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
 async function populateOrgCdn_(distFlavors, outputTempDir, outputDir) {
   for (const {flavorType, rtvPrefixes} of distFlavors) {
     await Promise.all(
-      rtvPrefixes.map((rtvPrefix) => {
+      rtvPrefixes.map(async (rtvPrefix) => {
         const rtvNumber = `${rtvPrefix}${VERSION}`;
         const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
-        return fs
-          .ensureDir(rtvPath)
-          .then(() =>
-            fs.copy(path.join(outputTempDir, flavorType, 'dist'), rtvPath)
-          );
+        await fs.ensureDir(rtvPath);
+        return fs.copy(path.join(outputTempDir, flavorType, 'dist'), rtvPath);
       })
     );
   }
@@ -240,7 +237,7 @@ async function populateOrgCdn_(distFlavors, outputTempDir, outputDir) {
   logSeparator_();
 }
 
-async function prependConfig_(distFlavors, outputDir) {
+async function prependConfig_(outputDir) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
     ([rtvPrefix]) => {
       const rtvNumber = `${rtvPrefix}${VERSION}`;
@@ -276,6 +273,7 @@ async function prependConfig_(distFlavors, outputDir) {
       })
     );
   }
+  await Promise.all(allPrependPromises);
 
   logSeparator_();
 }
@@ -350,7 +348,7 @@ async function release() {
   await populateOrgCdn_(distFlavors, outputTempDir, outputDir);
 
   log('Prepending config to entry files...');
-  await prependConfig_(distFlavors, outputDir);
+  await prependConfig_(outputDir);
 
   log('Copying from temporary directory to', cyan('net-wildcard'));
   await populateNetWildcard_(outputTempDir, outputDir);
