@@ -22,6 +22,7 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../src/localized-strings';
+import {Services} from '../../src/services';
 
 describes.fakeWin('localization', {amp: true}, (env) => {
   let win;
@@ -177,9 +178,7 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     });
 
     it('should take precedence over document language', () => {
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('fr', {
         'test_string_id': {
           string: 'oui',
@@ -197,9 +196,7 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     });
 
     it('should fall back if string is not found', () => {
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('fr', {
         'incorrect_test_string_id': {
           string: 'non',
@@ -217,9 +214,7 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     });
 
     it('should fall back if language code is not registered', () => {
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'yes',
