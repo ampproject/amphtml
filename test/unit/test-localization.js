@@ -22,6 +22,7 @@ import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../src/localized-strings';
+import {Services} from '../../src/services';
 
 describes.fakeWin('localization', {amp: true}, (env) => {
   let win;
@@ -160,6 +161,68 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
       expect(Object.keys(originalStringBundle)).to.deep.equal(
         Object.keys(pseudoLocaleBundle)
+      );
+    });
+  });
+});
+
+describes.fakeWin('viewer localization', {amp: true}, (env) => {
+  describe('viewer language override', () => {
+    let win;
+
+    beforeEach(() => {
+      win = env.win;
+      env.sandbox
+        .stub(Services.viewerForDoc(env.ampdoc), 'getParam')
+        .returns('fr');
+    });
+
+    it('should take precedence over document language', () => {
+      const localizationService = new LocalizationService(win.document.body);
+      localizationService.registerLocalizedStringBundle('fr', {
+        'test_string_id': {
+          string: 'oui',
+        },
+      });
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'oui'
+      );
+    });
+
+    it('should fall back if string is not found', () => {
+      const localizationService = new LocalizationService(win.document.body);
+      localizationService.registerLocalizedStringBundle('fr', {
+        'incorrect_test_string_id': {
+          string: 'non',
+        },
+      });
+      localizationService.registerLocalizedStringBundle('en', {
+        'correct_test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(
+        localizationService.getLocalizedString('correct_test_string_id')
+      ).to.equal('yes');
+    });
+
+    it('should fall back if language code is not registered', () => {
+      const localizationService = new LocalizationService(win.document.body);
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'yes',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'yes'
       );
     });
   });
