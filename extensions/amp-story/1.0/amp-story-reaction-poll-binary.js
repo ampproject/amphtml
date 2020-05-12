@@ -17,10 +17,9 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-poll-binary-1.0.css';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction-poll-binary';
@@ -76,8 +75,8 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
   }
 
   /** @override */
-  buildComponent(element) {
-    this.rootEl_ = buildBinaryPollTemplate(element);
+  buildComponent() {
+    this.rootEl_ = buildBinaryPollTemplate(this.element);
     this.attachContent_(this.rootEl_);
     return this.rootEl_;
   }
@@ -91,19 +90,13 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    */
   attachContent_(root) {
     // Configure options.
-    const options = toArray(this.element.querySelectorAll('option'));
-    if (options.length != 2) {
+    if (this.options_.length != 2) {
+      devAssert(this.options_.length == 2, 'Improper number of options');
       dev().error(TAG, 'Improper number of options');
     }
-    options.forEach((option) => {
+    this.options_.forEach((option) => {
       root.appendChild(this.generateOption_(option));
-      this.element.removeChild(option);
     });
-
-    // Check all elements were processed.
-    if (this.element.children.length !== 0) {
-      dev().error(TAG, 'Too many children');
-    }
     this.adaptFontSize_(root);
   }
 
@@ -139,13 +132,13 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
   }
 
   /**
-   * Creates an option template filled with the details from the <option> element.
-   * @param {Element} option
+   * Creates an option template filled with the details the attributes.
+   * @param {./amp-story-reaction.OptionConfigType} option
    * @return {Element} option element
    * @private
    */
   generateOption_(option) {
-    const convertedOption = buildOptionTemplate(dev().assertElement(option));
+    const convertedOption = buildOptionTemplate(this.rootEl_);
 
     const optionText = scopedQuerySelector(
       convertedOption,
@@ -165,16 +158,13 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
 
     const percentages = this.preprocessPercentages_(responseData);
 
-    responseData.forEach((response, index) => {
+    percentages.forEach((percentage, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      const currOption = this.optionElements_[index].querySelector(
+      const currOption = this.getOptionElements()[index];
+      currOption.querySelector(
         '.i-amphtml-story-reaction-option-percentage-text'
-      );
-      currOption.textContent = `${percentages[index]}%`;
-      this.optionElements_[index].setAttribute(
-        'style',
-        `flex-grow: ${percentages[index]}`
-      );
+      ).textContent = `${percentage}%`;
+      currOption.setAttribute('style', `flex-grow: ${percentage}`);
     });
   }
 }
