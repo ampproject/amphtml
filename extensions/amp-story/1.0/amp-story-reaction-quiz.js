@@ -17,9 +17,9 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -72,7 +72,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
 
     /** @private {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationForDoc(element);
+    this.localizationService_ = getLocalizationService(element);
   }
 
   /** @override */

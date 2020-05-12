@@ -92,12 +92,7 @@ export class LocalizationService {
    * @param {!Element} element
    */
   constructor(element) {
-    const rootEl = element.ownerDocument.documentElement;
-
-    /**
-     * @private @const {!Array<string>}
-     */
-    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
+    this.element_ = element;
 
     /**
      * A mapping of language code to localized string bundle.
@@ -145,10 +140,8 @@ export class LocalizationService {
    *     one exists, or the default otherwise.
    * @return {string|null}
    */
-  getLocalizedString(localizedStringId, elementToUse = undefined) {
-    const languageCodes = elementToUse
-      ? this.getLanguageCodesForElement_(elementToUse)
-      : this.rootLanguageCodes_;
+  getLocalizedString(localizedStringId, elementToUse = this.element_) {
+    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,

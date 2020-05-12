@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
-import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {hasOwn} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
 
@@ -83,9 +83,7 @@ function renderSingle(doc, elementDef) {
   const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
   const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
   if (hasLocalizedTextContent || hasLocalizedLabel) {
-    const localizationService = Services.localizationForDoc(
-      devAssert(doc.body)
-    );
+    const localizationService = getLocalizationService(devAssert(doc.body));
     devAssert(localizationService, 'Could not retrieve LocalizationService.');
 
     if (hasLocalizedTextContent) {
