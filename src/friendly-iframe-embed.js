@@ -20,7 +20,7 @@ import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css.js';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,

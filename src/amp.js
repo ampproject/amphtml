@@ -23,8 +23,8 @@ import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-impor
 
 import {Services} from './services';
 import {adoptWithMultidocDeps} from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampDocCss} from '../build/ampdoc.css.js';
+import {cssText as ampSharedCss} from '../build/ampshared.css.js';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {getMode} from './mode';
 import {

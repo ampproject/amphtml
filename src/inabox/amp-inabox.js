@@ -23,7 +23,7 @@ import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
 import {allowLongTasksInChunking, startupChunk} from '../chunk';
-import {cssText as ampSharedCss} from '../../build/ampshared.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css.js';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';

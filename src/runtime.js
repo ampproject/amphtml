@@ -25,8 +25,8 @@ import {
 } from './log';
 import {MultidocManager} from './multidoc-manager';
 import {Services} from './services';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {cssText as ampDocCss} from '../build/ampdoc.css.js';
+import {cssText as ampSharedCss} from '../build/ampshared.css.js';
 import {config} from './config';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';

@@ -29,7 +29,7 @@ import {
 import {applySandbox} from '../3p-frame';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../../build/amp-story-player-iframe.css';
+import {cssText} from '../../build/amp-story-player-iframe.css.js';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 
