@@ -10,7 +10,7 @@
         "interval": 15,
         "maxTimerLength": 7200
       },
-     "request": "track"
+    "request": "track"
     }
   }
 }
