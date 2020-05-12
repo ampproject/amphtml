@@ -32,7 +32,9 @@ import {toArray} from '../../../src/types';
 const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-reaction-quiz-container">
+    <div
+      class="i-amphtml-story-reaction-quiz-container i-amphtml-story-reaction-container"
+    >
       <div class="i-amphtml-story-reaction-quiz-prompt-container"></div>
       <div class="i-amphtml-story-reaction-quiz-option-container"></div>
     </div>
@@ -52,8 +54,6 @@ const buildOptionTemplate = (option) => {
       class="i-amphtml-story-reaction-quiz-option i-amphtml-story-reaction-option"
     >
       <span class="i-amphtml-story-reaction-quiz-answer-choice"></span>
-      <span class="i-amphtml-story-reaction-quiz-option-text"></span>
-      <span class="i-amphtml-story-reaction-quiz-percentage-text"></span>
     </span>
   `;
 };
@@ -64,6 +64,9 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
    */
   constructor(element) {
     super(element, ReactionType.QUIZ);
+
+    /** @private {!Array<string>} */
+    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
 
     /** @private {!../../../src/service/localization.LocalizationService} */
     this.localizationService_ = getLocalizationService(element);
@@ -127,27 +130,9 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   }
 
   /**
-   * Localize the answer choice options if available.
-   * @param {Element} root
-   */
-  localizeComponent(root) {
-    // Get localized answer choice options, if exsting.
-    let answerChoiceOptions = ['A', 'B', 'C', 'D'];
-    answerChoiceOptions = answerChoiceOptions.map((choice) => {
-      return this.localizationService_.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-      );
-    });
-    // Set content of answer choices to options.
-    toArray(
-      root.querySelectorAll('.i-amphtml-story-reaction-quiz-answer-choice')
-    ).forEach((option, index) => {
-      option.textContent = answerChoiceOptions[index];
-    });
-  }
-
-  /**
-   * Creates an option template filled with the details from the <option> element.
+   * Creates an option container with option content,
+   * adds styling and answer choices,
+   * and adds it to the quiz element.
    *
    * @param {!./amp-story-reaction.OptionConfigType} option
    * @param {number} index
@@ -173,7 +158,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     percentageText.classList.add(
       'i-amphtml-story-reaction-quiz-percentage-text'
     );
-    optionText.textContent = option.textContent;
+    convertedOption.appendChild(percentageText);
 
     if (option['correct']) {
       convertedOption.setAttribute('correct', 'correct');

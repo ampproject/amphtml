@@ -81,7 +81,6 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(ampStoryQuizEl);
       registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
