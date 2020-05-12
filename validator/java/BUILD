@@ -37,8 +37,6 @@ java_library(
        "@maven//:com_google_code_findbugs_jsr305",
        "@maven//:com_fasterxml_jackson_core",
        "@maven//:com_fasterxml_jackson_jaxrs",
-       "@maven//:com_fasterxml_jackson_jaxrs",
-       "@maven//:com_fasterxml_jackson_core",
        "@maven//:net_sourceforge_cssparser_cssparser",
        "@maven//:org_testng_testng",
        "@maven//:ch_qos_logback_logback_classic",
@@ -57,7 +55,6 @@ java_library(
     deps = [
         ":amphtml_validator_java_proto_lib",
         ":amphtml_validator_lib",
-        "@maven//:net_sourceforge_cssparser_cssparser",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_testng_testng",
         "@maven//:junit_junit",
