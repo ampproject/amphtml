@@ -26,6 +26,7 @@ import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -75,7 +76,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_ = this.win.document.createElement('div');
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationForDoc(element);
+    this.localizationService_ = getLocalizationService(element);
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;

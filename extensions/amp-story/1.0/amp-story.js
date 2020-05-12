@@ -107,6 +107,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
@@ -358,7 +359,7 @@ export class AmpStory extends AMP.BaseElement {
     this.liveStoryManager_ = null;
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationForDoc(this.element);
+    this.localizationService_ = getLocalizationService(this.element);
 
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)

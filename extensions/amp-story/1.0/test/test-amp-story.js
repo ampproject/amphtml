@@ -29,6 +29,7 @@ import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
@@ -117,9 +118,7 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

@@ -19,6 +19,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {CommonSignals} from '../../../../src/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -59,9 +60,7 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
 
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

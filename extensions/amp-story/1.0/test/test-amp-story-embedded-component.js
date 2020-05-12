@@ -22,6 +22,7 @@ import {
 } from '../amp-story-store-service';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent} from '../story-analytics';
 import {addAttributesToElement} from '../../../../src/dom';
@@ -40,6 +41,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     // Making sure mutator tasks run synchronously.
     env.sandbox.stub(Services, 'mutatorForDoc').returns({

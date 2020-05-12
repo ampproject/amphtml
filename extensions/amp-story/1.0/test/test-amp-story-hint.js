@@ -16,6 +16,7 @@
 
 import {AmpStoryHint} from '../amp-story-hint';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -29,7 +30,7 @@ describes.fakeWin('amp-story hint layer', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
 
-    const localizationService = Services.localizationForDoc(win.document.body);
+    const localizationService = new LocalizationService(win.document.body);
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);

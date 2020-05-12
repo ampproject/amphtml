@@ -20,6 +20,7 @@
 
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   calculateTargetScalingFactor,
@@ -58,9 +59,7 @@ describes.realWin(
         };
       });
 
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);

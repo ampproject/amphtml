@@ -22,6 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
+import {getLocalizationService} from './amp-story-localization-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -268,7 +269,7 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      const localizationService = Services.localizationForDoc(this.parentEl_);
+      const localizationService = getLocalizationService(this.parentEl_);
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
       const failureString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
