@@ -47,10 +47,11 @@ module.exports = {
           });
         }
 
-        if (ext !== '.js') {
+        if (!/\.m?js$/.test(ext)) {
           context.report({
             node: source,
-            message: 'Importing non-js files is unsupported',
+            message:
+              'Importing non-js files is unsupported. If this is a JS file, add .js or .mjs to the import path.',
           });
         }
       },
