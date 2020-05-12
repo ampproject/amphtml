@@ -18,6 +18,7 @@ import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {isCookieAllowed} from './cookie-reader';
 import {isExperimentOn} from '../../../src/experiments';
@@ -72,7 +73,10 @@ export class CookieWriter {
       const task = () => {
         this.writeDeferred_.resolve(this.init_());
       };
-      if (isExperimentOn(this.win_, 'analytics-chunks')) {
+      if (
+        isExperimentOn(this.win_, 'analytics-chunks') &&
+        getMode(this.win_).runtime != 'inabox'
+      ) {
         chunk(this.element_, task, ChunkPriority.LOW);
       } else {
         task();

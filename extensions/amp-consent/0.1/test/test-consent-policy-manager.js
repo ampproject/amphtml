@@ -65,6 +65,9 @@ describes.realWin(
               })
             );
           },
+          getConsentInstanceGdprApplies: () => {
+            return Promise.resolve(false);
+          },
         });
       });
     });
@@ -570,6 +573,26 @@ describes.realWin(
         ).to.eventually.deep.equal({
           'shared': 'test',
         });
+      });
+    });
+
+    describe('getGdprApplies', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+      });
+
+      it('should return gdprApplies value', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        // Set above in getConsentInstanceGdprApplies mock
+        await expect(manager.getGdprApplies()).to.eventually.be.false;
       });
     });
   }

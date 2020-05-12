@@ -162,7 +162,7 @@ export class ProgressBar {
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(
           this.getRoot(),
           () => {
-            pageIds.forEach((id) => {
+            /** @type {!Array} */ (pageIds).forEach((id) => {
               if (!(id in this.segmentIdMap_)) {
                 this.addSegment_(id);
               }

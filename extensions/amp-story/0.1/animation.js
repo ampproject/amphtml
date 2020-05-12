@@ -461,7 +461,7 @@ export class AnimationManager {
 
   /**
    * @private
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Array} TODO(#23582): Specify return type
    */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');

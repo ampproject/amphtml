@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
+  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
@@ -34,6 +35,7 @@ import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -291,7 +293,7 @@ export class AnalyticsRoot {
       let elements = [];
       for (let i = 0; i < selectors.length; i++) {
         let nodeList;
-        const elementArray = [];
+        let elementArray = [];
         const selector = selectors[i];
         try {
           nodeList = this.getRoot().querySelectorAll(selector);
@@ -303,6 +305,7 @@ export class AnalyticsRoot {
             elementArray.push(nodeList[j]);
           }
         }
+        elementArray = this.getDataVarsElements_(elementArray, selector);
         userAssert(elementArray.length, `Element "${selector}" not found`);
         this.verifyAmpElements_(elementArray, selector);
         elements = elements.concat(elementArray);
@@ -312,6 +315,41 @@ export class AnalyticsRoot {
         (element, index) => elements.indexOf(element) === index
       );
     });
+  }
+
+  /**
+   * Return all elements that have a data-vars attribute.
+   * @param {!Array<!Element>} elementArray
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   */
+  getDataVarsElements_(elementArray, selector) {
+    let removedCount = 0;
+    const dataVarsArray = [];
+    for (let i = 0; i < elementArray.length; i++) {
+      const dataVarKeys = Object.keys(
+        getDataParamsFromAttributes(
+          elementArray[i],
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      );
+      if (dataVarKeys.length) {
+        dataVarsArray.push(elementArray[i]);
+      } else {
+        removedCount++;
+      }
+    }
+    if (removedCount) {
+      user().warn(
+        TAG,
+        '%s element(s) ommited from selector "%s"' +
+          ' because no data-vars-* attribute was found.',
+        removedCount,
+        selector
+      );
+    }
+    return dataVarsArray;
   }
 
   /**

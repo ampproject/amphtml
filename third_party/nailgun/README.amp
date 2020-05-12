@@ -12,4 +12,9 @@ Files in this directory (copied from https://github.com/facebook/nailgun/release
 - nailgun-runner (copied from ng.py)
 
 Local Modifications:
-None.
+- nailgun-runner: [python3] Fix memoryview to work with python3
+  https://github.com/facebook/nailgun/commit/90167a65969d90094d7997e0308d9ddb1124d4b6
+- nailgun-runner: [python3] Ensure UTF8 strings are sent properly
+  https://github.com/facebook/nailgun/commit/f923d52beff7963f508b808f846f9970f97be0f6
+- nailgun-runner: [python3] Remove bytes -> str conversion
+  https://github.com/facebook/nailgun/commit/878f95db2ec6cb3f69144ec456a4b3fa3f1eb2f9

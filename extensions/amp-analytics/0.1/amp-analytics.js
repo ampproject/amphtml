@@ -37,7 +37,7 @@ import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {endsWith, expandTemplate, startsWith} from '../../../src/string';
+import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
@@ -231,7 +231,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isExperimentOn(this.win, 'analytics-chunks')) {
+        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
           chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
         } else {
           loadConfigTask();
@@ -372,11 +372,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
               return this.addTrigger_(trigger);
-            } else if (
-              trigger['selector'] &&
-              startsWith(trigger['selector'], '${') &&
-              endsWith(trigger['selector'], '}')
-            ) {
+            } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
@@ -587,7 +583,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const linkerTask = () => {
       this.linkerManager_.init();
     };
-    if (isExperimentOn(this.win, 'analytics-chunks')) {
+    if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
       chunk(this.element, linkerTask, ChunkPriority.LOW);
     } else {
       linkerTask();
@@ -724,7 +720,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isExperimentOn(this.win, 'analytics-chunks')) {
+      if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
         chunk(this.element, sampleInTask, ChunkPriority.LOW);
       } else {
         sampleInTask();

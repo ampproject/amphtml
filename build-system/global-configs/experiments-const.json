@@ -1,1 +1,4 @@
-{}
+{
+  "INTERSECTION_OBSERVER_POLYFILL_INABOX": false,
+  "MOVE_FIXED_LAYER": false
+}

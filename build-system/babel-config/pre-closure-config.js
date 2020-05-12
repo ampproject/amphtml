@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin} = require('./replace-plugin');
+const {getExperimentConstant, getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
@@ -25,6 +25,12 @@ const {getReplacePlugin} = require('./replace-plugin');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
+  // For experiment, remove FixedLayer import from v0.js, otherwise remove
+  // from amp-viewer-integration
+  const fixedLayerImport =
+    getExperimentConstant() == 'MOVE_FIXED_LAYER'
+      ? './../fixed-layer'
+      : '../../../src/service/fixed-layer';
   const filterImportsPlugin = [
     'filter-imports',
     {
@@ -43,6 +49,8 @@ function getPreClosureConfig() {
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+        // Used by experiment
+        [fixedLayerImport]: ['FixedLayer'],
       },
     },
   ];
@@ -57,6 +65,7 @@ function getPreClosureConfig() {
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+    './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
@@ -72,9 +81,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,
-    argv.single_pass
-      ? './build-system/babel-plugins/babel-plugin-transform-amp-asserts'
-      : null,
+    './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm ? filterImportsPlugin : null,
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
@@ -82,7 +89,7 @@ function getPreClosureConfig() {
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,
-    argv.esm
+    !(argv.fortesting || isCheckTypes)
       ? [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},

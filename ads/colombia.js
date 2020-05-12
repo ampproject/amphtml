@@ -37,7 +37,7 @@ export function colombia(global, data) {
   });
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (newrequest) {
-    newrequest.forEach(function (d) {
+    /** @type {!Array} */ (newrequest).forEach(function (d) {
       if (d.intersectionRect.height > 0) {
         global._colombia.push({
           visible: true,

@@ -197,6 +197,7 @@ export const fakeWin = describeEnv((spec) => [
  * @param {string} name
  * @param {{
  *   fakeRegisterElement: (boolean|undefined),
+ *   skipCustomElementsPolyfill: (boolean|undefined),
  *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
@@ -648,7 +649,7 @@ class RealWinFixture {
           Object.defineProperty(win, 'customElements', {
             get: () => customElements,
           });
-        } else {
+        } else if (!spec.skipCustomElementsPolyfill) {
           // The anonymous class parameter allows us to detect native classes
           // vs transpiled classes.
           installCustomElements(win, class {});

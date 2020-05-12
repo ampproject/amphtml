@@ -37,6 +37,11 @@
     "pageview": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
     "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
   },
+  "blueconic": {
+    "event": "https://!tenantId/s/!pixelId.gif?",
+    "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
+    "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo_&userAgent=_user_agent_"
+  },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
     "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
@@ -79,8 +84,8 @@
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
-    "base": "https://sb.scorecardresearch.com/b?",
-    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
+    "base": "https://sb.scorecardresearch.com/p?",
+    "pageview": "https://sb.scorecardresearch.com/p?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
   "cxense": {
     "host": "https://scomcluster.cxense.com",
