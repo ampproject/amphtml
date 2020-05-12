@@ -35,7 +35,10 @@ java_library(
     deps = [
        "@maven//:org_w3c_css_sac",
        "@maven//:com_google_code_findbugs_jsr305",
-       "@maven//:org_json_json",
+       "@maven//:com_fasterxml_jackson_core",
+       "@maven//:com_fasterxml_jackson_jaxrs",
+       "@maven//:com_fasterxml_jackson_jaxrs",
+       "@maven//:com_fasterxml_jackson_core",
        "@maven//:net_sourceforge_cssparser_cssparser",
        "@maven//:org_testng_testng",
        "@maven//:ch_qos_logback_logback_classic",
