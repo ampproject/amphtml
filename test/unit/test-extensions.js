@@ -645,100 +645,279 @@ describes.sandboxed('Extensions', {}, () => {
       env.sandbox.stub(extensions, 'preloadExtension');
     });
 
-    it('should devAssert if script cannot be found', () => {
-      expect(() => {
-        allowConsoleError(() => extensions.reloadExtension('amp-list'));
-      }).to.throw('Cannot find script for extension: amp-list');
+    describe('regular scripts', () => {
+      it('should devAssert if script cannot be found', () => {
+        expect(() => {
+          allowConsoleError(() => extensions.reloadExtension('amp-list'));
+        }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(extensions.preloadExtension).to.not.be.called;
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
+
+      it('should ignore inserted scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        list.setAttribute('i-amphtml-inserted', '');
+        win.document.head.appendChild(list);
+
+        expect(() => {
+          allowConsoleError(() => extensions.reloadExtension('amp-list'));
+        }).to.throw('Cannot find script for extension: amp-list');
+
+        expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
+
+      it('should support [custom-element] scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        win.document.head.appendChild(list);
+
+        extensions.reloadExtension('amp-list');
+
+        expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+      });
+
+      it('should support "latest" version scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.js'
+        );
+        win.document.head.appendChild(list);
+
+        extensions.reloadExtension('amp-list');
+
+        expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-list',
+          'latest'
+        );
+      });
+
+      it('should support [custom-template] scripts', () => {
+        const mustache = document.createElement('script');
+        mustache.setAttribute('custom-template', 'amp-mustache');
+        mustache.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+        );
+        win.document.head.appendChild(mustache);
+
+        extensions.reloadExtension('amp-mustache');
+
+        expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-mustache',
+          '0.2'
+        );
+      });
+
+      it('should support no-attribute scripts', () => {
+        const viewer = document.createElement('script');
+        viewer.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+        );
+        win.document.head.appendChild(viewer);
+
+        extensions.reloadExtension('amp-viewer-integration');
+
+        expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-viewer-integration',
+          '0.1'
+        );
+      });
     });
 
-    it('should ignore inserted scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
-      list.setAttribute('i-amphtml-inserted', '');
-      win.document.head.appendChild(list);
+    describe('module/nomdule script pairs', () => {
+      it('should devAssert if script cannot be found', () => {
+        expect(() => {
+          allowConsoleError(() => extensions.reloadExtension('amp-list'));
+        }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(() => {
-        allowConsoleError(() => extensions.reloadExtension('amp-list'));
-      }).to.throw('Cannot find script for extension: amp-list');
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
 
-      expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-      expect(extensions.preloadExtension).to.not.be.called;
-    });
+      it('should ignore inserted scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
+        );
+        mod.setAttribute('i-amphtml-inserted', '');
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-    it('should support [custom-element] scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
-      win.document.head.appendChild(list);
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        nomod.setAttribute('i-amphtml-inserted', '');
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
 
-      extensions.reloadExtension('amp-list');
+        expect(() => {
+          allowConsoleError(() => extensions.reloadExtension('amp-list'));
+        }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-list'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
-    });
+        expect(mod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(nomod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
 
-    it('should support "latest" version scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-list-latest.js'
-      );
-      win.document.head.appendChild(list);
+      it('should support [custom-element] scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-      extensions.reloadExtension('amp-list');
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
 
-      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-list'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-list',
-        'latest'
-      );
-    });
+        extensions.reloadExtension('amp-list');
 
-    it('should support [custom-template] scripts', () => {
-      const mustache = document.createElement('script');
-      mustache.setAttribute('custom-template', 'amp-mustache');
-      mustache.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
-      );
-      win.document.head.appendChild(mustache);
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+      });
 
-      extensions.reloadExtension('amp-mustache');
+      it('should support "latest" version scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-      expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-mustache'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-mustache',
-        '0.2'
-      );
-    });
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
 
-    it('should support no-attribute scripts', () => {
-      const viewer = document.createElement('script');
-      viewer.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
-      );
-      win.document.head.appendChild(viewer);
+        extensions.reloadExtension('amp-list');
 
-      extensions.reloadExtension('amp-viewer-integration');
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-list',
+          'latest'
+        );
+      });
 
-      expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-viewer-integration'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-viewer-integration',
-        '0.1'
-      );
+      it('should support [custom-template] scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-template', 'amp-mustache');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
+
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-template', 'amp-mustache');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
+
+        extensions.reloadExtension('amp-mustache');
+
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-mustache',
+          '0.2'
+        );
+      });
+
+      it('should support no-attribute scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
+
+        const nomod = document.createElement('script');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
+
+        extensions.reloadExtension('amp-viewer-integration');
+
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-viewer-integration',
+          '0.1'
+        );
+      });
     });
   });
 
