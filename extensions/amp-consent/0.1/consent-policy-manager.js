@@ -136,7 +136,7 @@ export class ConsentPolicyManager {
         // Has initial consent state value. Evaluate immediately
         instance.evaluate(this.consentState_);
       }
-      this.consentStateChangeObservables_.add(state => {
+      this.consentStateChangeObservables_.add((state) => {
         instance.evaluate(state);
       });
       this.consentPromptInitiated_.promise.then(() => {
@@ -151,9 +151,9 @@ export class ConsentPolicyManager {
    */
   init_() {
     // Set up handler to listen to consent instance value change.
-    this.ConsentStateManagerPromise_.then(manager => {
+    this.ConsentStateManagerPromise_.then((manager) => {
       manager.whenConsentReady().then(() => {
-        manager.onConsentStateChange(info => {
+        manager.onConsentStateChange((info) => {
           this.consentStateChangeHandler_(info);
           if (this.consentValueInitiatedResolver_) {
             this.consentValueInitiatedResolver_();
@@ -179,7 +179,8 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const prevConsentStr = this.consentString_;
+    const {consentString_: prevConsentStr} = this;
+
     this.consentString_ = consentStr;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
@@ -263,8 +264,22 @@ export class ConsentPolicyManager {
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
-      .then(manager => {
+      .then((manager) => {
         return manager.getConsentInstanceSharedData();
+      });
+  }
+
+  /**
+   * Get gdprApplies value of a policy.
+   *
+   * @param {string} policyId
+   * @return {!Promise<?boolean>}
+   */
+  getGdprApplies(policyId) {
+    return this.whenPolicyResolved(policyId)
+      .then(() => this.ConsentStateManagerPromise_)
+      .then((manager) => {
+        return manager.getConsentInstanceGdprApplies();
       });
   }
 

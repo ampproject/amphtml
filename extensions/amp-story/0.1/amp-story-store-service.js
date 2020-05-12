@@ -245,7 +245,7 @@ export class AmpStoryStoreService {
     const oldState = {...this.state_};
     this.state_ = actions(this.state_, action, data);
 
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       if (oldState[key] !== this.state_[key]) {
         this.listeners_[key].fire(this.state_[key]);
       }

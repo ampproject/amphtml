@@ -139,15 +139,12 @@ export class ViewportImpl {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    /** @private @const {!FixedLayer} */
-    this.fixedLayer_ = new FixedLayer(
-      ampdoc,
-      this.vsync_,
-      this.binding_.getBorderTop(),
-      this.paddingTop_,
-      this.binding_.requiresFixedLayerTransfer()
-    );
-    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+    /** @private {?FixedLayer} */
+    this.fixedLayer_ = null;
+
+    if (!MOVE_FIXED_LAYER) {
+      this.createFixedLayer(FixedLayer);
+    }
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -155,7 +152,9 @@ export class ViewportImpl {
       'disableScroll',
       this.disableScrollEventHandler_.bind(this)
     );
-    this.binding_.updatePaddingTop(this.paddingTop_);
+    if (this.viewer_.isEmbedded()) {
+      this.binding_.updatePaddingTop(this.paddingTop_);
+    }
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
@@ -195,7 +194,7 @@ export class ViewportImpl {
         Object.defineProperty(win, 'scrollTo', {
           value: (x, y) => this.setScrollTop(y),
         });
-        ['pageYOffset', 'scrollY'].forEach(prop => {
+        ['pageYOffset', 'scrollY'].forEach((prop) => {
           Object.defineProperty(win, prop, {
             get: () => this.getScrollTop(),
           });
@@ -268,7 +267,7 @@ export class ViewportImpl {
 
   /** @override */
   updatePaddingBottom(paddingBottom) {
-    this.ampdoc.waitForBodyOpen().then(body => {
+    this.ampdoc.waitForBodyOpen().then((body) => {
       setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
@@ -341,14 +340,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getLayoutRect(el, opt_premeasuredRect) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -362,7 +361,12 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+    return this.binding_.getLayoutRect(
+      el,
+      scrollLeft,
+      scrollTop,
+      opt_premeasuredRect
+    );
   }
 
   /** @override */
@@ -379,7 +383,7 @@ export class ViewportImpl {
       });
     }
 
-    return Promise.all([local, root]).then(values => {
+    return Promise.all([local, root]).then((values) => {
       const l = values[0];
       const r = values[1];
       if (!r) {
@@ -396,12 +400,15 @@ export class ViewportImpl {
 
   /** @override */
   isDeclaredFixed(element) {
+    if (!this.fixedLayer_) {
+      return false;
+    }
     return this.fixedLayer_.isDeclaredFixed(element);
   }
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.scrollIntoViewInternal_(element, parent)
     );
   }
@@ -416,7 +423,7 @@ export class ViewportImpl {
       Math.max(0, elementTop - this.paddingTop_)
     );
 
-    newScrollTopPromise.then(newScrollTop =>
+    newScrollTopPromise.then((newScrollTop) =>
       this.setElementScrollTop_(parent, newScrollTop)
     );
   }
@@ -428,7 +435,7 @@ export class ViewportImpl {
       "Curve without duration doesn't make sense."
     );
 
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.animateScrollWithinParent(
         element,
         parent,
@@ -465,7 +472,7 @@ export class ViewportImpl {
         break;
     }
 
-    return this.getElementScrollTop_(parent).then(curScrollTop => {
+    return this.getElementScrollTop_(parent).then((curScrollTop) => {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       const newScrollTop = Math.max(0, calculatedScrollTop);
       if (newScrollTop == curScrollTop) {
@@ -505,7 +512,7 @@ export class ViewportImpl {
     const interpolate = numeric(curScrollTop, newScrollTop);
     return Animation.animate(
       parent,
-      position => {
+      (position) => {
         this.setElementScrollTop_(parent, interpolate(position));
       },
       duration,
@@ -785,6 +792,18 @@ export class ViewportImpl {
     this.fixedLayer_.removeElement(element);
   }
 
+  /** @override */
+  createFixedLayer(constructor) {
+    this.fixedLayer_ = new constructor(
+      this.ampdoc,
+      this.vsync_,
+      this.binding_.getBorderTop(),
+      this.paddingTop_,
+      this.binding_.requiresFixedLayerTransfer()
+    );
+    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+  }
+
   /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
@@ -886,7 +905,7 @@ export class ViewportImpl {
     const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
     return Animation.animate(
       this.ampdoc.getRootNode(),
-      time => {
+      (time) => {
         const p = tr(time);
         this.fixedLayer_.transformMutate(`translateY(${p}px)`);
       },
@@ -1015,7 +1034,10 @@ export class ViewportImpl {
     const oldSize = this.size_;
     this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
-    this.fixedLayer_.update().then(() => {
+    const promise = this.fixedLayer_
+      ? this.fixedLayer_.update()
+      : Promise.resolve();
+    promise.then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
       this.changed_(/*relayoutAll*/ widthChanged, 0);
       const sizeChanged = widthChanged || oldSize.height != newSize.height;

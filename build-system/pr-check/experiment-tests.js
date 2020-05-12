@@ -31,8 +31,7 @@ const {
 const {experiment} = require('minimist')(process.argv.slice(2));
 const FILENAME = `${experiment}-tests.js`;
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function getConfig_() {
   const config = experimentsConfig[experiment];
@@ -45,7 +44,7 @@ function getConfig_() {
     return;
   }
 
-  if (new Date(config.expirationDateUTC) < Date.now) {
+  if (new Date(config['expiration_date_utc']) < Date.now) {
     return;
   }
 

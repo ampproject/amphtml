@@ -24,7 +24,7 @@ amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   overflow: hidden !important;
 }
 
-amp-consent {
+amp-story amp-consent {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;

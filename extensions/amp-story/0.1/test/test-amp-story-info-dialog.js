@@ -27,7 +27,7 @@ import {
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, env => {
+describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let moreInfoLinkUrl;
   let embedded;
   let parentEl;
@@ -41,7 +41,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
     embedded = true;
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -53,13 +53,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       },
     });
 
-    env.sandbox.stub(Services, 'localizationServiceV01').returns({
-      getLocalizedString: localizedStringId => `string(${localizedStringId})`,
-    });
-
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
-      sendMessageAwaitResponse: eventType => {
+      sendMessageAwaitResponse: (eventType) => {
         if (eventType === 'moreInfoLinkUrl') {
           return Promise.resolve(moreInfoLinkUrl);
         }

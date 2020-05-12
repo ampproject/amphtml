@@ -21,7 +21,7 @@ describes.endtoend(
       'http://localhost:8000/test/fixtures/e2e/amp-selector/amp-selector-tabs.html',
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(() => {

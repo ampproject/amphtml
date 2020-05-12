@@ -18,8 +18,9 @@
  *    Original version of this file was derived from
  *    https://github.com/ampproject/amphtml/blob/master/test/unit/test-srcset.js
  */
-goog.provide('parse_srcset.ParseSrcsetTest');
-goog.require('parse_srcset.parseSrcset');
+goog.module('parse_srcset.ParseSrcsetTest');
+
+const parse_srcset = goog.require('parse_srcset');
 
 /**
  * A strict comparison between two values.
@@ -53,7 +54,6 @@ function test(s, expected) {
 }
 
 describe('Srcset parseSrcset', () => {
-
   it('should accept single source', () => {
     test('image', [
       {url: 'image', widthOrPixelDensity: '1x'},
@@ -152,7 +152,6 @@ describe('Srcset parseSrcset', () => {
   });
 
   it('should accept leading and trailing commas and commas in url', () => {
-
     // Leading and trailing commas are OK, as are commas in side URLs.
     // This example only looks a little strange because the ParseSourceSet
     // function does not further validate the URL.
@@ -164,7 +163,6 @@ describe('Srcset parseSrcset', () => {
     test(',example.com/,/,/,/,50w,', [
       {url: 'example.com/,/,/,/,50w', widthOrPixelDensity: '1x'},
     ]);
-
   });
 
   it('should accept no-whitespace', () => {

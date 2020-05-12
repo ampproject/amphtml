@@ -7,10 +7,6 @@ teaser:
 experimental: true
 ---
 
-# amp-script
-
-Allows running custom JavaScript to render UI.
-
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -27,39 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
+# amp-script
 
 ## Overview
 
@@ -215,7 +179,7 @@ With regard to dynamic creation of AMP elements (e.g. via `document.createElemen
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-1. Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+1. Same-origin `src` must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
 
 Example of script hashes:
@@ -258,7 +222,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node.
 [/tip]
 
 ## Attributes
@@ -267,7 +231,7 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 For executing remote scripts.
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript` or `text/javascript`.
 
 **script**
 

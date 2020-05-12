@@ -25,25 +25,6 @@ limitations under the License.
 
 # amp-animation
 
-Defines and runs animations.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/animations.amp.html">animations.amp.html</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 AMP Animations rely on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and run animations in AMP documents.
@@ -417,7 +398,7 @@ CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the J
 
 - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
 - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
-- CSS extensions such as [`width()`, `height()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) cannot be used in CSS.
+- CSS extensions such as [`width()`, `height()`, `x()`, `y()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) cannot be used in CSS.
 
 #### White listed properties for keyframes
 
@@ -429,6 +410,8 @@ performance. Currently the list contains:
 - [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
 - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
 - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
+- [`clip-path`](https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path). Only supported values are
+  `inset()`, `circle()`, `ellipse()`, and `polygon()`.
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
 
@@ -561,7 +544,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
       {
         "selector": ".target-class",
         "duration": "4s",
-        "delay": "var(--delay, 100ms)",
+        "delay": "var(--delay, 100ms)"
       }
     ]
   </script>
@@ -572,7 +555,7 @@ Animation components can specify their own variables as `--var-name` fields. The
 
 ### CSS extensions
 
-`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `num()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
+`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `num()`, `width()`, `height()`, `x()` and `y()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
 
 #### CSS `index()` extension
 
@@ -618,17 +601,17 @@ The second form has two arguments and returns the random value between these two
 }
 ```
 
-#### CSS `width()` and `height()` extensions
+#### CSS `width()`, `height()`, `x()` and `y()` extensions
 
-The `width()` and `height()` extensions return the width/height of the animated element or the element specified by the selector. The returned value is in pixels, e.g. `100px`.
+The `width()`/`height()` and `x()`/`y()` extensions return the size or coordinates of the animated element or the element specified by the selector. The returned value is in pixels, e.g. `100px`.
 
 The following forms are supported:
 
-- `width()` and `height()` - width/height of the animated element.
-- `width('.selector')` and `height('.selector')` - width/height of the element specified by the selector. Any CSS selector can be used. For instance, `width('#container > li')`.
-- `width(closest('.selector'))` and `height(closest('.selector'))` - width/height of the element specified by the closest selector.
+- `width()`, `height()`, `x()`, `y()` - width/height or coordinates of the animated element.
+- With a selector, like: `width('.selector')` or `x('.selector')` - dimension or coordinate of the element specified by the selector. Any CSS selector can be used. For instance, `height('#container > li')`.
+- With a closest selector, like: `height(closest('.selector'))` or `y(closest('.selector'))` - dimension or coordinate of the element specified by the closest selector.
 
-The `width()` and `height()` are epsecially useful for transforms. The `left`, `top` and similar CSS properties that can use `%` values to express animations proportional to container size. However, `transform` property interpretes `%` values differently - as a percent of the selected element. Thus, the `width()` and `height()` can be used to express transform animations in terms of container elements and similar.
+The `width()` and `height()` are especially useful for transforms. The `left`, `top` and similar CSS properties that can use `%` values to express animations proportional to container size. However, `transform` property interpretes `%` values differently - as a percent of the selected element. Thus, the `width()` and `height()` can be used to express transform animations in terms of container elements and similar.
 
 These functions can be combined with `calc()`, `var()` and other CSS expressions. For instance:
 

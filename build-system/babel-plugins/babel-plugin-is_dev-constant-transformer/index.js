@@ -20,7 +20,7 @@
  * @param {Object} babelTypes
  * @return {!Object}
  */
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   return {
     visitor: {
       VariableDeclarator(path) {

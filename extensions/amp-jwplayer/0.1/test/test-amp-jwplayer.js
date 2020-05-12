@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-jwplayer'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -44,11 +44,7 @@ describes.realWin(
       env.sandbox
         .stub(env.ampdoc.getHeadNode(), 'querySelector')
         .withArgs('meta[property="og:title"]')
-        .returns(
-          html`
-            <meta property="og:title" content="title_tag" />
-          `
-        );
+        .returns(html` <meta property="og:title" content="title_tag" /> `);
       doc.body.appendChild(jw);
       return jw.build().then(() => {
         jw.layoutCallback();
@@ -133,7 +129,7 @@ describes.realWin(
       return getjwplayer({
         'data-playlist-id': 'zzz',
         'data-player-id': 'sDZEo0ea',
-      }).then(jw => {
+      }).then((jw) => {
         const iframe = jw.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

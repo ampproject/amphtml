@@ -168,6 +168,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-springboard-player', '0.1', AMP => {
+AMP.extension('amp-springboard-player', '0.1', (AMP) => {
   AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
 });

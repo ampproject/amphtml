@@ -1,9 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - 'lts/*'
-python:
-  - '2.7'
+  - '12'
 notifications:
   email:
     recipients:
@@ -14,21 +12,31 @@ before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-  - pip install --user protobuf
+  # Ensure python v2 and v3 are available, and "python" defaults to v3 (docs.travis-ci.com/user/reference/xenial/#python-support)
+  - pyenv global 3.6.7 2.7.15
+  - python3 --version
+  - python2 --version
+  - python --version
+  # Xenial's version of python-protobuf is outdated (github.com/ampproject/amphtml/pull/22528)
+  - pip3 install --user protobuf
 branches:
   only:
     - master
     - release
     - canary
+    - nightly
     - /^amp-release-.*$/
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
       - expect-dev
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
+      - pkg-config
   chrome: stable
   hosts:
     - ads.localhost
@@ -39,6 +47,9 @@ addons:
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
+env:
+  jobs:
+    - CACHENAME=AMPHTMLJOB
 stages:
   - name: build
   - name: test
@@ -62,6 +73,10 @@ jobs:
       name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
+    - stage: build
+      name: 'Module Dist, Bundle Size'
+      script:
+        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
       name: 'Single Pass Tests'
       script:
@@ -104,6 +119,15 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
       cache: false
+    - stage: experiment
+      name: 'Performance Tests'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js
+      env:
+        - CACHE_NAME=PERFORMANCEJOB
+  allow_failures:
+    - env: CACHE_NAME=PERFORMANCEJOB
+  fast_finish: true
 before_cache:
   # do not store cache for pr builds or experiment stage builds
   - if [[ $TRAVIS_EVENT_TYPE == pull_request ]] || [[ $TRAVIS_BUILD_STAGE_NAME == experiment ]]; then exit $TRAVIS_TEST_RESULT ; fi
@@ -111,9 +135,13 @@ cache:
   directories:
     - node_modules
     - build-system/tasks/e2e/node_modules
+    - build-system/tasks/performance/node_modules
     - build-system/tasks/visual-diff/node_modules
     - sauce_connect
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - validator/java/bazel-installer
+    - $HOME/.m2
+    - .karma-cache
   yarn: true

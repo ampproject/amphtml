@@ -21,13 +21,13 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
-describes.realWin('amp-apester-media-monetization', {}, env => {
+describes.realWin('amp-apester-media-monetization', {}, (env) => {
   let win, doc;
   let baseElement;
   let docInfo;
-  const queryAmpAdBladeSelector = myDoc =>
+  const queryAmpAdBladeSelector = (myDoc) =>
     myDoc.querySelector('amp-ad[type=blade]');
-  const queryAmpAdDisplaySelector = myDoc =>
+  const queryAmpAdDisplaySelector = (myDoc) =>
     myDoc.querySelector('amp-ad[type=doubleclick]');
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     baseElement = doc.createElement('amp-apester-media');
 
     const mutator = {
-      attemptChangeSize: () => env.sandbox.stub(),
+      requestChangeSize: () => env.sandbox.stub(),
     };
     env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
 
@@ -48,7 +48,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     };
     installDocService(win, /* isSingleDoc */ true);
     resetServiceForTesting(win, 'documentInfo');
-    return registerServiceBuilderForDoc(doc, 'documentInfo', function() {
+    return registerServiceBuilderForDoc(doc, 'documentInfo', function () {
       return {
         get: () => docInfo,
       };

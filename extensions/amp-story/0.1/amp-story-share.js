@@ -115,7 +115,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params).forEach(field => {
+    Object.keys(opt_params).forEach((field) => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -186,8 +186,11 @@ function buildCopySuccessfulToast(doc, url) {
  * Social share widget for story bookend.
  */
 export class ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} parentEl
+   */
+  constructor(win, parentEl) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
@@ -197,8 +200,7 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
-    this.localizationServicePromise_ = null;
+    this.parentEl_ = parentEl;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = Services.storyRequestServiceV01(this.win);
@@ -206,10 +208,11 @@ export class ShareWidget {
 
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    * @return {!ShareWidget}
    */
-  static create(win) {
-    return new ShareWidget(win);
+  static create(win, parentEl) {
+    return new ShareWidget(win, parentEl);
   }
 
   /**
@@ -220,9 +223,6 @@ export class ShareWidget {
     devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
-    this.localizationServicePromise_ = Services.localizationServiceForOrNullV01(
-      this.win
-    );
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
@@ -257,7 +257,7 @@ export class ShareWidget {
     this.add_(linkShareButton);
 
     // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
-    listen(linkShareButton, 'click', e => {
+    listen(linkShareButton, 'click', (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
     });
@@ -268,16 +268,12 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      this.localizationServicePromise_.then(localizationService => {
-        devAssert(
-          localizationService,
-          'Could not retrieve LocalizationService.'
-        );
-        const failureString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-        );
-        Toast.show(this.win, dev().assertString(failureString));
-      });
+      const localizationService = Services.localizationForDoc(this.parentEl_);
+      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+      const failureString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+      );
+      Toast.show(this.win, dev().assertString(failureString));
       return;
     }
 
@@ -326,7 +322,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadBookendConfig().then(config => {
+    this.requestService_.loadBookendConfig().then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
@@ -344,7 +340,7 @@ export class ShareWidget {
   parseProvidersToClassicApi(providers) {
     const providersMap = {};
 
-    providers.forEach(currentProvider => {
+    providers.forEach((currentProvider) => {
       if (
         isObject(currentProvider) &&
         currentProvider['provider'] == 'facebook'
@@ -370,7 +366,7 @@ export class ShareWidget {
       providers = this.parseProvidersToClassicApi(providers);
     }
 
-    Object.keys(providers).forEach(type => {
+    Object.keys(providers).forEach((type) => {
       if (type == 'system') {
         user().warn(
           'AMP-STORY',
@@ -437,9 +433,12 @@ export class ShareWidget {
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
 export class ScrollableShareWidget extends ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} parentEl
+   */
+  constructor(win, parentEl) {
+    super(win, parentEl);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
@@ -454,10 +453,11 @@ export class ScrollableShareWidget extends ShareWidget {
 
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    * @return {!ScrollableShareWidget}
    */
-  static create(win) {
-    return new ScrollableShareWidget(win);
+  static create(win, parentEl) {
+    return new ScrollableShareWidget(win, parentEl);
   }
 
   /**
@@ -491,7 +491,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
     this.vsync_.run(
       {
-        measure: state => {
+        measure: (state) => {
           const containerWidth = this.root./*OK*/ clientWidth;
 
           if (containerWidth == this.containerWidth_) {
@@ -535,7 +535,7 @@ export class ScrollableShareWidget extends ShareWidget {
 
           this.containerWidth_ = containerWidth;
         },
-        mutate: state => {
+        mutate: (state) => {
           if (state.noop) {
             return;
           }
@@ -559,10 +559,8 @@ export class ScrollableShareWidget extends ShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-      dev()
-        .assertElement(this.root)
-        .querySelectorAll('li'),
-      el => !!el.firstElementChild
+      dev().assertElement(this.root).querySelectorAll('li'),
+      (el) => !!el.firstElementChild
     );
   }
 

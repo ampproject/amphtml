@@ -15,7 +15,11 @@
  */
 'use strict';
 
-const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
+const browserifyPersistFs = require('browserify-persist-fs');
+const crypto = require('crypto');
+const fs = require('fs');
+const globby = require('globby');
+
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -36,13 +40,39 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 30 * 60,
 };
 
-const BABELIFY_CONFIG = {
-  ...BABELIFY_GLOBAL_TRANSFORM,
-  ...BABELIFY_PLUGINS,
-  sourceMapsAbsolute: true,
-};
+// Used by persistent browserify caching to further salt hashes with our
+// environment state. Eg, when updating a babel-plugin, the environment hash
+// must change somehow so that the cache busts and the file is retransformed.
+const createHash = (input) =>
+  crypto.createHash('sha1').update(input).digest('hex');
 
-const preprocessors = ['browserify'];
+const persistentCache = browserifyPersistFs(
+  '.karma-cache',
+  {
+    deps: createHash(fs.readFileSync('./yarn.lock')),
+    build: globby
+      .sync([
+        'build-system/**/*.js',
+        '!build-system/eslint-rules',
+        '!**/test/**',
+      ])
+      .map((f) => {
+        return createHash(fs.readFileSync(f));
+      }),
+  },
+  () => {
+    process.stdout.write('.');
+  }
+);
+
+persistentCache.gc(
+  {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  () => {
+    // swallow errors
+  }
+);
 
 /**
  * @param {!Object} config
@@ -59,10 +89,10 @@ module.exports = {
 
   preprocessors: {
     './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': preprocessors,
-    './ads/**/test/test-*.js': preprocessors,
-    './extensions/**/test/**/*.js': preprocessors,
-    './testing/**/*.js': preprocessors,
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -70,16 +100,16 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
-  babelifyConfig: BABELIFY_CONFIG,
-
   browserify: {
     watch: true,
     debug: true,
     fast: true,
     basedir: __dirname + '/../../',
-    transform: [['babelify', BABELIFY_CONFIG]],
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
+
+    persistentCache,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -311,7 +341,7 @@ module.exports = {
     {
       'middleware:custom': [
         'factory',
-        function() {
+        function () {
           return require(require.resolve('../server/app.js'));
         },
       ],

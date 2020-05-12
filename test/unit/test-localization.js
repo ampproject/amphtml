@@ -15,15 +15,19 @@
  */
 
 import {
-  LocalizationService,
-  getLanguageCodesFromString,
-} from '../../src/service/localization';
-import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../src/localized-strings';
+import {Services} from '../../src/services';
+import {getLanguageCodesFromString} from '../../src/service/localization';
 
-describes.fakeWin('localization', {}, env => {
+describes.fakeWin('localization', {amp: true}, (env) => {
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
   describe('localized string IDs', () => {
     it('should have unique values', () => {
       // Transform string IDs from a map of keys to values to a multimap of
@@ -46,7 +50,7 @@ describes.fakeWin('localization', {}, env => {
       // Assert that each of the lists of keys from the created multimap has
       // exactly one value.
       const localizedStringIdValues = Object.keys(valuesToKeys);
-      localizedStringIdValues.forEach(value => {
+      localizedStringIdValues.forEach((value) => {
         const keys = valuesToKeys[value];
         expect(keys, `${value} is never used in a localized string ID`).to.not
           .be.empty;
@@ -61,7 +65,9 @@ describes.fakeWin('localization', {}, env => {
 
   describe('localization service', () => {
     it('should get string text', () => {
-      const localizationService = new LocalizationService(env.win);
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
@@ -75,7 +81,9 @@ describes.fakeWin('localization', {}, env => {
 
     it('should handle registration of uppercase locales', () => {
       env.win.document.documentElement.setAttribute('lang', 'zh-CN');
-      const localizationService = new LocalizationService(env.win);
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('zh-CN', {
         '123': {
           string: '买票',
@@ -86,7 +94,9 @@ describes.fakeWin('localization', {}, env => {
     });
 
     it('should utilize fallback if string is missing', () => {
-      const localizationService = new LocalizationService(env.win);
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           fallback: 'test fallback content',
@@ -99,7 +109,9 @@ describes.fakeWin('localization', {}, env => {
     });
 
     it('should not utilize fallback if string is present', () => {
-      const localizationService = new LocalizationService(env.win);
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
       localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
@@ -133,7 +145,7 @@ describes.fakeWin('localization', {}, env => {
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
-        s => `${s} ${s}`
+        (s) => `${s} ${s}`
       );
 
       expect(pseudoLocaleBundle['test_string_id'].string).to.equal('foo foo');
@@ -149,7 +161,7 @@ describes.fakeWin('localization', {}, env => {
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
-        s => `${s} ${s}`
+        (s) => `${s} ${s}`
       );
 
       expect(Object.keys(originalStringBundle)).to.deep.equal(

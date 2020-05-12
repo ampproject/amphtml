@@ -23,12 +23,12 @@ import {
   UIType,
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
+import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
@@ -50,27 +50,31 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
-    let win, ampdoc;
+  (env) => {
+    let ampdoc;
     let element;
     let hasSwipeCapability = false;
     let isEmbedded = false;
     let story;
     let replaceStateStub;
+    let win;
 
     /**
      * @param {number} count
-     * @param {Array<string>=} opt_ids
+     * @param {Array<string>=} ids
      * @return {!Array<!Element>}
      */
-    async function createStoryWithPages(count, opt_ids) {
+    async function createStoryWithPages(count, ids = [], autoAdvance = false) {
       element = win.document.createElement('amp-story');
 
       Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
-          page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+          if (autoAdvance) {
+            page.setAttribute('auto-advance-after', '2s');
+          }
+          page.id = ids && ids[i] ? ids[i] : `-page-${i}`;
           element.appendChild(page);
           return page;
         });
@@ -113,31 +117,30 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
+      const localizationService = Services.localizationForDoc(
+        win.document.body
+      );
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
-      env.sandbox
-        .stub(viewer, 'isEmbedded')
-        .withArgs()
-        .returns(isEmbedded);
+      env.sandbox.stub(viewer, 'isEmbedded').withArgs().returns(isEmbedded);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };
       });
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function() {
+      registerServiceBuilder(win, 'story-store', function () {
         return storeService;
-      });
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function() {
-        return localizationService;
       });
 
       AmpStory.isBrowserSupported = () => true;
@@ -150,7 +153,6 @@ describes.realWin(
     it('should build with the expected number of pages', async () => {
       const pagesCount = 2;
       await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-
       await story.layoutCallback();
       expect(story.getPageCount()).to.equal(pagesCount);
     });
@@ -161,7 +163,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
 
@@ -219,7 +221,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
 
@@ -236,7 +238,7 @@ describes.realWin(
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
-      let pages = Array.from(pageElements).map(el => el.getImpl());
+      let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
       const oldPage = pages[0];
@@ -266,7 +268,7 @@ describes.realWin(
       // Stubbing because we need to assert synchronously
       env.sandbox
         .stub(element.implementation_, 'mutateElement')
-        .callsFake(mutator => {
+        .callsFake((mutator) => {
           mutator();
           return Promise.resolve();
         });
@@ -378,7 +380,7 @@ describes.realWin(
         .then(() => {
           expect(bookendXhr).to.have.been.calledOnce;
         })
-        .catch(error => {
+        .catch((error) => {
           expect(error).to.be.undefined;
         });
     });
@@ -499,7 +501,7 @@ describes.realWin(
       story.landscapeOrientationMedia_ = {matches: true};
       story.element.setAttribute('standalone', '');
       story.element.setAttribute('supports-landscape', '');
-      env.sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
+      env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
 
       story.buildCallback();
 
@@ -524,7 +526,7 @@ describes.realWin(
       ]);
 
       const pages = story.element.querySelectorAll('amp-story-page');
-      const pageIds = Array.prototype.map.call(pages, page => page.id);
+      const pageIds = Array.prototype.map.call(pages, (page) => page.id);
       expect(pageIds).to.deep.equal([
         'cover',
         'page-1',
@@ -613,7 +615,7 @@ describes.realWin(
         // In a real scenario, promise is resolved when the user accepted or
         // rejected the consent.
         let resolver;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolver = resolve;
         });
 
@@ -1149,9 +1151,39 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(
-                  sendMessageStub
-                ).to.be.calledWithExactly('selectDocument', {next: true});
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    next: true,
+                    advancementMode: AdvancementMode.MANUAL_ADVANCE,
+                  }
+                );
+                return true;
+              }
+              return false;
+            }, 'sendMessageStub should be called');
+          });
+
+          it('should send a message when auto-advancing on last page in viewer', async () => {
+            await createStoryWithPages(1, ['cover'], true /** autoAdvance */);
+            const sendMessageStub = env.sandbox.stub(
+              story.viewerMessagingHandler_,
+              'send'
+            );
+
+            await story.layoutCallback();
+
+            story.activePage_.advancement_.onAdvance();
+
+            await waitFor(() => {
+              if (sendMessageStub.calledOnce) {
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    next: true,
+                    advancementMode: AdvancementMode.AUTO_ADVANCE_TIME,
+                  }
+                );
                 return true;
               }
               return false;
@@ -1202,9 +1234,13 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(
-                  sendMessageStub
-                ).to.be.calledWithExactly('selectDocument', {previous: true});
+                expect(sendMessageStub).to.be.calledWithExactly(
+                  'selectDocument',
+                  {
+                    previous: true,
+                    advancementMode: AdvancementMode.MANUAL_ADVANCE,
+                  }
+                );
                 return true;
               }
               return false;
@@ -1328,7 +1364,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1360,7 +1396,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1394,7 +1430,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1423,7 +1459,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1480,7 +1516,7 @@ describes.realWin(
           let authorizedCallback;
           const fakeAccessService = {
             areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: fn => (authorizedCallback = fn),
+            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
           };
           env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
@@ -1778,6 +1814,42 @@ describes.realWin(
         const distanceGraph = story.getPagesByDistance_();
         expect(distanceGraph[1].includes('cover')).to.be.true;
         toggleExperiment(win, 'amp-story-branching', false);
+      });
+    });
+
+    describe('amp-story play/pause', () => {
+      it('should set playable to true if page has autoadvance', async () => {
+        await createStoryWithPages(1, ['cover'], true /** autoAdvance */);
+
+        await story.layoutCallback();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.true;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+          )
+        ).to.be.true;
+      });
+
+      it('should set playable to false if page does not have playable', async () => {
+        await createStoryWithPages(1, ['cover'], false /** autoAdvance */);
+
+        await story.layoutCallback();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END);
+        expect(
+          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+        ).to.be.false;
+        expect(
+          story.storeService_.get(
+            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+          )
+        ).to.be.false;
       });
     });
   }

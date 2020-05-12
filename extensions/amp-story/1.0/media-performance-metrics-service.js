@@ -20,9 +20,11 @@ import {
 } from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
+import {urls} from '../../../src/config';
 
 /**
  * Media status.
@@ -33,6 +35,16 @@ const Status = {
   PAUSED: 1,
   PLAYING: 2,
   WAITING: 3,
+};
+
+/**
+ * Cache serving status.
+ * @enum
+ */
+const CacheState = {
+  ORIGIN: 0, // Served from origin.
+  ORIGIN_CACHE_MISS: 1, // Served from origin even though cache URL was present.
+  CACHE: 2, // Served from cache.
 };
 
 /**
@@ -85,12 +97,12 @@ const TAG = 'media-performance-metrics';
  * @param  {!Window} win
  * @return {!MediaPerformanceMetricsService}
  */
-export const getMediaPerformanceMetricsService = win => {
+export const getMediaPerformanceMetricsService = (win) => {
   let service = Services.mediaPerformanceMetricsService(win);
 
   if (!service) {
     service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', function() {
+    registerServiceBuilder(win, 'media-performance-metrics', function () {
       return service;
     });
   }
@@ -116,6 +128,9 @@ export class MediaPerformanceMetricsService {
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
+
+    /** @private @const {!../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(win.document.body);
   }
 
   /**
@@ -170,7 +185,7 @@ export class MediaPerformanceMetricsService {
       return;
     }
 
-    mediaEntry.unlisteners.forEach(unlisten => unlisten());
+    mediaEntry.unlisteners.forEach((unlisten) => unlisten());
     this.deleteMediaEntry_(media);
 
     switch (mediaEntry.status) {
@@ -192,7 +207,21 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   sendMetrics_(mediaEntry) {
-    const {metrics} = mediaEntry;
+    const {media, metrics} = mediaEntry;
+
+    let videoCacheState;
+    if (this.urlService_.isProxyOrigin(media.currentSrc)) {
+      videoCacheState = CacheState.CACHE;
+    } else {
+      // Media is served from origin. Checks if there was a cached source.
+      const {hostname} = this.urlService_.parse(urls.cdn);
+      videoCacheState = media.querySelector(
+        `[src*="${escapeCssSelectorIdent(hostname)}"]`
+      )
+        ? CacheState.ORIGIN_CACHE_MISS
+        : CacheState.ORIGIN;
+    }
+    this.performanceService_.tickDelta('vcs', videoCacheState);
 
     // If the media errored.
     if (metrics.error !== null) {
@@ -331,7 +360,7 @@ export class MediaPerformanceMetricsService {
     if (!media.hasAttribute('src')) {
       errorTarget = lastChildElement(
         media,
-        child => child.tagName === 'SOURCE'
+        (child) => child.tagName === 'SOURCE'
       );
     }
     unlisteners.push(

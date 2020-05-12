@@ -95,7 +95,7 @@ function postReport(type, action) {
       },
       // Do not use `json: true` because the response is a string, not JSON.
     })
-      .then(body => {
+      .then((body) => {
         log(
           green('INFO:'),
           'reported',
@@ -110,7 +110,7 @@ function postReport(type, action) {
           );
         }
       })
-      .catch(error => {
+      .catch((error) => {
         log(
           yellow('WARNING:'),
           'failed to report',
@@ -143,7 +143,9 @@ function reportTestStarted() {
 async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
-    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
+    const action = testTypeBuildTargets.some((target) =>
+      buildTargets.has(target)
+    )
       ? 'queued'
       : 'skipped';
     for (const subType of subTypes) {

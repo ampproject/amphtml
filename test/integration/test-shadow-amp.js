@@ -45,7 +45,7 @@ describes.integration(
       </script>
     `,
   },
-  env => {
+  (env) => {
     let docController;
     let shadowDoc;
 

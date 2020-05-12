@@ -186,6 +186,7 @@ import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
+import {my6sense} from '../ads/my6sense';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -217,11 +218,13 @@ import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rakutenunifiedads} from '../ads/rakutenunifiedads';
 import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
+import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
@@ -478,6 +481,7 @@ register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
+register('my6sense', my6sense);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
@@ -510,12 +514,14 @@ register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rakutenunifiedads', rakutenunifiedads);
 register('rbinfox', rbinfox);
 register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
 register('relap', relap);
+register('relappro', relappro);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
@@ -638,7 +644,7 @@ export function draw3p(win, data, configCallback) {
     win.context.tagName
   );
   if (configCallback) {
-    configCallback(data, data => {
+    configCallback(data, (data) => {
       userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -659,7 +665,7 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(
+window.draw3p = function (
   opt_configCallback,
   opt_allowed3pTypes,
   opt_allowedEmbeddingOrigins

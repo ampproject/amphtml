@@ -94,7 +94,7 @@ export class AutoAdvance {
       () => this.handleTouchStart_(),
       {capture: true, passive: true}
     );
-    listen(element, CarouselEvents.INDEX_CHANGE, event => {
+    listen(element, CarouselEvents.INDEX_CHANGE, (event) => {
       this.handleIndexChange_(event);
     });
   }

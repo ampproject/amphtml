@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-3q-player'],
     },
   },
-  function(env) {
+  function (env) {
     let win;
     let doc;
     let timer;

@@ -127,7 +127,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.storeService_ = null;
 
     /** @private {!./story-ad-localization.StoryAdLocalization} */
-    this.localizationService_ = new StoryAdLocalization(this.win);
+    this.localizationService_ = new StoryAdLocalization(this.element);
 
     /** @private {boolean} */
     this.hasForcedRender_ = false;
@@ -141,30 +141,32 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
-      devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
-      this.storeService_ = storeService;
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
+        this.storeService_ = storeService;
 
-      if (!this.isAutomaticAdInsertionAllowed_()) {
-        return;
+        if (!this.isAutomaticAdInsertionAllowed_()) {
+          return;
+        }
+
+        const ampStoryElement = this.element.parentElement;
+        userAssert(
+          ampStoryElement.tagName === 'AMP-STORY',
+          `<${TAG}> should be child of <amp-story>`
+        );
+
+        const ampdoc = this.getAmpDoc();
+        const extensionService = Services.extensionsFor(this.win);
+        extensionService./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
+
+        this.buttonFitter_ = new ButtonTextFitter(ampdoc);
+
+        return ampStoryElement.getImpl().then((impl) => {
+          this.ampStory_ = impl;
+        });
       }
-
-      const ampStoryElement = this.element.parentElement;
-      userAssert(
-        ampStoryElement.tagName === 'AMP-STORY',
-        `<${TAG}> should be child of <amp-story>`
-      );
-
-      const ampdoc = this.getAmpDoc();
-      const extensionService = Services.extensionsFor(this.win);
-      extensionService./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
-
-      this.buttonFitter_ = new ButtonTextFitter(ampdoc);
-
-      return ampStoryElement.getImpl().then(impl => {
-        this.ampStory_ = impl;
-      });
-    });
+    );
   }
 
   /** @override */
@@ -278,13 +280,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -292,13 +294,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (pageId) => {
       const pageIndex = this.storeService_.get(
         StateProperty.CURRENT_PAGE_INDEX
       );
@@ -409,7 +411,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     this.ampStory_.element.appendChild(pageElement);
 
-    pageElement.getImpl().then(impl => {
+    pageElement.getImpl().then((impl) => {
       this.ampStory_.addPage(impl);
     });
   }
@@ -492,7 +494,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.enoughContentPagesViewed_() &&
       !this.tryingToPlace_
     ) {
-      this.tryToPlaceAdAfterPage_(pageId).then(adState => {
+      this.tryToPlaceAdAfterPage_(pageId).then((adState) => {
         this.tryingToPlace_ = false;
 
         if (adState === AD_STATE.INSERTED) {
@@ -632,7 +634,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         return AD_STATE.PENDING;
       }
 
-      return nextAdPage.maybeCreateCta().then(ctaCreated => {
+      return nextAdPage.maybeCreateCta().then((ctaCreated) => {
         if (!ctaCreated) {
           // Failed on outlink creation.
           return AD_STATE.FAILED;
@@ -645,7 +647,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         // analytics events moving forward.
         const adIndex = this.adPageIds_[nextAdPageId];
         const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
-        this.analytics_.then(analytics =>
+        this.analytics_.then((analytics) =>
           analytics.setVar(adIndex, AnalyticsVars.POSITION, pageNumber + 1)
         );
 
@@ -691,13 +693,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    this.analytics_.then(analytics =>
+    this.analytics_.then((analytics) =>
       analytics.fireEvent(this.element, vars['adIndex'], eventType, vars)
     );
   }
 }
 
-AMP.extension('amp-story-auto-ads', '0.1', AMP => {
+AMP.extension('amp-story-auto-ads', '0.1', (AMP) => {
   AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds, CSS);
   AMP.registerServiceForDoc(STORY_AD_ANALYTICS, StoryAdAnalytics);
 });

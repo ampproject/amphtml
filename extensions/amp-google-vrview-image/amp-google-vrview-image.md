@@ -26,29 +26,6 @@ limitations under the License.
 
 # amp-google-vrview-image
 
-VR image
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-google-vrview-image" src="https://cdn.ampproject.org/v0/amp-google-vrview-image-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height, responsive, fill, flex-item</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-google-vrview-image/">amp-google-vrview-image example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.

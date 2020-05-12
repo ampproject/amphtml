@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {isArray, toWin} from '../../../src/types';
+import {isArray} from '../../../src/types';
 
 /**
  * @typedef {{
@@ -60,7 +60,7 @@ export function renderAsElement(doc, elementDef) {
  */
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
-  elementsDef.forEach(elementDef =>
+  elementsDef.forEach((elementDef) =>
     fragment.appendChild(renderSingle(doc, elementDef))
   );
   return fragment;
@@ -83,25 +83,25 @@ function renderSingle(doc, elementDef) {
   const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
   const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
   if (hasLocalizedTextContent || hasLocalizedLabel) {
-    const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNull(win).then(localizationService => {
-      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+    const localizationService = Services.localizationForDoc(
+      devAssert(doc.body)
+    );
+    devAssert(localizationService, 'Could not retrieve LocalizationService.');
 
-      if (hasLocalizedTextContent) {
-        el.textContent = localizationService.getLocalizedString(
-          /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-        );
-      }
+    if (hasLocalizedTextContent) {
+      el.textContent = localizationService.getLocalizedString(
+        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+      );
+    }
 
-      if (hasLocalizedLabel) {
-        const labelString = localizationService.getLocalizedString(
-          /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
-        );
-        if (labelString) {
-          el.setAttribute('aria-label', labelString);
-        }
+    if (hasLocalizedLabel) {
+      const labelString = localizationService.getLocalizedString(
+        /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
+      );
+      if (labelString) {
+        el.setAttribute('aria-label', labelString);
       }
-    });
+    }
   }
 
   if (hasOwn(elementDef, 'unlocalizedString')) {

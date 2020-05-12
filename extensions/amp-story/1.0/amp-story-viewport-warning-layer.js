@@ -41,7 +41,7 @@ const RESIZE_THROTTLE_MS = 300;
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = element => {
+const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="
         i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
@@ -81,9 +81,6 @@ export class ViewportWarningLayer {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    // TODO: at this point the localization service is not registered yet. We
-    // should refactor the way it is registered it so it works like the store
-    // and analytics services.
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
@@ -117,7 +114,7 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-    this.localizationService_ = Services.localizationService(this.win_);
+    this.localizationService_ = Services.localizationForDoc(this.storyElement_);
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
@@ -149,7 +146,7 @@ export class ViewportWarningLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -157,7 +154,7 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(
       StateProperty.VIEWPORT_WARNING_STATE,
-      viewportWarningState => {
+      (viewportWarningState) => {
         this.onViewportWarningStateUpdate_(viewportWarningState);
       },
       true /** callToInitialize */

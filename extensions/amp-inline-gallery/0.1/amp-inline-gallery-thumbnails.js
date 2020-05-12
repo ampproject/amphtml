@@ -55,6 +55,11 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     const aspectRatioWidth =
       Number(this.element.getAttribute('aspect-ratio-width')) || 0;
@@ -68,10 +73,10 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     // carousel and not the carousel from the thumbnail strip. We stop
     // propagation since the gallery is not interested in slide changes from
     // our carousel.
-    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, (event) => {
       event.stopPropagation();
     });
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       event.stopPropagation();
     });
   }
@@ -140,7 +145,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
           }
         )
       );
-      this.carousel_.getImpl().then(impl => {
+      this.carousel_.getImpl().then((impl) => {
         impl.goToSlide(index, {smoothScroll: true});
       });
     };
@@ -237,7 +242,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    thumbnails.forEach(t => this.carousel_.appendChild(t));
+    thumbnails.forEach((t) => this.carousel_.appendChild(t));
 
     // We create with loop defaulting to false above, and allow it to be
     // overwriten.

@@ -26,29 +26,13 @@ limitations under the License.
   height="320"
   type="temedya"
   layout="responsive"
-  data-title="widget-title"
-  data-siteId="site-id"
-  data-keyId="key-id"
-  data-siteUrl="site-url"
-  data-typeId="ad-type"
-  data-paidItem="paid-item-count"
-  data-organicItem="organic-item-count"
-  data-theme="theme-style"
+  data-widgetId="vidyome"
 >
 </amp-embed>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
-
 ### Required parameters
 
-- `data-title`: Widget Title
-- `data-siteId`: Vidyome Website Id
-- `data-keyId`: Vidyome Widget Key Id
-- `data-siteUrl`: Web Site URL
-- `data-typeId`: Widget Type ID (7)
-- `data-paidItem`: Paid Item Count
-- `data-organicItem`: Organic Item Count
-- `data-theme`: Theme Type (light | dark | google)
+- `data-widgetId`: Widget ID

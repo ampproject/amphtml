@@ -168,7 +168,7 @@ export class ConsentConfig {
       config['consentRequired'] = 'remote';
     }
 
-    return this.mergeGeoOverride_(config).then(mergedConfig =>
+    return this.mergeGeoOverride_(config).then((mergedConfig) =>
       this.validateMergedGeoOverride_(mergedConfig)
     );
   }
@@ -182,7 +182,7 @@ export class ConsentConfig {
     if (!config['geoOverride']) {
       return Promise.resolve(config);
     }
-    return Services.geoForDocOrNull(this.element_).then(geoService => {
+    return Services.geoForDocOrNull(this.element_).then((geoService) => {
       userAssert(
         geoService,
         '%s: requires <amp-geo> to use `geoOverride`',

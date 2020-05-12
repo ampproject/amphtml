@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsEn from './_locales/en';
@@ -71,12 +71,12 @@ export const CtaTypes = {
 
 export class StoryAdLocalization {
   /**
-   * @param {!Window} win
+   * @param {!Element} storyAutoAdsEl
    */
-  constructor(win) {
-    /** @private @const {!Window} win */
-    this.win_ = win;
-    /** @private {?LocalizationService} */
+  constructor(storyAutoAdsEl) {
+    /** @private @const {!Element} */
+    this.storyAutoAdsEl_ = storyAutoAdsEl;
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
   }
 
@@ -95,11 +95,13 @@ export class StoryAdLocalization {
    * Create localization service and register all bundles.
    */
   init_() {
-    this.localizationService_ = new LocalizationService(this.win_);
+    this.localizationService_ = Services.localizationForDoc(
+      this.storyAutoAdsEl_
+    );
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,
-      s => `[${s} one two]`
+      (s) => `[${s} one two]`
     );
 
     this.localizationService_

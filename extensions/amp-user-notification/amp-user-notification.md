@@ -24,35 +24,6 @@ limitations under the License.
 
 # amp-user-notification
 
-[TOC]
-
-Displays a dismissable notification to the user.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js">&lt;/script></code>
-      </div>
-      <small>Notice that  "amp-user-notification" script is required.</small>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#basic-usage-with-local-storage">Annotated code example for amp-user-notification (with local storage)</a></li>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#advanced-usage-with-a-server-endpoint">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
 ## Usage
 
 An `id` is required because multiple `amp-user-notification` elements are allowed and the `id` is used to differentiate them.
@@ -139,9 +110,9 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "waldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "waldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>
@@ -171,9 +142,9 @@ In this example user in Mexico would not trigger the notification, but a user in
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "whereIsWaldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "whereIsWaldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>

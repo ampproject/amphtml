@@ -16,8 +16,12 @@ limitations under the License.
 
 # Error reporting in AMP
 
-AMP reports errors to the endpoint specified by the `errorReportingUrl` config
-property. E.g. `https://amp-error-reporting.appspot.com/r` for `cdn.ampproject.org`.
+AMP reports 90% of errors to the endpoint specified by the `errorReportingUrl`
+config property, with the remaining 10% reporting to the endpoint specified by
+the `betaErrorReportingUrl` config. E.g. for `cdn.ampproject.org`
+
+- 90%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r`
+- 10%: `https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta`
 
 The following fields are reported:
 

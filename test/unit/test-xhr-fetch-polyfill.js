@@ -18,18 +18,18 @@ import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
 import {Services} from '../../src/services';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
-describes.sandboxed('fetch', {}, env => {
+describes.sandboxed('fetch', {}, (env) => {
   describe('fetch method', () => {
     const methodErrorRegex = /Only one of\s+GET, POST is currently allowed/;
     let xhrCreated;
 
     function setupMockXhr() {
       const mockXhr = env.sandbox.useFakeXMLHttpRequest();
-      xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
+      xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
     }
 
     function mockOkResponse() {
-      xhrCreated.then(xhr =>
+      xhrCreated.then((xhr) =>
         xhr.respond(
           200,
           {
@@ -46,7 +46,7 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should allow GET method', () => {
       mockOkResponse();
-      return fetchPolyfill('/get?k=v1').then(response => {
+      return fetchPolyfill('/get?k=v1').then((response) => {
         expect(response.ok).to.be.equal(true);
       });
     });
@@ -58,7 +58,7 @@ describes.sandboxed('fetch', {}, env => {
         body: {
           hello: 'world',
         },
-      }).then(response => {
+      }).then((response) => {
         expect(response.ok).to.be.equal(true);
       });
     });
@@ -124,14 +124,14 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should do `GET` as default method', () => {
       fetchPolyfill('/get?k=v1');
-      return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+      return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
     });
 
     it('should normalize POST method name to uppercase', () => {
       fetchPolyfill('/get?k=v1', {
         method: 'post',
       });
-      return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
+      return xhrCreated.then((xhr) => expect(xhr.method).to.equal('POST'));
     });
 
     it('should parse and pass the headers', () => {
@@ -143,7 +143,7 @@ describes.sandboxed('fetch', {}, env => {
         method: 'post',
         headers,
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         for (const key in headers) {
           expect(xhr.requestHeaders[key]).to.be.equal(headers[key]);
         }
@@ -159,7 +159,7 @@ describes.sandboxed('fetch', {}, env => {
         method: 'post',
         body: JSON.stringify(bodyData),
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         expect(xhr.requestBody).to.be.equal(JSON.stringify(bodyData));
       });
     });
@@ -168,7 +168,7 @@ describes.sandboxed('fetch', {}, env => {
       fetchPolyfill('/get?k=v1', {
         credentials: 'include',
       });
-      return xhrCreated.then(xhr => {
+      return xhrCreated.then((xhr) => {
         expect(xhr.withCredentials).to.be.equal(true);
       });
     });
@@ -232,7 +232,7 @@ describes.sandboxed('fetch', {}, env => {
 
     it('should provide text', () => {
       const response = new Response(TEST_TEXT);
-      return response.text().then(result => {
+      return response.text().then((result) => {
         expect(result).to.equal(TEST_TEXT);
       });
     });
@@ -240,7 +240,7 @@ describes.sandboxed('fetch', {}, env => {
     it('should provide text only once', () => {
       expectAsyncConsoleError(bodyUsedErrorRegex);
       const response = new Response(TEST_TEXT);
-      return response.text().then(result => {
+      return response.text().then((result) => {
         expect(result).to.equal(TEST_TEXT);
         expect(response.text.bind(response), 'should throw').to.throw(
           Error,
@@ -255,7 +255,7 @@ describes.sandboxed('fetch', {}, env => {
         'key2': 'Value2',
       };
       const response = new Response(JSON.stringify(RESPONSE_JSON));
-      return response.json().then(result => {
+      return response.json().then((result) => {
         expect(result).to.deep.equal(RESPONSE_JSON);
       });
     });
@@ -263,7 +263,7 @@ describes.sandboxed('fetch', {}, env => {
     it('should be cloneable and each instance should provide text', () => {
       const response = new Response(TEST_TEXT);
       const clone = response.clone();
-      return Promise.all([response.text(), clone.text()]).then(results => {
+      return Promise.all([response.text(), clone.text()]).then((results) => {
         expect(results[0]).to.equal(TEST_TEXT);
         expect(results[1]).to.equal(TEST_TEXT);
       });

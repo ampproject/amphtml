@@ -68,7 +68,7 @@ describes.repeated(
         inputNames.push('getAttribute');
         inputNames.push('submit');
         inputs = {};
-        inputNames.forEach(name => {
+        inputNames.forEach((name) => {
           const input = document.createElement('input');
           input.id = name;
           form.appendChild(input);

@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-ooyala-player
 
-Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, flex-item, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 ```html

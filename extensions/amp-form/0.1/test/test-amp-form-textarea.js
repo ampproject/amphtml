@@ -32,7 +32,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let doc;
     beforeEach(() => {
       doc = env.ampdoc.getRootNode();
@@ -157,7 +157,7 @@ describes.realWin(
     });
 
     describe('handleTextareaDrag', () => {
-      it('should handle text area drag', done => {
+      it('should handle text area drag', (done) => {
         const textarea = doc.createElement('textarea');
         textarea.setAttribute('autoexpand', '');
         textarea.setAttribute('rows', '4');

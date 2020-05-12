@@ -64,7 +64,7 @@ export class InfoDialog {
     this.isBuilt_ = false;
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win_);
+    this.localizationService_ = Services.localizationForDoc(parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -126,7 +126,7 @@ export class InfoDialog {
       appendPromise,
       this.setHeading_(),
       this.setPageLink_(pageUrl),
-      this.requestMoreInfoLink_().then(moreInfoUrl =>
+      this.requestMoreInfoLink_().then((moreInfoUrl) =>
         this.setMoreInfoLinkUrl_(moreInfoUrl)
       ),
     ]);
@@ -144,11 +144,11 @@ export class InfoDialog {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.INFO_DIALOG_STATE, isOpen => {
+    this.storeService_.subscribe(StateProperty.INFO_DIALOG_STATE, (isOpen) => {
       this.onInfoDialogStateUpdated_(isOpen);
     });
 
-    this.element_.addEventListener('click', event =>
+    this.element_.addEventListener('click', (event) =>
       this.onInfoDialogClick_(event)
     );
   }
@@ -178,7 +178,7 @@ export class InfoDialog {
   onInfoDialogClick_(event) {
     const el = dev().assertElement(event.target);
     // Closes the dialog if click happened outside of the dialog main container.
-    if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
       this.close_();
     }
   }
@@ -198,11 +198,11 @@ export class InfoDialog {
    */
   requestMoreInfoLink_() {
     if (!this.viewer_.isEmbedded()) {
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
     return this.viewer_
       ./*OK*/ sendMessageAwaitResponse('moreInfoLinkUrl', /* data */ undefined)
-      .then(moreInfoUrl => {
+      .then((moreInfoUrl) => {
         if (!moreInfoUrl) {
           return null;
         }

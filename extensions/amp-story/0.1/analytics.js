@@ -75,14 +75,14 @@ export class AmpStoryAnalytics {
   triggerEvent_(eventType) {
     const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
     variablesPromise.then(
-      variables => {
+      (variables) => {
         triggerAnalyticsEvent(
           this.element_,
           eventType,
           /** @type {!JsonObject} */ (variables)
         );
       },
-      reason => {
+      (reason) => {
         dev().error('AMP-STORY', 'Could not get analytics variables', reason);
       }
     );

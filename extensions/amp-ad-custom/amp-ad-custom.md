@@ -1,3 +1,11 @@
+---
+$category@: ads-analytics
+formats:
+  - ads
+teaser:
+  text: Alternative way to serve valid AMPHTML ads.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 

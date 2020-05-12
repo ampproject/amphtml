@@ -604,7 +604,7 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <td>Unmutes the video.</td>
   </tr>
   <tr>
-    <td><code>fullscreen</code></td>
+    <td><code>fullscreenenter</code></td>
     <td>Takes the video to fullscreen.</td>
   </tr>
 </table>

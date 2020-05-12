@@ -21,7 +21,7 @@ import {getCurve} from './curve';
 
 const TAG_ = 'Animation';
 
-const NOOP_CALLBACK = function() {};
+const NOOP_CALLBACK = function () {};
 
 /**
  * The animation class allows construction of arbitrary animation processes.

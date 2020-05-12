@@ -202,12 +202,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-next-page-v2',
-    name: 'Document-level (true) infinite scroll experience',
-    spec: 'https://github.com/ampproject/amphtml/issues/25500',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -248,14 +242,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'inabox-viewport-friendly',
-    name:
-      'Inabox viewport measures the host window directly if ' +
-      'within friendly iframe',
-    spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -292,6 +278,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
   },
   {
+    id: 'intersect-resources',
+    name: 'Use IntersectionObserver for resource scheduling.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25428',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
+  },
+  {
     id: 'layoutbox-invalidate-on-scroll',
     name:
       'Invalidate the cached layoutboxes of elements nested in a scroller ' +
@@ -304,5 +296,31 @@ export const EXPERIMENTS = [
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
+  },
+  {
+    id: 'visibility-trigger-improvements',
+    name: 'AMP Analytics Visibility Trigger Improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/26823',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
+  },
+  {
+    id: 'random-subdomains-for-safeframe',
+    name: 'Enable Random Subdomains for SafeFrame',
+  },
+  {
+    id: 'analytics-chunks',
+    name: 'AMP Analytics Break long tasks to chunks',
+    spec: 'TODO: add before merge',
+    cleanupIssue: 'TODO: create issue before merge',
+  },
+  {
+    id: 'amp-ad-no-center-css',
+    name: 'Removing the centering css rule for amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+  },
+  {
+    id: 'fie-init-chunking',
+    name: 'More chunking for friendly iframe initialization',
+    spec: 'https://github.com/ampproject/amphtml/issues/27584',
   },
 ];

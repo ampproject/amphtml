@@ -1,5 +1,12 @@
 {
-  "experimentA": {},
+  "experimentA": {
+    "name": "IntersectionObserverPolyfill",
+    "environment": "AMP",
+    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL",
+    "issue": "https://github.com/ampproject/amphtml/issues/27807",
+    "expirationDateUTC": "2020-05-31",
+    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL"
+  },
   "experimentB": {},
   "experimentC": {}
 }

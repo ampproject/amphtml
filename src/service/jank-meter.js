@@ -160,7 +160,7 @@ export class JankMeter {
     if (!this.isEnabled_() || !isLongTaskApiSupported(this.win_)) {
       return;
     }
-    this.longTaskObserver_ = new this.win_.PerformanceObserver(entryList => {
+    this.longTaskObserver_ = new this.win_.PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       for (let i = 0; i < entries.length; i++) {
         if (entries[i].entryType == 'longtask') {
@@ -188,7 +188,7 @@ export class JankMeter {
    */
   initializeBatteryManager_() {
     if (isBatteryApiSupported(this.win_)) {
-      this.win_.navigator.getBattery().then(battery => {
+      this.win_.navigator.getBattery().then((battery) => {
         this.batteryManager_ = battery;
         this.batteryLevelStart_ = battery.level * 100;
       });

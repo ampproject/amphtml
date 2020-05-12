@@ -24,26 +24,7 @@ limitations under the License.
 
 # amp-brightcove
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>An <code>amp-brightcove</code> component displays the Brightcove Player as used in Brightcove's <a href="https://www.brightcove.com/en/online-video-platform">Video Cloud</a> or <a href="https://www.brightcove.com/en/player">Brightcove Player</a>.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-brightcove/">Annotated code example for amp-brightcove</a></td>
-  </tr>
-</table>
-
-[TOC]
+An `amp-brightcove` component displays the Brightcove Player as used in Brightcove's [Video Cloud](https://www.brightcove.com/en/online-video-platform) or [Brightcove Player](https://www.brightcove.com/en/player).
 
 ## Example
 

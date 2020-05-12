@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-recaptcha-input'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     beforeEach(() => {
@@ -101,13 +101,13 @@ describes.realWin(
       });
 
       it('Should be visible after built', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(ampRecaptchaInput).to.not.have.display('none');
         });
       });
 
-      it('Should apply styles aftyer build', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+      it('Should apply styles after build', () => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(win.getComputedStyle(ampRecaptchaInput).position).to.equal(
             'absolute'
           );
@@ -118,7 +118,7 @@ describes.realWin(
       });
 
       it('Should register with the recaptcha service after layout', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
           expect(
             ampRecaptchaInput.implementation_.recaptchaService_
@@ -128,7 +128,7 @@ describes.realWin(
       });
 
       it('Should unregister with the recaptcha service after unlayout', () => {
-        return getRecaptchaInput().then(ampRecaptchaInput => {
+        return getRecaptchaInput().then((ampRecaptchaInput) => {
           expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
           expect(
             ampRecaptchaInput.implementation_.recaptchaService_
@@ -147,7 +147,7 @@ describes.realWin(
         'Should not register with the recaptcha service' +
           ' if already registered',
         () => {
-          return getRecaptchaInput().then(ampRecaptchaInput => {
+          return getRecaptchaInput().then((ampRecaptchaInput) => {
             expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
             expect(
               ampRecaptchaInput.implementation_.recaptchaService_
@@ -166,7 +166,7 @@ describes.realWin(
         'Should not unregister with the recaptcha service' +
           ' if not already registered',
         () => {
-          return getRecaptchaInput().then(ampRecaptchaInput => {
+          return getRecaptchaInput().then((ampRecaptchaInput) => {
             expect(ampRecaptchaInput.implementation_.registerPromise_).to.be.ok;
             expect(
               ampRecaptchaInput.implementation_.recaptchaService_

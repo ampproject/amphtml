@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -147,6 +147,13 @@ export class Performance {
     );
 
     /**
+     * Whether the user agent supports the navigation timing API
+     *
+     * @private {boolean}
+     */
+    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
+
+    /**
      * The latest reported largest contentful paint time, where the loadTime
      * is specified.
      *
@@ -237,7 +244,7 @@ export class Performance {
         this.tickDelta('msr', this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tickDelta('timeOrigin', this.timeOrigin_);
+        this.tick('timeOrigin', undefined, this.timeOrigin_);
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -260,7 +267,7 @@ export class Performance {
    */
   maybeAddStoryExperimentId_() {
     const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
-    return isStoryDocument(ampdoc).then(isStory => {
+    return isStoryDocument(ampdoc).then((isStory) => {
       if (isStory) {
         this.addEnabledExperiment('story');
       }
@@ -282,6 +289,14 @@ export class Performance {
    * See https://github.com/WICG/paint-timing
    */
   registerPerformanceObserver_() {
+    // Turn off performanceObserver derived metrics for inabox as there
+    // will never be a viewer to report to.
+    // TODO(ccordry): we are still doing some other unnecessary measurements for
+    // the inabox case, but would need a larger refactor.
+    if (getMode(this.win).runtime === 'inabox') {
+      return;
+    }
+
     // Chromium doesn't implement the buffered flag for PerformanceObserver.
     // That means we need to read existing entries and maintain state
     // as to whether we have reported a value yet, since in the future it may
@@ -290,7 +305,8 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-    const processEntry = entry => {
+    let recordedNavigation = false;
+    const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
         recordedFirstPaint = true;
@@ -319,6 +335,18 @@ export class Performance {
         if (entry.renderTime) {
           this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
+      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
+        [
+          'domComplete',
+          'domContentLoadedEventEnd',
+          'domContentLoadedEventStart',
+          'domInteractive',
+          'loadEventEnd',
+          'loadEventStart',
+          'requestStart',
+          'responseStart',
+        ].forEach((label) => this.tick(label, entry[label]));
+        recordedNavigation = true;
       }
     };
 
@@ -348,6 +376,11 @@ export class Performance {
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
+    if (this.supportsNavigation_) {
+      const navigationObserver = this.createPerformanceObserver_(processEntry);
+      navigationObserver.observe({type: 'navigation', buffered: true});
+    }
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -371,7 +404,7 @@ export class Performance {
    * @private
    */
   createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver(list => {
+    return new this.win.PerformanceObserver((list) => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
@@ -385,7 +418,7 @@ export class Performance {
     if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
       return;
     }
-    this.win.perfMetrics.onFirstInputDelay(delay => {
+    this.win.perfMetrics.onFirstInputDelay((delay) => {
       this.tickDelta('fid-polyfill', delay);
       this.flush();
     });
@@ -544,10 +577,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const {documentElement} = this.win.document;
-    const size = Services.viewportForDoc(documentElement).getSize();
-    const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
+      const {documentElement} = this.win.document;
+      const size = Services.viewportForDoc(documentElement).getSize();
+      const rect = layoutRectLtwh(0, 0, size.width, size.height);
       return whenContentIniLoad(
         documentElement,
         this.win,
@@ -565,19 +598,26 @@ export class Performance {
    *     when adding a new metric.
    * @param {number=} opt_delta The delta. Call tickDelta instead of setting
    *     this directly.
+   * @param {number=} opt_value The value to use. Overrides default calculation.
    */
-  tick(label, opt_delta) {
+  tick(label, opt_delta, opt_value) {
+    devAssert(
+      opt_delta == undefined || opt_value == undefined,
+      'You may not set both opt_delta and opt_value.'
+    );
+
     const data = dict({'label': label});
     let delta;
 
-    // Absolute value case (not delta).
-    if (opt_delta == undefined) {
-      // Marking only makes sense for non-deltas.
+    if (opt_delta != undefined) {
+      data['delta'] = delta = Math.max(opt_delta, 0);
+    } else if (opt_value != undefined) {
+      data['value'] = opt_value;
+    } else {
+      // Marking only makes sense for non-overridden values (and no deltas).
       this.mark(label);
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
-    } else {
-      data['delta'] = delta = Math.max(opt_delta, 0);
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
@@ -701,7 +741,7 @@ export class Performance {
       return;
     }
 
-    this.events_.forEach(tickEvent => {
+    this.events_.forEach((tickEvent) => {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;

@@ -41,7 +41,7 @@ export function whenContentIniLoad(
   opt_isInPrerender
 ) {
   const ampdoc = Services.ampdoc(elementOrAmpDoc);
-  return getMeasuredResources(ampdoc, hostWin, r => {
+  return getMeasuredResources(ampdoc, hostWin, (r) => {
     // TODO(jridgewell): Remove isFixed check here once the position
     // is calculted correctly in a separate layer for embeds.
     if (
@@ -52,9 +52,9 @@ export function whenContentIniLoad(
       return false;
     }
     return true;
-  }).then(resources => {
+  }).then((resources) => {
     const promises = [];
-    resources.forEach(r => {
+    resources.forEach((r) => {
       if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
         promises.push(r.loadedOnce());
       }
@@ -76,8 +76,6 @@ export function getMeasuredResources(ampdoc, hostWin, filterFn) {
   // First, wait for the `ready-scan` signal. Waiting for each element
   // individually is too expensive and `ready-scan` will cover most of
   // the initially parsed elements.
-  // TODO(jridgewell): this path should be switched to use a future
-  // "layer has been measured" signal.
   return ampdoc
     .signals()
     .whenSignal(READY_SCAN_SIGNAL)
@@ -85,7 +83,7 @@ export function getMeasuredResources(ampdoc, hostWin, filterFn) {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
       const resources = Services.resourcesForDoc(ampdoc);
-      resources.get().forEach(r => {
+      resources.get().forEach((r) => {
         if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
           measurePromiseArray.push(r.getPageLayoutBoxAsync());
         }
@@ -94,7 +92,7 @@ export function getMeasuredResources(ampdoc, hostWin, filterFn) {
     })
     .then(() => {
       const resources = Services.resourcesForDoc(ampdoc);
-      return resources.get().filter(r => {
+      return resources.get().filter((r) => {
         return (
           r.hostWin == hostWin &&
           !r.hasOwner() &&

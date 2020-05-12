@@ -20,7 +20,7 @@ import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
 
-describes.realWin('ConsentConfig', {amp: 1}, env => {
+describes.realWin('ConsentConfig', {amp: 1}, (env) => {
   let doc;
   let element;
   let defaultConfig;
@@ -523,7 +523,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create predefined _till_responded policy', function*() {
+    it('create predefined _till_responded policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_responded']).to.deep.equal({
         'waitFor': {
@@ -538,7 +538,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create predefined _till_accepted policy', function*() {
+    it('create predefined _till_accepted policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_accepted']).to.deep.equal({
         'waitFor': {
@@ -547,7 +547,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create default _auto_reject policy', function*() {
+    it('create default _auto_reject policy', function* () {
       const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_auto_reject']).to.deep.equal({
         'waitFor': {
@@ -566,7 +566,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('override default policy', function*() {
+    it('override default policy', function* () {
       const policy = expandPolicyConfig(
         dict({
           'default': {
