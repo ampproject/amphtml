@@ -396,7 +396,7 @@ function compile(
         )
         .pipe(postClosureBabel())
         .pipe(sanitize())
-        .pipe(writeSourcemaps())
+        .pipe(writeSourcemaps(options))
         .pipe(gulp.dest('.'))
         .on('end', resolve);
     }
