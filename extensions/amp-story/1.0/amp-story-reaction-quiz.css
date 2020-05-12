@@ -267,11 +267,11 @@
      left: 101% !important;
  }
  
- .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-option-selected[correct].i-amphtml-story-reaction-quiz-option {
+ .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected[correct].i-amphtml-story-reaction-quiz-option {
      background: var(--correct-color) !important;
  }
  
- .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-option-selected:not([correct]).i-amphtml-story-reaction-quiz-option {
+ .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected:not([correct]).i-amphtml-story-reaction-quiz-option {
      background: var(--incorrect-color) !important;
  }
  
