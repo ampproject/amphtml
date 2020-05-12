@@ -176,7 +176,9 @@ export class PreactBaseElement extends AMP.BaseElement {
         const container = this.win.document.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
-        this.element.appendChild(container);
+        if (!Ctor['detached']) {
+          this.element.appendChild(container);
+        }
       }
     }
 
@@ -240,6 +242,14 @@ PreactBaseElement['className'] = '';
  * @protected {boolean}
  */
 PreactBaseElement['passthrough'] = false;
+
+/**
+ * Enabling detached mode alters the children to be rendered in an
+ * unappended container. By default the children will be attached to the DOM.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['detached'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.

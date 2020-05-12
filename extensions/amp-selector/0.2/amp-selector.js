@@ -332,6 +332,9 @@ function SelectorShim(props) {
 AmpSelector.Component = SelectorShim;
 
 /** @override */
+AmpSelector.detached = true;
+
+/** @override */
 AmpSelector.props = {
   // TODO: Add 'forms' attribute when form integrations are supported.
   'disabled': {attr: 'disabled', type: 'boolean'},
