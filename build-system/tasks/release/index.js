@@ -257,18 +257,17 @@ async function prependConfig_(outputDir) {
     };
 
     allPrependPromises.push(
-      ...TARGETS_TO_CONFIG.map((target) => {
+      ...TARGETS_TO_CONFIG.map(async (target) => {
         const targetPath = path.join(rtvPath, target.file);
         const channelConfig = JSON.stringify({
           ...channelPartialConfig,
           ...target.config,
         });
 
-        fs.readFile(targetPath, 'utf-8').then((contents) =>
-          fs.writeFile(
-            targetPath,
-            `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
-          )
+        const contents = await fs.readFile(targetPath, 'utf-8');
+        return fs.writeFile(
+          targetPath,
+          `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
         );
       })
     );
