@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS} from '../../../build/amp-selector-0.2.css';
+import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -126,8 +126,8 @@ class AmpSelector extends PreactBaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-selector-v2'),
-      'expected amp-selector-v2 experiment to be enabled'
+      isExperimentOn(this.win, 'amp-selector-bento'),
+      'expected amp-selector-bento experiment to be enabled'
     );
     return true;
   }
@@ -343,6 +343,6 @@ AmpSelector.props = {
   'keyboardSelectMode': {attr: 'keyboard-select-mode'},
 };
 
-AMP.extension(TAG, '0.2', (AMP) => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSelector, CSS);
 });

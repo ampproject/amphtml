@@ -25,7 +25,7 @@ storiesOf('amp-selector', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-selector', version: 0.2}]})
+  .addParameters({extensions: [{name: 'amp-selector', version: 1.0}]})
   .add('with <amp-img>', () => {
     return (
       <amp-selector class="sample-selector" layout="container">
