@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
@@ -34,6 +36,11 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {

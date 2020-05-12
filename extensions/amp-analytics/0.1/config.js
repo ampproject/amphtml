@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
+import {DEFAULT_CONFIG} from './default-config';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
@@ -40,10 +40,13 @@ export class AnalyticsConfig {
     this.win_ = null;
 
     /**
-     * @const {!JsonObject} Copied here for tests.
+     * @const {!JsonObject}
      * @private
      */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
+    this.defaultConfig_ = DEFAULT_CONFIG || dict();
+
+    /** @private {!JsonObject} */
+    this.vendorConfig_ = dict();
 
     /**
      * @private {JsonObject}
@@ -115,7 +118,7 @@ export class AnalyticsConfig {
       .then((res) => res.json())
       .then(
         (jsonValue) => {
-          this.predefinedConfig_[type] = jsonValue;
+          this.vendorConfig_ = jsonValue || dict();
           dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
         },
         (err) => {
@@ -336,7 +339,7 @@ export class AnalyticsConfig {
    * Order of precedence for configs from highest to lowest:
    * - Remote config: specified through an attribute of the tag.
    * - Inline config: specified insize the tag.
-   * - Predefined config: Defined as part of the platform.
+   * - Predefined Vendor config: Defined as part of the platform.
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
@@ -350,17 +353,16 @@ export class AnalyticsConfig {
         'requestCount': 0,
       },
     });
-    const defaultConfig = this.predefinedConfig_['default'] || {};
-    mergeObjects(expandConfigRequest(defaultConfig), config);
+    mergeObjects(expandConfigRequest(this.defaultConfig_), config);
     mergeObjects(
-      expandConfigRequest(this.getTypeConfig_()),
+      expandConfigRequest(this.vendorConfig_),
       config,
-      /* predefined */ true
+      /* predefined-vendor */ true
     );
     mergeObjects(
       expandConfigRequest(rewrittenConfig),
       config,
-      /* predefined */ true
+      /* predefined-vendor */ true
     );
     return config;
   }
@@ -370,16 +372,7 @@ export class AnalyticsConfig {
    * @return {!JsonObject}
    */
   getConfigRewriter_() {
-    return this.getTypeConfig_()['configRewriter'] || {};
-  }
-
-  /**
-   * Reads a vendor configuration.
-   * @return {!JsonObject}
-   */
-  getTypeConfig_() {
-    const type = this.element_.getAttribute('type');
-    return this.predefinedConfig_[type] || {};
+    return this.vendorConfig_['configRewriter'] || {};
   }
 
   /**
@@ -412,8 +405,7 @@ export class AnalyticsConfig {
    * @param {!JsonObject} inlineConfig
    */
   validateTransport_(inlineConfig) {
-    const type = this.element_.getAttribute('type');
-    if (this.predefinedConfig_[type]) {
+    if (this.vendorConfig_) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
       // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
@@ -494,19 +486,19 @@ export class AnalyticsConfig {
  *
  * @param {Object|Array} from Object or array to merge from
  * @param {Object|Array} to Object or Array to merge into
- * @param {boolean=} opt_predefinedConfig
+ * @param {boolean=} opt_predefinedVendorConfig
  * @return {*} TODO(#23582): Specify return type
  */
-export function mergeObjects(from, to, opt_predefinedConfig) {
+export function mergeObjects(from, to, opt_predefinedVendorConfig) {
   if (to === null || to === undefined) {
     to = {};
   }
 
-  // Assert that optouts are allowed only in predefined configs.
+  // Assert that optouts are allowed only in predefined vendor configs.
   // The last expression adds an exception of known, safe optout function
   // that is already being used in the wild.
   userAssert(
-    opt_predefinedConfig ||
+    opt_predefinedVendorConfig ||
       !from ||
       !from['optout'] ||
       from['optout'] == '_gaUserPrefs.ioo' ||
@@ -516,7 +508,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
 
   for (const property in from) {
     userAssert(
-      opt_predefinedConfig || property != 'iframePing',
+      opt_predefinedVendorConfig || property != 'iframePing',
       'iframePing config is only available to vendor config.'
     );
     // Only deal with own properties.
@@ -528,7 +520,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
         to[property] = mergeObjects(
           from[property],
           to[property],
-          opt_predefinedConfig
+          opt_predefinedVendorConfig
         );
       } else if (isObject(from[property])) {
         if (!isObject(to[property])) {
@@ -537,7 +529,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
         to[property] = mergeObjects(
           from[property],
           to[property],
-          opt_predefinedConfig
+          opt_predefinedVendorConfig
         );
       } else {
         to[property] = from[property];

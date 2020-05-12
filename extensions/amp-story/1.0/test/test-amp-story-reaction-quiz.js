@@ -61,6 +61,11 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       env.sandbox
         .stub(Services, 'cidForDoc')
         .resolves({get: () => Promise.resolve('cid')});

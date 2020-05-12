@@ -21,6 +21,7 @@ import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
+import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
@@ -126,6 +127,10 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     storyElem = doc.createElement('amp-story');
     storyElem.appendChild(doc.createElement('amp-story-page'));
     doc.body.appendChild(storyElem);

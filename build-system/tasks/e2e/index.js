@@ -24,7 +24,7 @@ const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildMinifiedRuntime,
+  buildRuntime,
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
@@ -39,16 +39,16 @@ const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-async function launchWebServer_() {
+async function launchWebServer_(minified) {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.debug},
-    {compiled: true}
+    {compiled: minified}
   );
 }
 
-function cleanUp_() {
-  stopServer();
+async function cleanUp_() {
+  await stopServer();
 }
 
 function createMocha_() {
@@ -84,11 +84,11 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildMinifiedRuntime();
+    buildRuntime(/* minified */ !!argv.compiled);
   }
 
   // start up web server
-  await launchWebServer_();
+  await launchWebServer_(/* minified */ argv.compiled);
 
   // run tests
   if (!argv.watch) {
@@ -113,7 +113,7 @@ async function e2e() {
     await reportTestStarted();
     mocha.run(async (failures) => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
@@ -150,7 +150,11 @@ e2e.flags = {
     '`chrome`, `firefox`, `safari`.',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
+  'core_runtime_only': '  Builds only the core runtime.',
+  'nobuild':
+    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'extensions': '  Builds only the listed extensions.',
+  'compiled': '  Runs the tests using minified js',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

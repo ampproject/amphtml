@@ -38,7 +38,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {buildRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
@@ -760,7 +760,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    buildMinifiedRuntime();
+    buildRuntime();
   }
 }
 
@@ -799,7 +799,7 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  stopServer();
+  await stopServer();
   await exitPercyAgent_();
 }
 

@@ -29,10 +29,22 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 /**
  * Cleans and builds binaries with --fortesting flag and
  * overriden config.
+ *
+ * @param {boolean} minified
  */
-function buildMinifiedRuntime() {
+// TODO(gh/amphtml/28312): Directly call dist() or build()
+// instead of spwaning a new process.
+function buildRuntime(minified = true) {
   execOrDie('gulp clean');
-  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+
+  let command = minified ? `gulp dist --fortesting` : `gulp build --fortesting`;
+  if (argv.core_runtime_only) {
+    command += ` --core_runtime_only`;
+  } else if (argv.extensions) {
+    command += ` --extensions=${argv.extensions}`;
+  }
+
+  execOrDie(command);
 }
 
 /**
@@ -157,7 +169,7 @@ function installPackages(dir) {
 }
 
 module.exports = {
-  buildMinifiedRuntime,
+  buildRuntime,
   getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,
