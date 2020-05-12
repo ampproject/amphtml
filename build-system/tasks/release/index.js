@@ -193,18 +193,17 @@ async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
 
   const ampSwBaseTempDir = path.join(outputTempDir, 'base/dist/sw');
 
-  const ampSwNpmPackageJson = await fetch(AMP_SW_NPM_PACKAGE_URL).json();
+  const ampSwNpmPackageJson = (await fetch(AMP_SW_NPM_PACKAGE_URL)).json();
   const {latest} = ampSwNpmPackageJson['dist-tags'];
   const ampSwTarballUrl = ampSwNpmPackageJson.versions[latest].dist.tarball;
 
-  const ampSwTarballResponse = await fetch(ampSwTarballUrl);
+  const tarWritableStream = tar.extract({
+    cwd: ampSwBaseTempDir,
+    filter: (path) => path.startsWith('package/dist'),
+    strip: 2, // to strip "package/dist/".
+  });
+  (await fetch(ampSwTarballUrl)).body.pipe(tarWritableStream);
   await new Promise((resolve) => {
-    const tarWritableStream = tar.extract({
-      cwd: ampSwBaseTempDir,
-      filter: (path) => path.startsWith('package/dist'),
-      strip: 2, // to strip "package/dist/".
-    });
-    ampSwTarballResponse.body.pipe(tarWritableStream);
     tarWritableStream.on('end', resolve);
   });
 
