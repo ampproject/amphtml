@@ -97,7 +97,7 @@ Adds support for Dynatrace real user monitoring. Requires defining _var_ `app` w
 Type attribute value: `epica`
 
 Adds support for EPICA page views and events.
-More details can be found at [EPICA docs](https://www.epica.ai/docs/spec/).
+More details can be found at [EPICA docs](https://www.epica.ai).
 
 ### Eulerian Analytics
 
@@ -109,7 +109,7 @@ Adds support for Eulerian Technologies Analytics. Requires defining _var_ `analy
 
 Type attribute value: `facebookpixel`
 
-Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](../../../../documentation/components/reference/amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/ads-for-websites/pixel-events).
+Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/ads-for-websites/pixel-events).
 
 ### Gemius
 
@@ -148,7 +148,7 @@ Additionally, the following variables must be defined:
 - `cp`: code
 - `url`: HTTPS location of `amp-analytics-infonline.html`
 
-More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/downloads/web-mew-und-ctv/).
+More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
 
 ### Keen
 
@@ -195,7 +195,7 @@ Adds support for Médiamétrie tracking pages. Requires defining _var_ `serial`.
 
 Type attribute value: `mediarithmics`
 
-Adds support for mediarithmics. More information and configuration details can be found at [developer.mediarithmics.com](https://developer.mediarithmics.com/).
+Adds support for mediarithmics. More information and configuration details can be found at `https://developer.mediarithmics.com`.
 
 ### Moat Analytics
 
@@ -237,7 +237,7 @@ Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen 
 
 Type attribute value: `oewa`
 
-Adds support for [OEWA](https://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
+Adds support for `[OEWA](https://www.oewa.at)`. Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
 
 Additionally, the following variables must be defined:
 
@@ -312,7 +312,7 @@ Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration d
 
 Type attribute value: `simplereach`
 
-Adds support for SimpleReach. Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation).
+Adds support for SimpleReach. Configuration details can be found at `http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation`.
 
 ### Snowplow Analytics
 
@@ -324,7 +324,7 @@ Adds support for Snowplow Analytics. More details for adding Snowplow Analytics 
 
 Type attribute value: `top100`
 
-Adds support for Rambler/TOP-100. Configuration details can be found at [top100.rambler.ru](https://top100.rambler.ru/docs).
+Adds support for Rambler/TOP-100. Configuration details can be found at [top100.rambler.ru](https://top100.rambler.ru).
 
 ### TEA Analytics
 
