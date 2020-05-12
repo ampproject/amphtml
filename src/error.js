@@ -640,7 +640,7 @@ export function getErrorReportData(
 
   // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
   // all clients are serving a version with pre-throttling.
-  if (data['rt'] === 'production') {
+  if (data['bt'] === 'production') {
     // Setting this field allows the error reporting service to know that this
     // error has already been pre-throttled for Stable, so it doesn't need to
     // throttle again.
