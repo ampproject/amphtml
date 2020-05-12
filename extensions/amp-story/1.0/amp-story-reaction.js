@@ -67,6 +67,15 @@ export let ReactionOptionType;
 export let ReactionResponseType;
 
 /**
+ * @typedef {{
+ *    optionIndex: number,
+ *    text: string,
+ *    correct: ?string
+ * }}
+ */
+export let OptionConfigType;
+
+/**
  * Reaction abstract class with shared functionality for interactive components.
  *
  * Lifecycle:
@@ -112,6 +121,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @private {?Array<!Element>>} */
     this.optionElements_ = null;
+
+    /** @protected {?Array<!OptionConfigType>} */
+    this.options_ = null;
 
     /** @protected {?Element} */
     this.rootEl_ = null;
@@ -163,6 +175,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
@@ -181,7 +194,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    *      {optionIndex: 1, text: 'Developers', correct: 'correct'}
    *    ]
    * @protected
-   * @return {!Array<Map<string,?>>}
+   * @return {!Array<!OptionConfigType>}
    */
   parseOptions_() {
     const options = [];
@@ -191,9 +204,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
         const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
         while (options.length < optionNumber) {
-          options.push(new Map([['optionIndex', options.length]]));
+          options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1].set(splitParts[2], attr.value);
+        options[optionNumber - 1][splitParts[2]] = attr.value;
       }
     });
     return options;
