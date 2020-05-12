@@ -773,6 +773,13 @@ The `login` action flow is as follows:
    Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Login page, when possible, will send the signal in cases of both success or failure.
 5. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
+The `login` action will be triggered when the Reader clicks on a button with the `subscriptions-action="login"` attribute. For example:
+```html
+<button subscriptions-action="login">
+  Already subscribed? Login now
+</button>
+```
+
 
 ### `subscribe`
 The `subscribe` flow is as follows:
@@ -792,6 +799,13 @@ The `subscribe` flow is as follows:
    Notice the use of a URL hash parameter `success`. The value is either `true` or `false` depending on whether the login succeeds or is abandoned. Ideally the Subscribe page, when possible, will send the signal in cases of both success or failure.
 4. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
+The `subscribe` action will be triggered when the Reader clicks on a button with the `subscriptions-action="subscribe"` attribute. For example:
+```html
+<button subscriptions-action="subscribe">
+  Subscribe now
+</button>
+```
+
 ## Analytics
 
 The `amp-subscriptions` component triggers the following analytics signals:
@@ -808,7 +822,7 @@ The `amp-subscriptions` component triggers the following analytics signals:
 
 3. `subscriptions-service-activated`
 
-- Triggered when a configured service is selected and activated for use. See [Service Score Factors][9].
+- Triggered when a configured service is selected and activated for use. See [service score factors][9].
 - Data: `serviceId` of the selected service.
 
 4. `subscriptions-entitlement-resolved`
@@ -838,7 +852,7 @@ The `amp-subscriptions` component triggers the following analytics signals:
 
 9. `subscriptions-action-delegated`
 
-- Triggered just before a delegated service action is handed off to the other service. See [Action Delegation][16].
+- Triggered just before a delegated service action is handed off to the other service. See `[subscription-service][15]`.
 - Data: `serviceId` and the delegated `action` of the selected service.
 
 10. `subscriptions-action-ActionName-started`
@@ -891,5 +905,4 @@ The `amp-subscriptions` component triggers the following analytics signals:
 [12]: #actions
 [13]: #url-variables
 [14]: #combining-the-amp-reader-id-with-publisher-cookies
-[15]: #action-markup
-[16]: #action-delegation
+[15]: #subscription-service
