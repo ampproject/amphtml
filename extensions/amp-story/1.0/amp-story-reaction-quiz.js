@@ -18,13 +18,10 @@ import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
-
-/** @const {string} */
-const TAG = 'amp-story-reaction-quiz';
 
 /**
  * Generates the template for the quiz.
@@ -78,13 +75,18 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(
+      this.element,
+      dev().assertElement(this.rootEl_),
+      CSS
+    );
   }
 
   /** @override */
   buildComponent(element) {
     this.rootEl_ = buildQuizTemplate(element);
     this.attachContent_(this.rootEl_);
+    return this.rootEl_;
   }
 
   /**
@@ -103,8 +105,8 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
     // First child must be heading h1-h3
     if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
-      dev().error(
-        TAG,
+      devAssert(
+        false,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
       this.rootEl_.removeChild(promptContainer);
@@ -119,9 +121,10 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     }
 
     const options = toArray(this.element.querySelectorAll('option'));
-    if (options.length < 2 || options.length > 4) {
-      dev().error(TAG, 'Improper number of options');
-    }
+    devAssert(
+      options.length >= 2 && options.length <= 4,
+      'Improper number of options'
+    );
 
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
@@ -131,9 +134,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     });
     options.forEach((option, index) => this.configureOption_(option, index));
 
-    if (this.element.children.length !== 0) {
-      dev().error(TAG, 'Too many children');
-    }
+    devAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**
@@ -188,23 +189,21 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
   /**
    * @override
    */
-  updateOptionPercentages_(responseData) {
-    if (!responseData) {
+  updateOptionPercentages_(optionsData) {
+    if (!optionsData) {
       return;
     }
 
-    const options = toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
-    );
+    const optionElements = this.getOptionElements();
 
-    const percentages = this.preprocessPercentages_(responseData);
+    const percentages = this.preprocessPercentages_(optionsData);
 
-    toArray(responseData['responses']).forEach((response) => {
+    optionsData.forEach((optionData, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      if (options[response['reactionValue']]) {
-        options[response['reactionValue']].querySelector(
+      if (optionElements[index]) {
+        optionElements[index].querySelector(
           '.i-amphtml-story-reaction-quiz-percentage-text'
-        ).textContent = `${percentages[response['reactionValue']]}%`;
+        ).textContent = `${percentages[index]}%`;
       }
     });
 
