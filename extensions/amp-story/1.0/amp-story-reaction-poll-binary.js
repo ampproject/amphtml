@@ -20,6 +20,7 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-story-reaction-poll-binary';
@@ -71,7 +72,11 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    createShadowRootWithStyle(
+      this.element,
+      dev().assertElement(this.rootEl_),
+      CSS
+    );
   }
 
   /** @override */
@@ -107,9 +112,11 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
   adaptFontSize_(root) {
     this.mutateElement(() => {
       let largestFontSize = FontSize.EMOJI;
-      scopedQuerySelectorAll(
-        root,
-        '.i-amphtml-story-reaction-option-title > span'
+      toArray(
+        scopedQuerySelectorAll(
+          dev().assertElement(root),
+          '.i-amphtml-story-reaction-option-title > span'
+        )
       ).forEach((e) => {
         if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
           largestFontSize = FontSize.EMOJI;
@@ -138,7 +145,7 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    * @private
    */
   generateOption_(option) {
-    const convertedOption = buildOptionTemplate(this.rootEl_);
+    const convertedOption = buildOptionTemplate(this.element);
 
     const optionText = scopedQuerySelector(
       convertedOption,
