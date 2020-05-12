@@ -95,7 +95,15 @@ async function prCheck(cb) {
     runCheck('gulp check-sourcemaps');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+  if (buildTargets.has('RUNTIME') || buildTargets.has('EXTENSION_GENERATOR')) {
+    runCheck('gulp make-extension --name=amp-test-generated-extension');
+  }
+
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('EXTENSION_GENERATOR') ||
+    buildTargets.has('UNIT_TEST')
+  ) {
     runCheck('gulp unit --local_changes --headless');
   }
 
@@ -111,7 +119,11 @@ async function prCheck(cb) {
     runCheck('gulp integration --nobuild --compiled --headless');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('EXTENSION_GENERATOR') ||
+    buildTargets.has('VALIDATOR')
+  ) {
     runCheck('gulp validator');
   }
 
