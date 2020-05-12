@@ -647,6 +647,7 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
+    this.maybeChangeHeight_ = true;
     dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }

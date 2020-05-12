@@ -1992,12 +1992,26 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(toggle).calledOnceWith(true, {startTime: 42});
       });
 
+      it('should not schedule it to turn on if already laid out when enters viewport', () => {
+        stubInA4A(false);
+        const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
+        const toggle = env.sandbox.spy(element, 'toggleLoading');
+        element.layoutCount_ = 1;
+        element.viewportCallback(true);
+        clock.tick(1000);
+
+        expect(timerDelay).to.have.not.been.called;
+        expect(toggle).to.have.not.been.called;
+      });
+
       it('should NOT turn on when enters viewport but already laid out', () => {
         stubInA4A(false);
+        const timerDelay = env.sandbox.spy(Services.timerFor(win), 'delay');
         const toggle = env.sandbox.spy(element, 'toggleLoading');
         element.viewportCallback(true);
         element.layoutCount_ = 1;
         clock.tick(1000);
+        expect(timerDelay).to.have.been.called;
         expect(toggle).to.have.not.been.called;
       });
 

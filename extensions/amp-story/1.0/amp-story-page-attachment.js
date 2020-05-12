@@ -206,6 +206,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       },
       true /** useCapture */
     );
+
+    // Closes the remote attachment drawer when navigation deeplinked to an app.
+    if (this.type_ === AttachmentType.REMOTE) {
+      const ampdoc = this.getAmpDoc();
+      ampdoc.onVisibilityChanged(() => {
+        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+    }
   }
 
   /**

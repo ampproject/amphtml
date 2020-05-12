@@ -489,7 +489,9 @@ function expandExtraUrlParams(
         .then((value) => (params[key] = value));
       requestPromises.push(request);
     } else if (isArray(value)) {
-      value.forEach((_, index) => expandObject(value, index));
+      /** @type {!Array} */ (value).forEach((_, index) =>
+        expandObject(value, index)
+      );
     } else if (isObject(value) && value !== null) {
       Object.keys(value).forEach((key) => expandObject(value, key));
     }

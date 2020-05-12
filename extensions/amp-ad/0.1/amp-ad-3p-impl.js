@@ -244,14 +244,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach((p) => {
+      /** @type {!Array} */ (this.config.prefetch).forEach((p) => {
         preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
       preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach((p) => {
+      /** @type {!Array} */ (this.config.preconnect).forEach((p) => {
         preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }

@@ -195,8 +195,9 @@
       "url": "examples/visual-tests/amp-list/amp-list.amp.html",
       "name": "AMP List and Mustache",
       "loading_complete_selectors": [
-        ".list1",
-        ".list2"
+        "#list1 > div[role='list']",
+        "#list2 > div[role='list']",
+        "#list3 > div[role='list']",
       ],
       "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
@@ -665,8 +666,8 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-quiz-sizing-positioning.html",
-      "name": "amp-story-quiz: sizing and positioning",
+      "url": "examples/visual-tests/amp-story/amp-story-reaction-quiz-sizing-positioning.html",
+      "name": "amp-story-reaction-quiz: sizing and positioning",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",

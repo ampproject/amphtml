@@ -18,7 +18,6 @@ package org.ampproject;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
-import com.google.javascript.jscomp.CustomPassExecutionTime;
 import com.google.javascript.jscomp.FlagUsageException;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
@@ -27,7 +26,7 @@ import java.io.IOException;
 
 
 /**
- * Adds a custom pass for Tree shaking `dev.fine` and `dev.assert` calls.
+ * Sets custom closure compiler flags that cannot be set via the command line.
  */
 public class AmpCommandLineRunner extends CommandLineRunner {
 
@@ -37,23 +36,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean typecheck_only = false;
 
   private boolean pseudo_names = false;
-
-  private boolean is_production_env = true;
-
-  /**
-   * List of string suffixes to eliminate from the AST.
-   */
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev$$module$src$log().assert()",
-      "dev$$module$src$log().fine()",
-      "dev$$module$src$log().assertElement()",
-      "dev$$module$src$log().assertString()",
-      "dev$$module$src$log().assertNumber()",
-      "dev$$module$src$log().assertArray()",
-      "dev$$module$src$log().assertBoolean()",
-      "devAssert$$module$src$log()",
-      "user$$module$src$log().fine()"
-      );
 
   protected AmpCommandLineRunner(String[] args) {
     super(args);
@@ -65,8 +47,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
-    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes);
-    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
@@ -106,8 +86,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     for (String arg : args) {
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
-      } else if (arg.contains("FORTESTING=true")) {
-        runner.is_production_env = false;
       } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
       }

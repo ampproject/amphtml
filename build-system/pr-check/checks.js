@@ -57,6 +57,8 @@ async function main() {
     timedExecOrDie('gulp server-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
+    timedExecOrDie('gulp check-sourcemaps');
+    timedExecOrDie('gulp performance-urls');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -67,6 +69,7 @@ async function main() {
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
+    timedExecOrDie('gulp performance-urls');
 
     if (buildTargets.has('AVA')) {
       timedExecOrDie('gulp ava');
@@ -101,6 +104,7 @@ async function main() {
     if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
+      timedExecOrDie('gulp check-sourcemaps');
     }
   }
 

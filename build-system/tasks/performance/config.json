@@ -1,14 +1,17 @@
 {
   "headless": true,
-  "runs": 100,
+  "runs": 50,
   "handlers": [
     {
       "handlerName": "defaultHandler",
-      "urls": []
+      "urls": ["http://localhost:8000/examples/bind/basic.amp.html"]
     },
     {
       "handlerName": "analyticsHandler",
-      "urls": [],
+      "urls": [
+        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-basic.html",
+        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-multiple.html"
+      ],
       "timeout": 2000,
       "extraUrlParam": {
         "analytics": "amp-analytics-performance-param"

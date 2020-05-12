@@ -338,10 +338,9 @@ export class Resource {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build
         // so check if we're "ready for layout" (measured and built) here.
-        if (this.intersect_) {
-          this.state_ = this.hasBeenMeasured()
-            ? ResourceState.READY_FOR_LAYOUT
-            : ResourceState.NOT_LAID_OUT;
+        if (this.intersect_ && this.hasBeenMeasured()) {
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.element.onMeasure(/* sizeChanged */ true);
         } else {
           this.state_ = ResourceState.NOT_LAID_OUT;
         }

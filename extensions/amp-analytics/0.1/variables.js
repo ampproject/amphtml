@@ -218,7 +218,8 @@ export class VariableService {
         'DateTimeFormat' in this.ampdoc_.win.Intl
       ) {
         // It could be undefined (i.e. IE11)
-        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+        tzCode = new this.ampdoc_.win.Intl.DateTimeFormat().resolvedOptions()
+          .timeZone;
       }
 
       return tzCode;
