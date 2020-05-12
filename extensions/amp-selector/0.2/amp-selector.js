@@ -294,6 +294,8 @@ function OptionShim(props) {
   useLayoutEffect(() => {
     domElement.setAttribute('role', role);
   }, [domElement, role]);
+
+  return <div></div>;
 }
 
 /**
