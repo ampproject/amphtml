@@ -20,14 +20,14 @@ const through = require('through2');
 const {red, cyan, yellow} = require('ansi-colors');
 
 /**
- * Searches for the identifier "$$module$", which Closure uses to uniquely
+ * Searches for the identifier "module$", which Closure uses to uniquely
  * reference module imports. If any are found, that means Closure couldn't
  * import the module correctly.
  *
  * @return {!Stream}
  */
 exports.checkForUnknownDeps = function () {
-  const regex = /[\w$]+?module\$[\w$]+/;
+  const regex = /[\w$]*module\$[\w$]+/;
 
   return through.obj(function (file, encoding, cb) {
     const contents = file.contents.toString();
