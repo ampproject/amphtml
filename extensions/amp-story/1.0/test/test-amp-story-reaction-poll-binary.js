@@ -89,6 +89,19 @@ describes.realWin(
       });
     });
 
+    it('should fill the content of the options', async () => {
+      ampStoryPoll.element.setAttribute('option-1-text', 'Fizz');
+      ampStoryPoll.element.setAttribute('option-2-text', 'Buzz');
+      ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain(
+        'Fizz'
+      );
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain(
+        'Buzz'
+      );
+    });
+
     it('should enter the post-interaction state on option click', async () => {
       addConfigToReaction(ampStoryPoll, 2);
       ampStoryPoll.buildCallback();
@@ -117,6 +130,36 @@ describes.realWin(
 
       expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50%');
       expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('50%');
+    });
+
+    it('should change the font-size wih the emoji content', async () => {
+      ampStoryPoll.element.setAttribute('option-1-text', '🧛');
+      ampStoryPoll.element.setAttribute('option-2-text', '🧛');
+      ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+      expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
+        '--post-select-scale-variable: 2'
+      );
+    });
+
+    it('should change the font-size with one line content', async () => {
+      ampStoryPoll.element.setAttribute('option-1-text', 'This');
+      ampStoryPoll.element.setAttribute('option-2-text', 'That');
+      ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+      expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
+        '--post-select-scale-variable: 1.14'
+      );
+    });
+
+    it('should change the font-size with two line content', async () => {
+      ampStoryPoll.element.setAttribute('option-1-text', 'This is one');
+      ampStoryPoll.element.setAttribute('option-2-text', 'That is two');
+      ampStoryPoll.buildCallback();
+      await ampStoryPoll.layoutCallback();
+      expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
+        '--post-select-scale-variable: 1'
+      );
     });
   }
 );
