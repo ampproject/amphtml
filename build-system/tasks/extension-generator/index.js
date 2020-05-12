@@ -104,6 +104,7 @@ describes.realWin(
   '${name}',
   {
     amp: {
+      runtimeOn: true,
       extensions: ['${name}'],
     },
   },
@@ -120,7 +121,7 @@ describes.realWin(
     });
 
     it('should have hello world when built', () => {
-      element.build();
+      await element.whenBuilt();
       expect(element.querySelector('div').textContent).to.equal('hello world');
     });
   }
