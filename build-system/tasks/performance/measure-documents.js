@@ -242,7 +242,6 @@ async function setupAdditionalHandlers(
             if (!handlerOptions.endTime) {
               Object.assign(handlerOptions, {
                 endTime,
-                'timeout': 0,
               });
               // Resolve and short circuit setTimeout
               resolve();
