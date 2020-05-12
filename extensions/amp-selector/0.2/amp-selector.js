@@ -288,7 +288,7 @@ function OptionShim(props) {
 
   useLayoutEffect(() => {
     toggleAttribute(domElement, 'disabled', isDisabled);
-    toggleAttribute(domElement, 'aria-disabled', isDisabled);
+    domElement.setAttribute('aria-disabled', !!isDisabled);
   }, [domElement, isDisabled]);
 
   useLayoutEffect(() => {
@@ -310,12 +310,12 @@ function SelectorShim(props) {
 
   useLayoutEffect(() => {
     toggleAttribute(domElement, 'multiple', multiple);
-    toggleAttribute(domElement, 'aria-multiselectable', multiple);
+    domElement.setAttribute('aria-multiselectable', !!multiple);
   }, [domElement, multiple]);
 
   useLayoutEffect(() => {
     toggleAttribute(domElement, 'disabled', disabled);
-    toggleAttribute(domElement, 'aria-disabled', disabled);
+    domElement.setAttribute('aria-disabled', !!disabled);
   }, [domElement, disabled]);
 
   useLayoutEffect(() => {
