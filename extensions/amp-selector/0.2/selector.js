@@ -73,6 +73,7 @@ export function Selector(props) {
       aria-disabled={disabled}
       aria-multiselectable={multiple}
       disabled={disabled}
+      multiple={multiple}
     >
       <SelectorContext.Provider value={context}>
         {children}
