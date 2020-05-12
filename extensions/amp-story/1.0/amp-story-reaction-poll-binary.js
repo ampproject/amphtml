@@ -117,8 +117,6 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
           '.i-amphtml-story-reaction-option-title > span'
         )
       ).forEach((e) => {
-        console.log(e.textContent, e./*OK*/ clientHeight);
-
         if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
           largestFontSize = FontSize.EMOJI;
         } else if (
@@ -136,7 +134,6 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
           largestFontSize / FontSize.DOUBLE_LINE
         ).toFixed(2)} !important;`
       );
-      console.log(largestFontSize, largestFontSize / FontSize.DOUBLE_LINE);
     });
   }
 
