@@ -27,8 +27,7 @@ import dev.amp.validator.exception.MaxParseNodesException;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
 import dev.amp.validator.utils.TagSpecUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -290,8 +289,8 @@ public class AMPHtmlHandler extends DefaultHandler {
         if (!this.context.getTagStack().hasAncestor("TEMPLATE")
           && this.context.getTagStack().isScriptTypeJsonChild()) {
             try {
-                new JSONObject(text);
-            } catch (JSONException e) {
+                OBJECT_MAPPER.readTree(text);
+            } catch (IOException e) {
                 List<String> params = new ArrayList<>();
                 this.context.addWarning(
                         ValidatorProtos.ValidationError.Code.INVALID_JSON_CDATA,
@@ -372,5 +371,10 @@ public class AMPHtmlHandler extends DefaultHandler {
      * Characters can be called multiple times per tag.
      */
     private StringBuilder charactersBuilder;
+
+    /**
+     * Jackson ObjectMapper instance.
+     */
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 }
 
