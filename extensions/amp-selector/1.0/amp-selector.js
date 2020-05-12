@@ -86,7 +86,17 @@ class AmpSelector extends PreactBaseElement {
           'value',
           []
         ));
-        const toggleValue = toggle(index, initialValue, options, opt_select);
+        const isMultiple = /** @type {boolean} */ (this.getProp(
+          'multiple',
+          false
+        ));
+        const toggleValue = toggle(
+          index,
+          initialValue,
+          options,
+          isMultiple,
+          opt_select
+        );
         if (!toggleValue) {
           return;
         }
@@ -153,8 +163,8 @@ function getOptionState(element, mu) {
           '[option]'
         )
     )
-    .forEach((child) => {
-      const option = child.getAttribute('option');
+    .forEach((child, index) => {
+      const option = child.getAttribute('option') || index.toString();
       const selected = child.hasAttribute('selected');
       const disabled = child.hasAttribute('disabled');
       const props = {
@@ -208,11 +218,12 @@ function fireSelectEvent(win, action, el, option, value, trust) {
  * @param {number} index
  * @param {!Array<string>} value
  * @param {Array<string>} options
+ * @param {boolean} isMultiple
  * @param {boolean=} opt_select
  * @return {JsonObject|undefined}
  */
-function toggle(index, value, options, opt_select) {
-  userAssert(index, "'index' must be specified");
+function toggle(index, value, options, isMultiple, opt_select) {
+  userAssert(typeof index === 'number', "'index' must be specified");
   userAssert(index >= 0, "'index' must be greater than 0");
   userAssert(
     index < options.length,
@@ -224,7 +235,11 @@ function toggle(index, value, options, opt_select) {
     if (opt_select == false) {
       return;
     }
-    value.push(option);
+    if (isMultiple) {
+      value.push(option);
+    } else {
+      value = [option];
+    }
   } else {
     if (opt_select == true) {
       return;
