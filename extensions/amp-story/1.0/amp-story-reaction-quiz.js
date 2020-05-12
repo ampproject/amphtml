@@ -134,7 +134,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
    * adds styling and answer choices,
    * and adds it to the quiz element.
    *
-   * @param {!Map<string, object>} option
+   * @param {!./amp-story-reaction.OptionConfigType} option
    * @param {number} index
    * @private
    */
@@ -145,12 +145,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     convertedOption.querySelector(
       '.i-amphtml-story-reaction-quiz-answer-choice'
     ).textContent = this.answerChoiceOptions_[index];
-    convertedOption.optionIndex_ = option.get('optionIndex');
+    convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-reaction-quiz-option-text');
-    optionText.textContent = option.get('text');
+    optionText.textContent = option['text'];
     convertedOption.appendChild(optionText);
 
     // Add text container for percentage display
@@ -160,7 +160,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     );
     convertedOption.appendChild(percentageText);
 
-    if (option.get('correct')) {
+    if (option['correct']) {
       convertedOption.setAttribute('correct', 'correct');
     }
 
