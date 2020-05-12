@@ -60,6 +60,11 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       env.sandbox
         .stub(Services, 'cidForDoc')
         .resolves({get: () => Promise.resolve('cid')});
@@ -73,11 +78,6 @@ describes.realWin(
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
-      });
-
-      const localizationService = new LocalizationService(ampStoryQuizEl);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
       });
 
       storyEl = win.document.createElement('amp-story');

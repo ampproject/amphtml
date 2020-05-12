@@ -170,9 +170,10 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#find-element}
    *
    * @param {string} unusedSelector
+   * @param {number=} unusedTimeout
    * @return {!Promise<!ElementHandle>}
    */
-  async findElement(unusedSelector) {}
+  async findElement(unusedSelector, unusedTimeout) {}
 
   /**
    * The Find Elements command is used to find all elements matching the

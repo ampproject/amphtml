@@ -59,7 +59,7 @@ feature_tests/regexps.html:46:2 The attribute 'href' in tag 'link rel=stylesheet
 |
 |    <!--
 |    href value_regex: "https://fonts\\.googleapis\\.com/css2?\\?.*|https://fast\\.fonts\\.net/.*"
-|    The first three examples are valid, the third example is invalid.
+|    The first three examples are valid, the fourth example is invalid.
 |    -->
 |    <link rel="stylesheet" type="text/css"
 |          href="https://fonts.googleapis.com/css?foobar">
