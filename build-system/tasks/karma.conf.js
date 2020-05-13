@@ -201,6 +201,7 @@ module.exports = {
       browserName: 'chrome',
       platform: 'Windows 10',
       version: 'latest',
+      extendedDebugging: true,
       ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Chrome_Beta: {

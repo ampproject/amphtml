@@ -36,6 +36,8 @@ kill "$PID"
 
 # Clean up files.
 if [[ -f "$LOG_FILE" ]]; then
+  echo "$LOG_PREFIX Contents of log file $(CYAN "$LOG_FILE")"
+  cat "$LOG_FILE"
   echo "$LOG_PREFIX Cleaning up log file $(CYAN "$LOG_FILE")"
   rm "$LOG_FILE"
 fi
