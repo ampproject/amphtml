@@ -21,13 +21,15 @@
 
 package dev.amp.validator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.ExitOnFirstErrorException;
 import dev.amp.validator.exception.MaxParseNodesException;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
 import dev.amp.validator.utils.TagSpecUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -290,7 +292,7 @@ public class AMPHtmlHandler extends DefaultHandler {
           && this.context.getTagStack().isScriptTypeJsonChild()) {
             try {
                 OBJECT_MAPPER.readTree(text);
-            } catch (IOException e) {
+            } catch (JsonProcessingException e) {
                 List<String> params = new ArrayList<>();
                 this.context.addWarning(
                         ValidatorProtos.ValidationError.Code.INVALID_JSON_CDATA,
