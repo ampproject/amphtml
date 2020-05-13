@@ -62,7 +62,7 @@ class AmpSelector extends PreactBaseElement {
         'value',
         []
       ));
-      const {value, option} = select(delta, initialValue, options);
+      const {value, option} = selectByDelta(delta, initialValue, options);
       handleSelect(value, option, trust);
     });
 
@@ -73,7 +73,7 @@ class AmpSelector extends PreactBaseElement {
         'value',
         []
       ));
-      const {value, option} = select(delta, initialValue, options);
+      const {value, option} = selectByDelta(delta, initialValue, options);
       handleSelect(value, option, trust);
     });
 
@@ -237,12 +237,22 @@ function toggle(index, value, options, opt_select) {
 }
 
 /**
+ * This method returns the new selected state by modifying
+ * at most one value of the current selected state by the given delta.
+ * The modification is done in FIFO order. When no values are selected,
+ * the new selected state becomes the option at the given delta.
+ *
+ * ex: (1, [0, 2], [0, 1, 2, 3]) => [2, 1]
+ * ex: (-1, [2, 1], [0, 1, 2, 3]) => [1]
+ * ex: (2, [2, 1], [0, 1, 2, 3]) => [1, 0]
+ * ex: (-1, [], [0, 1, 2, 3]) => [3]
+ *
  * @param {number} delta
  * @param {!Array<string>} value
  * @param {Array<string>} options
  * @return {{value: Array<string>, option: string}|undefined}
  */
-function select(delta, value, options) {
+function selectByDelta(delta, value, options) {
   const previous = options.indexOf(value.shift());
 
   // If previousIndex === -1 is true, then a negative delta will be offset
