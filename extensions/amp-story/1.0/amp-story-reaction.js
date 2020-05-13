@@ -100,8 +100,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
    * @param {!ReactionType} type
+   * @param {!Array<number>} bounds the bounds on number of options, inclusive
    */
-  constructor(element, type) {
+  constructor(element, type, bounds = [2, 4]) {
     super(element);
 
     /** @protected @const {ReactionType} */
@@ -121,6 +122,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
+
+    /** @private {!Array<number>} min and max number of options, inclusive */
+    this.optionBounds_ = bounds;
 
     /** @private {?Array<!Element>} */
     this.optionElements_ = null;
@@ -191,10 +195,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Reads the element attributes prefixed with option- and returns them as a list.
    * eg: [
    *      {optionIndex: 0, text: 'Koala'},
-   *      {optionIndex: 1, text: 'Developers', correct: 'correct'}
+   *      {optionIndex: 1, text: 'Developers', correct: ''}
    *    ]
    * @protected
-   * @return {!Array<!OptionConfigType>}
+   * @return {?Array<!OptionConfigType>}
    */
   parseOptions_() {
     const options = [];
@@ -203,13 +207,27 @@ export class AmpStoryReaction extends AMP.BaseElement {
       if (attr.name.match(/^option-\d+-\w+$/)) {
         const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
+        // Add all options in order on the array with correct index.
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
         options[optionNumber - 1][splitParts[2]] = attr.value;
       }
     });
-    return options;
+    if (
+      options.length >= this.optionBounds_[0] &&
+      options.length <= this.optionBounds_[1]
+    ) {
+      return options;
+    }
+    devAssert(
+      options.length >= 2 && options.length <= 4,
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${options.length}.`
+    );
+    dev().error(
+      TAG,
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${this.options_.length}.`
+    );
   }
 
   /**
