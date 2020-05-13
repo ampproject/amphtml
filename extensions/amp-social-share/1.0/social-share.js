@@ -193,7 +193,6 @@ function handleActivation(finalEndpoint) {
 function getQueryString(endpoint) {
   const q = endpoint.indexOf('?');
   const h = endpoint.indexOf('#');
-  console.log(q, h);
   if (h < q) {
     return endpoint.substr(q);
   } else {
