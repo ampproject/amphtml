@@ -221,7 +221,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return options;
     }
     devAssert(
-      options.length >= 2 && options.length <= 4,
+      options.length >= this.optionBounds_[0] &&
+        options.length <= this.optionBounds_[1],
       `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${options.length}.`
     );
     dev().error(
