@@ -39,11 +39,11 @@ const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
-async function launchWebServer_(minified) {
+async function launchWebServer_() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.debug},
-    {compiled: minified}
+    {compiled: argv.compiled}
   );
 }
 
@@ -84,11 +84,11 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime(/* minified */ !!argv.compiled);
+    await buildRuntime();
   }
 
   // start up web server
-  await launchWebServer_(/* minified */ argv.compiled);
+  await launchWebServer_();
 
   // run tests
   if (!argv.watch) {
@@ -154,7 +154,7 @@ e2e.flags = {
   'nobuild':
     '  Skips building the runtime via `gulp (build|dist) --fortesting`',
   'extensions': '  Builds only the listed extensions.',
-  'compiled': '  Runs the tests using minified js',
+  'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
