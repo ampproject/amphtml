@@ -329,6 +329,8 @@ export class Placement {
   isLayoutViewportNarrow_(element) {
     const viewportSize = Services.viewportForDoc(element).getSize();
 
+    // The threshold aligns with the one for Non-AMP website. Checkout
+    // isLayoutViewportNarrow in responsive_util.js for internal reference.
     return viewportSize.width < 488;
   }
 }

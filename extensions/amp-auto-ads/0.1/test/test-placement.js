@@ -608,7 +608,7 @@ describes.realWin(
         });
       });
 
-      it('should set the full-with responsive attributes for responsive enabled mobile users.', () => {
+      it('should set the full-with responsive attributes for responsive enabled users on narrow viewport.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
@@ -618,7 +618,7 @@ describes.realWin(
         );
         viewportMock
           .expects('getSize')
-          .returns({width: 411, height: 823})
+          .returns({width: 487, height: 823})
           .atLeast(1);
 
         const placements = getPlacementsFromConfigObj(ampdoc, {
@@ -663,7 +663,7 @@ describes.realWin(
           });
       });
 
-      it('should not set the full-with responsive attributes for responsive enabled desktop users.', () => {
+      it('should not set the full-with responsive attributes for responsive enabled users on wide viewport.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
@@ -673,7 +673,7 @@ describes.realWin(
         );
         viewportMock
           .expects('getSize')
-          .returns({width: 1620, height: 1300})
+          .returns({width: 488, height: 1000})
           .atLeast(1);
 
         const placements = getPlacementsFromConfigObj(ampdoc, {
