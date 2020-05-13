@@ -193,7 +193,8 @@ async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
 
   const ampSwBaseTempDir = path.join(outputTempDir, 'base/dist/sw');
 
-  const ampSwNpmPackageJson = (await fetch(AMP_SW_NPM_PACKAGE_URL)).json();
+  const ampSwNpmPackageResponse = await fetch(AMP_SW_NPM_PACKAGE_URL);
+  const ampSwNpmPackageJson = await ampSwNpmPackageResponse.json();
   const {latest} = ampSwNpmPackageJson['dist-tags'];
   const ampSwTarballUrl = ampSwNpmPackageJson.versions[latest].dist.tarball;
 
