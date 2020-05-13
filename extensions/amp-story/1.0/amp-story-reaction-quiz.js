@@ -21,7 +21,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
 
 /**
  * Generates the template for the quiz.
