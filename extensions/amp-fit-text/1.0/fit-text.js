@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
-import {px, setStyle, setStyles} from '../../../src/style';
+import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
@@ -138,6 +138,7 @@ function calculateFontSize(
  */
 function getOverflowStyle(measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/ scrollHeight > maxHeight;
+  console.log(overflown);
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
   if (overflown) {
@@ -147,6 +148,6 @@ function getOverflowStyle(measurer, maxHeight, fontSize) {
       'maxHeight': px(lineHeight * numberOfLines),
     });
   } else {
-    setStyles(measurer, {});
+    resetStyles(measurer, ['lineClamp', '-webkit-line-clamp', 'maxHeight']);
   }
 }
