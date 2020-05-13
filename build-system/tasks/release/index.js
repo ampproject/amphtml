@@ -241,7 +241,7 @@ async function prependConfig_(outputDir) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
     ([rtvPrefix]) => {
       const rtvNumber = `${rtvPrefix}${VERSION}`;
-      const rtvPath = path.join(outputDir, 'org-cdn', rtvNumber);
+      const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
       return fs.pathExistsSync(path.join(rtvPath));
     }
   );
