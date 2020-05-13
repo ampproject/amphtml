@@ -33,8 +33,8 @@ class AmpTimeago extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-timeago-v2'),
-      'expected amp-timeago-v2 experiment to be enabled'
+      isExperimentOn(this.win, 'amp-timeago-bento'),
+      'expected amp-timeago-bento experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }
@@ -53,6 +53,6 @@ AmpTimeago['props'] = {
   'cutoff': {attr: 'cutoff', type: 'number'},
 };
 
-AMP.extension(TAG, '0.2', (AMP) => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpTimeago);
 });

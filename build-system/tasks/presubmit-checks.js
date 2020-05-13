@@ -1082,7 +1082,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/0.2/timeago.js',
+      'extensions/amp-timeago/1.0/timeago.js',
     ],
   },
   '\\.expandStringSync\\(': {

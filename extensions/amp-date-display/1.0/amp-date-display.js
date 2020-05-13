@@ -71,8 +71,8 @@ class AmpDateDisplay extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-date-display-v2'),
-      'expected amp-date-display-v2 experiment to be enabled'
+      isExperimentOn(this.win, 'amp-date-display-bento'),
+      'expected amp-date-display-bento experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }
@@ -94,6 +94,6 @@ AmpDateDisplay['props'] = {
   'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
 };
 
-AMP.extension(TAG, '0.2', (AMP) => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpDateDisplay);
 });
