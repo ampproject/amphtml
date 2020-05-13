@@ -1,5 +1,12 @@
 {
-  "experimentA": {},
+  "experimentA": {
+    "name": "IntersectionObserverPolyfillInabox",
+    "environment": "INABOX",
+    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL_INABOX",
+    "issue": "https://github.com/ampproject/amphtml/issues/27807",
+    "expirationDateUTC": "2020-06-30",
+    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
+  },
   "experimentB": {},
   "experimentC": {}
 }
