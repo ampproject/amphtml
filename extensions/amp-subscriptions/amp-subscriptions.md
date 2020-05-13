@@ -313,7 +313,12 @@ In the markup the actions can be delegated to other services for them to execute
 e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
 
 ```html
-  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+<button
+  subscriptions-action="subscribe"
+  subscriptions-service="subscribe.google.com"
+>
+  Subscribe
+</button>
 ```
 
 ### Action decoration
