@@ -23,7 +23,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-timeago:0.2'],
+      extensions: ['amp-timeago:1.0'],
     },
   },
   (env) => {
@@ -52,7 +52,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-timeago-v2', true);
+      toggleExperiment(win, 'amp-timeago-bento', true);
 
       element = win.document.createElement('amp-timeago');
       element.setAttribute('layout', 'fixed');
@@ -61,7 +61,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-timeago-v2', false);
+      toggleExperiment(win, 'amp-timeago-bento', false);
     });
 
     it('should renders display 2 days ago when built', async () => {
