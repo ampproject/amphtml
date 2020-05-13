@@ -100,8 +100,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
    * @param {!ReactionType} type
+   * @param {!Array<number>} bounds the bounds on number of options, inclusive
    */
-  constructor(element, type) {
+  constructor(element, type, bounds = [2, 4]) {
     super(element);
 
     /** @protected @const {ReactionType} */
@@ -122,8 +123,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {!Array<number>} min and max number of options, inclusive */
-    this.optionBounds_ = [2, 4];
+    /** @private {!Array<number>} min and max number of options, inclusive */
+    this.optionBounds_ = bounds;
 
     /** @private {?Array<!Element>} */
     this.optionElements_ = null;
