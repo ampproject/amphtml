@@ -40,7 +40,7 @@ export function SocialShare(props) {
   );
   const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
 
-  const type = props.type.toUpperCase();
+  const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
   const backgroundStyle = CSS[type] || CSS.DEFAULT;
   const size = {
@@ -130,7 +130,7 @@ function throwWarning(message) {
  * @return {?string}
  */
 function createEndpoint(typeConfig, baseEndpoint, props) {
-  const {params, bindings} = props;
+  const {'params': params, 'bindings': bindings} = props;
   const combinedParams = dict({...typeConfig['defaultParams'], ...params});
   const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
 
