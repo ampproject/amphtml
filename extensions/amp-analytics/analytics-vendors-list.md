@@ -44,6 +44,10 @@ Type attribute value: `alexametrics`
 
 Adds support for Alexa Certified Site Metrics. The `atrk_acct` and `domain` variables must be specified. More information can be found at [Alexa’s Certified Metrics FAQ](https://support.alexa.com/hc/en-us/sections/200063374-Certified-Site-Metrics).
 
+### Amplitude
+
+Type attribute value: `amplitude`
+
 ### AT Internet
 
 Type attribute value: `atinternet`
@@ -56,11 +60,27 @@ Type attribute value: `baiduanalytics`
 
 Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
 
+### BlueConic
+
+Type attribute value: `blueconic`
+
+### Browsi
+
+Type attribute value: `browsi`
+
 ### Burt
 
 Type attribute value: `burt`
 
 Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`. More details can be found at [burtcorp.com](http://burtcorp.com).
+
+### BySide
+
+Type attribute value: `byside`
+
+### Captain Metrics
+
+Type attribute value: `captainmetrics`
 
 ### Chartbeat
 
@@ -85,6 +105,10 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 Type attribute value: `cxense`
 
 Adds support for Cxense Insight analytics. Requires defining _var_ `siteId` with Cxense-provided _siteId_. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+### Deep.BI
+
+Type attribute value: `deepbi`
 
 ### Dynatrace
 
@@ -135,6 +159,10 @@ Type attribute value: N/A
 
 Unlike other analytics vendors, Google Tag Manager is a tag management service, and does not require the `type` attribute. Google Tag Manager is [supported](https://developers.google.com/google-ads/amp/landing-pages#google_tag_manager) in AMP. Consult the Google Tag Manager documentation for [supported tags](https://support.google.com/tagmanager/answer/6106924) and for instructions on [adding Google Tag Manager to your AMP page](https://support.google.com/tagmanager/answer/6103696).
 
+### Ibeat Analytics
+
+Type attribute value: `ibeatanalytics`
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
@@ -149,6 +177,10 @@ Additionally, the following variables must be defined:
 - `url`: HTTPS location of `amp-analytics-infonline.html`
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
+
+### ip-label
+
+Type attribute value: `iplabel`
 
 ### Keen
 
@@ -185,6 +217,10 @@ Type attribute value: `lotame`
 
 Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
 
+### Marin Software
+
+Type attribute value: `marinsoftware`
+
 ### Médiamétrie
 
 Type attribute value: `mediametrie`
@@ -196,6 +232,14 @@ Adds support for Médiamétrie tracking pages. Requires defining _var_ `serial`.
 Type attribute value: `mediarithmics`
 
 Adds support for mediarithmics. More information and configuration details can be found at `https://developer.mediarithmics.com`.
+
+### Memo
+
+Type attribute value: `memo`
+
+### Metrika
+
+Type attribute value: `metrika`
 
 ### Moat Analytics
 
@@ -209,11 +253,19 @@ Type attribute value: `mobify`
 
 Adds support for Mobify. More details for adding Mobify support can be found at [docs.mobify.com](https://docs.mobify.com/amp-sdk/latest/guides/amp-analytics/).
 
+### MoEngage
+
+Type attribute value: `moengage`
+
 ### mParticle
 
 Type attribute value: `mparticle`
 
 Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
+
+### Navegg
+
+Type attribute value: `navegg`
 
 ### New Relic
 
@@ -254,6 +306,10 @@ In the `requests` section:
 **NOTE –** There is a variation named `oewadirect` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
 [/tip]
 
+### Oracle Infinity Analytics
+
+Type attribute value: `oracleInfinityAnalytics`
+
 ### Parsely
 
 Type attribute value: `parsely`
@@ -270,6 +326,10 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 - `key`: your Permutive public API key
 
 Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+
+### Pistats
+
+Type attribute value: `piStats`
 
 ### Piano
 
@@ -295,12 +355,28 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
+### Rakam
+
+Type attribute value: `rakam`
+
+### reppublika
+
+Type attribute value: `reppublika`
+
+### Retargetly
+
+Type attribute value: `retargetly`
+
 ### Segment
 
 Type attribute value: `segment`
 
 Adds support for segment page views and events.
 To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
+
+### ShinyStat
+
+Type attribute value: `shinystat`
 
 ### SOASTA mPulse
 
@@ -316,7 +392,7 @@ Adds support for SimpleReach. Configuration details can be found at `http://docs
 
 ### Snowplow Analytics
 
-Type attribute value: `snowplow`
+Type attribute value: `snowplow`, `snowplow_v2`
 
 Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
 
@@ -356,11 +432,19 @@ Type attribute value: `umenganalytics`
 
 Adds support for Umeng+ Analytics. More details for adding Umeng+ Analytics support can be found at [dev.umeng.com](http://dev.umeng.com/udplus/js-sdkdoc#5).
 
+### Upscore
+
+Type attribute value: `upscore`
+
 ### Vpon Analytics
 
 Type attribute value: `vponanalytics`
 
 Adds support for Vpon Vpon Analytics. Configuration details can be found at [Vpon Analytics](https://cmp.vpadn.com/dmp/doc/amp_analytics.html).
+
+### Webengage
+
+Type attribute `webengage`
 
 ### Webtrekk
 
