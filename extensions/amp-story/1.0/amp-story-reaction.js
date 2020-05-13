@@ -122,6 +122,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @protected {!Array<number>} min and max number of options, inclusive */
+    this.optionBounds_ = [2, 4];
+
     /** @private {?Array<!Element>} */
     this.optionElements_ = null;
 
@@ -191,10 +194,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Reads the element attributes prefixed with option- and returns them as a list.
    * eg: [
    *      {optionIndex: 0, text: 'Koala'},
-   *      {optionIndex: 1, text: 'Developers', correct: 'correct'}
+   *      {optionIndex: 1, text: 'Developers', correct: ''}
    *    ]
    * @protected
-   * @return {!Array<!OptionConfigType>}
+   * @return {?Array<!OptionConfigType>}
    */
   parseOptions_() {
     const options = [];
@@ -209,7 +212,21 @@ export class AmpStoryReaction extends AMP.BaseElement {
         options[optionNumber - 1][splitParts[2]] = attr.value;
       }
     });
-    return options;
+    if (
+      options.length >= this.optionBounds_[0] &&
+      options.length <= this.optionBounds_[1]
+    ) {
+      console.log(options);
+
+      return options;
+    }
+    devAssert(
+      this.options_ && this.options_.length >= 2 && this.options_.length <= 4,
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${this.options_.length}.`
+    );
+    dev().error(
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${this.options_.length}.`
+    );
   }
 
   /**

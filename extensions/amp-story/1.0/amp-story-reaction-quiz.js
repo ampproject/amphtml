@@ -103,17 +103,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     if (!this.element.hasAttribute('prompt-text')) {
       this.rootEl_.removeChild(promptContainer);
     } else {
-      const prompt = document.createElement('h1');
+      const prompt = document.createElement('p');
 
       prompt.textContent = this.element.getAttribute('prompt-text');
       prompt.classList.add('i-amphtml-story-reaction-quiz-prompt');
       promptContainer.appendChild(prompt);
     }
-
-    devAssert(
-      this.options_ && this.options_.length >= 2 && this.options_.length <= 4,
-      'Improper number of options'
-    );
 
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
@@ -159,7 +154,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     );
     convertedOption.appendChild(percentageText);
 
-    if (option['correct']) {
+    if ('correct' in option) {
       convertedOption.setAttribute('correct', 'correct');
     }
 
