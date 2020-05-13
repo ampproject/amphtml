@@ -171,6 +171,11 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     if (!this.container_) {
       if (Ctor['children'] || Ctor['passthrough']) {
+        devAssert(
+          !Ctor['detached'],
+          'The AMP element cannot be rendered in detached mode ' +
+            'when configured with "children" or "passthrough" properties.'
+        );
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
