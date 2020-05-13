@@ -223,6 +223,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${this.options_.length}.`
     );
     dev().error(
+      TAG,
       `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${this.options_.length}.`
     );
   }
