@@ -608,16 +608,18 @@ describes.realWin(
         });
       });
 
-      it('should set the correct attributes for responsive enabled ads using amp-ad responsive', () => {
+      it('should set the full-with responsive attributes for responsive enabled users on narrow viewport.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
-          return Promise.resolve();
-        });
-        env.sandbox.stub(mutator.viewport_, 'getWidth').callsFake(() => 2000);
+        const viewportMock = env.sandbox.mock(
+          Services.viewportForDoc(env.win.document)
+        );
+        viewportMock
+          .expects('getSize')
+          .returns({width: 487, height: 823})
+          .atLeast(1);
 
         const placements = getPlacementsFromConfigObj(ampdoc, {
           placements: [
@@ -658,6 +660,61 @@ describes.realWin(
             expect(adElement.style.marginLeft).to.equal('');
             expect(adElement.style.marginRight).to.equal('');
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+          });
+      });
+
+      it('should not set the full-with responsive attributes for responsive enabled users on wide viewport.', () => {
+        const anchor = doc.createElement('div');
+        anchor.id = 'anId';
+        container.appendChild(anchor);
+
+        const viewportMock = env.sandbox.mock(
+          Services.viewportForDoc(env.win.document)
+        );
+        viewportMock
+          .expects('getSize')
+          .returns({width: 488, height: 1000})
+          .atLeast(1);
+
+        const placements = getPlacementsFromConfigObj(ampdoc, {
+          placements: [
+            {
+              anchor: {
+                selector: 'DIV#anId',
+              },
+              pos: 2,
+              type: 1,
+            },
+          ],
+        });
+        expect(placements).to.have.lengthOf(1);
+
+        const attributes = {
+          'type': '_ping_',
+        };
+
+        const sizing = {};
+        const adTracker = new AdTracker([], {
+          initialMinSpacing: 0,
+          subsequentMinSpacing: [],
+          maxAdCount: 10,
+        });
+
+        return placements[0]
+          .placeAd(attributes, sizing, adTracker, true)
+          .then((placementState) => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.hasAttribute('data-auto-format')).to.be.false;
+            expect(adElement.hasAttribute('data-full-width')).to.be.false;
+            expect(adElement.style.marginTop).to.equal('');
+            expect(adElement.style.marginBottom).to.equal('');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+            expect(placementState).to.equal(PlacementState.PLACED);
           });
       });
 
