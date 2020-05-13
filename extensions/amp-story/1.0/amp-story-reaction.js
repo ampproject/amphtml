@@ -206,6 +206,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       if (attr.name.match(/^option-\d+-\w+$/)) {
         const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
+        // Add all options in order on the array with correct index.
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
