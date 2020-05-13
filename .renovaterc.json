@@ -15,11 +15,11 @@
   "packageRules": [
     {
       "updateTypes": ["patch"],
-      "groupName": "subpackage dependencies (patch updates)",
+      "groupName": "subpackage dependencies (patch updates)"
     },
     {
       "updateTypes": ["minor"],
-      "groupName": "subpackage dependencies (minor updates)",
+      "groupName": "subpackage dependencies (minor updates)"
     },
 
     {
@@ -64,12 +64,12 @@
     {
       "paths": ["+(package.json)"],
       "updateTypes": ["patch"],
-      "groupName": "core dependencies (patch updates)",
+      "groupName": "core dependencies (patch updates)"
     },
     {
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
-      "groupName": "core dependencies (minor updates)",
+      "groupName": "core dependencies (minor updates)"
     },
   ]
 }
