@@ -29,8 +29,6 @@ limitations under the License.
 
 The `amp-animation` component defines and runs custom animations and effects. It relies on the [Web Animations API](https://www.w3.org/TR/web-animations/).
 
-An `amp-animation` element defines such an animation as a JSON structure.
-
 An `amp-animation` element defines animations in a JSON structure. The top-level object defines an animation process using [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and comprised of:
 
