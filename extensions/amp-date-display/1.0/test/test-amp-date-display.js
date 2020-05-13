@@ -27,7 +27,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-mustache:0.2', 'amp-date-display:0.2'],
+      extensions: ['amp-mustache:0.2', 'amp-date-display:1.0'],
     },
   },
   (env) => {
