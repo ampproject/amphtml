@@ -94,7 +94,7 @@ describes.realWin(
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(2);
     });
 
-    it('should not create the prompt and options container if there is a prompt', () => {
+    it('should not create the prompt and options container if there no prompt', () => {
       populateQuiz(ampStoryQuiz, 4, undefined);
       ampStoryQuiz.buildCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(1);
