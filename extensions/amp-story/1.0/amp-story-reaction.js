@@ -216,8 +216,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
       options.length >= this.optionBounds_[0] &&
       options.length <= this.optionBounds_[1]
     ) {
-      console.log(options);
-
       return options;
     }
     devAssert(
