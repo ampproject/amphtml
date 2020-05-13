@@ -29,42 +29,32 @@ limitations under the License.
 
 The `amp-animation` component defines and runs custom animations and effects. It relies on the [Web Animations API](https://www.w3.org/TR/web-animations/).
 
-An `amp-animation` element defines animations in a JSON structure. The top-level object defines an animation process using [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
-and comprised of:
-
-- Target element(s) referenced by a selector
-- Conditions: media query and supports condition
-- Timing properties
-- Keyframes
-
-```text
-{
-  "selector": "#target-id",
-  // Conditions
-  // Variables
-  // Timing properties
-  // Subtargets
-  ...
-  "keyframes": []
-}
-```
-
-Trigger animation start via the `trigger` attribute or an [action](#actions).
-
-The overarching process can contain any arbitrary number of animation pieces defined within the `animations` array.
+An `amp-animation` component defines animations in a JSON structure. The top-level section defines the overarching animation by declaring target element(s), execution conditions, timing properties and [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect). The overarching process can contain any arbitrary number of animation parts defined within the `animations` array. Animation parts in the animation's array may have their own target elements, execution conditions, timing properties, and keyfreames effects.
 
 ```html
 <amp-animation layout="nodisplay">
   <script type="application/json">
     {
-      ...
+      "selector": "#target-id",
+      "duration": "1s",
+      "iterations": "4",
+      "fill": "both",
+      "direction": "alternate",
       "animations": [
         {
-          // Animation 1
+          "media": "(max-width: 320px)",
+          "selector": ".target-class",
+          "easing": "cubic-bezier(0,0,.21,1)",
+          "keyframes": {
+            "transform": "rotate(var(--angle))"
+          }
         },
-        ...
         {
-          // Animation N
+          "media": "(min-width: 321px)",
+          "selector": ".target-class",
+          "delay": "var(--delay)",
+          "easing": "cubic-bezier(0,0,.21,1)",
+          "keyframes": "rotate"
         }
       ]
     }
@@ -72,7 +62,7 @@ The overarching process can contain any arbitrary number of animation pieces def
 </amp-animation>
 ```
 
-If the animation uses a single element and a single keyframe effect, the configuration is valid as a single animation definition.
+If the animation uses a single element and a single keyframes effect, the configuration is valid as a single animation definition.
 
 ```html
 <amp-animation layout="nodisplay">
@@ -108,6 +98,8 @@ If the animation uses multiple elements, but does not have a top-level animation
 </amp-animation>
 ```
 
+Trigger animation start via the `trigger` attribute or an [action](#actions).
+
 You may place `amp-animation` controlled via actions anywhere in the DOM. If the animation contains `trigger="visibility"` it must be a direct child of the `<body>`.
 
 ### Defining effects
@@ -116,7 +108,7 @@ You may place `amp-animation` controlled via actions anywhere in the DOM. If the
 
 You must declare effects as keyframes to apply animations using `amp-animations`.
 
-You may specify keyframes in amp-animation in the same way as defined in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec. You may also reference the @keyframes name defined as CSS within the `<style amp-custom>` tag.
+You may specify keyframes in amp-animation in the same way as defined in MDN's [Keyframe Formats](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats). You may also reference the @keyframes name defined as CSS within the `<style amp-custom>` tag.
 
 Some typical examples of keyframes definitions are below.
 
@@ -307,7 +299,7 @@ Animation components inherit timing properties specified for the top-level anima
 
 #### Variables and calculated expressions
 
-`amp-animation` allows use of `var()` and `calc()` expressions for timing and keyframes values.
+`amp-animation` allows use of `var()`, `calc()`, `min()` and `max()` expressions for timing and keyframes values.
 
 ```html
 <amp-animation layout="nodisplay">
@@ -355,7 +347,7 @@ In the example above:
 - While `--x` propagates into the nested animation, it is overridden. The ending translate value is `150px`.
 - `--y` is not specified anywhere in the `<amp-animation>` component. It defaults to `0px` if the query does not find it defined as CSS within the `<amp style-custom>` tags.
 
-Pollyfills apply to both `var()` and `calc()` on supported platform. For unsupported platforms, include default values for `var()` expressions.
+Pollyfills apply to both `var()` and `calc()` on supported platforms. As a best practice, include default values for `var()`.
 
 ```html
 <amp-animation layout="nodisplay">
@@ -379,7 +371,7 @@ The `amp-animation` component provides the following CSS extensions: `rand()`, `
 
 ##### CSS `index()` extension
 
-The `index()` function returns an index of the current target element in the animation effect. This is most relevant when animating multiple targets with the same effect using `selector` property. The first target matched by the `selector` will have `index 0,]`, the second will have `index 1` and so on.
+The `index()` function returns an index of the current target element in the animation effect. This is most relevant when animating multiple targets with the same effect using `selector` property. The first target matched by the `selector` will have `index 0`, the second will have `index 1` and so on.
 
 Among other uses, this property can combine with `calc()` expressions to create a staggered effect. For instance:
 
@@ -505,13 +497,13 @@ Use media queries, support conditions and switch statements for platform compati
 Specify media queries with the `media` property. This property can contain any expression allowed
 for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
 
-When specified, the animation component will only appear when met with the defined environment.
+When specified, the animation component will only execute when the environment supports the specified CSS feature. 
 
 #### Supports condition
 
 Specify supports conditions using the supports property. The support property contains any expression allowed for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
 
-When specified, the animation component will only appear when met with the defined environment.
+When specified, the animation component will only execute when the environment supports the specified CSS feature. 
 
 ### Animation `switch` statement
 
