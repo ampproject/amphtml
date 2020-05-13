@@ -66,7 +66,7 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, ReactionType.POLL);
+    super(element, ReactionType.POLL, /* bounds */ [2, 2]);
   }
 
   /** @override */
