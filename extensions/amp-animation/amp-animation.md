@@ -88,7 +88,7 @@ If the animation uses a single element and a single keyframe effect, the configu
 </amp-animation>
 ```
 
-Ff the animation uses multiple elements, but does not have a top-level animation, the configuration is valid as an array of definitions.
+If the animation uses multiple elements, but does not have a top-level animation, the configuration is valid as an array of definitions.
 
 ```html
 <amp-animation layout="nodisplay">
