@@ -30,29 +30,25 @@ export function FitText(props) {
     'children': children,
     'minFontSize': minFontSize = 6,
     'maxFontSize': maxFontSize = 72,
-    'width': width = props['style']['width'] || '100%',
-    'height': height = props['style']['height'] || '100%',
     ...rest
   } = props;
   const contentRef = useRef(null);
   const measurerRef = useRef(null);
 
-  const resize = useCallback(
-    (maxHeight, maxWidth) => {
-      if (!measurerRef.current) {
-        return;
-      }
-      const fontSize = calculateFontSize(
-        measurerRef.current,
-        Number(maxHeight),
-        Number(maxWidth),
-        minFontSize,
-        maxFontSize
-      );
-      getOverflowStyle(measurerRef.current, Number(maxHeight), fontSize);
-    },
-    [maxFontSize, minFontSize]
-  );
+  const resize = useCallback(() => {
+    if (!measurerRef.current || !contentRef.current) {
+      return;
+    }
+    const {offsetHeight, offsetWidth} = contentRef.current;
+    const fontSize = calculateFontSize(
+      measurerRef.current,
+      Number(offsetHeight),
+      Number(offsetWidth),
+      minFontSize,
+      maxFontSize
+    );
+    getOverflowStyle(measurerRef.current, Number(offsetHeight), fontSize);
+  }, [maxFontSize, minFontSize]);
 
   // Here and below, useLayoutEffect is used so intermediary font sizes
   // during resizing are resolved before the component visually updates.
@@ -73,25 +69,19 @@ export function FitText(props) {
 
   // Font size should readjust when content changes.
   useLayoutEffect(() => {
-    resize(height, width);
-  }, [children, resize, height, width]);
+    resize();
+  }, [children, resize]);
 
   return (
-    <div {...rest}>
+    <div ref={contentRef} {...rest}>
       <div
-        ref={contentRef}
         style={{
           ...styles.fitTextContent,
-          'width': px(width),
-          'height': px(height),
+          'width': '100%',
+          'height': '100%',
         }}
       >
-        <div
-          ref={measurerRef}
-          style={{
-            ...styles.fitTextContentWrapper,
-          }}
-        >
+        <div ref={measurerRef} style={styles.fitTextContentWrapper}>
           {children}
         </div>
       </div>
@@ -138,7 +128,6 @@ function calculateFontSize(
  */
 function getOverflowStyle(measurer, maxHeight, fontSize) {
   const overflown = measurer./*OK*/ scrollHeight > maxHeight;
-  console.log(overflown);
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
   if (overflown) {
