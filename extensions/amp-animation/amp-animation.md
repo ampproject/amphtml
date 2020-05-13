@@ -214,7 +214,7 @@ Most CSS `@keyframes` match the JSON inline keyframes definition in the [Web Ani
 
 - You may need vendor prefixes, such as `@-ms-keyframes {}` or `-moz-transform` for broad-platform support. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
 - In unsupported platforms, `amp-animation`'s pollyfills will fail when using calc() and var() with keyframes specified in CSS. Use fallback values in CSS to avoid this.
-- CSS extensions such as [`width()`, `height()`, `x()`, `y()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) are not available in CSS.
+- CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`, `rand()`, `index()` and `length()` are not available to keyframes.
 
 ##### White listed properties for keyframes
 
@@ -640,9 +640,7 @@ Should always be `nodisplay`.
 
 ### id [optional]
 
-An ID can be used to determine [sequencing](./amp-story.md#sequencing-animations)
-when defining multiple animations. Other animated elements or `<amp-story-animation>` effects can use this ID to determine that they should
-start animating only after this effect has finished.
+The `id` of the animation component. Used to reference the animation and chain a sequence of animations.
 
 ## Actions
 
