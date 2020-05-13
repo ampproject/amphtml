@@ -119,7 +119,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @private {?Array<!Element>>} */
+    /** @private {?Array<!Element>} */
     this.optionElements_ = null;
 
     /** @protected {?Array<!OptionConfigType>} */
