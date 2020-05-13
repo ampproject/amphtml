@@ -27,97 +27,18 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
-
+const NAME = 'SocialShare';
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {
-  const name = 'SocialShare';
   useResourcesNotify();
-
-  const {
-    'typeConfig': typeConfig,
-    'baseEndpoint': baseEndpoint,
-    'checkedWidth': checkedWidth,
-    'checkedHeight': checkedHeight,
-  } = checkProps(props, name);
+  const {typeConfig, baseEndpoint, checkedWidth, checkedHeight} = checkProps(
+    props,
+    NAME
+  );
   const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
-
-  /**
-   * @private
-   * @param {!JsonObject} typeConfig
-   * @param {?string} baseEndpoint
-   * @param {!JsonObject} props
-   * @return {?string}
-   */
-  function createEndpoint(typeConfig, baseEndpoint, props) {
-    const {params, bindings} = props;
-    const combinedParams = dict();
-    Object.assign(combinedParams, typeConfig['defaultParams'], params);
-    const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
-
-    const combinedBindings = dict();
-    const bindingVars = typeConfig['bindings'];
-    if (bindingVars) {
-      bindingVars.forEach((name) => {
-        combinedBindings[name.toUpperCase()] = params[name] || '';
-      });
-    }
-    if (bindings) {
-      Object.keys(bindings).forEach((name) => {
-        combinedBindings[name.toUpperCase()] = bindings[name] || '';
-      });
-    }
-    const finalEndpoint = Object.keys(combinedBindings).reduce(
-      (endpoint, binding) =>
-        endpoint.replace(new RegExp(binding, 'g'), combinedBindings[binding]),
-      endpointWithParams
-    );
-    return finalEndpoint;
-  }
-
-  /**
-   * @private
-   */
-  function handleActivation() {
-    const protocol = finalEndpoint.split(':', 1)[0];
-    const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    if (protocol === 'navigator-share') {
-      if (window && window.navigator && window.navigator.share) {
-        const dataStr = finalEndpoint.substr(finalEndpoint.indexOf('?'));
-        const data = parseQueryString(dataStr);
-        window.navigator.share(data).catch((e) => {
-          throwWarning(`${e.message}. ${name}`);
-        });
-      } else {
-        throwWarning(
-          `Could not complete system share.  Navigator unavailable. ${name}`
-        );
-      }
-    } else if (protocol === 'sms') {
-      openWindowDialog(
-        window,
-        finalEndpoint.replace('?', '?&'),
-        '_blank',
-        windowFeatures
-      );
-    } else {
-      openWindowDialog(window, finalEndpoint, '_blank', windowFeatures);
-    }
-  }
-
-  /**
-   * @private
-   * @param {!Event} event
-   */
-  function handleKeyPress(event) {
-    const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
-      event.preventDefault();
-      handleActivation();
-    }
-  }
 
   const type = props.type.toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
@@ -130,8 +51,8 @@ export function SocialShare(props) {
     <div
       role="button"
       tabindex={props['tabIndex'] || '0'}
-      onKeyDown={handleKeyPress}
-      onClick={handleActivation}
+      onKeyDown={(e) => handleKeyPress(e, finalEndpoint)}
+      onClick={() => handleActivation(finalEndpoint)}
       style={{...size, ...props['style']}}
       {...props}
     >
@@ -146,10 +67,21 @@ export function SocialShare(props) {
 /**
  * @param {!JsonObject} props
  * @param {?string} name
- * @return {!JsonObject}
+ * @return {struct}
+ *   {!JsonObject} typeConfig
+ *   {string} baseEndpoint
+ *   {number} checkedWidth
+ *   {number} checkedHeight
  */
 function checkProps(props, name) {
-  const {type, shareEndpoint, params, bindings, width, height} = props;
+  const {
+    'type': type,
+    'shareEndpoint': shareEndpoint,
+    'params': params,
+    'bindings': bindings,
+    'width': width,
+    'height': height,
+  } = props;
 
   // Verify type is provided
   if (type === undefined) {
@@ -174,26 +106,8 @@ function checkProps(props, name) {
     );
   }
 
-  // Verify width and height are valid integers
-  // Silently assigns default for undefined, null
-  // Throws Warning for booleans, strings, 0, negative numbers
-  // No errors when positive integer or equivalent string
-  let checkedWidth =
-    width === null || width === undefined ? DEFAULT_WIDTH : width;
-  let checkedHeight =
-    height === null || height === undefined ? DEFAULT_HEIGHT : height;
-  if (typeof checkedWidth === 'boolean' || !(Math.floor(checkedWidth) > 0)) {
-    throwWarning(
-      `The width property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_WIDTH}. ${name}`
-    );
-    checkedWidth = DEFAULT_WIDTH;
-  }
-  if (typeof checkedHeight === 'boolean' || !(Math.floor(checkedHeight) > 0)) {
-    throwWarning(
-      `The height property should be a positive integer of type Integer or String, defaulting to ${DEFAULT_HEIGHT}. ${name}`
-    );
-    checkedHeight = DEFAULT_HEIGHT;
-  }
+  const checkedWidth = width ?? DEFAULT_WIDTH;
+  const checkedHeight = height ?? DEFAULT_HEIGHT;
   return {
     typeConfig,
     baseEndpoint,
@@ -207,4 +121,93 @@ function checkProps(props, name) {
  */
 function throwWarning(message) {
   console.warn(message);
+}
+
+/**
+ * @param {!JsonObject} typeConfig
+ * @param {?string} baseEndpoint
+ * @param {!JsonObject} props
+ * @return {?string}
+ */
+function createEndpoint(typeConfig, baseEndpoint, props) {
+  const {params, bindings} = props;
+  const combinedParams = dict({...typeConfig['defaultParams'], ...params});
+  const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
+
+  const combinedBindings = dict();
+  const bindingVars = typeConfig['bindings'];
+  if (bindingVars) {
+    bindingVars.forEach((name) => {
+      combinedBindings[name.toUpperCase()] = combinedParams[name] || '';
+    });
+  }
+  if (bindings) {
+    Object.keys(bindings).forEach((name) => {
+      combinedBindings[name.toUpperCase()] = bindings[name] || '';
+    });
+  }
+  const finalEndpoint = Object.keys(combinedBindings).reduce(
+    (endpoint, binding) =>
+      endpoint.replace(new RegExp(binding, 'g'), combinedBindings[binding]),
+    endpointWithParams
+  );
+  return finalEndpoint;
+}
+
+/**
+ * Opens a new window with the fully processed endpoint
+ * @param {?string} finalEndpoint
+ */
+function handleActivation(finalEndpoint) {
+  const protocol = finalEndpoint.split(':', 1)[0];
+  const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+  if (protocol === 'navigator-share') {
+    if (window && window.navigator && window.navigator.share) {
+      const data = parseQueryString(getQueryString(finalEndpoint));
+      window.navigator.share(data).catch((e) => {
+        throwWarning(`${e.message}. ${NAME}`);
+      });
+    } else {
+      throwWarning(
+        `Could not complete system share.  Navigator unavailable. ${NAME}`
+      );
+    }
+  } else if (protocol === 'sms') {
+    openWindowDialog(
+      window,
+      finalEndpoint.replace('?', '?&'),
+      '_blank',
+      windowFeatures
+    );
+  } else {
+    openWindowDialog(window, finalEndpoint, '_blank', windowFeatures);
+  }
+}
+
+/**
+ * Returns the Query String of a full url, will not include # parameters
+ * @param {?string} endpoint
+ * @return {?string}
+ */
+
+function getQueryString(endpoint) {
+  const q = endpoint.indexOf('?');
+  const h = endpoint.indexOf('#');
+  console.log(q, h);
+  if (h < q) {
+    return endpoint.substr(q);
+  } else {
+    return endpoint.substr(q, h - q);
+  }
+}
+
+/**
+ * @param {!Event} event
+ */
+function handleKeyPress(event, finalEndpoint) {
+  const {key} = event;
+  if (key == Keys.SPACE || key == Keys.ENTER) {
+    event.preventDefault();
+    handleActivation(finalEndpoint);
+  }
 }
