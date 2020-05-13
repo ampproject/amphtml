@@ -88,7 +88,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
-      'extensions/amp-timeago/0.2/timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-timeago/1.0/timeago.js->third_party/timeagojs/timeago.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -169,6 +169,9 @@ exports.rules = [
   {
     filesMatching: '{src,extensions}/**/*.js',
     mustNotDependOn: '3p/**/*.js',
+    allowlist: [
+      'src/inabox/inabox-iframe-messaging-client.js->3p/iframe-messaging-client.js',
+    ],
   },
 
   // Rules for extensions.
@@ -248,6 +251,7 @@ exports.rules = [
       // Story education
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -361,17 +365,42 @@ exports.rules = [
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
-      'extensions/amp-story/0.1/amp-story.js->src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story.js->src/service/localization.js',
+      'extensions/amp-story/0.1/amp-story-localization-service.js->src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-location.js',
+      // Experiment moving Fixed Layer to extension
+      'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js->' +
+        'src/service/fixed-layer.js',
     ],
   },
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/base-element.js',
+  },
+  {
+    filesMatching: 'src/polyfills/**/*.js',
+    mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfills/fetch.js->src/log.js',
+      'src/polyfills/fetch.js->src/types.js',
+      'src/polyfills/fetch.js->src/json.js',
+      'src/polyfills/fetch.js->src/utils/object.js',
+      'src/polyfills/fetch.js->src/utils/bytes.js',
+      'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
+      'src/polyfills/custom-elements.js->src/resolved-promise.js',
+    ],
+  },
+  {
+    filesMatching: 'src/polyfillstub/**/*.js',
+    mustNotDependOn: '**/*.js',
+    allowlist: [
+      'src/polyfillstub/intersection-observer-stub.js->src/services.js',
+      'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
+    ],
   },
   {
     filesMatching: '**/*.js',
@@ -390,9 +419,11 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
+      'src/polyfills.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
+      'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
     ],
   },
   {

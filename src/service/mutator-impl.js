@@ -225,7 +225,7 @@ export class MutatorImpl {
         }
         // With IntersectionObserver, "relayout top" is no longer needed since
         // relative positional changes won't affect correctness.
-        if (!this.intersect_) {
+        if (!this.intersect_ && !skipRemeasure) {
           relayoutTop = calcRelayoutTop();
         }
       },

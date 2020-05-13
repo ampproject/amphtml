@@ -97,6 +97,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     });
 
     toggle(this.element, true);
+    this.element.setAttribute('aria-live', 'assertive');
   }
 
   /**
@@ -106,7 +107,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildInline_() {
     this.headerEl_.appendChild(
       htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button"
+          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
               role="button">
           </span>`
     );
@@ -205,6 +206,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       },
       true /** useCapture */
     );
+
+    // Closes the remote attachment drawer when navigation deeplinked to an app.
+    if (this.type_ === AttachmentType.REMOTE) {
+      const ampdoc = this.getAmpDoc();
+      ampdoc.onVisibilityChanged(() => {
+        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+    }
   }
 
   /**

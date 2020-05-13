@@ -1,1 +1,4 @@
-{}
+{
+  "INTERSECTION_OBSERVER_POLYFILL": true,
+  "MOVE_FIXED_LAYER": false
+}

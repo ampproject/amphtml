@@ -62,30 +62,44 @@ async function watch() {
  * Perform the prerequisite steps before starting the unminified build.
  * Used by `gulp` and `gulp build`.
  *
- * @param {boolean} watch
+ * @param {!Object} options
  */
-async function runPreBuildSteps(watch) {
-  await compileCss(watch);
+async function runPreBuildSteps(options) {
+  await compileCss(options);
   await compileJison();
-  await bootstrapThirdPartyFrames(watch);
+  await bootstrapThirdPartyFrames(options);
 }
 
 /**
  * Unminified build. Entry point for `gulp build`.
  */
 async function build() {
+  await doBuild();
+}
+
+/**
+ * Performs an unminified build with the given extra args.
+ *
+ * @param {Object=} extraArgs
+ */
+async function doBuild(extraArgs = {}) {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   process.env.NODE_ENV = 'development';
+  const options = {
+    fortesting: extraArgs.fortesting || argv.fortesting,
+    minify: false,
+    watch: argv.watch,
+  };
   printNobuildHelp();
   printConfigHelp('gulp build');
   parseExtensionFlags();
-  await runPreBuildSteps(argv.watch);
+  await runPreBuildSteps(options);
   if (argv.core_runtime_only) {
-    await compileCoreRuntime(argv.watch, /* minify */ false);
+    await compileCoreRuntime(options);
   } else {
-    await compileAllJs(/* minify */ false);
-    await buildExtensions({watch: argv.watch});
+    await compileAllJs(options);
+    await buildExtensions(options);
   }
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
@@ -94,6 +108,7 @@ async function build() {
 
 module.exports = {
   build,
+  doBuild,
   runPreBuildSteps,
   watch,
 };
@@ -110,7 +125,6 @@ build.flags = {
   core_runtime_only: '  Builds only the core runtime.',
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
   version_override: '  Overrides the version written to AMP_CONFIG',
-  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
   watch: '  Watches for changes in files, re-builds when detected',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',

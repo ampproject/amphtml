@@ -159,7 +159,7 @@ function setCustomVars(oxRequest, customVars) {
   customVarKeys.forEach((customVarKey) => {
     const customVarValue = customVars[customVarKey];
     if (Array.isArray(customVarValue)) {
-      customVarValue.forEach((value) => {
+      /** @type {!Array} */ (customVarValue).forEach((value) => {
         oxRequest.addVariable(customVarKey, value);
       });
     } else {

@@ -40,13 +40,25 @@
           {
             "transport": {"beacon": false, "xhrpost": false},
             "requests": {
-              "base": "fake.com/ad?multiVisible=true&adId=${id}"
+              "base": "fake.com/ad?multiVisible=true&adId=${id}",
+              "queryAll": "fake.com/ad?queryAll=true",
+              "restrictDataVars": "fake.com/ad?restrictDataVars=true&adId=${id}"
             },
             "triggers": {
               "multiVisible": {
                 "on": "visible",
                 "request": "base",
                 "selector": ["#ad1","#ad2"]
+              },
+              "querySelectorAll": {
+                "on": "visible",
+                "request": "queryAll",
+                "selector": [".myClass"]
+              },
+              "restrictDataVars": {
+                "on": "visible",
+                "request": "restrictDataVars",
+                "selector": [".restrictDataVars"]
               }
             }
           }
@@ -72,6 +84,244 @@
         data-ad-height=250>
     </amp-ad>
 
+    <amp-ad id='ad3' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad3'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad4' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad4'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad5' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad5'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad6' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad6'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad7' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad7'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad8' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad8'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad9' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad9'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad10' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad10'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad11' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad11'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad12' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad12'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad13' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad13'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad14' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad14'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad15' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad15'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad16' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad16'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad17' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad17'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad18' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad18'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad19' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad19'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+      </amp-ad>
+    <amp-ad id='ad20' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad20'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad21' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad21'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad22' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad22'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad23' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad23'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad24' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad24'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad25' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad26' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad27' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad28' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
+    <amp-ad id='ad29' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass restrictDataVars">
+      </amp-ad>
 
   </div>
   <script>

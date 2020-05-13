@@ -250,10 +250,8 @@ describe('amp-a4a', () => {
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const safeFrameUrl =
-      'https://tpc.googlesyndication.com/safeframe/' +
-      sfVersion +
-      '/html/container.html';
-    const child = element.querySelector(`iframe[src^="${safeFrameUrl}"][name]`);
+      'googlesyndication.com/safeframe/' + sfVersion + '/html/container.html';
+    const child = element.querySelector(`iframe[src*="${safeFrameUrl}"][name]`);
     expect(child).to.be.ok;
     const name = child.getAttribute('name');
     expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
@@ -945,11 +943,11 @@ describe('amp-a4a', () => {
               expect(devStub).to.not.be.called;
             }
             const safeframeUrl =
-              'https://tpc.googlesyndication.com/safeframe/' +
+              '.googlesyndication.com/safeframe/' +
               DEFAULT_SAFEFRAME_VERSION +
               '/html/container.html';
             const safeChild = a4aElement.querySelector(
-              `iframe[src^="${safeframeUrl}"]`
+              `iframe[src*="${safeframeUrl}"]`
             );
             expect(safeChild).to.not.be.ok;
             if (headerVal != 'nameframe') {
@@ -1228,7 +1226,12 @@ describe('amp-a4a', () => {
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
-      expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
+      expect(
+        getAdUrlSpy.calledWith(
+          {consentState: null, consentString: null, gdprApplies: null},
+          rtcResponse
+        )
+      ).to.be.true;
       expect(fetchMock.called('ad')).to.be.true;
       expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
       expect(
@@ -1769,7 +1772,7 @@ describe('amp-a4a', () => {
       expect(
         doc.querySelector(
           'link[rel=preload]' +
-            '[href="https://tpc.googlesyndication.com/safeframe/' +
+            '[href*=".googlesyndication.com/safeframe/' +
             '1-2-3/html/container.html"]'
         )
       ).to.be.ok;
@@ -2275,7 +2278,7 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString;
+      let fixture, a4aElement, a4a, consentString, gdprApplies;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2287,6 +2290,7 @@ describe('amp-a4a', () => {
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
+        gdprApplies = true;
         return fixture;
       });
 
@@ -2304,6 +2308,7 @@ describe('amp-a4a', () => {
             Promise.resolve({
               whenPolicyResolved: () => policyPromise,
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2320,8 +2325,13 @@ describe('amp-a4a', () => {
         expect(getAdUrlSpy).to.not.be.called;
         inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+            gdprApplies,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2355,6 +2365,7 @@ describe('amp-a4a', () => {
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2367,8 +2378,13 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+            gdprApplies,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2392,6 +2408,9 @@ describe('amp-a4a', () => {
               getConsentStringInfo: () => {
                 throw new Error('consent err!');
               },
+              getGdprApplies: () => {
+                throw new Error('consent err!');
+              },
             })
           );
 
@@ -2404,7 +2423,13 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN)).calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.UNKNOWN,
+            consentString: null,
+            gdprApplies: null,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.UNKNOWN,

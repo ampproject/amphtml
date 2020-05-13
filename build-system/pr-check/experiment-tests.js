@@ -44,7 +44,7 @@ function getConfig_() {
     return;
   }
 
-  if (new Date(config.expirationDateUTC) < Date.now) {
+  if (new Date(config['expiration_date_utc']) < Date.now) {
     return;
   }
 
@@ -60,7 +60,7 @@ function build_(config) {
 
 function test_() {
   timedExecOrDie('gulp integration --nobuild --compiled --headless');
-  timedExecOrDie('gulp e2e --nobuild --headless');
+  timedExecOrDie('gulp e2e --nobuild --compiled --headless');
 }
 
 function main() {

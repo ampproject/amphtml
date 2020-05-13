@@ -38,7 +38,6 @@ const KeyToSeleniumMap = {
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
-  [Key.CtrlV]: SeleniumKey.chord(SeleniumKey.CONTROL, 'v'),
 };
 
 /**
@@ -118,10 +117,11 @@ class SeleniumWebDriverController {
    * until.js#elementLocated
    * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L237}
    * @param {string} selector
+   * @param {number=} timeout
    * @return {!Promise<!ElementHandle<!WebElement>>}
    * @override
    */
-  async findElement(selector) {
+  async findElement(selector, timeout = ELEMENT_WAIT_TIMEOUT) {
     const bySelector = By.css(selector);
 
     const label = 'for element to be located ' + selector;
@@ -140,7 +140,7 @@ class SeleniumWebDriverController {
         throw e;
       }
     });
-    const webElement = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
+    const webElement = await this.driver.wait(condition, timeout);
     return new ElementHandle(webElement, this);
   }
 
@@ -297,12 +297,32 @@ class SeleniumWebDriverController {
       ? handle.getElement()
       : await this.driver.switchTo().activeElement();
 
+    if (keys === Key.CtrlV) {
+      return await this.pasteFromClipboard();
+    }
+
     const key = KeyToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }
 
     return await targetElement.sendKeys(keys);
+  }
+
+  /**
+   * Pastes from the clipboard by perfoming the keyboard shortcut.
+   * https://stackoverflow.com/a/41046276
+   * @return {!Promise}
+   * @override
+   */
+  pasteFromClipboard() {
+    return this.driver
+      .actions()
+      .keyDown(SeleniumKey.SHIFT)
+      .keyDown(SeleniumKey.INSERT)
+      .keyUp(SeleniumKey.SHIFT)
+      .keyUp(SeleniumKey.INSERT)
+      .perform();
   }
 
   /**

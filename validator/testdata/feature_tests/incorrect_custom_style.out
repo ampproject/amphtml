@@ -74,6 +74,6 @@ feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style a
 |    <!-- Invalid due to !important -->
 |    <b style="color: red !important"></div>
 >>   ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:60:2 The attribute 'style' in tag 'b' is set to the invalid value 'color: red !important'.
+feature_tests/incorrect_custom_style.html:60:2 The attribute 'style' in tag 'b' is set to the invalid value 'CSS !important'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
 |  </body>
 |  </html>
