@@ -194,7 +194,7 @@ function getQueryString(endpoint) {
   let h = endpoint.indexOf('#');
   q = q === -1 ? endpoint.length : q;
   h = h === -1 ? endpoint.length : h;
-  return h < q ? '' : endpoint.substr(q, h - q);
+  return endpoint.substr(q, h - q);
 }
 
 /**
