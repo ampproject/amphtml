@@ -49,7 +49,6 @@ class AmpFitText extends PreactBaseElement {
     childOb.observe(this.element, {
       childList: true,
       subtree: true,
-      attributes: true,
     });
 
     const props = getFontSizeAttrs(this.element);
