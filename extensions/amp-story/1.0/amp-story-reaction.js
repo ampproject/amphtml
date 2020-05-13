@@ -110,6 +110,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
+    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    this.backendDataPromise_ = null;
+
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
@@ -125,6 +128,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Array<!OptionConfigType>} */
     this.options_ = null;
 
+    /** @protected {?Array<!ReactionOptionType>} */
+    this.optionsData_ = null;
+
     /** @protected {?Element} */
     this.rootEl_ = null;
 
@@ -133,12 +139,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
-
-    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
-    this.backendDataPromise_ = null;
-
-    /** @protected {?Array<!ReactionOptionType>} */
-    this.optionsData_ = null;
 
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
