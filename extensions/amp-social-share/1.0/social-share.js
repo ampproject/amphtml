@@ -189,7 +189,6 @@ function handleActivation(finalEndpoint) {
  * @param {?string} endpoint
  * @return {?string}
  */
-
 function getQueryString(endpoint) {
   const q = endpoint.indexOf('?');
   const h = endpoint.indexOf('#');
