@@ -23,13 +23,13 @@
     },
 
     {
-      "paths": ["src/purifier/package.json"],
+      "paths": ["src/**"],
       "updateTypes": ["patch"],
       "groupName": "runtime dependencies (patch updates)",
       "reviewers": "team:wg-runtime"
     },
     {
-      "paths": ["src/purifier/package.json"],
+      "paths": ["src/**"],
       "updateTypes": ["minor"],
       "groupName": "runtime dependencies (minor updates)",
       "reviewers": "team:wg-runtime"
