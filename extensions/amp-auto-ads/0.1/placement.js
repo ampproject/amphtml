@@ -199,13 +199,17 @@ export class Placement {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = isResponsiveEnabled
-          ? this.createResponsiveAdElement_(baseAttributes)
+
+        const shouldUseFullWidthResponsive =
+          isResponsiveEnabled &&
+          this.isLayoutViewportNarrow_(this.anchorElement_);
+        this.adElement_ = shouldUseFullWidthResponsive
+          ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
 
         this.injector_(this.anchorElement_, this.getAdElement());
 
-        if (isResponsiveEnabled) {
+        if (shouldUseFullWidthResponsive) {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
@@ -296,7 +300,7 @@ export class Placement {
    * @return {!Element}
    * @private
    */
-  createResponsiveAdElement_(baseAttributes) {
+  createFullWidthResponsiveAdElement_(baseAttributes) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(
       dict({
         'width': '100vw',
@@ -314,6 +318,20 @@ export class Placement {
       'amp-ad',
       attributes
     );
+  }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    // The threshold aligns with the one for Non-AMP website. Checkout
+    // isLayoutViewportNarrow in responsive_util.js for internal reference.
+    return viewportSize.width < 488;
   }
 }
 
