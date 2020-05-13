@@ -107,6 +107,12 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
+    /**
+     * True if the ratios have already been ticked.
+     * @private {boolean}
+     */
+    this.slowAndEagerElementRatiosTicked_ = false;
+
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -461,6 +467,7 @@ export class Performance {
       if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
+      this.tickEagerAndSlowElementRatios_();
     }
   }
 
@@ -477,6 +484,7 @@ export class Performance {
       if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
+      this.tickEagerAndSlowElementRatios_();
     }
   }
 
@@ -515,6 +523,30 @@ export class Performance {
         {capture: true}
       );
     }
+  }
+
+  /**
+   * Tick both the eager and slow element ratios.
+   */
+  tickEagerAndSlowElementRatios_() {
+    if (this.slowAndEagerElementRatiosTicked_) {
+      return;
+    }
+    if (!this.resources_) {
+      const TAG = 'Performance';
+      dev().error(TAG, 'Failed to tick ser and eer due to null resources');
+      return;
+    }
+
+    this.slowAndEagerElementRatiosTicked_ = true;
+    this.tickDelta(
+      TickLabel.SLOW_ELEMENT_RATIO,
+      this.resources_.getSlowElementRatio()
+    );
+    this.tickDelta(
+      TickLabel.EAGER_ELEMENT_RATIO,
+      this.resources_.getEagerElementRatio()
+    );
   }
 
   /**

@@ -194,6 +194,18 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
+    /**
+     * Number of resources that were laid out after entering viewport.
+     * @private {number}
+     */
+    this.slowElementCount_ = 0;
+
+    /**
+     * Total number of laid out resources.
+     * @private {number}
+     */
+    this.totalLayoutCount_ = 0;
+
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
@@ -788,6 +800,40 @@ export class ResourcesImpl {
   }
 
   /**
+   * Returns the percent of resources that were laid out but never entered viewport.
+   * @return {number}
+   */
+  getEagerElementRatio() {
+    if (this.totalLayoutCount_ === 0) {
+      return 0;
+    }
+
+    let eagerCount = 0;
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (
+        r.getState() === ResourceState.LAYOUT_COMPLETE &&
+        !r.hasEnteredViewport()
+      ) {
+        eagerCount++;
+      }
+    }
+
+    return eagerCount / this.totalLayoutCount_;
+  }
+
+  /**
+   * Returns the percent of resources that were laid out after entering viewport.
+   * @return {number}
+   */
+  getSlowElementRatio() {
+    if (this.totalLayoutCount_ === 0) {
+      return 0;
+    }
+    return this.slowElementCount_ / this.totalLayoutCount_;
+  }
+
+  /**
    * Returns `true` when there's mutate work currently batched.
    * @return {boolean}
    * @private
@@ -1276,7 +1322,7 @@ export class ResourcesImpl {
     // depending on prerenderSize in pre-render mode.
     let loadRect;
     if (this.visible_) {
-      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+      loadRect = viewportRect; //expandLayoutRect(viewportRect, 0.25, 2);
     } else if (this.prerenderSize_ > 0) {
       loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
@@ -1595,6 +1641,11 @@ export class ResourcesImpl {
    * @private
    */
   taskComplete_(task, success, opt_reason) {
+    this.totalLayoutCount_++;
+    if (task.resource.isInViewport()) {
+      this.slowElementCount_++;
+    }
+
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {

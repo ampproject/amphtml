@@ -876,6 +876,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     env.sandbox.stub(Services, 'resourcesForDoc').returns({
       getResourcesInRect: () => unresolvedPromise,
       whenFirstPass: () => Promise.resolve(),
+      getSlowElementRatio: () => 1,
+      getEagerElementRatio: () => 1,
     });
     env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,
@@ -1051,13 +1053,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
 
-      expect(perf.events_.length).to.equal(3);
-      expect(perf.events_[0]).to.be.jsonEqual({
+      const lcpEvents = perf.events_.filter((evt) =>
+        evt.label.startsWith('lcp')
+      );
+      expect(lcpEvents.length).to.equal(2);
+      expect(perf.events_).deep.include({
         label: 'lcpl',
         delta: 10,
       });
-
-      expect(perf.events_[1]).to.be.jsonEqual({
+      expect(perf.events_).deep.include({
         label: 'lcpr',
         delta: 23,
       });
@@ -1275,8 +1279,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       viewerVisibilityState = VisibilityState.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
+      const clsEvents = perf.events_.filter((evt) => evt.label === 'cls');
+      expect(clsEvents.length).to.equal(1);
+      expect(perf.events_).deep.include({
         label: 'cls',
         delta: 0.55,
       });

@@ -463,6 +463,70 @@ describe('Resources', () => {
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
+
+  describe('eager element ratio (eer)', () => {
+    function getResource({eager}) {
+      return {
+        getState: () => ResourceState.LAYOUT_COMPLETE,
+        hasEnteredViewport: () => !eager,
+      };
+    }
+    const task = {resource: {isInViewport: () => {}}};
+
+    it('0 layouts --> 0', () => {
+      expect(resources.getEagerElementRatio()).equal(0);
+    });
+
+    it('0 eager / 1 total --> 0', () => {
+      resources.resources_ = [getResource({eager: false})];
+      resources.taskComplete_(task);
+      expect(resources.getEagerElementRatio()).equal(0);
+    });
+
+    it('1 eager / 1 total --> 1', () => {
+      resources.resources_ = [getResource({eager: true})];
+      resources.taskComplete_(task);
+      expect(resources.getEagerElementRatio()).equal(1);
+    });
+
+    it('9 eager / 10 total --> 0.9', () => {
+      for (let i = 0; i < 9; i++) {
+        resources.taskComplete_(task);
+        resources.resources_.push(getResource({eager: true}));
+      }
+      resources.taskComplete_(task);
+      resources.resources_.push(getResource({eager: false}));
+
+      expect(resources.getEagerElementRatio()).equal(0.9);
+    });
+  });
+
+  describe('eager element ratio (eer)', () => {
+    const slowTask = {resource: {isInViewport: () => true}};
+    const fastTask = {resource: {isInViewport: () => false}};
+
+    it('No layouts --> 0', () => {
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
+    it('0 slow / 1 total --> 0', () => {
+      resources.taskComplete_(fastTask);
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
+    it('1 slow / 1 total --> 1', () => {
+      resources.taskComplete_(slowTask);
+      expect(resources.getSlowElementRatio()).equal(1);
+    });
+
+    it('9 slow/ 10 total --> 0.9', () => {
+      for (let i = 0; i < 9; i++) {
+        resources.taskComplete_(slowTask);
+      }
+      resources.taskComplete_(fastTask);
+      expect(resources.getSlowElementRatio()).equal(0.9);
+    });
+  });
 });
 
 describes.fakeWin(
