@@ -51,7 +51,7 @@ and comprised of:
 }
 ```
 
-Trigger animation start via the `trigger` attribute or an `on` actions.
+Trigger animation start via the `trigger` attribute or an [action](#actions).
 
 The overarching process can contain any arbitrary number of animation pieces defined within the `animations` array.
 
