@@ -305,7 +305,7 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {object=} opt_consentMetadata
+   * @param {Object=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
   update(state, consentString, opt_consentMetadata, opt_systemUpdate) {

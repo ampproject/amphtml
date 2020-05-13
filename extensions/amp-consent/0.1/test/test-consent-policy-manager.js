@@ -80,11 +80,7 @@ describes.realWin(
       let manager;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE.ACCEPTED,
-          'test',
-          {}
-        );
+        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -93,7 +89,7 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
-        expect(manager.consentMetadata_).to.deep.equal({});
+        expect(manager.consentMetadata_).to.be.undefined;
       });
 
       describe('Register policy instance', () => {
@@ -592,13 +588,10 @@ describes.realWin(
           .callsFake(() => {
             return Promise.resolve();
           });
-        consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE.ACCEPTED,
-          'test',
-          {}
-        );
+        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
       });
 
+      // TODO(micajuineho) combine into metadata values
       it('should return gdprApplies value', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
@@ -606,9 +599,8 @@ describes.realWin(
           },
         });
         await macroTask();
-        await expect(
-          manager.getConsentMetadataInfo('default')
-        ).to.eventually.deep.equal({});
+        await expect(manager.getConsentMetadataInfo('default')).to.eventually.be
+          .undefined;
       });
     });
 

@@ -27,6 +27,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
@@ -683,6 +684,46 @@ describes.realWin(
             'consentMetadata': undefined,
           });
         });
+      });
+    });
+
+    describe('consent metadata', () => {
+      let ampConsent;
+
+      beforeEach(() => {
+        const defaultConfig = dict({
+          'consents': {
+            'ABC': {
+              'checkConsentHref': 'https://response1',
+            },
+          },
+        });
+        const consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+      });
+
+      it('should error and return undefined on invalid metadata', () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        const metadata = ampConsent.configureMetadataByConsentString_(
+          'bad metadata',
+          'consentString'
+        );
+        expect(spy.args[0][1]).to.match(
+          /CMP metadata is invalid or no consent string is found./
+        );
+        expect(metadata).to.be.undefined;
+      });
+
+      it('should return undefined with no consent string', () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        const metadata = ampConsent.configureMetadataByConsentString_({
+          'gdprApplies': true,
+        });
+        expect(spy.args[0][1]).to.match(
+          /CMP metadata is invalid or no consent string is found./
+        );
+        expect(metadata).to.be.undefined;
       });
     });
 

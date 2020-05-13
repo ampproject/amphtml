@@ -86,7 +86,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
         getStoredConsentInfo({
           's': 0,
           'r': 'test',
-          'm': {},
         })
       ).to.deep.equal(
         dict({
@@ -101,7 +100,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
           's': -1,
           'r': 'test',
           'd': 1,
-          'm': {},
         })
       ).to.deep.equal(
         dict({

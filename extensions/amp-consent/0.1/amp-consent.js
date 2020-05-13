@@ -288,7 +288,7 @@ export class AmpConsent extends AMP.BaseElement {
           data['info'] = undefined;
         }
         consentString = data['info'];
-        metadata = this.configureMetadataByConsentString(
+        metadata = this.configureMetadataByConsentString_(
           data['consentMetadata'],
           consentString
         );
@@ -380,7 +380,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {string} action
    * @param {string=} consentString
-   * @param {Object=} opt_consentMetadata
+   * @param {JsonObject=} opt_consentMetadata
    */
   handleAction_(action, consentString, opt_consentMetadata) {
     if (!isEnumValue(ACTION_TYPE, action)) {
@@ -552,7 +552,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
-   * @param {object=} opt_responseMetadata
+   * @param {JsonObject=} opt_responseMetadata
    */
   updateCacheIfNotNull_(
     responseStateValue,
@@ -565,7 +565,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
         responseConsentString,
-        this.configureMetadataByConsentString(
+        this.configureMetadataByConsentString_(
           opt_responseMetadata,
           responseConsentString
         )
@@ -709,21 +709,19 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * If consentString is undefined or invalid, don't
    * include any metadata in update.
-   * @param {*} metadata
-   * @param {string=} consentString
-   * @return {Object=}
+   * @param {JsonObject=} opt_metadata
+   * @param {string=} opt_consentString
+   * @return {?JsonObject|undefined}
    */
-  configureMetadataByConsentString(metadata, consentString) {
-    if (!isObject(metadata) || !consentString) {
-      if (metadata) {
-        user().error(
-          TAG,
-          'metadata sent by CMP is invalid and will not update.'
-        );
-      }
-      return undefined;
+  configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+    if (!isObject(opt_metadata) || !opt_consentString) {
+      user().error(
+        TAG,
+        'CMP metadata is invalid or no consent string is found.'
+      );
+      return;
     }
-    return metadata;
+    return opt_metadata;
   }
 }
 

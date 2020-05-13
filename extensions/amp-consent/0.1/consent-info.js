@@ -346,8 +346,8 @@ function composeMetadataStoreValue(unused) {
  * {'ga': true, 'cst': 'tcf-v2'} =>
  * {'gdprApplies': true, 'consentStringType': 'tcf-v2'}
  *
- * @param {Object=} unused
- * @return {Object=}
+ * @param {Object|null|undefined} unused
+ * @return {undefined}
  */
 function convertStorageMetadata(unused) {
   return undefined;
