@@ -72,24 +72,14 @@ const EXTENSION_BUNDLE_MAP = {
 /**
  * List of unminified targets to which AMP_CONFIG should be written
  */
-const UNMINIFIED_TARGETS = [
-  'alp.max.js',
-  'amp-inabox.js',
-  'amp-shadow.js',
-  'amp.js',
-];
+const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
  * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
  * for details.
  */
-const MINIFIED_TARGETS = [
-  'alp.js',
-  'amp4ads-v0.js',
-  'shadow-v0.js',
-  'v0.js',
-].map(maybeToEsmName);
+const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
 /**
  * Used while building the 3p frame
@@ -295,7 +285,8 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     }
     endBuildStep('Minified', name, timeInfo.startTime);
 
-    if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+    const target = path.basename(minifiedName, path.extname(minifiedName));
+    if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
       await applyAmpConfig(
         maybeToEsmName(`${destDir}/${minifiedName}`),
         /* localDev */ options.fortesting,
@@ -443,7 +434,8 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         endBuildStep('Compiled', name, startTime);
       })
       .then(() => {
-        if (UNMINIFIED_TARGETS.includes(destFilename)) {
+        const target = path.basename(destFilename, path.extname(destFilename));
+        if (UNMINIFIED_TARGETS.includes(target)) {
           return applyAmpConfig(
             `${destDir}/${destFilename}`,
             /* localDev */ true,
