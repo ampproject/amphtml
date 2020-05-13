@@ -58,6 +58,7 @@ java_library(
     deps = [
         ":amphtml_validator_java_proto_lib",
         ":amphtml_validator_lib",
+        "@maven//:net_sourceforge_cssparser_cssparser",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_testng_testng",
         "@maven//:junit_junit",

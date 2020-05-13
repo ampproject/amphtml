@@ -17,15 +17,9 @@
 # This script builds the Java AMP Validator.
 set -e # Exit on error
 bazel clean
-echo "finish clean"
 bazel run //:fetchAMPResources
-echo "finish fetchAMPResources"
 bazel build -s //:amphtml_validator_java_proto_lib
-echo "finish amphtml_validator_java_proto_lib"
 bazel run //:copyValidatorJavaSource
-echo "finish copyValidatorJavaSource"
 bazel build -s //:amphtml_validator_lib
-echo "finish amphtml_validator_lib"
-bazel build //:amphtml_validator_test
-echo "finish amphtml_validator_test"
+bazel build -s //:amphtml_validator_test
 
