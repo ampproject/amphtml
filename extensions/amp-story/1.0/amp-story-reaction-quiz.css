@@ -316,8 +316,8 @@ h3.i-amphtml-story-reaction-quiz-prompt {
         visibility: hidden;
     }
     21% { 
-    visibility: visible;
-    transform: scale(0.01); 
+        visibility: visible;
+        transform: scale(0.01); 
     }
     22% { transform: scale(0.013); }
     23% { transform: scale(0.051); }
