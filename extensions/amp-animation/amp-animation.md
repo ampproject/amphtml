@@ -46,15 +46,17 @@ An `amp-animation` component defines animations in a JSON structure. The top-lev
           "selector": ".target-class",
           "easing": "cubic-bezier(0,0,.21,1)",
           "keyframes": {
-            "transform": "rotate(var(--angle))"
+            "transform": "rotate(20deg)"
           }
         },
         {
           "media": "(min-width: 321px)",
           "selector": ".target-class",
-          "delay": "var(--delay)",
+          "delay": "2s",
           "easing": "cubic-bezier(0,0,.21,1)",
-          "keyframes": "rotate"
+          "keyframes": {
+            "transform": "rotate(30deg)"
+          }
         }
       ]
     }
