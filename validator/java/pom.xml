@@ -533,7 +533,12 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.11.0</version>
         </dependency>
-        <dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.11.0</version>
+      </dependency>
+      <dependency>
             <groupId>net.sourceforge.cssparser</groupId>
             <artifactId>cssparser</artifactId>
             <version>0.9.27</version>
