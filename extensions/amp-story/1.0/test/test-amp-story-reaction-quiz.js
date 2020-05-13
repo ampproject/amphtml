@@ -16,7 +16,6 @@
 
 import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   addConfigToReaction,
@@ -61,11 +60,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
 
-      const localizationService = new LocalizationService(win.document.body);
-      env.sandbox
-        .stub(Services, 'localizationForDoc')
-        .returns(localizationService);
-
       env.sandbox
         .stub(Services, 'cidForDoc')
         .resolves({get: () => Promise.resolve('cid')});
@@ -79,10 +73,6 @@ describes.realWin(
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
-      });
-
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
       });
 
       storyEl = win.document.createElement('amp-story');
@@ -104,7 +94,7 @@ describes.realWin(
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(2);
     });
 
-    it('should not create the prompt and options container if there is a prompt', () => {
+    it('should not create the prompt and options container if there no prompt', () => {
       populateQuiz(ampStoryQuiz, 4, undefined);
       ampStoryQuiz.buildCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(1);

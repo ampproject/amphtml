@@ -25,7 +25,7 @@ import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
-  appendPathToUrlWithA,
+  appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
@@ -110,6 +110,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
+    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    this.backendDataPromise_ = null;
+
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
@@ -119,8 +122,14 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @private {?Array<!Element>} */
+    this.optionElements_ = null;
+
     /** @protected {?Array<!OptionConfigType>} */
     this.options_ = null;
+
+    /** @protected {?Array<!ReactionOptionType>} */
+    this.optionsData_ = null;
 
     /** @protected {?Element} */
     this.rootEl_ = null;
@@ -131,14 +140,11 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
-    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
-    this.backendDataPromise_ = null;
-
-    /** @protected {?Array<!ReactionOptionType>} */
-    this.optionsData_ = null;
-
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @protected {../../../src/service/url-impl.Url} */
+    this.urlService_ = Services.urlForDoc(this.element);
 
     /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
@@ -155,13 +161,16 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /**
    * Gets the options.
-   * @visibleForTesting
+   * @protected
    * @return {!Array<!Element>}
    */
   getOptionElements() {
-    return toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
-    );
+    if (!this.optionElements_) {
+      this.optionElements_ = toArray(
+        this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
+      );
+    }
+    return this.optionElements_;
   }
 
   /** @override */
@@ -512,18 +521,14 @@ export class AmpStoryReaction extends AMP.BaseElement {
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      const aTag = /** @type {!HTMLAnchorElement} */ (document.createElement(
-        'a'
-      ));
-      url = appendPathToUrlWithA(
-        aTag,
-        url,
+      url = appendPathToUrl(
+        this.urlService_.parse(url),
         dev().assertString(this.reactionId_)
       );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrlWithA(aTag, url, '/react');
+        url = appendPathToUrl(this.urlService_.parse(url), '/react');
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_

@@ -21,7 +21,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
-import {toArray} from '../../../src/types';
 
 /**
  * Generates the template for the quiz.
@@ -185,19 +184,13 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       return;
     }
 
-    const optionElements = toArray(
-      this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
-    );
-
     const percentages = this.preprocessPercentages_(optionsData);
 
     percentages.forEach((percentage, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
-      if (optionElements[index]) {
-        optionElements[index].querySelector(
-          '.i-amphtml-story-reaction-quiz-percentage-text'
-        ).textContent = `${percentage}%`;
-      }
+      this.getOptionElements()[index].querySelector(
+        '.i-amphtml-story-reaction-quiz-percentage-text'
+      ).textContent = `${percentage}%`;
     });
 
     this.rootEl_.setAttribute(
