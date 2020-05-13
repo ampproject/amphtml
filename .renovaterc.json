@@ -9,16 +9,17 @@
     "enabled": false
   },
   "ignorePaths": [],
+  "timezone": "America/Los_Angeles",
   "packageRules": [
     {
       "updateTypes": ["patch"],
       "groupName": "dependencies (patch)",
-      "schedule": "before 8am every weekday"
+      "schedule": "12am every weekday"
     },
     {
       "updateTypes": ["minor"],
       "groupName": "dependencies (minor)",
-      "schedule": "before 8am every weekday"
+      "schedule": "12am every weekday"
     }
   ]
 }
