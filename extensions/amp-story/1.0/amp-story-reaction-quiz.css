@@ -55,7 +55,7 @@ h1.i-amphtml-story-reaction-quiz-prompt {
     max-height: 144px !important;
 }
 
-h2.i-amphtml-story-reaction-quiz-prompt {
+h2.i-amphtml-story-reaction-quiz-prompt, p.i-amphtml-story-reaction-quiz-prompt {
     font-size: 22px !important;
     line-height: 28px !important;
     max-height: 112px !important;
