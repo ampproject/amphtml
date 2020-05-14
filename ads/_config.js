@@ -1176,6 +1176,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://us.adserver.yahoo.com',
   },
 
+  'yahoofedads': {
+    renderStartImplemented: true,
+  },
+
   'yahoojp': {
     prefetch: [
       'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
