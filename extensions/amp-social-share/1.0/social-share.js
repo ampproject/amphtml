@@ -133,7 +133,7 @@ function createEndpoint(typeConfig, baseEndpoint, props) {
   const {'params': params, 'bindings': bindings} = props;
   const combinedParams = {...typeConfig['defaultParams'], ...params};
   const endpointWithParams = addParamsToUrl(
-    /** @type {?string} */ (baseEndpoint),
+    /** @type {string} */ (baseEndpoint),
     /** @type {!JsonObject} */ (combinedParams)
   );
 
@@ -167,7 +167,7 @@ function handleActivation(finalEndpoint) {
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
       const data = parseQueryString(
-        /** @type {?string} */ (getQueryString(finalEndpoint))
+        /** @type {string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
         throwWarning(`${e.message}. ${NAME}`);
