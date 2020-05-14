@@ -119,7 +119,8 @@ function checkProps(props) {
  * @param {?string} message
  */
 function throwWarning(message) {
-  console.warn(message);
+  console /*OK*/
+    .warn(message);
 }
 
 /**
