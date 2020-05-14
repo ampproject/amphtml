@@ -83,7 +83,10 @@
       "automerge": true,
       "updateTypes": ["minor", "patch"],
       "packagePatterns": ["^@ampproject/"],
-      "groupName": "ampproject dependencies (minor & patch updates)"
+      "groupName": "ampproject dependencies (minor & patch updates)",
+      "dependencies": {
+        "enabled": true
+      }
     }
   ]
 }
