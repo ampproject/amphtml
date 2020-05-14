@@ -52,6 +52,7 @@ export const ReactionType = {
 export const ReactionFlags = {
   THEME: 'theme',
   CHIP_CORNER: 'chip-corner',
+  CHIP_STYLE: 'chip-style',
 };
 
 /** @const {string} */
