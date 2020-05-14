@@ -482,7 +482,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
       this.hasUserSelection_ = true;
 
       if (this.optionsData_) {
-        console.log(this.optionsData_, optionEl.optionIndex_);
         this.optionsData_[optionEl.optionIndex_]['totalCount']++;
         this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
       }
