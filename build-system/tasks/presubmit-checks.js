@@ -118,6 +118,7 @@ const forbiddenTerms = {
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
@@ -624,6 +625,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
   'startupChunk\\(': {
