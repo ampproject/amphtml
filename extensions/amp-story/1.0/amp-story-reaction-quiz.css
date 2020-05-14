@@ -55,10 +55,11 @@
      max-height: 144px !important;
  }
  
- h2.i-amphtml-story-reaction-quiz-prompt {
+ h2.i-amphtml-story-reaction-quiz-prompt, p.i-amphtml-story-reaction-quiz-prompt {
      font-size: 22px !important;
      line-height: 28px !important;
      max-height: 112px !important;
+     font-weight: bold;
  }
  
  h3.i-amphtml-story-reaction-quiz-prompt {
@@ -267,11 +268,11 @@
      left: 101% !important;
  }
  
- .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-option-selected[correct].i-amphtml-story-reaction-quiz-option {
+ .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected[correct].i-amphtml-story-reaction-quiz-option {
      background: var(--correct-color) !important;
  }
  
- .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-option-selected:not([correct]).i-amphtml-story-reaction-quiz-option {
+ .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected:not([correct]).i-amphtml-story-reaction-quiz-option {
      background: var(--incorrect-color) !important;
  }
  
