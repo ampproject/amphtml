@@ -122,6 +122,8 @@ const targetMatchers = {
       })
     );
   },
+  'EXTENSION_GENERATOR': (file) =>
+    file.startsWith('build-system/tasks/extension-generator/'),
   'FLAG_CONFIG': (file) => {
     if (isOwnersFile(file)) {
       return false;
