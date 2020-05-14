@@ -373,9 +373,11 @@ export class AnimationRunner {
       return;
     }
 
-    if (this.runner_) {
-      // Init or no-op if the runner was already running.
-      this.runner_.start();
+    if (
+      this.runner_ &&
+      this.runner_.getPlayState() !== WebAnimationPlayState.FINISHED &&
+      this.runner_.getPlayState() !== WebAnimationPlayState.IDLE
+    ) {
       this.runner_.pause();
     }
   }
