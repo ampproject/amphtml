@@ -170,6 +170,6 @@ AmpSocialShare['props'] = {
   'type': {attr: 'type'},
 };
 
-AMP.extension(TAG, '0.2', (AMP) => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare);
 });
