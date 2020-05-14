@@ -45,9 +45,9 @@
 
         function startBusywork() {
             for (var i = 0; i < 1000000000; i++);
-            // Puppeteer will never exit if we dont kill this eventually.
+            // Puppeteer will often hang if we dont kill this work.
             if (Date.now() - startTime < 5000) {
-                window.setTimeout(startBusywork, 0);
+                window.setTimeout(startBusywork, 100);
             }
         }
 
