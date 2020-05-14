@@ -16,14 +16,10 @@
 
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-poll-binary-1.0.css';
-import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-
-/** @const {string} */
-const TAG = 'amp-story-reaction-poll-binary';
 
 /** @const @enum {number} */
 export const FontSize = {
@@ -71,12 +67,7 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
-    createShadowRootWithStyle(
-      this.element,
-      dev().assertElement(this.rootEl_),
-      CSS
-    );
+    super.buildCallback(CSS);
   }
 
   /** @override */
@@ -166,7 +157,7 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
       currOption.querySelector(
         '.i-amphtml-story-reaction-option-percentage-text'
       ).textContent = `${percentage}%`;
-      currOption.setAttribute('style', `flex-grow: ${percentage}`);
+      currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
     });
   }
 }
