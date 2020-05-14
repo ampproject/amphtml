@@ -29,7 +29,7 @@ limitations under the License.
 
 The `amp-animation` component defines and runs custom animations and effects. It relies on the [Web Animations API](https://www.w3.org/TR/web-animations/).
 
-An `amp-animation` component defines animations in a JSON structure. The top-level section defines the overarching animation by declaring target element(s), execution conditions, timing properties and [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect). The overarching process can contain any arbitrary number of animation parts defined within the `animations` array. Animation parts in the animation's array may have their own target elements, execution conditions, timing properties, and keyfreames effects.
+An `amp-animation` component defines animations in a JSON structure. The top-level section defines the overarching animation by declaring target element(s), execution conditions, timing properties and [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect). The overarching process can contain any arbitrary number of animation parts defined within the `animations` array. Animation parts in the animation's array may have their own target elements, execution conditions, timing properties, and keyframes effects.
 
 ```html
 <amp-animation layout="nodisplay">
@@ -42,7 +42,6 @@ An `amp-animation` component defines animations in a JSON structure. The top-lev
       "direction": "alternate",
       "animations": [
         {
-          "media": "(max-width: 320px)",
           "selector": ".target-class",
           "easing": "cubic-bezier(0,0,.21,1)",
           "keyframes": {
@@ -50,8 +49,6 @@ An `amp-animation` component defines animations in a JSON structure. The top-lev
           }
         },
         {
-          "media": "(min-width: 321px)",
-          "selector": ".target-class",
           "delay": "2s",
           "easing": "cubic-bezier(0,0,.21,1)",
           "keyframes": {
@@ -85,12 +82,12 @@ If the animation uses multiple elements, but does not have a top-level animation
   <script type="application/json">
     [
       {
-        "selector": ".target-class",
+        "selector": ".target1",
         "duration": 1000,
         "keyframes": {"opacity": 1}
       },
       {
-        "selector": ".target-class",
+        "selector": ".target2",
         "duration": 600,
         "delay": 400,
         "keyframes": {"transform": "scale(2)"}
@@ -100,7 +97,7 @@ If the animation uses multiple elements, but does not have a top-level animation
 </amp-animation>
 ```
 
-Trigger animation start via the `trigger` attribute or an [action](#actions).
+Trigger the start of one or multiple animations via the `trigger` attribute or an [action](#actions).
 
 You may place `amp-animation` controlled via actions anywhere in the DOM. If the animation contains `trigger="visibility"` it must be a direct child of the `<body>`.
 
@@ -110,7 +107,7 @@ You may place `amp-animation` controlled via actions anywhere in the DOM. If the
 
 You must declare effects as keyframes to apply animations using `amp-animations`.
 
-You may specify keyframes in amp-animation in the same way as defined in MDN's [Keyframe Formats](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats). You may also reference the @keyframes name defined as CSS within the `<style amp-custom>` tag.
+You may specify keyframes in amp-animation in the same way as defined in MDN's [Keyframe Formats](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Keyframe_Formats). You may also reference the @keyframes name defined as CSS within the `<style amp-custom>` or `<style amp-keyframes>` tag.
 
 Some typical examples of keyframes definitions are below.
 
@@ -206,9 +203,9 @@ Most CSS `@keyframes` match the JSON inline keyframes definition in the [Web Ani
 
 - You may need vendor prefixes, such as `@-ms-keyframes {}` or `-moz-transform` for broad-platform support. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
 - In unsupported platforms, `amp-animation`'s pollyfills will fail when using calc() and var() with keyframes specified in CSS. Use fallback values in CSS to avoid this.
-- CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`, `rand()`, `index()` and `length()` are not available to keyframes.
+- CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`, `rand()`, `index()` and `length()` are not available to `@keyframes`.
 
-##### White listed properties for keyframes
+##### Allowed properties for keyframes
 
 The amp-animation component restricts CSS allowable properties to optimize performance. Below is the allow-listed properties:
 
@@ -365,11 +362,11 @@ Pollyfills apply to both `var()` and `calc()` on supported platforms. As a best 
 </amp-animation>
 ```
 
-Override variables of target elements specified in the `<style amp-custom>` tag by using `--var-name` fields in `amp-animation` component. `var()` expression first try to resolve values specified within the animation component and then query target styles.
+Override variables of target elements specified in the `<style amp-custom>` tag by using `--var-name` fields in `amp-animation` component. `var()` expressions first try to resolve values specified within the animation component and then resolve target styles.
 
 #### CSS extensions
 
-The `amp-animation` component provides the following CSS extensions: `rand()`, `num()`, `width()`, `height()`, `x()` and `y()`. The allowed CSS extensions are valid everywhere where CSS values are usable within the `amp-animation` definition. This includes timing and keyframe values.
+The `amp-animation` component provides the following CSS extensions: `rand()`, `num()`, `width()`, `height()`, `x()` and `y()`. The allowed CSS extensions are valid everywhere where CSS values are usable within the `amp-animation` definition. This includes timing and keyframes values.
 
 ##### CSS `index()` extension
 
@@ -499,13 +496,13 @@ Use media queries, support conditions and switch statements for platform compati
 Specify media queries with the `media` property. This property can contain any expression allowed
 for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
 
-When specified, the animation component will only execute when the environment supports the specified CSS feature. 
+When specified, the animation component will only execute when the environment supports the specified CSS feature.
 
 #### Supports condition
 
 Specify supports conditions using the supports property. The support property contains any expression allowed for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
 
-When specified, the animation component will only execute when the environment supports the specified CSS feature. 
+When specified, the animation component will only execute when the environment supports the specified CSS feature.
 
 ### Animation `switch` statement
 
