@@ -107,15 +107,29 @@ function logSeparator_() {
   log('---\n\n');
 }
 
-async function prepareEnvironment_(outputDir, outputTempDir) {
+/**
+ * Prepares output and temp directories, and ensures dependencies are installed.
+ *
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ * @param {string} tempDir full directory path to temporary working directory.
+ */
+async function prepareEnvironment_(outputDir, tempDir) {
   await fs.emptyDir(outputDir);
-  await fs.emptyDir(outputTempDir);
+  await fs.emptyDir(tempDir);
   logSeparator_();
 
   execOrDie('gulp update-packages');
   logSeparator_();
 }
 
+/**
+ * Discovers which AMP flavors are defined in the current working directory.
+ *
+ * The returned list of flavors will always contain the base flavor, and any
+ * defined experiments in ../../global-configs/experiments-config.json.
+ *
+ * @return {!Array<!Object>} list of AMP flavors to build.
+ */
 function discoverDistFlavors_() {
   const distFlavors = [
     BASE_FLAVOR_CONFIG,
@@ -145,14 +159,20 @@ function discoverDistFlavors_() {
   return distFlavors;
 }
 
-async function compileDistFlavors_(distFlavors, outputTempDir) {
+/**
+ * Compiles all AMP flavors sequentially.
+ *
+ * @param {!Array<!Object>} distFlavors list of AMP flavors to build.
+ * @param {string} tempDir full directory path to temporary working directory.
+ */
+async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command} of distFlavors) {
     log('Compiling flavor', `${green(flavorType)}:`);
 
     execOrDie('gulp clean');
     execOrDie(command);
 
-    const flavorTempDistDir = path.join(outputTempDir, flavorType);
+    const flavorTempDistDir = path.join(tempDir, flavorType);
     log('Moving build artifacts to', `${cyan(flavorTempDistDir)}...`);
     await fs.ensureDir(flavorTempDistDir);
 
@@ -186,12 +206,19 @@ async function compileDistFlavors_(distFlavors, outputTempDir) {
   }
 }
 
-async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
+/**
+ * Fetches latest AMP service-worker package from the npm registry.
+ *
+ * @param {!Array<!Object>} distFlavors list of AMP flavors to build.
+ * @param {string} tempDir full directory path to temporary working directory.
+ */
+async function fetchAmpSw_(distFlavors, tempDir) {
+  const distFlavorTypes = distFlavors.map(({flavorType}) => flavorType);
   for (const flavorType of distFlavorTypes) {
-    await fs.ensureDir(path.join(outputTempDir, flavorType, 'dist/sw'));
+    await fs.ensureDir(path.join(tempDir, flavorType, 'dist/sw'));
   }
 
-  const ampSwBaseTempDir = path.join(outputTempDir, 'base/dist/sw');
+  const ampSwBaseTempDir = path.join(tempDir, 'base/dist/sw');
 
   const ampSwNpmPackageResponse = await fetch(AMP_SW_NPM_PACKAGE_URL);
   const ampSwNpmPackageJson = await ampSwNpmPackageResponse.json();
@@ -212,24 +239,31 @@ async function fetchAmpSw_(distFlavorTypes, outputTempDir) {
     distFlavorTypes
       .filter((flavorType) => flavorType != 'base')
       .map((flavorType) =>
-        fs.copy(
-          ampSwBaseTempDir,
-          path.join(outputTempDir, flavorType, 'dist/sw')
-        )
+        fs.copy(ampSwBaseTempDir, path.join(tempDir, flavorType, 'dist/sw'))
       )
   );
 
   logSeparator_();
 }
 
-async function populateOrgCdn_(distFlavors, outputTempDir, outputDir) {
+/**
+ * Copies compiled build artifacts to RTV-based directories.
+ *
+ * Each flavor translates to one or more RTV numbers, for a detailed explanation
+ * see spec/amp-framework-hosting.md.
+ *
+ * @param {!Array<!Object>} distFlavors list of AMP flavors to build.
+ * @param {string} tempDir full directory path to temporary working directory.
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ */
+async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
   for (const {flavorType, rtvPrefixes} of distFlavors) {
     await Promise.all(
       rtvPrefixes.map(async (rtvPrefix) => {
         const rtvNumber = `${rtvPrefix}${VERSION}`;
         const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
         await fs.ensureDir(rtvPath);
-        return fs.copy(path.join(outputTempDir, flavorType, 'dist'), rtvPath);
+        return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
       })
     );
   }
@@ -237,6 +271,15 @@ async function populateOrgCdn_(distFlavors, outputTempDir, outputDir) {
   logSeparator_();
 }
 
+/**
+ * Prepends the AMP_CONFIG configuration object to all the entry files.
+ *
+ * Entry files are those that publishers would embed in their page, i.e.
+ * https://cdn.ampproject.org/v0.js, but could be others for different users,
+ * e.g., /amp4ads-v0.js for AMP ads.
+ *
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ */
 async function prependConfig_(outputDir) {
   const activeChannels = Object.entries(CHANNEL_CONFIGS).filter(
     ([rtvPrefix]) => {
@@ -277,19 +320,27 @@ async function prependConfig_(outputDir) {
   logSeparator_();
 }
 
-async function populateNetWildcard_(outputTempDir, outputDir) {
+/**
+ * Copies compiled build artifacts to the AMP ads frame container directory.
+ *
+ * @param {string} tempDir full directory path to temporary working directory.
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ */
+async function populateNetWildcard_(tempDir, outputDir) {
   const netWildcardDir = path.join(outputDir, 'net-wildcard', VERSION);
   await fs.ensureDir(netWildcardDir);
-  await fs.copy(
-    path.join(outputTempDir, 'base/dist.3p', VERSION),
-    netWildcardDir
-  );
+  await fs.copy(path.join(tempDir, 'base/dist.3p', VERSION), netWildcardDir);
 
   logSeparator_();
 }
 
-async function cleanup_(outputTempDir) {
-  await fs.rmdir(outputTempDir, {recursive: true});
+/**
+ * Cleans are deletes the temp directory.
+ *
+ * @param {string} tempDir full directory path to temporary working directory.
+ */
+async function cleanup_(tempDir) {
+  await fs.rmdir(tempDir, {recursive: true});
 
   logSeparator_();
 }
@@ -308,17 +359,16 @@ async function release() {
   logSeparator_();
 
   const outputDir = path.resolve(argv.output_dir || './release');
-  const outputTempDir = path.join(outputDir, 'tmp');
+  const tempDir = path.join(outputDir, 'tmp');
 
   log('Preparing environment for release build in', `${cyan(outputDir)}...`);
-  await prepareEnvironment_(outputDir, outputTempDir);
+  await prepareEnvironment_(outputDir, tempDir);
 
   log('Discovering release', `${green('flavors')}...`);
   const distFlavors = await discoverDistFlavors_();
-  const distFlavorTypes = distFlavors.map(({flavorType}) => flavorType);
 
   log('Compiling all', `${green('flavors')}...`);
-  await compileDistFlavors_(distFlavors, outputTempDir);
+  await compileDistFlavors_(distFlavors, tempDir);
 
   // TODO(#28168, erwinmombay): this is a temporary hack, and should be removed
   // once the '--module --nomodule' flags exist.
@@ -329,31 +379,32 @@ async function release() {
     cyan('base/dist')
   );
   await Promise.all(
-    distFlavorTypes
+    distFlavors
+      .map(({flavorType}) => flavorType)
       .filter((flavorType) => flavorType != 'base')
       .map((flavorType) =>
         fs.copy(
-          path.join(outputTempDir, 'base/dist'),
-          path.join(outputTempDir, flavorType, 'dist'),
+          path.join(tempDir, 'base/dist'),
+          path.join(tempDir, flavorType, 'dist'),
           {overwrite: false}
         )
       )
   );
 
   log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
-  await fetchAmpSw_(distFlavorTypes, outputTempDir);
+  await fetchAmpSw_(distFlavors, tempDir);
 
   log('Copying from temporary directory to', cyan('org-cdn'));
-  await populateOrgCdn_(distFlavors, outputTempDir, outputDir);
+  await populateOrgCdn_(distFlavors, tempDir, outputDir);
 
   log('Prepending config to entry files...');
   await prependConfig_(outputDir);
 
   log('Copying from temporary directory to', cyan('net-wildcard'));
-  await populateNetWildcard_(outputTempDir, outputDir);
+  await populateNetWildcard_(tempDir, outputDir);
 
   log('Cleaning up temp dir...');
-  await cleanup_(outputTempDir);
+  await cleanup_(tempDir);
 
   log('Release build is done!');
   log('  See:', cyan(outputDir));
