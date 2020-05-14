@@ -336,7 +336,7 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
           </dependency>
           <dependency>
             <groupId>org.dom4j</groupId>
