@@ -1,5 +1,6 @@
 # Release Schedule
 
+[filter format="none"]
 - [Release Channels](#release-channels)
   - [Nightly](#nightly)
   - [Weekly](#weekly)
@@ -9,6 +10,7 @@
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
   - [Release Freezes](#release-freezes)
+[/filter]
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
 
@@ -17,6 +19,10 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a 
 The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
 To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_ (see the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) for more details).
+
+[tip]
+For a quick visual overview of when a PR has reached a certain stage you can refer to the [interactive release calendar](https://amp.dev/documentation/guides-and-tutorials/contribute/vendor-contributions/release-schedule/).
+[/tip]
 
 ### Nightly
 
