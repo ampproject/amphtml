@@ -217,7 +217,7 @@ async function fetchAmpSw_(distFlavors, tempDir) {
     await fs.ensureDir(path.join(tempDir, flavorType, 'dist/sw'));
   }
 
-  const ampSwBaseTempDir = path.join(tempDir, 'base/dist/sw');
+  const ampSwTempDir = path.join(tempDir, 'ampproject/amp-sw');
 
   const ampSwNpmPackageResponse = await fetch(AMP_SW_NPM_PACKAGE_URL);
   const ampSwNpmPackageJson = await ampSwNpmPackageResponse.json();
@@ -225,7 +225,7 @@ async function fetchAmpSw_(distFlavors, tempDir) {
   const ampSwTarballUrl = ampSwNpmPackageJson.versions[latest].dist.tarball;
 
   const tarWritableStream = tar.extract({
-    cwd: ampSwBaseTempDir,
+    cwd: ampSwTempDir,
     filter: (path) => path.startsWith('package/dist'),
     strip: 2, // to strip "package/dist/".
   });
@@ -235,11 +235,9 @@ async function fetchAmpSw_(distFlavors, tempDir) {
   });
 
   await Promise.all(
-    distFlavorTypes
-      .filter((flavorType) => flavorType != 'base')
-      .map((flavorType) =>
-        fs.copy(ampSwBaseTempDir, path.join(tempDir, flavorType, 'dist/sw'))
-      )
+    distFlavorTypes.map((flavorType) =>
+      fs.copy(ampSwTempDir, path.join(tempDir, flavorType, 'dist/sw'))
+    )
   );
 
   logSeparator_();
@@ -370,7 +368,9 @@ async function release() {
   await compileDistFlavors_(distFlavors, tempDir);
 
   // TODO(#28168, erwinmombay): this is a temporary hack, and should be removed
-  // once the '--module --nomodule' flags exist.
+  // once the '--module --nomodule' flags exist. This is the only thing blocking
+  // us from being able to shard `gulp release` for parallel executions for each
+  // flavor!
   log(
     'Copying any files missing in',
     `non-${green('base')}`,
