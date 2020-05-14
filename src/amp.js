@@ -22,6 +22,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
+import {TickLabel} from './enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -102,7 +103,7 @@ function bootstrap(ampdoc, perf) {
     /* makes the body visible */ true
   );
   startupChunk(self.document, function finalTick() {
-    perf.tick('e_is');
+    perf.tick(TickLabel.END_INSTALL_STYLES);
     Services.resourcesForDoc(ampdoc).ampInitComplete();
     // TODO(erwinm): move invocation of the `flush` method when we have the
     // new ticks in place to batch the ticks properly.
@@ -151,7 +152,7 @@ if (shouldMainBootstrapRun) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
-    perf.tick('is');
+    perf.tick(TickLabel.INSTALL_STYLES);
     if (IS_ESM) {
       bootstrap(ampdoc, perf);
     } else {
