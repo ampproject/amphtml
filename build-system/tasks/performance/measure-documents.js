@@ -33,6 +33,7 @@ const {
   getAnalyticsMetrics,
 } = require('./analytics-handler');
 const {cyan, green} = require('ansi-colors');
+const {setupAdRequestHandler} = require('./ads-handler');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -201,14 +202,20 @@ function setupDefaultHandlers(handlersList, version) {
  * @param {?Object} handlerOptions
  * @param {!Puppeteer.page} page
  * @param {!function} resolve
+ * @param {string} version
  */
 async function setupAdditionalHandlers(
   handlersList,
   handlerOptions,
   page,
-  resolve
+  resolve,
+  version
 ) {
   switch (handlerOptions.handlerName) {
+    case 'adsHandler':
+      setupAdRequestHandler(handlersList, version);
+      setupAnalyticsHandler(handlersList, handlerOptions, resolve);
+      break;
     case 'analyticsHandler':
       setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
@@ -248,6 +255,7 @@ function startRequestListener(handlersList, page) {
  */
 async function addHandlerMetric(handlerOptions, page) {
   switch (handlerOptions.handlerName) {
+    case 'adsHandler':
     case 'analyticsHandler':
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
@@ -310,7 +318,8 @@ async function measureDocument(url, version, config) {
     handlersList,
     handlerOptionsForUrl,
     page,
-    resolve
+    resolve,
+    version
   );
   startRequestListener(handlersList, page);
   try {

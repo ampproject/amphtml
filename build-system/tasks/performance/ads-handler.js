@@ -21,6 +21,13 @@ const AD_SERVER_DOMAIN = 'securepubads.g.doubleclick.net';
 const EXAMPLE_AD_PATH =
   'http://localhost:8000/test/fixtures/performance/amp-ad/amphtml-ad.html';
 
+/**
+ * Handler that will intercept ads requests and return a locally cached ad
+ * instead.
+ * @param {!Array<function>} handlersList
+ * @param {string} version
+ * @return {boolean}
+ */
 function setupAdRequestHandler(handlersList, version) {
   handlersList.push((interceptedRequest) => {
     const url = interceptedRequest.url();
