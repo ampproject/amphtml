@@ -16,7 +16,6 @@
 
 function setupAnalyticsHandler(handlersList, handlerOptions, resolve) {
   const {extraUrlParam} = handlerOptions;
-  // Q: Is the idea here that we might use more than 1 kv pair?
   const analyticsParam = Object.keys(extraUrlParam)
     .map((key) => `${key}=${extraUrlParam[key]}`)
     .join('&');
