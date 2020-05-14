@@ -373,12 +373,13 @@ export class AnimationRunner {
       return;
     }
 
-    if (
-      this.runner_ &&
-      this.runner_.getPlayState() !== WebAnimationPlayState.FINISHED &&
-      this.runner_.getPlayState() !== WebAnimationPlayState.IDLE
-    ) {
-      this.runner_.pause();
+    if (this.runner_) {
+      try {
+        this.runner_.pause();
+      } catch {
+        // This fails when the animation is finished explicitly
+        // (runner.finish()) since this destroys internal players. This is fine.
+      }
     }
   }
 
