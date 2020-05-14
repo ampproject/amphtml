@@ -60,8 +60,8 @@ class AmpFitText extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-fit-text-v2'),
-      'expected amp-fit-text-v2 experiment to be enabled'
+      isExperimentOn(this.win, 'amp-fit-text-bento'),
+      'expected amp-fit-text-bento experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   }
@@ -73,6 +73,6 @@ AmpFitText['Component'] = FitText;
 /** @override */
 AmpFitText['passthrough'] = true;
 
-AMP.extension(TAG, '0.2', (AMP) => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFitText, CSS);
 });
