@@ -76,6 +76,15 @@
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
       "groupName": "core dependencies (minor updates)"
+    },
+
+    {
+      "updateTypes": ["minor", "patch"],
+      "packagePatterns": ["^@ampproject/"],
+      "groupName": "ampproject dependencies (minor & patch updates)",
+      "dependencies": {
+        "enabled": true
+      }
     }
   ]
 }
