@@ -76,6 +76,14 @@
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
       "groupName": "core dependencies (minor updates)"
+    },
+
+    {
+      "assignAutomerge": true,
+      "automerge": true,
+      "updateTypes": ["minor", "patch"],
+      "packagePatterns": ["^@ampprojects/"],
+      "groupName": "ampproject dependencies (minor & patch updates)"
     }
   ]
 }
