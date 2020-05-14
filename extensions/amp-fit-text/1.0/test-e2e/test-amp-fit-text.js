@@ -36,26 +36,26 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render in correct font-size', async function () {
+    it.skip('should render in correct font-size', async function () {
       await verifyElementStyles(await selectContentDiv('test1'), {
         'font-size': '32px',
       });
     });
 
-    it('should render with overflow', async function () {
+    it.skip('should render with overflow', async function () {
       await verifyElementStyles(await selectContentDiv('test2'), {
         'font-size': '42px',
         'overflow': 'hidden',
       });
     });
 
-    it('should render in correct font-size with a lot of text', async function () {
+    it.skip('should render in correct font-size with a lot of text', async function () {
       await verifyElementStyles(await selectContentDiv('test3'), {
         'font-size': '16px',
       });
     });
 
-    it('should account for border dimensions', async function () {
+    it.skip('should account for border dimensions', async function () {
       await verifyElementStyles(await selectContentDiv('test4'), {
         'font-size': '20px',
       });
