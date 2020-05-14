@@ -892,6 +892,7 @@ exports.extensionBundles = [
         'amp-story-info-dialog',
         'amp-story-reaction',
         'amp-story-reaction-quiz',
+        'amp-story-reaction-poll-binary',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',

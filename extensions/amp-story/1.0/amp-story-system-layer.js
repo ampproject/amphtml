@@ -66,6 +66,10 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
+const CURRENT_PAGE_HAS_PLAYABLE_ATTRIBUTE =
+  'i-amphtml-current-page-has-playable';
+
+/** @private @const {string} */
 const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
 
 /** @private @const {string} */
@@ -707,6 +711,7 @@ export class SystemLayer {
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
       shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-mobile');
 
       switch (uiState) {
         case UIType.DESKTOP_PANELS:
@@ -714,6 +719,9 @@ export class SystemLayer {
           break;
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.MOBILE:
+          shadowRoot.classList.add('i-amphtml-story-mobile');
           break;
       }
     });

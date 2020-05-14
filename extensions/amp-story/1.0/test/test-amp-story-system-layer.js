@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   Action,
   AmpStoryStoreService,
@@ -224,6 +223,61 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
     storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-pause-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
+  });
+
+  it('should disable paused button if page does not has playable', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute(
+      'i-amphtml-current-page-has-playable'
+    );
+  });
+
+  it('setting paused state to true should show the paused button', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
+  });
+
+  it('setting paused state to false should show the play button', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the play button should change state to false', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-play-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the pause button should change state to true', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYABLE, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_PLAYABLE, true);
     storeService.dispatch(Action.TOGGLE_PAUSED, false);
     systemLayer
       .getShadowRoot()

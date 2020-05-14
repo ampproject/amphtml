@@ -1382,6 +1382,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.PREVIOUS);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**
@@ -1405,6 +1406,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.NEXT);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
   }
 
   /**

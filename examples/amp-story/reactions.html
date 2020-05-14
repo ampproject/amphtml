@@ -6,6 +6,29 @@
     <link rel="canonical" href="reactions.html">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      a.button {
+        text-decoration: none;
+        background-color: rgb(12, 157, 241);
+        color: #333333;
+        padding: 10px;
+        height: 30%;
+        top: 35%;
+        left: 20%;
+        right: 20%;
+        position: absolute;
+        text-align: center;
+        border-radius: 8px;
+      }
+
+      a.button:hover {
+        background-color: rgb(0, 108, 209);
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+    </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
@@ -118,6 +141,123 @@
                 option-2-text="Etruscan shrew" option-2-correct>
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="https://localhost:3000/reactions"
+                id="movie-light-connected"
+                style="--reaction-answer-choice-background: #fff!important; --reaction-main-color: #005af0; --reaction-main-color-transparent: rgba(0,90,240,0.09);"
+                option-1-text="דוקטור מוזר"
+                option-2-text="פנתר שחור">
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">
+            <iframe src="https://www.amp.dev" style="width:100%;height:100%"></iframe>
+          </amp-story-page-attachment>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="https://localhost:3000/reactions"
+                id="movie-dark-connected""
+                theme="dark"
+                option-1-text="Doctor Strange"
+                option-2-text="Black Panther">
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="https://localhost:3000/reactions"
+                id="movie-light-connected"
+                style="--reaction-main-color: #FFC700; --reaction-main-color-transparent: rgba(255, 199, 0, 0.3);"
+                option-1-text="🧛"
+                option-2-text="🐆">
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="https://localhost:3000/reactions"
+                id="movie-light-connected"
+                style="--reaction-main-color: rgb(0, 0, 0); --reaction-main-color-transparent: rgba(0, 0, 0, 0.2);"
+                option-1-text="Doctor"
+                option-2-text="Panther">
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
+              <amp-story-reaction-poll-binary
+                endpoint="https://localhost:3000/reactions"
+                id="movie-light-connected"
+                theme="dark"
+                style="--reaction-theme-background: #005AF0 !important;"
+                option-1-text="Doctor Strange"
+                option-2-text="Panther">
+              </amp-story-reaction-poll-binary>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-cta-layer>
+            <a href="https://www.ampproject.org" class="button">Outlink here!</a>
+          </amp-story-cta-layer>
         </amp-story-page>
     </amp-story>
   </body>
