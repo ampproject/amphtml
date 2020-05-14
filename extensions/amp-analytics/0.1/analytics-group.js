@@ -128,7 +128,7 @@ export class AnalyticsGroup {
  */
 export function isAnalyticsChunksExperimentOn(win) {
   if (getMode(win).runtime == 'inabox') {
-    return false;
+    return isExperimentOn(win, 'analytics-chunks-inabox');
   }
   return isExperimentOn(win, 'analytics-chunks');
 }
