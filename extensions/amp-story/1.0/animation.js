@@ -374,9 +374,12 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      // Init or no-op if the runner was already running.
-      this.runner_.start();
-      this.runner_.pause();
+      try {
+        this.runner_.pause();
+      } catch {
+        // This fails when the animation is finished explicitly
+        // (runner.finish()) since this destroys internal players. This is fine.
+      }
     }
   }
 
