@@ -44,15 +44,25 @@ function setupAnalyticsHandler(handlersList, handlerOptions, resolve) {
 
         // Sample pages can indicate the total number of expected requests.
         // Will not be on real pages.
-        if (optExpectedRequests && !handlerOptions['expectedRequests']) {
-          handlerOptions['expectedRequests'] = optExpectedRequests;
+        if (
+          optExpectedRequests &&
+          !isNaN(parseInt(optExpectedRequests, 10)) &&
+          !handlerOptions['expectedRequests']
+        ) {
+          handlerOptions['expectedRequests'] = parseInt(
+            optExpectedRequests,
+            10
+          );
         }
 
         // Named request in sample page. Will not be named on real pages.
         const requestName = optRequestName || `request${requestsSeen}`;
         handlerOptions.requests.push({requestName, time});
 
-        if (!optExpectedRequests || requestsSeen >= optExpectedRequests) {
+        if (
+          !handlerOptions['expectedRequests'] ||
+          requestsSeen >= handlerOptions['expectedRequests']
+        ) {
           // Resolve and short circuit setTimeout
           resolve();
         }
@@ -78,7 +88,9 @@ async function maybeHandleAnalyticsRequest(
   const interceptedUrl = interceptedRequest.url();
   if (interceptedUrl.includes(analyticsParam)) {
     const {searchParams} = new URL(interceptedUrl);
+    // Magic parameter name to name request.
     const requestName = searchParams.get('requestName');
+    // Magic parameter name to indicate total requests expected.
     const expectedRequests = searchParams.get('expectedRequests');
 
     requestCallback(Date.now(), requestName, expectedRequests);
@@ -116,7 +128,7 @@ function getAnalyticsMetrics(analyticsHandlerOptions) {
 
   // Page has opted into tracking more than 1 request.
   requests.forEach(
-    ({name, time}) => (analyticsMetrics[name] = time - startTime)
+    ({requestName, time}) => (analyticsMetrics[requestName] = time - startTime)
   );
 
   return analyticsMetrics;
