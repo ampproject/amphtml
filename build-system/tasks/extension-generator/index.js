@@ -98,27 +98,34 @@ function getJsTestExtensionFile(name) {
  */
 
 import '../${name}';
+import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('${name}', {
-  amp: {
-    extensions: ['${name}'],
+describes.realWin(
+  '${name}',
+  {
+    amp: {
+      runtimeOn: true,
+      extensions: ['${name}'],
+    },
   },
-}, env => {
+  (env) => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = createElementWithAttributes(win.document, '${name}', {
+        layout: 'responsive',
+      });
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('${name}');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should have hello world when built', () => {
+      await element.whenBuilt();
+      expect(element.querySelector('div').textContent).to.equal('hello world');
+    });
+  }
+);
 `;
 }
 
