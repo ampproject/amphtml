@@ -10,16 +10,72 @@
   },
   "ignorePaths": [],
   "timezone": "America/Los_Angeles",
+  "schedule": "12am every weekday",
+  "reviewers": "team:build-cop",
   "packageRules": [
     {
       "updateTypes": ["patch"],
-      "groupName": "dependencies (patch)",
-      "schedule": "12am every weekday"
+      "groupName": "subpackage dependencies (patch updates)"
     },
     {
       "updateTypes": ["minor"],
-      "groupName": "dependencies (minor)",
-      "schedule": "12am every weekday"
+      "groupName": "subpackage dependencies (minor updates)"
+    },
+
+    {
+      "paths": ["src/**"],
+      "updateTypes": ["patch"],
+      "groupName": "runtime dependencies (patch updates)",
+      "reviewers": "team:wg-runtime",
+      "labels": ["WG: runtime"]
+    },
+    {
+      "paths": ["src/**"],
+      "updateTypes": ["minor"],
+      "groupName": "runtime dependencies (minor updates)",
+      "reviewers": "team:wg-runtime",
+      "labels": ["WG: runtime"]
+    },
+
+    {
+      "paths": ["build-system/**"],
+      "updateTypes": ["patch"],
+      "groupName": "build system dependencies (patch updates)",
+      "reviewers": "team:wg-infra",
+      "labels": ["WG: infra"]
+    },
+    {
+      "paths": ["build-system/**"],
+      "updateTypes": ["minor"],
+      "groupName": "build system dependencies (minor updates)",
+      "reviewers": "team:wg-infra",
+      "labels": ["WG: infra"]
+    },
+
+    {
+      "paths": ["validator/**"],
+      "updateTypes": ["patch"],
+      "groupName": "validator dependencies (patch updates)",
+      "reviewers": "team:wg-caching",
+      "labels": ["WG: caching"]
+    },
+    {
+      "paths": ["validator/**"],
+      "updateTypes": ["minor"],
+      "groupName": "validator dependencies (minor updates)",
+      "reviewers": "team:wg-caching",
+      "labels": ["WG: caching"]
+    },
+
+    {
+      "paths": ["+(package.json)"],
+      "updateTypes": ["patch"],
+      "groupName": "core dependencies (patch updates)"
+    },
+    {
+      "paths": ["+(package.json)"],
+      "updateTypes": ["minor"],
+      "groupName": "core dependencies (minor updates)"
     }
   ]
 }
