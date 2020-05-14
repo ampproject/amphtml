@@ -151,6 +151,7 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
       '.i-amphtml-story-reaction-option-title > span'
     );
     optionText.textContent = option['text'];
+    convertedOption.optionIndex_ = option['optionIndex'];
     return convertedOption;
   }
 

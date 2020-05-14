@@ -7,24 +7,6 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
-      a.button {
-        text-decoration: none;
-        background-color: rgb(12, 157, 241);
-        color: #333333;
-        padding: 10px;
-        height: 30%;
-        top: 35%;
-        left: 20%;
-        right: 20%;
-        position: absolute;
-        text-align: center;
-        border-radius: 8px;
-      }
-
-      a.button:hover {
-        background-color: rgb(0, 108, 209);
-      }
-
       body {
         font-family: 'Poppins', sans-serif;
       }
@@ -155,7 +137,7 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="https://localhost:3000/reactions"
+                endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
                 style="--reaction-answer-choice-background: #fff!important; --reaction-main-color: #005af0; --reaction-main-color-transparent: rgba(0,90,240,0.09);"
                 option-1-text="דוקטור מוזר"
@@ -180,8 +162,8 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="https://localhost:3000/reactions"
-                id="movie-dark-connected""
+                endpoint="http://localhost:3000/reactions"
+                id="movie-dark-connected"
                 theme="dark"
                 option-1-text="Doctor Strange"
                 option-2-text="Black Panther">
@@ -202,7 +184,7 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="https://localhost:3000/reactions"
+                endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
                 style="--reaction-main-color: #FFC700; --reaction-main-color-transparent: rgba(255, 199, 0, 0.3);"
                 option-1-text="🧛"
@@ -224,7 +206,7 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="https://localhost:3000/reactions"
+                endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
                 style="--reaction-main-color: rgb(0, 0, 0); --reaction-main-color-transparent: rgba(0, 0, 0, 0.2);"
                 option-1-text="Doctor"
@@ -246,7 +228,7 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-reaction-poll-binary
-                endpoint="https://localhost:3000/reactions"
+                endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
                 theme="dark"
                 style="--reaction-theme-background: #005AF0 !important;"
@@ -255,9 +237,6 @@
               </amp-story-reaction-poll-binary>
             </div>
           </amp-story-grid-layer>
-          <amp-story-cta-layer>
-            <a href="https://www.ampproject.org" class="button">Outlink here!</a>
-          </amp-story-cta-layer>
         </amp-story-page>
     </amp-story>
   </body>
