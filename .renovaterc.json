@@ -8,5 +8,18 @@
   "dependencies": {
     "enabled": false
   },
-  "ignorePaths": []
+  "ignorePaths": [],
+  "timezone": "America/Los_Angeles",
+  "packageRules": [
+    {
+      "updateTypes": ["patch"],
+      "groupName": "dependencies (patch)",
+      "schedule": "12am every weekday"
+    },
+    {
+      "updateTypes": ["minor"],
+      "groupName": "dependencies (minor)",
+      "schedule": "12am every weekday"
+    }
+  ]
 }
