@@ -36,9 +36,11 @@ describes.realWin(
 
     async function getjwplayer(attributes) {
       const jwp = doc.createElement('amp-jwplayer');
+
       for (const key in attributes) {
         jwp.setAttribute(key, attributes[key]);
       }
+
       const html = htmlFor(env.win.document);
 
       env.sandbox
@@ -421,6 +423,17 @@ describes.realWin(
       expect(imp.iframe_).to.be.null;
       expect(placeholder).to.not.have.display('');
     });
+
+    it('supports outstream requests', () => {
+      const attributes = {
+        'data-media-id': 'outstream',
+        'data-player-id': 'p4gV8jF3',
+      };
+      const jwp = await getjwplayer(attributes);
+      const imp = jwp.implementation_;
+
+      expect(imp.contentid_).to.equal('oi7pAMI1');
+  });
 
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {

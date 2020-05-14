@@ -302,9 +302,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     const url = this.getSingleLineEmbed_();
     const src = addParamsToUrl(url, queryParams);
-    const frame = disableScrollingOnIframe(
-      createFrameFor(this, src, this.element.id)
-    );
+    const frame = createFrameFor(this, src, this.element.id);
 
     addUnsafeAllowAutoplay(frame);
     disableScrollingOnIframe(frame);
@@ -445,6 +443,14 @@ class AmpJWPlayer extends AMP.BaseElement {
           const playlistItem = {...detail};
           this.playlistItem_ = playlistItem;
           this.sendCommand_('getPlayedRanges');
+          break;
+        case 'resize':
+          const {width, height} = detail;
+          Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+            this.element,
+            height,
+            width
+          );
           break;
         case 'time':
           const {currentTime} = detail;
