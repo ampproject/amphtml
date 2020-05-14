@@ -35,7 +35,7 @@ const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
 
 /** @visibleForTesting */
-export const CONSENT_STRING_MAX_LENGTH = 200;
+export const CONSENT_STRING_MAX_LENGTH = 1024;
 
 export class ConsentStateManager {
   /**
@@ -377,8 +377,7 @@ export class ConsentInstance {
       const consentStr = consentInfo['consentString'];
       if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
         // Verify the length of consentString.
-        // 200 * 2 (utf8Encode) * 4/3 (base64) = 533 bytes.
-        // TODO: Need utf8Encode if necessary.
+        // 1024 * 4/3 (base64) = 1336 bytes.
         user().error(
           TAG,
           'Cannot store consentString which length exceeds %s. ' +
