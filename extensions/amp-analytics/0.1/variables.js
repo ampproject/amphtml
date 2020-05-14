@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -27,6 +28,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
@@ -234,20 +236,6 @@ export class VariableService {
     this.register_('SCROLL_LEFT', () =>
       Services.viewportForDoc(this.ampdoc_).getScrollLeft()
     );
-    // Was set async before
-    this.register_('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(
-        this.ampdoc_.win
-      ).getFirstContentfulPaint();
-    });
-
-    this.register_('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
-    });
-
-    this.register_('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
-    });
   }
 
   /**
@@ -260,7 +248,35 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = {...this.macros_, ...elementMacros};
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 

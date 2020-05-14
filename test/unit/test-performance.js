@@ -867,6 +867,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       onVisibilityChanged: () => {},
       whenFirstVisible: () => unresolvedPromise,
       getVisibilityState: () => viewerVisibilityState,
+      getFirstVisibleTime: () => 0,
     });
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => {},
@@ -921,7 +922,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -929,6 +930,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -951,6 +956,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       env.sandbox
         .stub(env.win, 'PerformanceObserver')
         .callsFake(PerformanceObserverStub);
+
+      env.sandbox.stub(env.ampdoc, 'getFirstVisibleTime').callsFake(() => null);
 
       installPerformanceService(env.win);
 
@@ -977,7 +984,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -985,6 +992,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -995,6 +1006,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     beforeEach(() => {
       setupFakesForVisibilityStateManipulation();
     });
+
     it('after performance service registered', () => {
       // Fake the Performance API.
       fakeWin.PerformanceObserver.supportedEntryTypes = [
@@ -1039,7 +1051,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'lcpl',
         delta: 10,
@@ -1094,7 +1106,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'fid',
         delta: 3,
@@ -1267,6 +1279,37 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'cls',
         delta: 0.55,
+      });
+    });
+  });
+
+  describe('getMetric', () => {
+    beforeEach(() => {
+      setupFakesForVisibilityStateManipulation();
+    });
+
+    function getPerformance() {
+      installPerformanceService(fakeWin);
+      return Services.performanceFor(fakeWin);
+    }
+
+    it('returns a promise that resolves to the value', async () => {
+      const perf = getPerformance();
+      perf.tick('mbv', 1);
+      const value = await perf.getMetric('mbv');
+      expect(value).to.eq(1);
+    });
+
+    describe('when API not supported', () => {
+      it('throws an error', async () => {
+        const perf = getPerformance();
+        try {
+          await perf.getMetric('lcpv');
+        } catch (error) {
+          expect(error.message).to.equal(
+            'Largest Contentful Paint not supported'
+          );
+        }
       });
     });
   });
