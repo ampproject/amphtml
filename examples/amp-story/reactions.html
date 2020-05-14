@@ -48,12 +48,12 @@
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/reactions"
                 theme="dark"
-                chip-corner="sharp">
-              <h1>Who won the first soccer world cup?</h1>
-              <option>France</option>
-              <option>Spain</option>
-              <option correct>Uruguay</option>
-              <option>Brazil</option>
+                chip-corner="sharp"
+                prompt-text="Who won the first soccer world cup?"
+                option-1-text="France"
+                option-2-text="Spain"
+                option-3-text="Uruguay" option-3-correct
+                option-4-text="Brazil">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -71,12 +71,12 @@
                 id="last-cup-dark"
                 theme="dark"
                 style="--reaction-accent-color:#000"
-                chip-corner="sharp">
-              <h1>Who won the last soccer world cup?</h1>
-              <option correct>France</option>
-              <option>Spain</option>
-              <option>Uruguay</option>
-              <option>Brazil</option>
+                chip-corner="sharp"
+                prompt-text="Who won the last soccer world cup?"
+                option-1-text="France" option-1-correct
+                option-2-text="Spain"
+                option-3-text="Uruguay"
+                option-4-text="Brazil">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -93,10 +93,10 @@
             <amp-story-reaction-quiz
                 id="largest-mammal-light"
                 endpoint="http://localhost:3000/reactions"
-                chip-corner="sharp">
-              <h1>What is the largest mammal?</h1>
-              <option correct>Blue whale</option>
-              <option>Etruscan shrew</option>
+                chip-corner="sharp"
+                prompt-text="What is the largest mammal?"
+                option-1-text="Blue whale" option-1-correct
+                option-2-text="Etruscan shrew">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -112,10 +112,10 @@
           <amp-story-grid-layer template="center">
             <amp-story-reaction-quiz
                 id="smallest-mammal-light"
-                chip-corner="sharp">
-              <h1>What is the smallest mammal?</h1>
-              <option>Blue whale</option>
-              <option correct>Etruscan shrew</option>
+                chip-corner="sharp"
+                prompt-text="What is the smallest mammal?"
+                option-1-text="Blue whale"
+                option-2-text="Etruscan shrew" option-2-correct>
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>

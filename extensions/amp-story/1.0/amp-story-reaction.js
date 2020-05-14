@@ -67,6 +67,15 @@ export let ReactionOptionType;
 export let ReactionResponseType;
 
 /**
+ * @typedef {{
+ *    optionIndex: number,
+ *    text: string,
+ *    correct: ?string
+ * }}
+ */
+export let OptionConfigType;
+
+/**
  * Reaction abstract class with shared functionality for interactive components.
  *
  * Lifecycle:
@@ -91,8 +100,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
    * @param {!ReactionType} type
+   * @param {!Array<number>} bounds the bounds on number of options, inclusive
    */
-  constructor(element, type) {
+  constructor(element, type, bounds = [2, 4]) {
     super(element);
 
     /** @protected @const {ReactionType} */
@@ -100,6 +110,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
+
+    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    this.backendDataPromise_ = null;
 
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
@@ -110,6 +123,18 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @private {!Array<number>} min and max number of options, inclusive */
+    this.optionBounds_ = bounds;
+
+    /** @private {?Array<!Element>} */
+    this.optionElements_ = null;
+
+    /** @protected {?Array<!OptionConfigType>} */
+    this.options_ = null;
+
+    /** @protected {?Array<!ReactionOptionType>} */
+    this.optionsData_ = null;
+
     /** @protected {?Element} */
     this.rootEl_ = null;
 
@@ -118,15 +143,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
-
-    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
-    this.backendDataPromise_ = null;
-
-    /** @protected {?Array<!ReactionOptionType>} */
-    this.optionsData_ = null;
-
-    /** @protected {?Array<!Element>} */
-    this.optionElements_ = null;
 
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
@@ -163,7 +179,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.rootEl_ = this.buildComponent(this.element);
+    this.options_ = this.parseOptions_();
+    this.rootEl_ = this.buildComponent();
     this.element.classList.add('i-amphtml-story-reaction');
     this.adjustGridLayer_();
     this.initializeListeners_();
@@ -175,12 +192,52 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Generates the template in rootEl_ and fills up with options.
-   * @param {!Element} unusedElement
+   * Reads the element attributes prefixed with option- and returns them as a list.
+   * eg: [
+   *      {optionIndex: 0, text: 'Koala'},
+   *      {optionIndex: 1, text: 'Developers', correct: ''}
+   *    ]
+   * @protected
+   * @return {?Array<!OptionConfigType>}
+   */
+  parseOptions_() {
+    const options = [];
+    toArray(this.element.attributes).forEach((attr) => {
+      // Match 'option-#-type' (eg: option-1-text, option-2-image, option-3-correct...)
+      if (attr.name.match(/^option-\d+-\w+$/)) {
+        const splitParts = attr.name.split('-');
+        const optionNumber = parseInt(splitParts[1], 10);
+        // Add all options in order on the array with correct index.
+        while (options.length < optionNumber) {
+          options.push({'optionIndex': options.length});
+        }
+        options[optionNumber - 1][splitParts[2]] = attr.value;
+      }
+    });
+    if (
+      options.length >= this.optionBounds_[0] &&
+      options.length <= this.optionBounds_[1]
+    ) {
+      return options;
+    }
+    devAssert(
+      options.length >= this.optionBounds_[0] &&
+        options.length <= this.optionBounds_[1],
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${options.length}.`
+    );
+    dev().error(
+      TAG,
+      `Improper number of options. Expected ${this.optionBounds_[0]} <= options <= ${this.optionBounds_[1]} but got ${options.length}.`
+    );
+  }
+
+  /**
+   * Generates the template from the config_ Map.
+   *
    * @return {!Element} rootEl_
    * @protected @abstract
    */
-  buildComponent(unusedElement) {
+  buildComponent() {
     // Subclass must override.
   }
 

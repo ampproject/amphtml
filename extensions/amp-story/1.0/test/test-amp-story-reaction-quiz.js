@@ -16,9 +16,11 @@
 
 import {AmpStoryReactionQuiz} from '../amp-story-reaction-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
-import {getMockReactionData} from './test-amp-story-reaction';
+import {
+  addConfigToReaction,
+  getMockReactionData,
+} from './test-amp-story-reaction';
 import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -27,23 +29,21 @@ import {registerServiceBuilder} from '../../../../src/service';
  *
  * @param {Window} win
  * @param {AmpStoryReactionQuiz} quiz
- * @param {number} numPrompts
- * @param {number} numOptions
+ * @param {=number} numOptions
+ * @param {?string} prompt
+ * @param {=number} correctOption
  */
-const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
-  for (let i = 0; i < numPrompts; i++) {
-    const prompt = win.document.createElement('h1');
-    prompt.textContent = 'prompt';
-    quizElement.appendChild(prompt);
+const populateQuiz = (
+  quiz,
+  numOptions = 4,
+  prompt = undefined,
+  correctOption = 1
+) => {
+  if (prompt) {
+    quiz.element.setAttribute('prompt-text', prompt);
   }
-
-  const option = win.document.createElement('option');
-  option.textContent = 'option';
-  for (let i = 0; i < numOptions; i++) {
-    quizElement.appendChild(option.cloneNode());
-  }
-
-  quizElement.setAttribute('id', 'TEST_quizId');
+  addConfigToReaction(quiz, numOptions, correctOption);
+  quiz.element.setAttribute('id', 'TEST_quizId');
 };
 
 describes.realWin(
@@ -59,11 +59,6 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-
-      const localizationService = new LocalizationService(win.document.body);
-      env.sandbox
-        .stub(Services, 'localizationForDoc')
-        .returns(localizationService);
 
       env.sandbox
         .stub(Services, 'cidForDoc')
@@ -93,14 +88,20 @@ describes.realWin(
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
 
-    it('should take the html and reformat it', () => {
-      populateQuiz(win, ampStoryQuiz.element);
+    it('should create the prompt and options container if there is a prompt', () => {
+      populateQuiz(ampStoryQuiz, 4, 'Is this a prompt?');
       ampStoryQuiz.buildCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(2);
     });
 
+    it('should not create the prompt and options container if there no prompt', () => {
+      populateQuiz(ampStoryQuiz, 4, undefined);
+      ampStoryQuiz.buildCallback();
+      expect(ampStoryQuiz.getRootElement().children.length).to.equal(1);
+    });
+
     it('should structure the content in the quiz element', () => {
-      populateQuiz(win, ampStoryQuiz.element);
+      populateQuiz(ampStoryQuiz, 4, 'Has prompt!?');
       ampStoryQuiz.buildCallback();
 
       const quizContent = ampStoryQuiz.getRootElement().children;
@@ -124,28 +125,8 @@ describes.realWin(
       ).to.have.length(4);
     });
 
-    it('should throw an error with fewer than one prompt', () => {
-      populateQuiz(win, ampStoryQuiz.element, 0);
-      allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(
-          /The first child must be a heading element <h1>, <h2>, or <h3>/
-        );
-      });
-    });
-
-    it('should throw an error with more than one prompt', () => {
-      populateQuiz(win, ampStoryQuiz.element, 2);
-      allowConsoleError(() => {
-        expect(() => {
-          ampStoryQuiz.buildCallback();
-        }).to.throw(/Too many children/);
-      });
-    });
-
     it('should throw an error with fewer than two options', () => {
-      populateQuiz(win, ampStoryQuiz.element, 1, 1);
+      populateQuiz(ampStoryQuiz, 1);
       allowConsoleError(() => {
         expect(() => {
           ampStoryQuiz.buildCallback();
@@ -154,12 +135,12 @@ describes.realWin(
     });
 
     it('should not throw an error with three options and one prompt', () => {
-      populateQuiz(win, ampStoryQuiz.element, 1, 3);
+      populateQuiz(ampStoryQuiz, 3);
       expect(() => ampStoryQuiz.buildCallback()).to.not.throw();
     });
 
     it('should throw an error with more than four options', () => {
-      populateQuiz(win, ampStoryQuiz.element, 1, 5);
+      populateQuiz(ampStoryQuiz, 5);
       allowConsoleError(() => {
         expect(() => {
           ampStoryQuiz.buildCallback();
@@ -168,7 +149,7 @@ describes.realWin(
     });
 
     it('should enter the post-interaction state on option click', async () => {
-      populateQuiz(win, ampStoryQuiz.element);
+      populateQuiz(ampStoryQuiz);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
@@ -194,12 +175,12 @@ describes.realWin(
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
-      populateQuiz(win, ampStoryQuiz.element);
+      populateQuiz(ampStoryQuiz);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
-      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.equal('30%');
-      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.equal('10%');
+      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
+      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
     });
   }
 );
