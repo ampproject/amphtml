@@ -1057,10 +1057,14 @@ describes.realWin(
       });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       it('should remove the muted attribute on unmuted state change', async () => {
 =======
       it('should add or remove the muted attribute on muted state change', async () => {
 >>>>>>> 5c82597fc... Added muted attribute
+=======
+      it('should remove the muted attribute on unmuted state change', async () => {
+>>>>>>> 8e18273fd... Split tests into two
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
@@ -1070,14 +1074,20 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
         expect(story.element.hasAttribute('muted')).to.be.false;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8e18273fd... Split tests into two
       });
 
       it('should add the muted attribute on unmuted state change', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
+<<<<<<< HEAD
 =======
 >>>>>>> 5c82597fc... Added muted attribute
+=======
+>>>>>>> 8e18273fd... Split tests into two
 
         story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
         expect(story.element.hasAttribute('muted')).to.be.true;
