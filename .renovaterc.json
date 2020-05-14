@@ -76,6 +76,6 @@
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
       "groupName": "core dependencies (minor updates)"
-    },
+    }
   ]
 }
