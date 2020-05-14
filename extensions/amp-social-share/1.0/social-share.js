@@ -133,14 +133,14 @@ function createEndpoint(typeConfig, baseEndpoint, props) {
   const {'params': params, 'bindings': bindings} = props;
   const combinedParams = {...typeConfig['defaultParams'], ...params};
   const endpointWithParams = addParamsToUrl(
-    /** @type {?string} */ baseEndpoint,
-    /** @type {!JsonObject} */ combinedParams
+    /** @type {?string} */ (baseEndpoint),
+    /** @type {!JsonObject} */ (combinedParams)
   );
 
   const combinedBindings = dict();
   const bindingVars = typeConfig['bindings'];
   if (bindingVars) {
-    Array.from(bindingVars).forEach((name) => {
+    /** @type {Array<string>} */ (bindingVars).forEach((name) => {
       combinedBindings[name.toUpperCase()] = combinedParams[name] || '';
     });
   }
@@ -167,7 +167,7 @@ function handleActivation(finalEndpoint) {
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
       const data = parseQueryString(
-        /** @type {?string} */ getQueryString(finalEndpoint)
+        /** @type {?string} */ (getQueryString(finalEndpoint))
       );
       window.navigator.share(data).catch((e) => {
         throwWarning(`${e.message}. ${NAME}`);
