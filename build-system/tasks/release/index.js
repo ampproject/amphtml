@@ -142,6 +142,8 @@ function discoverDistFlavors_() {
         ...experimentConfig,
       })),
   ];
+  // TODO(#28168, danielrozenberg): if --flavor is defined, filter out the other
+  // flavors.
 
   log(
     'The following',
@@ -355,6 +357,9 @@ async function release() {
   log.warn(Array(55).fill('*').join(''));
   logSeparator_();
 
+  // TODO(#27771, danielrozenberg): fail this release quickly if there are
+  // commits in the tree that are not from the `master` branch.
+
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 
@@ -400,6 +405,8 @@ async function release() {
   await prependConfig_(outputDir);
 
   log('Copying from temporary directory to', cyan('net-wildcard'));
+  // TODO(#28168, danielrozenberg): this should only be done if --flavor=base or
+  // if --flavor is not set.
   await populateNetWildcard_(tempDir, outputDir);
 
   log('Cleaning up temp dir...');
@@ -417,4 +424,7 @@ release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
     '  Directory path to emplace release files (defaults to "./release")',
+  // TODO(#28168, danielrozenberg): implement a '--flavor' flag that will limit
+  // this release to a single flavor, so that multiple build servers can split
+  // the work between them.
 };
