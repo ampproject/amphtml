@@ -52,10 +52,7 @@ class AmpFitText extends PreactBaseElement {
     });
 
     const props = getFontSizeAttrs(this.element);
-    props['style'] = {
-      'width': this.element./* OK */ offsetWidth,
-      'height': this.element./* OK */ offsetHeight,
-    };
+    props['style'] = {width: '100%', height: '100%'};
 
     return props;
   }
