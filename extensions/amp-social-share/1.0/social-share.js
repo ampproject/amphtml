@@ -105,8 +105,8 @@ function checkProps(props) {
     );
   }
 
-  const checkedWidth = width ?? DEFAULT_WIDTH;
-  const checkedHeight = height ?? DEFAULT_HEIGHT;
+  const checkedWidth = width || DEFAULT_WIDTH;
+  const checkedHeight = height || DEFAULT_HEIGHT;
   return {
     typeConfig,
     baseEndpoint,
