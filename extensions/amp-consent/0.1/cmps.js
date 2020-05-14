@@ -74,5 +74,5 @@ CMP_CONFIG['SourcePoint'] = {
 CMP_CONFIG['opencmp'] = {
   'consentInstanceId': 'opencmp',
   'checkConsentHref': 'https://amp.opencmp.net/consent/check',
-  'promptUISrc': 'https://cmp.opencmp.net/tcf-v2/amp/cmp.html',
+  'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
