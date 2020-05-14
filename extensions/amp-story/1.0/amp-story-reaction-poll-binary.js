@@ -93,11 +93,6 @@ export class AmpStoryReactionPollBinary extends AmpStoryReaction {
    * @param {Element} root
    */
   attachContent_(root) {
-    // Configure options.
-    if (this.options_.length != 2) {
-      devAssert(this.options_.length == 2, 'Improper number of options');
-      dev().error(TAG, 'Improper number of options');
-    }
     this.options_.forEach((option) => {
       root.appendChild(this.generateOption_(option));
     });
