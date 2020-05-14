@@ -56,9 +56,6 @@ const BUILTINS = dict({
       'mini': 'true',
     },
   },
-  'gplus': {
-    'obsolete': true,
-  },
   'email': {
     'bindings': ['recipient'],
     'shareEndpoint': 'mailto:RECIPIENT',
