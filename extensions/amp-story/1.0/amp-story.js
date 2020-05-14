@@ -154,6 +154,7 @@ const Attributes = {
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  MUTED: 'muted',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
