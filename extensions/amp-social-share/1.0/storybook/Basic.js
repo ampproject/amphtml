@@ -16,9 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {SocialShare} from '../social-share';
-import {addParamsToUrl} from '../../../../src/url';
-import {getSocialConfig} from '../amp-social-share-config';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
+import {object, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -40,16 +38,20 @@ export const _default = () => {
     'sms',
     'system',
     'custom endpoint',
+    undefined,
+    '',
+    'random',
   ];
-  let type = select('Provider Type', knobConfigurations, knobConfigurations[0]);
-  let href = text('Custom Share Endpoint', 'Not Specified');
+  const type = select('type', knobConfigurations, knobConfigurations[0]);
+  const href = text('shareEndpoint', 'Not Specified');
+  const params = object('params', {'subject': 'test'});
+  const bindings = object('bindings', {
+    'canonical_url': 'test2',
+    'recipient': 'email recipient',
+  });
+  const width = text('width', undefined);
+  const height = text('height', undefined);
 
-  const config = getSocialConfig(type);
-  if (type !== 'custom endpoint') {
-    href = addParamsToUrl(config.shareEndpoint, config.defaultParams);
-  } else {
-    type = 'system';
-  }
   return (
     <div>
       <p>
@@ -57,7 +59,15 @@ export const _default = () => {
         Update the provider using storybook knobs. Choose Provider Type: 'custom
         endpoint' to specify your own share endpoint.
       </p>
-      <SocialShare type={type} href={href} />
+      <SocialShare
+        type={type}
+        href={href}
+        shareEndpoint={href}
+        params={params}
+        bindings={bindings}
+        width={width}
+        height={height}
+      />
     </div>
   );
 };
