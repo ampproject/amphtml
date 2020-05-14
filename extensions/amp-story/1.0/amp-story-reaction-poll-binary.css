@@ -17,9 +17,6 @@
  @import url('https://fonts.googleapis.com/css?family=Poppins:wght@500;700&display=swap');
 
 .i-amphtml-story-reaction-poll-binary-container {
-    --transition-time: 0.3s !important;
-    --transition-type: ease-out !important;
-
     font-family: 'Poppins', sans-serif !important;
     display: flex !important;
     align-items: stretch !important;
@@ -53,8 +50,6 @@
     flex-grow: 50;
     flex: 100;
     overflow: hidden !important;
-    transition: all var(--transition-type) var(--transition-time) !important;
-    transition-delay: var(--transition-time) !important;
 }
 
 .i-amphtml-story-reaction-option:hover .i-amphtml-story-reaction-option-title {
@@ -74,7 +69,6 @@
     font-size: 28px !important;
     margin: 0 !important;
     line-height: 28px !important;
-    transition: transform var(--transition-type) var(--transition-time) !important;
     width: 124px;
     height: 66px;
     display: flex;
@@ -90,7 +84,6 @@
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title > span {
     transform: scale(var(--post-select-scale-variable)) !important;
-    transition: transform var(--transition-type) var(--transition-time) !important;
 }
 
 .i-amphtml-story-reaction-option-percentage-text {
@@ -99,7 +92,6 @@
     margin: 0 !important;
     max-height: 1px !important;
     overflow-y: hidden !important;
-    transition: all var(--transition-type) var(--transition-time) !important;
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-percentage-text {
