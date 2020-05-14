@@ -39,15 +39,15 @@ export function FitText(props) {
     if (!measurerRef.current || !contentRef.current) {
       return;
     }
-    const {offsetHeight, offsetWidth} = contentRef.current;
+    const {clientHeight, clientWidth} = contentRef.current;
     const fontSize = calculateFontSize(
       measurerRef.current,
-      Number(offsetHeight),
-      Number(offsetWidth),
+      clientHeight,
+      clientWidth,
       minFontSize,
       maxFontSize
     );
-    getOverflowStyle(measurerRef.current, Number(offsetHeight), fontSize);
+    getOverflowStyle(measurerRef.current, clientHeight, fontSize);
   }, [maxFontSize, minFontSize]);
 
   // Here and below, useLayoutEffect is used so intermediary font sizes
@@ -73,8 +73,9 @@ export function FitText(props) {
   }, [children, resize]);
 
   return (
-    <div ref={contentRef} {...rest}>
+    <div {...rest}>
       <div
+        ref={contentRef}
         style={{
           ...styles.fitTextContent,
           'width': '100%',
