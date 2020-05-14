@@ -132,12 +132,15 @@ function throwWarning(message) {
 function createEndpoint(typeConfig, baseEndpoint, props) {
   const {'params': params, 'bindings': bindings} = props;
   const combinedParams = {...typeConfig['defaultParams'], ...params};
-  const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
+  const endpointWithParams = addParamsToUrl(
+    /** @type {?string} */ baseEndpoint,
+    /** @type {!JsonObject} */ combinedParams
+  );
 
   const combinedBindings = dict();
   const bindingVars = typeConfig['bindings'];
   if (bindingVars) {
-    bindingVars.forEach((name) => {
+    Array.from(bindingVars).forEach((name) => {
       combinedBindings[name.toUpperCase()] = combinedParams[name] || '';
     });
   }
@@ -163,7 +166,9 @@ function handleActivation(finalEndpoint) {
   const windowFeatures = 'resizable,scrollbars,width=640,height=480';
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
-      const data = parseQueryString(getQueryString(finalEndpoint));
+      const data = parseQueryString(
+        /** @type {?string} */ getQueryString(finalEndpoint)
+      );
       window.navigator.share(data).catch((e) => {
         throwWarning(`${e.message}. ${NAME}`);
       });
