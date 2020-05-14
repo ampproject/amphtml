@@ -58,11 +58,7 @@ export function FitText(props) {
     if (!node) {
       return;
     }
-    const observer = new ResizeObserver((entries) => {
-      const last = entries[entries.length - 1];
-      const {height: maxHeight, width: maxWidth} = last['contentRect'];
-      resize(maxHeight, maxWidth);
-    });
+    const observer = new ResizeObserver(resize);
     observer.observe(node);
     return () => observer.disconnect();
   }, [resize]);
