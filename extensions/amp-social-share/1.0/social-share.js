@@ -35,8 +35,7 @@ const NAME = 'SocialShare';
 export function SocialShare(props) {
   useResourcesNotify();
   const {typeConfig, baseEndpoint, checkedWidth, checkedHeight} = checkProps(
-    props,
-    NAME
+    props
   );
   const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
 
@@ -66,14 +65,14 @@ export function SocialShare(props) {
 
 /**
  * @param {!JsonObject} props
- * @param {?string} name
- * @return {struct}
- *   {!JsonObject} typeConfig
- *   {string} baseEndpoint
- *   {number} checkedWidth
- *   {number} checkedHeight
+ * @return {{
+ *   typeConfig: !JsonObject,
+ *   baseEndpoint: ?string,
+ *   checkedWidth: ?number,
+ *   checkedHeight: ?number,
+ * }}
  */
-function checkProps(props, name) {
+function checkProps(props) {
   const {
     'type': type,
     'shareEndpoint': shareEndpoint,
@@ -85,15 +84,15 @@ function checkProps(props, name) {
 
   // Verify type is provided
   if (type === undefined) {
-    throw new Error(`The type attribute is required. ${name}`);
+    throw new Error(`The type attribute is required. ${NAME}`);
   }
 
   // bindings and params props must be objects
   if (params && !isObject(params)) {
-    throw new Error(`The params property should be an object. ${name}`);
+    throw new Error(`The params property should be an object. ${NAME}`);
   }
   if (bindings && !isObject(bindings)) {
-    throw new Error(`The bindings property should be an object. ${name}`);
+    throw new Error(`The bindings property should be an object. ${NAME}`);
   }
 
   // User must provide shareEndpoint if they choose a type that is not
@@ -102,7 +101,7 @@ function checkProps(props, name) {
   const baseEndpoint = typeConfig['shareEndpoint'] || shareEndpoint;
   if (baseEndpoint === undefined) {
     throw new Error(
-      `A shareEndpoint is required if not using a pre-configured type. ${name}`
+      `A shareEndpoint is required if not using a pre-configured type. ${NAME}`
     );
   }
 
@@ -131,7 +130,7 @@ function throwWarning(message) {
  */
 function createEndpoint(typeConfig, baseEndpoint, props) {
   const {'params': params, 'bindings': bindings} = props;
-  const combinedParams = dict({...typeConfig['defaultParams'], ...params});
+  const combinedParams = {...typeConfig['defaultParams'], ...params};
   const endpointWithParams = addParamsToUrl(baseEndpoint, combinedParams);
 
   const combinedBindings = dict();
@@ -199,6 +198,7 @@ function getQueryString(endpoint) {
 
 /**
  * @param {!Event} event
+ * @param {?string} finalEndpoint
  */
 function handleKeyPress(event, finalEndpoint) {
   const {key} = event;
