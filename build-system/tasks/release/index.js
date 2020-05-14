@@ -37,17 +37,17 @@ const BASE_FLAVOR_CONFIG = {
   environment: 'AMP',
 };
 
-// Deep map from [environment][flavorType] to RTV prefix.
+// Deep map from [environment][flavorType] to list of RTV prefixes.
 const EXPERIMENTAL_RTV_PREFIXES = {
   AMP: {
-    experimentA: '10',
-    experimentB: '11',
-    experimentC: '12',
+    experimentA: ['10'],
+    experimentB: ['11'],
+    experimentC: ['12'],
   },
   INABOX: {
-    experimentA: '20',
-    experimentB: '22',
-    experimentC: '24',
+    experimentA: ['20', '21'],
+    experimentB: ['22', '23'],
+    experimentC: ['24', '25'],
   },
 };
 
@@ -137,9 +137,8 @@ function discoverDistFlavors_() {
       .filter(([, experimentConfig]) => experimentConfig.command)
       .map(([flavorType, experimentConfig]) => ({
         flavorType,
-        rtvPrefixes: [
+        rtvPrefixes:
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
-        ],
         ...experimentConfig,
       })),
   ];
