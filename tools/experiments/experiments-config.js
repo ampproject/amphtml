@@ -309,9 +309,15 @@ export const EXPERIMENTS = [
   },
   {
     id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks',
-    spec: 'TODO: add before merge',
-    cleanupIssue: 'TODO: create issue before merge',
+    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
+  },
+  {
+    id: 'analytics-chunks-inabox',
+    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
     id: 'amp-ad-no-center-css',
