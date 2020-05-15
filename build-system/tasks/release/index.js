@@ -214,12 +214,14 @@ async function compileDistFlavors_(distFlavors, tempDir) {
  * @param {string} tempDir full directory path to temporary working directory.
  */
 async function fetchAmpSw_(distFlavors, tempDir) {
-  const distFlavorTypes = distFlavors.map(({flavorType}) => flavorType);
-  for (const flavorType of distFlavorTypes) {
-    await fs.ensureDir(path.join(tempDir, flavorType, 'dist/sw'));
-  }
-
   const ampSwTempDir = path.join(tempDir, 'ampproject/amp-sw');
+  const distFlavorTypes = distFlavors.map(({flavorType}) => flavorType);
+  await Promise.all([
+    fs.ensureDir(ampSwTempDir),
+    ...distFlavorTypes.map((flavorType) =>
+      fs.ensureDir(path.join(tempDir, flavorType, 'dist/sw'))
+    ),
+  ]);
 
   const ampSwNpmPackageResponse = await fetch(AMP_SW_NPM_PACKAGE_URL);
   const ampSwNpmPackageJson = await ampSwNpmPackageResponse.json();
