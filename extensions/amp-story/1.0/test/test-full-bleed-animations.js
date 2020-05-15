@@ -26,7 +26,7 @@ import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
-import {getPresetDef} from '../animation-presets';
+import {presets} from '../animation-presets';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
@@ -59,6 +59,11 @@ describes.realWin(
         };
       });
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
@@ -66,11 +71,6 @@ describes.realWin(
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
 
       AmpStory.isBrowserSupported = () => true;
 
@@ -242,8 +242,11 @@ describes.realWin(
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = getPresetDef('pan-up', {});
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(dimensions);
+      const calculatedKeyframes = presets['pan-up'];
+      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+        dimensions,
+        /* options */ {}
+      );
 
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;

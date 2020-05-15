@@ -22,6 +22,7 @@ import {
   measureMutateElementStub,
   mutateElementStub,
 } from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
   'items': ['1', '2'],
@@ -42,7 +43,7 @@ describes.realWin(
     let ampdoc;
     let element, list;
     let templates;
-    let lockHeightSpy;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -56,14 +57,42 @@ describes.realWin(
       };
       env.sandbox.stub(Services, 'templatesFor').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
-
       element = doc.createElement('amp-list');
       list = new AmpList(element);
       lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
     });
 
     afterEach(() => {
-      expect(lockHeightSpy.notCalled).to.be.true;
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
+    });
+
+    it('should not init if layout="container"', async () => {
+      toggleExperiment(win, 'amp-list-layout-container', true);
+      const placeholder = doc.createElement('div');
+      placeholder.style.height = '1337px';
+      element.appendChild(placeholder);
+      element.getPlaceholder = () => placeholder;
+
+      element.setAttribute('load-more', 'manual');
+      doc.body.appendChild(element);
+
+      element.setAttribute('layout', 'container');
+
+      list = new AmpList(element);
+      list.isLayoutSupported('container');
+      list.element.applySize = () => {};
+
+      env.sandbox.stub(list, 'getOverflowElement').returns(null);
+      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+
+      allowConsoleError(() => {
+        expect(() => list.buildCallback()).to.throw(
+          'amp-list initialized with layout=container does not support infinite scrolling with [load-more]. amp-list​​​'
+        );
+      });
+      toggleExperiment(win, 'amp-list-layout-container', false);
     });
 
     describe('manual', () => {
@@ -221,6 +250,7 @@ describes.realWin(
         expect(renderSpy).to.be.calledTwice;
         expect(renderSpy).to.be.calledWith([div3, div4], true);
 
+        list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
       });
 
@@ -233,6 +263,7 @@ describes.realWin(
         env.sandbox
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
+
         const div1 = doc.createElement('div');
         div1.textContent = '1';
         const div2 = doc.createElement('div');

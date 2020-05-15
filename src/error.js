@@ -67,7 +67,7 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Chance to post to the new error reporting endpoint.
  * @const {number}
  */
-const BETA_ERROR_REPORT_URL_FREQ = 0.2;
+const BETA_ERROR_REPORT_URL_FREQ = 0.1;
 
 /**
  * Collects error messages, so they can be included in subsequent reports.
@@ -357,20 +357,13 @@ function onError(message, filename, line, col, error) {
 
 /**
  * Determines the error reporting endpoint which should be used.
- *
- * @param {!JsonObject} errData Data from `getErrorReportData`.
+ * If changing this URL, keep `/spec/amp-errors.md` in sync.
  * @return {string} error reporting endpoint URL.
  */
-function chooseReportingUrl_(errData) {
-  const useBeta =
-    // Legacy reporting drops non-.js stacktraces.
-    errData['esm'] === '1' ||
-    // Legacy reporting throttles non-canary binary types by a factor of 20.
-    errData['bt'] === 'nightly' ||
-    // Randomly divert remaining error reporting traffic.
-    Math.random() < BETA_ERROR_REPORT_URL_FREQ;
-
-  return useBeta ? urls.betaErrorReporting : urls.errorReporting;
+function chooseReportingUrl_() {
+  return Math.random() < BETA_ERROR_REPORT_URL_FREQ
+    ? urls.betaErrorReporting
+    : urls.errorReporting;
 }
 
 /**
@@ -383,10 +376,16 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
+
+  // Throttle reports from Stable by 90%.
+  if (data['pt'] && Math.random() < 0.9) {
+    return Promise.resolve();
+  }
+
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', chooseReportingUrl_(data), true);
+      xhr.open('POST', chooseReportingUrl_(), true);
       xhr.send(JSON.stringify(data));
     }
   });
@@ -445,6 +444,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'el': errorReportData['el'], // tagName
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
+    'pt': errorReportData['pt'], // is pre-throttled
     'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
@@ -637,6 +637,15 @@ export function getErrorReportData(
   data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
+
+  // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
+  // all clients are serving a version with pre-throttling.
+  if (data['bt'] === 'production') {
+    // Setting this field allows the error reporting service to know that this
+    // error has already been pre-throttled for Stable, so it doesn't need to
+    // throttle again.
+    data['pt'] = '1';
+  }
 
   pushLimit(accumulatedErrorMessages, message, 25);
 

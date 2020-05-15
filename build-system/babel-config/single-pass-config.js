@@ -37,7 +37,8 @@ function getSinglePassPostConfig() {
 
 /**
  * Gets the config for babel transforms run while building the dependency tree
- * during `gulp dist --single_pass`.
+ * during `gulp dist --single_pass`. Does so by creating a clone of the normal
+ * pre-closure config, and adding an additional plugin.
  *
  * @return {!Object}
  */

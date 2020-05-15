@@ -621,7 +621,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
-  tag: "A"
+  tag: "A" # `show-tooltip` attribute is whitelisted in validator-main.protoascii.
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
@@ -637,6 +637,7 @@ descendant_tag_list: {
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
+  tag: "AMP-STATE"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -736,6 +737,7 @@ descendant_tag_list: {
   tag: "TABLE"
   tag: "TBODY"
   tag: "TD"
+  tag: "TEMPLATE"
   tag: "TEXT"
   tag: "TEXTPATH"
   tag: "TFOOT"
@@ -755,9 +757,38 @@ descendant_tag_list: {
   tag: "VKERN"
   tag: "WBR"
 }
-tags: {  # <amp-story-page-attachment>
+tags: {  # <amp-story-page-attachment> with href
   html_format: AMP
   tag_name: "AMP-STORY-PAGE-ATTACHMENT"
+  spec_name: "amp-story-page-attachment[href]"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_last_child: true
+  attrs: {
+    name: "layout"
+    mandatory: true
+    value: "nodisplay"
+  }
+  attrs: {
+    name: "theme"
+    value: "dark"
+    value: "light"
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
+}
+tags: {  # <amp-story-page-attachment> with no href
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE-ATTACHMENT"
+  spec_name: "amp-story-page-attachment"
   mandatory_ancestor: "AMP-STORY-PAGE"
   descendant_tag_list: "amp-story-page-attachment-allowed-descendants"
   mandatory_last_child: true

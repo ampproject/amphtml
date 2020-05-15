@@ -21,6 +21,7 @@ const gulpBabel = require('gulp-babel');
 const log = require('fancy-log');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
+const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {EventEmitter} = require('events');
 const {red, cyan} = require('ansi-colors');
 
@@ -84,6 +85,12 @@ function preClosureBabel() {
     }
 
     let data, err;
+    debug(
+      CompilationLifecycles['pre-babel'],
+      file.path,
+      file.contents,
+      file.sourceMap
+    );
     function onData(d) {
       babel.off('error', onError);
       data = d;
@@ -99,6 +106,12 @@ function preClosureBabel() {
         return next(err);
       }
 
+      debug(
+        CompilationLifecycles['pre-closure'],
+        file.path,
+        data.contents,
+        data.sourceMap
+      );
       cache[path] = {
         file: data,
         hash,

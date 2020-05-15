@@ -16,7 +16,7 @@
 #
 # This script builds the Java AMP Validator and runs a full test suite.
 
-echo travis_fold:start:java_validator_build
+set -e # Exit on error
+
 ./build.sh
-echo travis_fold:end:java_validator_build
 bazel run //:amphtml_validator_test

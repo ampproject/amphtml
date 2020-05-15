@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isLocalhostOrigin} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -150,6 +151,18 @@ export class Navigation {
     this.appendExtraParams_ = false;
     shouldAppendExtraParams(this.ampdoc).then((res) => {
       this.appendExtraParams_ = res;
+    });
+
+    /** @private {boolean} */
+    this.isTrustedViewer_ = false;
+    /** @private {boolean} */
+    this.isLocalViewer_ = false;
+    Promise.all([
+      this.viewer_.isTrustedViewer(),
+      this.viewer_.getViewerOrigin(),
+    ]).then((values) => {
+      this.isTrustedViewer_ = values[0];
+      this.isLocalViewer_ = isLocalhostOrigin(values[1]);
     });
 
     /**
@@ -566,6 +579,10 @@ export class Navigation {
       ) {
         this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
       }
+
+      if (this.viewerInterceptsNavigation(to, 'intercept_click')) {
+        e.preventDefault();
+      }
     }
   }
 
@@ -737,6 +754,47 @@ export class Navigation {
     const baseHref =
       getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
     return this.parseUrl_(baseHref);
+  }
+
+  /**
+   * Requests navigation through a Viewer to the given destination.
+   *
+   * This function only proceeds if:
+   * 1. The viewer supports the 'interceptNavigation' capability.
+   * 2. The contained AMP doc has 'opted in' via including the 'allow-navigation-interception'
+   * attribute on the <html> tag.
+   * 3. The viewer is trusted or from localhost.
+   *
+   * @param {string} url A URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  viewerInterceptsNavigation(url, requestedBy) {
+    const viewerHasCapability = this.viewer_.hasCapability(
+      'interceptNavigation'
+    );
+    const docOptedIn = this.ampdoc
+      .getRootNode()
+      .documentElement.hasAttribute('allow-navigation-interception');
+
+    if (
+      !viewerHasCapability ||
+      !docOptedIn ||
+      !(this.isTrustedViewer_ || this.isLocalViewer_)
+    ) {
+      return false;
+    }
+
+    this.viewer_.sendMessage(
+      'navigateTo',
+      dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      })
+    );
+    return true;
   }
 }
 

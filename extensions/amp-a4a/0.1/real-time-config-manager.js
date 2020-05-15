@@ -592,7 +592,7 @@ export class RealTimeConfigManager {
           urlObj['errorReportingUrl'] = undefined;
         }
       };
-      (rtcConfig['urls'] || []).forEach((urlObj) => {
+      /** @type {!Array} */ (rtcConfig['urls'] || []).forEach((urlObj) => {
         if (isObject(urlObj)) {
           validateErrorReportingUrl(urlObj);
         }

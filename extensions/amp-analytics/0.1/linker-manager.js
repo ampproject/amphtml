@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -28,9 +29,6 @@ import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
-
-/** @const {string} */
-const LINKER_CREATED = 'i-amphtml-linker-created';
 
 export class LinkerManager {
   /**
@@ -54,9 +52,6 @@ export class LinkerManager {
 
     /** @const @private {!Element} */
     this.element_ = element;
-
-    /** @private {!Array<Promise>} */
-    this.allLinkerPromises_ = [];
 
     /** @const @private {!JsonObject} */
     this.resolvedIds_ = dict();
@@ -82,11 +77,13 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
-   * @return {*} TODO(#23582): Specify return type
+   * init() is asynchronouse and non blocking.
+   * Return a promise for testing only.
+   * @return {!Promise}
    */
   init() {
     if (!isObject(this.config_)) {
-      return;
+      return Promise.resolve();
     }
 
     this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);
@@ -95,7 +92,7 @@ export class LinkerManager {
       /** @type {!JsonObject} */ (this.config_)
     );
     // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = Object.keys(this.config_).map((name) => {
+    const allLinkerPromises = Object.keys(this.config_).map((name) => {
       const ids = this.config_[name]['ids'];
       // Keys for linker data.
       const keys = Object.keys(ids);
@@ -123,7 +120,7 @@ export class LinkerManager {
       });
     });
 
-    if (this.allLinkerPromises_.length) {
+    if (allLinkerPromises.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator((element, event) => {
         if (!element.href || event.type !== 'click') {
@@ -139,7 +136,7 @@ export class LinkerManager {
 
     this.enableFormSupport_();
 
-    return Promise.all(this.allLinkerPromises_);
+    return Promise.all(allLinkerPromises);
   }
 
   /**
@@ -233,20 +230,7 @@ export class LinkerManager {
       return false;
     }
 
-    const headNode = this.ampdoc_.getHeadNode();
-    const linkerCreatedEl =
-      headNode instanceof ShadowRoot
-        ? this.ampdoc_.getBody()
-        : headNode.querySelector(
-            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-          );
-
-    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
-      return false;
-    }
-
-    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
-    return true;
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
   }
 
   /**

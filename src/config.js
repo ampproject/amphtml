@@ -74,10 +74,11 @@ export const urls = {
   cdnProxyRegex,
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
   errorReporting:
-    env['errorReportingUrl'] || 'https://amp-error-reporting.appspot.com/r',
+    env['errorReportingUrl'] ||
+    'https://us-central1-amp-error-reporting.cloudfunctions.net/r',
   betaErrorReporting:
     env['betaErrorReportingUrl'] ||
-    'https://us-central1-amp-error-reporting.cloudfunctions.net/r',
+    'https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta',
   localDev: env['localDev'] || false,
   /**
    * These domains are trusted with more sensitive viewer operations such as

@@ -214,7 +214,7 @@ export class IframeTransport {
           entry['name'] == 'cross-origin-descendant' &&
           entry.attribution
         ) {
-          entry.attribution.forEach((attrib) => {
+          /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
             if (
               this.frameUrl_ == attrib['containerSrc'] &&
               ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0

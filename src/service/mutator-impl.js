@@ -225,18 +225,18 @@ export class MutatorImpl {
         }
         // With IntersectionObserver, "relayout top" is no longer needed since
         // relative positional changes won't affect correctness.
-        if (!this.intersect_) {
+        if (!this.intersect_ && !skipRemeasure) {
           relayoutTop = calcRelayoutTop();
         }
       },
       mutate: () => {
         mutator();
+
+        // `skipRemeasure` is set by callers when we know that `mutator`
+        // cannot cause a change in size/position e.g. toggleLoading().
         if (skipRemeasure) {
           return;
         }
-
-        // TODO(willchou): toggleLoading() mutate causes a lot of unnecessary
-        // remeasures. Add affordance to mutateElement() to disable remeasures.
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);

@@ -52,7 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryQuiz} from './amp-story-quiz';
+import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -72,7 +72,6 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
-import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -89,6 +88,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -107,12 +107,13 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
-import {registerServiceBuilder} from '../../../src/service';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -153,6 +154,7 @@ const Attributes = {
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  MUTED: 'muted',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
@@ -357,9 +359,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    const localizationService = this.localizationService_;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(this.element);
+
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
@@ -392,10 +394,6 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-
-    registerServiceBuilder(this.win, 'localization', function () {
-      return localizationService;
-    });
   }
 
   /** @override */
@@ -429,7 +427,9 @@ export class AmpStory extends AMP.BaseElement {
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
-    this.element.removeAttribute('title');
+    if (!this.platform_.isBot()) {
+      this.element.removeAttribute('title');
+    }
 
     // Remove text nodes which would be shown outside of the amp-story
     const textNodes = childNodes(
@@ -459,6 +459,7 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+    this.element.setAttribute('aria-live', 'polite');
   }
 
   /**
@@ -527,7 +528,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     };
 
-    mediaQueryEls.forEach((el) => {
+    toArray(mediaQueryEls).forEach((el) => {
       const className = el.getAttribute('class-name');
       const media = el.getAttribute('media');
 
@@ -615,6 +616,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
+    this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
@@ -945,7 +947,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Renders the layout for the story
+   * Renders the layout for the story.
    * @return {!Promise} A promise that is resolved when the story layout is
    *       loaded
    * @private
@@ -1183,7 +1185,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   validateConsent_(consentEl) {
     if (!childElementByTag(consentEl, 'amp-story-consent')) {
-      dev().error(TAG, 'amp-consent must have an amp-story-consent child');
+      user().error(TAG, 'amp-consent must have an amp-story-consent child');
     }
 
     const allowedTags = ['SCRIPT', 'AMP-STORY-CONSENT'];
@@ -1195,7 +1197,7 @@ export class AmpStory extends AMP.BaseElement {
     if (toRemoveChildren.length === 0) {
       return;
     }
-    dev().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
+    user().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
@@ -1654,7 +1656,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * For some reason, Safari has an issue where sometimes when pages become
-   * visible, some descendants are not painted.  This is a hack where we detect
+   * visible, some descendants are not painted.  This is a hack, where we detect
    * that the browser is Safari and force it to repaint, to avoid this case.
    * See newmuis/amphtml-story#106 for details.
    * @private
@@ -1855,7 +1857,15 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-panels');
           for (let i = 0; i < pageAttachments.length; i++) {
-            this.element.appendChild(pageAttachments[i]);
+            this.element.insertBefore(
+              pageAttachments[i],
+              // Attachments that are just links are rendered in-line with their
+              // story page.
+              pageAttachments[i].getAttribute('href')
+                ? pageAttachments[i].parentElement.nextElementSibling
+                : // Other attachments are rendered at the end.
+                  null
+            );
           }
         });
 
@@ -1940,8 +1950,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
-
-    isPaused ? this.advancement_.stop() : this.advancement_.start();
 
     this.activePage_.setState(pageState);
   }
@@ -2500,6 +2508,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   onMutedStateUpdate_(isMuted) {
     isMuted ? this.mute_() : this.unmute_();
+    this.element.toggleAttribute(Attributes.MUTED, isMuted);
   }
 
   /**
@@ -2571,6 +2580,26 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
+    );
+  }
+
+  /**
+   * Shows the play/pause icon if there is an element with playback on the story.
+   * @private
+   */
+  updatePausedIcon_() {
+    const containsElementsWithPlayback = !!scopedQuerySelector(
+      this.element,
+      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+    );
+
+    const storyHasBackgroundAudio = this.element.hasAttribute(
+      'background-audio'
+    );
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
+      containsElementsWithPlayback || storyHasBackgroundAudio
     );
   }
 
@@ -2757,7 +2786,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   static isBrowserSupported(win) {
     return Boolean(
-      win.CSS && win.CSS.supports && win.CSS.supports('display', 'grid')
+      win.CSS &&
+        win.CSS.supports &&
+        win.CSS.supports('display', 'grid') &&
+        win.CSS.supports('color', 'var(--test)')
     );
   }
 }
@@ -2771,6 +2803,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement('amp-story-quiz', AmpStoryQuiz);
+  AMP.registerElement('amp-story-reaction-quiz', AmpStoryReactionQuiz);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

@@ -15,8 +15,10 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
+const wrappers = require('./compile-wrappers');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -130,7 +132,6 @@ exports.jsBundles = {
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-      compilationLevel: 'WHITESPACE_ONLY',
       skipUnknownDepsCheck: true,
     },
   },
@@ -145,7 +146,7 @@ exports.jsBundles = {
     },
   },
   'amp-story-player.js': {
-    srcDir: './src/',
+    srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',
@@ -173,6 +174,10 @@ exports.jsBundles = {
     options: {
       minifiedName: 'v0.js',
       includePolyfills: true,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
     },
   },
   'amp-shadow.js': {
@@ -465,7 +470,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -643,6 +648,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-install-serviceworker',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-intersection-observer-polyfill',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
@@ -879,7 +890,8 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-quiz',
+        'amp-story-reaction',
+        'amp-story-reaction-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
@@ -1011,13 +1023,13 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-social-share',
-    version: '0.2',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -1166,7 +1178,7 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
-];
+].sort((a, b) => a.name.localeCompare(b.name));
 
 /**
  * Used to alias a version of an extension to an older deprecated version.

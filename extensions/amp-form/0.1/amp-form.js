@@ -37,6 +37,7 @@ import {
   addParamsToUrl,
   isProxyOrigin,
   parseQueryString,
+  serializeQueryString,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -127,8 +128,11 @@ export class AmpForm {
     /** @private @const {string} */
     this.id_ = id;
 
+    /** @private @const {?Document} */
+    this.doc_ = element.ownerDocument;
+
     /** @const @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    this.win_ = toWin(this.doc_.defaultView);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -182,6 +186,9 @@ export class AmpForm {
     /** @const @private {?string} */
     this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
+    /** @const @private {?string} */
+    this.encType_ = this.getEncType_('enctype');
+
     /** @const @private {boolean} */
     this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
     // Need to disable browser validation in order to allow us to take full
@@ -216,6 +223,8 @@ export class AmpForm {
     /** @const @private {!./form-verifiers.FormVerifier} */
     this.verifier_ = getFormVerifier(this.form_, () => this.handleXhrVerify_());
 
+    /** If the element is in an email document, allow its `clear` and `submit` actions. */
+    this.actions_.addToWhitelist('FORM', ['clear', 'submit'], ['email']);
     this.actions_.installActionHandler(
       this.form_,
       this.actionHandler_.bind(this)
@@ -235,6 +244,9 @@ export class AmpForm {
     Services.formSubmitForDoc(element).then((service) => {
       this.formSubmitService_ = service;
     });
+
+    /** @private */
+    this.isAmp4Email_ = this.doc_ && isAmp4Email(this.doc_);
   }
 
   /**
@@ -259,6 +271,28 @@ export class AmpForm {
   }
 
   /**
+   * Gets and validates an attribute for form request encoding type.
+   * @param {string} attribute
+   * @return {?string}
+   * @private
+   */
+  getEncType_(attribute) {
+    const encType = this.form_.getAttribute(attribute);
+    if (
+      encType === 'application/x-www-form-urlencoded' ||
+      encType === 'multipart/form-data'
+    ) {
+      return encType;
+    } else if (encType !== null) {
+      user().warn(
+        TAG,
+        `Unexpected enctype: ${encType}. Defaulting to 'multipart/form-data'.`
+      );
+    }
+    return 'multipart/form-data';
+  }
+
+  /**
    * @return {string|undefined} the value of the form's xssi-prefix attribute.
    */
   getXssiPrefix() {
@@ -275,6 +309,7 @@ export class AmpForm {
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
+    let headers = dict({'Accept': 'application/json'});
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
@@ -291,7 +326,17 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = createFormDataWrapper(this.win_, this.form_);
+      if (this.encType_ === 'application/x-www-form-urlencoded') {
+        body = serializeQueryString(this.getFormAsObject_());
+        headers = dict({
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        });
+      } else {
+        // default case: encType_ is 'multipart/form-data'
+        devAssert(this.encType_ === 'multipart/form-data');
+        body = createFormDataWrapper(this.win_, this.form_);
+      }
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach((name) => {
           body.delete(name);
@@ -310,7 +355,7 @@ export class AmpForm {
         'body': body,
         'method': method,
         'credentials': 'include',
-        'headers': dict({'Accept': 'application/json'}),
+        'headers': headers,
       }),
     };
 
@@ -955,9 +1000,8 @@ export class AmpForm {
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
     }
-    const doc = this.form_.ownerDocument;
     // Only degrade trust across form submission in AMP4EMAIL for now.
-    return doc && isAmp4Email(doc)
+    return this.isAmp4Email_
       ? /** @type {!ActionTrust} */ (incomingTrust - 1)
       : incomingTrust;
   }
@@ -1145,9 +1189,8 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      const doc = this.form_.ownerDocument;
       userAssert(
-        !(doc && isAmp4Email(doc)),
+        !this.isAmp4Email_,
         'Redirects not supported in AMP4Email.',
         this.form_
       );

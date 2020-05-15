@@ -33,15 +33,22 @@ import {
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -162,13 +169,14 @@ export class Builder {
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!../../../src/service/owners-interface.OwnersInterface} owners
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef=} options
    */
-  constructor(win, rootNode, baseUrl, vsync, owners) {
+  constructor(win, rootNode, baseUrl, vsync, owners, options = {}) {
     /** @const @private */
     this.win_ = win;
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl, options);
 
     /** @const @private */
     this.vsync_ = vsync;
@@ -435,7 +443,9 @@ export class MeasureScanner extends Scanner {
           );
         })
         .then((requests) => {
-          requests.forEach((request) => this.requests_.push(request));
+          /** @type {!Array} */ (requests).forEach((request) =>
+            this.requests_.push(request)
+          );
         });
       this.deps_.push(promise);
     });
@@ -465,7 +475,7 @@ export class MeasureScanner extends Scanner {
     let specKeyframes = spec.keyframes;
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
-      const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
+      const keyframes = extractKeyframes(this.css_.rootNode, specKeyframes);
       userAssert(
         keyframes,
         `Keyframes not found in stylesheet: "${specKeyframes}"`
@@ -840,13 +850,22 @@ class CssContextImpl {
    * @param {!Window} win
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
+   * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
-  constructor(win, rootNode, baseUrl) {
+  constructor(win, rootNode, baseUrl, options) {
+    const {scope = null, scaleByScope = false} = options;
+
     /** @const @private */
     this.win_ = win;
 
-    /** @const @private */
+    /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
+
+    /** @const @private {?Element} */
+    this.scope_ = scope;
+
+    /** @const @private {boolean} */
+    this.scaleByScope_ = scaleByScope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -875,8 +894,20 @@ class CssContextImpl {
     /** @private {?string} */
     this.dim_ = null;
 
-    /** @private {?{width: number, height: number}} */
-    this.viewportSize_ = null;
+    /**
+     * @private {?{
+     *   size: {width: number, height: number},
+     *   offset: {x: number, y: number},
+     *   scaleFactorX: number,
+     *   scaleFactorY: number,
+     * }}
+     */
+    this.viewportParams_ = null;
+  }
+
+  /** @return {!Document|!ShadowRoot} */
+  get rootNode() {
+    return this.rootNode_;
   }
 
   /**
@@ -903,7 +934,7 @@ class CssContextImpl {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.rootNode_.getElementById(id);
+    return this.scopedQuerySelector_(`#${escapeCssSelectorIdent(id)}`);
   }
 
   /**
@@ -912,7 +943,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
+      return toArray(this.scopedQuerySelectorAll_(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -1160,13 +1191,32 @@ class CssContextImpl {
 
   /** @override */
   getViewportSize() {
-    if (!this.viewportSize_) {
-      this.viewportSize_ = {
-        width: this.win_./*OK*/ innerWidth,
-        height: this.win_./*OK*/ innerHeight,
-      };
+    return this.getViewportParams_().size;
+  }
+
+  /** @private */
+  getViewportParams_() {
+    if (!this.viewportParams_) {
+      if (this.scope_ && this.scaleByScope_) {
+        const rect = this.scope_./*OK*/ getBoundingClientRect();
+        const {offsetWidth, offsetHeight} = this.scope_;
+        this.viewportParams_ = {
+          offset: {x: rect.x, y: rect.y},
+          size: {width: offsetWidth, height: offsetHeight},
+          scaleFactorX: offsetWidth / (rect.width || 1),
+          scaleFactorY: offsetHeight / (rect.height || 1),
+        };
+      } else {
+        const {innerWidth, innerHeight} = this.win_;
+        this.viewportParams_ = {
+          offset: {x: 0, y: 0},
+          size: {width: innerWidth, height: innerHeight},
+          scaleFactorX: 1,
+          scaleFactorY: 1,
+        };
+      }
     }
-    return this.viewportSize_;
+    return this.viewportParams_;
   }
 
   /** @override */
@@ -1201,13 +1251,13 @@ class CssContextImpl {
   }
 
   /** @override */
-  getCurrentElementSize() {
-    return this.getElementSize_(this.requireTarget_());
+  getCurrentElementRect() {
+    return this.getElementRect_(this.requireTarget_());
   }
 
   /** @override */
-  getElementSize(selector, selectionMethod) {
-    return this.getElementSize_(this.getElement_(selector, selectionMethod));
+  getElementRect(selector, selectionMethod) {
+    return this.getElementRect_(this.getElement_(selector, selectionMethod));
   }
 
   /**
@@ -1225,12 +1275,18 @@ class CssContextImpl {
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestAncestorElementBySelector(
+        const maybeFoundInScope = closestAncestorElementBySelector(
           this.requireTarget_(),
           selector
         );
+        if (
+          maybeFoundInScope &&
+          (!this.scope_ || this.scope_.contains(maybeFoundInScope))
+        ) {
+          element = maybeFoundInScope;
+        }
       } else {
-        element = this.rootNode_./*OK*/ querySelector(selector);
+        element = this.scopedQuerySelector_(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1240,17 +1296,49 @@ class CssContextImpl {
 
   /**
    * @param {!Element} target
-   * @return {!{width: number, height: number}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
-  getElementSize_(target) {
-    const b = target./*OK*/ getBoundingClientRect();
-    return {width: b.width, height: b.height};
+  getElementRect_(target) {
+    const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
+    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+
+    // This assumes default `transform-origin: center center`
+    return layoutRectLtwh(
+      (x - offset.x) * scaleFactorX,
+      (y - offset.y) * scaleFactorY,
+      width * scaleFactorX,
+      height * scaleFactorY
+    );
   }
 
   /** @override */
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
     return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
+  }
+
+  /**
+   * @param {string} selector
+   * @return {?Element}
+   * @private
+   */
+  scopedQuerySelector_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelector(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelector(selector);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!NodeList}
+   * @private
+   */
+  scopedQuerySelectorAll_(selector) {
+    if (this.scope_) {
+      return /*OK*/ scopedQuerySelectorAll(this.scope_, selector);
+    }
+    return this.rootNode_./*OK*/ querySelectorAll(selector);
   }
 }

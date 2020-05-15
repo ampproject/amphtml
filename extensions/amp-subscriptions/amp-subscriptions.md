@@ -450,6 +450,20 @@ The "local" service is configured in "iframe" mode as follows:
 </script>
 ```
 
+The properties in the "local" service are (remote mode):
+
+- "type" - optional type, defaults to "remote"
+- "authorizationUrl" - the authorization endpoint URL.
+- "pingbackUrl" - the pingback endpoint URL.
+- "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
+
+In iframe mode the `authorizationUrl` and `pingbackUrl` are deleted
+and replaced by:
+
+- "iframeSrc" - publisher supplied iframe
+- "iframeVars - AMP variables to be sent to the iframe
+- "type" - must be "iframe"
+
 See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of the messaging protocol.
 
 ### Vendor services

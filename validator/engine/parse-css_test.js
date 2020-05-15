@@ -57,8 +57,20 @@ describe('stripVendorPrefix', () => {
  * @return {number}
  */
 const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn([
-  'line', 'col', 'tokenType', 'name', 'prelude', 'declarations', 'rules',
-  'errorType', 'msg', 'type', 'value', 'repr', 'unit', 'eof',
+  'line',
+  'col',
+  'tokenType',
+  'name',
+  'prelude',
+  'declarations',
+  'rules',
+  'errorType',
+  'msg',
+  'type',
+  'value',
+  'repr',
+  'unit',
+  'eof',
 ]);
 
 /**
@@ -67,8 +79,8 @@ const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn([
  */
 function assertJSONEquals(left, right) {
   assertStrictEqual(
-      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/4),
-      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/4));
+      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/ 4),
+      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/ 4));
 }
 
 /** @type {!Object<string,parse_css.BlockType>} */
@@ -243,7 +255,8 @@ class LogRulePositions extends parse_css.RuleVisitor {
 
   /** @inheritDoc */
   leaveAtRule(atRule) {
-    this.out.push('Leaving AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
+    this.out.push(
+        'Leaving AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
   }
 
   /** @inheritDoc */
@@ -295,7 +308,8 @@ describe('parseAStylesheet', () => {
               'tokenType': 'DECLARATION',
               'name': 'bar',
               'value': [
-                {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'}, {
+                {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
+                {
                   'line': 1,
                   'col': 11,
                   'tokenType': 'FUNCTION_TOKEN',
@@ -310,7 +324,8 @@ describe('parseAStylesheet', () => {
                   'repr': '255',
                 },
                 {'line': 1, 'col': 18, 'tokenType': 'COMMA'},
-                {'line': 1, 'col': 19, 'tokenType': 'WHITESPACE'}, {
+                {'line': 1, 'col': 19, 'tokenType': 'WHITESPACE'},
+                {
                   'line': 1,
                   'col': 20,
                   'tokenType': 'NUMBER',
@@ -319,7 +334,8 @@ describe('parseAStylesheet', () => {
                   'repr': '0',
                 },
                 {'line': 1, 'col': 21, 'tokenType': 'COMMA'},
-                {'line': 1, 'col': 22, 'tokenType': 'WHITESPACE'}, {
+                {'line': 1, 'col': 22, 'tokenType': 'WHITESPACE'},
+                {
                   'line': 1,
                   'col': 23,
                   'tokenType': 'NUMBER',
@@ -342,11 +358,12 @@ describe('parseAStylesheet', () => {
     sheet.accept(visitor);
     assertStrictEqual(
         'Stylesheet (1,0)\n' +
-        'QualifiedRule (1,0)\n' +
-        'Declaration (1,6)\n' +
-        'Leaving Declaration (1,6)\n' +
-        'Leaving QualifiedRule (1,0)\n' +
-        'Leaving Stylesheet (1,0)\n', visitor.out.join(''));
+            'QualifiedRule (1,0)\n' +
+            'Declaration (1,6)\n' +
+            'Leaving Declaration (1,6)\n' +
+            'Leaving QualifiedRule (1,0)\n' +
+            'Leaving Stylesheet (1,0)\n',
+        visitor.out.join(''));
   });
 
   it('parses a hash reference', () => {
@@ -413,8 +430,8 @@ describe('parseAStylesheet', () => {
   });
 
   it('parses nested media rules and declarations',
-      () => {
-        const css = 'h1 { color: red; }\n' +
+     () => {
+       const css = 'h1 { color: red; }\n' +
            '@media print {\n' +
            '  @media print {\n' +
            '    h2.bar { size: 4px; }\n' +
@@ -424,102 +441,102 @@ describe('parseAStylesheet', () => {
            '  font-family: \'MyFont\';\n' +
            '  src: url(\'foo.ttf\');\n' +
            '}';
-        const errors = [];
-        const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
-        assertJSONEquals(
-            [
-              {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
-              {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 3, 'tokenType': 'OPEN_CURLY'},
-              {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'color'},
-              {'line': 1, 'col': 10, 'tokenType': 'COLON'},
-              {'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'red'},
-              {'line': 1, 'col': 15, 'tokenType': 'SEMICOLON'},
-              {'line': 1, 'col': 16, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 17, 'tokenType': 'CLOSE_CURLY'},
-              {'line': 1, 'col': 18, 'tokenType': 'WHITESPACE'},
-              {'line': 2, 'col': 0, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
-              {'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
-              {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
-              {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
-              {'line': 2, 'col': 13, 'tokenType': 'OPEN_CURLY'},
-              {'line': 2, 'col': 14, 'tokenType': 'WHITESPACE'},
-              {'line': 3, 'col': 2, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
-              {'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
-              {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value': 'print'},
-              {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
-              {'line': 3, 'col': 15, 'tokenType': 'OPEN_CURLY'},
-              {'line': 3, 'col': 16, 'tokenType': 'WHITESPACE'},
-              {'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value': 'h2'},
-              {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value': '.'},
-              {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value': 'bar'},
-              {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
-              {'line': 4, 'col': 11, 'tokenType': 'OPEN_CURLY'},
-              {'line': 4, 'col': 12, 'tokenType': 'WHITESPACE'},
-              {'line': 4, 'col': 13, 'tokenType': 'IDENT', 'value': 'size'},
-              {'line': 4, 'col': 17, 'tokenType': 'COLON'},
-              {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
-              {
-                'line': 4,
-                'col': 19,
-                'tokenType': 'DIMENSION',
-                'type': 'integer',
-                'value': 4,
-                'repr': '4',
-                'unit': 'px',
-              },
-              {'line': 4, 'col': 22, 'tokenType': 'SEMICOLON'},
-              {'line': 4, 'col': 23, 'tokenType': 'WHITESPACE'},
-              {'line': 4, 'col': 24, 'tokenType': 'CLOSE_CURLY'},
-              {'line': 4, 'col': 25, 'tokenType': 'WHITESPACE'},
-              {'line': 5, 'col': 2, 'tokenType': 'CLOSE_CURLY'},
-              {'line': 5, 'col': 3, 'tokenType': 'WHITESPACE'},
-              {'line': 6, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
-              {'line': 6, 'col': 1, 'tokenType': 'WHITESPACE'},
-              {
-                'line': 7,
-                'col': 0,
-                'tokenType': 'AT_KEYWORD',
-                'value': 'font-face',
-              },
-              {'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
-              {'line': 7, 'col': 11, 'tokenType': 'OPEN_CURLY'},
-              {'line': 7, 'col': 12, 'tokenType': 'WHITESPACE'},
-              {
-                'line': 8,
-                'col': 2,
-                'tokenType': 'IDENT',
-                'value': 'font-family',
-              },
-              {'line': 8, 'col': 13, 'tokenType': 'COLON'},
-              {'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'},
-              {'line': 8, 'col': 15, 'tokenType': 'STRING', 'value': 'MyFont'},
-              {'line': 8, 'col': 23, 'tokenType': 'SEMICOLON'},
-              {'line': 8, 'col': 24, 'tokenType': 'WHITESPACE'},
-              {'line': 9, 'col': 2, 'tokenType': 'IDENT', 'value': 'src'},
-              {'line': 9, 'col': 5, 'tokenType': 'COLON'},
-              {'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'},
-              {
-                'line': 9,
-                'col': 7,
-                'tokenType': 'FUNCTION_TOKEN',
-                'value': 'url',
-              },
-              {'line': 9, 'col': 11, 'tokenType': 'STRING', 'value': 'foo.ttf'},
-              {'line': 9, 'col': 20, 'tokenType': 'CLOSE_PAREN'},
-              {'line': 9, 'col': 21, 'tokenType': 'SEMICOLON'},
-              {'line': 9, 'col': 22, 'tokenType': 'WHITESPACE'},
-              {'line': 10, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
-              {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'},
-            ],
-            tokenlist);
-        const sheet = parse_css.parseAStylesheet(
-            tokenlist, ampAtRuleParsingSpec,
-            parse_css.BlockType.PARSE_AS_IGNORE, errors);
-        assertStrictEqual(0, errors.length);
-        assertJSONEquals(
+       const errors = [];
+       const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
+       assertJSONEquals(
+           [
+             {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
+             {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
+             {'line': 1, 'col': 3, 'tokenType': 'OPEN_CURLY'},
+             {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
+             {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'color'},
+             {'line': 1, 'col': 10, 'tokenType': 'COLON'},
+             {'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
+             {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'red'},
+             {'line': 1, 'col': 15, 'tokenType': 'SEMICOLON'},
+             {'line': 1, 'col': 16, 'tokenType': 'WHITESPACE'},
+             {'line': 1, 'col': 17, 'tokenType': 'CLOSE_CURLY'},
+             {'line': 1, 'col': 18, 'tokenType': 'WHITESPACE'},
+             {'line': 2, 'col': 0, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
+             {'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
+             {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
+             {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
+             {'line': 2, 'col': 13, 'tokenType': 'OPEN_CURLY'},
+             {'line': 2, 'col': 14, 'tokenType': 'WHITESPACE'},
+             {'line': 3, 'col': 2, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
+             {'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
+             {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value': 'print'},
+             {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
+             {'line': 3, 'col': 15, 'tokenType': 'OPEN_CURLY'},
+             {'line': 3, 'col': 16, 'tokenType': 'WHITESPACE'},
+             {'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value': 'h2'},
+             {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value': '.'},
+             {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value': 'bar'},
+             {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
+             {'line': 4, 'col': 11, 'tokenType': 'OPEN_CURLY'},
+             {'line': 4, 'col': 12, 'tokenType': 'WHITESPACE'},
+             {'line': 4, 'col': 13, 'tokenType': 'IDENT', 'value': 'size'},
+             {'line': 4, 'col': 17, 'tokenType': 'COLON'},
+             {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
+             {
+               'line': 4,
+               'col': 19,
+               'tokenType': 'DIMENSION',
+               'type': 'integer',
+               'value': 4,
+               'repr': '4',
+               'unit': 'px',
+             },
+             {'line': 4, 'col': 22, 'tokenType': 'SEMICOLON'},
+             {'line': 4, 'col': 23, 'tokenType': 'WHITESPACE'},
+             {'line': 4, 'col': 24, 'tokenType': 'CLOSE_CURLY'},
+             {'line': 4, 'col': 25, 'tokenType': 'WHITESPACE'},
+             {'line': 5, 'col': 2, 'tokenType': 'CLOSE_CURLY'},
+             {'line': 5, 'col': 3, 'tokenType': 'WHITESPACE'},
+             {'line': 6, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
+             {'line': 6, 'col': 1, 'tokenType': 'WHITESPACE'},
+             {
+               'line': 7,
+               'col': 0,
+               'tokenType': 'AT_KEYWORD',
+               'value': 'font-face',
+             },
+             {'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
+             {'line': 7, 'col': 11, 'tokenType': 'OPEN_CURLY'},
+             {'line': 7, 'col': 12, 'tokenType': 'WHITESPACE'},
+             {
+               'line': 8,
+               'col': 2,
+               'tokenType': 'IDENT',
+               'value': 'font-family',
+             },
+             {'line': 8, 'col': 13, 'tokenType': 'COLON'},
+             {'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'},
+             {'line': 8, 'col': 15, 'tokenType': 'STRING', 'value': 'MyFont'},
+             {'line': 8, 'col': 23, 'tokenType': 'SEMICOLON'},
+             {'line': 8, 'col': 24, 'tokenType': 'WHITESPACE'},
+             {'line': 9, 'col': 2, 'tokenType': 'IDENT', 'value': 'src'},
+             {'line': 9, 'col': 5, 'tokenType': 'COLON'},
+             {'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'},
+             {
+               'line': 9,
+               'col': 7,
+               'tokenType': 'FUNCTION_TOKEN',
+               'value': 'url',
+             },
+             {'line': 9, 'col': 11, 'tokenType': 'STRING', 'value': 'foo.ttf'},
+             {'line': 9, 'col': 20, 'tokenType': 'CLOSE_PAREN'},
+             {'line': 9, 'col': 21, 'tokenType': 'SEMICOLON'},
+             {'line': 9, 'col': 22, 'tokenType': 'WHITESPACE'},
+             {'line': 10, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
+             {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'},
+           ],
+           tokenlist);
+       const sheet = parse_css.parseAStylesheet(
+           tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertStrictEqual(0, errors.length);
+       assertJSONEquals(
             {
               'line': 1,
               'col': 0,
@@ -660,13 +677,13 @@ describe('parseAStylesheet', () => {
               'eof': {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'},
             },
             sheet);
-      });
+     });
 
   it('generates errors not assertions for invalid css', () => {
-    const css = '#foo { foo.bar {} }\n' + // qual. rule inside declarations
-        '@font-face { @media {} }\n' + // @rule inside declarations
-        '@media { @gregable }\n' + // unrecognized @rule, ignored
-        'color: red;\n'; // declaration outside qualified rule.
+    const css = '#foo { foo.bar {} }\n' +  // qual. rule inside declarations
+        '@font-face { @media {} }\n' +     // @rule inside declarations
+        '@media { @gregable }\n' +         // unrecognized @rule, ignored
+        'color: red;\n';  // declaration outside qualified rule.
     const errors = [];
     const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
     parse_css.parseAStylesheet(
@@ -914,8 +931,7 @@ describe('parseAStylesheet', () => {
   });
 });
 
-describe('extractUrls', () => {
-
+describe('extractUrlsFromStylesheet', () => {
   // Tests that font urls are parsed with font-face atRuleScope.
   it('finds font in font-face', () => {
     const css =
@@ -926,7 +942,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [{
@@ -950,7 +966,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [{
@@ -1024,7 +1040,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [
@@ -1077,7 +1093,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals([], errors);
     assertJSONEquals(
         [
@@ -1116,7 +1132,7 @@ describe('extractUrls', () => {
         tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, errors);
+    parse_css.extractUrlsFromStylesheet(sheet, parsedUrls, errors);
     assertJSONEquals(
         [{
           'line': 4,
@@ -1224,7 +1240,8 @@ describe('parseMediaQueries', () => {
       ['screen and (color)', 'screen', 'color'],
       ['screen and (color), braille', 'screen,braille', 'color'],
       [
-        'screen and (min-width: 50px) and (max-width:51px)', 'screen',
+        'screen and (min-width: 50px) and (max-width:51px)',
+        'screen',
         'min-width,max-width',
       ],
       ['(color) and (max-width:abc)', '', 'color,max-width'],
@@ -1249,12 +1266,16 @@ describe('parseMediaQueries', () => {
 
       let seenTypes = '';
       for (const token of mediaTypes) {
-        if (seenTypes !== '') {seenTypes += ',';}
+        if (seenTypes !== '') {
+          seenTypes += ',';
+        }
         seenTypes += token.value;
       }
       let seenFeatures = '';
       for (const token of mediaFeatures) {
-        if (seenFeatures !== '') {seenFeatures += ',';}
+        if (seenFeatures !== '') {
+          seenFeatures += ',';
+        }
         seenFeatures += token.value;
       }
 
@@ -1262,7 +1283,7 @@ describe('parseMediaQueries', () => {
       assertStrictEqual(expectedFeatures, seenFeatures);
     }
   });
-}); // describe('parseMediaQueries')
+});  // describe('parseMediaQueries')
 
 /**
  * @param {string} selector

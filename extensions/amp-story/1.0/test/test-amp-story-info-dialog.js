@@ -24,10 +24,11 @@ import {
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
 } from '../amp-story-info-dialog';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
+describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   let moreInfoLinkUrl;
   let embedded;
   let parentEl;
@@ -39,6 +40,11 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+
     storeService = new AmpStoryStoreService(win);
     embedded = true;
     registerServiceBuilder(win, 'story-store', function () {
@@ -51,10 +57,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
         callback();
         return Promise.resolve();
       },
-    });
-
-    env.sandbox.stub(Services, 'localizationService').returns({
-      getLocalizedString: (localizedStringId) => `string(${localizedStringId})`,
     });
 
     env.sandbox.stub(Services, 'viewerForDoc').returns({

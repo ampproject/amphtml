@@ -125,6 +125,17 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Do not layout if the component returns before
+    // this.shareEndpoint_ is resolved from buildCallback.
+    if (!this.shareEndpoint_) {
+      return Promise.resolve();
+    }
+
+    const hrefWithVars = addParamsToUrl(
+      dev().assertString(this.shareEndpoint_),
+      this.params_
+    );
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindings = {};
     if (this.bindingVars_) {
       this.bindingVars_.forEach((name) => {
@@ -133,11 +144,6 @@ class AmpSocialShare extends AMP.BaseElement {
       });
     }
 
-    const hrefWithVars = addParamsToUrl(
-      dev().assertString(this.shareEndpoint_),
-      this.params_
-    );
-    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     return urlReplacements
       .expandUrlAsync(hrefWithVars, bindings)
       .then((href) => {

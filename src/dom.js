@@ -146,11 +146,25 @@ export function copyChildren(from, to) {
  * if that is null at the beginning.
  * @param {!Element|!ShadowRoot} root
  * @param {!Element} element
- * @param {?Node} after
+ * @param {?Node=} after
  */
-export function insertAfterOrAtStart(root, element, after) {
-  const before = after ? after.nextSibling : root.firstChild;
+export function insertAfterOrAtStart(root, element, after = null) {
+  if (!after) {
+    insertAtStart(root, element);
+    return;
+  }
+  const before = after.nextSibling;
   root.insertBefore(element, before);
+}
+
+/**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element|!ShadowRoot} root
+ * @param {!Element} element
+ */
+export function insertAtStart(root, element) {
+  root.insertBefore(element, root.firstChild);
 }
 
 /**
