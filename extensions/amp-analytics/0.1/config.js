@@ -405,7 +405,7 @@ export class AnalyticsConfig {
    * @param {!JsonObject} inlineConfig
    */
   validateTransport_(inlineConfig) {
-    if (this.vendorConfig_) {
+    if (this.element_.getAttribute('type')) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
       // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
