@@ -391,18 +391,22 @@ event.response</pre></td>
 
 ### amp-list <a name="amp-list-1"></a>
 
+### amp-list <a name="amp-list"></a>
+
 <table>
   <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-    <tr>
-    <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONAINTER"</code>.</td>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
   </tr>
   <tr>
-    <td><code>refresh</code></td>
-    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
+    <td><code>changeToLayoutContainer</code></td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
+    <td>None</td>
   </tr>
 </table>
 
@@ -419,18 +423,17 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>selectUp(delta=INTEGER)</code></td>
-    <td>Moves the selection up by the value of `delta`. The default `delta` is set to -1.</td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to -1. If no options are selected, the selected state will become the value of the last option.</td>
   </tr>
   <tr>
     <td><code>selectDown(delta=INTEGER)</code></td>
-    <td>Moves the selection down by the value of `delta`. The default `delta` is set to 1.</td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to 1. If no options are selected, the selected state will become the value of the first option.</td>
   </tr>
   <tr>
     <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
-    <td>Toggle's the application of the `selected`. If the select attribute is absent, this action adds it. If the select attribute is present, this action removes it.
+    <td>Toggles the application of the `selected`. If the select attribute is absent, this action adds it. If the select attribute is present, this action removes it.
 
     You may force and keep an add or remove by including a boolean value in the `value` argument. A value of `true` will force add the `selected` attribute and not remove it if already present. A value of  `false` will remove the attribute, but not add it if absent.
-
   </td>
   </tr>
 </table>
