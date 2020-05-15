@@ -93,16 +93,19 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
+   * @param {Object=} opt_consentMetadata
    */
-  updateConsentInstanceState(state, consentStr) {
+  updateConsentInstanceState(state, consentStr, opt_consentMetadata) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, false);
+    this.instance_.update(state, consentStr, opt_consentMetadata, false);
 
     if (this.consentChangeHandler_) {
-      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
+      this.consentChangeHandler_(
+        constructConsentInfo(state, consentStr, opt_consentMetadata)
+      );
     }
   }
 
@@ -289,7 +292,12 @@ export class ConsentInstance {
         // No need to update with dirtyBit
         return;
       }
-      this.update(info['consentState'], info['consentString'], true);
+      this.update(
+        info['consentState'],
+        info['consentString'],
+        info['consentMetadata'],
+        true
+      );
     });
   }
 
@@ -297,9 +305,10 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {Object=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, opt_systemUpdate) {
+  update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
@@ -307,10 +316,13 @@ export class ConsentInstance {
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
       const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-      // If state is dismissed, use the old consent string.
+      const localConsentMetadata =
+        this.localConsentInfo_ && this.localConsentInfo_['consentMetadata'];
+      // If state is dismissed, use the old consent string and metadata.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr
+        localConsentStr,
+        localConsentMetadata
       );
       return;
     }
@@ -322,6 +334,7 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
+        opt_consentMetadata,
         true
       );
     } else {
@@ -329,13 +342,15 @@ export class ConsentInstance {
       // from localConsentInfo_
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        consentString
+        consentString,
+        opt_consentMetadata
       );
     }
 
     const newConsentInfo = constructConsentInfo(
       calculatedState,
       consentString,
+      opt_consentMetadata,
       this.hasDirtyBitNext_
     );
 
@@ -390,6 +405,8 @@ export class ConsentInstance {
         // TODO: Good to have a way to inform CMP service in this case
         return;
       }
+
+      // TODO: enforce metadata limits here (if any)
 
       const value = composeStoreValue(consentInfo);
       if (value == null) {
@@ -484,6 +501,9 @@ export class ConsentInstance {
       );
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
+      }
+      if (consentInfo['consentMetadata']) {
+        request['consentMetadata'] = consentInfo['consentMetadata'];
       }
       const init = {
         credentials: 'include',
