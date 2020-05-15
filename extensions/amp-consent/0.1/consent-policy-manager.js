@@ -76,6 +76,9 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
+
+    /** @private {?Object|undefined} */
+    this.consentMetadata_ = null;
   }
 
   /**
@@ -179,9 +182,14 @@ export class ConsentPolicyManager {
   consentStateChangeHandler_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
-    const {consentString_: prevConsentStr} = this;
+    const consentMetadata = info['consentMetadata'];
+    const {
+      consentString_: prevConsentStr,
+      consentMetadata_: prevConsentMetadata,
+    } = this;
 
     this.consentString_ = consentStr;
+    this.consentMetadata_ = consentMetadata;
     if (state === CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
@@ -200,8 +208,9 @@ export class ConsentPolicyManager {
       if (this.consentState_ === null) {
         this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
       }
-      // consentString doesn't change with dismiss action
+      // consentString & consentMetadata doesn't change with dismiss action
       this.consentString_ = prevConsentStr;
+      this.consentMetadata_ = prevConsentMetadata;
     } else {
       this.consentState_ = state;
     }
@@ -292,6 +301,18 @@ export class ConsentPolicyManager {
   getConsentStringInfo(policyId) {
     return this.whenPolicyResolved(policyId).then(() => {
       return this.consentString_;
+    });
+  }
+
+  /**
+   * Get the consent metadata value of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?Object|undefined>}
+   */
+  getConsentMetadataInfo(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.consentMetadata_;
     });
   }
 

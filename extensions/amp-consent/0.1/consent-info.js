@@ -23,6 +23,8 @@ import {isEnumValue, isObject} from '../../../src/types';
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
+ * METADATA: set when consent metadata is passed in to store more granular consent info
+ * on vendors.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
@@ -30,7 +32,17 @@ export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
+  METADATA: 'm',
 };
+
+/**
+ * Key values for retriving/storing metadata values within consent info
+ * TODO(micajuineho)
+ * GDPR_APPLIES: 'ga'
+ * CONSENT_STRING_TYPE: 'cst'
+ * @enum {string}
+ */
+export const METADATA_STORAGE_KEY = {};
 
 /**
  * @enum {number}
@@ -50,6 +62,7 @@ export const CONSENT_ITEM_STATE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
+ *  consentMetadata: (Object|undefined),
  *  isDirty: (boolean|undefined),
  * }}
  */
@@ -64,6 +77,7 @@ export function getStoredConsentInfo(value) {
   if (value === undefined) {
     return constructConsentInfo(
       CONSENT_ITEM_STATE.UNKNOWN,
+      undefined,
       undefined,
       undefined
     );
@@ -80,6 +94,7 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
+    convertStorageMetadata(value[STORAGE_KEY.METADATA]),
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -145,6 +160,12 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.IS_DIRTY] = 1;
   }
 
+  if (consentInfo['consentMetadata']) {
+    obj[STORAGE_KEY.METADATA] = composeMetadataStoreValue(
+      consentInfo['consentMetadata']
+    );
+  }
+
   if (Object.keys(obj) == 0) {
     return null;
   }
@@ -191,9 +212,24 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    return stateEqual && stringEqual && isDirtyEqual;
+    const metadataEqual = isMetadataEqual(
+      infoA['consentMetadata'],
+      infoB['consentMetadata']
+    );
+    return stateEqual && stringEqual && metadataEqual && isDirtyEqual;
   }
   return false;
+}
+
+/**
+ * Compares metadata values from consentInfo
+ *
+ * @param {Object=} unusedMetadataA
+ * @param {Object=} unusedMetadataB
+ * @return {boolean}
+ */
+function isMetadataEqual(unusedMetadataA, unusedMetadataB) {
+  return true;
 }
 
 /**
@@ -203,24 +239,28 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
  */
 function getLegacyStoredConsentInfo(value) {
   const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined);
+  return constructConsentInfo(state);
 }
 
 /**
  * Construct the consentInfo object from values
+ *
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
+ * @param {Object=} opt_consentMetadata
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
+  opt_consentMetadata,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
+    'consentMetadata': opt_consentMetadata,
     'isDirty': opt_isDirty,
   };
 }
@@ -285,4 +325,30 @@ export function getConsentStateValue(enumState) {
   }
 
   return 'unknown';
+}
+
+/**
+ * Converts metadata to stroage value:
+ * {'gdprApplies': true, 'consentStringType': 'tcf-v2'} =>
+ * {'ga': true, 'cst': 'tcf-v2'}
+ *
+ * @param {Object} unused
+ * @return {Object}
+ */
+function composeMetadataStoreValue(unused) {
+  const storageMetadata = map();
+  // TODO(micajuineho) if (metadata['gdprApplies']) {...}
+  return storageMetadata;
+}
+
+/**
+ * TODO(micajuineho) Converts stroage metadata to human readable object:
+ * {'ga': true, 'cst': 'tcf-v2'} =>
+ * {'gdprApplies': true, 'consentStringType': 'tcf-v2'}
+ *
+ * @param {Object|null|undefined} unused
+ * @return {undefined}
+ */
+function convertStorageMetadata(unused) {
+  return undefined;
 }
