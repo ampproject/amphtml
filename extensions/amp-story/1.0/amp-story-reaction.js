@@ -47,7 +47,7 @@ export const ReactionType = {
 };
 
 /**
- * @const @enum {number}
+ * @const @enum {string}
  */
 export const ReactionFlags = {
   THEME: 'theme',
