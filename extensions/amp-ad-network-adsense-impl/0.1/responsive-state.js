@@ -166,9 +166,6 @@ export class ResponsiveState {
    * @return {?Promise} a promise that resolves when ad size settings are updated, or null if no listener was attached.
    */
   static maybeAttachSettingsListener(element, iframe, adClientId) {
-    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
-      return null;
-    }
     let promiseResolver;
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
@@ -176,24 +173,26 @@ export class ResponsiveState {
     const win = toWin(element.ownerDocument.defaultView);
 
     const listener = (event) => {
-      if (event['source'] != iframe.contentWindow) {
+      const data = getData(event);
+      if (!data.includes('googMsgType')) {
         return;
       }
-      const data = getData(event);
-      // data will look like this:
+      const dataList = JSON.parse(data);
+
+      // dataList will look like this:
       // {
       //   'googMsgType': 'adsense-settings',
       //   'adClient': 'ca-pub-123',
       //   'enableAutoAdSize': '1'
       // }
-      if (!!data && data['googMsgType'] != 'adsense-settings') {
+      if (!!dataList && dataList['googMsgType'] != 'adsense-settings') {
         return;
       }
-      if (data['adClient'] != adClientId) {
+      if (dataList['adClient'] != adClientId) {
         return;
       }
 
-      const autoAdSizeStatus = data['enableAutoAdSize'] == '1';
+      const autoAdSizeStatus = dataList['enableAutoAdSize'] == '1';
       win.removeEventListener('message', listener);
 
       Services.storageForDoc(element)
