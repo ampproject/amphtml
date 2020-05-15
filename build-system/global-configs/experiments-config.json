@@ -4,9 +4,16 @@
     "environment": "INABOX",
     "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL_INABOX",
     "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expirationDateUTC": "2020-06-30",
-    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
+    "expiration_date_utc": "2020-06-30",
+    "define_experiment_constant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
   },
-  "experimentB": {},
+  "experimentB": {
+    "name": "MoveFixedLayer",
+    "environment": "AMP",
+    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
+    "issue": "https://github.com/ampproject/amphtml/issues/27120",
+    "expiration_date_utc": "2021-01-01",
+    "define_experiment_constant": "MOVE_FIXED_LAYER"
+  },
   "experimentC": {}
 }
