@@ -1056,7 +1056,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const lcpEvents = perf.events_.filter((evt) =>
         evt.label.startsWith('lcp')
       );
-      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents.length).to.equal(3);
       expect(perf.events_).deep.include({
         label: 'lcpl',
         delta: 10,
@@ -1205,7 +1205,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(1);
+      let clsEvents = perf.events_.filter((event) => event.label === 'cls');
+      expect(clsEvents.length).equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'cls',
         delta: 0.55,
@@ -1232,8 +1233,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       });
 
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[1]).to.be.jsonEqual({
+      clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
+      expect(clsEvents.length).to.equal(2);
+      expect(clsEvents).to.deep.include({
         label: 'cls-2',
         delta: 1.5501,
       });
@@ -1247,7 +1249,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       });
 
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
+      clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
+      expect(clsEvents.length).to.equal(2);
     });
 
     it('when the viewer visibility changes to inactive', () => {
@@ -1279,7 +1282,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       viewerVisibilityState = VisibilityState.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
-      const clsEvents = perf.events_.filter((evt) => evt.label === 'cls');
+      const clsEvents = perf.events_.filter((evt) =>
+        evt.label.startsWith('cls')
+      );
       expect(clsEvents.length).to.equal(1);
       expect(perf.events_).deep.include({
         label: 'cls',
