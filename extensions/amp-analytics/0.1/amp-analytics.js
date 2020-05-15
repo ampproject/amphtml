@@ -40,8 +40,8 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
+import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
@@ -231,7 +231,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+        if (isAnalyticsChunksExperimentOn(this.win)) {
           chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
         } else {
           loadConfigTask();
@@ -583,7 +583,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const linkerTask = () => {
       this.linkerManager_.init();
     };
-    if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+    if (isAnalyticsChunksExperimentOn(this.win)) {
       chunk(this.element, linkerTask, ChunkPriority.LOW);
     } else {
       linkerTask();
@@ -720,7 +720,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+      if (isAnalyticsChunksExperimentOn(this.win)) {
         chunk(this.element, sampleInTask, ChunkPriority.LOW);
       } else {
         sampleInTask();
