@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryPlayer,
+  IFRAME_IDX,
+} from '../../src/amp-story-player/amp-story-player-impl';
 import {AmpStoryPlayerManager} from '../../src/amp-story-player/amp-story-player-manager';
-import {IFRAME_IDX} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -282,6 +285,26 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => manager.loadPlayers()).to.throw(
         /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
       );
+    });
+  });
+
+  describe('Player API', () => {
+    it('calls build and layout callbacks when calling load', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      const story = win.document.createElement('a');
+      story.setAttribute('href', DEFAULT_CACHE_URL);
+      playerEl.appendChild(story);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      const buildSpy = env.sandbox.spy(player, 'buildCallback');
+      const layoutSpy = env.sandbox.spy(player, 'layoutCallback');
+      expect(buildSpy).to.not.have.been.called;
+      expect(layoutSpy).to.not.have.been.called;
+
+      await player.load();
+
+      expect(buildSpy).to.have.been.calledOnce;
+      expect(layoutSpy).to.have.been.calledOnce;
     });
   });
 });
