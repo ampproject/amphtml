@@ -23,6 +23,9 @@ import {validateData, writeScript} from '../3p/3p';
 export function iprom(global, data) {
   validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
 
+  /**
+   * Callback for WriteScript
+   */
   function namespaceLoaded() {
     const {sitepath, zone} = data;
     const config = {
@@ -35,7 +38,7 @@ export function iprom(global, data) {
       channels: data.channels ? data.channels.split(',') : [],
     };
 
-    let tag = new ipromNS.AdTag(config);
+    const tag = new window.ipromNS.AdTag(config);
     tag.init();
   }
 
