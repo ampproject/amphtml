@@ -28,7 +28,6 @@ limitations under the License.
 
 Provides a way for viewers to glance at the content outline and jump to any section. This is helpful for mobile devices where even a couple of sentences into a section requires scrolling.
 
-
 ## Usage
 
 The `amp-accordion` component allows you to display collapsible and expandable
@@ -73,7 +72,7 @@ The example below contains an `amp-accordion` with three sections. The
 [filter formats="websites, ads"]Include the `disable-session-state` attribute
 to preserve the collapsed/expanded state.[/filter]
 
-```html
+````html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
   <section>
     <h2>Section 1</h2>
@@ -118,16 +117,16 @@ animation when the content is expanded and "roll up" animation when collapsed.
     ></amp-img>
   </section>
 </amp-accordion>
-```
+````
 
-[filter formats="websites"] 
+[filter formats="websites"]
 
 ### disable-session-states
 
 Include the `disable-session-states` attribute on `<amp-accordion>` to disable
 collapsed/expanded state preservation.
 
-[/filter]  <!-- formats="websites" -->
+[/filter] <!-- formats="websites" -->
 
 ### expanded
 
@@ -194,11 +193,11 @@ false.
 ## Actions
 
 ### toggle
+
 The `toggle` action switches the `expanded` and `collapsed` states of
 `amp-accordion` sections. When called with no arguments, it toggles all sections
 of the accordion. To specify a specific section, add the `section` argument and
 use its corresponding `id` as the value.
-
 
 ```html
 <amp-accordion id="myAccordion">
@@ -222,6 +221,7 @@ use its corresponding `id` as the value.
 ```
 
 ### expand
+
 The `expand` action expands the sections of the `amp-accordion`. If a section
 is already expanded, it stays expanded. When called with no arguments, it
 expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
@@ -247,7 +247,7 @@ it collapses all sections of the accordion. To specify a section, add the
 </button>
 ```
 
-[/filter]  <!-- formats="websites" -->
+[/filter] <!-- formats="websites" -->
 
 ## Events
 
