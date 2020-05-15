@@ -29,6 +29,7 @@ const {
 const {
   isTravisBuild,
   travisBuildNumber,
+  travisJobNumber,
   travisPullRequestSha,
 } = require('../common/travis');
 const {execOrDie, execWithError, exec} = require('../common/exec');
@@ -43,9 +44,13 @@ const DIST_OUTPUT_FILE = isTravisBuild()
 const ESM_DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_esm_dist_${travisBuildNumber()}.zip`
   : '';
+const SAUCE_CONNECT_LOG_OUTPUT_FILE = isTravisBuild()
+  ? `sauce_connect_log_${travisJobNumber()}.zip`
+  : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const SAUCE_CONNECT_LOG = 'sauce_connect_log';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
@@ -370,6 +375,16 @@ function uploadEsmDistOutput(functionName) {
 }
 
 /**
+ * Zips and uploads the sauce connect log to a remote storage location.
+ * TODO(rsimha, #28343): This is temporarily needed for troubleshooting. Remove
+ * after #28343 has been fixed.
+ * @param {string} functionName
+ */
+function uploadSauceConnectLog(functionName) {
+  uploadOutput_(functionName, SAUCE_CONNECT_LOG_OUTPUT_FILE, SAUCE_CONNECT_LOG);
+}
+
+/**
  * Replaces URLS in HTML files, zips and uploads dist output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
  * @param {string} functionName
@@ -412,4 +427,5 @@ module.exports = {
   uploadBuildOutput,
   uploadDistOutput,
   uploadEsmDistOutput,
+  uploadSauceConnectLog,
 };

@@ -35,6 +35,7 @@ const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
+const {uploadSauceConnectLog} = require('../../pr-check/utils');
 
 /**
  * Updates the browsers based off of the test type
@@ -265,6 +266,11 @@ class RuntimeTestRunner {
         yellow(`Karma test failed with exit code ${this.exitCode}`)
       );
       process.exitCode = this.exitCode;
+
+      // TODO(rsimha, #28343): Troubleshooting code. Remove after #28343 has been fixed.
+      if (argv.saucelabs) {
+        uploadSauceConnectLog('runtime-test-base.js');
+      }
     }
   }
 }
