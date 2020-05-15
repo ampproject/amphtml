@@ -203,6 +203,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       dev().assertElement(this.rootEl_),
       CSS + concreteCSS
     );
+    devAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**

@@ -17,8 +17,6 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 
@@ -114,8 +112,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     this.options_.forEach((option, index) =>
       this.configureOption_(option, index)
     );
-
-    devAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**
