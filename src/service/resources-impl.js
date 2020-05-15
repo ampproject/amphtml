@@ -799,10 +799,7 @@ export class ResourcesImpl {
     }
   }
 
-  /**
-   * Returns the percent of resources that were laid out but never entered viewport.
-   * @return {number}
-   */
+  /** @override */
   getEagerElementRatio() {
     if (this.totalLayoutCount_ === 0) {
       return 0;
@@ -822,10 +819,7 @@ export class ResourcesImpl {
     return eagerCount / this.totalLayoutCount_;
   }
 
-  /**
-   * Returns the percent of resources that were laid out after entering viewport.
-   * @return {number}
-   */
+  /** @override */
   getSlowElementRatio() {
     if (this.totalLayoutCount_ === 0) {
       return 0;

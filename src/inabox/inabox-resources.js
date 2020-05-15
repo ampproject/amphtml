@@ -255,12 +255,12 @@ export class InaboxResources {
     }
   }
 
-  /***/
+  /** @override */
   getEagerElementRatio() {
     return 0;
   }
 
-  /***/
+  /** @override */
   getSlowElementRatio() {
     return 0;
   }
