@@ -198,12 +198,12 @@ export class AmpStoryReaction extends AMP.BaseElement {
     });
     this.adjustGridLayer_();
     this.initializeListeners_();
+    devAssert(this.element.children.length == 0, 'Too many children');
     createShadowRootWithStyle(
       this.element,
       dev().assertElement(this.rootEl_),
       CSS + concreteCSS
     );
-    devAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**
