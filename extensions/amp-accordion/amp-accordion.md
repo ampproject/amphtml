@@ -50,7 +50,7 @@ on mobile devices.
 - An `amp-accordion` with a defined `id` preserves the collapsed or expanded
   state of each section while the user remains on your domain.
 
-[/filter]
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -120,14 +120,14 @@ animation when the content is expanded and "roll up" animation when collapsed.
 </amp-accordion>
 ```
 
-[filter formats="websites"]
+[filter formats="websites"] 
 
 ### disable-session-states
 
 Include the `disable-session-states` attribute on `<amp-accordion>` to disable
 collapsed/expanded state preservation.
 
-[/filter]
+[/filter]  <!-- formats="websites" -->
 
 ### expanded
 
@@ -247,7 +247,7 @@ it collapses all sections of the accordion. To specify a section, add the
 </button>
 ```
 
-[/filter]
+[/filter]  <!-- formats="websites" -->
 
 ## Events
 
