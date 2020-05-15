@@ -1316,7 +1316,7 @@ export class ResourcesImpl {
     // depending on prerenderSize in pre-render mode.
     let loadRect;
     if (this.visible_) {
-      loadRect = viewportRect; //expandLayoutRect(viewportRect, 0.25, 2);
+      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
     } else if (this.prerenderSize_ > 0) {
       loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
