@@ -292,7 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('signals when its ready to be interacted with', async () => {
       buildStoryPlayer();
       const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('onReady', readySpy);
+      playerEl.addEventListener('ready', readySpy);
       await manager.loadPlayers();
 
       expect(readySpy).to.have.been.calledOnce;
@@ -303,7 +303,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const readySpy = env.sandbox.spy();
       await manager.loadPlayers();
 
-      playerEl.addEventListener('onReady', readySpy);
+      playerEl.addEventListener('ready', readySpy);
 
       expect(readySpy).to.not.have.been.called;
     });
