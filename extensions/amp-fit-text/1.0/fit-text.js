@@ -58,7 +58,7 @@ export function FitText(props) {
     if (!node) {
       return;
     }
-    const observer = new ResizeObserver(resize);
+    const observer = new ResizeObserver(() => resize());
     observer.observe(node);
     return () => observer.disconnect();
   }, [resize]);
