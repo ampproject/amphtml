@@ -95,6 +95,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.containerEl_.classList.add('i-amphtml-story-education');
+    toggle(this.element, false);
     toggle(this.containerEl_, false);
     this.startListening_();
     // Extra host to reset inherited styles and further enforce shadow DOM style
@@ -198,6 +199,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
+          toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
             Action.TOGGLE_PAUSED,
@@ -270,6 +272,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
+      toggle(this.element, true);
       toggle(this.containerEl_, true);
       this.containerEl_.appendChild(template);
     });
