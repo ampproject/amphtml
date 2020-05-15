@@ -29,6 +29,7 @@ import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -174,10 +175,15 @@ export class ResponsiveState {
 
     const listener = (event) => {
       const data = getData(event);
-      if (!data.includes('googMsgType')) {
+      let dataList = null;
+      if (typeof data == 'string') {
+        dataList = tryParseJson(data);
+      } else if (typeof data == 'object') {
+        dataList = data;
+      }
+      if (dataList == null) {
         return;
       }
-      const dataList = JSON.parse(data);
 
       // dataList will look like this:
       // {
