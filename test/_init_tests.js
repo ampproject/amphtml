@@ -345,6 +345,7 @@ function warnForConsoleError() {
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
+    console.log('throw error');
     const helpMessage =
       'The test "' +
       testName +
@@ -492,7 +493,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line 
+chai.use(require('chai-as-promised')); // eslint-disable-line
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;
