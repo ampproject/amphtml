@@ -61,9 +61,7 @@ function setupAdoConfig(mode, global, consent) {
 function setupPreview(global, data) {
   if (global.ado && data.aoPreview && !isFalseString(data.aoPreview)) {
     global.ado.preview({
-      enabled: true,
-      emiter: data['aoEmitter'],
-      id: data['aoPreview'],
+      enabled: true
     });
   }
 }
