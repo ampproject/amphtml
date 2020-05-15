@@ -455,12 +455,10 @@ export class AmpStoryPlayer {
    * @private
    */
   getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
-    const {location} = this.win_;
-
     const params = dict({
       'amp_js_v': '0.1',
       'visibilityState': visibilityState,
-      'origin': location.origin,
+      'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
