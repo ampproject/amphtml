@@ -230,6 +230,7 @@
       this.startResolve_ = null;
       this.startPromise_ = null;
       this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
+      this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -240,6 +241,8 @@
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
       this.iframe.setAttribute('scrolling', 'yes');
+      this.iframe.setAttribute('height', '800');
+      this.iframe.setAttribute('width', '1200');
       this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
@@ -436,6 +439,7 @@
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
+      this.receivedMessages.push({name, data});
       switch(name) {
         case 'bindReady':
           return Promise.resolve();
