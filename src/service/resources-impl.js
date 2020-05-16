@@ -1344,11 +1344,13 @@ export class ResourcesImpl {
       return;
     }
 
+    const lastDequeueTime = this.exec_.getLastDequeueTime();
     if (
       this.visible_ &&
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
-      now > this.exec_.getLastDequeueTime() + 5000
+      lastDequeueTime > 0 &&
+      now > lastDequeueTime + 5000
     ) {
       // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
