@@ -1200,6 +1200,8 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.build).to.be.called;
   });
 
+  // NOTE: This test doesn't appear to test what it claims to test.
+  // resource1 is not "outside viewport".
   it('should layout resource if outside viewport but idle', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
@@ -1214,6 +1216,33 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.discoverWork_();
 
     expect(schedulePassStub).to.be.calledOnce;
+  });
+
+  it('should only idle layout when Resources is actually idle', () => {
+    const clock = sandbox.useFakeTimers();
+    sandbox.stub(resources, 'scheduleLayoutOrPreload');
+    resources.documentReady_ = true;
+
+    // resource2 is not in the loading rectangle, but qualifies for idle layout.
+    sandbox.stub(resource2.element, 'nextSibling').returns({});
+    resource2.element.isBuilt = () => true;
+    resource2.element.renderOutsideViewport = () => false;
+    resource2.element.idleRenderOutsideViewport = () => true;
+    resource2.state_ = ResourceState.READY_FOR_LAYOUT;
+
+    // No idle layout for since last dequeue time is 0.
+    resources.discoverWork_();
+    expect(resources.scheduleLayoutOrPreload).to.not.be.calledWith(resource2);
+
+    // No idle layout since it hasn't been 5s since last dequeue time.
+    sandbox.stub(resources.exec_, 'getLastDequeueTime').returns(123);
+    resources.discoverWork_();
+    expect(resources.scheduleLayoutOrPreload).to.not.be.calledWith(resource2);
+
+    // Idle layout for resource2 is allowed!
+    clock.tick(5124);
+    resources.discoverWork_();
+    expect(resources.scheduleLayoutOrPreload).to.be.calledWith(resource2);
   });
 
   it('should force build resources during discoverWork layout phase', () => {
