@@ -11,23 +11,17 @@
   "masterIssue": true,
   "masterIssueApproval": true,
   "reviewers": ["team:build-cop"],
+  "separateMinorPatch": true,
   "packageRules": [
     {
-      "updateTypes": ["patch"],
+      "updateTypes": ["minor"],
       "groupName": "subpackage dependencies (patch updates)"
     },
     {
-      "updateTypes": ["minor"],
+      "updateTypes": ["patch", "pin"],
       "groupName": "subpackage dependencies (minor updates)"
     },
 
-    {
-      "paths": ["src/**"],
-      "updateTypes": ["patch"],
-      "groupName": "runtime dependencies (patch updates)",
-      "reviewers": ["team:wg-runtime"],
-      "labels": ["WG: runtime"]
-    },
     {
       "paths": ["src/**"],
       "updateTypes": ["minor"],
@@ -35,17 +29,24 @@
       "reviewers": ["team:wg-runtime"],
       "labels": ["WG: runtime"]
     },
+    {
+      "paths": ["src/**"],
+      "updateTypes": ["patch", "pin"],
+      "groupName": "runtime dependencies (patch updates)",
+      "reviewers": ["team:wg-runtime"],
+      "labels": ["WG: runtime"]
+    },
 
     {
       "paths": ["build-system/**"],
-      "updateTypes": ["patch"],
+      "updateTypes": ["minor"],
       "groupName": "build system dependencies (patch updates)",
       "reviewers": ["team:wg-infra"],
       "labels": ["WG: infra"]
     },
     {
       "paths": ["build-system/**"],
-      "updateTypes": ["minor"],
+      "updateTypes": ["patch", "pin"],
       "groupName": "build system dependencies (minor updates)",
       "reviewers": ["team:wg-infra"],
       "labels": ["WG: infra"]
@@ -53,14 +54,14 @@
 
     {
       "paths": ["validator/**"],
-      "updateTypes": ["patch"],
+      "updateTypes": ["minor"],
       "groupName": "validator dependencies (patch updates)",
       "reviewers": ["team:wg-caching"],
       "labels": ["WG: caching"]
     },
     {
       "paths": ["validator/**"],
-      "updateTypes": ["minor"],
+      "updateTypes": ["patch", "pin"],
       "groupName": "validator dependencies (minor updates)",
       "reviewers": ["team:wg-caching"],
       "labels": ["WG: caching"]
@@ -68,17 +69,17 @@
 
     {
       "paths": ["+(package.json)"],
-      "updateTypes": ["patch"],
+      "updateTypes": ["minor"],
       "groupName": "core dependencies (patch updates)"
     },
     {
       "paths": ["+(package.json)"],
-      "updateTypes": ["minor"],
+      "updateTypes": ["patch", "pin"],
       "groupName": "core dependencies (minor updates)"
     },
 
     {
-      "updateTypes": ["minor", "patch"],
+      "updateTypes": ["minor", "patch", "pin"],
       "packagePatterns": ["^@ampproject/"],
       "groupName": "ampproject dependencies (minor & patch updates)",
       "depTypeList": ["dependencies", "devDependencies"]
