@@ -1069,6 +1069,7 @@ describes.realWin(
 
       it('should add the muted attribute on unmuted state change', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
+
         await story.layoutCallback();
 
         story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
