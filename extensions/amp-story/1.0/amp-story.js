@@ -2507,8 +2507,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
-    isMuted ? this.mute_() : this.unmute_();
-    this.element.toggleAttribute(Attributes.MUTED, isMuted);
+    if (isMuted) {
+      this.mute_();
+      this.element.setAttribute(Attributes.MUTED, '');
+    } else {
+      this.unmute_();
+      this.element.removeAttribute(Attributes.MUTED);
+    }
   }
 
   /**
