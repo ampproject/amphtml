@@ -47,7 +47,7 @@ export function FitText(props) {
       minFontSize,
       maxFontSize
     );
-    getOverflowStyle(measurerRef.current, clientHeight, fontSize);
+    setOverflowStyle(measurerRef.current, clientHeight, fontSize);
   }, [maxFontSize, minFontSize]);
 
   // Here and below, useLayoutEffect is used so intermediary font sizes
@@ -102,7 +102,7 @@ function calculateFontSize(
   maxFontSize
 ) {
   maxFontSize++;
-  // Binomial search for the best font size.
+  // Binary search for the best font size.
   while (maxFontSize - minFontSize > 1) {
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
     setStyle(measurer, 'fontSize', px(mid));
@@ -123,11 +123,11 @@ function calculateFontSize(
  * @param {number} maxHeight
  * @param {number} fontSize
  */
-function getOverflowStyle(measurer, maxHeight, fontSize) {
-  const overflown = measurer./*OK*/ scrollHeight > maxHeight;
+function setOverflowStyle(measurer, maxHeight, fontSize) {
+  const overflowed = measurer./*OK*/ scrollHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
-  if (overflown) {
+  if (overflowed) {
     setStyles(measurer, {
       'lineClamp': numberOfLines,
       '-webkit-line-clamp': numberOfLines,
