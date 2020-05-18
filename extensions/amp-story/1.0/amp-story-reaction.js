@@ -488,30 +488,36 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    this.backendDataPromise_.then(() => {
-      if (this.hasUserSelection_) {
-        return;
-      }
-
-      this.triggerAnalytics_(optionEl);
-      this.hasUserSelection_ = true;
-
-      if (this.optionsData_) {
-        this.optionsData_[optionEl.optionIndex_]['totalCount']++;
-        this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
-      }
-
-      this.mutateElement(() => {
-        if (this.optionsData_) {
-          this.updateOptionPercentages_(this.optionsData_);
+    this.backendDataPromise_
+      .then(() => {
+        if (this.hasUserSelection_) {
+          return;
         }
-        this.updateToPostSelectionState_(optionEl);
-      });
 
-      if (this.element.hasAttribute('endpoint')) {
-        this.executeReactionRequest_('POST', optionEl.optionIndex_);
-      }
-    });
+        this.triggerAnalytics_(optionEl);
+        this.hasUserSelection_ = true;
+
+        if (this.optionsData_) {
+          this.optionsData_[optionEl.optionIndex_]['totalCount']++;
+          this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
+        }
+
+        this.mutateElement(() => {
+          if (this.optionsData_) {
+            this.updateOptionPercentages_(this.optionsData_);
+          }
+          this.updateToPostSelectionState_(optionEl);
+        });
+
+        if (this.element.hasAttribute('endpoint')) {
+          this.executeReactionRequest_('POST', optionEl.optionIndex_);
+        }
+      })
+      .catch(() => {
+        this.mutateElement(() => {
+          this.updateToPostSelectionState_(optionEl);
+        });
+      });
   }
 
   /**
