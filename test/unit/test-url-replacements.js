@@ -1507,7 +1507,6 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             documentElement
           );
           urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
-          const collectVars = {};
           const expanded = urlReplacements.expandUrlSync(
             'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
             {
@@ -1519,18 +1518,11 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
               'PROM': function () {
                 return Promise.resolve('boo');
               },
-            },
-            collectVars
+            }
           );
           expect(expanded).to.match(
             /^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/
           );
-          expect(collectVars).to.deep.equal({
-            'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
-            'CONST': 'ABC',
-            'FUNCT(hello,world)': 'helloworld',
-            'PAGE_LOAD_TIME': 9,
-          });
         });
 
         it('should reject protocol changes', () => {
@@ -1586,7 +1578,6 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
               throw Error('Should not be called');
             },
           },
-          undefined,
           {
             'CONST': true,
           }
