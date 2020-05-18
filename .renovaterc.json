@@ -12,7 +12,6 @@
 
   "masterIssue": true,
   "masterIssueApproval": true,
-  "reviewers": ["team:@ampproject/build-cop"],
 
   "separateMinorPatch": true,
   "packageRules": [
@@ -29,14 +28,12 @@
       "paths": ["src/**"],
       "updateTypes": ["minor"],
       "groupName": "runtime dependencies",
-      "reviewers": ["team:@ampproject/wg-runtime"],
       "labels": ["WG: runtime"]
     },
     {
       "paths": ["src/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "runtime dependencies",
-      "reviewers": ["team:@ampproject/wg-runtime"],
       "labels": ["WG: runtime"]
     },
 
@@ -44,14 +41,12 @@
       "paths": ["build-system/**"],
       "updateTypes": ["minor"],
       "groupName": "build system dependencies",
-      "reviewers": ["team:@ampproject/wg-infra"],
       "labels": ["WG: infra"]
     },
     {
       "paths": ["build-system/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "build system dependencies",
-      "reviewers": ["team:@ampproject/wg-infra"],
       "labels": ["WG: infra"]
     },
 
@@ -59,14 +54,12 @@
       "paths": ["validator/**"],
       "updateTypes": ["minor"],
       "groupName": "validator dependencies",
-      "reviewers": ["team:@ampproject/wg-caching"],
       "labels": ["WG: caching"]
     },
     {
       "paths": ["validator/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "validator dependencies",
-      "reviewers": ["team:@ampproject/wg-caching"],
       "labels": ["WG: caching"]
     },
 
