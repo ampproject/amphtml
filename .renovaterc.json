@@ -5,13 +5,12 @@
   },
   "statusCheckVerify": true,
   "commitMessagePrefix": "📦",
-  "dependencies": {
-    "enabled": false
-  },
   "ignorePaths": [],
   "timezone": "America/Los_Angeles",
-  "schedule": "12am every weekday",
-  "reviewers": "team:build-cop",
+  "schedule": "at any time",
+  "masterIssue": true,
+  "masterIssueApproval": true,
+  "reviewers": ["team:build-cop"],
   "packageRules": [
     {
       "updateTypes": ["patch"],
@@ -26,14 +25,14 @@
       "paths": ["src/**"],
       "updateTypes": ["patch"],
       "groupName": "runtime dependencies (patch updates)",
-      "reviewers": "team:wg-runtime",
+      "reviewers": ["team:wg-runtime"],
       "labels": ["WG: runtime"]
     },
     {
       "paths": ["src/**"],
       "updateTypes": ["minor"],
       "groupName": "runtime dependencies (minor updates)",
-      "reviewers": "team:wg-runtime",
+      "reviewers": ["team:wg-runtime"],
       "labels": ["WG: runtime"]
     },
 
@@ -41,14 +40,14 @@
       "paths": ["build-system/**"],
       "updateTypes": ["patch"],
       "groupName": "build system dependencies (patch updates)",
-      "reviewers": "team:wg-infra",
+      "reviewers": ["team:wg-infra"],
       "labels": ["WG: infra"]
     },
     {
       "paths": ["build-system/**"],
       "updateTypes": ["minor"],
       "groupName": "build system dependencies (minor updates)",
-      "reviewers": "team:wg-infra",
+      "reviewers": ["team:wg-infra"],
       "labels": ["WG: infra"]
     },
 
@@ -56,14 +55,14 @@
       "paths": ["validator/**"],
       "updateTypes": ["patch"],
       "groupName": "validator dependencies (patch updates)",
-      "reviewers": "team:wg-caching",
+      "reviewers": ["team:wg-caching"],
       "labels": ["WG: caching"]
     },
     {
       "paths": ["validator/**"],
       "updateTypes": ["minor"],
       "groupName": "validator dependencies (minor updates)",
-      "reviewers": "team:wg-caching",
+      "reviewers": ["team:wg-caching"],
       "labels": ["WG: caching"]
     },
 
@@ -82,9 +81,7 @@
       "updateTypes": ["minor", "patch"],
       "packagePatterns": ["^@ampproject/"],
       "groupName": "ampproject dependencies (minor & patch updates)",
-      "dependencies": {
-        "enabled": true
-      }
+      "depTypeList": ["dependencies", "devDependencies"]
     }
   ]
 }
