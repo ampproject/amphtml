@@ -1403,7 +1403,7 @@ export class ResourcesImpl {
 
     let timeout = -1;
     const state = Object.create(null);
-    let task = this.queue_.peek(this.boundTaskScorer_, state);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev().fine(
@@ -1469,7 +1469,7 @@ export class ResourcesImpl {
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_, state);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
