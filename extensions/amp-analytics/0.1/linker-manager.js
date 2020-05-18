@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -28,9 +29,6 @@ import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
-
-/** @const {string} */
-const LINKER_CREATED = 'i-amphtml-linker-created';
 
 export class LinkerManager {
   /**
@@ -232,20 +230,7 @@ export class LinkerManager {
       return false;
     }
 
-    const headNode = this.ampdoc_.getHeadNode();
-    const linkerCreatedEl =
-      headNode instanceof ShadowRoot
-        ? this.ampdoc_.getBody()
-        : headNode.querySelector(
-            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-          );
-
-    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
-      return false;
-    }
-
-    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
-    return true;
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
   }
 
   /**
