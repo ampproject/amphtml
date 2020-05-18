@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,43 +14,57 @@
  * limitations under the License.
  */
 
+/**
+ * TODO: The timeout is increased for cross-light/shadow DOM traversal.
+ * This should be removed, but currently without it the tests are flaky.
+ **/
+const testTimeout = 11500;
+
 describes.endtoend(
   'amp-fit-text',
   {
     testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-fit-text/0.1/amp-fit-text.html',
-    environments: 'ampdoc-amp4ads-preset',
+      'http://localhost:8000/test/fixtures/e2e/amp-fit-text/1.0/amp-fit-text.html',
+    environments: 'ampdoc-preset',
+    experiments: ['amp-fit-text-v2'],
   },
   (env) => {
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(async function () {
+      this.timeout(testTimeout);
       controller = env.controller;
     });
 
-    it('should render in correct font-size', async () => {
+    it.skip('should render in correct font-size', async function () {
       await verifyElementStyles(await selectContentDiv('test1'), {
         'font-size': '32px',
       });
+    });
 
+    it.skip('should render with overflow', async function () {
       await verifyElementStyles(await selectContentDiv('test2'), {
         'font-size': '42px',
         'overflow': 'hidden',
       });
+    });
 
+    it.skip('should render in correct font-size with a lot of text', async function () {
       await verifyElementStyles(await selectContentDiv('test3'), {
         'font-size': '16px',
       });
+    });
 
+    it.skip('should account for border dimensions', async function () {
       await verifyElementStyles(await selectContentDiv('test4'), {
         'font-size': '20px',
       });
     });
 
     async function selectContentDiv(id) {
-      return await controller.findElement(
-        `#${id} .i-amphtml-fit-text-content > div`
-      );
+      const element = await controller.findElement(`#${id}`);
+      await controller.switchToShadowRoot(element);
+      return await controller.findElement('div > div > div');
     }
 
     async function verifyElementStyles(element, styles) {
