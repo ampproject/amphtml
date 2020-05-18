@@ -21,12 +21,12 @@
 // Good:
 // ```
 // function foo(...args) {}
+// const {...rest} = {foo: 1};
 // ```
 //
 // Bad:
 // ```
 // const [...rest] = [1, 2, 3];
-// const {...rest} = {foo: 1};
 // ```
 module.exports = function (context) {
   return {
@@ -34,13 +34,6 @@ module.exports = function (context) {
       context.report({
         node,
         message: 'Collecting elements using a rest element is not allowed.',
-      });
-    },
-
-    'ObjectPattern > RestElement, ExperimentalRestProperty': function (node) {
-      context.report({
-        node,
-        message: 'Collecting props using a rest property is not allowed.',
       });
     },
   };
