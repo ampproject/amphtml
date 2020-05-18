@@ -8,6 +8,7 @@
   "ignorePaths": [],
   "timezone": "America/Los_Angeles",
   "schedule": "after 5pm every weekday",
+  "masterIssue": true,
   "reviewers": ["team:build-cop"],
   "packageRules": [
     {
