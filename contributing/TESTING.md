@@ -139,7 +139,13 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp e2e --watch`                                        | Watches for changes in test files, runs tests.                                                                                                                                                                                                           |
 | `gulp check-sourcemaps`                                   | Checks sourcemaps generated during minified compilation for correctness.                                                                                                                                                                                 |
 
-All of the commands above can be ran with node's `--inspect` flag if you would like the process to stop at `debugger` statements. For example, `gulp serve` becomes `node --inspect $(which gulp) serve`
+**Pro tip:** All the above commands can be run in debug mode using `node --inspect`. This will make the Chrome debugger stop at `debugger;` statements, after which local state can be inspected using dev tools.
+
+For example, in order to debug `gulp serve`, run the following command:
+
+```sh
+node --inspect $(which gulp) serve
+```
 
 ## Manual testing
 
