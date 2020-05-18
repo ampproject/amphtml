@@ -16,7 +16,7 @@ export function installRootServices(ampdoc) {
   // <BaseURI.Provider value={ampdoc.getUrl()}>
   contextRoot.set('baseURI', ampdoc.getUrl());
 
-  // Measure rendrability.
+  // Measure renderability.
   /*
     function RenderableMeasurerProvider({children}) {
       const measureSize = useContext(SizeMeasurer);
@@ -57,7 +57,7 @@ function setRootVisibility(contextRoot, visibilityState) {
 export const RootVisibility = contextType('RootVisibility');
 
 /**
- * QQQQQQ: is reduceParentPath() gives us what we want?
+ * QQQQQQ: does reduceParentPath() give us what we want?
  *
  * Lightbox:
  * - ContextNode(this.element).set(Renderable, false);
