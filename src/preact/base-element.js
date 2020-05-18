@@ -19,6 +19,7 @@ import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
+import {hasOwn} from '../utils/object';
 import {matches} from '../dom';
 import {render} from './index';
 
@@ -170,12 +171,19 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     if (!this.container_) {
       if (Ctor['children'] || Ctor['passthrough']) {
+        devAssert(
+          !Ctor['detached'],
+          'The AMP element cannot be rendered in detached mode ' +
+            'when configured with "children" or "passthrough" properties.'
+        );
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
-        this.element.appendChild(container);
+        if (!Ctor['detached']) {
+          this.element.appendChild(container);
+        }
       }
     }
 
@@ -197,6 +205,19 @@ export class PreactBaseElement extends AMP.BaseElement {
       deferred.resolve();
       this.scheduledRenderDeferred_ = null;
     }
+  }
+
+  /**
+   * @protected
+   * @param {string} prop
+   * @param {*} opt_fallback
+   * @return {*}
+   */
+  getProp(prop, opt_fallback) {
+    if (!hasOwn(this.defaultProps_, prop)) {
+      return opt_fallback;
+    }
+    return this.defaultProps_[prop];
   }
 }
 
@@ -226,6 +247,14 @@ PreactBaseElement['className'] = '';
  * @protected {boolean}
  */
 PreactBaseElement['passthrough'] = false;
+
+/**
+ * Enabling detached mode alters the children to be rendered in an
+ * unappended container. By default the children will be attached to the DOM.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['detached'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
@@ -263,7 +292,10 @@ function collectProps(Ctor, element, defaultProps) {
   // Props.
   for (const name in propDefs) {
     const def = propDefs[name];
-    const value = element.getAttribute(def.attr);
+    const value =
+      def.type == 'boolean'
+        ? element.hasAttribute(def.attr)
+        : element.getAttribute(def.attr);
     if (value == null) {
       props[name] = def.default;
     } else {
