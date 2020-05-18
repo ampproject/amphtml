@@ -29,6 +29,7 @@ import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
+import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 
 /** @type {string} */
 const TAG = 'amp-story-education';
@@ -203,6 +204,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
             Action.TOGGLE_PAUSED,
             this.storyPausedStateToRestore_
           );
+          setModalAsClosed(this.element);
+          this.element.setAttribute('aria-modal', 'false');
         });
         break;
       case State.NAVIGATION_TAP:
@@ -272,6 +275,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
       removeChildren(this.containerEl_);
       toggle(this.containerEl_, true);
       this.containerEl_.appendChild(template);
+      setModalAsOpen(this.element);
+      this.element.setAttribute('aria-modal', 'true');
     });
   }
 
