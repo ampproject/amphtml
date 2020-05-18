@@ -18,11 +18,11 @@
   "packageRules": [
     {
       "updateTypes": ["minor"],
-      "groupName": "subpackage dependencies",
+      "groupName": "subpackage dependencies"
     },
     {
       "updateTypes": ["patch", "pin"],
-      "groupName": "subpackage dependencies",
+      "groupName": "subpackage dependencies"
     },
 
     {
@@ -91,12 +91,12 @@
     {
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
-      "groupName": "core dependencies",
+      "groupName": "core dependencies"
     },
     {
       "paths": ["+(package.json)"],
       "updateTypes": ["patch", "pin"],
-      "groupName": "core dependencies",
+      "groupName": "core dependencies"
     },
 
     {
@@ -108,7 +108,7 @@
       "updateTypes": ["minor", "patch", "pin"],
       "packagePatterns": ["^@ampproject/"],
       "groupName": "ampproject dependencies",
-      "depTypeList": ["dependencies", "devDependencies"],
+      "depTypeList": ["dependencies", "devDependencies"]
     }
   ]
 }
