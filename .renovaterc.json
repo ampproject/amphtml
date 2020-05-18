@@ -30,9 +30,6 @@
       "updateTypes": ["minor"],
       "groupName": "runtime dependencies",
       "reviewers": ["team:@ampproject/wg-runtime"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-runtime` to review this PR."
-      ],
       "labels": ["WG: runtime"]
     },
     {
@@ -40,9 +37,6 @@
       "updateTypes": ["patch", "pin"],
       "groupName": "runtime dependencies",
       "reviewers": ["team:@ampproject/wg-runtime"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-runtime` to review this PR."
-      ],
       "labels": ["WG: runtime"]
     },
 
@@ -51,9 +45,6 @@
       "updateTypes": ["minor"],
       "groupName": "build system dependencies",
       "reviewers": ["team:@ampproject/wg-infra"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-infra` to review this PR."
-      ],
       "labels": ["WG: infra"]
     },
     {
@@ -61,9 +52,6 @@
       "updateTypes": ["patch", "pin"],
       "groupName": "build system dependencies",
       "reviewers": ["team:@ampproject/wg-infra"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-infra` to review this PR."
-      ],
       "labels": ["WG: infra"]
     },
 
@@ -72,9 +60,6 @@
       "updateTypes": ["minor"],
       "groupName": "validator dependencies",
       "reviewers": ["team:@ampproject/wg-caching"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-caching` to review this PR."
-      ],
       "labels": ["WG: caching"]
     },
     {
@@ -82,9 +67,6 @@
       "updateTypes": ["patch", "pin"],
       "groupName": "validator dependencies",
       "reviewers": ["team:@ampproject/wg-caching"],
-      "prBodyNotes": [
-        "I've added two members of `@ampproject/wg-caching` to review this PR."
-      ],
       "labels": ["WG: caching"]
     },
 
