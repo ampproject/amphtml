@@ -148,7 +148,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -1514,11 +1514,10 @@ export class ResourcesImpl {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
-   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task, unusedCache) {
+  calcTaskScore_(task) {
     // TODO(jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
