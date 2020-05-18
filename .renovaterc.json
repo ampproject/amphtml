@@ -12,26 +12,24 @@
 
   "masterIssue": true,
   "masterIssueApproval": true,
-  "reviewersSampleSize": 2,
+  "reviewers": ["team:@ampproject/build-cop"],
 
   "separateMinorPatch": true,
   "packageRules": [
     {
       "updateTypes": ["minor"],
       "groupName": "subpackage dependencies",
-      "prBodyNotes": ["/cc @ampproject/build-cop"]
     },
     {
       "updateTypes": ["patch", "pin"],
       "groupName": "subpackage dependencies",
-      "prBodyNotes": ["/cc @ampproject/build-cop"]
     },
 
     {
       "paths": ["src/**"],
       "updateTypes": ["minor"],
       "groupName": "runtime dependencies",
-      "reviewers": ["team:wg-runtime"],
+      "reviewers": ["team:@ampproject/wg-runtime"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-runtime` to review this PR."
       ],
@@ -41,7 +39,7 @@
       "paths": ["src/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "runtime dependencies",
-      "reviewers": ["team:wg-runtime"],
+      "reviewers": ["team:@ampproject/wg-runtime"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-runtime` to review this PR."
       ],
@@ -52,7 +50,7 @@
       "paths": ["build-system/**"],
       "updateTypes": ["minor"],
       "groupName": "build system dependencies",
-      "reviewers": ["team:wg-infra"],
+      "reviewers": ["team:@ampproject/wg-infra"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-infra` to review this PR."
       ],
@@ -62,7 +60,7 @@
       "paths": ["build-system/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "build system dependencies",
-      "reviewers": ["team:wg-infra"],
+      "reviewers": ["team:@ampproject/wg-infra"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-infra` to review this PR."
       ],
@@ -73,7 +71,7 @@
       "paths": ["validator/**"],
       "updateTypes": ["minor"],
       "groupName": "validator dependencies",
-      "reviewers": ["team:wg-caching"],
+      "reviewers": ["team:@ampproject/wg-caching"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-caching` to review this PR."
       ],
@@ -83,7 +81,7 @@
       "paths": ["validator/**"],
       "updateTypes": ["patch", "pin"],
       "groupName": "validator dependencies",
-      "reviewers": ["team:wg-caching"],
+      "reviewers": ["team:@ampproject/wg-caching"],
       "prBodyNotes": [
         "I've added two members of `@ampproject/wg-caching` to review this PR."
       ],
@@ -94,13 +92,11 @@
       "paths": ["+(package.json)"],
       "updateTypes": ["minor"],
       "groupName": "core dependencies",
-      "prBodyNotes": ["/cc @ampproject/build-cop"]
     },
     {
       "paths": ["+(package.json)"],
       "updateTypes": ["patch", "pin"],
       "groupName": "core dependencies",
-      "prBodyNotes": ["/cc @ampproject/build-cop"]
     },
 
     {
@@ -113,7 +109,6 @@
       "packagePatterns": ["^@ampproject/"],
       "groupName": "ampproject dependencies",
       "depTypeList": ["dependencies", "devDependencies"],
-      "prBodyNotes": ["/cc @ampproject/build-cop"]
     }
   ]
 }
