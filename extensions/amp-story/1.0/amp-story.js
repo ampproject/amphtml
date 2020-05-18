@@ -2508,11 +2508,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   onMutedStateUpdate_(isMuted) {
     isMuted ? this.mute_() : this.unmute_();
-    this.mutateElement(() => {
-      isMuted
-        ? this.element.setAttribute(Attributes.MUTED, isMuted)
-        : this.element.removeAttribute(Attributes.MUTED);
-    });
+    isMuted
+      ? this.element.setAttribute(Attributes.MUTED, '')
+      : this.element.removeAttribute(Attributes.MUTED);
   }
 
   /**
