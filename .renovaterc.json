@@ -7,7 +7,7 @@
   "commitMessagePrefix": "📦",
   "ignorePaths": [],
   "timezone": "America/Los_Angeles",
-  "schedule": "after 5pm every weekday",
+  "schedule": "after 12am every weekday",
   "masterIssue": true,
   "reviewers": ["team:build-cop"],
   "packageRules": [
