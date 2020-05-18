@@ -32,6 +32,7 @@ import {installAmpdocServices} from '../../src/service/core-services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import {toArray} from '../../src/types';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -634,21 +635,18 @@ describes.fakeWin(
       expect(s3.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-test-element5'
       );
-      const inserted = win.document.head.querySelectorAll(
-        '[i-amphtml-inserted]'
+
+      const inserted = toArray(
+        win.document.head.querySelectorAll('[i-amphtml-inserted]')
+      ).map((s) => s.src);
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element1-0.1.js'
       );
-      expect(inserted).to.have.length(3);
-      expect(inserted[0].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element1-0.1.js'
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element4-0.1.js'
       );
-      expect(inserted[1].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element4-0.1.js'
-      );
-      expect(inserted[2].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element5-0.1.js'
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element5-0.1.js'
       );
     });
 

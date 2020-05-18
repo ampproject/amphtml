@@ -527,7 +527,7 @@ exports.singlePassCompile = async function (entryModule, options, timeInfo) {
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
     })
-    .then(compile)
+    .then((flagsArray) => compile(flagsArray, options))
     .then(wrapMainBinaries)
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
@@ -690,7 +690,7 @@ function cleanupWeakModuleFiles() {
   return del([weakModuleJsFile, weakModuleMapFile]);
 }
 
-function compile(flagsArray) {
+function compile(flagsArray, options) {
   log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
   return new Promise(function (resolve, reject) {
@@ -703,7 +703,7 @@ function compile(flagsArray) {
       .on('error', (err) => handleSinglePassCompilerError(err))
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
-      .pipe(writeSourcemaps())
+      .pipe(writeSourcemaps(options))
       .pipe(
         gulpIf(
           /(\/amp-|\/_base)/,

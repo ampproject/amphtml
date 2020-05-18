@@ -114,6 +114,12 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['PLACEMENT_ID', 'DIV_ID'],
     disableKeyAppend: true,
   },
+  glxm: {
+    url:
+      'https://pbserver.galaxiemedia.fr/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
+    disableKeyAppend: true,
+  },
   aps: {
     url:
       'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS&gdprc=CONSENT_STRING',
