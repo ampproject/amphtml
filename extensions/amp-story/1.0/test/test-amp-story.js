@@ -1056,7 +1056,11 @@ describes.realWin(
         });
       });
 
+<<<<<<< HEAD
       it('should remove the muted attribute on unmuted state change', async () => {
+=======
+      it('should add or remove the muted attribute on muted state change', async () => {
+>>>>>>> 5c82597fc... Added muted attribute
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
@@ -1065,12 +1069,15 @@ describes.realWin(
 
         story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
         expect(story.element.hasAttribute('muted')).to.be.false;
+<<<<<<< HEAD
       });
 
       it('should add the muted attribute on unmuted state change', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
+=======
+>>>>>>> 5c82597fc... Added muted attribute
 
         story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
         expect(story.element.hasAttribute('muted')).to.be.true;
