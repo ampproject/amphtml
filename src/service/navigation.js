@@ -830,7 +830,6 @@ function maybeExpandUrlParams(ampdoc, e) {
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
     hrefToExpand,
     vars,
-    undefined,
     /* opt_whitelist */ {
       // For now we only allow to replace the click location vars
       // and nothing else.

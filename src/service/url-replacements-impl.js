@@ -814,16 +814,15 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
+  expandStringSync(source, opt_bindings, opt_whiteList) {
     return /** @type {string} */ (new Expander(
       this.variableSource_,
       opt_bindings,
-      opt_collectVars,
+      /* opt_collectVars */ undefined,
       /* opt_sync */ true,
       opt_whiteList,
       /* opt_noEncode */ true
@@ -856,18 +855,17 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
+  expandUrlSync(url, opt_bindings, opt_whiteList) {
     return this.ensureProtocolMatches_(
       url,
       /** @type {string} */ (new Expander(
         this.variableSource_,
         opt_bindings,
-        opt_collectVars,
+        /* opt_collectVars */ undefined,
         /* opt_sync */ true,
         opt_whiteList
       )./*OK*/ expand(url))
@@ -1089,7 +1087,6 @@ export class UrlReplacements {
         defaultUrlParams = this.expandUrlSync(
           defaultUrlParams,
           /* opt_bindings */ undefined,
-          /* opt_collectVars */ undefined,
           /* opt_whitelist */ overrideWhitelist
         );
       }
@@ -1111,7 +1108,6 @@ export class UrlReplacements {
       ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
-          /* opt_collectVars */ undefined,
           /* opt_whitelist */ allowedList
         )
       : href;
