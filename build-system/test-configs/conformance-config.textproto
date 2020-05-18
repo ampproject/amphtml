@@ -19,7 +19,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'toggleAttribute is not supported in IE and iOS11. Switch to setAttribute and removeAttribute.'
+  error_message: 'toggleAttribute is not supported in IE and iOS prior to 13.3. Switch to setAttribute and removeAttribute.'
   value: 'Element.prototype.toggleAttribute'
 }
 
