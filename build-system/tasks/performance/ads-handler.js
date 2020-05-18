@@ -18,7 +18,7 @@ const fs = require('fs');
 const {urlToCachePath} = require('./helpers');
 
 const AD_SERVER_DOMAIN = 'securepubads.g.doubleclick.net';
-const EXAMPLE_AD_PATH =
+const EXAMPLE_AD_URL =
   'http://localhost:8000/test/fixtures/performance/amp-ad/amphtml-ad.html';
 
 /**
@@ -33,7 +33,7 @@ function setupAdRequestHandler(handlersList, version) {
     const url = interceptedRequest.url();
     // TODO(ccordry): allow dynamic ad response.
     if (url.includes(AD_SERVER_DOMAIN)) {
-      const path = urlToCachePath(EXAMPLE_AD_PATH, version);
+      const path = urlToCachePath(EXAMPLE_AD_URL, version);
       const body = fs.readFileSync(path);
       interceptedRequest.respond({
         status: 200,
