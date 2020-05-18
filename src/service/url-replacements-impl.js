@@ -851,6 +851,29 @@ export class UrlReplacements {
   }
 
   /**
+   * Takes an array of binding keys and attempts to substitute values.
+   * The key is an all or nothing subsitution (cannot match only part of a key)
+   * Returns a Promise resolving to an object with keys mapped to substituted
+   * values.  If a key in the input array is not matched, it will not be
+   * included in the output. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.
+   * @param {Array<string>} source
+   * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList
+   * @return {Promise<Object<string, string|number>>}
+   */
+  expandBindingsAsync(source, opt_bindings, opt_whiteList) {
+    return /** @type {!Promise<string>} */ (new Expander(
+      this.variableSource_,
+      opt_bindings,
+      /* opt_collectVars */ undefined,
+      /* opt_sync */ undefined,
+      opt_whiteList,
+      /* opt_noEncode */ true
+    )./*OK*/ expandBindings(source));
+  }
+
+  /**
    * Synchronously expands the provided URL by replacing all known variables
    * with their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
