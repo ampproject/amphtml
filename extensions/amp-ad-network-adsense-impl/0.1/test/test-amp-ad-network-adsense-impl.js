@@ -476,7 +476,7 @@ describes.realWin(
           'enableAutoAdSize': '1',
         };
 
-        win.postMessage(data, '*');
+        win.postMessage(JSON.stringify(data), '*');
 
         await savePromise;
 
