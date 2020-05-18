@@ -185,11 +185,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(element).register(this);
 
     /** Register Brid actions */
-    this.registerDefaultAction(
-      this.destroy.bind(this),
-      BridActions.DESTROY,
-      ActionTrust.HIGH
-    );
+    this.registerDefaultAction(() => this.destroy(), BridActions.DESTROY);
   }
 
   /** @override */
@@ -328,7 +324,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     }
 
     if (Object.values(BridEvents).includes(params[3])) {
-      this.actions_.trigger(this.player_, params[3], null, ActionTrust.HIGH);
+      this.actions_.trigger(this.player_, params[3], null, ActionTrust.LOW);
     }
   }
 
