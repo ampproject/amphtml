@@ -172,7 +172,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -225,7 +225,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event =>
+    this.unlistenMessage_ = listen(this.win, 'message', (event) =>
       this.handleMinuteMediaPlayerMessage_(event)
     );
 
@@ -467,6 +467,6 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMinuteMediaPlayer);
 });

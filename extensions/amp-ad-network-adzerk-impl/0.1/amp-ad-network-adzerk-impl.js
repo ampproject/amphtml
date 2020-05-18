@@ -104,19 +104,18 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
-    return tryResolve(() => utf8Decode(bytes)).then(body => {
+    return tryResolve(() => utf8Decode(bytes)).then((body) => {
       checkStillCurrent();
-      this.ampCreativeJson_ =
-        /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
-          body
-        ) || {});
+      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
+        body
+      ) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return ampAdTemplateHelper
         .fetch(this.ampCreativeJson_.templateUrl)
-        .then(parsedTemplate => {
+        .then((parsedTemplate) => {
           return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
         })
-        .catch(error => {
+        .catch((error) => {
           dev().warn(
             TAG,
             'Error fetching/expanding template',
@@ -181,7 +180,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
           this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body
         )
-        .then(renderedElement => {
+        .then((renderedElement) => {
           if (this.ampCreativeJson_.analytics) {
             ampAdTemplateHelper.insertAnalytics(
               renderedElement,
@@ -207,6 +206,6 @@ function pushIfNotExist(array, item) {
   }
 }
 
-AMP.extension('amp-ad-network-adzerk-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-adzerk-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-adzerk-impl', AmpAdNetworkAdzerkImpl);
 });

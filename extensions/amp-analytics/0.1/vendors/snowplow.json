@@ -12,5 +12,8 @@
     "beacon": false,
     "xhrpost": false,
     "image": true
+  },
+  "warningMessage": {
+    "message": "This version of Snowplow AMP tracking is deprecated. Please use snowplow_v2."
   }
 }

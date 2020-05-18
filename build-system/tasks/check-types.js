@@ -28,7 +28,6 @@ const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {maybeUpdatePackages} = require('./update-packages');
-const {transferSrcsToTempDir} = require('./helpers');
 
 /**
  * Dedicated type check path.
@@ -40,7 +39,6 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-  transferSrcsToTempDir({isChecktypes: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
@@ -49,14 +47,14 @@ async function checkTypes() {
     './ads/inabox/inabox-host.js',
     './src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function(key) {
+  const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
   });
   const extensionSrcs = extensionValues
-    .filter(function(extension) {
+    .filter(function (extension) {
       return !extension.noTypeCheck;
     })
-    .map(function(extension) {
+    .map(function (extension) {
       return (
         './extensions/' +
         extension.name +
@@ -136,6 +134,7 @@ module.exports = {
 
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

@@ -26,7 +26,7 @@ function queryParametersToObject(input) {
   }
   return input
     .split('&')
-    .filter(_ => _)
+    .filter((_) => _)
     .reduce((obj, val) => {
       const kv = val.split('=');
       return Object.assign(obj, {[kv[0]]: kv[1] || true});
@@ -56,7 +56,7 @@ export function fusion(global, data) {
     () => {
       global.Fusion.apply(container, global.Fusion.loadAds(data, parameters));
 
-      global.Fusion.on.warning.run(ev => {
+      global.Fusion.on.warning.run((ev) => {
         if (ev.msg === 'Space not present in response.') {
           global.context.noContentAvailable();
         }

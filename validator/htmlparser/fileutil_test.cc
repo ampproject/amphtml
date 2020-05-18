@@ -61,7 +61,7 @@ Hello world!
   EXPECT_TRUE(htmlparser::FileUtil::ReadFileLines(
       htmlparser::FileReadOptions(),
       content,
-      [&](std::string_view line) {
+      [&](std::string_view line, int line_no) {
         switch (i++) {
           case 1:
             EXPECT_EQ(line, "<html>");
@@ -107,7 +107,7 @@ Bar world! <!--TEST CASE -->
       htmlparser::FileUtil::ReadFileLines(
           htmlparser::FileReadOptions(),
           content,
-          [&](std::string_view line) {
+          [&](std::string_view line, int line_no) {
             if (i++ == 0) {
               data.Clear();
               data.url = line;

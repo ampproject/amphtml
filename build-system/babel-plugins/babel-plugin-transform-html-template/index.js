@@ -44,7 +44,7 @@ function optimizeLiteralOutput(templateLiteral) {
   });
 }
 
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   /**
    * Determines whether a TaggedTemplateExpression should be handled based on
    * naming convention:
@@ -56,7 +56,7 @@ module.exports = function({types: t}) {
    * @param {Node} tag
    * @return {boolean}
    */
-  const isTagOrFactoryByName = tag =>
+  const isTagOrFactoryByName = (tag) =>
     (t.isIdentifier(tag) && staticTemplateTags.has(tag.name)) ||
     (t.isCallExpression(tag) &&
       t.isIdentifier(tag.callee) &&
@@ -100,7 +100,7 @@ module.exports = function({types: t}) {
                 hoistedIdentifier = path.scope.generateUidIdentifier(
                   'template'
                 );
-                const program = path.findParent(path => path.isProgram());
+                const program = path.findParent((path) => path.isProgram());
 
                 program.scope.push({
                   id: t.cloneNode(hoistedIdentifier),

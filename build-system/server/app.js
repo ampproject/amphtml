@@ -52,6 +52,14 @@ const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
+
+// Middleware is executed in order, so this must be at the top.
+// TODO(#24333): Migrate all server URL handlers to new-server/router and
+// deprecate this file.
+if (argv.new_server) {
+  app.use(require('./new-server/router'));
+}
+
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
@@ -72,7 +80,8 @@ app.use((req, res, next) => {
 
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    isRtvMode(serveMode)
   );
 }
 
@@ -234,7 +243,7 @@ app.use('/pwa', (req, res) => {
   }
   res.statusCode = 200;
   res.setHeader('Content-Type', contentType);
-  fs.promises.readFile(pc.cwd() + file).then(file => {
+  fs.promises.readFile(pc.cwd() + file).then((file) => {
     res.end(file);
   });
 });
@@ -295,7 +304,7 @@ app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   const fields = Object.create(null);
-  form.on('field', function(name, value) {
+  form.on('field', function (name, value) {
     if (!(name in fields)) {
       fields[name] = value;
       return;
@@ -311,7 +320,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, unusedErr => {
+  form.parse(req, (unusedErr) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -405,7 +414,7 @@ app.use('/form/autocomplete/query', (req, res) => {
     res.json({items: autocompleteColors});
   } else {
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = autocompleteColors.filter(l =>
+    const filtered = autocompleteColors.filter((l) =>
       l.toLowerCase().includes(lowerCaseQuery)
     );
     res.json({items: filtered});
@@ -423,7 +432,7 @@ app.use('/form/mention/query', (req, res) => {
     return;
   }
   const lowerCaseQuery = query.toLowerCase().trim();
-  const filtered = autocompleteEmailData.filter(l =>
+  const filtered = autocompleteEmailData.filter((l) =>
     l.toLowerCase().startsWith(lowerCaseQuery)
   );
   res.json({items: filtered});
@@ -484,7 +493,7 @@ function proxyToAmpProxy(req, res, mode) {
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   console.log('Fetching URL: ' + url);
-  request(url, function(error, response, body) {
+  request(url, function (error, response, body) {
     body = body
       // Unversion URLs.
       .replace(
@@ -576,7 +585,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       pagination.textContent = '';
       const liveChildren = [].slice
         .call(items.children)
-        .filter(x => !x.hasAttribute('data-tombstone'));
+        .filter((x) => !x.hasAttribute('data-tombstone'));
 
       const pageCount = Math.ceil(liveChildren.length / perPage);
       const pageListItems = Array.apply(null, Array(pageCount))
@@ -858,7 +867,7 @@ app.get('/a4a_template/*', (req, res) => {
     `0.1/data/${match[2]}.template`;
   fs.promises
     .readFile(filePath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
@@ -939,7 +948,7 @@ app.get(
     const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
-      .then(file => {
+      .then((file) => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
@@ -1020,7 +1029,7 @@ app.get(
         if (stream > 0) {
           res.writeHead(200, {'Content-Type': 'text/html'});
           let pos = 0;
-          const writeChunk = function() {
+          const writeChunk = function () {
             const chunk = file.substring(
               pos,
               Math.min(pos + stream, file.length)
@@ -1163,7 +1172,7 @@ app.get('/adzerk/*', (req, res) => {
     pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.promises
     .readFile(filePath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
       res.setHeader('AMP-Ad-Response-Type', 'template');
@@ -1220,7 +1229,7 @@ app.get(
       // This will not be useful until extension-location.js change in prod
       // Require url from cdn
       const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function(error, response) {
+      request(filePath, function (error, response) {
         if (error) {
           res.status(404);
           res.end();
@@ -1257,7 +1266,7 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then(file => {
+    .then((file) => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1289,7 +1298,7 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.promises
         .readFile(pc.cwd() + path, 'utf8')
-        .then(file => {
+        .then((file) => {
           res.end(file);
         })
         .catch(next);
@@ -1307,7 +1316,7 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then(file => {
+    .then((file) => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1351,7 +1360,7 @@ app.get('/dist/diversions', (req, res) => {
  * Web worker binary.
  */
 app.get('/dist/ww(.max)?.js', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then(file => {
+  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
@@ -1489,7 +1498,7 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
 
   fs.promises
     .readFile(localVendorConfigPath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })

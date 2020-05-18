@@ -187,7 +187,7 @@ export function asyncStringReplace(str, regex, replacer) {
   const stringBuilder = [];
   let lastIndex = 0;
 
-  str.replace(regex, function(match) {
+  str.replace(regex, function (match) {
     // String.prototype.replace will pass 3 to n number of arguments to the
     // callback function based on how many capture groups the regex may or may
     // not contain. We know that the match will always be first, and the
@@ -202,7 +202,7 @@ export function asyncStringReplace(str, regex, replacer) {
   });
   stringBuilder.push(str.slice(lastIndex));
 
-  return Promise.all(stringBuilder).then(resolved => resolved.join(''));
+  return Promise.all(stringBuilder).then((resolved) => resolved.join(''));
 }
 
 /**

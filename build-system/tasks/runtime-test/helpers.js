@@ -25,11 +25,14 @@ const {
   reportTestFinished,
   reportTestRunComplete,
 } = require('../report-test-status');
-const {green, yellow, cyan, red} = require('ansi-colors');
+const {green, yellow, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
-const BATCHSIZE = 4; // Number of Sauce Lab browsers
+// Number of Sauce Lab browsers. Three was determined to be the lowest number we
+// could set without causing a significant increase in Travis job time. See
+// https://github.com/ampproject/amphtml/pull/27016 for the relevant discussion.
+const BATCHSIZE = 3;
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
 
@@ -163,7 +166,7 @@ function maybePrintArgvMessages() {
   } else {
     log(green('Running tests against unminified code.'));
   }
-  Object.keys(argv).forEach(arg => {
+  Object.keys(argv).forEach((arg) => {
     const message = argvMessages[arg];
     if (message) {
       log(yellow(`--${arg}:`), green(message));
@@ -185,15 +188,6 @@ function maybePrintCoverageMessage() {
  * @param {Object} browser
  * @private
  */
-function karmaBrowserStart_(browser) {
-  console./*OK*/ log('\n');
-  log(`${browser.name}: ${green('STARTED')}`);
-}
-
-/**
- * @param {Object} browser
- * @private
- */
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
@@ -206,22 +200,7 @@ async function karmaBrowserComplete_(browser) {
       'Received a status with zero tests:',
       cyan(JSON.stringify(result))
     );
-
-    return;
   }
-  // Print a summary for each browser as soon as tests complete.
-  let message =
-    `${browser.name}: Executed ` +
-    `${result.success + result.failed} of ${result.total} ` +
-    `(Skipped ${result.skipped}) `;
-  if (result.failed === 0) {
-    message += green('SUCCESS');
-  } else {
-    message += red(result.failed + ' FAILED');
-  }
-  message += '\n';
-  console./*OK*/ log('\n');
-  log(message);
 }
 
 /**
@@ -242,48 +221,27 @@ function karmaRunStart_() {
 }
 
 /**
- * Runs tests in sauce labs
+ * Runs tests in Sauce Labs in batches.
  *
- * If --stable is provided, runs tests only on stable browsers in sauce labs without batching.
- * If --beta is provided, runs tests only on beta browsers in sauce labs without batching. Does not fail.
- * If neither --stable nor --beta are provided, runs test on all browsers in sauce labs with batching.
+ * If --stable is provided, runs tests only on stable browsers in Sauce Labs.
+ * If --beta is provided, runs tests only on beta browsers in Sauce Labs. Does not fail the build.
+ * If neither --stable nor --beta are provided, runs test on all browsers in Sauce Labs.
  *
  * @param {Object} config karma config
  * @return {!Promise<number>} exitCode
  */
 async function runTestInSauceLabs(config) {
-  const browsers = {stable: [], beta: []};
-  for (const browserId of config.browsers) {
-    browsers[
-      browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
-    ].push(browserId);
-  }
+  const flagSet = argv.stable || argv.beta;
+  const useStable = argv.stable || !flagSet;
+  const useBeta = argv.beta || !flagSet;
 
-  if (argv.stable) {
-    config.browsers = browsers.stable;
-    return createKarmaServer(config, reportTestRunComplete);
-  }
+  const isBeta = (browserId) => browserId.toLowerCase().endsWith('_beta');
+  const isStable = (browserId) => !isBeta(browserId);
 
-  if (argv.beta) {
-    config.browsers = browsers.beta;
-    const betaExitCode = await createKarmaServer(config, reportTestRunComplete);
-    if (betaExitCode != 0) {
-      log(
-        yellow('Some tests have failed on'),
-        cyan('beta'),
-        yellow('browsers.')
-      );
-      log(
-        yellow('This is not currently a fatal error, but will become an'),
-        yellow('error once the beta browsers are released as next stable'),
-        yellow('version!')
-      );
-    }
-
-    return 0;
-  }
-
-  return await runTestInBatches_(config, browsers);
+  return await runTestInBatches_(config, {
+    beta: useBeta ? config.browsers.filter(isBeta) : [],
+    stable: useStable ? config.browsers.filter(isStable) : [],
+  });
 }
 
 /**
@@ -401,9 +359,8 @@ async function runTestInBatchesWithBrowsers_(
     configBatch.browsers = browsers.slice(startIndex, endIndex);
     log(
       green('Batch'),
-      cyan(`#${batch}`) + green(': Running tests on'),
-      cyan(configBatch.browsers.length),
-      green('Sauce Labs browser(s)...')
+      cyan(`#${batch}`) + green(':'),
+      cyan(configBatch.browsers.join(', '))
     );
     batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
     startIndex = batch * BATCHSIZE;
@@ -411,7 +368,7 @@ async function runTestInBatchesWithBrowsers_(
     endIndex = Math.min(batch * BATCHSIZE, browsers.length);
   }
 
-  return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
+  return batchExitCodes.every((exitCode) => exitCode == 0) ? 0 : 1;
 }
 
 /**
@@ -427,11 +384,11 @@ async function createKarmaServer(
   runCompleteFn = reportTestRunComplete
 ) {
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(configBatch, exitCode => {
+  const karmaServer = new Server(configBatch, (exitCode) => {
     maybePrintCoverageMessage();
     resolver(exitCode);
   });
@@ -439,7 +396,6 @@ async function createKarmaServer(
   karmaServer
     .on('run_start', karmaRunStart_)
     .on('browsers_ready', karmaBrowsersReady_)
-    .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
     .on('run_complete', runCompleteFn);
 

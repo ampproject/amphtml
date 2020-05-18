@@ -23,6 +23,7 @@ package dev.amp.validator;
 
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
+import dev.amp.validator.utils.CssSpecUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -235,7 +236,7 @@ public class CdataMatcherTest {
         cDataBuilder.setMaxBytes(6);
         cDataBuilder.setCssSpec(ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
-                        .setName("font-face").setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR).build()).build());
+                  .setName("font-face").build()).build());
 
         tagSpecBuilder.setCdata(cDataBuilder.build());
 
@@ -518,8 +519,9 @@ public class CdataMatcherTest {
         cDataBuilder.setCssSpec(ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("font-face").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder()
-                                .build()).setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR).build()).build());
-        tagSpecBuilder.setCdata(cDataBuilder.build());
+                                .build()).build()).build());
+
+                    tagSpecBuilder.setCdata(cDataBuilder.build());
 
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
         Mockito.when(mockParsedTagSpec.getSpec()).thenReturn(tagSpecBuilder.build());
@@ -581,7 +583,7 @@ public class CdataMatcherTest {
         final ValidatorProtos.CssSpec cssSpec = ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("media").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder().setIssuesAsError(true)
-                                .build()).setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR).build())
+                                .build()).build())
                 .setValidateAmp4Ads(true).setValidateKeyframes(true).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
@@ -659,7 +661,7 @@ public class CdataMatcherTest {
         final ValidatorProtos.CssSpec cssSpec = ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("media").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder().setIssuesAsError(false)
-                                .build()).setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR).build())
+                    .build()).build())
                 .setValidateAmp4Ads(false).setValidateKeyframes(false).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);

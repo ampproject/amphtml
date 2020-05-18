@@ -31,12 +31,12 @@ const TAG = 'amp-story';
  * @param  {!Window} win
  * @return {!AmpStoryStoreService}
  */
-export const getStoreService = win => {
+export const getStoreService = (win) => {
   let service = Services.storyStoreService(win);
 
   if (!service) {
     service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return service;
     });
   }
@@ -80,6 +80,7 @@ export let InteractiveComponentDef;
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
+ *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
@@ -88,16 +89,20 @@ export let InteractiveComponentDef;
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
+ *    educationState: boolean,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
+ *    pageHasElementsWithPlaybackState: boolean,
  *    pausedState: boolean,
+ *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
+ *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
@@ -109,6 +114,7 @@ export let InteractiveComponentDef;
  *    currentPageIndex: number,
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
+ *    pageSize: {width: number, height: number},
  * }}
  */
 export let State;
@@ -119,6 +125,7 @@ export const StateProperty = {
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
+  CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
@@ -129,12 +136,16 @@ export const StateProperty = {
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
+  EDUCATION_STATE: 'educationState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PAUSED_STATE: 'pausedState',
+  // Story preview state.
+  PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
@@ -143,6 +154,8 @@ export const StateProperty = {
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
+  // Any page has elements with playback.
+  STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
   VIEWPORT_WARNING_STATE: 'viewportWarningState',
@@ -156,6 +169,7 @@ export const StateProperty = {
   NAVIGATION_PATH: 'navigationPath',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
+  PAGE_SIZE: 'pageSize',
 };
 
 /** @const @enum {string} */
@@ -171,11 +185,13 @@ export const Action = {
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
+  TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
@@ -183,10 +199,12 @@ export const Action = {
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
+  SET_PAGE_SIZE: 'updatePageSize',
 };
 
 /**
@@ -268,6 +286,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       });
+    case Action.TOGGLE_EDUCATION:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.EDUCATION_STATE]: !!data,
+      });
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
       return /** @type {!State} */ ({
@@ -298,6 +321,12 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
+    // Shows or hides the play/pause controls.
+    case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+      });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ ({
@@ -308,6 +337,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: !!data,
       });
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ ({
@@ -394,6 +428,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_IDS]: data,
       });
+    case Action.SET_PAGE_SIZE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_SIZE]: data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -467,7 +506,7 @@ export class AmpStoryStoreService {
     this.state_ = actions(this.state_, action, data);
 
     let comparisonFn;
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       comparisonFn = stateComparisonFunctions[key];
       if (
         comparisonFn
@@ -492,6 +531,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
@@ -499,6 +539,7 @@ export class AmpStoryStoreService {
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
@@ -506,6 +547,7 @@ export class AmpStoryStoreService {
       },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
@@ -513,6 +555,7 @@ export class AmpStoryStoreService {
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.VIEWPORT_WARNING_STATE]: false,
@@ -526,6 +569,8 @@ export class AmpStoryStoreService {
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
+      [StateProperty.PAGE_SIZE]: null,
+      [StateProperty.PREVIEW_STATE]: false,
     });
   }
 
@@ -543,6 +588,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
@@ -550,6 +596,16 @@ export class AmpStoryStoreService {
       case EmbedMode.NO_SHARING:
         return {
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+        };
+      case EmbedMode.PREVIEW:
+        return {
+          [StateProperty.PREVIEW_STATE]: true,
+          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty.CAN_SHOW_BOOKEND]: false,
+          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
+          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
       default:
         return {};

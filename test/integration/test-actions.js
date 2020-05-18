@@ -24,12 +24,14 @@ describe
     let fixture;
 
     beforeEach(() => {
-      return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
-        fixture = f;
+      return createFixtureIframe('test/fixtures/actions.html', 500).then(
+        (f) => {
+          fixture = f;
 
-        // Wait for one <amp-img> element to load.
-        return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-      });
+          // Wait for one <amp-img> element to load.
+          return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
+        }
+      );
     });
 
     function waitForDisplay(element, display) {
@@ -37,7 +39,7 @@ describe
     }
 
     describe('"tap" event', () => {
-      it('<non-AMP element>.toggleVisibility', function*() {
+      it('<non-AMP element>.toggleVisibility', function* () {
         const span = fixture.doc.getElementById('spanToHide');
         const button = fixture.doc.getElementById('hideBtn');
 
@@ -45,7 +47,7 @@ describe
         yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
       });
 
-      it('<AMP element>.toggleVisibility', function*() {
+      it('<AMP element>.toggleVisibility', function* () {
         const img = fixture.doc.getElementById('imgToToggle');
         const button = fixture.doc.getElementById('toggleBtn');
 
@@ -62,8 +64,8 @@ describe
       describe
         .configure()
         .skipIfPropertiesObfuscated()
-        .run('navigate', function() {
-          it('AMP.navigateTo(url=)', function*() {
+        .run('navigate', function () {
+          it('AMP.navigateTo(url=)', function* () {
             const button = fixture.doc.getElementById('navigateBtn');
 
             // This is brittle but I don't know how else to stub
@@ -81,7 +83,7 @@ describe
           });
         });
 
-      it('AMP.print()', function*() {
+      it('AMP.print()', function* () {
         const button = fixture.doc.getElementById('printBtn');
 
         const print = window.sandbox.stub(fixture.win, 'print');

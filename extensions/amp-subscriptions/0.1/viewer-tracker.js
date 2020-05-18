@@ -46,7 +46,7 @@ export class ViewerTracker {
   scheduleView(timeToView) {
     this.reportViewPromise_ = null;
     return this.ampdoc_.whenReady().then(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         if (this.ampdoc_.isVisible()) {
           resolve();
         }
@@ -69,7 +69,7 @@ export class ViewerTracker {
       return this.reportViewPromise_;
     }
     dev().fine(TAG, 'start view monitoring');
-    this.reportViewPromise_ = this.whenViewed_(timeToView).catch(reason => {
+    this.reportViewPromise_ = this.whenViewed_(timeToView).catch((reason) => {
       // Ignore - view has been canceled.
       dev().fine(TAG, 'view cancelled:', reason);
       this.reportViewPromise_ = null;
@@ -119,10 +119,10 @@ export class ViewerTracker {
       );
     }).then(
       () => {
-        unlistenSet.forEach(unlisten => unlisten());
+        unlistenSet.forEach((unlisten) => unlisten());
       },
-      reason => {
-        unlistenSet.forEach(unlisten => unlisten());
+      (reason) => {
+        unlistenSet.forEach((unlisten) => unlisten());
         throw reason;
       }
     );

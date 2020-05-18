@@ -23,5 +23,3 @@ limitations under the License.
 -->
 
 # amp-share-tracking
-
-The [share tracking feature](https://github.com/ampproject/amphtml/issues/3135) is under development.

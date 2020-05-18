@@ -35,7 +35,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
 
       setTimeout(() => one.resolve('one'), 0);
 
-      return resolver.then(result => {
+      return resolver.then((result) => {
         expect(result).to.equal('one');
       });
     });
@@ -63,10 +63,10 @@ describes.sandboxed('PromiseUtils', {}, () => {
       setTimeout(() => five.resolve('five'), 10);
 
       return Promise.all([
-        firstResolver.then(result => {
+        firstResolver.then((result) => {
           expect(result).to.equal('two');
         }),
-        secondResolver.then(result => {
+        secondResolver.then((result) => {
           expect(result).to.equal('five');
         }),
       ]);
@@ -83,7 +83,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
       setTimeout(() => one.resolve('one'), 0);
       setTimeout(() => two.resolve('two'), 10);
 
-      return resolver.then(result => {
+      return resolver.then((result) => {
         expect(result).to.equal('two');
       });
     });
@@ -113,20 +113,20 @@ describes.sandboxed('PromiseUtils', {}, () => {
 
       return Promise.all([
         firstResolver.then(
-          result => {
+          (result) => {
             expect(result).to.equal('three');
           },
-          unusedError => {
+          (unusedError) => {
             // shouldn't run
             expect(false).to.be.true;
           }
         ),
         secondResolver.then(
-          unusedResult => {
+          (unusedResult) => {
             // shouldn't run
             expect(false).to.be.true;
           },
-          error => {
+          (error) => {
             expect(error).to.equal('six');
           }
         ),

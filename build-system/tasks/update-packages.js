@@ -38,7 +38,7 @@ function writeIfUpdated(patchedName, file) {
 }
 
 /**
- * Patches Web Animations API by wrapping its body into `install` function.
+ * Patches Web Animations polyfill by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
  */
@@ -50,7 +50,7 @@ function patchWebAnimations() {
     .readFileSync('node_modules/web-animations-js/web-animations.min.js')
     .toString();
   // Replace |requestAnimationFrame| with |window|.
-  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+  file = file.replace(/requestAnimationFrame/g, function (a, b) {
     if (file.charAt(b - 1) == '.') {
       return a;
     }
@@ -73,6 +73,25 @@ function patchWebAnimations() {
     file +
     '\n' +
     '}\n';
+  writeIfUpdated(patchedName, file);
+}
+
+/**
+ * Patches Intersection Observer polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
+ */
+function patchIntersectionObserver() {
+  // Copies intersection-observer into a new file that has an export.
+  const patchedName =
+    'node_modules/intersection-observer/intersection-observer.install.js';
+  let file = fs
+    .readFileSync('node_modules/intersection-observer/intersection-observer.js')
+    .toString();
+
+  // Wrap the contents inside the install function.
+  file = `export function installIntersectionObserver() {\n${file}\n}\n`;
   writeIfUpdated(patchedName, file);
 }
 
@@ -118,13 +137,14 @@ function maybeUpdatePackages() {
 
 /**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
- * web-animations-js if necessary.
+ * polyfills if necessary.
  */
 async function updatePackages() {
   if (!isTravisBuild()) {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchIntersectionObserver();
 }
 
 module.exports = {

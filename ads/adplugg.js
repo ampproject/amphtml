@@ -50,10 +50,10 @@ export function adplugg(global, data) {
   const {AdPlugg} = global;
 
   // Register event listeners (via async wrapper).
-  AdPlugg.push(function() {
+  AdPlugg.push(function () {
     const {AdPlugg} = global;
     // Register the renderStart event listener.
-    AdPlugg.on(adTag, 'adplugg:renderStart', function(event) {
+    AdPlugg.on(adTag, 'adplugg:renderStart', function (event) {
       // Create the opt_data object.
       const optData = {};
       if (hasOwn(event, 'width')) {
@@ -66,7 +66,7 @@ export function adplugg(global, data) {
     });
 
     // Register the noContentAvailable event listener.
-    AdPlugg.on(adTag, 'adplugg:noContentAvailable', function() {
+    AdPlugg.on(adTag, 'adplugg:noContentAvailable', function () {
       global.context.noContentAvailable();
     });
   });

@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-o2-player
 
-Displays the AOL O2Player.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-   <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-o2-player/">Annotated code example for amp-o2-player</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.

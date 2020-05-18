@@ -53,6 +53,8 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>blueconic</option>
+      <option>browsi</option>
       <option>burt</option>
       <option>byside</option>
       <option>captainmetrics</option>
@@ -83,6 +85,7 @@
       <option>mediator</option>
       <option>memo</option>
       <option>mobify</option>
+      <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
       <option>newrelic</option>
@@ -189,6 +192,10 @@ For complete documentation and additional examples please see: https://marketing
       "vars": {
         "eVar1": "button clicked"
       }
+    },
+    "linkers": {
+      "enabled": true,
+      "destinationDomains": ["localhost"]
     }
   }
 }
@@ -332,6 +339,40 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- Baidu stats example -->
 
+<!-- BlueConic analytics tracking -->
+<amp-analytics type="blueconic" id="blueconic">
+  <script type="application/json">
+    {
+      "triggers": {
+        "pageView": {
+          "on": "visible",
+          "request": "event",
+          "vars": {
+            "pixelId": "your-pixel-id"
+          }
+        }
+      },
+      "vars": {
+        "tenantId": "your-tenant-url",
+        "property": "your-property"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End BlueConic analytics example -->
+
+<!-- Browsi prediction tracking example -->
+<amp-analytics type="browsi" id="browsi">
+  <script type="application/json">
+    {
+      "vars": {
+        "pubKey": "demo-pub",
+        "siteKey": "demo-site"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Browsi prediction tracking example -->
 
 <!-- Burt tracking -->
 <amp-analytics type="burt" id="burt">
@@ -981,6 +1022,31 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Mobify example -->
 
+<!-- start MoEngage Analytics example -->
+<amp-analytics type="moengage" id="moengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "appId": "78FL7RI8NHROB3HLU4X42O44"
+      },
+      "triggers": {
+        "clickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "extraUrlParams": {
+            "a": {
+              "title": "${title}"
+            },
+            "e": "amp example button click"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end MoEngage Analytics example -->
+
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
 -->
@@ -1405,7 +1471,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "collectorHost": "collector.snplow.net",
-      "appId": "amp-examples-v2.0.1",
+      "appId": "amp-examples-v2.0.2",
       "userId": "someUserId",
       "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
     },
@@ -1421,7 +1487,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackFirstPagePing": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 10,
           "maxTimerLength": 9.99,
@@ -1438,7 +1504,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackPagePings": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 30,
           "maxTimerLength": 1800,
@@ -1721,12 +1787,11 @@ For complete documentation and additional examples please see: https://marketing
 {
   "vars": {
     "aid": "99999999",
-    "ctIds": "1234,34343,564645",
     "ag": "agency",
     "au": "author1,author2",
     "pt": "publishTime",
     "ct": "1",
-    "d":"m.ibeatdev.com",
+    "d":"m.ibeatdev.com"
   }
 }
 </script>

@@ -1,3 +1,14 @@
+---
+$category: layout
+formats:
+  - websites
+  - email
+  - ads
+  - stories
+teaser:
+  text: A generic, multi-purpose container element that brings AMP's powerful layouts to any element.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 

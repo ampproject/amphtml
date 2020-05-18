@@ -65,7 +65,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then(response => {
+    return super.sendXhrRequest(adUrl).then((response) => {
       if (!response) {
         return null;
       }
@@ -79,7 +79,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then(
-          responseText =>
+          (responseText) =>
             new Response(this.transformCreative_(responseText), {
               status,
               headers,
@@ -134,6 +134,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 }
 
-AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-fake-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
 });

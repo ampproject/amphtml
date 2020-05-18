@@ -180,6 +180,8 @@ These guidelines are specific to the amphtml repository. Other ampproject repos 
 
 We have a well-defined process for handling requests for changes to the **experimental**/**beta**, **stable**, or **lts** release builds. These changes are known as "cherry-picks".
 
+> Note: We do not support cherry-picks into the **nightly** release channel; in the event of security or privacy issues, a rollback is performed instead.
+
 **The bar for getting a cherry-pick into a live release is very high** because our goal is to produce high quality launches on a predictable schedule.
 
 **Keep in mind that performing a cherry-pick requires a significant amount of work from you and the on-duty engineer** and they can take a long time to process.

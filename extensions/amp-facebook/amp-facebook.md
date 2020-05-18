@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Facebook post or video.
+  text: Displays a Facebook post, video or comment.
 ---
 
 <!---
@@ -23,23 +23,6 @@ limitations under the License.
 -->
 
 # amp-facebook
-
-Displays a Facebook post, video or comment.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook/">annotated amp-facebook</a> example.</td>
-  </tr>
-</table>
 
 ## Overview
 

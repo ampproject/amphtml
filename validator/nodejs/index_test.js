@@ -191,7 +191,7 @@ it('emits text if --format=text is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=text',
+        '../nodejs/cli.js', '--format=text',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
@@ -209,7 +209,7 @@ it('emits json if --format=json is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=json',
+        '../nodejs/cli.js', '--format=json',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
@@ -249,7 +249,7 @@ it('supports AMP4ADS with --html_format command line option', function(done) {
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=text', '--html_format=AMP4ADS',
+        '../nodejs/cli.js', '--format=text', '--html_format=AMP4ADS',
         '--validator_js=../dist/validator_minified.js',
         'amp4ads_feature_tests/style-amp-custom.html',
         'amp4ads_feature_tests/min_valid_amp4ads.html',

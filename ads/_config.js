@@ -309,11 +309,11 @@ const adConfig = jsonConfiguration({
   },
 
   'beopinion': {
-    prefetch: 'https://widget.beopinion.com/sdk.js',
+    prefetch: 'https://widget.beop.io/sdk.js',
     preconnect: [
-      'https://t.beopinion.com',
-      'https://s.beopinion.com',
-      'https://data.beopinion.com',
+      'https://t.beop.io',
+      'https://s.beop.io',
+      'https://data.beop.io',
     ],
     renderStartImplemented: true,
   },
@@ -707,6 +707,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'my6sense': {
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -755,6 +759,8 @@ const adConfig = jsonConfiguration({
   },
 
   'nws': {},
+
+  'oblivki': {},
 
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
@@ -852,6 +858,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'rakutenunifiedads': {
+    prefetch: 'https://s-cdn.rmp.rakuten.co.jp/js/amp.js',
+    renderStartImplemented: true,
+  },
+
   'rbinfox': {
     renderStartImplemented: true,
   },
@@ -869,6 +880,12 @@ const adConfig = jsonConfiguration({
   },
 
   'relap': {
+    renderStartImplemented: true,
+  },
+
+  'relappro': {
+    prefetch: 'https://cdn.relappro.com/adservices/amp/relappro.amp.min.js',
+    preconnect: 'https://tags.relappro.com',
     renderStartImplemented: true,
   },
 
@@ -1050,7 +1067,7 @@ const adConfig = jsonConfiguration({
 
   'temedya': {
     prefetch: [
-      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://widget.cdn.vidyome.com/builds/loader-amp.js',
       'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
     ],
     renderStartImplemented: true,

@@ -47,6 +47,13 @@ const AmpAdImplementation = {
   AMP_AD_IFRAME_GET: '5',
 };
 
+/** @const {!{id: string, control: string, experiment: string}} */
+export const AMP_AD_NO_CENTER_CSS_EXP = {
+  id: 'amp-ad-no-center-css',
+  control: '21065897',
+  experiment: '21065898',
+};
+
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
   'AMP-CAROUSEL': 'ac',
@@ -215,10 +222,10 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
-  const ampAdSelector = r =>
+  const ampAdSelector = (r) =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
   return (
-    getMeasuredResources(ampdoc, ampdoc.win, r => {
+    getMeasuredResources(ampdoc, ampdoc.win, (r) => {
       const isAmpAdType =
         r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
       if (isAmpAdType) {
@@ -231,9 +238,9 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
     })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
-      .then(resources =>
+      .then((resources) =>
         Promise.all(
-          resources.map(resource => {
+          resources.map((resource) => {
             if (resource.element.tagName == 'AMP-AD') {
               return resource.element;
             }
@@ -246,7 +253,7 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
         )
       )
       // Group by networkId.
-      .then(elements =>
+      .then((elements) =>
         elements.reduce((result, element) => {
           const groupId = groupFn(element);
           (result[groupId] || (result[groupId] = [])).push(element.getImpl());
@@ -276,7 +283,7 @@ export function googlePageParameters(a4a, startTime) {
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
     referrerPromise,
-  ]).then(promiseResults => {
+  ]).then((promiseResults) => {
     const clientId = promiseResults[0];
     const referrer = promiseResults[1];
     const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
@@ -343,7 +350,7 @@ export function googleAdUrl(
 ) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  return googlePageParameters(a4a, startTime).then(pageLevelParameters => {
+  return googlePageParameters(a4a, startTime).then((pageLevelParameters) => {
     Object.assign(parameters, blockLevelParameters, pageLevelParameters);
     return truncAndTimeUrl(baseUrl, parameters, startTime);
   });
@@ -703,7 +710,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  * @see parseExperimentIds, validateExperimentIds
  */
 export function mergeExperimentIds(newIds, currentIdString) {
-  const newIdString = newIds.filter(newId => Number(newId)).join(',');
+  const newIdString = newIds.filter((newId) => Number(newId)).join(',');
   currentIdString = currentIdString || '';
   return (
     currentIdString + (currentIdString && newIdString ? ',' : '') + newIdString
@@ -868,7 +875,7 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
     (consentPolicyId
       ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
       : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED)
-    ).then(consentState =>
+    ).then((consentState) =>
       consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
       consentState == CONSENT_POLICY_STATE.UNKNOWN
         ? /** @type {!IdentityToken} */ ({})
@@ -900,8 +907,8 @@ function executeIdentityTokenFetch(
       ampCors: false,
       credentials: 'include',
     })
-    .then(res => res.json())
-    .then(obj => {
+    .then((res) => res.json())
+    .then((obj) => {
       const token = obj['newToken'];
       const jar = obj['1p_jar'] || '';
       const pucrd = obj['pucrd'] || '';
@@ -938,7 +945,7 @@ function executeIdentityTokenFetch(
       // returning empty
       return {fetchTimeMs};
     })
-    .catch(unusedErr => {
+    .catch((unusedErr) => {
       // TODO log?
       return {};
     });
@@ -982,7 +989,7 @@ export function isCdnProxy(win) {
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {
   const nameframeExperimentHeader = headers.get('amp-nameframe-exp');
   if (nameframeExperimentHeader) {
-    nameframeExperimentHeader.split(';').forEach(config => {
+    nameframeExperimentHeader.split(';').forEach((config) => {
       if (config == 'instantLoad' || config == 'writeInBody') {
         nameframeConfig[config] = true;
       }

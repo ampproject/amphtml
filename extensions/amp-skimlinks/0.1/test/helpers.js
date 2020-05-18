@@ -20,7 +20,7 @@ import {DEFAULT_SKIM_OPTIONS} from './constants';
 import {Services} from '../../../../src/services';
 import {Tracking} from '../tracking';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   const {win} = env;
 
   return {

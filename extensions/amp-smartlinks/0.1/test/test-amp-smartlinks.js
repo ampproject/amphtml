@@ -20,7 +20,7 @@ import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Services} from '../../../../src/services';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   return {
     createAmpSmartlinks(extensionAttrs) {
       const ampTag = document.createElement('amp-smartlinks');
@@ -37,7 +37,7 @@ const helpersFactory = env => {
 describes.fakeWin(
   'amp-smartlinks',
   {amp: {extensions: ['amp-smartlinks']}},
-  env => {
+  (env) => {
     let ampSmartlinks, helpers, xhr;
 
     beforeEach(() => {

@@ -81,34 +81,34 @@ export function getPlatform() {
 export function extractElementTags(element) {
   const tagsAttribute = element && element.getAttribute('data-apester-tags');
   if (tagsAttribute) {
-    return tagsAttribute.split(',').map(tag => tag.trim()) || [];
+    return tagsAttribute.split(',').map((tag) => tag.trim()) || [];
   }
   return [];
 }
 
 /**
  * Extract article's first 5 words from the title and use them for tags.
- * @param {!Node} root
+ * @param {!Document|!ShadowRoot} root
  * @return {!Array<string>}
  */
-export function extratctTitle(root) {
+export function extractTitle(root) {
   const scriptTags = toArray(
     root.querySelectorAll('script[type="application/ld+json"]')
   );
   return scriptTags
-    .map(scriptTag => {
+    .map((scriptTag) => {
       if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
         return {};
       }
       return tryParseJson(scriptTag.textContent) || {};
     })
-    .map(jsonLd => jsonLd && jsonLd['headline'])
-    .filter(e => typeof e === 'string')
-    .map(title =>
+    .map((jsonLd) => jsonLd && jsonLd['headline'])
+    .filter((e) => typeof e === 'string')
+    .map((title) =>
       title
         .trim()
         .split(' ')
-        .filter(w => w.length > 2)
+        .filter((w) => w.length > 2)
     )
     .reduce((result, headline) => {
       return result.concat(headline);
@@ -117,33 +117,31 @@ export function extratctTitle(root) {
 }
 /**
  * Extracts article meta keywords
- * @param {*} root
- * @return {*} TODO(#23582): Specify return type
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {Array<string>}
  */
-export function extractArticleTags(root) {
-  const metaKeywords = root.querySelector('meta[name="keywords"]') || {
-    content: '',
-  };
-  return metaKeywords.content
-    .trim()
+export function extractArticleTags(ampdoc) {
+  return (ampdoc.getMetaByName('keywords') || '')
     .split(',')
-    .filter(e => e)
-    .map(e => e.trim());
+    .map((e) => e.trim())
+    .filter((e) => e);
 }
 
 /**
  * Extracts tags from a given element and document.
- * @param {!Node} root
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Node} element
  * @return {Array<string>}
  */
-export function extractTags(root, element) {
+export function extractTags(ampdoc, element) {
   const extractedTags = extractElementTags(element) || [];
-  const articleMetaTags = extractArticleTags(root);
+  const articleMetaTags = extractArticleTags(ampdoc);
   const concatedTags = extractedTags.concat(
-    articleMetaTags.length ? articleMetaTags : extratctTitle(root) || []
+    articleMetaTags.length
+      ? articleMetaTags
+      : extractTitle(ampdoc.getRootNode()) || []
   );
-  const loweredCase = concatedTags.map(tag => tag.toLowerCase().trim());
+  const loweredCase = concatedTags.map((tag) => tag.toLowerCase().trim());
   const noDuplication = loweredCase.filter(
     (item, pos, self) => self.indexOf(item) === pos
   );
@@ -175,7 +173,7 @@ export function setFullscreenOff(element) {
  * @param {!Array} unlisteners
  */
 export function registerEvent(eventName, callback, win, iframe, unlisteners) {
-  const unlisten = events.listen(win, 'message', event => {
+  const unlisten = events.listen(win, 'message', (event) => {
     const fromApesterMedia = iframe.contentWindow === event.source;
     if (events.getData(event)['type'] === eventName && fromApesterMedia) {
       callback(events.getData(event));
@@ -200,7 +198,7 @@ export function generatePixelURL(publisherId, affiliateId) {
   };
 
   const qs = Object.keys(qsObj)
-    .map(key => `${key}=${qsObj[key]}`)
+    .map((key) => `${key}=${qsObj[key]}`)
     .join('&');
 
   return `${ampPixelURL}?${qs}`;

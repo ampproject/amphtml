@@ -11,7 +11,7 @@
 BASE_DIR=$1
 if [ -z "$BASE_DIR" ]
 then
-      BASE_DIR=$BUILD_WORKING_DIRECTORY
+    BASE_DIR=$BUILD_WORKING_DIRECTORY
 fi
 
 AMP_VALIDATOR_PROTOASCII="validator-all.protoascii"
@@ -21,7 +21,9 @@ AMP_RESOURCES_DIR=$BASE_DIR/"src/main/resources"
 AMP_VALIDATOR_GENERATED_DIR=$BASE_DIR/"src/main/java/amp/validator"
 
 if [[ -f "$AMP_VALIDATOR_PROTO_DIR/$AMP_VALIDATOR_PROTO" && -f "$AMP_RESOURCES_DIR/$AMP_VALIDATOR_PROTOASCII" ]]; then
-    echo "Both $AMP_VALIDATOR_PROTO && $AMP_VALIDATOR_PROTOASCII exists";
+    if [[ -z "$TRAVIS" ]]; then
+        echo "Both $AMP_VALIDATOR_PROTO and $AMP_VALIDATOR_PROTOASCII exist";
+    fi
 else
     # Creating proto & resources directories.
     mkdir -p ${AMP_VALIDATOR_GENERATED_DIR}
@@ -30,12 +32,23 @@ else
 
     pushd $BASE_DIR
 
-    echo "Append validator main proto asci files"
+    if [[ -z "$TRAVIS" ]]; then
+        echo "Appending validator main protoascii files..."
+    fi
     cat ../validator-main.protoascii >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
 
-    echo "Concatenate all extension proto asci files"
+    if [[ -z "$TRAVIS" ]]; then
+        echo "Appending validator css protoascii files..."
+    fi
+    cat ../validator-css.protoascii >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
+
+    if [[ -z "$TRAVIS" ]]; then
+        echo "Concatenating all extension protoascii files..."
+    fi
     for i in `find ../../extensions -name "*.protoascii"`; do
-        echo $i;
+        if [[ -z "$TRAVIS" ]]; then
+            echo $i;
+        fi
         cat $i >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
     done
 

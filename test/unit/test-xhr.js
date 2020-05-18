@@ -29,7 +29,7 @@ import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 describe
   .configure()
   .skipSafari()
-  .run('XHR', function() {
+  .run('XHR', function () {
     let ampdocServiceForStub;
     let ampdoc;
     let ampdocViewerStub;
@@ -63,7 +63,7 @@ describe
 
     function setupMockXhr() {
       const mockXhr = window.sandbox.useFakeXMLHttpRequest();
-      xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
+      xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
     }
 
     function noOrigin(url) {
@@ -92,7 +92,7 @@ describe
       location.href = 'https://acme.com/path';
     });
 
-    scenarios.forEach(test => {
+    scenarios.forEach((test) => {
       let xhr;
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
@@ -167,12 +167,12 @@ describe
 
           it('should do `GET` as default method', () => {
             xhr.fetchJson('/get?k=v1');
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+            return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
           });
 
           it('should normalize GET method name to uppercase', () => {
             xhr.fetchJson('/abc');
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+            return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
           });
 
           it('should normalize POST method name to uppercase', () => {
@@ -182,12 +182,14 @@ describe
                 hello: 'world',
               },
             });
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
+            return xhrCreated.then((xhr) =>
+              expect(xhr.method).to.equal('POST')
+            );
           });
 
           it('should inject source origin query parameter', () => {
             xhr.fetchJson('/get?k=v1#h1');
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(noOrigin(xhr.url)).to.equal(
                 '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1'
               )
@@ -196,7 +198,7 @@ describe
 
           it('should inject source origin query parameter w/o query', () => {
             xhr.fetchJson('/get');
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(noOrigin(xhr.url)).to.equal(
                 '/get?__amp_source_origin=https%3A%2F%2Facme.com'
               )
@@ -232,7 +234,7 @@ describe
               'set to false',
             () => {
               xhr.fetchJson('/get', {ampCors: false});
-              return xhrCreated.then(xhr =>
+              return xhrCreated.then((xhr) =>
                 expect(noOrigin(xhr.url)).to.equal('/get')
               );
             }
@@ -240,7 +242,7 @@ describe
 
           it('should accept AMP origin when received in response', () => {
             const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
+            xhrCreated.then((xhr) =>
               xhr.respond(
                 200,
                 {
@@ -336,7 +338,7 @@ describe
           it('should resolve if success', () => {
             mockXhr.status = 200;
             return assertSuccess(createResponseInstance('', mockXhr)).then(
-              response => {
+              (response) => {
                 expect(response.status).to.equal(200);
               }
             ).should.not.be.rejected;
@@ -351,7 +353,7 @@ describe
           it('should include response in error', () => {
             mockXhr.status = 500;
             return assertSuccess(createResponseInstance('', mockXhr)).catch(
-              error => {
+              (error) => {
                 expect(error.response).to.exist;
                 expect(error.response.status).to.equal(500);
               }
@@ -372,8 +374,8 @@ describe
           window.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v1');
             });
@@ -385,8 +387,8 @@ describe
             encodeURIComponent(`${baseUrl}/get?k=v2`);
           return xhr
             .fetchJson(url, {ampCors: false})
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v2');
             });
@@ -398,7 +400,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               expect(error.message).to.contain('HTTP error 404');
             }
           );
@@ -410,7 +412,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               expect(error.message).to.contain('HTTP error 500');
             }
           );
@@ -419,7 +421,7 @@ describe
         it('should NOT succeed CORS setting cookies without credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url).then(res => {
+          return xhr.fetchJson(url).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.be.null;
           });
@@ -428,7 +430,7 @@ describe
         it('should succeed CORS setting cookies with credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
+          return xhr.fetchJson(url, {credentials: 'include'}).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.equal('v1');
           });
@@ -437,7 +439,7 @@ describe
         it('should ignore CORS setting cookies w/omit credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
+          return xhr.fetchJson(url, {credentials: 'omit'}).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.be.null;
           });
@@ -455,7 +457,7 @@ describe
           const url =
             `${baseUrl}/response-headers?AMP-Header=Value1&` +
             'Access-Control-Expose-Headers=AMP-Header';
-          return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
+          return xhr.fetchAmpCors_(url, {ampCors: false}).then((res) => {
             expect(res.headers.get('AMP-Header')).to.equal('Value1');
           });
         });
@@ -466,7 +468,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               const {message} = error;
               expect(message).to.contain('http://localhost:31863');
               expect(message).not.to.contain('status/500');
@@ -494,10 +496,10 @@ describe
             headers: {'Accept': 'text/plain'},
           });
           return promise
-            .then(res => {
+            .then((res) => {
               return res.text();
             })
-            .then(text => {
+            .then((text) => {
               expect(text).to.equal(TEST_TEXT);
             });
         });
@@ -515,17 +517,17 @@ describe
         if (test.desc != 'Native') {
           it('should be able to fetch a response', () => {
             setupMockXhr();
-            const promise = xhr.fetch('/index.html').then(response => {
+            const promise = xhr.fetch('/index.html').then((response) => {
               expect(response.headers.get('X-foo-header')).to.equal('foo data');
               expect(response.headers.get('X-bar-header')).to.equal('bar data');
               response
                 .arrayBuffer()
-                .then(bytes => utf8FromArrayBuffer(bytes))
-                .then(text => {
+                .then((bytes) => utf8FromArrayBuffer(bytes))
+                .then((text) => {
                   expect(text).to.equal(creative);
                 });
             });
-            xhrCreated.then(xhr =>
+            xhrCreated.then((xhr) =>
               xhr.respond(
                 200,
                 {
@@ -542,7 +544,7 @@ describe
       });
     });
 
-    scenarios.forEach(test => {
+    scenarios.forEach((test) => {
       const {testServerPort} = window.ampTestRuntimeConfig;
       const url = `http://localhost:${testServerPort}/post`;
 
@@ -563,7 +565,7 @@ describe
                 'Other': 'another',
               },
             });
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(xhr.requestHeaders).to.deep.equal({
                 'Accept': 'application/json',
                 'Content-Type': 'text/plain;charset=utf-8',
@@ -584,8 +586,8 @@ describe
                 'Content-Type': 'application/json;charset=utf-8',
               },
             })
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res.json).to.jsonEqual({
                 hello: 'world',
               });
@@ -933,6 +935,7 @@ describe
       });
 
       it('should be rejected when response undefined', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve());
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -942,6 +945,7 @@ describe
       });
 
       it('should be rejected when response null', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve(null));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -951,6 +955,7 @@ describe
       });
 
       it('should be rejected when response is string', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve('response text'));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -983,13 +988,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/')
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(242);
+              expect(response).to.have.property('status').that.equals(242);
               expect(response)
                 .to.have.property('statusText')
                 .that.equals('Magic status');
@@ -1024,13 +1027,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/')
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(242);
+              expect(response).to.have.property('status').that.equals(242);
               return expect(response.json()).to.eventually.deep.equal({
                 content: 32,
               });
@@ -1043,13 +1044,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(200);
+              expect(response).to.have.property('status').that.equals(200);
               return expect(response.text()).to.eventually.be.empty;
             });
         });
@@ -1060,12 +1059,10 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(200);
+              expect(response).to.have.property('status').that.equals(200);
             });
         });
 
@@ -1075,7 +1072,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               return expect(response.text()).to.eventually.equal('32');
             });
         });
@@ -1086,7 +1083,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               return expect(response)
                 .to.have.property('status')
                 .that.equals(209);
@@ -1109,7 +1106,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get(1)).to.equal('true');
               expect(response.headers.get('false')).to.equal('NaN');
               expect(response.headers.get('undefined')).to.equal('null');
@@ -1132,7 +1129,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('content-type')).to.equal(
                 'text/plain'
               );
@@ -1151,7 +1148,7 @@ describe
       });
 
       it('should call response.json() if prefix is either missing or the empty string', () => {
-        xhrCreated.then(mock => mock.respond(200, [], '{a: 1}'));
+        xhrCreated.then((mock) => mock.respond(200, [], '{a: 1}'));
         const response = {
           json: () => Promise.resolve(),
           text: () => Promise.reject(new Error('should not be called')),
@@ -1164,21 +1161,21 @@ describe
       });
 
       it('should not strip characters if the prefix is not present', () => {
-        xhrCreated.then(mock => mock.respond(200, [], '{"a": 1}'));
+        xhrCreated.then((mock) => mock.respond(200, [], '{"a": 1}'));
         return xhr
           .fetchJson('/abc')
-          .then(res => xhr.xssiJson(res, 'while(1)'))
-          .then(json => {
+          .then((res) => xhr.xssiJson(res, 'while(1)'))
+          .then((json) => {
             expect(json).to.be.deep.equal({a: 1});
           });
       });
 
       it('should strip prefix from the response text if prefix is present', () => {
-        xhrCreated.then(mock => mock.respond(200, [], 'while(1){"a": 1}'));
+        xhrCreated.then((mock) => mock.respond(200, [], 'while(1){"a": 1}'));
         return xhr
           .fetchJson('/abc')
-          .then(res => xhr.xssiJson(res, 'while(1)'))
-          .then(json => {
+          .then((res) => xhr.xssiJson(res, 'while(1)'))
+          .then((json) => {
             expect(json).to.be.deep.equal({a: 1});
           });
       });

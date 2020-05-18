@@ -181,8 +181,10 @@ class AmpLightbox extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
 
-    this.registerDefaultAction(i => this.open_(i.trust), 'open');
-    this.registerAction('close', i => this.close(i.trust));
+    this.registerDefaultAction((i) => this.open_(i.trust), 'open');
+    this.registerAction('close', (i) => this.close(i.trust));
+    /** If the element is in an email document, allow its `open` and `close` actions. */
+    this.action_.addToWhitelist('AMP-LIGHTBOX', ['open', 'close'], ['email']);
   }
 
   /**
@@ -191,7 +193,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
-    this.getComponentDescendants_().forEach(child => {
+    this.getComponentDescendants_().forEach((child) => {
       Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
@@ -226,7 +228,7 @@ class AmpLightbox extends AMP.BaseElement {
     }
     element.appendChild(this.container_);
 
-    children.forEach(child => {
+    children.forEach((child) => {
       this.container_.appendChild(child);
     });
 
@@ -323,7 +325,7 @@ class AmpLightbox extends AMP.BaseElement {
     const props = Object.keys(openStyle);
 
     const transition = props
-      .map(p => `${p} ${durationSeconds}s ease-in`)
+      .map((p) => `${p} ${durationSeconds}s ease-in`)
       .join(',');
 
     this.eventCounter_++;
@@ -379,7 +381,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.getHistory_()
       .push(this.close.bind(this))
-      .then(historyId => {
+      .then((historyId) => {
         this.historyId_ = historyId;
       });
 
@@ -599,14 +601,14 @@ class AmpLightbox extends AMP.BaseElement {
    */
   updateChildrenInViewport_(newPos, oldPos) {
     const seen = [];
-    this.forEachVisibleChild_(newPos, cell => {
+    this.forEachVisibleChild_(newPos, (cell) => {
       seen.push(cell);
       const owners = Services.ownersForDoc(this.element);
       owners.updateInViewport(this.element, cell, true);
       owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, cell => {
+      this.forEachVisibleChild_(oldPos, (cell) => {
         if (!seen.includes(cell)) {
           Services.ownersForDoc(this.element).updateInViewport(
             this.element,
@@ -737,7 +739,7 @@ function setTransparentBody(win, body) {
   );
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   // TODO(alanorozco): refactor this somehow so we don't need to do a direct
   // getMode check
   if (getMode().runtime == 'inabox') {

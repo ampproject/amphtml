@@ -111,7 +111,7 @@ export class AbstractAmpContext {
 
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win, this.getHostWindow_());
-    this.client_.setSentinel(dev().assertString(this.sentinel));
+    this.client_.setSentinel(devAssert(this.sentinel));
 
     this.listenForPageVisibility_();
   }
@@ -129,7 +129,7 @@ export class AbstractAmpContext {
     this.client_.makeRequest(
       MessageType.SEND_EMBED_STATE,
       MessageType.EMBED_STATE,
-      data => {
+      (data) => {
         this.hidden = data['pageHidden'];
         this.dispatchVisibilityChangeEvent_();
       }
@@ -155,7 +155,7 @@ export class AbstractAmpContext {
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
-    return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
+    return this.client_.registerCallback(MessageType.EMBED_STATE, (data) => {
       callback({hidden: data['pageHidden']});
     });
   }
@@ -171,7 +171,7 @@ export class AbstractAmpContext {
     return this.client_.makeRequest(
       MessageType.SEND_INTERSECTIONS,
       MessageType.INTERSECTION,
-      intersection => {
+      (intersection) => {
         callback(intersection['changes']);
       }
     );
@@ -230,7 +230,7 @@ export class AbstractAmpContext {
    *    request succeeds.
    */
   onResizeSuccess(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   }
@@ -243,7 +243,7 @@ export class AbstractAmpContext {
    *    request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
+    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   }

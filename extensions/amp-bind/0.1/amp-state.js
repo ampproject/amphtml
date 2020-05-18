@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -44,6 +45,9 @@ export class AmpState extends AMP.BaseElement {
      * @private {?JsonObject|undefined}
      */
     this.localData_ = undefined;
+
+    /** @private {!Deferred} */
+    this.loadingDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -69,7 +73,7 @@ export class AmpState extends AMP.BaseElement {
 
     const {element} = this;
     if (element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(element).then(bind => {
+      Services.bindForDocOrNull(element).then((bind) => {
         devAssert(bind);
         bind.addOverridableKey(element.getAttribute('id'));
       });
@@ -146,7 +150,7 @@ export class AmpState extends AMP.BaseElement {
       );
       return null;
     }
-    return tryParseJson(firstChild.textContent, e => {
+    return tryParseJson(firstChild.textContent, (e) => {
       this.user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
   }
@@ -188,8 +192,8 @@ export class AmpState extends AMP.BaseElement {
         ? UrlReplacementPolicy.OPT_IN
         : UrlReplacementPolicy.ALL;
 
-    return getViewerAuthTokenIfAvailable(element).then(token =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
+    return getViewerAuthTokenIfAvailable(element).then((token) =>
+      this.fetch_(ampdoc, policy, opt_refresh, token).catch((error) => {
         const event = error
           ? createCustomEvent(
               this.win,
@@ -207,15 +211,43 @@ export class AmpState extends AMP.BaseElement {
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<undefined>}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
+    // On init, we reuse the deferred created in the constructor.
+    if (!isInit) {
+      this.loadingDeferred_ = new Deferred();
+    }
+
+    // Store the deferred locally, in case a new fetch overwrites
+    // it before resolution.
+    const loadingDeferred = this.loadingDeferred_;
+
     // Don't fetch in prerender mode.
     return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-      .then(json => this.updateState_(json, isInit));
+      .then((json) => this.updateState_(json, isInit))
+      .then(() => loadingDeferred.resolve())
+      .catch((err) => {
+        loadingDeferred.resolve();
+        throw err;
+      });
+  }
+
+  /**
+   * For an "amp-state" with a src attribute, this returns a promise that
+   * resolves after the fetch and update completes. For non-src "amp-state"s,
+   * return a resolved promise.
+   *
+   * @return {!Promise}
+   */
+  getFetchingPromise() {
+    if (!this.element.hasAttribute('src')) {
+      return Promise.resolve();
+    }
+    return this.loadingDeferred_.promise;
   }
 
   /**
@@ -229,7 +261,7 @@ export class AmpState extends AMP.BaseElement {
       return Promise.resolve();
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
-    return Services.bindForDocOrNull(this.element).then(bind => {
+    return Services.bindForDocOrNull(this.element).then((bind) => {
       devAssert(bind);
       const state = /** @type {!JsonObject} */ (map());
       state[id] = json;

@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {createElement, useContext, useEffect, useRef} from './index';
+import * as Preact from './index';
 import {dev} from '../log';
 import {getAmpContext} from './context';
 import {matches, toggleAttribute} from '../dom';
 import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
+import {useContext, useEffect, useRef} from './index';
 import {useMountEffect} from './utils';
 
 /**
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
-  const slotProps = {name, ...(props || {})};
-  return createElement(Slot, slotProps);
+  return <Slot {...(props || {})} name={name} />;
 }
 
 /**
  * Slot component.
  *
  * @param {!JsonObject} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());
-  const ref = useRef(null);
+  const ref = useRef(/** @type {?Element} */ (null));
   const slotProps = {...props, ref};
   useEffect(() => {
     const slot = dev().assertElement(ref.current);
@@ -52,7 +52,7 @@ export function Slot(props) {
     // TBD: Just for debug for now. but maybe can also be used for hydration?
     slot.setAttribute('i-amphtml-context', JSON.stringify(context));
     // TODO: remove debug info.
-    assignedElements.forEach(node => {
+    assignedElements.forEach((node) => {
       node.__assignedSlot = slot;
       node.setAttribute('i-amphtml-context', JSON.stringify(context));
     });
@@ -64,7 +64,7 @@ export function Slot(props) {
       //    `hidden`. Similarly do other attributes.
       // 2. Re-propagate click events to slots since React stops propagation.
       //    See https://github.com/facebook/react/issues/9242.
-      assignedElements.forEach(node => {
+      assignedElements.forEach((node) => {
         // Basic attributes:
         const {attributes} = slot;
         for (let i = 0, l = attributes.length; i < l; i++) {
@@ -88,7 +88,7 @@ export function Slot(props) {
         toggleAttribute(node, 'expanded', slot.hasAttribute('expanded'));
         if (!node['i-amphtml-event-distr']) {
           node['i-amphtml-event-distr'] = true;
-          node.addEventListener('click', e => {
+          node.addEventListener('click', (e) => {
             // Stop propagation on the original event to avoid deliving this
             // event twice with frameworks that correctly work with composed
             // boundaries.
@@ -110,11 +110,11 @@ export function Slot(props) {
       slot['i-amphtml-context'] = context;
       // TODO: Switch to fast child-node discover. See Revamp for the algo.
       const affectedNodes = [];
-      assignedElements.forEach(node => {
+      assignedElements.forEach((node) => {
         node['i-amphtml-context'] = context;
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));
       });
-      affectedNodes.forEach(node => {
+      affectedNodes.forEach((node) => {
         const event = new Event('i-amphtml-context-changed', {
           bubbles: false,
           cancelable: true,
@@ -135,13 +135,14 @@ export function Slot(props) {
   // useEffect, because it must only be run once while the previous needs to
   // run every render.
   useMountEffect(() => {
+    const slot = dev().assertElement(ref.current);
+
     return () => {
-      const slot = dev().assertElement(ref.current);
       const affectedNodes = [];
-      getAssignedElements(props, slot).forEach(node => {
+      getAssignedElements(props, slot).forEach((node) => {
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));
       });
-      affectedNodes.forEach(node => {
+      affectedNodes.forEach((node) => {
         const event = new Event('i-amphtml-unmounted', {
           bubbles: false,
           cancelable: true,
@@ -152,7 +153,7 @@ export function Slot(props) {
     };
   });
 
-  return createElement('slot', slotProps);
+  return <slot {...slotProps} />;
 }
 
 /**
