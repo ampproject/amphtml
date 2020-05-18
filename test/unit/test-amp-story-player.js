@@ -289,22 +289,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
-    it('calls build and layout callbacks when calling load', async () => {
+    it('load callback builds iframe inside the player', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       const story = win.document.createElement('a');
       story.setAttribute('href', DEFAULT_CACHE_URL);
       playerEl.appendChild(story);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      const buildSpy = env.sandbox.spy(player, 'buildCallback');
-      const layoutSpy = env.sandbox.spy(player, 'layoutCallback');
-      expect(buildSpy).to.not.have.been.called;
-      expect(layoutSpy).to.not.have.been.called;
 
       await player.load();
 
-      expect(buildSpy).to.have.been.calledOnce;
-      expect(layoutSpy).to.have.been.calledOnce;
+      expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
     });
   });
 });

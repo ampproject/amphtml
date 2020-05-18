@@ -23,4 +23,4 @@ self.onload = () => {
 };
 
 // eslint-disable-next-line no-undef
-globalThis.ampStoryPlayer = AmpStoryPlayer;
+globalThis.AmpStoryPlayer = AmpStoryPlayer;
