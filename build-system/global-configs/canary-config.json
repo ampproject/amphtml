@@ -1,8 +1,8 @@
 {
   "allow-doc-opt-in": [
     "amp-next-page",
-    "inabox-viewport-friendly",
-    "analytics-chunks"
+    "analytics-chunks",
+    "analytics-chunks-inabox"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 1,

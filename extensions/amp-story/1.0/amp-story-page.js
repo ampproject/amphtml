@@ -69,6 +69,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -1104,14 +1105,20 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       const parentEl = mediaEl.parentElement;
-      let layoutPromise = Promise.resolve();
+      let promise = Promise.resolve();
       if (
         parentEl.tagName === 'AMP-VIDEO' ||
-        parentEl.tagName === 'AMP-AUDIO'
+        (parentEl.tagName === 'AMP-AUDIO' &&
+          parentEl.getAttribute('layout') !== Layout.NODISPLAY)
       ) {
-        layoutPromise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
+        promise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
+      } else if (
+        parentEl.tagName === 'AMP-AUDIO' &&
+        parentEl.getAttribute('layout') === Layout.NODISPLAY
+      ) {
+        promise = parentEl.signals().whenSignal(CommonSignals.BUILT);
       }
-      return layoutPromise.then(() => {
+      return promise.then(() => {
         mediaPool.register(
           /** @type {!./media-pool.DomElementDef} */ (mediaEl)
         );
@@ -1529,7 +1536,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     const videoEls = this.getAllVideos_();
 
     if (videoEls.length) {
-      this.debounceToggleLoadingSpinner_(true);
+      const alreadyPlaying = videoEls.some((video) => video.currentTime != 0);
+      if (!alreadyPlaying) {
+        this.debounceToggleLoadingSpinner_(true);
+      }
     }
 
     Array.prototype.forEach.call(videoEls, (videoEl) => {
@@ -1642,7 +1652,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
-    labelEl.textContent = Services.localizationForDoc(
+    labelEl.textContent = getLocalizationService(
       this.element
     ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
 
@@ -1689,7 +1699,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = Services.localizationForDoc(
+    labelEl.textContent = getLocalizationService(
       this.element
     ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO);
 
@@ -1744,7 +1754,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
         (openLabelAttr && openLabelAttr.trim()) ||
-        Services.localizationForDoc(this.element).getLocalizedString(
+        getLocalizationService(this.element).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 

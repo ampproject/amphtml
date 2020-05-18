@@ -19,6 +19,9 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
 const path = require('path');
+const {clean} = require('../tasks/clean');
+const {doBuild} = require('../tasks/build');
+const {doDist} = require('../tasks/dist');
 const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
@@ -27,12 +30,16 @@ const {isTravisBuild} = require('./travis');
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
- * Cleans and builds binaries with --fortesting flag and
- * overriden config.
+ * Performs a clean build of the AMP runtime in testing mode.
+ * Used by `gulp e2e|integration|visual_diff`.
  */
-function buildMinifiedRuntime() {
-  execOrDie('gulp clean');
-  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+async function buildRuntime() {
+  await clean();
+  if (argv.compiled) {
+    await doDist({fortesting: true});
+  } else {
+    await doBuild({fortesting: true});
+  }
 }
 
 /**
@@ -157,7 +164,7 @@ function installPackages(dir) {
 }
 
 module.exports = {
-  buildMinifiedRuntime,
+  buildRuntime,
   getFilesChanged,
   getFilesFromArgv,
   getFilesToCheck,

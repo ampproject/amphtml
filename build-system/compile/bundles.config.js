@@ -470,7 +470,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -1023,13 +1023,13 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-social-share',
-    version: '0.2',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },

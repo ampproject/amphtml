@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  includeJsonLiteral,
-  jsonConfiguration,
-  jsonLiteral,
-} from '../../../src/json';
+import {jsonConfiguration} from '../../../src/json';
 
 // TODO(zhouyx@: Rename file and object name)
-const DEFAULT_CONFIG = jsonLiteral({
+const defaultConfig = jsonConfiguration({
   'transport': {'beacon': true, 'xhrpost': true, 'image': true},
   'vars': {
     'accessReaderId': 'ACCESS_READER_ID',
@@ -45,14 +41,17 @@ const DEFAULT_CONFIG = jsonLiteral({
     'contentLoadTime': 'CONTENT_LOAD_TIME',
     'cookie': 'COOKIE',
     'counter': 'COUNTER',
+    'cumulativeLayoutShift': 'CUMULATIVE_LAYOUT_SHIFT',
     'documentCharset': 'DOCUMENT_CHARSET',
     'documentReferrer': 'DOCUMENT_REFERRER',
     'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
     'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
     'externalReferrer': 'EXTERNAL_REFERRER',
     'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
+    'firstInputDelay': 'FIRST_INPUT_DELAY',
     'firstViewportReady': 'FIRST_VIEWPORT_READY',
     'fragmentParam': 'FRAGMENT_PARAM',
+    'largestContentfulPaint': 'LARGEST_CONTENTFUL_PAINT',
     'makeBodyVisible': 'MAKE_BODY_VISIBLE',
     'htmlAttr': 'HTML_ATTR',
     'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
@@ -91,11 +90,7 @@ const DEFAULT_CONFIG = jsonLiteral({
   },
 });
 
-const analyticsConfig = jsonConfiguration({
-  'default': includeJsonLiteral(DEFAULT_CONFIG),
-});
-
 /**
  * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = analyticsConfig;
+export const DEFAULT_CONFIG = defaultConfig;

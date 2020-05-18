@@ -33,15 +33,11 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {
-  childElementsByTag,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** @const {string} */
@@ -378,9 +374,12 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      // Init or no-op if the runner was already running.
-      this.runner_.start();
-      this.runner_.pause();
+      try {
+        this.runner_.pause();
+      } catch (e) {
+        // This fails when the animation is finished explicitly
+        // (runner.finish()) since this destroys internal players. This is fine.
+      }
     }
   }
 
@@ -638,7 +637,9 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            childElementsByTag(this.page_, 'amp-story-animation'),
+            this.page_.querySelectorAll(
+              'amp-story-animation[trigger=visibility]'
+            ),
             (el) =>
               this.createRunner_({
                 source: el,
@@ -717,6 +718,7 @@ export class AnimationManager {
       .then((webAnimationService) =>
         webAnimationService.createBuilder({
           scope: this.page_,
+          scaleByScope: true,
         })
       );
   }
