@@ -25,7 +25,6 @@
     "promise-pjs": "1.1.4",
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
-    "renovate": "^19.239.8",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
   },
