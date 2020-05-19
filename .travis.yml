@@ -126,8 +126,7 @@ jobs:
       env:
         - CACHE_NAME=PERFORMANCEJOB
   allow_failures:
-    - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
-    - script: unbuffer node build-system/pr-check/remote-tests.js # See #28343
+    - env: CACHE_NAME=PERFORMANCEJOB
   fast_finish: true
 before_cache:
   # do not store cache for pr builds or experiment stage builds

@@ -45,7 +45,8 @@ export function Slot(props) {
   const ref = useRef(/** @type {?Element} */ (null));
   const slotProps = {...props, ref};
   useEffect(() => {
-    const slot = dev().assertElement(ref.current);
+    const {current} = dev().assertElement(ref);
+    const slot = dev().assertElement(current);
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
 

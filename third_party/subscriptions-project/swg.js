@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.105 */
+/** Version: 0.1.22.103 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4913,9 +4913,11 @@ class UserData {
  * limitations under the License.
  */
 
+
 /**
  */
 class SubscribeResponse$1 {
+
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
@@ -4924,18 +4926,9 @@ class SubscribeResponse$1 {
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
    * @param {?string=} oldSku
-   * @param {?number=} paymentRecurrence
    */
-  constructor(
-    raw,
-    purchaseData,
-    userData,
-    entitlements,
-    productType,
-    completeHandler,
-    oldSku = null,
-    paymentRecurrence = null
-  ) {
+  constructor(raw, purchaseData, userData, entitlements, productType,
+      completeHandler, oldSku = null) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -4950,8 +4943,6 @@ class SubscribeResponse$1 {
     this.completeHandler_ = completeHandler;
     /** @const {?string} */
     this.oldSku = oldSku;
-    /** @const {?number} */
-    this.paymentRecurrence = paymentRecurrence;
   }
 
   /**
@@ -4959,13 +4950,13 @@ class SubscribeResponse$1 {
    */
   clone() {
     return new SubscribeResponse$1(
-      this.raw,
-      this.purchaseData,
-      this.userData,
-      this.entitlements,
-      this.productType,
-      this.completeHandler_,
-      this.oldSku
+        this.raw,
+        this.purchaseData,
+        this.userData,
+        this.entitlements,
+        this.productType,
+        this.completeHandler_,
+        this.oldSku
     );
   }
 
@@ -4977,7 +4968,7 @@ class SubscribeResponse$1 {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
       'entitlements': this.entitlements ? this.entitlements.json() : null,
-      'oldSku': this.oldSku,
+      'oldSku' : this.oldSku,
       'productType': this.productType,
     };
   }
@@ -5000,9 +4991,11 @@ class SubscribeResponse$1 {
   }
 }
 
+
 /**
  */
 class PurchaseData {
+
   /**
    * @param {string} raw
    * @param {string} signature
@@ -5660,7 +5653,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.105',
+    '_client': 'SwG 0.1.22.103',
   });
 }
 
@@ -5842,7 +5835,7 @@ class PayCompleteFlow {
     /** @const @type {./client-event-manager.ClientEventManager} */
     const eventManager = deps.eventManager();
 
-    deps.payClient().onResponse((payPromise) => {
+    deps.payClient().onResponse(payPromise => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
       const promise = validatePayResponse(
@@ -5852,7 +5845,7 @@ class PayCompleteFlow {
       );
       deps.callbacks().triggerPaymentResponse(promise);
       return promise.then(
-        (response) => {
+        response => {
           const sku = parseSkuFromPurchaseDataSafe(response.purchaseData);
           deps.analytics().setSku(sku || '');
           eventManager.logSwgEvent(
@@ -5862,7 +5855,7 @@ class PayCompleteFlow {
           );
           flow.start(response);
         },
-        (reason) => {
+        reason => {
           if (isCancelError(reason)) {
             const productType = /** @type {!Object} */ (reason)['productType'];
             const flow =
@@ -5934,12 +5927,10 @@ class PayCompleteFlow {
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
-    // TODO(dianajing): future-proof isOneTime flag
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'productType': this.response_['productType'],
       'isSubscriptionUpdate': !!this.response_['oldSku'],
-      'isOneTime': !!this.response_['paymentRecurrence'],
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -6025,7 +6016,7 @@ PayCompleteFlow.waitingForPayClient_ = false;
 function validatePayResponse(deps, payPromise, completeHandler) {
   const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
   PayCompleteFlow.waitingForPayClient_ = false;
-  return payPromise.then((data) => {
+  return payPromise.then(data => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
@@ -6080,7 +6071,6 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let raw = null;
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
-  let paymentRecurrence = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -6096,9 +6086,6 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       }
       if ('paymentRequest' in data) {
         oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
-        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
-          'paymentRecurrence'
-        ];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -6123,8 +6110,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     parseEntitlements(deps, swgData),
     productType,
     completeHandler,
-    oldSku,
-    paymentRecurrence
+    oldSku
   );
 }
 
@@ -6170,10 +6156,12 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  return /** @type {?string} */ (getPropertyFromJsonString(
-    purchaseData.raw,
-    'productId'
-  ) || null);
+  return (
+    /** @type {?string} */ (getPropertyFromJsonString(
+      purchaseData.raw,
+      'productId'
+    ) || null)
+  );
 }
 
 /**
@@ -6779,7 +6767,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.105',
+        '_client': 'SwG 0.1.22.103',
         'supportsEventManager': true,
       },
       args || {}
@@ -7621,7 +7609,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.105');
+    context.setClientVersion('SwG 0.1.22.103');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];

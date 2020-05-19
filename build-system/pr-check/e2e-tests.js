@@ -42,7 +42,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+    timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -53,7 +53,7 @@ async function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+      timedExecOrDie('gulp e2e --nobuild --headless');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,

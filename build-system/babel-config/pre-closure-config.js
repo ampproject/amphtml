@@ -25,10 +25,6 @@ const {getExperimentConstant, getReplacePlugin} = require('./helpers');
  */
 function getPreClosureConfig() {
   const isCheckTypes = argv._.includes('check-types');
-  const testTasks = ['e2e', 'integration', 'visual-diff'];
-  const isTestTask = testTasks.some((task) => argv._.includes(task));
-  const isFortesting = argv.fortesting || isTestTask;
-
   // For experiment, remove FixedLayer import from v0.js, otherwise remove
   // from amp-viewer-integration
   const fixedLayerImport =
@@ -93,13 +89,13 @@ function getPreClosureConfig() {
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,
-    !(isFortesting || isCheckTypes)
+    !(argv.fortesting || isCheckTypes)
       ? [
           './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
           {isEsmBuild: !!argv.esm},
         ]
       : null,
-    !(isFortesting || isCheckTypes)
+    !(argv.fortesting || isCheckTypes)
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);

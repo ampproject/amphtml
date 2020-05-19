@@ -34,7 +34,6 @@ const replacedMember = 'STATIC_CONFIG_';
 
 /**
  * Sub-plugin that transforms inlined file that exports wrapped constructor.
- * @param {{types: string}} options
  * @return {!Object}
  */
 function transformRedefineInline({types: t}) {
@@ -134,7 +133,6 @@ const redefineInline = (sourceFilename, opts) =>
 
 /**
  * Replaces `configureComponent()` wrapping calls.
- * @param {{types: string}} options
  * @return {!Object}
  */
 module.exports = function ({types: t}) {

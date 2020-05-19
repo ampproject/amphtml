@@ -38,7 +38,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime, installPackages} = require('../../common/utils');
+const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
@@ -157,7 +157,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: argv.compiled}
+    {compiled: true}
   );
 }
 
@@ -683,7 +683,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
-  await ensureOrBuildAmpRuntimeInTestMode_();
+  ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
@@ -753,14 +753,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build|dist --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    await buildRuntime();
+    buildMinifiedRuntime();
   }
 }
 
@@ -825,5 +825,4 @@ visualDiff.flags = {
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
   'noyarn': '  Skip calling yarn to install dependencies',
-  'compiled': '  Runs tests against minified JS',
 };

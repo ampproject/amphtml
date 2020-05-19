@@ -410,10 +410,29 @@ describes.realWin(
       });
     });
     describe('maybeAttachSettingsListener', () => {
+      it("doesn't set up a listener if the experiment is not enabled", () => {
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+        const promise = ResponsiveState.maybeAttachSettingsListener(
+          element,
+          fakeIframe,
+          AD_CLIENT_ID
+        );
+        expect(promise).to.be.null;
+      });
+
       describe('sets up a listener that', () => {
         let promise;
 
         beforeEach(() => {
+          forceExperimentBranch(
+            win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
           const element = createElement({
             'data-ad-client': AD_CLIENT_ID,
             'height': '200px',
@@ -433,7 +452,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(JSON.stringify(data), '*');
+          win.postMessage(data, '*');
 
           await promise;
 
@@ -446,7 +465,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(JSON.stringify(data), '*');
+          win.postMessage(data, '*');
 
           await promise;
 
@@ -461,13 +480,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(JSON.stringify(badData), '*');
+          win.postMessage(badData, '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(JSON.stringify(goodData), '*');
+          win.postMessage(goodData, '*');
 
           await promise;
 
@@ -482,13 +501,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID + 'i',
             'enableAutoAdSize': '1',
           };
-          win.postMessage(JSON.stringify(badData), '*');
+          win.postMessage(badData, '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(JSON.stringify(goodData), '*');
+          win.postMessage(goodData, '*');
 
           await promise;
 

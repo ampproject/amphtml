@@ -18,9 +18,10 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
+const {applyAmpConfig} = require('./helpers');
+const {build} = require('./build');
 const {clean} = require('./clean');
-const {doBuild} = require('./build');
-const {doDist} = require('./dist');
+const {dist} = require('./dist');
 
 async function walk(dest) {
   const filelist = [];
@@ -50,10 +51,10 @@ async function copyAndReplaceUrls(src, dest) {
 async function firebase() {
   if (!argv.nobuild) {
     await clean();
-    if (argv.compiled) {
-      await doDist({fortesting: argv.fortesting});
+    if (argv.min) {
+      await dist();
     } else {
-      await doBuild({fortesting: argv.fortesting});
+      await build();
     }
   }
   await fs.mkdirp('firebase');
@@ -77,6 +78,16 @@ async function firebase() {
     fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),
   ]);
 
+  if (argv.fortesting) {
+    await Promise.all([
+      applyAmpConfig(
+        'firebase/dist.3p/current/integration.js',
+        /* localDev */ true
+      ),
+      applyAmpConfig('firebase/dist/amp.js', /* localDev */ true),
+    ]);
+  }
+
   await Promise.all([
     fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
       overwrite: true,
@@ -90,7 +101,7 @@ async function replaceUrls(filePath) {
     /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
     '/dist/amp.js'
   );
-  if (argv.compiled) {
+  if (argv.min) {
     result = result.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
       '/dist/v0/$1.js'
@@ -110,9 +121,9 @@ module.exports = {
 
 firebase.description = 'Generates firebase folder for deployment';
 firebase.flags = {
-  'file': '  File to deploy to firebase as index.html',
-  'compiled': '  Deploy from minified files',
-  'nobuild': '  Skips the gulp build|dist step.',
+  'file': 'File to deploy to firebase as index.html',
+  'min': 'Source from minified files',
+  'nobuild': 'Skips the gulp build|dist step.',
   'fortesting':
-    '  Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
+    'Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };

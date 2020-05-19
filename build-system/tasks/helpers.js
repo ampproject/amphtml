@@ -72,14 +72,24 @@ const EXTENSION_BUNDLE_MAP = {
 /**
  * List of unminified targets to which AMP_CONFIG should be written
  */
-const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
+const UNMINIFIED_TARGETS = [
+  'alp.max.js',
+  'amp-inabox.js',
+  'amp-shadow.js',
+  'amp.js',
+];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
  * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
  * for details.
  */
-const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
+const MINIFIED_TARGETS = [
+  'alp.js',
+  'amp4ads-v0.js',
+  'shadow-v0.js',
+  'v0.js',
+].map(maybeToEsmName);
 
 /**
  * Used while building the 3p frame
@@ -113,22 +123,22 @@ function doBuildJs(jsBundles, name, extraOptions) {
 
 /**
  * Generates frames.html
- *
- * @param {!Object} options
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
  */
-async function bootstrapThirdPartyFrames(options) {
+async function bootstrapThirdPartyFrames(watch, minify) {
   const startTime = Date.now();
   const promises = [];
-  const {watch, minify} = options;
   thirdPartyFrames.forEach((frameObject) => {
     promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, options)
+      thirdPartyBootstrap(frameObject.max, frameObject.min, minify)
     );
   });
   if (watch) {
     thirdPartyFrames.forEach((frameObject) => {
       const watchFunc = () => {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+        thirdPartyBootstrap(frameObject.max, frameObject.min, minify);
       };
       gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
     });
@@ -143,45 +153,46 @@ async function bootstrapThirdPartyFrames(options) {
 
 /**
  * Compile and optionally minify the core runtime.
- *
- * @param {!Object} options
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
  */
-async function compileCoreRuntime(options) {
-  await doBuildJs(jsBundles, 'amp.js', options);
+async function compileCoreRuntime(watch, minify) {
+  await doBuildJs(jsBundles, 'amp.js', {watch, minify});
 }
 
 /**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
- * @param {!Object} options
+ * @param {boolean} minify
  * @return {!Promise}
  */
-async function compileAllJs(options) {
-  const {minify} = options;
+async function compileAllJs(minify) {
   if (minify) {
     log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   } else {
     log('Compiling JS with', cyan('browserify') + '...');
   }
   const startTime = Date.now();
+  const {watch} = argv;
   await Promise.all([
-    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'alp.max.js', options),
-    doBuildJs(jsBundles, 'examiner.max.js', options),
-    doBuildJs(jsBundles, 'ww.max.js', options),
-    doBuildJs(jsBundles, 'integration.js', options),
-    doBuildJs(jsBundles, 'ampcontext-lib.js', options),
-    doBuildJs(jsBundles, 'iframe-transport-client-lib.js', options),
-    doBuildJs(jsBundles, 'recaptcha.js', options),
-    doBuildJs(jsBundles, 'amp-viewer-host.max.js', options),
-    doBuildJs(jsBundles, 'video-iframe-integration.js', options),
-    doBuildJs(jsBundles, 'amp-story-player.js', options),
-    doBuildJs(jsBundles, 'amp-inabox-host.js', options),
-    doBuildJs(jsBundles, 'amp-shadow.js', options),
-    doBuildJs(jsBundles, 'amp-inabox.js', options),
+    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
+    doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ampcontext-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'iframe-transport-client-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-story-player.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
   ]);
-  await compileCoreRuntime(options);
+  await compileCoreRuntime(watch, minify);
   endBuildStep(
     minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
@@ -285,12 +296,10 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     }
     endBuildStep('Minified', name, timeInfo.startTime);
 
-    const target = path.basename(minifiedName, path.extname(minifiedName));
-    if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
+    if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
       await applyAmpConfig(
         maybeToEsmName(`${destDir}/${minifiedName}`),
-        /* localDev */ options.fortesting,
-        /* fortesting */ options.fortesting
+        /* localDev */ !!argv.fortesting
       );
     }
 
@@ -301,8 +310,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       altMainBundles.map(({name}) =>
         applyAmpConfig(
           maybeToEsmName(`dist/${name}.js`),
-          /* localDev */ options.fortesting,
-          /* fortesting */ options.fortesting
+          /* localDev */ !!argv.fortesting
         )
       )
     );
@@ -434,12 +442,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         endBuildStep('Compiled', name, startTime);
       })
       .then(() => {
-        const target = path.basename(destFilename, path.extname(destFilename));
-        if (UNMINIFIED_TARGETS.includes(target)) {
+        if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return applyAmpConfig(
             `${destDir}/${destFilename}`,
-            /* localDev */ true,
-            /* fortesting */ options.fortesting
+            /* localDev */ true
           );
         }
       });
@@ -555,13 +561,11 @@ function printNobuildHelp() {
  * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
  * fortesting mode. Called by "gulp build" and "gulp dist" while building
  * various runtime files.
- *
  * @param {string} targetFile File to which the config is to be written.
  * @param {boolean} localDev Whether or not to enable local development.
- * @param {boolean} fortesting Whether or not to enable testing mode.
  * @return {!Promise}
  */
-async function applyAmpConfig(targetFile, localDev, fortesting) {
+async function applyAmpConfig(targetFile, localDev) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -574,7 +578,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
       /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
       /* opt_branch */ false,
-      /* opt_fortesting */ fortesting
+      /* opt_fortesting */ !!argv.fortesting
     );
   });
 }
@@ -599,11 +603,10 @@ function concatFilesToString(files) {
  *
  * @param {string} input
  * @param {string} outputName
- * @param {!Object} options
+ * @param {boolean} minify
  * @return {!Promise}
  */
-function thirdPartyBootstrap(input, outputName, options) {
-  const {minify, fortesting} = options;
+function thirdPartyBootstrap(input, outputName, minify) {
   if (!minify) {
     return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
   }
@@ -612,7 +615,7 @@ function thirdPartyBootstrap(input, outputName, options) {
   // actual frame host for the JS inside the frame.
   // But during testing we need a relative reference because the
   // version is not available on the absolute path.
-  const integrationJs = fortesting
+  const integrationJs = argv.fortesting
     ? './f.js'
     : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.

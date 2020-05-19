@@ -489,7 +489,6 @@ export class ConsentUI {
             'consentStateValue': getConsentStateValue(
               consentInfo['consentState']
             ),
-            'consentMetadata': consentInfo['consentMetadata'],
             'consentString': consentInfo['consentString'],
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],

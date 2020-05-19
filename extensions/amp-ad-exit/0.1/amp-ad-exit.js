@@ -270,7 +270,12 @@ export class AmpAdExit extends AMP.BaseElement {
       }
     }
     return (url) =>
-      replacements.expandUrlSync(url, substitutionFunctions, whitelist);
+      replacements.expandUrlSync(
+        url,
+        substitutionFunctions,
+        undefined /* opt_collectVars */,
+        whitelist
+      );
   }
 
   /**

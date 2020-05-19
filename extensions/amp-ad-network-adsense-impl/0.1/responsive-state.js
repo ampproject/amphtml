@@ -29,7 +29,6 @@ import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -167,6 +166,9 @@ export class ResponsiveState {
    * @return {?Promise} a promise that resolves when ad size settings are updated, or null if no listener was attached.
    */
   static maybeAttachSettingsListener(element, iframe, adClientId) {
+    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
+      return null;
+    }
     let promiseResolver;
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
@@ -174,31 +176,24 @@ export class ResponsiveState {
     const win = toWin(element.ownerDocument.defaultView);
 
     const listener = (event) => {
-      const data = getData(event);
-      let dataList = null;
-      if (typeof data == 'string') {
-        dataList = tryParseJson(data);
-      } else if (typeof data == 'object') {
-        dataList = data;
-      }
-      if (dataList == null) {
+      if (event['source'] != iframe.contentWindow) {
         return;
       }
-
-      // dataList will look like this:
+      const data = getData(event);
+      // data will look like this:
       // {
       //   'googMsgType': 'adsense-settings',
       //   'adClient': 'ca-pub-123',
       //   'enableAutoAdSize': '1'
       // }
-      if (!!dataList && dataList['googMsgType'] != 'adsense-settings') {
+      if (!!data && data['googMsgType'] != 'adsense-settings') {
         return;
       }
-      if (dataList['adClient'] != adClientId) {
+      if (data['adClient'] != adClientId) {
         return;
       }
 
-      const autoAdSizeStatus = dataList['enableAutoAdSize'] == '1';
+      const autoAdSizeStatus = data['enableAutoAdSize'] == '1';
       win.removeEventListener('message', listener);
 
       Services.storageForDoc(element)

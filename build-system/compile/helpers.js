@@ -21,7 +21,7 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 
-function getSourceMapBase(options) {
+function getSourceMapBase() {
   if (argv.sourcemap_url) {
     // Custom sourcemap URLs have placeholder {version} that should be
     // replaced with the actual version. Also, ensure trailing slash exists.
@@ -29,15 +29,15 @@ function getSourceMapBase(options) {
       .replace(/\{version\}/g, internalRuntimeVersion)
       .replace(/([^/])$/, '$1/');
   }
-  if (options.fortesting) {
+  if (argv.fortesting) {
     return 'http://localhost:8000/';
   }
   return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;
 }
 
-function writeSourcemaps(options) {
+function writeSourcemaps() {
   return sourcemaps.write('.', {
-    sourceRoot: getSourceMapBase(options),
+    sourceRoot: getSourceMapBase(),
     includeContent: !!argv.full_sourcemaps,
   });
 }

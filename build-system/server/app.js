@@ -939,7 +939,6 @@ app.get(
     '/examples/(**/)?*.html',
     '/test/manual/(**/)?*.html',
     '/test/fixtures/e2e/(**/)?*.html',
-    '/test/fixtures/performance/(**/)?*.html',
   ],
   (req, res, next) => {
     const filePath = req.path;

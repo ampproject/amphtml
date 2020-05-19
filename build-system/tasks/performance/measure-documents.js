@@ -28,12 +28,7 @@ const {
   getLocalPathFromExtension,
   localFileToCachePath,
 } = require('./helpers');
-const {
-  setupAnalyticsHandler,
-  getAnalyticsMetrics,
-} = require('./analytics-handler');
 const {cyan, green} = require('ansi-colors');
-const {setupAdRequestHandler} = require('./ads-handler');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -81,6 +76,30 @@ const setupMeasurement = (page) =>
       entryTypes: ['largest-contentful-paint'],
     });
   });
+
+/**
+ * Matches intercepted request with special analytics parameter
+ * and records first outgoing analytics request, using callback.
+ * Abort all requests, to not ping real servers.
+ *
+ * @param {Request} interceptedRequest
+ * @param {string} analyticsParam
+ * @param {!Function} setEndTimeCallback
+ * @return {!Promise<boolean>}
+ */
+async function handleAnalyticsRequests(
+  interceptedRequest,
+  analyticsParam,
+  setEndTimeCallback
+) {
+  const interceptedUrl = interceptedRequest.url();
+  if (interceptedUrl.includes(analyticsParam)) {
+    setEndTimeCallback(Date.now());
+    interceptedRequest.abort();
+    return true;
+  }
+  return false;
+}
 
 /**
  * Intecepts requests for default extensions made by runtime,
@@ -202,22 +221,35 @@ function setupDefaultHandlers(handlersList, version) {
  * @param {?Object} handlerOptions
  * @param {!Puppeteer.page} page
  * @param {!function} resolve
- * @param {string} version
  */
 async function setupAdditionalHandlers(
   handlersList,
   handlerOptions,
   page,
-  resolve,
-  version
+  resolve
 ) {
   switch (handlerOptions.handlerName) {
-    case 'adsHandler':
-      setupAdRequestHandler(handlersList, version);
-      setupAnalyticsHandler(handlersList, handlerOptions, resolve);
-      break;
     case 'analyticsHandler':
-      setupAnalyticsHandler(handlersList, handlerOptions, resolve);
+      // Set up timing
+      Object.assign(handlerOptions, {'startTime': Date.now()});
+      handlersList.push((interceptedRequest) =>
+        handleAnalyticsRequests(
+          interceptedRequest,
+          Object.keys(handlerOptions.extraUrlParam)
+            .map((key) => `${key}=${handlerOptions.extraUrlParam[key]}`)
+            .toString(),
+          (endTime) => {
+            if (!handlerOptions.endTime) {
+              Object.assign(handlerOptions, {
+                endTime,
+                'timeout': 0,
+              });
+              // Resolve and short circuit setTimeout
+              resolve();
+            }
+          }
+        )
+      );
       break;
     case 'defaultHandler':
       await setupMeasurement(page);
@@ -255,12 +287,33 @@ function startRequestListener(handlersList, page) {
  */
 async function addHandlerMetric(handlerOptions, page) {
   switch (handlerOptions.handlerName) {
-    case 'adsHandler':
     case 'analyticsHandler':
-      return getAnalyticsMetrics(handlerOptions);
+      return getAnalyticsMetric(handlerOptions);
     case 'defaultHandler':
       return await readMetrics(page);
   }
+}
+
+/**
+ * If reqest didn't fire, don't include any value for
+ * analyticsRequest.
+ *
+ * @param {?Object} analyticsHandlerOptions
+ * @return {!Object}
+ */
+function getAnalyticsMetric(analyticsHandlerOptions) {
+  const {endTime, startTime} = analyticsHandlerOptions;
+  const analyticsMetric = {};
+  // If there is no end time, that means that request didn't fire.
+  let requestsFailed = 0;
+  if (!endTime) {
+    requestsFailed++;
+  } else {
+    analyticsMetric['analyticsRequest'] = endTime - startTime;
+  }
+  // `percentRequestsFailed` because we take the mean rather than sum
+  analyticsMetric['percentRequestsFailed'] = requestsFailed;
+  return analyticsMetric;
 }
 
 /**
@@ -318,8 +371,7 @@ async function measureDocument(url, version, config) {
     handlersList,
     handlerOptionsForUrl,
     page,
-    resolve,
-    version
+    resolve
   );
   startRequestListener(handlersList, page);
   try {

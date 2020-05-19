@@ -18,7 +18,6 @@
 // LocalizedStringId enum values and any other strings.
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
-import {Services} from '../services';
 import {closest} from '../dom';
 
 /**
@@ -96,11 +95,6 @@ export class LocalizationService {
     this.element_ = element;
 
     /**
-     * @private @const {?string}
-     */
-    this.viewerLanguageCode_ = Services.viewerForDoc(element).getParam('lang');
-
-    /**
      * A mapping of language code to localized string bundle.
      * @private @const {!Object<string, !../localized-strings.LocalizedStringBundleDef>}
      */
@@ -115,13 +109,7 @@ export class LocalizationService {
   getLanguageCodesForElement_(element) {
     const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
-    const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
-
-    if (this.viewerLanguageCode_) {
-      languageCodesToUse.unshift(this.viewerLanguageCode_);
-    }
-
-    return languageCodesToUse;
+    return getLanguageCodesFromString(languageCode || '');
   }
 
   /**

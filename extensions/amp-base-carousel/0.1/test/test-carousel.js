@@ -98,7 +98,6 @@ describes.realWin('carousel implementation', {}, (env) => {
 
     element.appendChild(scrollContainer);
     doc.body.appendChild(element);
-    element.getAmpDoc = () => env.ampdoc;
   });
 
   afterEach(() => {

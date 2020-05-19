@@ -147,12 +147,6 @@ const targetMatchers = {
   'PACKAGE_UPGRADE': (file) => {
     return file == 'package.json' || file == 'yarn.lock';
   },
-  'RUNTIME': (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return file.startsWith('src/');
-  },
   'SERVER': (file) => {
     if (isOwnersFile(file)) {
       return false;

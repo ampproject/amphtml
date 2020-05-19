@@ -1105,20 +1105,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       const parentEl = mediaEl.parentElement;
-      let promise = Promise.resolve();
+      let layoutPromise = Promise.resolve();
       if (
         parentEl.tagName === 'AMP-VIDEO' ||
-        (parentEl.tagName === 'AMP-AUDIO' &&
-          parentEl.getAttribute('layout') !== Layout.NODISPLAY)
+        parentEl.tagName === 'AMP-AUDIO'
       ) {
-        promise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
-      } else if (
-        parentEl.tagName === 'AMP-AUDIO' &&
-        parentEl.getAttribute('layout') === Layout.NODISPLAY
-      ) {
-        promise = parentEl.signals().whenSignal(CommonSignals.BUILT);
+        layoutPromise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
       }
-      return promise.then(() => {
+      return layoutPromise.then(() => {
         mediaPool.register(
           /** @type {!./media-pool.DomElementDef} */ (mediaEl)
         );

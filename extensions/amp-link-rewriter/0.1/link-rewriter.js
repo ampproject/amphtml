@@ -162,6 +162,7 @@ export class LinkRewriter {
       this.rewrittenUrl_,
       /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
       {DOCUMENT_REFERRER: this.referrer_},
+      undefined,
       PAGE_PROP_WHITELIST
     );
   }

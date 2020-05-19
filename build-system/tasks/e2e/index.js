@@ -24,7 +24,7 @@ const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
-  buildRuntime,
+  buildMinifiedRuntime,
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
@@ -43,7 +43,7 @@ async function launchWebServer_() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.debug},
-    {compiled: argv.compiled}
+    {compiled: true}
   );
 }
 
@@ -84,7 +84,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    await buildRuntime();
+    buildMinifiedRuntime();
   }
 
   // start up web server
@@ -151,10 +151,8 @@ e2e.flags = {
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'core_runtime_only': '  Builds only the core runtime.',
-  'nobuild':
-    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'extensions': '  Builds only the listed extensions.',
-  'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
