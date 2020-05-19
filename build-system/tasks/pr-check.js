@@ -115,15 +115,10 @@ async function prCheck(cb) {
     runCheck('gulp validator');
   }
 
-  if (buildTargets.has('VALIDATOR_JAVA')) {
-    // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-    console.log(
-      `${FILELOGPREFIX} Skipping`,
-      colors.cyan('Java Validator Tests'),
-      'temporarily because the Ubuntu keyserver is down.'
-    );
+  // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
+  // if (buildTargets.has('VALIDATOR_JAVA')) {
     // runCheck('gulp validator-java');
-  }
+  // }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');
