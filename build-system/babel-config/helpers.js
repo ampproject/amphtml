@@ -66,7 +66,7 @@ function getReplacePlugin() {
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach((experiment) => {
     const experimentDefine =
-      experimentsConfig[experiment]['defineExperimentConstant'];
+      experimentsConfig[experiment]['define_experiment_constant'];
     const flagExists = (element) =>
       element['identifierName'] === experimentDefine;
     // only add default replacement if it already doesn't exist in array

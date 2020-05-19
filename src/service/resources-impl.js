@@ -647,7 +647,6 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
-    this.maybeChangeHeight_ = true;
     dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }
@@ -686,7 +685,9 @@ export class ResourcesImpl {
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     const firstPassAfterDocumentReady =
-      this.documentReady_ && this.firstPassAfterDocumentReady_;
+      this.documentReady_ &&
+      this.firstPassAfterDocumentReady_ &&
+      this.ampInitialized_;
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
