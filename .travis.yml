@@ -36,7 +36,6 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
-      - pkg-config
   chrome: stable
   hosts:
     - ads.localhost
