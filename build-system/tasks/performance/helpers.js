@@ -20,6 +20,7 @@ const path = require('path');
 
 const CDN_URL = 'https://cdn.ampproject.org/';
 const V0_PATH = '/dist/v0.js';
+const INABOX_PATH = '/dist/amp4ads-v0.js';
 const LOCAL_PATH_REGEXP = /dist\/(v0\/amp-[A-Za-z\-0-9\.]+.js)/;
 const ANALYTICS_VENDORS_PATH = '../../../dist/v0/analytics-vendors/';
 const CONTROL = 'control';
@@ -148,13 +149,14 @@ function getFileFromAbsolutePath(filePath) {
 }
 
 module.exports = {
-  V0_PATH,
   CDN_URL,
   CONTROL,
   DEFAULT_EXTENSIONS,
   EXPERIMENT,
+  INABOX_PATH,
   LOCAL_PATH_REGEXP,
   RESULTS_PATH,
+  V0_PATH,
   copyToCache,
   downloadToDisk,
   getFileFromAbsolutePath,
