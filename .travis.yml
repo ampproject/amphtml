@@ -100,6 +100,9 @@ jobs:
         - ps -ef
     - stage: test
       name: 'End to End Tests'
+      before_script:
+        # fix chromedriver version until giggio/node-chromedriver/pull/267 is merged
+        - bundle exec chromedriver-update 83.0.4103.39
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
       env:
