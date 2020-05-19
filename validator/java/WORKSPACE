@@ -58,7 +58,11 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 maven_install(
     artifacts = [
 	"com.google.code.findbugs:jsr305:3.0.2",
-	"org.json:json:20190722",
+	"com.fasterxml.jackson.core:jackson-annotations:2.11.0",
+	"com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.11.0",
+	"com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.11.0",
+	"com.fasterxml.jackson.core:jackson-databind:2.11.0",
+	"com.fasterxml.jackson.core:jackson-core:2.11.0",
 	"net.sourceforge.cssparser:cssparser:0.9.27",
 	"org.w3c.css:sac:1.3",
 	"org.testng:testng:6.8",

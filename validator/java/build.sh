@@ -18,7 +18,8 @@
 set -e # Exit on error
 bazel clean
 bazel run //:fetchAMPResources
-bazel build //:amphtml_validator_java_proto_lib
+bazel build -s //:amphtml_validator_java_proto_lib
 bazel run //:copyValidatorJavaSource
-bazel build //:amphtml_validator_lib
-bazel build //:amphtml_validator_test
+bazel build -s //:amphtml_validator_lib
+bazel build -s //:amphtml_validator_test
+

@@ -94,9 +94,8 @@ public class AMPHtmlParser {
             parser.parse(new InputSource(new StringReader(inputHtml)));
         } catch (IOException | SAXException ex) {
             final ValidatorProtos.ValidationResult.Builder result = handler.validationResult();
+            result.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
             if (result.getErrorsCount() == 0) {
-                result.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
-
                 ValidatorProtos.ValidationError.Builder error = ValidatorProtos.ValidationError.newBuilder();
                 error.setSeverity(ValidatorProtos.ValidationError.Severity.ERROR);
                 error.setCode(ValidatorProtos.ValidationError.Code.UNKNOWN_CODE);

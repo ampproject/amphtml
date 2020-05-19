@@ -21,14 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import dev.amp.validator.ValidatorProtos;
-import dev.amp.validator.Context;
-import dev.amp.validator.ParsedAttrSpec;
-import dev.amp.validator.ParsedAttrSpecs;
-import dev.amp.validator.ParsedHtmlTag;
-import dev.amp.validator.ParsedTagSpec;
-import dev.amp.validator.ParsedValidatorRules;
-import dev.amp.validator.TagStack;
+import dev.amp.validator.*;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
 import org.mockito.ArgumentCaptor;
@@ -134,7 +127,8 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
+    ValidateTagResult result =
+      new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -205,8 +199,8 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = ValidatorProtos.ValidationResult.newBuilder();
-
+    result =
+      new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
     } catch (TagValidationException | IOException | CssValidationException e) {
@@ -268,7 +262,8 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = ValidatorProtos.ValidationResult.newBuilder();
+    result =
+      new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -334,7 +329,8 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("BASE");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = ValidatorProtos.ValidationResult.newBuilder();
+    result =
+      new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
