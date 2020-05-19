@@ -36,7 +36,6 @@ const {runYarnChecks} = require('./yarn-checks');
 const FILENAME = 'validator-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
