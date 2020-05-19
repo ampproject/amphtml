@@ -3526,7 +3526,7 @@ function validateAttrValueProperties(
     }
     const propertySpec = valuePropertyByName[name];
     if (propertySpec.value !== null) {
-      if (propertySpec.value !== value.toLowerCase()) {
+      if (propertySpec.value !== value.trim().toLowerCase()) {
         context.addError(
             generated.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
             context.getLineCol(),
