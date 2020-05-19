@@ -74,6 +74,24 @@ public class ValidateTagResult {
         this.validationResult = validationResult;
     }
 
+
+    /**
+     * Setter for inlineStyleCssBytes
+     *
+     * @param inlineStyleCssBytes the allowed byte length for css
+     */
+    public void setInlineStyleCssBytes(final int inlineStyleCssBytes) {
+      this.inlineStyleCssBytes = inlineStyleCssBytes;
+    }
+
+    /**
+     * Getter for inlineStyleCssBytes
+     * @return the allowed byte length for css
+     */
+    public int getInlineStyleCssBytes() {
+      return inlineStyleCssBytes;
+    }
+
     /**
      * Validation result.
      */
@@ -83,4 +101,9 @@ public class ValidateTagResult {
      * Best match tag spec.
      */
     private ParsedTagSpec bestMatchTagSpec;
+
+    /**
+     * inline style allowed byte length
+     */
+    private int inlineStyleCssBytes;
 }

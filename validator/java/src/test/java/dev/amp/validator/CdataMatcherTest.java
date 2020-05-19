@@ -23,7 +23,6 @@ package dev.amp.validator;
 
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
-import dev.amp.validator.utils.CssSpecUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -411,7 +410,6 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getLineCol()).thenReturn(locator);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
-        Mockito.when(mockTagStack.isStyleAmpCustomChild()).thenReturn(true);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);

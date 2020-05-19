@@ -89,10 +89,12 @@ public class ReferencePointMatcher {
             if (!parsedTagSpec.isUsedForTypeIdentifiers(context.getTypeIdentifiers())) {
                 continue;
             }
-            ValidatorProtos.ValidationResult.Builder resultForAttempt =
+            // TODO (GeorgeLuo) : refactor here to handle InlineStyleCssBytes
+            //  changes (5/3/2020)
+            final ValidateTagResult resultForAttemptWrapper =
                     TagSpecUtils.validateTagAgainstSpec(
                     parsedTagSpec, /*bestMatchReferencePoint=*/null, context, tag);
-
+            final ValidatorProtos.ValidationResult.Builder resultForAttempt = resultForAttemptWrapper.getValidationResult();
             if (context.getRules().betterValidationResultThan(resultForAttempt, resultForBestAttempt)) {
                 resultForBestAttempt = resultForAttempt;
             }

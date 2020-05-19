@@ -459,7 +459,6 @@ public class TagStackTest {
                 .getByTagSpecId("test_satisfies_parent_head"));
         Assert.assertEquals(tagStack.parentStackEntry().getTagSpec(),
                 mockValidatorRules.getByTagSpecId("test_satisfies"));
-        Assert.assertFalse(tagStack.isStyleAmpCustomChild());
     }
 
     @Test
@@ -515,7 +514,6 @@ public class TagStackTest {
                 .getByTagSpecId("test_satisfies"));
         Assert.assertEquals(tagStack.parentStackEntry().getTagSpec(),
                 mockValidatorRules.getByTagSpecId("test_satisfies_parent_head"));
-        Assert.assertTrue(tagStack.isStyleAmpCustomChild());
 
         Assert.assertTrue(tagStack.parentStackEntry().getHasDescendantConstraintLists());
         Assert.assertEquals(tagStack.allowedDescendantsList().size(), 1);
