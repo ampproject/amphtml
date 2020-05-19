@@ -4,9 +4,86 @@
     "supportPolicy": ["lts_active"]
   },
   "statusCheckVerify": true,
+  "ignorePaths": [],
+
   "commitMessagePrefix": "📦",
-  "dependencies": {
-    "enabled": false
-  },
-  "ignorePaths": []
+  "timezone": "America/Los_Angeles",
+  "schedule": "at any time",
+
+  "masterIssue": true,
+  "masterIssueApproval": true,
+
+  "separateMinorPatch": true,
+  "packageRules": [
+    {
+      "updateTypes": ["minor"],
+      "groupName": "subpackage dependencies"
+    },
+    {
+      "updateTypes": ["patch", "pin"],
+      "groupName": "subpackage dependencies"
+    },
+
+    {
+      "paths": ["src/**"],
+      "updateTypes": ["minor"],
+      "groupName": "runtime dependencies",
+      "labels": ["WG: runtime"]
+    },
+    {
+      "paths": ["src/**"],
+      "updateTypes": ["patch", "pin"],
+      "groupName": "runtime dependencies",
+      "labels": ["WG: runtime"]
+    },
+
+    {
+      "paths": ["build-system/**"],
+      "updateTypes": ["minor"],
+      "groupName": "build system dependencies",
+      "labels": ["WG: infra"]
+    },
+    {
+      "paths": ["build-system/**"],
+      "updateTypes": ["patch", "pin"],
+      "groupName": "build system dependencies",
+      "labels": ["WG: infra"]
+    },
+
+    {
+      "paths": ["validator/**"],
+      "updateTypes": ["minor"],
+      "groupName": "validator dependencies",
+      "labels": ["WG: caching"]
+    },
+    {
+      "paths": ["validator/**"],
+      "updateTypes": ["patch", "pin"],
+      "groupName": "validator dependencies",
+      "labels": ["WG: caching"]
+    },
+
+    {
+      "paths": ["+(package.json)"],
+      "updateTypes": ["minor"],
+      "groupName": "core dependencies"
+    },
+    {
+      "paths": ["+(package.json)"],
+      "updateTypes": ["patch", "pin"],
+      "groupName": "core dependencies"
+    },
+
+    {
+      "depTypeList": ["dependencies"],
+      "enabled": false
+    },
+
+    {
+      "updateTypes": ["minor", "patch", "pin"],
+      "packagePatterns": ["^@ampproject/"],
+      "groupName": "ampproject dependencies",
+      "depTypeList": ["dependencies", "devDependencies"]
+    }
+  ]
 }

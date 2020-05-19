@@ -18,10 +18,9 @@ import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
+import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isCookieAllowed} from './cookie-reader';
-import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
@@ -73,10 +72,7 @@ export class CookieWriter {
       const task = () => {
         this.writeDeferred_.resolve(this.init_());
       };
-      if (
-        isExperimentOn(this.win_, 'analytics-chunks') &&
-        getMode(this.win_).runtime != 'inabox'
-      ) {
+      if (isAnalyticsChunksExperimentOn(this.win_)) {
         chunk(this.element_, task, ChunkPriority.LOW);
       } else {
         task();
