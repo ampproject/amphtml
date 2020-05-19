@@ -12,6 +12,7 @@
 
   "masterIssue": true,
   "masterIssueApproval": true,
+  "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
 
   "separateMinorPatch": true,
   "packageRules": [
@@ -72,6 +73,14 @@
       "paths": ["+(package.json)"],
       "updateTypes": ["patch", "pin"],
       "groupName": "core dependencies"
+    },
+
+    {
+      "packagePatterns": ["\\b(prettier|eslint)\\b"],
+      "groupName": "linting dependencies",
+      "prBodyNotes": [
+        "This PR upgrades one or more packages used to ensure code formatting. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build."
+      ]
     },
 
     {
