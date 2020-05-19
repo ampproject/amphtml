@@ -31,7 +31,7 @@ export function iprom(global, data) {
     const {sitepath, zone} = data;
     const ipromNS = window.ipromNS || {};
 
-    ipromNSAdTag = ipromNS.AdTag || {};
+    ipromNS.AdTag = ipromNS.AdTag || {};
 
     const config = {
       sitePath: parseJson(sitepath),
