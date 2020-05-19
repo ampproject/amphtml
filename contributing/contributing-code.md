@@ -209,4 +209,8 @@ The following outlines the process to request a cherry-pick.
 
 **If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to cherry-pick both release channels.
 
+**It is possible that a P0 issue gets _discovered_ on Monday or Tuesday, when it was _already present_ in the code-base in the previous week.** When that happens, the previous week's **nightly** release (which is bound to be promoted to **experimental**/**beta** on Tuesday morning) will contain the offending code without the fix. In this case, the release on-duty engineer must perform a cherry-pick before promoting last week's **nightly** to **experimental**/**beta**.
+
+> Note: While the cherry-pick is performed on top of last week's **nightly** release, we do not promote that fix to the **nightly** release channel. This is because the cherry-pick is performed on top of a previous nightly release, not on top of the latest.
+
 If you run into any issues or have any questions when requesting a cherry-pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
