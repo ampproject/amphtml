@@ -21,16 +21,15 @@
 
 package dev.amp.validator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.ExitOnFirstErrorException;
 import dev.amp.validator.exception.MaxParseNodesException;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
-import dev.amp.validator.utils.ByteUtils;
 import dev.amp.validator.utils.TagSpecUtils;
-import org.json.JSONObject;
-import org.json.JSONException;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -40,7 +39,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Validation handler which accepts callbacks from HTML parser.
@@ -148,30 +146,6 @@ public class AMPHtmlHandler extends DefaultHandler {
 
         if (encounteredTag.upperName().equals("BODY")) {
             this.emitMissingExtensionErrors();
-        }
-
-        Map<String, String> attrsByKey = encounteredTag.attrsByKey();
-        String styleAttr = attrsByKey.get("style");
-        if (styleAttr != null) {
-            int styleLen = ByteUtils.byteLength(styleAttr);
-            this.context.addInlineStyleByteSize(styleLen);
-            for (ValidatorProtos.CssLengthSpec cssLengthSpec : this.context.getRules().getCssLengthSpec()) {
-                if (cssLengthSpec.getMaxBytesPerInlineStyle() != -1
-                        && styleLen > cssLengthSpec.getMaxBytesPerInlineStyle()) {
-
-                    List<String> params = new ArrayList<>();
-                    params.add(encounteredTag.lowerName());
-                    params.add(Integer.toString(styleLen));
-                    params.add(Integer.toString(cssLengthSpec.getMaxBytesPerInlineStyle()));
-
-                    this.context.addError(
-                            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
-                            this.context.getLineCol(), params,
-                            cssLengthSpec.getSpecUrl(), this.validationResult);
-                    //TODO - tagchowder doesn't seem to maintain duplicate attributes.
-                    //encounteredTag.dedupeAttrs();
-                }
-            }
         }
 
         try {
@@ -317,8 +291,8 @@ public class AMPHtmlHandler extends DefaultHandler {
         if (!this.context.getTagStack().hasAncestor("TEMPLATE")
           && this.context.getTagStack().isScriptTypeJsonChild()) {
             try {
-                new JSONObject(text);
-            } catch (JSONException e) {
+                OBJECT_MAPPER.readTree(text);
+            } catch (JsonProcessingException e) {
                 List<String> params = new ArrayList<>();
                 this.context.addWarning(
                         ValidatorProtos.ValidationError.Code.INVALID_JSON_CDATA,
@@ -399,5 +373,10 @@ public class AMPHtmlHandler extends DefaultHandler {
      * Characters can be called multiple times per tag.
      */
     private StringBuilder charactersBuilder;
+
+    /**
+     * Jackson ObjectMapper instance.
+     */
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 }
 

@@ -21,30 +21,35 @@
 
 package dev.amp.validator.utils;
 
-import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
+import dev.amp.validator.Context;
+import dev.amp.validator.ParsedAttrSpec;
+import dev.amp.validator.UrlErrorInStylesheetAdapter;
+import dev.amp.validator.ValidateTagResult;
+import dev.amp.validator.ValidatorProtos;
+import dev.amp.validator.css.Canonicalizer;
+import dev.amp.validator.css.CssParser;
+import dev.amp.validator.css.CssTokenUtil;
+import dev.amp.validator.css.CssValidationException;
+import dev.amp.validator.css.Declaration;
+import dev.amp.validator.css.EOFToken;
+import dev.amp.validator.css.ErrorToken;
+import dev.amp.validator.css.ParsedCssUrl;
+import dev.amp.validator.css.ParsedDocCssSpec;
+import dev.amp.validator.css.Stylesheet;
+import dev.amp.validator.css.TokenType;
 import dev.amp.validator.visitor.Amp4AdsVisitor;
+import dev.amp.validator.visitor.ImportantPropertyVisitor;
 import dev.amp.validator.visitor.KeyframesVisitor;
 import dev.amp.validator.visitor.RuleVisitor;
 import dev.amp.validator.visitor.UrlFunctionVisitor;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static dev.amp.validator.css.CssTokenUtil.copyPosTo;
-import static dev.amp.validator.css.CssTokenUtil.getTokenType;
-
-import dev.amp.validator.css.ErrorToken;
-import dev.amp.validator.css.CssValidationException;
-import dev.amp.validator.css.TokenType;
-import dev.amp.validator.css.Stylesheet;
-import dev.amp.validator.css.Declaration;
-import dev.amp.validator.css.ParsedCssUrl;
-import dev.amp.validator.css.Canonicalizer;
-import dev.amp.validator.css.CssTokenUtil;
-import dev.amp.validator.css.EOFToken;
 
 /**
  * Methods to handle Css Spec processing.
@@ -100,15 +105,48 @@ public final class CssSpecUtils {
      */
     public static void extractUrls(@Nonnull final Stylesheet stylesheet, @Nonnull final List<ParsedCssUrl> parsedUrls,
                                    @Nonnull final List<ErrorToken> errors) throws CssValidationException {
-
-        final int parsedUrlsOldLength = parsedUrls.size();
         final int errorsOldLength = errors.size();
         final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedUrls, errors);
         stylesheet.accept(visitor);
         // If anything went wrong, delete the urls we've already emitted.
         if (errorsOldLength != errors.size()) {
+            final int parsedUrlsOldLength = parsedUrls.size();
             parsedUrls.subList(parsedUrlsOldLength, parsedUrls.size()).clear();
         }
+    }
+
+    /**
+     * Same as the stylesheet variant above, but operates on a single declaration at
+     * a time. Usedful when operating on parsed style attributes.
+     *
+     * @param declaration the decl to parse
+     * @param parsedUrls  collection of urls
+     * @param errors      reference
+     * @throws CssValidationException CssValidationException
+     */
+    public static void extractUrlsFromDeclaration(@Nonnull final Declaration declaration, @Nonnull final List<ParsedCssUrl> parsedUrls,
+                                                  @Nonnull final List<ErrorToken> errors) throws CssValidationException {
+        final int errorsOldLength = errors.size();
+        final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedUrls, errors);
+        declaration.accept(visitor);
+        // If anything went wrong, delete the urls we've already emitted.
+        if (errorsOldLength != errors.size()) {
+            final int parsedUrlsOldLength = parsedUrls.size();
+            parsedUrls.subList(parsedUrlsOldLength, parsedUrls.size()).clear();
+        }
+    }
+
+    /**
+     * Extracts the declarations marked `!important` within within the provided
+     * stylesheet, emitting them into `important`.
+     *
+     * @param stylesheet to walk through
+     * @param important  list to populate
+     */
+    public static void extractImportantDeclarations(@Nonnull final Stylesheet stylesheet,
+                                                    @Nonnull final List<Declaration> important) throws CssValidationException {
+        final ImportantPropertyVisitor visitor = new ImportantPropertyVisitor(important);
+        stylesheet.accept(visitor);
     }
 
     /**
@@ -163,7 +201,6 @@ public final class CssSpecUtils {
         return token.toString().toLowerCase().equals(str.toLowerCase());
     }
 
-
     /**
      * validate the keyframes of css content
      *
@@ -175,7 +212,6 @@ public final class CssSpecUtils {
                                             @Nonnull final List<ErrorToken> errors) throws CssValidationException {
         final RuleVisitor visitor = new KeyframesVisitor(errors);
         styleSheet.accept(visitor);
-
     }
 
     /**
@@ -235,11 +271,11 @@ public final class CssSpecUtils {
         }
         final Token token = tokens.get(tokenIdx);
 
-        if (getTokenType(token) != TokenType.URL) {
+        if (CssTokenUtil.getTokenType(token) != TokenType.URL) {
             throw new CssValidationException("Url token not within range of tokens");
         }
 
-        copyPosTo(token, parsed);
+        CssTokenUtil.copyPosTo(token, parsed);
         parsed.setUtf8Url(token.toString());
     }
 
@@ -259,8 +295,7 @@ public final class CssSpecUtils {
     public static int parseUrlFunction(@Nonnull final List<Token> tokens, int tokenIdx,
                                        @Nonnull final ParsedCssUrl parsed) throws CssValidationException {
         final Token token = tokens.get(tokenIdx);
-
-        if (getTokenType(token) != TokenType.FUNCTION_TOKEN) {
+        if (CssTokenUtil.getTokenType(token) != TokenType.FUNCTION_TOKEN) {
             throw new CssValidationException("Token at index is not a function token");
         }
 
@@ -268,11 +303,11 @@ public final class CssSpecUtils {
             throw new CssValidationException("Token value is not url");
         }
 
-        if (getTokenType(tokens.get(tokens.size() - 1)) != TokenType.EOF_TOKEN) {
+        if (CssTokenUtil.getTokenType(tokens.get(tokens.size() - 1)) != TokenType.EOF_TOKEN) {
             throw new CssValidationException("Last token is not EOF token");
         }
 
-        copyPosTo(token, parsed);
+        CssTokenUtil.copyPosTo(token, parsed);
         tokenIdx++; // We've digested the function token above.
         // Safe: tokens ends w/ EOF_TOKEN.
         if (tokenIdx >= tokens.size()) {
@@ -280,7 +315,7 @@ public final class CssSpecUtils {
         }
 
         // Consume optional whitespace.
-        while (getTokenType(tokens.get(tokenIdx)) == TokenType.WHITESPACE) {
+        while (CssTokenUtil.getTokenType(tokens.get(tokenIdx)) == TokenType.WHITESPACE) {
             tokenIdx++;
             // Safe: tokens ends w/ EOF_TOKEN.
             if (tokenIdx >= tokens.size()) {
@@ -289,7 +324,7 @@ public final class CssSpecUtils {
         }
 
         // Consume URL.
-        if (getTokenType(tokens.get(tokenIdx)) != TokenType.STRING) {
+        if (CssTokenUtil.getTokenType(tokens.get(tokenIdx)) != TokenType.STRING) {
             return -1;
         }
         parsed.setUtf8Url((tokens.get(tokenIdx).toString()));
@@ -301,7 +336,7 @@ public final class CssSpecUtils {
         }
 
         // Consume optional whitespace.
-        while (getTokenType(tokens.get(tokenIdx)) == TokenType.WHITESPACE) {
+        while (CssTokenUtil.getTokenType(tokens.get(tokenIdx)) == TokenType.WHITESPACE) {
             tokenIdx++;
             // Safe: tokens ends w/ EOF_TOKEN.
             if (tokenIdx >= tokens.size()) {
@@ -310,7 +345,7 @@ public final class CssSpecUtils {
         }
 
         // Consume ')'
-        if (getTokenType(tokens.get(tokenIdx)) != TokenType.CLOSE_PAREN) {
+        if (CssTokenUtil.getTokenType(tokens.get(tokenIdx)) != TokenType.CLOSE_PAREN) {
             return -1;
         }
         return tokenIdx + 1;
@@ -333,20 +368,216 @@ public final class CssSpecUtils {
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);
     }
 
-    /** Max number of allowed declarations. */
+    /**
+     * Helper method for ValidateAttributes.
+     *
+     * @param parsedAttrSpec
+     * @param context
+     * @param tagSpec
+     * @param attrName
+     * @param attrValue
+     * @param result
+     * @throws IOException for css tokenize
+     */
+    public static void validateAttrCss(
+            @Nonnull final ParsedAttrSpec parsedAttrSpec,
+            @Nonnull final Context context,
+            @Nonnull final ValidatorProtos.TagSpec tagSpec,
+            @Nonnull final String attrName,
+            @Nonnull final String attrValue,
+            @Nonnull final ValidateTagResult result) throws IOException, CssValidationException {
+        final int attrByteLen = ByteUtils.byteLength(attrValue);
+
+        // Track the number of CSS bytes. If this tagspec is selected as the best
+        // match, this count will be added to the overall document inline style byte
+        // count for determining if that byte count has been exceeded.
+        result.setInlineStyleCssBytes(attrByteLen);
+
+        final List<ErrorToken> cssErrors = new ArrayList<>();
+        // The line/col we are passing in here is not the actual start point in the
+        // text for the attribute string. It's the start point for the tag. This
+        // means that any line/col values for tokens are also similarly offset
+        // incorrectly. For error messages, this means we just use the line/col of
+        // the tag instead of the token so as to minimize confusion. This could be
+        // improved further.
+        // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute
+        // attribute offsets for use in CSS error messages.
+        final CssParser cssParser = new CssParser(attrValue,
+                context.getLineCol().getLineNumber(), context.getLineCol().getColumnNumber(), cssErrors);
+        final List<Token> tokenList = cssParser.tokenize();
+
+        final List<Declaration> declarations = parseInlineStyle(tokenList, cssErrors);
+
+        for (final ErrorToken errorToken : cssErrors) {
+            // Override the first parameter with the name of this style tag.
+            final List<String> params = errorToken.getParams();
+            // Override the first parameter with the name of this style tag.
+            params.set(0, tagSpec.getTagName());
+            context.addError(
+                    errorToken.getCode(),
+                    errorToken.getLine(),
+                    errorToken.getCol(),
+                    params,
+                    /* url */ "",
+                    result.getValidationResult());
+        }
+
+        // If there were errors parsing, exit from validating further.
+        if (cssErrors.size() > 0) {
+            return;
+        }
+
+        final ParsedDocCssSpec maybeSpec = context.matchingDocCssSpec();
+        if (maybeSpec != null) {
+            // Determine if we've exceeded the maximum bytes per inline style
+            // requirements.
+            if (maybeSpec.getSpec().getMaxBytesPerInlineStyle() >= 0
+                    && attrByteLen > maybeSpec.getSpec().getMaxBytesPerInlineStyle()) {
+                List<String> params = new ArrayList<>();
+                params.add(TagSpecUtils.getTagSpecName(tagSpec));
+                params.add(Integer.toString(attrByteLen));
+                params.add(Integer.toString(maybeSpec.getSpec().getMaxBytesPerInlineStyle()));
+
+                if (maybeSpec.getSpec().getMaxBytesIsWarning()) {
+                    context.addWarning(
+                            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+                            context.getLineCol(), params,
+                            maybeSpec.getSpec().getSpecUrl(), result.getValidationResult());
+                    //TODO - tagchowder doesn't seem to maintain duplicate attributes.
+                    //encounteredTag.dedupeAttrs();
+                } else {
+                    context.addError(
+                            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+                            context.getLineCol(), params,
+                            maybeSpec.getSpec().getSpecUrl(), result.getValidationResult());
+                }
+            }
+
+            // Loop over the declarations found in the document, verify that they are
+            // in the allowed list for this DocCssSpec, and have allowed values if
+            // relevant.
+            for (final Declaration declaration : declarations) {
+                // Allowed declarations vary by context. SVG has its own set of CSS
+                // declarations not supported generally in HTML.
+                ValidatorProtos.CssDeclaration cssDeclaration = maybeSpec.getCssDeclarationByName(declaration.getName());
+                if (parsedAttrSpec.getSpec().getValueDocCss()) {
+                    cssDeclaration = maybeSpec.getCssDeclarationSvgByName(declaration.getName());
+                }
+                // If there is no matching declaration in the rules, then this declaration
+                // is not allowed.
+                if (cssDeclaration == null) {
+                    List<String> params = new ArrayList<>();
+                    params.add(declaration.getName());
+                    params.add(attrName);
+                    params.add(TagSpecUtils.getTagSpecName(tagSpec));
+
+                    context.addError(
+                            ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+                            context.getLineCol().getLineNumber() + declaration.getLine(),
+                            context.getLineCol().getColumnNumber() + declaration.getCol(),
+                            params,
+                            "",
+                            result.getValidationResult());
+                    // Don't emit additional errors for this declaration.
+                    continue;
+                } else if (cssDeclaration.getValueCaseiList().size() > 0) {
+                    boolean hasValidValue = false;
+                    final String firstIdent = declaration.firstIdent();
+                    for (final String value : cssDeclaration.getValueCaseiList()) {
+                        if (firstIdent.toLowerCase().equals(value)) {
+                            hasValidValue = true;
+                            break;
+                        }
+                    }
+                    if (!hasValidValue) {
+                        // Declaration value not allowed.
+                        List<String> params = new ArrayList<>();
+                        params.add(TagSpecUtils.getTagSpecName(tagSpec));
+                        params.add(declaration.getName());
+                        params.add(firstIdent);
+
+                        context.addError(
+                                ValidatorProtos.ValidationError.Code
+                                        .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                                context.getLineCol(),
+                                params,
+                                context.getRules().getStylesSpecUrl(), result.getValidationResult());
+                    }
+                }
+                if (!maybeSpec.getSpec().getAllowImportant()) {
+                    if (declaration.getImportant()) {
+                        // TODO(gregable): Use a more specific error message for
+                        // `!important` errors.
+                        List<String> params = new ArrayList<>();
+                        params.add(attrName);
+                        params.add(TagSpecUtils.getTagSpecName(tagSpec));
+                        params.add("CSS !important");
+
+                        context.addError(
+                                ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
+                                context.getLineCol(),
+                                params,
+                                context.getRules().getStylesSpecUrl(), result.getValidationResult());
+                    }
+                }
+
+                final List<ErrorToken> urlErrors = new ArrayList<>();
+                final List<ParsedCssUrl> parsedUrls = new ArrayList<>();
+                extractUrlsFromDeclaration(declaration, parsedUrls, urlErrors);
+                for (final ErrorToken errorToken : urlErrors) {
+                    // Override the first parameter with the name of the tag.
+                    List<String> params = errorToken.getParams();
+                    params.set(0, TagSpecUtils.getTagSpecName(tagSpec));
+
+                    context.addError(
+                            errorToken.getCode(), context.getLineCol(), params, "",
+                            result.getValidationResult());
+                }
+                if (urlErrors.size() > 0) {
+                    continue;
+                }
+                for (final ParsedCssUrl url : parsedUrls) {
+                    // Validate that the URL itself matches the spec.
+                    // Only image specs apply to inline styles. Fonts are only defined in
+                    // @font-face rules which we require a full stylesheet to define.
+                    if (maybeSpec.getSpec().hasImageUrlSpec()) {
+                        final UrlErrorInStylesheetAdapter adapter = new UrlErrorInStylesheetAdapter(
+                                context.getLineCol().getLineNumber(), context.getLineCol().getColumnNumber());
+                        AttributeSpecUtils.validateUrlAndProtocol(
+                                maybeSpec.getImageUrlSpec(), adapter, context, url.getUtf8Url(), tagSpec,
+                                result.getValidationResult());
+                    }
+                    // Subtract off URL lengths from doc-level inline style bytes, if
+                    // specified by the DocCssSpec.
+                    if (!maybeSpec.getSpec().getUrlBytesIncluded() && !UrlUtils.isDataUrl(url.getUtf8Url())) {
+                        result.setInlineStyleCssBytes(result.getInlineStyleCssBytes() - ByteUtils.byteLength(url.getUtf8Url()));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Max number of allowed declarations.
+     */
     private static final int MAX_NUM_ALLOWED_DECLARATIONS = 5;
 
-  /**
-   * Enum describing how to parse the rules inside a CSS AT Rule.
-   *
-   */
-  public enum BlockType {
-    /** Parse this simple block as a list of rules (Either Qualified Rules or AT Rules) */
-    PARSE_AS_RULES,
-    /** Parse this simple block as a list of declarations */
-    PARSE_AS_DECLARATIONS,
-    /** Ignore this simple block, do not parse. This is generally used
-     in conjunction with a later step emitting an error for this rule. */
-    PARSE_AS_IGNORE,
-  }
+    /**
+     * Enum describing how to parse the rules inside a CSS AT Rule.
+     */
+    public enum BlockType {
+        /**
+         * Parse this simple block as a list of rules (Either Qualified Rules or AT Rules)
+         */
+        PARSE_AS_RULES,
+        /**
+         * Parse this simple block as a list of declarations
+         */
+        PARSE_AS_DECLARATIONS,
+        /**
+         * Ignore this simple block, do not parse. This is generally used
+         * in conjunction with a later step emitting an error for this rule.
+         */
+        PARSE_AS_IGNORE,
+    }
 }
