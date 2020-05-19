@@ -27,7 +27,6 @@ const {
   startTimer,
   stopTimer,
   stopTimedJob,
-  timedExec: timedExecBase,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
