@@ -12,6 +12,13 @@
 
   "masterIssue": true,
   "masterIssueApproval": true,
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "Type",
+    "Change",
+    "Package file",
+  ],
 
   "separateMinorPatch": true,
   "packageRules": [
