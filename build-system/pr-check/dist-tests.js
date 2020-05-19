@@ -43,8 +43,8 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --headless');
-    timedExecOrDie('gulp unit --nobuild --headless');
+    timedExecOrDie('gulp integration --nobuild --headless --compiled');
+    timedExecOrDie('gulp unit --nobuild --headless --compiled');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -68,7 +68,9 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
+      timedExecOrDie(
+        'gulp unit --nobuild --headless --compiled --local_changes'
+      );
     }
 
     if (
@@ -76,11 +78,11 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp integration --nobuild --headless');
+      timedExecOrDie('gulp integration --nobuild --headless --compiled');
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless');
+      timedExecOrDie('gulp unit --nobuild --headless --compiled');
     }
   }
 
