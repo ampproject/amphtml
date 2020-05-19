@@ -199,7 +199,7 @@ We have a well-defined process for handling requests for changes to the **experi
 The following outlines the process to request a cherry-pick.
 
 - Ensure there is a [GitHub issue](https://github.com/ampproject/amphtml/issues/new/choose) filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
-- Escalate the issue to P0 by attaining consensus from one or more members of @ampproject/wg-approvers (if you are a member of this working group, you may not count your voice for concensus purposes)
+- Escalate the issue to P0 by attaining consensus from one or more members of the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers) (if you are a member of this working group, you may not count your voice for concensus purposes)
 - File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
 - Get the necessary approval for your cherry-pick, indicated via comments on the cherry-pick request issue.
   - For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick/rollback.
