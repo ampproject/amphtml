@@ -23,6 +23,8 @@ import {validateData, writeScript} from '../3p/3p';
 export function adhese(global, data) {
   validateData(data, ['location', 'format', 'account', 'requestType']);
   let targetParam = '';
+  const gctx = global.context;
+
   if (data['targeting']) {
     const targetList = data['targeting'];
     for (const category in targetList) {
@@ -35,6 +37,22 @@ export function adhese(global, data) {
       targetParam += '/';
     }
   }
+
+  if (gctx.consentSharedData) {
+    if (
+      gctx.consentSharedData.consentStateValue &&
+      gctx.consentSharedData.consentStateValue == 'accepted'
+    ) {
+      targetParam += 'tlall/';
+    }
+    if (
+      gctx.consentSharedData.consentString &&
+      gctx.consentSharedData.consentString !== ''
+    ) {
+      targetParam += 'xt' + gctx.consentSharedData.consentString + '/';
+    }
+  }
+
   targetParam += '?t=' + Date.now();
   writeScript(
     window,
@@ -50,6 +68,7 @@ export function adhese(global, data) {
       '/' +
       targetParam
   );
+
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
