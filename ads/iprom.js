@@ -29,6 +29,7 @@ export function iprom(global, data) {
    */
   function namespaceLoaded() {
     const {sitepath, zone} = data;
+    
     const ipromNS = window.ipromNS || {};
 
     ipromNS.AdTag = ipromNS.AdTag || {};
@@ -43,7 +44,7 @@ export function iprom(global, data) {
       channels: data.channels ? data.channels.split(',') : [],
     };
 
-    const tag = new window.ipromNS.AdTag(config);
+    const tag = new ipromNS.AdTag(config);
     tag.init();
   }
 
