@@ -505,6 +505,7 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.slot = 'i-amphtml-sizer';
     setStyles(sizer, {
       paddingTop:
         (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
