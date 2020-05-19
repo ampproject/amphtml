@@ -36,9 +36,10 @@ async function performance() {
   installPackages(__dirname);
   const config = new loadConfig();
   const urls = Object.keys(config.urlToHandlers);
-  await cacheDocuments(urls);
-  await compileScripts(urls);
-  await rewriteScriptTags(urls);
+  const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
+  await cacheDocuments(urlsAndAdsUrls);
+  await compileScripts(urlsAndAdsUrls);
+  await rewriteScriptTags(urlsAndAdsUrls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
   printReport(urls);
