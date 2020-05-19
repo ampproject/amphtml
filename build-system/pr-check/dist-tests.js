@@ -44,21 +44,19 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --headless --compiled');
-    timedExecOrDie('gulp unit --nobuild --headless --compiled');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('UNIT_TEST') &&
       !buildTargets.has('INTEGRATION_TEST')
     ) {
       console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Dist Tests'),
         'because this commit not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
+        'or integration tests.'
       );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
@@ -67,22 +65,12 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie(
-        'gulp unit --nobuild --headless --compiled --local_changes'
-      );
-    }
-
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp integration --nobuild --headless --compiled');
-    }
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --compiled');
     }
   }
 
