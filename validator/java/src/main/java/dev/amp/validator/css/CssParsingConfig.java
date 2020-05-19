@@ -21,7 +21,6 @@
 
 package dev.amp.validator.css;
 
-import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.utils.CssSpecUtils;
 
 import javax.annotation.Nonnull;

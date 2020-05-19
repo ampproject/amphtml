@@ -131,13 +131,6 @@ public class ParsedValidatorRulesTest {
         rulesBuilder.setStylesSpecUrl(STYLES_SPEC_URL);
         rulesBuilder.setScriptSpecUrl(SCRIPT_SPEC_URL);
         rulesBuilder.setTemplateSpecUrl(TEMPLATE_SPEC_URL);
-        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
-                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
-                .setMaxBytes(MAX_BYTES)
-                .build());
-        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
-                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP)
-                .build());
 
         Mockito.when(mockValidationManager.getRules()).thenReturn(rulesBuilder);
     }
@@ -582,13 +575,6 @@ public class ParsedValidatorRulesTest {
     }
 
     @Test
-    public void testCssLengthSpec() {
-        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
-
-        Assert.assertEquals(rules.getCssLengthSpec().get(0).getHtmlFormat(), ValidatorProtos.HtmlFormat.Code.AMP4EMAIL);
-    }
-
-    @Test
     public void testDescendantTagLists() {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
@@ -632,49 +618,6 @@ public class ParsedValidatorRulesTest {
 
         rules.maybeEmitValueSetMismatchErrors(mockContext, result);
         Mockito.verify(mockContext, Mockito.times(1)).addBuiltError(mismatchError, result);
-    }
-
-    @Test
-    public void testMaybeEmitCssLengthSpecErrors() throws TagValidationException {
-        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
-
-        Context mockContext = Mockito.mock(Context.class);
-
-        Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(MAX_BYTES);
-        Mockito.when(mockContext.getStyleAmpCustomByteSize()).thenReturn(MAX_BYTES);
-
-        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
-
-        rules.maybeEmitCssLengthSpecErrors(mockContext, result);
-
-        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
-
-        Mockito.verify(mockContext, Mockito.times(1))
-                .addError(errorCodeCapture.capture(),
-                        Mockito.any(Locator.class),
-                        listCaptor.capture(),
-                        Mockito.anyString(),
-                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
-
-        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG);
-        final List<String> params = listCaptor.getValue();
-        Assert.assertEquals(params.size(), 2);
-        Assert.assertEquals(params.get(0), "2000");
-        Assert.assertEquals(params.get(1), "1000");
-
-        mockContext = Mockito.mock(Context.class);
-
-        Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(0);
-        rules.maybeEmitCssLengthSpecErrors(mockContext, result);
-
-        Mockito.verify(mockContext, Mockito.times(0))
-                .addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
-                        Mockito.any(Locator.class),
-                        Mockito.anyListOf(String.class),
-                        Mockito.anyString(),
-                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
-
     }
 
     @Test

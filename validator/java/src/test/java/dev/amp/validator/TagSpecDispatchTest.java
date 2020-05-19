@@ -51,8 +51,8 @@ public class TagSpecDispatchTest {
         Assert.assertTrue(tagSpecDispatch.hasDispatchKeys());
         Assert.assertTrue(tagSpecDispatch.hasTagSpecs());
         Assert.assertEquals(tagSpecDispatch.allTagSpecs().size(), 2);
-        Assert.assertEquals(tagSpecDispatch.allTagSpecs().get(0), new Integer(10));
-        Assert.assertEquals(tagSpecDispatch.allTagSpecs().get(1), new Integer(9));
+        Assert.assertEquals(tagSpecDispatch.allTagSpecs().get(0), Integer.valueOf(10));
+        Assert.assertEquals(tagSpecDispatch.allTagSpecs().get(1), Integer.valueOf(9));
     }
 
     @Test

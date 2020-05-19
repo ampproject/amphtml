@@ -18,7 +18,7 @@ import static dev.amp.validator.utils.ExtensionsUtils.ScriptReleaseVersion.UNKNO
  * @author GeorgeLuo
  */
 
-public class ExtensionsUtils {
+public final class ExtensionsUtils {
   /**
    * Private constructor.
    */
