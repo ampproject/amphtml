@@ -141,7 +141,7 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
-    this.element_.load = this.load;
+    this.element_.load = this.load.bind(this);
   }
 
   /**

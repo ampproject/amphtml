@@ -22,5 +22,4 @@ self.onload = () => {
   manager.loadPlayers();
 };
 
-// eslint-disable-next-line no-undef
 globalThis.AmpStoryPlayer = AmpStoryPlayer;
