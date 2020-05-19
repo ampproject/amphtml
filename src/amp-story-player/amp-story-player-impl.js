@@ -50,7 +50,7 @@ const IframePosition = {
 const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 
 /** @const @type {!Array<string>} */
-const SANDBOX_WHITELIST = ['allow-top-navigation'];
+const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 
 /**
  * @enum {number}
@@ -190,7 +190,7 @@ export class AmpStoryPlayer {
     this.iframes_.push(iframeEl);
 
     applySandbox(iframeEl);
-    this.whitelistSandbox_(iframeEl);
+    this.addSandboxFlags_(iframeEl);
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
   }
@@ -199,13 +199,13 @@ export class AmpStoryPlayer {
    * @param {!Element} iframe
    * @private
    */
-  whitelistSandbox_(iframe) {
+  addSandboxFlags_(iframe) {
     if (!iframe.sandbox || !iframe.sandbox.supports) {
       return; // Can't feature detect support.
     }
 
-    for (let i = 0; i < SANDBOX_WHITELIST.length; i++) {
-      const flag = SANDBOX_WHITELIST[i];
+    for (let i = 0; i < SANDBOX_MIN_LIST.length; i++) {
+      const flag = SANDBOX_MIN_LIST[i];
 
       if (!iframe.sandbox.supports(flag)) {
         throw new Error(`Iframe doesn't support: ${flag}`);
