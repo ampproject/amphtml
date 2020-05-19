@@ -77,9 +77,8 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
       tag.removeChild(scriptTag);
       script = JSON.parse(scriptTag./*OK*/ innerHTML);
     }
-    script = Object.assign(script, {
-      extraUrlParams,
-    });
+    script.extraUrlParams = script.extraUrlParams || {};
+    Object.assign(script.extraUrlParams, extraUrlParams);
     script = await maybeMergeAndRemoveVendorConfig(tag, script);
     const newScriptTag = dom.window.document.createElement('script');
     newScriptTag.textContent = JSON.stringify(script);
@@ -92,20 +91,31 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
 
 /**
  * Rewrite analytics configs for each document
- * downloaded from the analytics handler urls
+ * downloaded from the analytics or ads handler urls
  * @param {?Object} handlers
  * @return {Promise}
  */
 function rewriteAnalyticsConfig(handlers) {
-  const {urls, extraUrlParam} = handlers.find(
-    (handler) => handler.handlerName === 'analyticsHandler'
-  );
-  return Promise.all(
-    urls.flatMap((url) => [
+  const handlerPromises = [];
+  handlers.forEach((handler) => {
+    const {handlerName, adsUrls, urls, extraUrlParam} = handler;
+    if (handlerName !== 'analyticsHandler' && handlerName !== 'adsHandler') {
+      return;
+    }
+
+    if (adsUrls) {
+      urls.push(...adsUrls);
+    }
+
+    const handlerPromise = urls.flatMap((url) => [
       alterAnalyticsTags(url, CONTROL, extraUrlParam),
       alterAnalyticsTags(url, EXPERIMENT, extraUrlParam),
-    ])
-  );
+    ]);
+
+    handlerPromises.push(handlerPromise);
+  });
+
+  return Promise.all(handlerPromises);
 }
 
 module.exports = rewriteAnalyticsConfig;
