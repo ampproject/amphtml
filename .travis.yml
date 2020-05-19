@@ -59,6 +59,9 @@ jobs:
   include:
     - stage: build
       name: 'Build'
+      before_script:
+        # fix chromedriver version until giggio/node-chromedriver/pull/267 is merged
+        - ./build-system/tasks/e2e/install-chromedriver.sh      
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
@@ -102,7 +105,7 @@ jobs:
       name: 'End to End Tests'
       before_script:
         # fix chromedriver version until giggio/node-chromedriver/pull/267 is merged
-        - bundle exec chromedriver-update 83.0.4103.39
+        - ./build-system/tasks/e2e/install-chromedriver.sh
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
       env:
