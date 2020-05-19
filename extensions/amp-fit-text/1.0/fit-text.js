@@ -50,23 +50,19 @@ export function FitText(props) {
     setOverflowStyle(measurerRef.current, clientHeight, fontSize);
   }, [maxFontSize, minFontSize]);
 
-  // Here and below, useLayoutEffect is used so intermediary font sizes
-  // during resizing are resolved before the component visually updates.
-  // Font size should readjust when container resizes.
+  // useLayoutEffect is used so intermediary font sizes during calculation
+  // are resolved before the component visually updates.
   useLayoutEffect(() => {
-    const node = contentRef.current;
-    if (!node) {
+    const container = contentRef.current;
+    const content = measurerRef.current;
+    if (!container || !content) {
       return;
     }
     const observer = new ResizeObserver(() => resize());
-    observer.observe(node);
+    observer.observe(container);
+    observer.observe(content);
     return () => observer.disconnect();
   }, [resize]);
-
-  // Font size should readjust when content changes.
-  useLayoutEffect(() => {
-    resize();
-  }, [children, resize]);
 
   return (
     <div {...rest}>
