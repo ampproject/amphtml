@@ -33,7 +33,6 @@ limitations under the License.
   data-genre='{"master_id":1,"code":"100371","match":"children"}'
   data-ifa="DUMMY_IFA"
   data-targeting='{"k1":"string type","k2":["male", "female"]}'
-  data-responsive="true"
 >
 </amp-ad>
 ```
@@ -51,4 +50,19 @@ limitations under the License.
 - `data-genre` : Genre object
 - `data-ifa` : IFA string
 - `data-targeting` : Targeting object
-- `data-responsive` : Boolean for responsive ad spot or not
+
+### How to handle responsive design
+
+Please refer to [Create responsive AMP pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design/)
+
+```html
+<amp-ad
+  width="300"
+  height="250"
+  type="rakutenunifiedads"
+  data-id="63"
+  data-env="dev"
+  layout="responsive"
+>
+</amp-ad>
+```
