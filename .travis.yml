@@ -59,9 +59,6 @@ jobs:
   include:
     - stage: build
       name: 'Build'
-      before_script:
-        # fix chromedriver version until giggio/node-chromedriver/pull/267 is merged
-        - ./build-system/tasks/e2e/install-chromedriver.sh      
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
