@@ -79,7 +79,7 @@
       "packagePatterns": ["\\b(prettier|eslint)\\b"],
       "groupName": "linting dependencies",
       "prBodyNotes": [
-        "This PR contains changes to linting dependencies. You may need to check out this branch, run `gulp lint --fix --local_changes`, and commit the lint fixes in order for Travis to pass."
+        "This PR upgrades one or more packages used to ensure code formatting. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build."
       ]
     },
 
