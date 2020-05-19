@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
-import {CSS} from '../../../build/amp-story-reaction-poll-binary-1.0.css';
+import {CSS} from '../../../build/amp-story-reaction-poll-1.0.css';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
@@ -36,9 +36,7 @@ export const FontSize = {
  */
 const buildBinaryPollTemplate = (element) => {
   const html = htmlFor(element);
-  return html`
-    <div class="i-amphtml-story-reaction-poll-binary-container"></div>
-  `;
+  return html` <div class="i-amphtml-story-reaction-poll-container"></div> `;
 };
 
 /**
@@ -57,7 +55,7 @@ const buildOptionTemplate = (element) => {
   `;
 };
 
-export class AmpStoryReactionPollBinary extends AmpStoryReaction {
+export class AmpStoryReactionPoll extends AmpStoryReaction {
   /**
    * @param {!AmpElement} element
    */

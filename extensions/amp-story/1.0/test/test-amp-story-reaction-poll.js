@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryReactionPollBinary} from '../amp-story-reaction-poll-binary';
+import {AmpStoryReactionPoll} from '../amp-story-reaction-poll';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
@@ -25,7 +25,7 @@ import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
-  'amp-story-reaction-poll-binary',
+  'amp-story-reaction-poll',
   {
     amp: true,
   },
@@ -43,7 +43,7 @@ describes.realWin(
         .resolves({get: () => Promise.resolve('cid')});
 
       const ampStoryPollEl = win.document.createElement(
-        'amp-story-reaction-poll-binary'
+        'amp-story-reaction-poll'
       );
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = getRequestService(win, ampStoryPollEl);
@@ -61,7 +61,7 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryPoll = new AmpStoryReactionPollBinary(ampStoryPollEl);
+      ampStoryPoll = new AmpStoryReactionPoll(ampStoryPollEl);
 
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
     });
