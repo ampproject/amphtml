@@ -17,48 +17,54 @@
   "separateMinorPatch": true,
   "packageRules": [
     {
-      "pin": { "groupName": "subpackage devDependencies" },
-      "patch": { "groupName": "subpackage devDependencies" },
-      "minor": { "groupName": "subpackage devDependencies" },
-      "major": { "managerBranchPrefix": "subpackage-" }
+      "paths": ["**/*"],
+      "groupName": "subpackage devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "subpackage-"
+      }
     },
     {
       "paths": ["src/**"],
       "labels": ["WG: runtime"],
 
-      "pin": { "groupName": "runtime devDependencies" },
-      "patch": { "groupName": "runtime devDependencies" },
-      "minor": { "groupName": "runtime devDependencies" },
-      "major": { "managerBranchPrefix": "runtime-" }
+      "groupName": "runtime devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "runtime-"
+      }
     },
 
     {
       "paths": ["build-system/**"],
       "labels": ["WG: infra"],
 
-      "pin": { "groupName": "build system devDependencies" },
-      "patch": { "groupName": "build system devDependencies" },
-      "minor": { "groupName": "build system devDependencies" },
-      "major": { "managerBranchPrefix": "build-system-" }
+      "groupName": "build system devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "build-system-"
+      }
     },
 
     {
       "paths": ["validator/**"],
       "labels": ["WG: caching"],
 
-      "pin": { "groupName": "validator devDependencies" },
-      "patch": { "groupName": "validator devDependencies" },
-      "minor": { "groupName": "validator devDependencies" },
-      "major": { "managerBranchPrefix": "validator-" }
+      "groupName": "validator devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "validator-"
+      }
     },
 
     {
       "paths": ["+(package.json)"],
 
-      "pin": { "groupName": "core devDependencies" },
-      "patch": { "groupName": "core devDependencies" },
-      "minor": { "groupName": "core devDependencies" },
-      "major": { "managerBranchPrefix": "core-" }
+      "groupName": "core devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "core-"
+      }
     },
 
     {
@@ -67,10 +73,11 @@
         "This PR upgrades one or more packages used to ensure code formatting. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build."
       ],
 
-      "pin": { "groupName": "linting devDependencies" },
-      "patch": { "groupName": "linting devDependencies" },
-      "minor": { "groupName": "linting devDependencies" },
-      "major": { "managerBranchPrefix": "linting-" }
+      "groupName": "linting devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "linting-"
+      }
     },
 
     {
@@ -83,20 +90,22 @@
       "packagePatterns": ["^@ampproject/"],
       "depTypeList": ["devDependencies"],
 
-      "pin": { "groupName": "ampproject devDependencies" },
-      "patch": { "groupName": "ampproject devDependencies" },
-      "minor": { "groupName": "ampproject devDependencies" },
-      "major": { "managerBranchPrefix": "ampproject-" }
+      "groupName": "ampproject devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
     },
 
     {
       "packagePatterns": ["^@ampproject/"],
       "depTypeList": ["dependencies"],
 
-      "pin": { "groupName": "ampproject dependencies" },
-      "patch": { "groupName": "ampproject dependencies" },
-      "minor": { "groupName": "ampproject dependencies" },
-      "major": { "managerBranchPrefix": "ampproject-" }
+      "groupName": "ampproject dependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
     }
   ]
 }
