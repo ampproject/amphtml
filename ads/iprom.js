@@ -15,6 +15,7 @@
  */
 
 import {validateData, writeScript} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 /**
  * @param {!Window} global
@@ -28,8 +29,12 @@ export function iprom(global, data) {
    */
   function namespaceLoaded() {
     const {sitepath, zone} = data;
+    const ipromNS = window.ipromNS || {};
+
+    ipromNSAdTag = ipromNS.AdTag || {};
+
     const config = {
-      sitePath: JSON.parse(sitepath),
+      sitePath: parseJson(sitepath),
       containerId: 'c',
       zoneId: zone,
       prebid: true,
