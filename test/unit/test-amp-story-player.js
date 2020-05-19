@@ -111,7 +111,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -126,7 +126,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
         existingParams +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -256,7 +256,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -271,7 +271,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
