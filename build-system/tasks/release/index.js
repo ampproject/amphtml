@@ -37,17 +37,20 @@ const BASE_FLAVOR_CONFIG = {
   environment: 'AMP',
 };
 
-// Deep map from [environment][flavorType] to list of RTV prefixes.
+// Deep map from [environment][flavorType] to an RTV prefix.
 const EXPERIMENTAL_RTV_PREFIXES = {
   AMP: {
-    experimentA: ['10'],
-    experimentB: ['11'],
-    experimentC: ['12'],
+    experimentA: '10',
+    experimentB: '11',
+    experimentC: '12',
   },
   INABOX: {
-    experimentA: ['20', '21'],
-    experimentB: ['22', '23'],
-    experimentC: ['24', '25'],
+    'experimentA-control': '20',
+    experimentA: '21',
+    'experimentB-control': '22',
+    experimentB: '23',
+    'experimentC-control': '24',
+    experimentC: '25',
   },
 };
 
@@ -137,8 +140,9 @@ function discoverDistFlavors_() {
       .filter(([, experimentConfig]) => experimentConfig.command)
       .map(([flavorType, experimentConfig]) => ({
         flavorType,
-        rtvPrefixes:
+        rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
+        ],
         ...experimentConfig,
       })),
   ];
@@ -258,15 +262,28 @@ async function fetchAmpSw_(distFlavors, tempDir) {
  * @param {string} outputDir full directory path to emplace artifacts in.
  */
 async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
-  for (const {flavorType, rtvPrefixes} of distFlavors) {
-    await Promise.all(
-      rtvPrefixes.map(async (rtvPrefix) => {
-        const rtvNumber = `${rtvPrefix}${VERSION}`;
-        const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
-        await fs.ensureDir(rtvPath);
-        return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
-      })
+  const rtvCopyingPromise = async (rtvPrefix, flavorType) => {
+    const rtvNumber = `${rtvPrefix}${VERSION}`;
+    const rtvPath = path.join(outputDir, 'org-cdn/rtv', rtvNumber);
+    await fs.ensureDir(rtvPath);
+    return fs.copy(path.join(tempDir, flavorType, 'dist'), rtvPath);
+  };
+
+  const rtvCopyingPromises = [];
+  for (const {environment, flavorType, rtvPrefixes} of distFlavors) {
+    rtvCopyingPromises.push(
+      ...rtvPrefixes.map((rtvPrefix) =>
+        rtvCopyingPromise(rtvPrefix, flavorType)
+      )
     );
+
+    // Special handling for INABOX experiments, which requires that their
+    // control population be created from the base flavor.
+    if (environment == 'INABOX') {
+      const rtvPrefix =
+        EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${flavorType}-control`];
+      rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
+    }
   }
 
   logSeparator_();
