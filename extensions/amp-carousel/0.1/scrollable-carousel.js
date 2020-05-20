@@ -89,6 +89,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
       },
       ActionTrust.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    Services.actionServiceForDoc(this.element).addToWhitelist(
+      'amp-carousel',
+      'goToSlide',
+      ['email']
+    );
   }
 
   /** @override */

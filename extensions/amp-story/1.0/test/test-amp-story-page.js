@@ -18,8 +18,8 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
+import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
@@ -48,14 +48,14 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
       }),
     };
 
+    const localizationService = Services.localizationForDoc(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     registerServiceBuilder(win, 'performance', function () {

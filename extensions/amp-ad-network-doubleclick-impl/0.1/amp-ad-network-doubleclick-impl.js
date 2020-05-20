@@ -52,6 +52,7 @@ import {
 } from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -333,6 +334,51 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.inZIndexHoldBack_ = false;
   }
 
+  /**
+   * @return {number|boolean} render on idle configuration with false
+   *    indicating disabled.
+   * @private
+   */
+  getIdleRenderEnabled_() {
+    if (this.isIdleRender_) {
+      return this.isIdleRender_;
+    }
+    // Disable if publisher has indicated a non-default loading strategy.
+    if (this.element.getAttribute('data-loading-strategy')) {
+      return false;
+    }
+    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
+    const vpRange = parseInt(expVal, 10);
+    if (expVal && isNaN(vpRange)) {
+      // holdback branch sends non-numeric value.
+      return false;
+    }
+    return vpRange || 12;
+  }
+
+  /** @override */
+  idleRenderOutsideViewport() {
+    const vpRange = this.getIdleRenderEnabled_();
+    if (vpRange === false) {
+      return vpRange;
+    }
+    const renderOutsideViewport = this.renderOutsideViewport();
+    // False will occur when throttle in effect.
+    if (typeof renderOutsideViewport === 'boolean') {
+      return renderOutsideViewport;
+    }
+    this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource()
+      .whenWithinViewport(renderOutsideViewport)
+      .then(() => (this.isIdleRender_ = false));
+    return vpRange;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
@@ -393,6 +439,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           [AMP_AD_NO_CENTER_CSS_EXP.control],
           [AMP_AD_NO_CENTER_CSS_EXP.experiment],
+        ],
+      },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
@@ -492,6 +545,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
+    const {consentString, gdprApplies} = consentTuple;
+
     return {
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
@@ -503,7 +558,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
-      'gdpr_consent': consentTuple.consentString,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
     };
   }
 
@@ -1118,7 +1174,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
         AMP_AD_NO_CENTER_CSS_EXP.control
     ) {
-      setStyles(this.iframe, {
+      setStyles(dev().assertElement(this.iframe), {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',

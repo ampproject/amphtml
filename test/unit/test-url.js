@@ -995,8 +995,9 @@ describe('getCorsUrl', () => {
         getCorsUrl(window, 'http://example.com/?__amp_source_origin')
       ).to.throw(/Source origin is not allowed in/);
     });
-    expect(() => getCorsUrl(window, 'http://example.com/?name=hello')).to.not
-      .throw;
+    expect(() =>
+      getCorsUrl(window, 'http://example.com/?name=hello')
+    ).to.not.throw();
   });
 
   it('should set __amp_source_origin as a url param', () => {
