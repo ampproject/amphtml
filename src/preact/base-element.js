@@ -16,7 +16,6 @@
 
 import * as Preact from './index';
 import {Deferred} from '../utils/promise';
-import {Layout} from '../layout';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
@@ -178,11 +177,11 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children" or "passthrough" properties.'
         );
         this.container_ = this.element.attachShadow({mode: 'open'});
-        if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
-          const slot = this.win.document.createElement('slot');
-          slot.name = 'i-amphtml-sizer';
-          this.container_.appendChild(slot);
-        }
+
+        // Create a slot for internal service elements i.e. "i-amphtml-sizer"
+        const slot = this.win.document.createElement('slot');
+        slot.setAttribute('name', 'i-amphtml-svc');
+        this.container_.appendChild(slot);
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
         this.container_ = container;
