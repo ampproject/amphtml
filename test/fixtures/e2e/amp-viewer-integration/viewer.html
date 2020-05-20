@@ -87,6 +87,7 @@
       this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
+      this.iframe.setAttribute('id', this.id);
       this.iframe.setAttribute('sandbox',
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
@@ -144,6 +145,7 @@
         return;
       }
       log('AMP Loaded');
+      this.iframe.dataset['loaded'] = '';
       this.alreadyLoaded_ = true;
       var waiter = this.container.querySelector('.wait');
       if (waiter) {
