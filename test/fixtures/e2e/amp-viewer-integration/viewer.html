@@ -84,7 +84,6 @@
       this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
-      this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
       this.iframe.setAttribute('id', this.id);
@@ -108,7 +107,6 @@
         history: 1,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
-        paddingTop: this.header./*OK*/offsetHeight,
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
@@ -173,30 +171,13 @@
     Viewer.prototype.onResize_ = function() {
       log('Resized to ', this.container./*OK*/offsetWidth,
           this.container./*OK*/offsetHeight,
-          this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
       this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
-        paddingTop: this.header./*OK*/offsetHeight
       }, false);
     };
-
-
-    Viewer.prototype.requestFullOverlay_ = function() {
-      log('requestFullOverlay');
-      this.header.style.opacity = 0;
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.cancelFullOverlay_ = function() {
-      log('cancelFullOverlay');
-      this.header.style.opacity = 1;
-      return Promise.resolve();
-    };
-
 
     Viewer.prototype.pushHistory_ = function(stackIndex) {
       log('push history to ', stackIndex);
@@ -256,9 +237,9 @@
           log('Focusin event', data);
           return Promise.resolve();
         case 'requestFullOverlay':
-          return this.requestFullOverlay_();
+          return Promise.resolve()
         case 'cancelFullOverlay':
-          return this.cancelFullOverlay_();
+          return Promise.resolve()
         case 'pushHistory':
           return this.pushHistory_(data.stackIndex);
         case 'popHistory':
