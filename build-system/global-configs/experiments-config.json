@@ -1,19 +1,12 @@
 {
   "experimentA": {
-    "name": "IntersectionObserverPolyfill",
-    "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL",
+    "name": "IntersectionObserverPolyfillInabox",
+    "environment": "INABOX",
+    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL_INABOX",
     "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expirationDateUTC": "2020-05-31",
-    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL"
+    "expiration_date_utc": "2020-06-30",
+    "define_experiment_constant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
   },
-  "experimentB": {
-    "name": "MOVE_FIXED_LAYER",
-    "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=MOVE_FIXED_LAYER",
-    "issue": "",
-    "expiration_date_utc": "2020-12-31",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
-  },
+  "experimentB": {},
   "experimentC": {}
 }

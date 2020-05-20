@@ -650,3 +650,15 @@ export function checkCorsUrl(url) {
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
 }
+
+/**
+ * Adds the path to the given url.
+ *
+ * @param {!Location} url
+ * @param {string} path
+ * @return {string}
+ */
+export function appendPathToUrl(url, path) {
+  const pathname = url.pathname.replace(/\/?$/, '/') + path.replace(/^\//, '');
+  return url.origin + pathname + url.search + url.hash;
+}

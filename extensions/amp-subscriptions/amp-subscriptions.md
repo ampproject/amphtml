@@ -234,7 +234,7 @@ The properties in the "local" service are (remote mode):
 - "pingbackUrl" - the pingback endpoint URL.
 - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
 
-In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
+In iframe mode the `authorizationUrl` and `pingbackUrl` are deleted
 and replaced by:
 
 - "iframeSrc" - publisher supplied iframe
@@ -313,7 +313,12 @@ In the markup the actions can be delegated to other services for them to execute
 e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
 
 ```html
-  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+<button
+  subscriptions-action="subscribe"
+  subscriptions-service="subscribe.google.com"
+>
+  Subscribe
+</button>
 ```
 
 ### Action decoration

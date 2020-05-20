@@ -55,6 +55,11 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     const aspectRatioWidth =
       Number(this.element.getAttribute('aspect-ratio-width')) || 0;

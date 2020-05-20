@@ -625,6 +625,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
   'startupChunk\\(': {
@@ -1081,7 +1082,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/0.2/timeago.js',
+      'extensions/amp-timeago/1.0/timeago.js',
     ],
   },
   '\\.expandStringSync\\(': {
