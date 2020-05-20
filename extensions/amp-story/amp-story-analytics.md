@@ -62,7 +62,7 @@ The `story-focus` trigger is fired when clicking an element that opens a tooltip
 
 To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
-The current element trackable by the `story-focus` and `story-click-through` triggers are:
+The current elements trackable by the `story-focus` and `story-click-through` triggers are:
 
 - `<a>`
 - `<amp-twitter>`
