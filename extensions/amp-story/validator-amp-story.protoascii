@@ -128,6 +128,7 @@ tags: {  # <amp-story-page>
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-ANIMATION"
     child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
@@ -801,6 +802,48 @@ tags: {  # <amp-story-page-attachment> with no href
     name: "theme"
     value: "dark"
     value: "light"
+  }
+}
+tags: {  # <amp-story-animation> <script>
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-animation json script"
+  mandatory_parent: "AMP-STORY-ANIMATION"
+  satisfies: "amp-story-animation json script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+tags: {  # <amp-story-animation>
+  # No amp_layout since this doesn't have a custom element implementation.
+  html_format: AMP
+  tag_name: "AMP-STORY-ANIMATION"
+  requires_extension: "amp-story"
+  requires: "amp-story-animation json script"
+  mandatory_parent: "AMP-STORY-PAGE"
+  attrs: { name: "animate-in-after" }
+  attrs: {
+    name: "trigger"
+    value: "visibility"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
   }
 }
 descendant_tag_list {
