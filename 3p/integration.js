@@ -280,6 +280,7 @@ import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
+import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
@@ -334,6 +335,7 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   temedya: true,
   whopainfeed: true,
+  yahoofedads: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -578,6 +580,7 @@ register('wisteria', wisteria);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
