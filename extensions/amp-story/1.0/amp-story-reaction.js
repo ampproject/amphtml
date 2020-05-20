@@ -192,7 +192,6 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
     this.rootEl_.classList.add('i-amphtml-story-reaction');
-    console.log(this.rootEl_);
     Object.values(ReactionFlags).forEach((attr) => {
       if (this.element.hasAttribute(attr)) {
         this.rootEl_.setAttribute(attr, this.element.getAttribute(attr));
