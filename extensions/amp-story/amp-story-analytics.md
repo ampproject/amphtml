@@ -58,14 +58,14 @@ The `story-last-page-visible` trigger is fired when the last page in the story i
 
 ### Tooltip focus trigger (`"on": "story-focus"`)
 
-The `story-focus` trigger is fired when clicking an element that opens a tooltip. This happens when clicking an affiliate link, an embedded tweet, or just a regular link.
-
-To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
+The `story-focus` trigger is fired when clicking an element that opens a tooltip.
 
 The current elements trackable by the `story-focus` and `story-click-through` triggers are:
 
 - `<a>`
 - `<amp-twitter>`
+
+To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
 Example:
 
