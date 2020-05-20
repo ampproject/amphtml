@@ -29,7 +29,7 @@ export function iprom(global, data) {
    */
   function namespaceLoaded() {
     const {sitepath, zone} = data;
-    
+
     const ipromNS = window.ipromNS || {};
 
     ipromNS.AdTag = ipromNS.AdTag || {};
