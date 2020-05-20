@@ -39,11 +39,14 @@
       justify-content: flex-start;
       align-items: center;
       padding: 0 8px;
+    } 
+    header h1 {
+      font-size: 22px; 
     }
 
     container {
       position: absolute;
-      top: 0;
+      top: 50px;
       left: 0;
       right: 0;
       bottom: 0;
@@ -57,11 +60,6 @@
       height: 100%;
     }
 
-    header h1 {
-      font-size: 22px;
-      flex-grow: 1;
-    }
-
     .wait {
       position: absolute;
       z-index: 3;
@@ -73,7 +71,7 @@
 
   <script>
     let viewer = null;
-    function Viewer(containerId, id, url) {
+    function Viewer(containerId, id, url, opt_caps) {
       this.id = id;
       this.url = url;
       this.alreadyLoaded_ = false;
@@ -82,14 +80,13 @@
       this.csi_ = 1;
       this.startResolve_ = null;
       this.startPromise_ = null;
-      this.caps_ = 'a2a,focus-rect,foo,keyboard,swipe,iframeScroll';
+      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,iframeScroll';
       this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
-      this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
       this.iframe.setAttribute('sandbox',
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
@@ -111,7 +108,6 @@
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
-        visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
@@ -300,19 +296,6 @@
       }
     };
 
-    Viewer.prototype.handleXhrIntercept_ = function(data) {
-    // Mocked response.
-    return Promise.resolve({
-        "body" : '{"items": [{"title": "Intercepted response", "url": "http://ampdev.org"}]}',
-        "init" : {
-          "headers": {
-            "Content-Type": "application/json",
-          },
-          "type": 'application/json',
-        },
-      });
-    };
-
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.handleUnload_');
       if (this.messaging_) {
@@ -419,12 +402,13 @@
       const hash = window.location.hash;
       const hashParams = parseQueryString(hash);
       const href = hashParams['href'];
+      const caps = hashParams['caps'];
 
       new Viewer(
-          'container-dynamic',
-          'dynamic',
+          'viewer-container',
+          'viewer',
           addQueryParam(href, 'amp_js_v', '0.1'),
-          true
+          caps
           ).start();
     } 
     window.onload = loadAmpDoc;
@@ -435,7 +419,7 @@
     <header>
       <h1>Viewer</h1>
     </header>
-    <container id="container-dynamic">
+    <container id="viewer-container">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>
