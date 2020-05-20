@@ -162,7 +162,10 @@ const targetMatchers = {
     return file == 'package.json' || file == 'yarn.lock';
   },
   'RENOVATE_CONFIG': (file) => {
-    return isRenovateConfigFile(file);
+    return (
+      isRenovateConfigFile(file) ||
+      file == 'build-system/tasks/check-renovate-config.js'
+    );
   },
   'RUNTIME': (file) => {
     if (isOwnersFile(file) || isRenovateConfigFile(file)) {
