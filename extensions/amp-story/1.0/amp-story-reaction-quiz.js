@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
+import {setStyles} from '../../../src/style';
 
 /**
  * Generates the template for the quiz.
@@ -179,14 +180,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       ).textContent = `${percentage}%`;
     });
 
-    this.rootEl_.setAttribute(
-      'style',
-      `
-      --option-1-percentage: ${percentages[0]}%;
-      --option-2-percentage: ${percentages[1]}%;
-      --option-3-percentage: ${percentages[2]}%;
-      --option-4-percentage: ${percentages[3]}%;
-    `
-    );
+    // TODO(mszylkowski): split each variable to be applied to the corresponding option.
+    setStyles(this.rootEl_, {
+      '--option-1-percentage': percentages[0] + '%',
+      '--option-2-percentage': percentages[1] + '%',
+      '--option-3-percentage': percentages[2] + '%',
+      '--option-4-percentage': percentages[3] + '%',
+    });
   }
 }

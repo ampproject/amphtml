@@ -13,89 +13,106 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-.i-amphtml-story-reaction-poll-container {
-    display: flex !important;
-    align-items: stretch !important;
-    justify-content: center !important;
-    height: 90px !important;
-    max-width: 296px !important;
-    border-radius: 16px !important;
-    box-shadow: 0px 2px 4px #000000aa !important;
-    color: var(--reaction-main-color) !important;
-    background: var(--reaction-theme-background) !important;
-    overflow: hidden !important;
 
-    --post-select-scale: 0.5 !important;
-    --post-select-scale-variable: 1 !important;
+.i-amphtml-story-reaction-poll-container {
+  display: flex !important;
+  justify-content: center !important;
+  height: 90px !important;
+  max-width: 296px !important;
+  border-radius: 16px !important;
+  box-shadow: 0px 2px 4px #000000aa !important;
+  color: var(--reaction-accent-color) !important;
+  background: var(--reaction-background-color) !important;
+  overflow: hidden !important;
+
+  --post-select-scale: 0.5 !important;
+  --post-select-scale-variable: 1 !important;
+}
+
+.i-amphtml-story-reaction-poll-container[theme="dark"] {
+  --reaction-accent-color: white;
 }
 
 .i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection) {
-    cursor: pointer !important;
-}
-
-[dir="rtl"] .i-amphtml-story-reaction-poll-container {
-    flex-direction: row-reverse !important;
+  cursor: pointer !important;
 }
 
 .i-amphtml-story-reaction-option {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    flex-direction: column !important;
-    flex-grow: 50 !important;
-    flex: 100 !important;
-    overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  flex-direction: column !important;
+  flex-grow: 50 !important;
+  flex: 100 !important;
+  overflow: hidden !important;
+  position: relative;
 }
 
-.i-amphtml-story-reaction-option:first-child {
-    border-right: 1px solid var(--reaction-main-color-translucent) !important;
+.i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection)
+  .i-amphtml-story-reaction-option:first-child::after {
+  content: '';
+  height: 100%;
+  position: absolute;
+  right: 1px;
+  width: 1px;
+  opacity: 0.3;
+  background-color: var(--reaction-accent-color);
 }
 
-.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected {
-    background-color: var(--reaction-main-color-transparent) !important;
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected::before {
+  content: '';
+  background-color: var(--reaction-accent-color);
+  opacity: 0.3;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
 }
 
 .i-amphtml-story-reaction-option-title {
-    font-weight: 800 !important;
-    font-size: 28px !important;
-    margin: 0 !important;
-    line-height: 28px !important;
-    width: 124px !important;
-    height: 66px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  font-weight: 800 !important;
+  font-size: 28px !important;
+  margin: 0 !important;
+  line-height: 36px !important;
+  width: 124px !important;
+  height: 66px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title {
-    transform: scale(var(--post-select-scale)) !important;
-    margin-bottom: -14px !important;
-    margin-top: -14px !important;
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-title {
+  transform: scale(var(--post-select-scale)) !important;
+  margin-bottom: -14px !important;
+  margin-top: -14px !important;
 }
 
-.i-amphtml-story-reaction-option-title > span {
-    overflow : hidden !important;
-    text-overflow: ellipsis !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    max-width: 100% !important;
+.i-amphtml-story-reaction-option-title-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  max-width: 100% !important;
 }
 
-.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-title > span {
-    transform: scale(var(--post-select-scale-variable)) !important;
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-title-text {
+  transform: scale(var(--post-select-scale-variable)) !important;
 }
 
 .i-amphtml-story-reaction-option-percentage-text {
-    font-weight: 700 !important;
-    font-size: 22px !important;
-    margin: 0 !important;
-    max-height: 1px !important;
-    overflow-y: hidden !important;
+  font-weight: 700 !important;
+  font-size: 22px !important;
+  margin: 0 !important;
+  max-height: 1px !important;
+  overflow-y: hidden !important;
 }
 
-.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-percentage-text {
-    max-height: 30px !important;
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-percentage-text {
+  max-height: 30px !important;
 }

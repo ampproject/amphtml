@@ -16,9 +16,8 @@
 
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-poll-1.0.css';
-import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const @enum {number} */
@@ -49,7 +48,9 @@ const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-reaction-option">
-      <span class="i-amphtml-story-reaction-option-title"><span></span></span>
+      <span class="i-amphtml-story-reaction-option-title"
+        ><span class="i-amphtml-story-reaction-option-title-text"></span
+      ></span>
       <span class="i-amphtml-story-reaction-option-percentage-text">0%</span>
     </div>
   `;
@@ -79,7 +80,7 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
    * Gets the options and adds them to the element
    *
    * @private
-   * @param {Element} root
+   * @param {!Element} root
    */
   attachContent_(root) {
     this.options_.forEach((option) => {
@@ -89,36 +90,49 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
   }
 
   /**
+   * This method changes the font-size on post-select to best display the titles.
+   *
+   * It measures the number of lines and chars on the titles and generates an appropriate font-size.
+   * - font-size: 28px - Both titles are emojis or short text (yes/no)
+   * - font-size: 16px - Both titles have at most one line
+   * - font-size: 14px - At least one title has two lines
+   *
+   * The title container will shrink 50% on post-select to indicate the safe-zone for the title is smaller.
+   * To keep the font-size (original font-size:28px) true to the guidelines above, a post-select-scale is applied counteracting it.
+   * Eg. post-select-scale:1 corresponds to font-size:14px after the 50% scale (for 2-lined title),
+   * but post-select-scale:1.14 corresponds to font-size:16px after the 50% scale (for 1-lined titles),
+   * and post-select-scale:2 corresponds to font-size:28px after the 50% scale (for emoji titles).
    * @private
-   * @param {Element} root
+   * @param {!Element} root
    */
   adaptFontSize_(root) {
-    this.mutateElement(() => {
-      let largestFontSize = FontSize.EMOJI;
-      toArray(
-        scopedQuerySelectorAll(
-          dev().assertElement(root),
-          '.i-amphtml-story-reaction-option-title > span'
-        )
-      ).forEach((e) => {
-        if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
-          largestFontSize = FontSize.EMOJI;
-        } else if (
-          e./*OK*/ clientHeight <= 30 &&
-          largestFontSize >= FontSize.SINGLE_LINE
-        ) {
-          largestFontSize = FontSize.SINGLE_LINE;
-        } else if (e./*OK*/ clientHeight > 30) {
-          largestFontSize = FontSize.DOUBLE_LINE;
-        }
-      });
-      root.setAttribute(
-        'style',
-        `--post-select-scale-variable: ${(
-          largestFontSize / FontSize.DOUBLE_LINE
-        ).toFixed(2)} !important;`
-      );
-    });
+    let largestFontSize = FontSize.EMOJI;
+    const allTitles = toArray(
+      root.querySelectorAll('.i-amphtml-story-reaction-option-title-text')
+    );
+    this.measureMutateElement(
+      () => {
+        allTitles.forEach((e) => {
+          if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
+            largestFontSize = FontSize.EMOJI;
+          } else if (
+            e./*OK*/ clientHeight <= 30 &&
+            largestFontSize >= FontSize.SINGLE_LINE
+          ) {
+            largestFontSize = FontSize.SINGLE_LINE;
+          } else if (e./*OK*/ clientHeight > 30) {
+            largestFontSize = FontSize.DOUBLE_LINE;
+          }
+        });
+      },
+      () => {
+        setStyle(
+          root,
+          '--post-select-scale-variable',
+          `${(largestFontSize / FontSize.DOUBLE_LINE).toFixed(2)} !important;`
+        );
+      }
+    );
   }
 
   /**
@@ -130,9 +144,8 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
   generateOption_(option) {
     const convertedOption = buildOptionTemplate(this.element);
 
-    const optionText = scopedQuerySelector(
-      convertedOption,
-      '.i-amphtml-story-reaction-option-title > span'
+    const optionText = convertedOption.querySelector(
+      '.i-amphtml-story-reaction-option-title-text'
     );
     optionText.textContent = option['text'];
     convertedOption.optionIndex_ = option['optionIndex'];

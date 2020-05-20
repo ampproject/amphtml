@@ -52,8 +52,8 @@
             <amp-story-reaction-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/reactions"
+                style="--reaction-accent-color:#20ac5e !important"
                 theme="dark"
-                chip-corner="sharp"
                 prompt-text="Who won the first soccer world cup?"
                 option-1-text="France"
                 option-2-text="Spain"
@@ -75,7 +75,7 @@
             <amp-story-reaction-quiz
                 id="last-cup-dark"
                 theme="dark"
-                style="--reaction-accent-color:#000"
+                style="--reaction-accent-color:#000 !important"
                 chip-corner="sharp"
                 prompt-text="Who won the last soccer world cup?"
                 option-1-text="France" option-1-correct
@@ -139,7 +139,6 @@
               <amp-story-reaction-poll
                 endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
-                style="--reaction-answer-choice-background: #fff!important; --reaction-main-color: #005af0; --reaction-main-color-transparent: rgba(0,90,240,0.09);"
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור">
               </amp-story-reaction-poll>
@@ -158,17 +157,14 @@
                 width="900">
             </amp-img>
           </amp-story-grid-layer>
-          <amp-story-grid-layer template="thirds">
-            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
-              <amp-story-reaction-poll
-                endpoint="http://localhost:3000/reactions"
-                id="movie-dark-connected"
-                theme="dark"
-                option-1-text="Doctor Strange"
-                option-2-text="Black Panther">
-              </amp-story-reaction-poll>
-            </div>
+          <amp-story-grid-layer template="center">
+            <amp-story-reaction-poll
+              endpoint="http://localhost:3000/reactions"
+              id="movie-light-connected"
+              theme="dark"
+              option-1-text="Doctor Strange"
+              option-2-text="Black Panther">
+            </amp-story-reaction-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="poll-binary-3">
@@ -186,7 +182,7 @@
               <amp-story-reaction-poll
                 endpoint="http://localhost:3000/reactions"
                 id="movie-light-connected"
-                style="--reaction-main-color: #FFC700; --reaction-main-color-transparent: rgba(255, 199, 0, 0.3);"
+                style="--reaction-accent-color: #FFC700 !important;"
                 option-1-text="🧛"
                 option-2-text="🐆">
               </amp-story-reaction-poll>
@@ -224,18 +220,14 @@
                 width="900">
             </amp-img>
           </amp-story-grid-layer>
-          <amp-story-grid-layer template="thirds">
-            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
-              <amp-story-reaction-poll
-                endpoint="http://localhost:3000/reactions"
-                id="movie-light-connected"
-                theme="dark"
-                style="--reaction-theme-background: #005AF0 !important;"
-                option-1-text="This is a really long text"
-                option-2-text="Panther">
-              </amp-story-reaction-poll>
-            </div>
+          <amp-story-grid-layer template="vertical">
+            <amp-story-reaction-poll
+              endpoint="http://localhost:3000/reactions"
+              id="movie-light-connected"
+              theme="dark"
+              option-1-text="This is a really long text"
+              option-2-text="Panther">
+            </amp-story-reaction-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

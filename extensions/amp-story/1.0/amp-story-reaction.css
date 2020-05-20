@@ -23,27 +23,14 @@
     /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
     min-width: 224px !important;
     max-width: 400px !important;
+    /* General CSS variables that work across all reactions */
+    --reaction-background-color: white;
     --reaction-accent-color: #005AF0;
-    --reaction-prompt-text-color: white;
-    --reaction-option-text-color: #5F6368;
-    --reaction-theme-background: white !important;
-    --reaction-theme-border: #DADCE0 !important;
-    --reaction-theme-shading: #ECEDEF !important;
-    --reaction-chip-radius: 32px !important;
-    --reaction-chip-shadow: none !important;
-    --reaction-answer-choice-border: var(--reaction-accent-color) !important;
-    --reaction-answer-choice-background: white !important;
-    --reaction-main-color: #005AF0;
-    --reaction-main-color-transparent: rgba(0, 88, 240, 0.2);
+    pointer-events: all;
 }
 
 .i-amphtml-story-reaction[theme="dark"] {
-    --reaction-option-text-color: white;
-    --reaction-theme-background: #202124 !important;
-    --reaction-theme-border: #3C4043 !important;
-    --reaction-theme-shading: #3C4043 !important;
-    --reaction-main-color: rgb(255, 255, 255);
-    --reaction-main-color-transparent: #FFFFFF16;
+    --reaction-background-color: #202124;
 }
 
 .i-amphtml-story-reaction[chip-corner="sharp"] {

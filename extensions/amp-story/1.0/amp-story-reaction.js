@@ -53,6 +53,7 @@ export const ReactionFlags = {
   THEME: 'theme',
   CHIP_CORNER: 'chip-corner',
   CHIP_STYLE: 'chip-style',
+  STYLE: 'style',
 };
 
 /** @const {string} */
@@ -191,9 +192,11 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
     this.rootEl_.classList.add('i-amphtml-story-reaction');
-    toArray(this.element.attributes).forEach((attr) => {
-      if (Object.values(ReactionFlags).includes(attr.name)) {
-        this.rootEl_.setAttribute(attr.name, attr.value);
+    this.element.classList.add('i-amphtml-story-reaction');
+    console.log(this.rootEl_);
+    Object.values(ReactionFlags).forEach((attr) => {
+      if (this.element.hasAttribute(attr)) {
+        this.rootEl_.setAttribute(attr, this.element.getAttribute(attr));
       }
     });
     this.adjustGridLayer_();
@@ -514,6 +517,9 @@ export class AmpStoryReaction extends AMP.BaseElement {
         }
       })
       .catch(() => {
+        // If backend is not properly connected, still update state.
+        this.triggerAnalytics_(optionEl);
+        this.hasUserSelection_ = true;
         this.mutateElement(() => {
           this.updateToPostSelectionState_(optionEl);
         });

@@ -394,6 +394,11 @@ amp-story-grid-layer a * {
   pointer-events: none !important;
 }
 
+/** Ensures only the visible parts of the reactions are clickable. */
+amp-story-grid-layer .i-amphtml-story-reaction {
+  pointer-events: none !important;
+}
+
 /** Apply click shield on embedded components on initial load. */
 amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
