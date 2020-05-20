@@ -59,7 +59,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
-    options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
     return options;
   }
