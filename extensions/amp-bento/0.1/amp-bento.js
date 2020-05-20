@@ -20,11 +20,15 @@ import {BentoComponent, CustomContext} from './component';
 import {dict} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
-import {LoadingIndicatorService} from './loading-indicator';
-import {installRootServices} from './root-services';
+//QQQQQ
+// import {LoadingIndicatorService} from './loading-indicator';
+// import {installRootServices} from './root-services';
+import {reactContextProp} from '../../../src/preact/react-context-prop';
 
 /** @const {string} */
 const TAG = 'amp-bento';
+
+const CustomContextProp = reactContextProp('amp-bento:CustomContext', CustomContext);
 
 class AmpBento extends PreactBaseElement {
   /** @override */
@@ -51,11 +55,12 @@ AmpBento['props'] = {
 
 AmpBento['passthrough'] = true;
 
-AmpBento['exportContexts'] = [CustomContext];
-AmpBento['useContexts'] = [CustomContext];
+AmpBento['exportContexts'] = [CustomContextProp];
+AmpBento['useContexts'] = [CustomContextProp];
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpBento);
-  AMP.registerServiceForDoc(`${TAG}-LI`, LoadingIndicatorService);
-  AMP.registerServiceForDoc(`${TAG}-RS`, installRootServices);
+  //QQQQQQ
+  // AMP.registerServiceForDoc(`${TAG}-LI`, LoadingIndicatorService);
+  // AMP.registerServiceForDoc(`${TAG}-RS`, installRootServices);
 });

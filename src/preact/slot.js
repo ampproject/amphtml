@@ -15,9 +15,9 @@
  */
 
 import * as Preact from './index';
-import {ContextNode} from '../node/node';
+import {ContextNode} from '../context';
 import {dev} from '../log';
-import {AmpContext} from './context';
+import {AmpContext, AmpContextProp} from './context';
 import {matches, toggleAttribute} from '../dom';
 import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
@@ -61,7 +61,7 @@ export function Slot(props) {
 
     // Export the standard contexts. Non-standard contexts are exported as
     // children of the slot component.
-    ContextNode.get(slot).setSelf(AmpContext, context);
+    ContextNode.get(slot).set(AmpContextProp, context);
     console.log('Slot: ExportContext:', 'AmpContext', '=', context, 'for', slot);
 
     // QQQQQ
@@ -178,8 +178,8 @@ export function Slot(props) {
   // as {children}.
   return (
     <slot {...slotProps}>
-      {exportContexts && exportContexts.map(contextType =>
-        <ExportContext key={contextType} slotRef={ref} contextType={contextType} />
+      {exportContexts && exportContexts.map(prop =>
+        <ExportContext key={prop.key} slotRef={ref} contextProp={prop} />
       )}
     </slot>
   );
@@ -188,13 +188,13 @@ export function Slot(props) {
 /**
  * A component with a sole purpose of exporting the specified component.
  */
-function ExportContext({slotRef, contextType}) {
-  const value = useContext(contextType);
-  useMountEffect(() => {
+function ExportContext({slotRef, contextProp}) {
+  const value = useContext(contextProp.type);
+  useEffect(() => {
     const slot = slotRef.current;
-    console.log('Slot: ExportContext:', contextType.__ampKey || contextType.__c, '=', value, 'for', slot);
-    ContextNode.get(slot).setSelf(contextType, value);
-  });
+    console.log('Slot: ExportContext:', contextProp.key, '=', value, 'for', slot);
+    ContextNode.get(slot).set(contextProp, value);
+  }, [value]);
 }
 
 /**

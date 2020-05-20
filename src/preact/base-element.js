@@ -17,11 +17,11 @@
 import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
-import {WithAmpContext, AmpContext} from './context';
+import {WithAmpContext, AmpContext, AmpContextProp} from './context';
 import {devAssert} from '../log';
 import {matches} from '../dom';
 import {render} from './index';
-import {ContextNode} from '../node/node';
+import {ContextNode, contextProp} from '../context';
 import {measure} from './measure';
 
 /**
@@ -99,26 +99,22 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.defaultProps_ = this.init() || null;
 
     const contextNode = ContextNode.get(this.element);
-    const consumeContext = (value, contextType) => {
-      console.log('BaseElement: consumeContext:',
-        contextType.__ampKey || contextType.__c || contextType,
-        '=',
-        value);
-      if (typeof contextType == 'object') {
-        this.contexts_.set(contextType, value);
-        this.scheduleRender_();
-      }
+    const consumeContext = (value, prop) => {
+      console.log('BaseElement: consumeContext:', prop, '=', value);
+      this.contexts_.set(prop.type, value);
+      this.scheduleRender_();
+      // QQQ: cleanup function to reset the context?
     };
 
     // Subscribe to the standard contexts.
-    contextNode.subscribe(AmpContext, contextConsumerCallback(AmpContext, consumeContext));
+    contextNode.subscribe(AmpContextProp, contextConsumerCallback(AmpContextProp, consumeContext));
 
     // Subscribe to the custom contexts.
     const Ctor = this.constructor;
     const {'useContexts': useContexts} = Ctor;
     if (useContexts) {
-      useContexts.forEach(contextType => {
-        contextNode.subscribe(contextType, contextConsumerCallback(contextType, consumeContext));
+      useContexts.forEach(prop => {
+        contextNode.subscribe(prop, contextConsumerCallback(prop, consumeContext));
       });
     }
 
@@ -292,7 +288,7 @@ function WithContexts({debug, contexts, children}) {
     contexts.forEach((value, key) => {
       if (value != null) {
         const Context = key;
-        console.log('WithContext:', debug, Context.__ampKey || Context.__c, '=', value);
+        console.log('WithContext:', debug, Context.__qqq, '=', value);
         tail = Preact.createElement(Context.Provider, {value}, tail);
       }
     });
@@ -409,10 +405,10 @@ function matchChild(element, defs) {
 }
 
 /**
- * @param {!ContextType} contextType
- * @param {function(*, !ContextType)} callback
- * @param {function(*)}
+ * @param {!ContextPropDef<T>} prop
+ * @param {function(T, !ContextPropDef<T>)} callback
+ * @template T
  */
-function contextConsumerCallback(contextType, callback) {
-  return (value) => callback(value, contextType);
+function contextConsumerCallback(prop, callback) {
+  return (value) => callback(value, prop);
 }

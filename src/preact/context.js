@@ -15,7 +15,8 @@
  */
 
 import * as Preact from './index';
-import {createKeyedContext, useContext} from './index';
+import {createContext, useContext} from './index';
+import {reactContextProp} from './react-context-prop';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -31,10 +32,13 @@ let context;
  *
  * @return {!PreactDef.Context}
  */
-export const AmpContext = createKeyedContext('AmpContext', {
+export const AmpContext = createContext({
   'renderable': true,
   'playable': true,
 });
+
+/** @const {!ContextPropDef<!JsonObject>} */
+export const AmpContextProp = reactContextProp('AmpContext', AmpContext);
 
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.

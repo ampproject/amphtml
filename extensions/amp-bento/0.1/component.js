@@ -15,12 +15,12 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {createKeyedContext, useContext, useRef} from '../../../src/preact';
+import {createContext, useContext, useRef} from '../../../src/preact';
 import {WithAmpContext, AmpContext} from '../../../src/preact/context';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
-export const CustomContext = createKeyedContext('amp-bento:CustomContext', {parent: null});
+export const CustomContext = createContext({parent: null});
 
 /**
  * @param {!JsonObject} props

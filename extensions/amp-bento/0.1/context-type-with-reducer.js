@@ -248,7 +248,7 @@ class LoadingIndicatorService {
     console.log('LoadingIndicatorService: contextChanges:', records);
 
     records.forEach(({contextNode}) => {
-      contextNode.subscribe(
+      const unsub = contextNode.subscribe(
         [Renderable, LoadState],
         (renderable, loadState) => {
           const loading =
@@ -263,6 +263,9 @@ class LoadingIndicatorService {
               contextNode.remove(LoadingIndicator, li);
               this.io_.unobserve(element);
             };
+          } else if (loadState === LoadState.LOADED) {
+            // TODO: what if an element needs reloading?
+            unsub();
           }
         }
       );
@@ -301,4 +304,31 @@ class LoadingIndicator {
     console.log('LoadingIndicator: destroy');
     this.toggle(false);
   }
+}
+
+function subscribeAll(contextNode, props, handler) {
+  const values = [];
+  values.length = props.length;
+  let cleanup = null;
+  const updateValue = (prop, value) => {
+    const index = props.indexOf(prop);
+    values[index] = value;
+    const allDefined = values.all(v => v !== undefined);
+    if (cleanup) {
+      cleanup();
+      cleanup = null;
+    }
+    if (allDefined) {
+      cleanup = handler(allDefined);
+    }
+  };
+  const singleHandler = (prop, value) => {
+    updateValue(prop, value);
+    return () => updateValue(prop, undefined);
+  };
+  const unsubscribes = props.map(prop =>
+    contextNode.subscribe(prop, (value) => singleHandler(prop, value)));
+  return () => {
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+  };
 }

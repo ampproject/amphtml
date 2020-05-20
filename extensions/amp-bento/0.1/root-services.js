@@ -1,6 +1,5 @@
 
-import {ContextNode, reducePath} from '../../../src/node/node';
-import {setKey, contextType} from '../../../src/node/context-type';
+import {ContextNode} from '../../../src/context';
 import {AmpContext} from '../../../src/preact/context';
 import {Deferred} from '../../../src/utils/promise';
 
@@ -206,3 +205,6 @@ const SizeMeasurer = contextType(
   {
     defaultRootFactory: SizeMeasurerImpl,
   });
+
+// QQQQ
+function reducePath() {}

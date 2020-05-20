@@ -1,7 +1,6 @@
 
-import {ContextNode} from '../../../src/node/node';
-import {setKey} from '../../../src/node/context-type';
-import {ContextNodeObserver} from '../../../src/node/observer';
+import {ContextNode} from '../../../src/context';
+import {ContextNodeObserver} from '../../../src/context/observer';
 import {AmpContext} from '../../../src/preact/context';
 
 /**
@@ -82,4 +81,5 @@ class LoadingIndicator {
   }
 }
 
-setKey(LoadingIndicator, 'LoadingIndicator');
+//QQQQ
+// setKey(LoadingIndicator, 'LoadingIndicator');

@@ -20,9 +20,12 @@ import {BentoComponent, CustomContext} from './component2';
 import {dict} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
+import {reactContextProp} from '../../../src/preact/react-context-prop';
 
 /** @const {string} */
 const TAG = 'amp-bento2';
+
+const CustomContextProp = reactContextProp('amp-bento2:CustomContext', CustomContext);
 
 class AmpBento2 extends PreactBaseElement {
   /** @override */
@@ -49,8 +52,8 @@ AmpBento2['props'] = {
 
 AmpBento2['passthrough'] = true;
 
-AmpBento2['exportContexts'] = [CustomContext];
-AmpBento2['useContexts'] = [CustomContext];
+AmpBento2['exportContexts'] = [CustomContextProp];
+AmpBento2['useContexts'] = [CustomContextProp];
 
 AMP.extension(TAG, '0.2', (AMP) => {
   AMP.registerElement(TAG, AmpBento2);
