@@ -19,12 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-  width="300"
-  height="250"
-  type="marfeel"
-  data-tenant="demo.marfeel.com"
->
+<amp-ad width="300" height="250" type="marfeel" data-tenant="demo.marfeel.com">
 </amp-ad>
 ```
 
