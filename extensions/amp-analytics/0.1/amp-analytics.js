@@ -288,7 +288,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -516,7 +516,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'

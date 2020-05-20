@@ -65,12 +65,6 @@ describes.realWin(
       'triggers': {'pageview': {'on': 'visible', 'request': 'foo'}},
     };
 
-    const noTriggersError =
-      '[AmpAnalytics <unknown id>] No triggers were ' +
-      'found in the config. No analytics data will be sent.';
-    const noRequestStringsError =
-      '[AmpAnalytics <unknown id>] No request ' +
-      'strings defined. Analytics data will not be sent from this page.';
     const oneScriptChildError =
       '[AmpAnalytics <unknown id>] The tag should ' +
       'contain only one <script> child.';
@@ -201,8 +195,6 @@ describes.realWin(
       });
 
       it('does not send a hit when config is not in a script tag', function () {
-        expectAsyncConsoleError(noTriggersError);
-        expectAsyncConsoleError(noRequestStringsError);
         const config = JSON.stringify(trivialConfig);
         const el = doc.createElement('amp-analytics');
         el.textContent = config;
@@ -242,8 +234,6 @@ describes.realWin(
 
       it('does not send a hit when multiple child tags exist', function () {
         expectAsyncConsoleError(oneScriptChildError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const analytics = getAnalyticsTag(trivialConfig);
         const script2 = document.createElement('script');
         script2.setAttribute('type', 'application/json');
@@ -253,8 +243,6 @@ describes.realWin(
 
       it('does not send a hit when script tag does not have a type attribute', function () {
         expectAsyncConsoleError(scriptTypeError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
@@ -270,8 +258,6 @@ describes.realWin(
 
       it('does not send a hit when json config is not valid', function () {
         expectAsyncConsoleError(configParseError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.setAttribute('type', 'application/json');
@@ -297,8 +283,6 @@ describes.realWin(
       });
 
       it('does not send a hit when request type is not defined', function () {
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(/Request string not found/);
         const analytics = getAnalyticsTag({
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
@@ -1716,9 +1700,6 @@ describes.realWin(
       });
 
       it('Initializes a new Linker.', () => {
-        expectAsyncConsoleError(noTriggersError);
-        expectAsyncConsoleError(noRequestStringsError);
-
         env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
         const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
