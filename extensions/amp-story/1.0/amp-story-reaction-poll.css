@@ -92,7 +92,6 @@
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
-  max-width: 100% !important;
 }
 
 .i-amphtml-story-reaction-post-selection
@@ -103,7 +102,6 @@
 .i-amphtml-story-reaction-option-percentage-text {
   font-weight: 700 !important;
   font-size: 22px !important;
-  margin: 0 !important;
   max-height: 1px !important;
   overflow-y: hidden !important;
 }
