@@ -8205,7 +8205,7 @@ http-proxy@^0.10:
     pkginfo "0.3.x"
     utile "~0.2.1"
 
-http-proxy@^1.18.0:
+http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -10303,10 +10303,10 @@ karma-super-dots-reporter@0.2.0:
     chalk "^0.5.1"
     log-symbols "^1.0.1"
 
-karma@5.0.8:
-  version "5.0.8"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-5.0.8.tgz#be9cec113c1b36e47e5fa03a370c76984a1a65ee"
-  integrity sha512-n0iQ66to2YivGTw202ReC5I33F7/BaiQRBEP6MNRex//3ckblNcEDV5T5CL+2W/wdjPc479IxDkMtBoOZ/4PnA==
+karma@5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-5.0.9.tgz#11a119b0c763a806fdc471b40c594a2240b5ca13"
+  integrity sha512-dUA5z7Lo7G4FRSe1ZAXqOINEEWxmCjDBbfRBmU/wYlSMwxUQJP/tEEP90yJt3Uqo03s9rCgVnxtlfq+uDhxSPg==
   dependencies:
     body-parser "^1.19.0"
     braces "^3.0.2"
@@ -10318,7 +10318,7 @@ karma@5.0.8:
     flatted "^2.0.2"
     glob "^7.1.6"
     graceful-fs "^4.2.4"
-    http-proxy "^1.18.0"
+    http-proxy "^1.18.1"
     isbinaryfile "^4.0.6"
     lodash "^4.17.15"
     log4js "^6.2.1"
@@ -15890,10 +15890,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@3.9.2:
-  version "3.9.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.2.tgz#64e9c8e9be6ea583c54607677dd4680a1cf35db9"
-  integrity sha512-q2ktq4n/uLuNNShyayit+DTobV2ApPEo/6so68JaD5ojvc/6GClBipedB9zNWYxRSAlZXAe405Rlijzl6qDiSw==
+typescript@3.9.3:
+  version "3.9.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.3.tgz#d3ac8883a97c26139e42df5e93eeece33d610b8a"
+  integrity sha512-D/wqnB2xzNFIcoBG9FG8cXRDjiqSTbG2wd8DMZeQyJlP1vfTkIxH4GKveWaEBYySKIg+USu+E+EDIR47SqnaMQ==
 
 ua-parser-js@0.7.21:
   version "0.7.21"
