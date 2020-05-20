@@ -50,11 +50,8 @@
 }
 
 .i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection)
-  .i-amphtml-story-reaction-option:first-child::after {
-  content: '';
+  .i-amphtml-story-reaction-option-divider {
   height: 100%;
-  position: absolute;
-  right: 1px;
   width: 1px;
   opacity: 0.3;
   background-color: var(--reaction-accent-color);
@@ -66,8 +63,8 @@
   background-color: var(--reaction-accent-color);
   opacity: 0.3;
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 0px;
+  right: 0px;
   height: 100%;
 }
 
@@ -86,8 +83,7 @@
 .i-amphtml-story-reaction-post-selection
   .i-amphtml-story-reaction-option-title {
   transform: scale(var(--post-select-scale)) !important;
-  margin-bottom: -14px !important;
-  margin-top: -14px !important;
+  height: 33px !important;
 }
 
 .i-amphtml-story-reaction-option-title-text {

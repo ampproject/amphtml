@@ -56,6 +56,17 @@ const buildOptionTemplate = (element) => {
   `;
 };
 
+/**
+ * Generates the template for the option divider.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildBinaryOptionDividerTemplate = (element) => {
+  const html = htmlFor(element);
+  return html` <div class="i-amphtml-story-reaction-option-divider"></div> `;
+};
+
 export class AmpStoryReactionPoll extends AmpStoryReaction {
   /**
    * @param {!AmpElement} element
@@ -83,9 +94,9 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
    * @param {!Element} root
    */
   attachContent_(root) {
-    this.options_.forEach((option) => {
-      root.appendChild(this.generateOption_(option));
-    });
+    root.appendChild(this.generateOption_(this.options_[0]));
+    root.appendChild(buildBinaryOptionDividerTemplate(root));
+    root.appendChild(this.generateOption_(this.options_[1]));
     this.adaptFontSize_(root);
   }
 
