@@ -60,7 +60,9 @@ const {getOutput} = require('../common/exec');
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkRenovateConfig() {
-  const {status, stdout} = getOutput('npx renovate-config-validator');
+  const {status, stdout} = getOutput(
+    'node_modules/renovate/dist/config-validator.js'
+  );
   const [configFile] = stdout.match(/(?<=Validating )\S+/);
 
   if (status === 0) {
