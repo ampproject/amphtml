@@ -110,6 +110,9 @@ export class AmpStoryPlayer {
     /** @private {boolean} */
     this.isLaidOut_ = false;
 
+    /** @private {boolean} */
+    this.isBuilt_ = false;
+
     /** @private {!IframePool} */
     this.iframePool_ = new IframePool();
 
@@ -129,6 +132,25 @@ export class AmpStoryPlayer {
       lastX: 0,
       isSwipeX: null,
     };
+
+    this.attachCallbacksToElement_();
+  }
+
+  /**
+   * Attaches callbacks to the DOM element for them to be used by publishers.
+   * @private
+   */
+  attachCallbacksToElement_() {
+    this.element_.load = this.load.bind(this);
+  }
+
+  /**
+   * External callback for manually loading the player.
+   * @public
+   */
+  load() {
+    this.buildCallback();
+    this.layoutCallback();
   }
 
   /**
@@ -141,10 +163,15 @@ export class AmpStoryPlayer {
 
   /** @public */
   buildCallback() {
+    if (this.isBuilt_) {
+      return;
+    }
+
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
+    this.isBuilt_ = true;
   }
 
   /** @private */
