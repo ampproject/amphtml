@@ -21,18 +21,10 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function marfeel(global, data) {
-  console.log(data);
-  // TODO: check mandatory fields
-  //validateData(data, [], ['slot', 'targeting', 'extras']);
-  loadScript(global, 'https://live.mrf.io/atomic/tiendeo.com/index', () => {
-    loadScript(
-      global,
-      'https://www.googletagservices.com/tag/js/gpt.js',
-      () => {
-        global.googletag.cmd.push(() => {
-          //new window.MarfeelAmpAd(global, data).createAd();
-        });
-      }
-    );
-  });
+  validateData(data, ['tenant']);
+
+  const {tenant, version} = data;
+  const versionQS = version ? `?v=${version}` : '';
+
+  loadScript(global, `https://live.mrf.io/amp-ad/${tenant}/index${versionQS}`);
 }
