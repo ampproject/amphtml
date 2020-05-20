@@ -27,6 +27,10 @@ const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 
+// Allowed renovate config filenames
+// See https://docs.renovatebot.com/configuration-options/
+const RENOVATE_CONFIG_REGEX = /(\.git(hu|la)b\/)?renovate\.json5?|\.renovaterc(\.json)?/;
+
 /**
  * Checks if the given file is an OWNERS file.
  *
@@ -35,6 +39,16 @@ const {isTravisBuild} = require('../common/travis');
  */
 function isOwnersFile(file) {
   return file.endsWith('OWNERS');
+}
+
+/**
+ * Checks if the given file is the renovate config file.
+ *
+ * @param {string} file
+ * @return {boolean}
+ */
+function isRenovateConfigFile(file) {
+  return RENOVATE_CONFIG_REGEX.test(file);
 }
 
 /**
@@ -58,7 +72,7 @@ function isValidatorFile(file) {
  */
 const targetMatchers = {
   'AVA': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -69,7 +83,7 @@ const targetMatchers = {
     );
   },
   'BABEL_PLUGIN': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -84,7 +98,7 @@ const targetMatchers = {
     );
   },
   'CACHES_JSON': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -93,7 +107,7 @@ const targetMatchers = {
     );
   },
   'DEV_DASHBOARD': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -103,7 +117,7 @@ const targetMatchers = {
     );
   },
   'DOCS': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -112,7 +126,7 @@ const targetMatchers = {
     );
   },
   'E2E_TEST': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -123,13 +137,13 @@ const targetMatchers = {
     );
   },
   'FLAG_CONFIG': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return file.startsWith('build-system/global-configs/');
   },
   'INTEGRATION_TEST': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -147,14 +161,17 @@ const targetMatchers = {
   'PACKAGE_UPGRADE': (file) => {
     return file == 'package.json' || file == 'yarn.lock';
   },
+  'RENOVATE_CONFIG': (file) => {
+    return isRenovateConfigFile(file);
+  },
   'RUNTIME': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return file.startsWith('src/');
   },
   'SERVER': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -164,7 +181,7 @@ const targetMatchers = {
     );
   },
   'UNIT_TEST': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -190,7 +207,7 @@ const targetMatchers = {
     );
   },
   'VALIDATOR_JAVA': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -199,7 +216,7 @@ const targetMatchers = {
     );
   },
   'VALIDATOR_WEBUI': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
@@ -208,7 +225,7 @@ const targetMatchers = {
     );
   },
   'VISUAL_DIFF': (file) => {
-    if (isOwnersFile(file)) {
+    if (isOwnersFile(file) || isRenovateConfigFile(file)) {
       return false;
     }
     return (
