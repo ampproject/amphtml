@@ -272,6 +272,14 @@ i-amphtml-sizer {
   display: none;
 }
 
+/** Hide all text node children of non-container elements. */
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) ,
+[layout]:not([layout=container]):not(.i-amphtml-element)
+{
+  color: transparent !important; 
+  line-height: 0 !important;
+}
+
 .i-amphtml-ghost {
   visibility: hidden !important;
 }
