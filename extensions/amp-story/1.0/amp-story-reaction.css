@@ -20,13 +20,13 @@
     font-family: 'Poppins', sans-serif !important;
     width: auto !important;
     height: auto !important;
+    pointer-events: all;
     /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
     min-width: 224px !important;
     max-width: 400px !important;
     /* General CSS variables that work across all reactions */
     --reaction-background-color: white;
     --reaction-accent-color: #005AF0;
-    pointer-events: all;
 }
 
 .i-amphtml-story-reaction[theme="dark"] {
