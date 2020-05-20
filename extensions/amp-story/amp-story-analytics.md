@@ -58,7 +58,7 @@ The `story-last-page-visible` trigger is fired when the last page in the story i
 
 ### Tooltip focus trigger (`"on": "story-focus"`)
 
-The `story-focus` trigger is fired when opening a tooltip. Which happens when clicking an affiliate link, an embedded tweet, or just a regular link.
+The `story-focus` trigger is fired when clicking an element that opens a tooltip. This happens when clicking an affiliate link, an embedded tweet, or just a regular link.
 
 To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
@@ -86,7 +86,7 @@ Example:
 
 ### Tooltip click through trigger (`"on": "story-click-through"`)
 
-The `story-click-through` trigger is fired when clicking on a previously opened tooltip.
+The `story-click-through` trigger is fired when clicking on a tooltip.
 
 To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
 
@@ -126,10 +126,6 @@ The `story-open` trigger is fired when opening a drawer or dialog inside a story
 
 The `story-close` trigger is fired when closing a drawer or dialog inside a story. The components that are currently trackable by this are the same as the [`story-open` trigger](#Story-open-trigger-"on":-"story-open").
 
-### Reaction trigger (`"on": "story-reaction"`)
-
-The `story-reaction` trigger is fired when a user interacts with a reaction component (e.g. an `<amp-story-reaction-quiz>`)
-
 ### Bookend enter trigger (`"on": "story-bookend-enter"`)
 
 The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
@@ -167,7 +163,9 @@ For the following event types, variables can be passed as part of the element le
 - story-open
 - story-close
 
-e.g.
+The variables passed as data attributes should follow the format `data-vars-*`.
+
+Example:
 
 Given the following analytics config with the corresponding element
 
@@ -191,7 +189,7 @@ Given the following analytics config with the corresponding element
 
 ```
 
-And in the request url the token would be of the format \${eventId} (follows camelcase):
+And in the request url the token would be of the format `${eventId}` (follows camelcase):
 
 `"focusedState": "${base}&tooltipClickId=${tooltipClickId}&tooltipTargetHref=${tooltipHref}"`
 
