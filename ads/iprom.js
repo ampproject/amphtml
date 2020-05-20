@@ -24,12 +24,12 @@ import {validateData, writeScript} from '../3p/3p';
 export function iprom(global, data) {
   validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
 
+  const {sitepath, zone} = data;
+
   /**
    * Callback for WriteScript
    */
   function namespaceLoaded() {
-    const {sitepath, zone} = data;
-
     const ipromNS = window.ipromNS || {};
 
     ipromNS.AdTag = ipromNS.AdTag || {};
