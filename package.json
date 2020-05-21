@@ -14,7 +14,7 @@
     "preinstall": "node build-system/common/check-package-manager.js"
   },
   "dependencies": {
-    "@ampproject/animations": "0.2.0",
+    "@ampproject/animations": "0.2.2",
     "@ampproject/toolbox-cache-url": "2.3.0",
     "@ampproject/viewer-messaging": "1.1.0",
     "@ampproject/worker-dom": "0.24.0",
