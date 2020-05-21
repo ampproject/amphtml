@@ -119,6 +119,7 @@
       <option>webengage</option>
       <option>webtrekk</option>
       <option>webtrekk_v2</option>
+      <option>rudderstack</option>
     </select>
     <input type="submit" value="Go">
   </form>
@@ -1911,6 +1912,33 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- end WebEngage Analytics example -->
+
+<!-- RudderStack example -->
+<amp-analytics config="https://cdn.rudderlabs.com/amp/rudderstack.json" id="rudderstack">
+  <script type="application/json">
+  {
+    "vars": {
+      "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
+      "dataPlaneUrl": "https://hosted.rudderlabs.com",
+      "pageName": "My Page name"
+    },
+    "extraUrlParams": {
+      "properties.source": "RudderStack"
+    },
+    "triggers": {
+      "click": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "track",
+        "vars": {
+          "eventName": "click"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+<!-- End RudderStack example -->
 </div>
 
 <div class="logo"></div>
