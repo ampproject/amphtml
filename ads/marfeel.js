@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-amp-selector [option] {
-  cursor: pointer;
-}
+import {loadScript, validateData} from '../3p/3p';
 
-amp-selector [option][selected] {
-  cursor: auto;
-  outline: solid 1px rgba(0,0,0,0.7);
-}
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function marfeel(global, data) {
+  validateData(data, ['tenant']);
 
-amp-selector[multiple] [option][selected] {
-  cursor: pointer;
-  outline: solid 1px rgba(0, 0, 0, 0.7);
-}
+  const {tenant, version} = data;
+  const versionQS = version ? `?v=${version}` : '';
 
-amp-selector [disabled][option],
-amp-selector[disabled] [option],
-amp-selector [selected][disabled],
-amp-selector[disabled] [selected] {
-  cursor: auto;
-  outline: none;
+  loadScript(global, `https://live.mrf.io/amp-ad/${tenant}/index${versionQS}`);
 }

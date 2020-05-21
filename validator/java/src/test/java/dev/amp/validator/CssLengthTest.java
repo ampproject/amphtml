@@ -61,7 +61,7 @@ public class CssLengthTest {
         Assert.assertFalse(cssLength.isAuto());
         Assert.assertFalse(cssLength.isFluid());
         Assert.assertTrue(cssLength.isValid());
-        Assert.assertEquals(cssLength.getNumeral(), new Float(800.0));
+        Assert.assertEquals(cssLength.getNumeral(), Float.valueOf(800));
         Assert.assertEquals(cssLength.getUnit(), "px");
         Assert.assertTrue(cssLength.isSet());
 
@@ -73,7 +73,7 @@ public class CssLengthTest {
         Assert.assertFalse(cssLength.isAuto());
         Assert.assertFalse(cssLength.isFluid());
         Assert.assertTrue(cssLength.isValid());
-        Assert.assertEquals(cssLength.getNumeral(), new Float(800.0));
+        Assert.assertEquals(cssLength.getNumeral(), Float.valueOf(800));
         Assert.assertEquals(cssLength.getUnit(), "rem");
         Assert.assertTrue(cssLength.isSet());
 

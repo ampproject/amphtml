@@ -36,7 +36,7 @@ FAIL
 |        <!-- Invalid: is not a descendant of amp-story-grid-layer. -->
 |        <amp-twitter width="375"
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-twitter-error.html:36:6 Tag 'amp-twitter' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-amp-twitter-error.html:36:6 Tag 'amp-twitter' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-animation', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story)
 >>       ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-amp-twitter-error.html:36:6 The tag 'amp-twitter' requires including the 'amp-twitter' extension JavaScript. (see https://amp.dev/documentation/components/amp-twitter)
 |          height="472"
