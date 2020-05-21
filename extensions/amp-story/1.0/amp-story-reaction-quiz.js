@@ -17,6 +17,7 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {dev} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
@@ -181,7 +182,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     });
 
     // TODO(mszylkowski): split each variable to be applied to the corresponding option.
-    setStyles(this.rootEl_, {
+    setStyles(dev().assertElement(this.rootEl_), {
       '--option-1-percentage': percentages[0] + '%',
       '--option-2-percentage': percentages[1] + '%',
       '--option-3-percentage': percentages[2] + '%',
