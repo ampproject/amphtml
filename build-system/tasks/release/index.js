@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../../global-configs/experiments-config.json');
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
+const klaw = require('klaw');
 const log = require('fancy-log');
 const path = require('path');
 const tar = require('tar');
@@ -291,6 +292,35 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
 }
 
 /**
+ * Generates a listing of all files in each org-cdn/rtv/ subdirectory.
+
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ */
+async function generateFileListing_(outputDir) {
+  await Promise.all(
+    Object.entries(CHANNEL_CONFIGS)
+      .map(([rtvPrefix]) =>
+        path.join(outputDir, 'org-cdn/rtv', `${rtvPrefix}${VERSION}`)
+      )
+      .filter((rtvPath) => fs.pathExistsSync(path.join(rtvPath)))
+      .map(async (rtvPath) => {
+        const filesPath = path.join(rtvPath, 'files.txt');
+
+        const files = [];
+        for await (const file of klaw(rtvPath)) {
+          if (file.stats.isFile()) {
+            files.push(path.relative(rtvPath, file.path));
+          }
+        }
+        files.sort();
+        files.push(''); // Add an empty line at end of file.
+
+        await fs.writeFile(filesPath, files.join('\n'));
+      })
+  );
+}
+
+/**
  * Prepends the AMP_CONFIG configuration object to all the entry files.
  *
  * Entry files are those that publishers would embed in their page, i.e.
@@ -420,6 +450,9 @@ async function release() {
 
   log('Copying from temporary directory to', cyan('org-cdn'));
   await populateOrgCdn_(distFlavors, tempDir, outputDir);
+
+  log('Generating', cyan('files.txt'), 'files in', cyan('org-cdn/rtv/*'));
+  await generateFileListing_(outputDir);
 
   log('Prepending config to entry files...');
   await prependConfig_(outputDir);
