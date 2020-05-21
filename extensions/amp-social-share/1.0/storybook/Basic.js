@@ -63,7 +63,7 @@ export const _default = () => {
         type={type}
         href={href}
         shareEndpoint={href}
-        params={params}
+        {...params}
         bindings={bindings}
         width={width}
         height={height}

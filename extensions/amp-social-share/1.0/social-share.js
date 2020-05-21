@@ -28,6 +28,17 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const NAME = 'SocialShare';
+const DEFINED_PROPERTIES = new Set([
+  'type',
+  'shareEndpoint',
+  'bindings',
+  'width',
+  'height',
+  'tabIndex',
+  'style',
+]);
+//need to add a property for the fully custom url provided
+
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
@@ -37,7 +48,12 @@ export function SocialShare(props) {
   const {typeConfig, baseEndpoint, checkedWidth, checkedHeight} = checkProps(
     props
   );
-  const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
+  const finalEndpoint = createEndpoint(
+    typeConfig,
+    baseEndpoint,
+    unpackParams(props),
+    props['bindings']
+  );
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
@@ -126,11 +142,11 @@ function throwWarning(message) {
 /**
  * @param {!JsonObject} typeConfig
  * @param {?string} baseEndpoint
- * @param {!JsonObject} props
+ * @param {!JsonObject} params
+ * @param {!JsonObject} bindings
  * @return {?string}
  */
-function createEndpoint(typeConfig, baseEndpoint, props) {
-  const {'params': params, 'bindings': bindings} = props;
+function createEndpoint(typeConfig, baseEndpoint, params, bindings) {
   const combinedParams = {...typeConfig['defaultParams'], ...params};
   const endpointWithParams = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
@@ -155,6 +171,20 @@ function createEndpoint(typeConfig, baseEndpoint, props) {
     endpointWithParams
   );
   return finalEndpoint;
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {!JsonObject}
+ */
+function unpackParams(props) {
+  const params = dict();
+  Object.keys(props).forEach((key) => {
+    if (!DEFINED_PROPERTIES.has(key)) {
+      params[key] = props[key];
+    }
+  });
+  return params;
 }
 
 /**

@@ -32,7 +32,7 @@ class AmpSocialShare extends PreactBaseElement {
     urlReplacements.expandBindingsAsync(DEFAULT_BINDINGS).then((bindings) => {
       this.mutateProps(dict({'bindings': bindings}));
     });
-    return {'params': urlParams};
+    return {...urlParams};
   }
 }
 
