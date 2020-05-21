@@ -28,8 +28,6 @@ branches:
     - /^amp-release-.*$/
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
       - expect-dev
