@@ -271,6 +271,21 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
+  it('should preload the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
+    await page.layoutCallback();
+
+    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
   it('should wait for media layoutCallback to register it', async () => {
     env.sandbox
       .stub(page.resources_, 'getResourceForElement')
