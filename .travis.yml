@@ -91,6 +91,10 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
+      name: 'Dist Tests'
+      script:
+        - unbuffer node build-system/pr-check/dist-tests.js
+    - stage: test
       name: 'Remote (Sauce Labs) Tests'
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
