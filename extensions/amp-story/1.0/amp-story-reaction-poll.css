@@ -29,10 +29,6 @@
   --post-select-scale-variable: 1 !important;
 }
 
-.i-amphtml-story-reaction-poll-container[theme="dark"] {
-  --reaction-accent-color: white;
-}
-
 .i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection) {
   cursor: pointer !important;
 }
