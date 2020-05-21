@@ -1339,11 +1339,6 @@ export class ResourcesImpl {
       }
     }
 
-    // With IntersectionObserver, skip phases 5+.
-    if (this.intersectionObserver_) {
-      return;
-    }
-
     if (
       this.visible_ &&
       this.exec_.getSize() == 0 &&
