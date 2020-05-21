@@ -22,10 +22,7 @@ import {
   getMockReactionData,
 } from './test-amp-story-reaction';
 import {getRequestService} from '../amp-story-request-service';
-import {
-  measureMutateElementStub,
-  mutateElementStub,
-} from '../../../../testing/test-helper';
+import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
