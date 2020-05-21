@@ -19,6 +19,8 @@ import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -33,6 +35,15 @@ class AmpSocialShare extends PreactBaseElement {
       this.mutateProps(dict({'bindings': bindings}));
     });
     return {...urlParams};
+  }
+
+  /** @override */
+  isLayoutSupported() {
+    userAssert(
+      isExperimentOn(this.win, 'amp-social-share-v2'),
+      'expected amp-social-share-v2 experiment to be enabled'
+    );
+    return true;
   }
 }
 
