@@ -263,6 +263,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AJA](../../ads/aja.md)
 - [AMoAd](../../ads/amoad.md)
 - [Aniview](../../ads/aniview.md)
+- [AnyClip](../../ads/anyclip.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
