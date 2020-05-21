@@ -20,7 +20,7 @@
   height: 90px !important;
   max-width: 296px !important;
   border-radius: 16px !important;
-  box-shadow: 0px 2px 4px #000000aa !important;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
   color: var(--reaction-accent-color) !important;
   background: var(--reaction-background-color) !important;
   overflow: hidden !important;
@@ -46,26 +46,26 @@
   flex-grow: 50 !important;
   flex: 100 !important;
   overflow: hidden !important;
-  position: relative;
+  position: relative !important;
 }
 
 .i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection)
   .i-amphtml-story-reaction-option-divider {
-  height: 100%;
-  width: 1px;
-  opacity: 0.3;
-  background-color: var(--reaction-accent-color);
+  height: 100% !important;
+  width: 1px !important;
+  opacity: 0.3 !important;
+  background-color: var(--reaction-accent-color) !important;
 }
 
 .i-amphtml-story-reaction-post-selection
   .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected::before {
-  content: '';
-  background-color: var(--reaction-accent-color);
-  opacity: 0.3;
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  height: 100%;
+  content: '' !important;
+  background-color: var(--reaction-accent-color) !important;
+  opacity: 0.2 !important;
+  position: absolute !important;
+  left: 0px !important;
+  right: 0px !important;
+  height: 100% !important;
 }
 
 .i-amphtml-story-reaction-option-title {
@@ -102,11 +102,10 @@
 .i-amphtml-story-reaction-option-percentage-text {
   font-weight: 700 !important;
   font-size: 22px !important;
-  max-height: 1px !important;
-  overflow-y: hidden !important;
+  display: none !important;
 }
 
 .i-amphtml-story-reaction-post-selection
   .i-amphtml-story-reaction-option-percentage-text {
-  max-height: 30px !important;
+  display: block !important;
 }

@@ -46,16 +46,6 @@ export const ReactionType = {
   POLL: 1,
 };
 
-/**
- * @const @enum {string}
- */
-export const ReactionFlags = {
-  THEME: 'theme',
-  CHIP_CORNER: 'chip-corner',
-  CHIP_STYLE: 'chip-style',
-  STYLE: 'style',
-};
-
 /** @const {string} */
 const ENDPOINT_INVALID_ERROR =
   'The publisher has specified an invalid datastore endpoint';
@@ -192,11 +182,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
     this.rootEl_.classList.add('i-amphtml-story-reaction');
-    Object.values(ReactionFlags).forEach((attr) => {
-      if (this.element.hasAttribute(attr)) {
-        this.rootEl_.setAttribute(attr, this.element.getAttribute(attr));
-      }
-    });
+    this.element.classList.add('i-amphtml-story-reaction-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
     devAssert(this.element.children.length == 0, 'Too many children');
