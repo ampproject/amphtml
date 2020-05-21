@@ -22,6 +22,10 @@ import {
   getMockReactionData,
 } from './test-amp-story-reaction';
 import {getRequestService} from '../amp-story-request-service';
+import {
+  measureMutateElementStub,
+  mutateElementStub,
+} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
@@ -62,7 +66,9 @@ describes.realWin(
 
       win.document.body.appendChild(storyEl);
       ampStoryPoll = new AmpStoryReactionPoll(ampStoryPollEl);
-
+      env.sandbox
+        .stub(ampStoryPoll, 'measureMutateElement')
+        .callsFake(measureMutateElementStub);
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
     });
 
@@ -138,7 +144,7 @@ describes.realWin(
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable: 2'
+        '--post-select-scale-variable:2'
       );
     });
 
@@ -148,7 +154,7 @@ describes.realWin(
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable: 1.14'
+        '--post-select-scale-variable:1.14'
       );
     });
 
@@ -158,7 +164,7 @@ describes.realWin(
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
-        '--post-select-scale-variable: 1'
+        '--post-select-scale-variable:1'
       );
     });
   }

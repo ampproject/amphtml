@@ -87,6 +87,11 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
     return this.rootEl_;
   }
 
+  /** @override */
+  layoutCallback() {
+    return this.adaptFontSize_(this.rootEl_).then(() => super.layoutCallback());
+  }
+
   /**
    * Gets the options and adds them to the element
    *
@@ -97,7 +102,6 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
     root.appendChild(this.generateOption_(this.options_[0]));
     root.appendChild(buildBinaryOptionDividerTemplate(root));
     root.appendChild(this.generateOption_(this.options_[1]));
-    this.adaptFontSize_(root);
   }
 
   /**
@@ -115,23 +119,24 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
    * and post-select-scale:2 corresponds to font-size:28px after the 50% scale (for emoji titles).
    * @private
    * @param {!Element} root
+   * @return {!Promise}
    */
   adaptFontSize_(root) {
     let largestFontSize = FontSize.EMOJI;
     const allTitles = toArray(
       root.querySelectorAll('.i-amphtml-story-reaction-option-title-text')
     );
-    this.measureMutateElement(
+    return this.measureMutateElement(
       () => {
         allTitles.forEach((e) => {
           if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
             largestFontSize = FontSize.EMOJI;
           } else if (
-            e./*OK*/ clientHeight <= 30 &&
+            e./*OK*/ clientHeight <= 36 &&
             largestFontSize >= FontSize.SINGLE_LINE
           ) {
             largestFontSize = FontSize.SINGLE_LINE;
-          } else if (e./*OK*/ clientHeight > 30) {
+          } else if (e./*OK*/ clientHeight > 36) {
             largestFontSize = FontSize.DOUBLE_LINE;
           }
         });
@@ -140,9 +145,10 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
         setStyle(
           root,
           '--post-select-scale-variable',
-          `${(largestFontSize / FontSize.DOUBLE_LINE).toFixed(2)} !important;`
+          `${(largestFontSize / FontSize.DOUBLE_LINE).toFixed(2)}`
         );
-      }
+      },
+      root
     );
   }
 
