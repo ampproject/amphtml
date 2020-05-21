@@ -29,6 +29,7 @@
     --option-4-percentage: 0%;
     background: var(--reaction-accent-color) !important;
     border-radius: 32px !important;
+    font-family: 'Poppins-bold', sans-serif !important;
 }
 
 /* TODO: remove bg on no-prompt attribute here */
