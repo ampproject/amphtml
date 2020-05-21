@@ -475,6 +475,10 @@ window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
 data.adrequest;
 
+// marfeel.js
+data.tenant;
+data.version;
+
 // medianet.js
 data.crid;
 data.hasOwnProperty;
