@@ -294,6 +294,16 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'anyclip': {
+    prefetch:
+      'https://player.anyclip.com/anyclip-widget/lre-widget/prod/v1/src/lre.js',
+    preconnect: [
+      'https://trafficmanager.anyclip.com',
+      'https://lreprx-server.anyclip.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
