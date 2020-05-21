@@ -23,14 +23,10 @@
     --correct-color-shaded: #00600f !important;
     --incorrect-color: #F34E4E !important;
     --incorrect-color-shaded: #B71C1C !important;
-}
-
-.i-amphtml-story-reaction-quiz-container {
     --option-1-percentage: 0%;
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
     --option-4-percentage: 0%;
-    font-family: 'Poppins-bold', sans-serif !important;
     background: var(--reaction-accent-color) !important;
     border-radius: 32px !important;
 }
