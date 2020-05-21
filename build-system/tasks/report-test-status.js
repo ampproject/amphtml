@@ -67,6 +67,10 @@ function inferTestType() {
     return `${type}/local-changes`;
   }
 
+  if (IS_SINGLE_PASS) {
+    return `${type}/single-pass`;
+  }
+
   if (IS_SAUCELABS_BETA) {
     return `${type}/saucelabs-beta`;
   } else if (IS_SAUCELABS_STABLE) {
@@ -75,10 +79,6 @@ function inferTestType() {
     return `${type}/saucelabs`;
   } else if (IS_DIST) {
     return `${type}/minified`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
   }
 
   return `${type}/local`;
