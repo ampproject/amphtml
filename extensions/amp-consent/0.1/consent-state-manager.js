@@ -16,18 +16,17 @@
 
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_STRING_TYPE, // eslint-disable-line no-unused-vars
   ConsentInfoDef,
+  ConsentMetadataDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
+  getConsentMetadataValue,
   getConsentStateValue,
-  getConsentStringTypeValue,
   getStoredConsentInfo,
   hasDirtyBit,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
-  ConsentMetadataDef,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -506,7 +505,9 @@ export class ConsentInstance {
         request['consentString'] = consentInfo['consentString'];
       }
       if (consentInfo['consentMetadata']) {
-        request['consentMetadata'] = consentInfo['consentMetadata'];
+        request['consentMetadata'] = getConsentMetadataValue(
+          consentInfo['consentMetadata']
+        );
       }
       const init = {
         credentials: 'include',

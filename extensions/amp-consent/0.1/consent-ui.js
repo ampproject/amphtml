@@ -27,7 +27,7 @@ import {
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {getConsentStateValue} from './consent-info';
+import {getConsentMetadataValue, getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
@@ -489,7 +489,9 @@ export class ConsentUI {
             'consentStateValue': getConsentStateValue(
               consentInfo['consentState']
             ),
-            'consentMetadata': consentInfo['consentMetadata'],
+            'consentMetadata': getConsentMetadataValue(
+              consentInfo['consentMetadata']
+            ),
             'consentString': consentInfo['consentString'],
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],

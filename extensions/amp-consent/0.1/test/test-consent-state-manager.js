@@ -15,8 +15,11 @@
  */
 import {
   CONSENT_ITEM_STATE,
+  CONSENT_STRING_TYPE,
   composeStoreValue,
   constructConsentInfo,
+  constructMetadata,
+  convertConsentStringType,
 } from '../consent-info';
 import {
   CONSENT_STRING_MAX_LENGTH,
@@ -132,13 +135,17 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         manager.updateConsentInstanceState(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test-string',
-          {}
+          constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
         );
         let value;
         const p = manager.getConsentInstanceInfo().then((v) => (value = v));
         yield p;
         expect(value).to.deep.equal(
-          constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test-string', {})
+          constructConsentInfo(
+            CONSENT_ITEM_STATE.ACCEPTED,
+            'test-string',
+            constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+          )
         );
       });
 
@@ -293,11 +300,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         });
 
         it('update consent info with consentString and metadata', function* () {
-          instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'accept');
+          instance.update(
+            CONSENT_ITEM_STATE.ACCEPTED,
+            'accept',
+            constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+          );
           yield macroTask();
           let consentInfo = constructConsentInfo(
             CONSENT_ITEM_STATE.ACCEPTED,
-            'accept'
+            'accept',
+            constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
           );
           expect(storageSetSpy).to.be.calledOnce;
           expect(storageSetSpy).to.be.calledWith(
@@ -306,11 +318,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           );
           storageSetSpy.resetHistory();
 
-          instance.update(CONSENT_ITEM_STATE.REJECTED, 'reject');
+          instance.update(
+            CONSENT_ITEM_STATE.REJECTED,
+            'reject',
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+          );
           yield macroTask();
           consentInfo = constructConsentInfo(
             CONSENT_ITEM_STATE.REJECTED,
-            'reject'
+            'reject',
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
           );
           expect(storageSetSpy).to.be.calledOnce;
           expect(storageSetSpy).to.be.calledWith(
@@ -325,7 +342,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.not.be.called;
 
-          instance.update(CONSENT_ITEM_STATE.UNKNOWN, 'test');
+          instance.update(
+            CONSENT_ITEM_STATE.UNKNOWN,
+            'test',
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
+          );
           yield macroTask();
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.be.calledOnce;
@@ -483,13 +504,21 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.equal('old');
         expect(requestBody.consentMetadata).to.be.undefined;
-        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'new', {});
+        yield instance.update(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'new',
+          constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+        );
         yield macroTask();
         expect(requestSpy).to.be.calledTwice;
         expect(requestBody.consentState).to.be.true;
         expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.equal('new');
-        expect(requestBody.consentMetadata).to.deep.equal({});
+        expect(requestBody.consentMetadata).to.deep.equal({
+          'consentStringType': convertConsentStringType(
+            CONSENT_STRING_TYPE.US_PRIVACY_STRING
+          ),
+        });
       });
 
       it('do not send update request on dismiss/notRequied', function* () {
