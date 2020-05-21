@@ -285,6 +285,7 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
       rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
     }
   }
+  await Promise.all(rtvCopyingPromises);
 
   logSeparator_();
 }
