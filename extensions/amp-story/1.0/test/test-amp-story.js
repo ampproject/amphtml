@@ -29,6 +29,7 @@ import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
@@ -117,9 +118,7 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
-      const localizationService = Services.localizationForDoc(
-        win.document.body
-      );
+      const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
@@ -1055,6 +1054,26 @@ describes.realWin(
           expect(coverMuteStub).to.have.been.calledOnce;
           expect(firstPageUnmuteStub).to.have.been.calledOnce;
         });
+      });
+
+      it('should remove the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        expect(story.element.hasAttribute('muted')).to.be.true;
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+        expect(story.element.hasAttribute('muted')).to.be.false;
+      });
+
+      it('should add the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+        expect(story.element.hasAttribute('muted')).to.be.true;
       });
 
       describe('#getMaxMediaElementCounts', () => {

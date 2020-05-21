@@ -308,10 +308,7 @@ public class ContextTest {
         final Context context = new Context(mockValidatorRules);
 
         context.addInlineStyleByteSize(40);
-        context.addStyleAmpCustomByteSize(50);
-
         Assert.assertEquals(context.getInlineStyleByteSize(), 40);
-        Assert.assertEquals(context.getStyleAmpCustomByteSize(), 50);
     }
 
     private ParsedValidatorRules mockValidatorRules;

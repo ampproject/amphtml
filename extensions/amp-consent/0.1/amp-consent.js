@@ -17,7 +17,6 @@
 import {
   CONSENT_ITEM_STATE,
   convertEnumValueToState,
-  getConsentMetadata,
   getConsentStateValue,
   getConsentStringTypeValue,
   hasStoredValue,
@@ -42,7 +41,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -259,7 +258,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
 
       let consentString;
-      let consentStringType;
+      let metadata;
       const data = getData(event);
 
       if (!data || data['type'] != 'consent-response') {
@@ -292,7 +291,10 @@ export class AmpConsent extends AMP.BaseElement {
           data['info'] = undefined;
         }
         consentString = data['info'];
-        consentStringType = data['consentStringType'];
+        metadata = this.configureMetadataByConsentString_(
+          data['consentMetadata'],
+          consentString
+        );
       }
 
       const iframes = this.element.querySelectorAll('iframe');
@@ -300,7 +302,7 @@ export class AmpConsent extends AMP.BaseElement {
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
-          this.handleAction_(action, consentString, consentStringType);
+          this.handleAction_(action, consentString, metadata);
           return;
         }
       }
@@ -378,11 +380,12 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Handler User action
+   *
    * @param {string} action
    * @param {string=} consentString
-   * @param {string=} consentStringType
+   * @param {JsonObject=} opt_consentMetadata
    */
-  handleAction_(action, consentString, consentStringType) {
+  handleAction_(action, consentString, opt_consentMetadata) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -405,14 +408,14 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.ACCEPTED,
         consentString,
-        consentStringType
+        opt_consentMetadata
       );
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.REJECTED,
         consentString,
-        consentStringType
+        opt_consentMetadata
       );
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
@@ -541,7 +544,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
           response['consentString'] || undefined,
-          response['consentStringType']
+          response['consentMetadata'] || undefined
         );
       }
     });
@@ -549,26 +552,26 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Sync with local storage if consentRequired is true.
+   *
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
-   * @param {string=} responseConsentStringType
+   * @param {JsonObject=} opt_responseMetadata
    */
   updateCacheIfNotNull_(
     responseStateValue,
     responseConsentString,
-    responseConsentStringType
+    opt_responseMetadata
   ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
-      const metadata = getConsentMetadata(
-        responseConsentString,
-        responseConsentStringType
-      );
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        metadata.consentString,
-        metadata.consentStringType
+        responseConsentString,
+        this.configureMetadataByConsentString_(
+          opt_responseMetadata,
+          responseConsentString
+        )
       );
     }
   }
@@ -591,6 +594,7 @@ export class AmpConsent extends AMP.BaseElement {
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
           'consentStringType': getConsentStringTypeValue(
             storedInfo['consentStringType']
@@ -706,6 +710,24 @@ export class AmpConsent extends AMP.BaseElement {
    */
   getIsPromptUiOnForTesting() {
     return this.isPromptUIOn_;
+  }
+
+  /**
+   * If consentString is undefined or invalid, don't
+   * include any metadata in update.
+   * @param {JsonObject=} opt_metadata
+   * @param {string=} opt_consentString
+   * @return {?JsonObject|undefined}
+   */
+  configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+    if (!isObject(opt_metadata) || !opt_consentString) {
+      user().error(
+        TAG,
+        'CMP metadata is invalid or no consent string is found.'
+      );
+      return;
+    }
+    return opt_metadata;
   }
 }
 

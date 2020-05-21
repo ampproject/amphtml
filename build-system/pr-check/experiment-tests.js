@@ -60,7 +60,7 @@ function build_(config) {
 
 function test_() {
   timedExecOrDie('gulp integration --nobuild --compiled --headless');
-  timedExecOrDie('gulp e2e --nobuild --headless');
+  timedExecOrDie('gulp e2e --nobuild --compiled --headless');
 }
 
 function main() {

@@ -23,15 +23,26 @@ import {isEnumValue, isObject} from '../../../src/types';
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
- * CONSENT_STRING_TYPE: Set when a consent type is used to store more metadata on the consent string.
+ * METADATA: set when consent metadata is passed in to store more granular consent info
+ * on vendors.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
 export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
-  CONSENT_STRING_TYPE: 'cst',
   IS_DIRTY: 'd',
+  METADATA: 'm',
+};
+
+/**
+ * Key values for retriving/storing metadata values within consent info
+ * TODO(micajuineho)
+ * GDPR_APPLIES: 'ga'
+ * @enum {string}
+ */
+export const METADATA_STORAGE_KEY = {
+  CONSENT_STRING_TYPE: 'cst',
 };
 
 /**
@@ -61,11 +72,18 @@ export const CONSENT_STRING_TYPE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
- *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ *  consentMetadata: (Object|undefined),
  *  isDirty: (boolean|undefined),
  * }}
  */
 export let ConsentInfoDef;
+
+/**
+ * @typedef {{
+ *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ * }}
+ */
+export let ConsentMetadataDef;
 
 /**
  * Convert the legacy storage value to Consent Info
@@ -93,7 +111,7 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
-    value[STORAGE_KEY.CONSENT_STRING_TYPE],
+    convertStorageMetadata(value[STORAGE_KEY.METADATA]),
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -163,6 +181,12 @@ export function composeStoreValue(consentInfo) {
     obj[STORAGE_KEY.IS_DIRTY] = 1;
   }
 
+  if (consentInfo['consentMetadata']) {
+    obj[STORAGE_KEY.METADATA] = composeMetadataStoreValue(
+      consentInfo['consentMetadata']
+    );
+  }
+
   if (Object.keys(obj) == 0) {
     return null;
   }
@@ -203,16 +227,30 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
       calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
       (infoA['consentString'] || '') === (infoB['consentString'] || '');
-    const typeEqual = infoA['consentStringType'] === infoB['consentStringType'];
     let isDirtyEqual;
     if (opt_isDirty) {
       isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    return stateEqual && stringEqual && typeEqual && isDirtyEqual;
+    const metadataEqual = isMetadataEqual(
+      infoA['consentMetadata'],
+      infoB['consentMetadata']
+    );
+    return stateEqual && stringEqual && metadataEqual && isDirtyEqual;
   }
   return false;
+}
+
+/**
+ * Compares metadata values from consentInfo
+ *
+ * @param {Object=} unusedMetadataA
+ * @param {Object=} unusedMetadataB
+ * @return {boolean}
+ */
+function isMetadataEqual(unusedMetadataA, unusedMetadataB) {
+  return true;
 }
 
 /**
@@ -222,28 +260,41 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
  */
 function getLegacyStoredConsentInfo(value) {
   const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined, undefined);
+  return constructConsentInfo(state);
 }
 
 /**
  * Construct the consentInfo object from values
+ *
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
- * @param {CONSENT_STRING_TYPE=} opt_consentStringType
+ * @param {ConsentMetadataDef=} opt_consentMetadata
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
-  opt_consentStringType,
+  opt_consentMetadata,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
-    'consentStringType': opt_consentStringType,
+    'consentMetadata': opt_consentMetadata,
     'isDirty': opt_isDirty,
+  };
+}
+
+/**
+ * Construct the consentMetadataDef object from values
+ *
+ * @param {string=} opt_consentStringType
+ * @return {!ConsentMetadataDef}
+ */
+export function constructMetadata(opt_consentStringType) {
+  return {
+    'consentStringType': opt_consentStringType,
   };
 }
 
@@ -294,6 +345,22 @@ export function convertEnumValueToConsentStringType(value) {
 }
 
 /**
+ * Helper function to convert storage CONSENT_STRING_TYPE value to enum value
+ * @param {!CONSENT_STRING_TYPE} value
+ * @return {?string}
+ */
+export function convertConsentStringType(value) {
+  if (value === CONSENT_STRING_TYPE.TCF_V1) {
+    return 'tcf-v1';
+  } else if (value === CONSENT_STRING_TYPE.TCF_V2) {
+    return 'tcf-v2';
+  } else if (value === CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
+    return 'us-privacy-string';
+  }
+  return null;
+}
+
+/**
  *
  * @param {!ConsentInfoDef} info
  * @return {boolean}
@@ -326,37 +393,39 @@ export function getConsentStateValue(enumState) {
 }
 
 /**
- * Convert the CONSENT_STRING_TYPE back to readable string
- * @param {!CONSENT_STRING_TYPE} enumType
- * @return {string|undefined}
+ * Converts metadata to stroage value:
+ * {'gdprApplies': true, 'consentStringType': 'tcf-v2'} =>
+ * {'ga': true, 'cst': 2}
+ *
+ * @param {ConsentMetadataDef=} consentInfoMetadata
+ * @return {Object}
  */
-export function getConsentStringTypeValue(enumType) {
-  switch (enumType) {
-    case CONSENT_STRING_TYPE.TCF_V1:
-      return 'tcf-v1';
-    case CONSENT_STRING_TYPE.TCF_V2:
-      return 'tcf-v2';
-    case CONSENT_STRING_TYPE.US_PRIVACY_STRING:
-      return 'us-privacy-string';
-    default:
-      return undefined;
+function composeMetadataStoreValue(consentInfoMetadata) {
+  const storageMetadata = map();
+  // TODO(micajuineho)
+  if (consentInfoMetadata['consentStringType']) {
+    storageMetadata['cst'] = convertEnumValueToConsentStringType(
+      consentInfoMetadata['consentStringType']
+    );
   }
+  return storageMetadata;
 }
 
 /**
- * Handle consent metadata by returning and object with
- * fields based off consentString.
- * @param {string|undefined} consentString
- * @param {string|undefined} consentStringType
- * @return {!Object}
+ * TODO(micajuineho) Converts stroage metadata to ConsentMetadataDef:
+ * {'ga': true, 'cst': 2} =>
+ * {'gdprApplies': true, 'consentStringType': 'tcf-v2'}
+ *
+ * @param {Object|null|undefined} storageMetadata
+ * @return {ConsentMetadataDef|undefined}
  */
-export function getConsentMetadata(consentString, consentStringType) {
-  const metadata = {};
-  // TODO(micajuineho) treat gdprApplies the same way
-  if (consentString) {
-    metadata['consentString'] = consentString;
-    metadata['consentStringType'] =
-      convertEnumValueToConsentStringType(consentStringType) || undefined;
+function convertStorageMetadata(storageMetadata) {
+  if (!storageMetadata) {
+    return undefined;
   }
-  return metadata;
+  return constructMetadata(
+    convertConsentStringType(
+      storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]
+    ) || undefined
+  );
 }

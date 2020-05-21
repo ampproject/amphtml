@@ -18,9 +18,17 @@
       }
     },
     {
-      "handlerName": "adsHander",
-      "urls": [],
-      "timeout": 5000
+      "handlerName": "adsHandler",
+      "urls": [
+        "http://localhost:8000/test/fixtures/performance/amp-ad/hostile-inabox-env.html"
+      ],
+      "adsUrls": [
+        "http://localhost:8000/test/fixtures/performance/amp-ad/amphtml-ad.html"
+      ],
+      "timeout": 5000,
+      "extraUrlParam": {
+        "intercept": true
+      }
     }
   ]
 }
