@@ -1183,13 +1183,22 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
 
-    it('should respect loading strategy', () => {
+    it('should respect loading strategy if fetch attribute present', () => {
       impl.element.setAttribute(
         'data-loading-strategy',
         'prefer-viewability-over-views'
       );
       impl.element.setAttribute('data-lazy-fetch', 'true');
       expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
+
+    it('should NOT delay due to non-true fetch attribute', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'false');
+      expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
 
