@@ -16,6 +16,7 @@
 
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-poll-1.0.css';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -89,7 +90,9 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
 
   /** @override */
   layoutCallback() {
-    return this.adaptFontSize_(this.rootEl_).then(() => super.layoutCallback());
+    return this.adaptFontSize_(dev().assertElement(this.rootEl_)).then(() =>
+      super.layoutCallback()
+    );
   }
 
   /**
