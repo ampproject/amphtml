@@ -106,6 +106,18 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       impl.layoutCallback();
       expect(impl.refreshManager_).to.be.null;
     });
+
+    it('should be disabled if lazy fetch enabled, despite meta tag', () => {
+      createAndAppendAdElement(
+        {name: 'amp-ad-doubleclick-sra'},
+        'meta',
+        doc.head
+      );
+      const element = createAndAppendAdElement({'data-lazy-fetch': true});
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.buildCallback();
+      expect(impl.useSra).to.be.false;
+    });
   });
 
   describe('block parameter joining', () => {
