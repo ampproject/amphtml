@@ -86,10 +86,17 @@ import {
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
 import {
   getExperimentBranch,
@@ -99,11 +106,7 @@ import {
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {
-  incrementLoadingAds,
-  is3pThrottled,
-  waitFor3pThrottle,
-} from '../../amp-ad/0.1/concurrent-load';
+
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isCancellation} from '../../../src/error';
 import {
@@ -161,6 +164,9 @@ export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
  * @const {string}
  */
 const DUMMY_FLUID_SIZE = '320x50';
+
+/** @const @private {string} attribute indicating if lazy fetch is enabled.*/
+const LAZY_FETCH_ATTRIBUTE = 'data-lazy-fetch';
 
 /**
  * Map of pageview tokens to the instances they belong to.
@@ -501,18 +507,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  delayAdRequestEnabled() {
+    if (this.element.getAttribute(LAZY_FETCH_ATTRIBUTE) !== 'true') {
+      return false;
+    }
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
+  }
+
+  /** @override */
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
+    const pubEnabledSra = !!this.win.document.querySelector(
+      'meta[name=amp-ad-doubleclick-sra]'
+    );
+    const delayFetchEnabled = !!this.win.document.querySelector(
+      `amp-ad[type=doubleclick][${escapeCssSelectorIdent(
+        LAZY_FETCH_ATTRIBUTE
+      )}=true]`
+    );
+    if (pubEnabledSra && delayFetchEnabled) {
+      user().warn(
+        TAG,
+        'SRA is not compatible with lazy fetching, disabling SRA'
+      );
+    }
     this.useSra =
-      (getMode().localDev &&
+      !delayFetchEnabled &&
+      ((getMode().localDev &&
         /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
-      !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
-      [
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
-      ].some((eid) => this.experimentIds.indexOf(eid) >= 0);
+        pubEnabledSra ||
+        [
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+        ].some((eid) => this.experimentIds.indexOf(eid) >= 0));
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
