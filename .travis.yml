@@ -28,15 +28,12 @@ branches:
     - /^amp-release-.*$/
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
       - expect-dev
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
-      - pkg-config
   chrome: stable
   hosts:
     - ads.localhost
@@ -91,6 +88,10 @@ jobs:
       name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
+    - stage: test
+      name: 'Dist Tests'
+      script:
+        - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
       name: 'Remote (Sauce Labs) Tests'
       script:

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,71 +17,60 @@
 
 /**
  * @fileoverview
- * This script runs validator tests.
- * This is run during the CI stage = build; job = validator.
+ * This script runs the unit and integration tests against minified code
+ * on a local Travis VM.
+ * This is run during the CI stage = test; job = dist tests.
  */
 
 const colors = require('ansi-colors');
 const {
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {runYarnChecks} = require('./yarn-checks');
 
-const FILENAME = 'validator-tests.js';
+const FILENAME = 'dist-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
 
   if (!isTravisPullRequestBuild()) {
-    timedExecOrDie('gulp validator');
-    // #27786: Java validator is not guaranteed to be in sync with AMP code.
-    // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-    // timedExec('gulp validator-java');
-    timedExecOrDie('gulp validator-webui');
+    downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp integration --nobuild --headless --compiled');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('VALIDATOR') &&
-      !buildTargets.has('VALIDATOR_WEBUI') &&
-      !buildTargets.has('VALIDATOR_JAVA')
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('INTEGRATION_TEST')
     ) {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Validator Tests'),
-        'because this commit does not affect the runtime, validator,',
-        'or validator web UI.'
+        colors.cyan('Dist Tests'),
+        'because this commit not affect the runtime, flag configs,',
+        'or integration tests.'
       );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
     }
 
-    if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
-      timedExecOrDie('gulp validator');
-    }
+    downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
 
-    // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-    // if (buildTargets.has('VALIDATOR_JAVA')) {
-    //   timedExecOrDie('gulp validator-java');
-    // } else if (buildTargets.has('RUNTIME')) {
-    //   timedExec('gulp validator-java');
-    // }
-
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      timedExecOrDie('gulp validator-webui');
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST')
+    ) {
+      timedExecOrDie('gulp integration --nobuild --headless --compiled');
     }
   }
 

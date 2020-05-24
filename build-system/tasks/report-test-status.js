@@ -33,11 +33,12 @@ const IS_SAUCELABS = !!argv.saucelabs;
 const IS_SAUCELABS_STABLE = !!argv.saucelabs && !!argv.stable;
 const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
 const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
   [
     'integration',
-    ['local', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
+    ['local', 'minified', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
   ],
   ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
@@ -66,16 +67,18 @@ function inferTestType() {
     return `${type}/local-changes`;
   }
 
+  if (IS_SINGLE_PASS) {
+    return `${type}/single-pass`;
+  }
+
   if (IS_SAUCELABS_BETA) {
     return `${type}/saucelabs-beta`;
   } else if (IS_SAUCELABS_STABLE) {
     return `${type}/saucelabs-stable`;
   } else if (IS_SAUCELABS) {
     return `${type}/saucelabs`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
+  } else if (IS_DIST) {
+    return `${type}/minified`;
   }
 
   return `${type}/local`;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from './amp-story-player-impl';
-import {AmpStoryPlayerManager} from './amp-story-player-manager';
+import {loadScript, validateData} from '../3p/3p';
 
-self.onload = () => {
-  const manager = new AmpStoryPlayerManager(self);
-  manager.loadPlayers();
-};
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function marfeel(global, data) {
+  validateData(data, ['tenant']);
 
-globalThis.AmpStoryPlayer = AmpStoryPlayer;
+  const {tenant, version} = data;
+  const versionQS = version ? `?v=${version}` : '';
+
+  loadScript(global, `https://live.mrf.io/amp-ad/${tenant}/index${versionQS}`);
+}
