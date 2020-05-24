@@ -108,6 +108,7 @@ import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
 import {
   lineDelimitedStreamer,
@@ -167,6 +168,13 @@ const DUMMY_FLUID_SIZE = '320x50';
 
 /** @const @private {string} attribute indicating if lazy fetch is enabled.*/
 const LAZY_FETCH_ATTRIBUTE = 'data-lazy-fetch';
+
+/**
+ * Macros that can be expanded in json targeting attribute.
+ */
+const TARGETING_MACRO_ALLOWLIST = {
+  'CLIENT_ID': true,
+};
 
 /**
  * Map of pageview tokens to the instances they belong to.
@@ -593,8 +601,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * Constructs block-level url parameters with side effect of setting
-   * size_, jsonTargeting, and adKey_ fields.
+   * Constructs block-level url parameters.
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
@@ -653,6 +660,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
+   * Sets initialSize_ , jsonTargeting, and adKey member fields.
    * @param {ConsentTupleDef} consentTuple
    * @visibleForTesting
    */
@@ -710,18 +718,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // fallback to non-SRA if single block.
     this.populateAdUrlState(consentTuple);
     // TODO: Check for required and allowed parameters. Probably use
-    // validateData, from 3p/3p/js, after noving it someplace common.
+    // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
-    const identityPromise = Services.timerFor(this.win)
+    const timerService = Services.timerFor(this.win);
+
+    const identityPromise = timerService
       .timeoutPromise(1000, this.identityTokenPromise_)
       .catch(() => {
         // On error/timeout, proceed.
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
+      this.mergeRtcResponses_(results)
+    );
+
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
+
     const checkStillCurrent = this.verifyStillCurrent();
-    Promise.all([opt_rtcResponsesPromise, identityPromise]).then((results) => {
+
+    Promise.all([
+      rtcParamsPromise,
+      identityPromise,
+      targetingExpansionPromise,
+    ]).then((results) => {
       checkStillCurrent();
-      const rtcParams = this.mergeRtcResponses_(results[0]);
+      const rtcParams = results[0];
       this.identityToken = results[1];
       googleAdUrl(
         this,
@@ -738,6 +764,52 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /**
+   * Waits for RTC to complete, then overwrites json attr targeting values
+   * with expanded vars.
+   * @param {!Promise} rtcMergedPromise
+   * @return {!Promise}
+   */
+  expandJsonTargeting_(rtcMergedPromise) {
+    return rtcMergedPromise.then(() => {
+      const targeting = this.jsonTargeting['targeting'];
+      if (!targeting) {
+        return Promise.resolve();
+      }
+      const expansionPromises = Object.keys(targeting).map((key) =>
+        this.expandValue_(targeting[key]).then((expanded) => {
+          targeting[key] = expanded;
+        })
+      );
+      return Promise.all(expansionPromises);
+    });
+  }
+
+  /**
+   * Expands json targeting values.
+   * @param {string|Array<string>} value
+   * @return {!Promise<string>|!Promise<Array<string>>}
+   */
+  expandValue_(value) {
+    if (isArray(value)) {
+      return Promise.all(value.map((arrVal) => this.expandString_(arrVal)));
+    }
+    return this.expandString_(value);
+  }
+
+  /**
+   * Expands macros in strings.
+   * @param {string} string
+   * @return {!Promise<string>}
+   */
+  expandString_(string) {
+    return Services.urlReplacementsForDoc(this.element).expandStringAsync(
+      string,
+      null /*opt_bindings*/,
+      TARGETING_MACRO_ALLOWLIST
+    );
   }
 
   /**
