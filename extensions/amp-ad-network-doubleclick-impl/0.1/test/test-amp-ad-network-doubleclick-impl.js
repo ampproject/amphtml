@@ -812,6 +812,36 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
     });
 
+    it('expands CLIENT_ID in targeting', () => {
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "cid": "CLIENT_ID(foo)"
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting inside array', () => {
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "arr": ["cats", "CLIENT_ID(foo)"]
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
+      });
+    });
+
     it('has correct format when height == "auto"', () => {
       element.setAttribute('height', 'auto');
       new AmpAd(element).upgradeCallback();
