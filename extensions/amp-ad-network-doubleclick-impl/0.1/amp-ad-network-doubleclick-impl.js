@@ -161,6 +161,17 @@ export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
 };
 
 /**
+ * @const @enum {string}
+ * @visibleForTesting
+ * TODO(#28555): Clean up experiment
+ */
+export const EXPAND_JSON_TARGETING_EXP = {
+  ID: 'expand-json-targeting',
+  CONTROL: '21066261',
+  EXPERIMENT: '21066262',
+};
+
+/**
  * Required size to be sent with fluid requests.
  * @const {string}
  */
@@ -462,6 +473,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [FIE_INIT_CHUNKING_EXP.experiment],
         ],
       },
+      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [EXPAND_JSON_TARGETING_EXP.CONTROL],
+          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -733,11 +751,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.mergeRtcResponses_(results)
     );
 
-    const targetingExpansionPromise = timerService
-      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-      .catch(() => {
-        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-      });
+    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
+    const isJsonTargetingExpOn =
+      isExperimentOn(this.win, 'expand-json-targeting') &&
+      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
+
+    const targetingExpansionPromise = isJsonTargetingExpOn
+      ? timerService
+          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+          .catch(() => {
+            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+          })
+      : Promise.resolve();
 
     const checkStillCurrent = this.verifyStillCurrent();
 
