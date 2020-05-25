@@ -76,3 +76,8 @@ CMP_CONFIG['Usercentrics'] = {
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
   'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
 };
+
+CMP_CONFIG['iubenda'] = {
+  'consentInstanceId': 'iubenda',
+  'checkConsentHref': 'https://hits.iubenda.com/cs/amp/checkConsent',
+};

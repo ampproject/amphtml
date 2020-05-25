@@ -79,6 +79,31 @@
     }
 
     </style>
+
+    <!-- iubenda example CSS -->
+    <style amp-custom>
+      .popupOverlay {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    
+      amp-iframe {
+        margin: 0;
+      }
+      
+      amp-consent.amp-active {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        position: fixed;
+      }
+    </style>
+    <!-- End iubenda example CSS -->
+
     <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
@@ -97,6 +122,7 @@
           <option>_ping_</option>
           <option>appconsent</option>
           <option>didomi</option>
+          <option>iubenda</option>
           <option>sirdata</option>
           <option>Marfeel</option>
           <option>Ogury</option>
@@ -184,6 +210,30 @@
           </div>
         </amp-consent>
         <!-- End didomi example -->
+
+      <!-- iubenda example -->
+      <amp-consent id="iubenda" layout="nodisplay" type="iubenda">
+        <!--
+          If you want to request consent only to EU users then replace "consentRequired": true with "promptIfUnknownForGeoGroup": "eu" -> allows to ask consent only to EU users.
+        -->
+        <script type="application/json">
+          {
+            "consentRequired": true,
+            "promptUI": "iubenda-consent-ui"
+          }
+        </script>
+        <div id="iubenda-consent-ui" class="popupOverlay">
+          <!--
+            Set src attribute to your webpage with the CS for the AMP pages.
+            Note: it must be served over HTTPS
+            See https://cdn.iubenda.com/cs/test/cs-for-amp.html for an example on how to set a page to embed CS
+          -->
+          <amp-iframe layout="fill" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" src="https://cdn.iubenda.com/cs/test/cs-for-amp.html">
+            <div placeholder>Loading</div>
+          </amp-iframe>
+        </div>
+      </amp-consent>
+      <!-- End iubenda example -->
 
       <!-- sirdata example -->
       <amp-consent id="consent" layout="nodisplay" type="sirdata">
