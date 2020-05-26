@@ -32,15 +32,15 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
-import {createCustomEvent, listenOnce} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
-import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {tryFocus} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -88,18 +88,11 @@ const DEFAULT_ANIMATION = 'fade-in';
  */
 function renderCloseButtonHeader(ctx) {
   return htmlFor(ctx)`
-    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+    <i-amphtml-ad-close-header role="button" tabindex=0 aria-label="Close Ad">
       <div>Ad</div>
       <i-amphtml-ad-close-button class="amp-ad-close-button">
       </i-amphtml-ad-close-button>
     </i-amphtml-ad-close-header>`;
-}
-
-/**
- * @param {!Element} header
- */
-function showCloseButtonHeader(header) {
-  header.classList.add('amp-ad-close-header');
 }
 
 class AmpLightbox extends AMP.BaseElement {
@@ -113,6 +106,9 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
+    /** @private @const {!Document} */
+    this.document_ = this.win.document;
+
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -124,6 +120,15 @@ class AmpLightbox extends AMP.BaseElement {
 
     /**  @private {?function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = null;
+
+    /**  @private {?function(this:AmpLightbox, Event)}*/
+    this.boundCloseOnEnter_ = null;
+
+    /**  @private {?function(this:AmpLightbox)}*/
+    this.boundFocusin_ = null;
+
+    /** @private {?Element} */
+    this.openerElement_ = null;
 
     /** @private {boolean} */
     this.isScrollable_ = false;
@@ -147,6 +152,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.closeButtonHeader_ = null;
+
+    /** @private {?Element} */
+    this.closeButton_ = null;
 
     const platform = Services.platformFor(this.win);
 
@@ -181,10 +189,24 @@ class AmpLightbox extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
 
-    this.registerDefaultAction((i) => this.open_(i.trust), 'open');
-    this.registerAction('close', (i) => this.close(i.trust));
+    this.registerDefaultAction(i => this.open_(i.trust, i.caller), 'open');
+    this.registerAction('close', i => this.close(i.trust));
     /** If the element is in an email document, allow its `open` and `close` actions. */
     this.action_.addToWhitelist('AMP-LIGHTBOX', ['open', 'close'], ['email']);
+
+    this.maybeRenderCloseButtonHeader_();
+    this.closeButton_ = this.getExistingCloseButton_();
+    // If we do not have a close button provided by the page author, create one
+    // at the start of the lightbox for screen readers.
+    if (!this.closeButton_) {
+      this.closeButton_ = this.createScreenReaderCloseButton_();
+      this.element.insertBefore(this.closeButton_, this.element.firstChild);
+    }
+    // always create a close button at the end for screen readers.
+    this.element.appendChild(this.createScreenReaderCloseButton_());
+
+    this.registerDefaultAction(i => this.open_(i.trust, i.caller), 'open');
+    this.registerAction('close', i => this.close(i.trust));
   }
 
   /**
@@ -193,7 +215,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
-    this.getComponentDescendants_().forEach((child) => {
+    this.getComponentDescendants_().forEach(child => {
       Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
@@ -228,7 +250,7 @@ class AmpLightbox extends AMP.BaseElement {
     }
     element.appendChild(this.container_);
 
-    children.forEach((child) => {
+    children.forEach(child => {
       this.container_.appendChild(child);
     });
 
@@ -262,25 +284,38 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * @param {!ActionTrust} trust
+   * @param {?Element} openerElement
    * @private
    */
-  open_(trust) {
+  open_(trust, openerElement) {
     if (this.active_) {
       return;
     }
+
     this.initialize_();
     this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
       this
     ));
-    this.win.document.documentElement.addEventListener(
+    this.document_.documentElement.addEventListener(
       'keydown',
       this.boundCloseOnEscape_
+    );
+    this.boundFocusin_ = /** @type {?function(this:AmpLightbox)} */ (this.onFocusin_.bind(
+      this
+    ));
+    this.document_.documentElement.addEventListener(
+      'focusin',
+      this.boundFocusin_
     );
 
     const {promise, resolve} = new Deferred();
     this.getViewport()
       .enterLightboxMode(this.element, promise)
       .then(() => this.finalizeOpen_(resolve, trust));
+
+    if (openerElement) {
+      this.openerElement_ = openerElement;
+    }
   }
 
   /** @override */
@@ -289,7 +324,9 @@ class AmpLightbox extends AMP.BaseElement {
     if (open !== undefined) {
       // Mutations via AMP.setState() require default trust.
       if (open) {
-        this.open_(ActionTrust.DEFAULT);
+        // This suppose that the element that trigered the open is where the focus currently is
+        const openerEl = document.activeElement;
+        this.open_(ActionTrust.DEFAULT, openerEl);
       } else {
         this.close(ActionTrust.DEFAULT);
       }
@@ -325,7 +362,7 @@ class AmpLightbox extends AMP.BaseElement {
     const props = Object.keys(openStyle);
 
     const transition = props
-      .map((p) => `${p} ${durationSeconds}s ease-in`)
+      .map(p => `${p} ${durationSeconds}s ease-in`)
       .join(',');
 
     this.eventCounter_++;
@@ -346,7 +383,7 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.handleAutofocus_();
-    this.maybeRenderCloseButtonHeader_();
+    this.maybeFitCloseButtonHeader_();
 
     // TODO (jridgewell): expose an API accomodating this per PR #14676
     this.mutateElement(() => {
@@ -379,41 +416,63 @@ class AmpLightbox extends AMP.BaseElement {
     owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN, trust);
 
+    this.focusInModal_();
+
     this.getHistory_()
       .push(this.close.bind(this))
-      .then((historyId) => {
+      .then(historyId => {
         this.historyId_ = historyId;
       });
 
     this.active_ = true;
   }
 
-  /** @private */
+  /**
+   * Renders a top bar with close button if the attribute close-button is set
+   * Used for ad if no close button is set.
+   * @private
+   */
   maybeRenderCloseButtonHeader_() {
     const {element} = this;
-
     if (element.getAttribute('close-button') == null) {
       return;
     }
 
-    const header = renderCloseButtonHeader(element);
+    this.closeButtonHeader_ = renderCloseButtonHeader(element);
+    element.insertBefore(this.closeButtonHeader_, this.container_);
 
-    this.closeButtonHeader_ = header;
+    this.closeButtonHeader_.addEventListener('click', () => {
+      // Click gesture is high trust.
+      this.close(ActionTrust.HIGH);
+    });
 
-    // Click gesture is high trust.
-    listenOnce(header, 'click', () => this.close(ActionTrust.HIGH));
+    this.boundCloseOnEnter_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEnter_.bind(
+      this
+    ));
+    this.closeButtonHeader_.addEventListener(
+      'keydown',
+      this.boundCloseOnEnter_
+    );
+  }
 
-    element.insertBefore(header, this.container_);
-
+  /**
+   * Activate and add basic style to the ad close header
+   * @private
+   */
+  maybeFitCloseButtonHeader_() {
+    if (!this.closeButtonHeader_) {
+      return;
+    }
     let headerHeight;
 
     this.measureMutateElement(
       () => {
-        headerHeight = header./*OK*/ getBoundingClientRect().height;
+        headerHeight = this.closeButtonHeader_./*OK*/ getBoundingClientRect()
+          .height;
       },
       () => {
         // Done in vsync in order to apply transition.
-        showCloseButtonHeader(header);
+        this.closeButtonHeader_.classList.add('amp-ad-close-header');
 
         setImportantStyles(dev().assertElement(this.container_), {
           'margin-top': px(headerHeight),
@@ -445,6 +504,20 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * Handles closing the lightbox when the enter key is pressed.
+   * Need it for i-amphtml-ad-close-header
+   * @param {!Event} event
+   * @private
+   */
+  closeOnEnter_(event) {
+    if (event.key == Keys.ENTER) {
+      event.preventDefault();
+      // Keypress gesture is high trust.
+      this.close(ActionTrust.HIGH);
+    }
+  }
+
+  /**
    * Closes the lightbox.
    *
    * @param {!ActionTrust} trust
@@ -456,10 +529,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       setStyle(this.element, 'webkitOverflowScrolling', '');
     }
-    if (this.closeButtonHeader_) {
-      removeElement(this.closeButtonHeader_);
-      this.closeButtonHeader_ = null;
-    }
+
     this.getViewport()
       .leaveLightboxMode(this.element)
       .then(() => this.finalizeClose_(trust));
@@ -501,17 +571,28 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
-    this.win.document.documentElement.removeEventListener(
+    this.document_.documentElement.removeEventListener(
       'keydown',
       this.boundCloseOnEscape_
     );
     this.boundCloseOnEscape_ = null;
+
+    this.document_.documentElement.removeEventListener(
+      'focusin',
+      this.boundFocusin_
+    );
+    this.boundFocusin_ = null;
+
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
       dev().assertElement(this.container_)
     );
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE, trust);
+
+    if (this.openerElement_) {
+      tryFocus(this.openerElement_);
+    }
   }
 
   /**
@@ -520,6 +601,100 @@ class AmpLightbox extends AMP.BaseElement {
    */
   isInAd_() {
     return getMode(this.win).runtime == 'inabox' || isInFie(this.element);
+  }
+
+  /**
+   * Verify if focus is still inside the lightbox.
+   * @return {boolean}
+   * @private
+   */
+  hasCurrentFocus_() {
+    const {element} = this;
+    if (element.contains(document.activeElement)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Handles closing the lightbox if focus is outside.
+   * @private
+   */
+  onFocusin_() {
+    if (!this.hasCurrentFocus_()) {
+      this.close(ActionTrust.HIGH);
+    }
+  }
+
+  /**
+   * Focus in the lightbox if it's not yet.
+   * @private
+   */
+  focusInModal_() {
+    if (!this.hasCurrentFocus_()) {
+      tryFocus(this.closeButton_);
+    }
+  }
+
+  /**
+   * Gets a close button, provided by the page author, if one exists.
+   * @return {?Element} The close button.
+   * @private
+   */
+  getExistingCloseButton_() {
+    if (this.closeButtonHeader_) {
+      return this.closeButtonHeader_;
+    }
+    const {element} = this;
+    const candidates = element.querySelectorAll('[on]');
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i];
+      const hasAction = this.action_.hasResolvableActionForTarget(
+        candidate,
+        'tap',
+        element,
+        devAssert(candidate.parentElement)
+      );
+
+      if (hasAction) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Creates an "invisible" close button for screen readers
+   * @return {!Element} The close button.
+   * @private
+   */
+  createScreenReaderCloseButton_() {
+    const {element} = this;
+
+    // Replacement label for invisible close button set value
+    const ariaLabel =
+      element.getAttribute('data-close-button-aria-label') || 'Close the modal';
+
+    // Invisible close button
+    const screenReaderCloseButton = this.document_.createElement('button');
+
+    screenReaderCloseButton.textContent = ariaLabel;
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
+    // This is for screen-readers only, should not get a tab stop. Note that
+    // screen readers can still swipe / navigate to this element, it just will
+    // not be reachable via the tab button. Note that for desktop, hitting esc
+    // to close is also an option.
+    // We do not want this in the tab order since it is not really "visible"
+    // and would be confusing to tab to if not using a screen reader.
+    screenReaderCloseButton.tabIndex = -1;
+    screenReaderCloseButton.addEventListener('click', () => {
+      // Click gesture is high trust.
+      this.close(ActionTrust.HIGH);
+    });
+
+    return screenReaderCloseButton;
   }
 
   /**
@@ -601,14 +776,14 @@ class AmpLightbox extends AMP.BaseElement {
    */
   updateChildrenInViewport_(newPos, oldPos) {
     const seen = [];
-    this.forEachVisibleChild_(newPos, (cell) => {
+    this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
       const owners = Services.ownersForDoc(this.element);
       owners.updateInViewport(this.element, cell, true);
       owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
-      this.forEachVisibleChild_(oldPos, (cell) => {
+      this.forEachVisibleChild_(oldPos, cell => {
         if (!seen.includes(cell)) {
           Services.ownersForDoc(this.element).updateInViewport(
             this.element,
@@ -739,7 +914,7 @@ function setTransparentBody(win, body) {
   );
 }
 
-AMP.extension(TAG, '0.1', (AMP) => {
+AMP.extension(TAG, '0.1', AMP => {
   // TODO(alanorozco): refactor this somehow so we don't need to do a direct
   // getMode check
   if (getMode().runtime == 'inabox') {

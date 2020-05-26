@@ -126,8 +126,6 @@ For AMPHTML ads, the `close-button` attribute is required. This attribute causes
 
 The `close-button` attribute is required and only allowed in AMPHTML ads. In regular AMP documents, you can render a close button wherever you need it as part of the `<amp-lightbox>` content.
 
-[/filter]<!-- formats="ads" -->
-
 ### Scrollable lightboxes are disallowed
 
 For AMPHTML ads, scrollable lightboxes are not allowed.
@@ -163,6 +161,8 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
 <img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
 </noscript>
 </amp-img>
+
+[/filter]<!-- formats="ads" -->
 
 ## Validation
 
