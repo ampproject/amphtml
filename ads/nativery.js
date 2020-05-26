@@ -30,6 +30,7 @@ export function nativery(global, data) {
     referrer: data.referrer || global.context.referrer,
     url: data.url || global.context.canonicalUrl,
     viewId: global.context.pageViewId,
+    visible: 0,
     params,
   };
 
@@ -38,6 +39,18 @@ export function nativery(global, data) {
     if (e && e.detail) {
       global.context.requestResize(undefined, e.detail.height);
     }
+  });
+
+  // install observation to check if is in viewport
+  const unlisten = global.context.observeIntersection(function (changes) {
+    changes.forEach(function (c) {
+      global._nativery.visible = Math.floor(
+        (c.intersectionRect.height / c.boundingClientRect.height) * 100
+      );
+      if (global._nativery.visible) {
+        unlisten();
+      }
+    });
   });
 
   // load the nativery loader asynchronously
