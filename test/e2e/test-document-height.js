@@ -32,7 +32,7 @@ describes.endtoend(
 
       // Example message: ['documentHeight, { height: 200 }]
       const firstHeight = documentHeightMessages[0].data.height;
-      await expect(Math.floor(firstHeight)).equal(447);
+      await expect(Math.floor(firstHeight)).equal(383);
     });
   }
 );
