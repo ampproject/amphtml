@@ -474,22 +474,32 @@ describe('Resources', () => {
     const task = {resource: {isInViewport: () => {}}};
 
     it('0 layouts --> 0', () => {
+      resources.firstVisibleTime_ = 1;
       expect(resources.getEagerElementRatio()).equal(0);
     });
 
+    it('Elements are all eager if page was never visible', () => {
+      resources.resources_ = [getResource({eager: false})];
+      resources.taskComplete_(task);
+      expect(resources.getEagerElementRatio()).equal(1);
+    });
+
     it('0 eager / 1 total --> 0', () => {
+      resources.firstVisibleTime_ = 1;
       resources.resources_ = [getResource({eager: false})];
       resources.taskComplete_(task);
       expect(resources.getEagerElementRatio()).equal(0);
     });
 
     it('1 eager / 1 total --> 1', () => {
+      resources.firstVisibleTime_ = 1;
       resources.resources_ = [getResource({eager: true})];
       resources.taskComplete_(task);
       expect(resources.getEagerElementRatio()).equal(1);
     });
 
     it('9 eager / 10 total --> 0.9', () => {
+      resources.firstVisibleTime_ = 1;
       for (let i = 0; i < 9; i++) {
         resources.taskComplete_(task);
         resources.resources_.push(getResource({eager: true}));
@@ -501,25 +511,35 @@ describe('Resources', () => {
     });
   });
 
-  describe('eager element ratio (eer)', () => {
+  describe('slow element ratio (ser)', () => {
     const slowTask = {resource: {isInViewport: () => true}};
     const fastTask = {resource: {isInViewport: () => false}};
 
     it('No layouts --> 0', () => {
+      resources.firstVisibleTime_ = 1;
       expect(resources.getSlowElementRatio()).equal(0);
     });
 
     it('0 slow / 1 total --> 0', () => {
+      resources.firstVisibleTime_ = 1;
       resources.taskComplete_(fastTask);
       expect(resources.getSlowElementRatio()).equal(0);
     });
 
+    it('ser is 0 if page was never visible', () => {
+      resources.firstVisibleTime_ = -1;
+      resources.taskComplete_(slowTask);
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
     it('1 slow / 1 total --> 1', () => {
+      resources.firstVisibleTime_ = 1;
       resources.taskComplete_(slowTask);
       expect(resources.getSlowElementRatio()).equal(1);
     });
 
     it('9 slow/ 10 total --> 0.9', () => {
+      resources.firstVisibleTime_ = 1;
       for (let i = 0; i < 9; i++) {
         resources.taskComplete_(slowTask);
       }

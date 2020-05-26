@@ -804,6 +804,9 @@ export class ResourcesImpl {
     if (this.totalLayoutCount_ === 0) {
       return 0;
     }
+    if (this.firstVisibleTime_ === -1) {
+      return 1;
+    }
 
     let eagerCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
@@ -1636,7 +1639,7 @@ export class ResourcesImpl {
    */
   taskComplete_(task, success, opt_reason) {
     this.totalLayoutCount_++;
-    if (task.resource.isInViewport()) {
+    if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
       this.slowElementCount_++;
     }
 
