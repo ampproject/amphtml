@@ -348,7 +348,9 @@ class InaboxViewportImpl {
   }
 
   /** @override */
-  updateFixedLayer() {}
+  updateFixedLayer() {
+    return Promise.resolve();
+  }
 
   /** @override */
   addToFixedLayer(unusedElement, opt_forceTransfer) {
