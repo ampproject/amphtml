@@ -36,6 +36,10 @@ export let ContextValueDef;
  */
 export let ContextPropDef;
 
+const DEFAULT_VALUE = {
+  recursive: false,
+};
+
 /**
  * @param {string|!ContextValueDef} keyOrSpec
  * @param {!ContextValueDef<T>=} opt_value
@@ -48,7 +52,7 @@ export function contextProp(keyOrSpec, opt_value) {
     {key: keyOrSpec, type: null} :
     keyOrSpec;
   return {
-    ...keyOrSpec,
+    ...spec,
     value: contextValue(opt_value ?? keyOrSpec.value),
   };
 }
@@ -59,5 +63,8 @@ export function contextProp(keyOrSpec, opt_value) {
  * @template T
  */
 export function contextValue(spec) {
-  return spec || {};
+  return {
+    ...DEFAULT_VALUE,
+    ...spec,
+  };
 }

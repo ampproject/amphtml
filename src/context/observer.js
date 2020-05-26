@@ -1,17 +1,31 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-//QQQQ
-function toKey() {}
+import {removeUniqueItem} from '../utils/array';
 
 /**
  * @typedef {{
- *   contextTypes: (!Array<!ContextTypeDef>|(!ContextTypeDef)),
+ *   props: (!Array<!ContextPropDef>|(!ContextPropDef)),
  * }}
  */
 export let ContextNodeObserverOptionsDef;
 
 /**
  * @typedef {{
- *   contextTypes: !Array<!ContextTypeDef>,
+ *   props: !Array<!ContextPropDef>,
  * }}
  */
 export let ContextNodeObserverEntryDef;
@@ -24,12 +38,13 @@ export class ContextNodeObserver {
     /** @private @const {function(!Array<!ContextNodeObserverEntryDef>)} */
     this.callback_ = callback;
 
-    const {contextTypes} = options;
+    const props = [].concat(options.props || []);
 
-    /** @private @const {!ContextNodeObserverOptionsDef} */
-    this.options_ = {
-      contextTypes: [].concat(contextTypes || []).map(toKey),
-    };
+    /** @private @const {!Map<string, !ContextPropDef>} */
+    this.props_ = new Map();
+    props.forEach(prop => {
+      this.props_.set(prop.key, prop);
+    });
 
     /** @private @const {!Array<!ContextNode>} */
     this.observedNodes_ = [];
@@ -79,13 +94,14 @@ export class ContextNodeObserver {
   }
 
   /**
-   * @param {{contextNode: !ContextNode, keys: !Array<!ContextTypeDef>}} event
+   * @param {!ContextNode} contextNode
+   * @param {string} key
    * @private
    */
-  observer_(event) {
-    const {contextNode, keys} = event;
-    if (matchesKeys(contextNode, keys, this.options_)) {
-      this.pushEvent_(contextNode);
+  observer_(contextNode, key) {
+    const prop = this.props_.get(key);
+    if (prop) {
+      this.pushEvent_(contextNode, prop);
     }
   }
 
@@ -94,10 +110,13 @@ export class ContextNodeObserver {
    * @private
    */
   scan_(contextNode) {
-    // QQQ: move to ContextNode? Or static node.js?
-    if (matches(contextNode, this.options_)) {
-      this.pushEvent_(contextNode);
-    }
+    // QQQ: use some private util with `scanUsed`?
+    this.props_.forEach((prop) => {
+      const value = contextNode.inputsByKey_?.get(prop.key);
+      if (value !== undefined) {
+        this.pushEvent_(contextNode, prop);
+      }
+    });
     // QQQ: enable fast-exist search.
     if (contextNode.children_) {
       contextNode.children_.forEach(this.scan_);
@@ -106,13 +125,12 @@ export class ContextNodeObserver {
 
   /**
    * @param {!ContextNode} contextNode
+   * @param {!ContextPropDef} prop
    * @private
    */
-  pushEvent_(contextNode) {
-    // QQQQ: push keys as well?
-    // QQQQ: push value as well?
-    // QQQQ: dedup.
-    this.events_.push({contextNode});
+  pushEvent_(contextNode, prop) {
+    // QQQ: dedup.
+    this.events_.push({contextNode, prop});
     if (!this.reportScheduled_) {
       this.reportScheduled_ = true;
       // QQQ: idle/vsync/etc
@@ -127,43 +145,4 @@ export class ContextNodeObserver {
     this.events_.length = 0;
     this.callback_(events);
   }
-}
-
-/**
- * @param {!ContextNode} contextNode
- * @param {!ContextNodeObserverOptionsDef} options
- * @return {boolean}
- */
-function matches(contextNode, options) {
-  const {contextTypes} = options;
-  if (contextTypes.length == 0) {
-    return true;
-  }
-  const subscribers = contextNode.subscribers_;
-  if (!subscribers) {
-    return false;
-  }
-  return contextTypes.some(key => {
-    const subscriber = subscribers.get(key);
-    return subscriber && subscriber.value != null;
-  });
-}
-
-/**
- * @param {!ContextNode} contextNode
- * @param {!Array<string>} keys
- * @param {!ContextNodeObserverOptionsDef} options
- * @return {boolean}
- */
-function matchesKeys(contextNode, keys, options) {
-  // QQQQ: combine with matches
-  const {contextTypes} = options;
-  if (contextTypes.length == 0) {
-    return true;
-  }
-  if (keys.length == 0) {
-    return false;
-  }
-  // QQQ: return intersection?
-  return contextTypes.some(key => keys.includes(key));
 }

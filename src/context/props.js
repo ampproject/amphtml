@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-export {ContextNode} from './node';
+import {contextProp} from './prop';
 
-export {
-  ContextPropDef,
-  ContextValueDef,
-  contextProp,
-  contextValue,
-} from './prop';
+// QQQQ: recursive computing
+/** @const {!ContextProp<boolean>} */
+export const RenderableProp = contextProp(
+  'Renderable',
+  {
+    recursive: true,
+    compute: (thisValue, parentValue) => thisValue && parentValue,
+  }
+);
 
-export {
-  RenderableProp,
-  PlayableProp,
-  LoadedStateProp,
-} from './props';
+/** @const {!ContextProp<boolean>} */
+export const PlayableProp = contextProp('Playable', {
+  recursive: true,
+  deps: [RenderableProp],
+  compute: (thisValue, parentValue, renderable) => thisValue && parentValue && renderable,
+  rootDefault: true,
+});
 
-export {
-  ContextNodeObserver,
-} from './observer';
+/** @const {!ContextProp<boolean>} */
+export const LoadedStateProp = contextProp('LoadedState');

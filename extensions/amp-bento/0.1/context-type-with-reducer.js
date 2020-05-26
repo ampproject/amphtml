@@ -1,4 +1,17 @@
 
+/*
+TODO:
+ [done] Simple values
+ - Computed values
+ - Pseudo-nodes
+ - Non-critical path scheduling for discovery, computations
+ - waitFor (util)
+ - subscribeToMany (util)
+ - Disconnection logic
+ - Can disconnection logic be done on a subscribeToMany?
+*/
+
+
 /** @type {!ContextType<boolean>} */
 const Renderable = contextType(
   'Renderable',
@@ -215,95 +228,6 @@ function useLoader({load: loadProp, onLoad, onLoadError}) {
     loadProp && loadingContext !== 'disabled' ||
     renderable && loadingContext === 'auto';
   return [load, onLoad, onLoadError];
-}
-
-class LoadingIndicatorService {
-
-  constructor(ampdoc) {
-    this.ampdoc = ampdoc;
-    console.log('LoadingIndicatorService: ', ampdoc);
-
-    this.io_ = new IntersectionObserver(this.handleIntersections_.bind(this));
-
-    this.co_ = new ContextNodeObserver(this.handleContextChanges_.bind(this), {
-      contextTypes: [LoadState],
-      // Only new nodes are observed.
-      add: true,
-      remove: false,
-      update: false,
-    });
-    this.co_.observe(ContextNode.get(ampdoc.getRootNode()), true);
-  }
-
-  disconnect() {
-    this.io_.disconnect();
-    this.co_.disconnect();
-  }
-
-  /**
-   * @param {!Array<!ContextNodeObserverEntryDef>} records
-   * @private
-   */
-  handleContextChanges_(records) {
-    console.log('LoadingIndicatorService: contextChanges:', records);
-
-    records.forEach(({contextNode}) => {
-      const unsub = contextNode.subscribe(
-        [Renderable, LoadState],
-        (renderable, loadState) => {
-          const loading =
-            loadState === LoadState.NONE ||
-            loadState === LoadState.LOADING;
-          if (renderable && loading) {
-            const element = contextNode.node;
-            // TODO: semantics of provide vs set.
-            contextNode.provide(LoadingIndicator);
-            this.io_.observe(element);
-            return () => {
-              contextNode.remove(LoadingIndicator, li);
-              this.io_.unobserve(element);
-            };
-          } else if (loadState === LoadState.LOADED) {
-            // TODO: what if an element needs reloading?
-            unsub();
-          }
-        }
-      );
-    });
-  }
-
-  /**
-   * @param {!Array<!IntersectionObserverEntry>} records
-   * @private
-   */
-  handleIntersections_(records) {
-    console.log('LoadingIndicatorService: intersections:', records);
-    records.forEach(({target, isIntersecting}) => {
-      const contextNode = ContextNode.get(target);
-      const li = contextNode.get(LoadingIndicator);
-      if (li) {
-        li.toggle(isIntersecting);
-      }
-    });
-  }
-}
-
-class LoadingIndicator {
-
-  constructor(contextNode) {
-    console.log('LoadingIndicator: constructor:', contextNode);
-    this.contextNode_ = contextNode;
-  }
-
-  toggle(on) {
-    console.log('LoadingIndicator: toggle:', this.contextNode_, on);
-    this.contextNode_.getNode().style.border = on ? '4px solid blue' : '';
-  }
-
-  dispose() {
-    console.log('LoadingIndicator: destroy');
-    this.toggle(false);
-  }
 }
 
 function subscribeAll(contextNode, props, handler) {

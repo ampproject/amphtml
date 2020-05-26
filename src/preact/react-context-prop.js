@@ -24,6 +24,5 @@ const CONTEXT_VALUE = { recursive: true };
  * @return {!ContextPropDef<PreactDef.Context>}
  */
 export function reactContextProp(key, contextType) {
-  contextType.__qqq = key;
   return contextProp({key, type: contextType}, CONTEXT_VALUE);
 }

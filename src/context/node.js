@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
+import {dev, devAssert} from '../log';
 import {Observable} from '../observable';
 import {getMode} from '../mode';
 import {pushIfNotExist, remove, removeUniqueItem} from '../utils/array';
@@ -26,7 +26,16 @@ import {startsWith} from '../string';
 // - subscribers
 // - propagation
 
-// QQQQ: disconnect logic with cleanup.
+// - multiple inputs
+// - dependency-only used updates
+// - root, isConnected
+// - observers on roots only
+// - useState/useStateFactory/useStateConstr/useMemo? with unmount option.
+// - deps for used values
+// - reusable objects. e.g. `hasChanged(oldValue, newValue):boolean`.
+
+// - explore full-parent approach where any recursive dep will auto-subscribe
+// to parent for deps and then it will resubscribe whenever parent changes.
 
 const NODE_PROP = '__ampNode';
 const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
@@ -49,6 +58,15 @@ const FRAGMENT_NODE = 11;
  * @template T
  */
 let SubscriberDef;
+
+/**
+ * @typedef {{
+ *   prop: !ContextPropDef<T>,
+ *   input: T,
+ * }}
+ * @template T
+ */
+let InputDef;
 
 /**
  * @typedef {{
@@ -195,19 +213,20 @@ export class ContextNode {
     /** @private {?Array<!ContextNode>} */
     this.children_ = null;
 
-    /** @private {?Map<string, *>} */
+    /** @private {?Map<string, !InputDef>} */
     this.inputsByKey_ = null;
 
     /** @private {?Map<string, !UsedDef>} */
     this.usedByKey_ = null;
 
+    // QQQQ: should be string <key> - Prop is misleading.
     /** @private {?Array<!ContextPropDef>} */
     this.checkProps_ = null;
 
     /** @private {boolean} */
     this.checkPropsAll_ = false;
 
-    /** @private {?Array<function(contextNode: !ContextNode, key: string, value: *) */
+    /** @private {?Array<function(contextNode: !ContextNode, key: string) */
     this.observers_ = null;
 
     // Schedulers.
@@ -233,6 +252,9 @@ export class ContextNode {
    * @return {boolean}
    */
   get isRoot() {
+    if (this.parent_) {
+      return false;
+    }
     const {nodeType} = this.node_;
     return (nodeType == DOCUMENT_NODE || nodeType == FRAGMENT_NODE);
   }
@@ -245,6 +267,13 @@ export class ContextNode {
   }
 
   /**
+   * @return {!Element}
+   */
+  get element() {
+    return dev().assertElement(this.node_);
+  }
+
+  /**
    * @return {!ContextNode}
    */
   get parent() {
@@ -253,7 +282,7 @@ export class ContextNode {
 
   /**
    * Internal observer.
-   * @param {function(contextNode: !ContextNode, key: string, value: *)}
+   * @param {function(contextNode: !ContextNode, key: string)}
    * @package
    */
   addObserver(observer) {
@@ -265,7 +294,7 @@ export class ContextNode {
 
   /**
    * Internal observer.
-   * @param {function(contextNode: !ContextNode, key: string, value: *)}
+   * @param {function(contextNode: !ContextNode, key: string)}
    * @package
    */
   removeObserver(observer) {
@@ -331,12 +360,16 @@ export class ContextNode {
   set(prop, input) {
     const {key} = prop;
     const inputsByKey = this.inputsByKey_ ?? (this.inputsByKey_ = new Map());
-    const oldInput = inputsByKey.get(key);
+    const oldInput = inputsByKey.get(key)?.input;
     if (input !== oldInput) {
       if (input === undefined) {
         inputsByKey.delete(key);
       } else {
-        inputsByKey.set(key, input);
+        inputsByKey.set(key, {prop, input});
+        if (oldInput === undefined) {
+          // New input: notify observers.
+          this.notifyObservers_(key);
+        }
       }
       this.ping(prop);
     }
@@ -363,6 +396,10 @@ export class ContextNode {
 
     const usedByKey = this.usedByKey_ ?? (this.usedByKey_ = new Map());
     const used = getOrCreateInPropMap(this.usedByKey_, prop, emptyUsed);
+    if (used.subscribers.includes(handler)) {
+      // Already a subscriber.
+      return;
+    }
     used.subscribers.push(subscriber);
 
     const existingValue = used.value;
@@ -378,6 +415,8 @@ export class ContextNode {
           subscriber.cleanup = handler(used.value);
         }
       });
+    } else {
+      this.ping(prop);
     }
 
     return this.unsubscribe.bind(this, prop, handler);
@@ -458,6 +497,17 @@ export class ContextNode {
     if (parent) {
       const children = parent.children_ ?? (parent.children_ = []);
       children.push(this);
+
+      // QQQ: optimize, but reparenting could look like a new observer appeared.
+      deepScan(this, (contextNode) => {
+        const inputsByKey = contextNode.inputsByKey_;
+        if (inputsByKey) {
+          inputsByKey.forEach((_, key) => {
+            contextNode.notifyObservers_(key);
+          });
+        }
+        return true;
+      }, true);
     }
 
     // Schedule updates.
@@ -466,6 +516,7 @@ export class ContextNode {
 
   /** @private */
   checkUpdates_() {
+    console.log('ContextNode: checkUpdates_: ', this.checkPropsAll_, this.checkProps_ && this.checkProps_.map(prop => prop.key));
     if (this.checkPropsAll_) {
       // Check all props.
       if (this.checkProps_) {
@@ -532,6 +583,18 @@ export class ContextNode {
             return true;
           }, true, /* excludeSelf */ false);
         }
+
+        const inputsByKey = this.inputsByKey_;
+        if (inputsByKey) {
+          inputsByKey.forEach(({prop, input}) => {
+            if (prop.deps) {
+              debugger;//QQQQQ
+            }
+            if (prop.deps && prop.deps.some(dep => dep.key == prop.key)) {
+              this.ping(prop);
+            }
+          });
+        }
       }
     }
   }
@@ -568,7 +631,7 @@ export class ContextNode {
    * @return {T|!Promise<T>|undefined}
    * @private
    */
-  calc_(prop) {//QQQ: check calls on what prop is usually passed.
+  calc_(prop) {
     const {key, value: {deps, recursive, compute, rootDefault}} = prop;
 
     const depValues =
@@ -576,7 +639,7 @@ export class ContextNode {
       deps.map(dep => this.getOrCalc_(dep)) :
       EMPTY_ARRAY;
 
-    const input = this.inputsByKey_?.get(key);
+    let input = this.inputsByKey_?.get(key)?.input;
 
     // Calculate the used value.
     let value;
@@ -586,7 +649,8 @@ export class ContextNode {
     if (recursive && (input === undefined || compute)) {
       let parentValue;
       if (this.isRoot) {
-        parentValue = resolveRootDefault(prop);
+        input = input ?? resolveRootDefault(prop);
+        parentValue = input;
       } else if (this.parent_) {
         // QQQ: optimazable - we don't need to check every node to the parent,
         // only those that define/use the prop.
@@ -653,9 +717,6 @@ export class ContextNode {
       });
     });
 
-    // Notify observers.
-    this.notifyUpdated_(key, value);
-
     // Propagate to children.
     if (recursive && this.children_) {
       // QQQ: optimizable: can propagate only to explicit dependants.
@@ -665,14 +726,13 @@ export class ContextNode {
 
   /**
    * @param {string} key
-   * @param {*} value
    * @private
    */
-  notifyUpdated_(key, value) {
+  notifyObservers_(key) {
     for (let n = this; n; n = n.parent_) {
       if (n.observers_) {
         n.observers_.forEach(observer => {
-          observer(this, key, value);
+          observer(this, key);
         });
       }
     }
