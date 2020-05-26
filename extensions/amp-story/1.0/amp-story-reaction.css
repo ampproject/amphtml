@@ -13,13 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
- @import url('https://fonts.googleapis.com/css?family=Poppins:wght@500;700&display=swap');
-
-.i-amphtml-story-reaction {
-  font-family: 'Poppins', sans-serif !important;
-  pointer-events: all;
-  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
-  min-width: 224px !important;
-  max-width: 400px !important;
-}
