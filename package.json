@@ -93,7 +93,7 @@
     "fetch-mock": "9.10.1",
     "formidable": "1.2.2",
     "fs-extra": "9.0.0",
-    "fuse.js": "5.2.3",
+    "fuse.js": "6.0.0",
     "globby": "11.0.0",
     "google-closure-compiler": "20200517.0.0",
     "gulp": "4.0.2",
