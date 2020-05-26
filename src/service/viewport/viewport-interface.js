@@ -299,6 +299,7 @@ export class ViewportInterface extends Disposable {
 
   /**
    * Updates the fixed layer.
+   * @return {!Promise}
    */
   updateFixedLayer() {}
 

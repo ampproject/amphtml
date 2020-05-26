@@ -599,7 +599,9 @@ export class ViewportImpl {
     );
 
     this.enterOverlayMode();
-    this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
+    if (this.fixedLayer_) {
+      this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
+    }
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
@@ -618,7 +620,9 @@ export class ViewportImpl {
       /* cancelUnsent */ true
     );
 
-    this.fixedLayer_.leaveLightbox();
+    if (this.fixedLayer_) {
+      this.fixedLayer_.leaveLightbox();
+    }
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
@@ -779,16 +783,25 @@ export class ViewportImpl {
 
   /** @override */
   updateFixedLayer() {
-    this.fixedLayer_.update();
+    if (!this.fixedLayer_) {
+      return Promise.resolve();
+    }
+    return this.fixedLayer_.update();
   }
 
   /** @override */
   addToFixedLayer(element, opt_forceTransfer) {
+    if (!this.fixedLayer_) {
+      return Promise.resolve();
+    }
     return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /** @override */
   removeFromFixedLayer(element) {
+    if (!this.fixedLayer_) {
+      return;
+    }
     this.fixedLayer_.removeElement(element);
   }
 
@@ -1034,10 +1047,7 @@ export class ViewportImpl {
     const oldSize = this.size_;
     this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
-    const promise = this.fixedLayer_
-      ? this.fixedLayer_.update()
-      : Promise.resolve();
-    promise.then(() => {
+    this.updateFixedLayer().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
       this.changed_(/*relayoutAll*/ widthChanged, 0);
       const sizeChanged = widthChanged || oldSize.height != newSize.height;
