@@ -1293,6 +1293,24 @@ describes.realWin(
       expect(resources.contentHeight_).to.equal(contentHeight);
     });
 
+    it('should only send contentHeight to the viewer once amp finishes init', () => {
+      resources.firstPassAfterDocumentReady_ = false;
+      resources.documentReady_ = false;
+      resources.ampInitialized_ = false;
+      resources.doPass();
+      expect(viewerSendMessageStub).not.called;
+
+      resources.firstPassAfterDocumentReady_ = true;
+      resources.documentReady_ = true;
+      resources.ampInitialized_ = true;
+      resources.doPass();
+      expect(viewerSendMessageStub).calledWithExactly(
+        'documentHeight',
+        {height: 0},
+        true
+      );
+    });
+
     it('should send contentHeight to viewer if height was changed', () => {
       sandbox.stub(resources.viewport_, 'getContentHeight').returns(200);
       resources.maybeChangeHeight_ = true;

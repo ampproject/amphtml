@@ -75,8 +75,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
     /** @private {!Element} */
     this.containerEl_ = this.win.document.createElement('div');
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(element);
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;
@@ -95,7 +95,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.localizationService_ = getLocalizationService(this.element);
     this.containerEl_.classList.add('i-amphtml-story-education');
+    toggle(this.element, false);
     toggle(this.containerEl_, false);
     this.startListening_();
     // Extra host to reset inherited styles and further enforce shadow DOM style
@@ -199,6 +201,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
+          toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
             Action.TOGGLE_PAUSED,
@@ -271,6 +274,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
+      toggle(this.element, true);
       toggle(this.containerEl_, true);
       this.containerEl_.appendChild(template);
     });

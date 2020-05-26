@@ -530,6 +530,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-fit-text',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-font',
     version: '0.1',
     latestVersion: '0.1',
@@ -931,7 +937,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-selector',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1023,7 +1029,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-social-share',
-    version: '0.2',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },

@@ -1056,6 +1056,26 @@ describes.realWin(
         });
       });
 
+      it('should remove the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        expect(story.element.hasAttribute('muted')).to.be.true;
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+        expect(story.element.hasAttribute('muted')).to.be.false;
+      });
+
+      it('should add the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+        expect(story.element.hasAttribute('muted')).to.be.true;
+      });
+
       describe('#getMaxMediaElementCounts', () => {
         it('should create 2 audio & video elements when no elements found', async () => {
           await createStoryWithPages(2, ['cover', 'page-1']);

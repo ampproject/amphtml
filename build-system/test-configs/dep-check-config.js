@@ -82,7 +82,7 @@ exports.rules = [
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-social-share/0.2/social-share.js->third_party/optimized-svg-icons/social-share-svgs.js',
+      'extensions/amp-social-share/1.0/social-share.js->third_party/optimized-svg-icons/social-share-svgs.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
@@ -293,6 +293,8 @@ exports.rules = [
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
