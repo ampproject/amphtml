@@ -513,12 +513,7 @@ class EndToEndFixture {
       // Set env props that require the fixture to be set up.
       if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
         env.receivedMessages = await controller.evaluate(() => {
-          // The viewer.html file will launch 10 test viewers, only one of which is the requested url.
-          // TODO(gh/amphtml/28200): only load the one viewer.
-          const viewer = window.parent.allViewers.find((v) =>
-            v.id.includes('dynamic')
-          );
-          return viewer.receivedMessages;
+          return window.parent.viewer.receivedMessages;
         });
       }
     } catch (ex) {
