@@ -26,6 +26,7 @@ import {
   removeFragment,
 } from '../url';
 import {applySandbox} from '../3p-frame';
+import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
@@ -171,7 +172,14 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
+    this.signalReady_();
     this.isBuilt_ = true;
+  }
+
+  /** @private */
+  signalReady_() {
+    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
+    this.element_.isReady = true;
   }
 
   /** @private */
