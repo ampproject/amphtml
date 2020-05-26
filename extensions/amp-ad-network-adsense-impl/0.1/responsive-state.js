@@ -64,13 +64,17 @@ export const MAX_HEIGHT_EXP = {
 export class ResponsiveState {
   /**
    * @param {!Element} element
+   * @param {boolean} isFallBackState
    */
-  constructor(element) {
+  constructor(element, isFallBackState) {
     /**  @private {!Element}*/
     this.element_ = element;
 
     /** @private {boolean} */
     this.isAlignedToViewport_ = false;
+
+    /** @private {boolean} */
+    this.isFallBackState_ = !!isFallBackState;
 
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
@@ -82,11 +86,44 @@ export class ResponsiveState {
    *  corresponds to a responsive ad, otherwise null.
    */
   static createIfResponsive(element) {
-    const autoFormat = element.getAttribute('data-auto-format');
-    if (!hasOwn(RAFMT_PARAMS, autoFormat)) {
+    if (
+      !this.isFallBackState_ &&
+      !hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))
+    ) {
       return null;
     }
     return new ResponsiveState(element);
+  }
+
+  /**
+   * @param {!Element} element to potentially create state for.
+   * @return {?ResponsiveState} fall back state.
+   */
+  static createFallBackState(element) {
+    return new ResponsiveState(element, true);
+  }
+
+  /**
+   * Upgrades the ad unit to full-width responsive if it does not fall back to container width.
+   * @param {!Element} element
+   * @param {string} adClientId
+   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
+   */
+  static maybeUpgradeToResponsive(element, adClientId) {
+    // For Desktop Full-width Ad request, it should fall back to container width.
+    if (
+      element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow_(element)
+    ) {
+      return Promise.resolve(
+        ResponsiveState.fallBackToContainerWidth_(element)
+      );
+    }
+
+    return ResponsiveState.maybeUpgradeToFullWidthResponsive(
+      element,
+      adClientId
+    );
   }
 
   /**
@@ -96,7 +133,7 @@ export class ResponsiveState {
    * @param {string} adClientId
    * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
    */
-  static maybeUpgradeToResponsive(element, adClientId) {
+  static maybeUpgradeToFullWidthResponsive(element, adClientId) {
     if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
       return Promise.resolve(null);
     }
@@ -146,6 +183,27 @@ export class ResponsiveState {
 
     const state = ResponsiveState.createIfResponsive(element);
     devAssert(state != null, 'Upgrade failed');
+    return /** @type {!ResponsiveState} */ (state);
+  }
+
+  /**
+   * Convert the element to container width responsive.
+   *
+   * @param {!Element} element
+   * @return {!ResponsiveState} responsive state
+   * @private
+   */
+  static fallBackToContainerWidth_(element) {
+    const width = String(element.parentElement.clientWidth);
+
+    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+    element.setAttribute('width', width);
+    element.removeAttribute('data-full-width');
+    element.removeAttribute('data-auto-format');
+
+    const state = ResponsiveState.createFallBackState(element);
+    devAssert(state != null, 'Fall back failed');
+    this.isFallBackState_ = true;
     return /** @type {!ResponsiveState} */ (state);
   }
 
@@ -236,6 +294,10 @@ export class ResponsiveState {
 
   /** @return {boolean} */
   isValidElement() {
+    if (this.isFallBackState_) {
+      return true;
+    }
+
     if (!this.element_.hasAttribute('data-full-width')) {
       user().warn(
         TAG,
@@ -288,15 +350,26 @@ export class ResponsiveState {
           )['direction'];
         },
         mutate: (state) => {
-          if (state.direction == 'rtl') {
-            setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
+          // If it's fall back state, align with the container width. Otherwise,
+          // adjust the mergin for full-width expansion.
+          if (this.isFallBackState_) {
+            setStyle(this.element_, 'width', '100%');
           } else {
-            setStyle(this.element_, 'marginLeft', -layoutBox.left, 'px');
+            if (state.direction == 'rtl') {
+              setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
+            } else {
+              setStyle(this.element_, 'marginLeft', -layoutBox.left, 'px');
+            }
           }
         },
       },
       {direction: ''}
     );
+  }
+
+  /** @return {boolean} */
+  isFallBackState() {
+    return this.isFallBackState_;
   }
 
   /**

@@ -116,6 +116,11 @@ describes.realWin(
       return ResponsiveState.createIfResponsive(element);
     }
 
+    function createFallBackState(attributes) {
+      createElement(attributes);
+      return ResponsiveState.createFallBackState(element);
+    }
+
     describe('createIfResponsive', () => {
       it('should return non null for a responsive element', () => {
         const state = createState({'data-auto-format': [ADSENSE_RSPV_TAG]});
@@ -128,13 +133,12 @@ describes.realWin(
     });
 
     describe('isValidElement', () => {
-      it('should return false if there is no data-full-width attribute', () => {
-        const state = createState({
-          'data-auto-format': [ADSENSE_RSPV_TAG],
+      it('should return truee if it is a fall back state', () => {
+        const state = createFallBackState({
           'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
-          'width': '100vw',
+          'width': '960',
         });
-        expect(state.isValidElement()).to.be.false;
+        expect(state.isValidElement()).to.be.true;
       });
 
       it('should return false if the height is not whitelisted', () => {
@@ -379,6 +383,39 @@ describes.realWin(
         );
 
         expect(result).to.be.null;
+      });
+
+      it('returns a fall back state for full-width responsive on desktop site', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElementWithNoStub({
+          'data-ad-client': AD_CLIENT_ID,
+          'data-auto-format': [ADSENSE_RSPV_TAG],
+          'data-full-width': '',
+          'height': '500px',
+          'width': '100vw',
+        });
+        const viewport = Services.viewportForDoc(element);
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.not.be.null;
+        expect(result.isValidElement()).to.be.true;
+        expect(element.getAttribute('height')).to.be.equal(
+          `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
+        );
+        expect(element.getAttribute('width')).to.be.not.equal('100vw');
+        expect(element).to.not.have.attribute('data-full-width');
+        expect(element).to.not.have.attribute('data-auto-format');
       });
 
       it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
