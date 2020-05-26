@@ -24,7 +24,13 @@ import {validateData, writeScript} from '../3p/3p';
 export function iprom(global, data) {
   validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
 
-  const {sitepath, zone} = data;
+  const ampdata = {
+    sitepath: '[]',
+    zone: [],
+    keywords: '',
+    channels: '',
+    ...data,
+  };
 
   /**
    * Callback for WriteScript
@@ -35,13 +41,13 @@ export function iprom(global, data) {
     ipromNS.AdTag = ipromNS.AdTag || {};
 
     const config = {
-      sitePath: parseJson(sitepath),
+      sitePath: parseJson(ampdata.sitepath),
       containerId: 'c',
-      zoneId: zone,
+      zoneId: ampdata.zone,
       prebid: true,
       amp: true,
-      keywords: data.keywords ? data.keywords.split(',') : [],
-      channels: data.channels ? data.channels.split(',') : [],
+      keywords: ampdata.keywords ? ampdata.keywords.split(',') : [],
+      channels: ampdata.channels ? ampdata.channels.split(',') : [],
     };
 
     const tag = new ipromNS.AdTag(config);
