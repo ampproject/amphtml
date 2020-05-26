@@ -289,6 +289,32 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
+    it('signals when its ready to be interacted with', async () => {
+      buildStoryPlayer();
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('ready', readySpy);
+      await manager.loadPlayers();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('does not signal when attaching listener after it was built', async () => {
+      buildStoryPlayer();
+      const readySpy = env.sandbox.spy();
+      await manager.loadPlayers();
+
+      playerEl.addEventListener('ready', readySpy);
+
+      expect(readySpy).to.not.have.been.called;
+    });
+
+    it('has isReady property after it is built', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      expect(playerEl.isReady).to.be.true;
+    });
+
     it('load callback builds iframe inside the player', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       const story = win.document.createElement('a');
