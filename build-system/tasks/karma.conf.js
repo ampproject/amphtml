@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -22,8 +23,6 @@ const globby = require('globby');
 
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
-
-const argv = require('minimist')(process.argv.slice(2));
 
 const TEST_SERVER_PORT = 8081;
 
@@ -34,7 +33,7 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
-if (argv.allow_debugger) {
+if (argv.debug) {
   COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
 }
 
