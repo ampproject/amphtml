@@ -44,7 +44,7 @@ const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
       return controller
-        .findElement('#AMP_DOC_dynamic[data-loaded]')
+        .findElement('#viewer[data-loaded]')
         .then((frame) => controller.switchToFrame(frame));
     },
 
@@ -61,7 +61,7 @@ const EnvironmentBehaviorMap = {
       url = url.replace('#', '&');
       // TODO(estherkim): somehow allow non-8000 port and domain
       return (
-        `http://localhost:8000/examples/viewer.html#href=${url}` +
+        `http://localhost:8000/test/fixtures/e2e/amp-viewer-integration/viewer.html#href=${url}` +
         `&caps=${defaultCaps.join(',')}`
       );
     },
