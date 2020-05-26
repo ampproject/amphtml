@@ -21,6 +21,9 @@
     .lightbox-close-button {
       background: white;
     }
+    .lightbox-close-button:focus {
+      background: red;
+    }
     .lightbox-text {
       color: white;
     }
@@ -39,8 +42,8 @@
   <span class="fixed" style="background-color: red">Fixed header</span>
 
   <h2>Scrollable Lightbox</h2>
-  <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay" animate-in="fly-in-bottom">
-    <button on="tap:lightbox-scrollable.close" class="lightbox-close-button">
+  <amp-lightbox on="lightboxOpen:lightbox-close-button.focus;lightboxClose:lightbox-close-button.focus" scrollable id="lightbox-scrollable" layout="nodisplay" animate-in="fly-in-bottom">
+    <button on="tap:lightbox-scrollable.close" id="lightbox-close-button" class="lightbox-close-button">
       Close Scrollable Lightbox
     </button>
     <p class="fixed">
@@ -51,6 +54,9 @@
     </p>
     <p>
       <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      <a href="https://amp.dev/documentation/examples/components/amp-lightbox/">Something else to focus in the lightbox</a>
     </p>
     <p class="lightbox-text">
       Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
@@ -87,7 +93,13 @@
       </p>
       <p>
       Proin sit amet lacus nec mi eleifend feugiat tristique ac leo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce id luctus nisi. Vestibulum viverra auctor nisl, a placerat leo interdum ac. Nullam porttitor auctor ultrices. Etiam tempus lectus urna, sit amet accumsan ante pellentesque eget. Fusce hendrerit scelerisque massa ut venenatis. Vivamus in diam maximus mi ultrices aliquet. Donec lacinia porttitor augue, nec blandit mauris eleifend at. Mauris ante ligula, tincidunt id risus sit amet, laoreet pharetra orci. Aenean id dolor condimentum, mattis libero et, posuere erat. Pellentesque quis magna eu odio pellentesque congue. Sed fringilla massa ut laoreet suscipit.
-      </p></div>
+      </p>
+  </div>
+
+  <button on="tap:lightbox-scrollable">
+    Open The Same Scrollable Lightbox
+  </button>
+
 </article>
 </body>
 </html>
