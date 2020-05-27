@@ -82,7 +82,6 @@ export class AmpImgur extends AMP.BaseElement {
     const sanitizedID = this.imgurid_.replace(
       /^(a\/)?(.*)/,
       (match, aSlash, rest) => {
-        console.log('match', match, 'aslash', aSlash, 'rest', rest);
         return 'a/' + encodeURIComponent(rest);
       }
     );
