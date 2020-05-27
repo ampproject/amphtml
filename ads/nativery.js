@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {toArray} from '../src/types';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -43,7 +44,7 @@ export function nativery(global, data) {
 
   // install observation to check if is in viewport
   const unlisten = global.context.observeIntersection(function (changes) {
-    changes.forEach(function (c) {
+    toArray(changes).forEach(function (c) {
       global._nativery.visible = Math.floor(
         (c.intersectionRect.height / c.boundingClientRect.height) * 100
       );
