@@ -578,6 +578,7 @@ describe('Layout', () => {
     div.appendChild(sizer);
     expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
     expect(div.sizerElement).to.equal(sizer);
+    expect(div.sizerElement.getAttribute('slot')).to.equal('i-amphtml-svc');
   });
 
   it('should allow sizer to be missing', () => {
