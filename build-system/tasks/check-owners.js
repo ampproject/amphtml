@@ -62,9 +62,6 @@ async function checkFile(file) {
     return;
   }
 
-  // TODO(rcebulko): Replace this placeholder with a check that uses the
-  // owners-bot parsing API.
-  // See https://github.com/ampproject/amp-github-apps/issues/281.
   const contents = fs.readFileSync(file, 'utf8').toString();
   try {
     JSON5.parse(contents);
