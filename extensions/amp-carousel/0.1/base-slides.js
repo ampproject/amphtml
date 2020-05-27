@@ -75,7 +75,7 @@ export class BaseSlides extends BaseCarousel {
 
     this.registerAction(
       'toggleAutoplay',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args && args['toggleOn'] !== undefined) {
           this.toggleAutoplay_(args['toggleOn']);

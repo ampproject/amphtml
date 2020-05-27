@@ -67,7 +67,7 @@ const RTC_VENDORS = jsonConfiguration({
   },
   medianet: {
     url:
-      'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
+      'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF&cste=CONSENT_STATE&cstr=CONSENT_STRING',
     macros: ['CID'],
     errorReportingUrl:
       'https://qsearch-a.akamaihd.net/log?logid=kfk&evtid=projectevents&project=amprtc_error&error=ERROR_TYPE&rd=HREF',
@@ -112,6 +112,12 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://ads.servebom.com/tmntag.js?v=1.2&fmt=amp&o={%22p%22%3APLACEMENT_ID}&div_id=DIV_ID',
     macros: ['PLACEMENT_ID', 'DIV_ID'],
+    disableKeyAppend: true,
+  },
+  glxm: {
+    url:
+      'https://pbserver.galaxiemedia.fr/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   aps: {
@@ -173,6 +179,14 @@ const RTC_VENDORS = jsonConfiguration({
   prebidflux: {
     url: 'https://prebid-server.flux-adserver.com/openrtb2/amp?tag_id=TAG_ID',
     macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  browsi: {
+    url:
+      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&ul=SCROLL_TOP&pl=PAGE_HEIGHT&bks=BKG_STATE&pk=PUB_KEY&sk=SITE_KEY&h=ATTR(height)&adix=ATTR(data-amp-slot-index)&ref=REFERRER&url=HREF',
+    macros: ['PUB_KEY', 'SITE_KEY'],
+    errorReportingUrl:
+      'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
 });

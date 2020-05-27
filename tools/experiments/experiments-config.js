@@ -242,14 +242,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'inabox-viewport-friendly',
-    name:
-      'Inabox viewport measures the host window directly if ' +
-      'within friendly iframe',
-    spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -304,5 +296,37 @@ export const EXPERIMENTS = [
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
+  },
+  {
+    id: 'visibility-trigger-improvements',
+    name: 'AMP Analytics Visibility Trigger Improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/26823',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
+  },
+  {
+    id: 'random-subdomains-for-safeframe',
+    name: 'Enable Random Subdomains for SafeFrame',
+  },
+  {
+    id: 'analytics-chunks',
+    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
+  },
+  {
+    id: 'analytics-chunks-inabox',
+    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
+  },
+  {
+    id: 'amp-ad-no-center-css',
+    name: 'Removing the centering css rule for amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+  },
+  {
+    id: 'fie-init-chunking',
+    name: 'More chunking for friendly iframe initialization',
+    spec: 'https://github.com/ampproject/amphtml/issues/27584',
   },
 ];

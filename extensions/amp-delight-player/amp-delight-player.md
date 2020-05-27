@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: The amp-delight-player element displays a cloud-hosted [Delight Player](https://delight-vr.com/).
+  text: The amp-delight-player element displays a cloud-hosted Delight Player.
 ---
 
 <!---

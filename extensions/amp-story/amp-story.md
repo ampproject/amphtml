@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-story
 
-The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
+[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subsect of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -275,9 +275,9 @@ The `amp-story` component represents an entire story. The component itself imple
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience AMP stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
-These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 
 #### `publisher-logo-src` guidelines
 

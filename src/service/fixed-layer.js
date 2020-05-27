@@ -148,7 +148,7 @@ export class FixedLayer {
       transferLayer.setLightboxMode(false);
     }
 
-    const fes = remove(this.elements_, fe => !!fe.lightboxed);
+    const fes = remove(this.elements_, (fe) => !!fe.lightboxed);
     this.returnFixedElements_(fes);
     if (!this.elements_.length) {
       this.unobserveHiddenMutations_();
@@ -303,7 +303,7 @@ export class FixedLayer {
     // determine whether an element is currently docked to apply transform.
     if (transform) {
       // Apply transform style to all fixed elements
-      this.elements_.forEach(e => {
+      this.elements_.forEach((e) => {
         if (e.fixedNow && e.top) {
           setStyle(e.element, 'transition', 'none');
           if (e.transform && e.transform != 'none') {
@@ -315,7 +315,7 @@ export class FixedLayer {
       });
     } else {
       // Reset transform style to all fixed elements
-      this.elements_.forEach(e => {
+      this.elements_.forEach((e) => {
         if (e.fixedNow && e.top) {
           setStyles(e.element, {
             transform: '',
@@ -412,9 +412,9 @@ export class FixedLayer {
     // Some of the elements may no longer be in DOM.
     /** @type {!Array<!ElementDef>} */
     const toRemove = this.elements_.filter(
-      fe => !this.ampdoc.contains(fe.element)
+      (fe) => !this.ampdoc.contains(fe.element)
     );
-    toRemove.forEach(fe => this.tearDownElement_(fe.element));
+    toRemove.forEach((fe) => this.tearDownElement_(fe.element));
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -430,7 +430,7 @@ export class FixedLayer {
     return this.vsync_
       .runPromise(
         {
-          measure: state => {
+          measure: (state) => {
             const elements = this.elements_;
             const autoTops = [];
             const {win} = this.ampdoc;
@@ -537,7 +537,7 @@ export class FixedLayer {
               };
             }
           },
-          mutate: state => {
+          mutate: (state) => {
             if (hasTransferables && this.transfer_) {
               this.getTransferLayer_().update();
             }
@@ -564,7 +564,7 @@ export class FixedLayer {
         },
         {}
       )
-      .catch(error => {
+      .catch((error) => {
         // Fail silently.
         dev().error(TAG, 'Failed to mutate fixed elements:', error);
       });
@@ -1096,7 +1096,7 @@ class TransferLayerBody {
 
     // Test if the element still matches one of the `fixed` selectors. If not
     // return it back to BODY.
-    const matches = fe.selectors.some(selector =>
+    const matches = fe.selectors.some((selector) =>
       this.matches_(element, selector)
     );
     if (!matches) {

@@ -73,7 +73,7 @@ export class AmpState extends AMP.BaseElement {
 
     const {element} = this;
     if (element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(element).then(bind => {
+      Services.bindForDocOrNull(element).then((bind) => {
         devAssert(bind);
         bind.addOverridableKey(element.getAttribute('id'));
       });
@@ -150,7 +150,7 @@ export class AmpState extends AMP.BaseElement {
       );
       return null;
     }
-    return tryParseJson(firstChild.textContent, e => {
+    return tryParseJson(firstChild.textContent, (e) => {
       this.user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
   }
@@ -192,8 +192,8 @@ export class AmpState extends AMP.BaseElement {
         ? UrlReplacementPolicy.OPT_IN
         : UrlReplacementPolicy.ALL;
 
-    return getViewerAuthTokenIfAvailable(element).then(token =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
+    return getViewerAuthTokenIfAvailable(element).then((token) =>
+      this.fetch_(ampdoc, policy, opt_refresh, token).catch((error) => {
         const event = error
           ? createCustomEvent(
               this.win,
@@ -228,9 +228,9 @@ export class AmpState extends AMP.BaseElement {
     return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-      .then(json => this.updateState_(json, isInit))
+      .then((json) => this.updateState_(json, isInit))
       .then(() => loadingDeferred.resolve())
-      .catch(err => {
+      .catch((err) => {
         loadingDeferred.resolve();
         throw err;
       });
@@ -261,7 +261,7 @@ export class AmpState extends AMP.BaseElement {
       return Promise.resolve();
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
-    return Services.bindForDocOrNull(this.element).then(bind => {
+    return Services.bindForDocOrNull(this.element).then((bind) => {
       devAssert(bind);
       const state = /** @type {!JsonObject} */ (map());
       state[id] = json;

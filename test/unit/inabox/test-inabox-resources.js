@@ -15,7 +15,7 @@
  */
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
 
-describes.realWin('inabox-resources', {amp: true}, env => {
+describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
   let resources;
 
@@ -64,7 +64,7 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     const buildStub = env.sandbox.stub(resource1, 'build');
     let resolveBuild;
     buildStub.returns(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolveBuild = resolve;
       })
     );

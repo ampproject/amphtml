@@ -184,7 +184,7 @@ export class InaboxMessagingHost {
     devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
       this.iframeMap_[request.sentinel].observeUnregisterFn ||
-      this.positionObserver_.observe(iframe, data =>
+      this.positionObserver_.observe(iframe, (data) =>
         this.sendPosition_(request, source, /** @type {?JsonObject} */ (data))
       );
     return true;
@@ -220,7 +220,7 @@ export class InaboxMessagingHost {
    * 2. Disable zoom and scroll on parent doc
    */
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.expandFrame(iframe, boxRect => {
+    this.frameOverlayManager_.expandFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
@@ -245,7 +245,7 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
+    this.frameOverlayManager_.collapseFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,

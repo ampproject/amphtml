@@ -38,8 +38,8 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {execOrDie, execScriptAsync} = require('../../common/exec');
-const {installPackages} = require('../../common/utils');
+const {buildRuntime, installPackages} = require('../../common/utils');
+const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
@@ -48,8 +48,6 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
-// CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -91,7 +89,7 @@ let percyAgentProcess_;
  * Override PERCY_* environment variables if passed via gulp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
-  ['percy_token', 'percy_branch'].forEach(variable => {
+  ['percy_token', 'percy_branch'].forEach((variable) => {
     if (variable in argv) {
       process.env[variable.toUpperCase()] = argv[variable];
     }
@@ -159,7 +157,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {compiled: argv.compiled}
   );
 }
 
@@ -208,7 +206,7 @@ async function newPage(browser, viewport = null) {
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
   await page.setRequestInterception(true);
-  page.on('request', interceptedRequest => {
+  page.on('request', (interceptedRequest) => {
     const requestUrl = new URL(interceptedRequest.url());
     const mockedFilepath = path.join(
       path.dirname(__filename),
@@ -318,12 +316,10 @@ function logTestError(testError) {
 /**
  * Runs the visual tests.
  *
- * @param {!Array<string>} assetGlobs an array of glob strings to load assets
- *     from.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function runVisualTests(assetGlobs, webpages) {
+async function runVisualTests(webpages) {
   // Create a Percy client and start a build.
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
@@ -346,7 +342,7 @@ async function runVisualTests(assetGlobs, webpages) {
  */
 async function generateSnapshots(webpages) {
   const numUnfilteredPages = webpages.length;
-  webpages = webpages.filter(webpage => !webpage.flaky);
+  webpages = webpages.filter((webpage) => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
     log(
       'info',
@@ -356,7 +352,7 @@ async function generateSnapshots(webpages) {
     );
   }
   if (argv.grep) {
-    webpages = webpages.filter(webpage => argv.grep.test(webpage.name));
+    webpages = webpages.filter((webpage) => argv.grep.test(webpage.name));
     log(
       'info',
       colors.cyan(`--grep ${argv.grep}`),
@@ -463,7 +459,7 @@ async function snapshotWebpages(browser, webpages) {
       await resetPage(page, viewport);
 
       const consoleMessages = [];
-      const consoleLogger = consoleMessage => {
+      const consoleLogger = (consoleMessage) => {
         consoleMessages.push(consoleMessage);
       };
       page.on('console', consoleLogger);
@@ -489,7 +485,7 @@ async function snapshotWebpages(browser, webpages) {
             );
           }, NAVIGATE_TIMEOUT_MS);
 
-          page.once('response', async response => {
+          page.once('response', async (response) => {
             log(
               'verbose',
               'Response for url',
@@ -517,7 +513,7 @@ async function snapshotWebpages(browser, webpages) {
             'is done, verifying page'
           );
         })
-        .catch(navigationError => {
+        .catch((navigationError) => {
           hasWarnings = true;
           addTestError(
             testErrors,
@@ -578,7 +574,7 @@ async function snapshotWebpages(browser, webpages) {
 
           // Create a default set of snapshot options for Percy and modify
           // them based on the test's configuration.
-          const snapshotOptions = {...DEFAULT_SNAPSHOT_OPTIONS};
+          const snapshotOptions = {};
           if (webpage.enable_percy_javascript) {
             snapshotOptions.enableJavaScript = true;
           }
@@ -597,7 +593,7 @@ async function snapshotWebpages(browser, webpages) {
           // Finally, send the snapshot to percy.
           await percySnapshot(page, name, snapshotOptions);
         })
-        .catch(async testError => {
+        .catch(async (testError) => {
           addTestError(
             testErrors,
             name,
@@ -687,7 +683,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
-  ensureOrBuildAmpRuntimeInTestMode_();
+  await ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
@@ -740,10 +736,7 @@ async function performVisualTests() {
         'utf8'
       )
     );
-    await runVisualTests(
-      visualTestsConfig.asset_globs,
-      visualTestsConfig.webpages
-    );
+    await runVisualTests(visualTestsConfig.webpages);
   }
 }
 
@@ -760,15 +753,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp dist --fortesting'),
+        colors.cyan('gulp build|dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    await buildRuntime();
   }
 }
 
@@ -791,7 +783,7 @@ function setupCleanup_() {
 async function exitPercyAgent_() {
   if (percyAgentProcess_ && !percyAgentProcess_.killed) {
     let resolver;
-    const percyAgentExited_ = new Promise(resolverIn => {
+    const percyAgentExited_ = new Promise((resolverIn) => {
       resolver = resolverIn;
     });
     percyAgentProcess_.on('exit', () => {
@@ -807,7 +799,7 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  stopServer();
+  await stopServer();
   await exitPercyAgent_();
 }
 
@@ -833,4 +825,5 @@ visualDiff.flags = {
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
   'noyarn': '  Skip calling yarn to install dependencies',
+  'compiled': '  Runs tests against minified JS',
 };

@@ -99,7 +99,6 @@
   transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
   z-index: 100002!important;
-  outline: none!important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {

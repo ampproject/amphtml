@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust, actionTrustToString} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Keys} from '../../../src/utils/key-codes';
@@ -147,6 +147,8 @@ export class AmpSlideScroll extends BaseSlides {
   buildSlides() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToWhitelist(TAG, 'goToSlide', ['email']);
 
     this.hasNativeSnapPoints_ =
       getStyle(this.element, 'scrollSnapType') != undefined;
@@ -229,7 +231,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.registerAction(
       'goToSlide',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.goToSlide(args['index'], ActionTrust.HIGH);
@@ -565,9 +567,7 @@ export class AmpSlideScroll extends BaseSlides {
     const count = String(this.noOfSlides_);
     return (
       ' ' +
-      this.getButtonSuffixFormat_()
-        .replace('%s', index)
-        .replace('%s', count)
+      this.getButtonSuffixFormat_().replace('%s', index).replace('%s', count)
     );
   }
 
@@ -770,7 +770,7 @@ export class AmpSlideScroll extends BaseSlides {
 
       this.element.dispatchCustomEvent(name, {
         index: newIndex,
-        ampTrust: actionTrustToString(opt_trust),
+        actionTrust: opt_trust,
       });
     }
   }
@@ -843,7 +843,7 @@ export class AmpSlideScroll extends BaseSlides {
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(
       slidesContainer,
-      pos => {
+      (pos) => {
         this.slidesContainer_./*OK*/ scrollLeft = interpolate(pos);
       },
       duration,
@@ -859,7 +859,7 @@ export class AmpSlideScroll extends BaseSlides {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    listen(this.element, 'touchmove', event => event.stopPropagation(), {
+    listen(this.element, 'touchmove', (event) => event.stopPropagation(), {
       passive: true,
     });
   }

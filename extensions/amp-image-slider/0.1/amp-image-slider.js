@@ -160,7 +160,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           if (args['percent'] !== undefined) {
@@ -358,7 +358,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.gestures_ = Gestures.get(this.element);
 
-    this.gestures_.onGesture(SwipeXRecognizer, e => {
+    this.gestures_.onGesture(SwipeXRecognizer, (e) => {
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
@@ -366,7 +366,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.pointerMoveX_(e.data.startX + e.data.deltaX);
     });
 
-    this.gestures_.onPointerDown(e => {
+    this.gestures_.onPointerDown((e) => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
       this.animateHideHint_();
@@ -781,6 +781,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-image-slider', '0.1', AMP => {
+AMP.extension('amp-image-slider', '0.1', (AMP) => {
   AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
 });

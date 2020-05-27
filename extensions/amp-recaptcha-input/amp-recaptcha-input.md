@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Appends a [reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) token to [AMP form](https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md) submissions.
+  text: Appends a reCAPTCHA v3 token to AMP form submissions.
 ---
 
 <!---
@@ -77,6 +77,10 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
   <tr>
     <td width="40%"><strong>data-action (required)</strong></td>
     <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-global [optional]</strong></td>
+    <td>By default, the iframe loads the recaptcha api script using the <code>www.google.com</code> endpoint.  There are some situations when this is not accessible.  When the <code>data-global</code> attribute is included, the component will load the script from the <code>www.recaptcha.net</code> endpoint instead.  More information can be found in the <a href="https://developers.google.com/recaptcha/docs/faq#can-i-use-recaptcha-globally">reCAPTCHA FAQ</a>.</td>
   </tr>
 </table>
 

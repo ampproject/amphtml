@@ -126,6 +126,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - AppNexus
 - APS
 - Automatad
+- Browsi
 - Criteo
 - FLUX
 - IndexExchange
@@ -134,6 +135,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - The Ozone Project
 - PubMatic OpenWrap
 - Purch
+- Galaxie Media
 - Rubicon
 - Salesforce
 - Yieldbot

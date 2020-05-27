@@ -74,6 +74,11 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.element.appendChild(this.createDom_());
 

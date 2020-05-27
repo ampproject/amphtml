@@ -32,7 +32,7 @@ import {Purifier} from '@ampproject/purifier';
 
 const purifier = new Purifier(document);
 const _unescapedValue = Mustache.Writer.prototype.unescapedValue;
-Mustache.Writer.prototype.unescapedValue = function(token, context) {
+Mustache.Writer.prototype.unescapedValue = function (token, context) {
   const result = _unescapedValue(token, context);
   return purifier.purifyTagsForTripleMustache(result);
 };

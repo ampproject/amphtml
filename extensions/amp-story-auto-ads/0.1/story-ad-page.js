@@ -283,7 +283,7 @@ export class StoryAdPage {
       }
 
       // Store the cta-type as an accesible var for any further pings.
-      this.analytics_.then(analytics =>
+      this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
@@ -343,7 +343,7 @@ export class StoryAdPage {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
     // displayed.
-    this.pageElement_.getImpl().then(impl => impl.delegateVideoAutoplay());
+    this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
     // Remove loading attribute once loaded so that desktop CSS will position
     // offscren with all other pages.
@@ -360,7 +360,7 @@ export class StoryAdPage {
 
     this.loaded_ = true;
 
-    this.loadCallbacks_.forEach(cb => cb());
+    this.loadCallbacks_.forEach((cb) => cb());
   }
 
   /**
@@ -387,7 +387,7 @@ export class StoryAdPage {
       ctaText // Content
     );
 
-    return fitPromise.then(success => {
+    return fitPromise.then((success) => {
       if (!success) {
         user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
         return false;
@@ -424,7 +424,7 @@ export class StoryAdPage {
    */
   extractA4AVars_() {
     const tags = getA4AMetaTags(this.adDoc_);
-    iterateCursor(tags, tag => {
+    iterateCursor(tags, (tag) => {
       const name = tag.name.split('amp4ads-vars-')[1];
       const {content} = tag;
       this.a4aVars_[name] = content;
@@ -512,7 +512,7 @@ export class StoryAdPage {
     );
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -560,7 +560,7 @@ export class StoryAdPage {
    * @private
    */
   analyticsEvent_(eventType, vars) {
-    this.analytics_.then(analytics =>
+    this.analytics_.then((analytics) =>
       analytics.fireEvent(this.pageElement_, this.index_, eventType, vars)
     );
   }

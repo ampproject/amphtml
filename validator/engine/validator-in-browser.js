@@ -14,21 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.require('amp.validator.ValidationResult');
-goog.require('amp.validator.validateString');
-goog.require('goog.Promise');
-goog.require('goog.uri.utils');
+goog.module('amp.validator.validatorInBrowser');
 
-goog.provide('amp.validator.validateInBrowser');
-goog.provide('amp.validator.validateUrlAndLog');
+const GoogPromise = goog.require('goog.Promise');
+const uriUtils = goog.require('goog.uri.utils');
+const validator = goog.require('amp.validator');
+const {ValidationResult} = goog.require('amp.validator.protogenerated');
 
 /**
  * Fetches the contents of a URL as a Promise.
  * @param {string} url
- * @return {!goog.Promise<string>} The fetched document.
+ * @return {!GoogPromise<string>} The fetched document.
  */
 function getUrl(url) {
-  return new goog.Promise(function(resolve, reject) {
+  return new GoogPromise(function(resolve, reject) {
     const xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -50,28 +49,33 @@ function getUrl(url) {
  * @param {string} url
  * @return {boolean}
  */
-amp.validator.isAmpCacheUrl = function(url) {
-  return url.toLowerCase().indexOf('cdn.ampproject.org') !== -1; // lgtm [js/incomplete-url-substring-sanitization]
+const isAmpCacheUrl = function(url) {
+  return url.toLowerCase().indexOf('cdn.ampproject.org') !==
+      -1;  // lgtm [js/incomplete-url-substring-sanitization]
 };
+exports.isAmpCacheUrl = isAmpCacheUrl;
+goog.exportSymbol('amp.validator.isAmpCacheUrl', isAmpCacheUrl);
 
 /**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
  * the DOM. This method is exported so it can be unit tested.
  * @param {!Document=} opt_doc
- * @return {!amp.validator.ValidationResult}
+ * @return {!ValidationResult}
  */
-amp.validator.validateInBrowser = function(opt_doc) {
-  const result = new amp.validator.ValidationResult();
-  result.status = amp.validator.ValidationResult.Status.UNKNOWN;
+const validateInBrowser = function(opt_doc) {
+  const result = new ValidationResult();
+  result.status = ValidationResult.Status.UNKNOWN;
 
   // If adding in-browser validation functions, please add them here.
   // Note that result.status is set to UNKNOWN by default. If a routine
   // finds an error, then it should be set to 'FAIL'. Otherwise, it
   // should be left alone - that is, even for warnings it should be left
-  // at UNKNOWN, so as to not override a FAIL coming from validateString
-  // below when we call mergeFrom.
+  // at UNKNOWN, so as to not override a FAIL coming from
+  // validator.validateString below when we call mergeFrom.
   return result;
 };
+exports.validateInBrowser = validateInBrowser;
+goog.exportSymbol('amp.validator.validateInBrowser', validateInBrowser);
 
 /**
  * Validates a URL input, logging to the console the result.
@@ -81,21 +85,20 @@ amp.validator.validateInBrowser = function(opt_doc) {
  * WARNING: This is exported; interface changes may break downstream users like
  * https://www.npmjs.com/package/amphtml-validator and
  * https://validator.amp.dev/.
- *
+
  * @param {string} url
  * @param {!Document=} opt_doc
- * @export
  */
-amp.validator.validateUrlAndLog = function(url, opt_doc) {
-  if (amp.validator.isAmpCacheUrl(url)) {
+const validateUrlAndLog = function(url, opt_doc) {
+  if (isAmpCacheUrl(url)) {
     console.error(
         'Attempting to validate an AMP cache URL. Please use ' +
         '#development=1 on the origin URL instead.');
     return;
   }
   getUrl(url).then(
-      function(html) { // Success
-        const fragment  = goog.uri.utils.getFragment(url);
+      function(html) {  // Success
+        const fragment = uriUtils.getFragment(url);
         let format = 'AMP';
         if (fragment.indexOf('development') != -1) {
           fragment.split('&').forEach(hashValue => {
@@ -105,14 +108,16 @@ amp.validator.validateUrlAndLog = function(url, opt_doc) {
             }
           });
         }
-        const validationResult = amp.validator.validateString(html, format);
+        const validationResult = validator.validateString(html, format);
         if (opt_doc) {
-          const browserResult = amp.validator.validateInBrowser(opt_doc);
+          const browserResult = validateInBrowser(opt_doc);
           validationResult.mergeFrom(browserResult);
         }
         validationResult.outputToTerminal(url, undefined);
       },
-      function(reason) { // Failure
+      function(reason) {  // Failure
         console.error(reason);
       });
 };
+exports.validateUrlAndLog = validateUrlAndLog;
+goog.exportSymbol('amp.validator.validateUrlAndLog', validateUrlAndLog);

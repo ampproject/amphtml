@@ -291,12 +291,12 @@ export class NextPageService {
         this.positionObserver_.observe(
           measurer,
           PositionObserverFidelity.LOW,
-          position => this.positionUpdate_(page, position)
+          (position) => this.positionUpdate_(page, position)
         );
         this.positionObserver_.observe(
           articleLinks,
           PositionObserverFidelity.LOW,
-          unused => this.articleLinksPositionUpdate_(documentRef)
+          (unused) => this.articleLinksPositionUpdate_(documentRef)
         );
       });
 
@@ -309,7 +309,7 @@ export class NextPageService {
       this.nextArticle_++;
       this.xhr_
         .fetch(next.ampUrl, {ampCors: false})
-        .then(response => {
+        .then((response) => {
           // Update AMP URL in case we were redirected.
           documentRef.ampUrl = response.url;
           const url = this.urlService_.parse(response.url);
@@ -320,7 +320,7 @@ export class NextPageService {
           );
           return response.text();
         })
-        .then(html => {
+        .then((html) => {
           const doc = this.win_.document.implementation.createHTMLDocument('');
           doc.open();
           doc.write(html);
@@ -328,7 +328,7 @@ export class NextPageService {
           return doc;
         })
         .then(
-          doc =>
+          (doc) =>
             new Promise((resolve, reject) => {
               if (documentRef.cancelled) {
                 // User has reached the end of the document already, don't render.
@@ -352,9 +352,9 @@ export class NextPageService {
                 }
               });
             }),
-          e => user().error(TAG, 'failed to fetch %s', next.ampUrl, e)
+          (e) => user().error(TAG, 'failed to fetch %s', next.ampUrl, e)
         )
-        .catch(e =>
+        .catch((e) =>
           dev().error(
             TAG,
             'failed to attach shadow document for %s',
@@ -399,7 +399,7 @@ export class NextPageService {
         'i-amphtml-reco-holder-article',
         'amp-next-page-link'
       );
-      articleHolder.addEventListener('click', e => {
+      articleHolder.addEventListener('click', (e) => {
         this.triggerAnalyticsEvent_(
           'amp-next-page-click',
           next.ampUrl,
@@ -458,7 +458,7 @@ export class NextPageService {
     );
     this.viewport_
       .getClientRectAsync(dev().assertElement(this.element_))
-      .then(elementBox => {
+      .then((elementBox) => {
         if (this.documentQueued_) {
           return;
         }
@@ -534,7 +534,7 @@ export class NextPageService {
    * @private
    */
   setActiveDocument_(ref) {
-    this.documentRefs_.forEach(docRef => {
+    this.documentRefs_.forEach((docRef) => {
       const {amp} = docRef;
       // Update the title and history
       if (docRef === ref) {

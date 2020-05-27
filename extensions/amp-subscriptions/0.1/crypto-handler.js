@@ -69,6 +69,9 @@ export class CryptoHandler {
   }
 
   /**
+   * Returns encrypted document key if it exists.
+   * This key is needed for requesting a different key
+   * that decrypts locked content on the page.
    * @param {string} serviceId Who you want to decrypt the key.
    *                           For example: 'google.com'
    * @return {?string}
@@ -91,10 +94,10 @@ export class CryptoHandler {
       return this.tryToDecryptDocumentImpl_(decryptedDocumentKey);
     }
     const docKeyUint8 = utf8Encode(decryptedDocumentKey);
-    return crypto.subtle.digest('SHA-256', docKeyUint8).then(val => {
+    return crypto.subtle.digest('SHA-256', docKeyUint8).then((val) => {
       const hashArray = toArray(new Uint8Array(val));
       const hashHex = hashArray
-        .map(b => padStart(b.toString(16), 2, '0'))
+        .map((b) => padStart(b.toString(16), 2, '0'))
         .join('');
       if (hashHex != this.shaKeyHash_) {
         return Promise.reject(new Error('Invalid Document Key'));
@@ -117,12 +120,12 @@ export class CryptoHandler {
         .getRootNode()
         .querySelectorAll('script[ciphertext]');
       const promises = [];
-      iterateCursor(encryptedSections, encryptedSection => {
+      iterateCursor(encryptedSections, (encryptedSection) => {
         promises.push(
           decryptAesGcm(
             decryptedDocumentKey,
             encryptedSection.textContent
-          ).then(decryptedContent => {
+          ).then((decryptedContent) => {
             encryptedSection./*OK*/ outerHTML = decryptedContent;
           })
         );

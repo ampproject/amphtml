@@ -40,7 +40,7 @@ module.exports = {
     const sourceCode = context.getSourceCode();
 
     return {
-      'CallExpression[callee.object.name="Object"][callee.property.name="assign"]': function(
+      'CallExpression[callee.object.name="Object"][callee.property.name="assign"]': function (
         node
       ) {
         const args = node.arguments;
@@ -52,13 +52,18 @@ module.exports = {
         if (first.type !== 'ObjectExpression') {
           return;
         }
+        for (const arg of args) {
+          if (arg.type === 'SpreadElement') {
+            return;
+          }
+        }
 
         context.report({
           node,
           message: 'Prefer using object literals with spread property syntax',
 
           fix(fixer) {
-            const texts = args.map(arg => `...${sourceCode.getText(arg)}`);
+            const texts = args.map((arg) => `...${sourceCode.getText(arg)}`);
             if (first.properties.length === 0) {
               texts.shift();
             }

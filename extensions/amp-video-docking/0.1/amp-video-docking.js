@@ -220,17 +220,15 @@ export function getPosterImageSrc(element) {
  * @return {!Element}
  * @private
  */
-const ShadowLayer = html =>
-  html`
-    <div class="amp-video-docked-shadow" hidden></div>
-  `;
+const ShadowLayer = (html) =>
+  html` <div class="amp-video-docked-shadow" hidden></div> `;
 
 /**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
-const PlaceholderBackground = html =>
+const PlaceholderBackground = (html) =>
   html`
     <div class="amp-video-docked-placeholder-background">
       <div
@@ -269,11 +267,9 @@ export class VideoDocking {
 
     /**
      * Overriden when user drags the video to a different corner.
-     * @private {!DirectionX}
+     * @private {?DirectionX}
      */
-    this.cornerDirectionX_ = isRTL(this.getDoc_())
-      ? DirectionX.LEFT
-      : DirectionX.RIGHT;
+    this.cornerDirectionX_ = null;
 
     const html = htmlFor(this.getDoc_());
 
@@ -383,7 +379,7 @@ export class VideoDocking {
       }
     }
 
-    listen(ampdoc.getBody(), VideoEvents.REGISTERED, e => {
+    listen(ampdoc.getBody(), VideoEvents.REGISTERED, (e) => {
       const target = dev().assertElement(e.target);
       if (isDockable(target)) {
         this.registerElement(target);
@@ -443,7 +439,7 @@ export class VideoDocking {
 
   /** @private */
   onViewportResize_() {
-    this.observed_.forEach(video => this.updateOnResize_(video));
+    this.observed_.forEach((video) => this.updateOnResize_(video));
   }
 
   /**
@@ -476,7 +472,7 @@ export class VideoDocking {
    * @public
    */
   registerElement(element) {
-    element.getImpl().then(video => this.register(video));
+    element.getImpl().then((video) => this.register(video));
   }
 
   /** @private */
@@ -519,7 +515,7 @@ export class VideoDocking {
    * @private
    */
   addDragListeners_(element) {
-    const handler = e => this.drag_(/** @type {!TouchEvent} */ (e));
+    const handler = (e) => this.drag_(/** @type {!TouchEvent} */ (e));
 
     listen(element, 'touchstart', handler);
     listen(element, 'mousedown', handler);
@@ -707,8 +703,8 @@ export class VideoDocking {
    * @private
    */
   isPlaying_(optVideo = null) {
-    const video =
-      /** @type {!VideoInterface} */ (optVideo || this.getDockedVideo_());
+    const video = /** @type {!VideoInterface} */ (optVideo ||
+      this.getDockedVideo_());
     return (
       this.manager_().getPlayingState(video) == PlayingStates.PLAYING_MANUAL
     );
@@ -760,7 +756,7 @@ export class VideoDocking {
     const isTransferLayerStep = true;
     return this.dock_(video, target, step, isTransferLayerStep).then(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           this.raf_(() => {
             this.dockInTransferLayerStep_(video, target, step + 0.1).then(
               resolve
@@ -954,7 +950,7 @@ export class VideoDocking {
     const boxNeedsSizing = this.boxNeedsSizing_(width, height);
 
     /** @param {!Element} element */
-    const maybeSetSizing = element => {
+    const maybeSetSizing = (element) => {
       if (!boxNeedsSizing) {
         return;
       }
@@ -966,12 +962,12 @@ export class VideoDocking {
       });
     };
 
-    const setOpacity = element =>
+    const setOpacity = (element) =>
       setImportantStyles(element, {
         'opacity': step,
       });
 
-    const setTransitionTiming = element =>
+    const setTransitionTiming = (element) =>
       setImportantStyles(element, {
         'transition-duration': `${transitionDurationMs}ms`,
         'transition-timing-function': transitionTiming,
@@ -1038,7 +1034,7 @@ export class VideoDocking {
         });
       });
 
-      this.getElementsOnDockArea_(video).forEach(el => {
+      this.getElementsOnDockArea_(video).forEach((el) => {
         setImportantStyles(el, {
           'transform': transform(x, y, scale),
         });
@@ -1241,7 +1237,7 @@ export class VideoDocking {
     const {x} = pointerCoords(e);
     const {directionX} = this.currentlyDocked_.target;
 
-    const onDragMove = throttleByAnimationFrame(this.ampdoc_.win, e =>
+    const onDragMove = throttleByAnimationFrame(this.ampdoc_.win, (e) =>
       this.onDragMove_(
         /** @type {!TouchEvent|!MouseEvent} */ (e),
         directionX,
@@ -1336,7 +1332,7 @@ export class VideoDocking {
         /* NOOP */
       };
     }
-    const handler = e => e.preventDefault();
+    const handler = (e) => e.preventDefault();
     win.addEventListener('touchmove', handler, {passive: false});
     return () => win.removeEventListener('touchmove', handler);
   }
@@ -1346,7 +1342,7 @@ export class VideoDocking {
    * @private
    */
   onDragEnd_(unlisteners) {
-    unlisteners.forEach(unlisten => unlisten.call());
+    unlisteners.forEach((unlisten) => unlisten.call());
 
     this.isDragging_ = false;
 
@@ -1619,7 +1615,7 @@ export class VideoDocking {
         shadowLayer,
         placeholderBackground,
         placeholderIcon,
-      ].forEach(el => {
+      ].forEach((el) => {
         resetStyles(el, [
           'transform',
           'transition',
@@ -1684,6 +1680,12 @@ export class VideoDocking {
       };
     }
 
+    if (this.cornerDirectionX_ === null) {
+      this.cornerDirectionX_ = isRTL(this.getDoc_())
+        ? DirectionX.LEFT
+        : DirectionX.RIGHT;
+    }
+
     return {
       type: DockTargetType.CORNER,
       rect: topCornerRect(
@@ -1718,6 +1720,6 @@ export class VideoDocking {
   }
 }
 
-AMP.extension(TAG, 0.1, AMP => {
+AMP.extension(TAG, 0.1, (AMP) => {
   AMP.registerServiceForDoc('video-docking', VideoDocking);
 });

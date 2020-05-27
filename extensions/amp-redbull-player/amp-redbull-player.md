@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Red Bull Video Player](https://player.redbull.com/demo/index.html).
+  text: Displays a Red Bull Video Player.
 ---
 
 <!---

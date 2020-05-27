@@ -1,6 +1,7 @@
 ---
 $category@: dynamic-content
 formats:
+  - stories
   - websites
 teaser:
   text: Provides an approximate country-level geolocation interface.
@@ -76,8 +77,8 @@ The `ISOCountryGroups` key allows selections by groups of country codes.
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -101,8 +102,8 @@ In the following example, we determine if the user is in a "soccer" country and 
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -138,6 +139,10 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.**
 
 In addition to user specifed country groups `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
 
+##### U.S. California Detection
+
+The `amp-geo` component provides the [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) information when it determines a request is from California. The `preset-us-ca` value from the preset list supports this feature.
+
 Additional countries may be included with the preset list as in the `myList` example below.
 
 ```html
@@ -145,8 +150,9 @@ Additional countries may be included with the preset list as in the `myList` exa
   <script type="application/json">
     {
       "ISOCountryGroups": {
-        "eea": [ "preset-eea" ],
-        "myList": [ "preset-eea", "ca", "au", "nz" ]
+        "eea": ["preset-eea"],
+        "usca": ["preset-us-ca"],
+        "myList": ["preset-eea", "preset-us-ca", "ca", "au", "nz"]
       }
     }
   </script>
@@ -170,6 +176,8 @@ This CSS hides the element that has the `foo` class until `amp-geo` has loaded a
 
 **Note**: Elements such as `amp-ad` and `amp-iframe` do not make external network requests when set to `display: none`.
 
+[filter formats="websites"]
+
 ### Integration with amp-bind
 
 If the `AmpBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information. Using the football example above, set the `AmpBind` flag to true to enable `amp-bind` integration.
@@ -180,8 +188,8 @@ If the `AmpBind` key is present in the configuration, `amp-geo` inserts an `amp-
     {
       "AmpBind": true,
       "ISOCountryGroups": {
-        "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
-        "football": [ "unknown" ]
+        "soccer": ["au", "ca", "ie", "nz", "us", "za"],
+        "football": ["unknown"]
       }
     }
   </script>
@@ -194,12 +202,14 @@ If the user were in Canada, the inserted `amp-state` would be as follows:
 <amp-state id="ampGeo">
   <script type="application/json">
     {
-    	"ISOCountry": "ca",
-       	 "soccer": true
-       }
+      "ISOCountry": "ca",
+      "soccer": true
+    }
   </script>
 </amp-state>
 ```
+
+[/filter]<!-- formats="websites" -->
 
 ### <a name="variable-substitution"></a>Variable substitution
 

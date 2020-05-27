@@ -25,6 +25,7 @@ const PACKAGE_JSON_PATHS = [
   'package.json',
   'build-system/tasks/e2e/package.json',
   'build-system/tasks/visual-diff/package.json',
+  'build-system/tasks/storybook/package.json',
 ];
 
 const checkerExecutable = 'npx npm-exact-versions';
@@ -35,7 +36,7 @@ const checkerExecutable = 'npx npm-exact-versions';
  */
 async function checkExactVersions() {
   let success = true;
-  PACKAGE_JSON_PATHS.forEach(file => {
+  PACKAGE_JSON_PATHS.forEach((file) => {
     const checkerCmd = `${checkerExecutable} --path ${file}`;
     const err = getStderr(checkerCmd);
     if (err) {

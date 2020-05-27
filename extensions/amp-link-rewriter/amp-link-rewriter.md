@@ -52,20 +52,17 @@ Code:
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-        "section": [
-            "#product-listing-1",
-            "#product-listing-2",
-        ],
-        "attribute": {
-            "href": "((?!(https:\/\/skip\.com)).)*",
-            "id": "comments",
-            "class": "sidebar",
-            "rel": "(?!(skip))*",
-        },
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+      "section": ["#product-listing-1", "#product-listing-2"],
+      "attribute": {
+        "href": "((?!(https:\/\/skip\.com)).)*",
+        "id": "comments",
+        "class": "sidebar",
+        "rel": "(?!(skip))*"
+      },
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>
@@ -91,20 +88,17 @@ The final code should look like:
     <amp-link-rewriter layout="nodisplay">
       <script type="application/json">
         {
-            "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-            "section": [
-                "#product-listing-1",
-                "#product-listing-2",
-            ],
-            "attribute": {
-                "href": "`((?!(https:\/\/skip\.com)).)*`",
-                "id": "comments",
-                "class": "sidebar",
-                "rel": "(?!(skip))*",
-            },
-            "vars": {
-                "customerId": "12345"
-            }
+          "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+          "section": ["#product-listing-1", "#product-listing-2"],
+          "attribute": {
+            "href": "`((?!(https:\/\/skip\.com)).)*`",
+            "id": "comments",
+            "class": "sidebar",
+            "rel": "(?!(skip))*"
+          },
+          "vars": {
+            "customerId": "12345"
+          }
         }
       </script>
     </amp-link-rewriter>
@@ -125,10 +119,10 @@ Example:
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>

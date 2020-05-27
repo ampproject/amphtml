@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: An `amp-powr-player` component displays the Powr Player as configured in the [Powr](https://powr.com) platform.
+  text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
 ---
 
 <!---

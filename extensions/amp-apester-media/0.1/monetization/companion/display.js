@@ -62,14 +62,14 @@ export function handleCompanionDisplay(media, apesterElement) {
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   const maxWidth = Math.max.apply(
     null,
-    bannerSizes.map(s => s[0])
+    bannerSizes.map((s) => s[0])
   );
   const maxHeight = Math.max.apply(
     null,
-    bannerSizes.map(s => s[1])
+    bannerSizes.map((s) => s[1])
   );
 
-  const multiSizeData = bannerSizes.map(size => size.join('x')).join();
+  const multiSizeData = bannerSizes.map((size) => size.join('x')).join();
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
@@ -85,7 +85,7 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   );
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
-  Services.mutatorForDoc(apesterElement).attemptChangeSize(
+  Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAd,
     maxHeight,
     /* newWidth */ undefined

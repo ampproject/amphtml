@@ -15,6 +15,7 @@
  */
 import {Services} from '../services';
 import {devAssert} from '../log';
+import {isAmp4Email} from '../format';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
 import {whenDocumentComplete} from '../document-ready';
@@ -294,12 +295,12 @@ export class VariableSource {
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
-      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+      keys = keys.filter((key) => this.getUrlMacroWhitelist_().includes(key));
     }
     // If a whitelist is passed into the call to GlobalVariableSource.expand_
     // then we only resolve values contained in the whitelist.
     if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
+      keys = keys.filter((key) => opt_whiteList[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -310,7 +311,7 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     // Keys that start with a `$` need to be escaped so that they do not
     // interfere with the regex that is constructed.
-    const escaped = keys.map(key => {
+    const escaped = keys.map((key) => {
       if (key[0] === '$') {
         return '\\' + key;
       }
@@ -330,8 +331,8 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
-   *     a meta tag).
+   * For email documents, all URL macros are disallowed by default.
+   * @return {Array<string>|undefined} The allowlist of substitutable AMP variables
    * @private
    */
   getUrlMacroWhitelist_() {
@@ -339,18 +340,17 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    // A meta[name="amp-allowed-url-macros"] tag, if present,
-    // contains, in its content attribute, a whitelist of variable substitution.
-    const meta = this.ampdoc.getMetaByName('amp-allowed-url-macros');
-    if (meta === null) {
-      return null;
+    // Disallow all URL macros for AMP4Email format documents.
+    if (this.ampdoc.isSingleDoc()) {
+      const doc = /** @type {!Document} */ (this.ampdoc.getRootNode());
+      if (isAmp4Email(doc)) {
+        /**
+         * The whitelist of variables allowed for variable substitution.
+         * @private {?Array<string>}
+         */
+        this.variableWhitelist_ = [''];
+        return this.variableWhitelist_;
+      }
     }
-
-    /**
-     * The whitelist of variables allowed for variable substitution.
-     * @private {?Array<string>}
-     */
-    this.variableWhitelist_ = meta.split(',').map(variable => variable.trim());
-    return this.variableWhitelist_;
   }
 }

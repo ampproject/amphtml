@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {Direction} from '../service';
 import {PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
-import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
@@ -73,7 +72,7 @@ describes.realWin(
     },
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
 
     beforeEach(() => {
@@ -173,7 +172,7 @@ describes.realWin(
           false /** waitForLayout */
         );
         await allowConsoleError(() =>
-          element.build().catch(err => {
+          element.build().catch((err) => {
             expect(err.message).to.include(
               'amp-next-page Page list expected an array, found: object: [object Object]'
             );
@@ -328,7 +327,7 @@ describes.realWin(
       });
 
       it('should not fetch the next document before scrolling', async () => {
-        [1, 2].forEach(i => {
+        [1, 2].forEach((i) => {
           expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
             VisibilityState.PRERENDER
@@ -457,11 +456,13 @@ describes.realWin(
 
         // Adds the two documents coming from Document 1's recommendations
         expect(service.pages_.length).to.equal(5);
-        expect(service.pages_.some(page => page.title == 'Title 3')).to.be.true;
-        expect(service.pages_.some(page => page.title == 'Title 4')).to.be.true;
+        expect(service.pages_.some((page) => page.title == 'Title 3')).to.be
+          .true;
+        expect(service.pages_.some((page) => page.title == 'Title 4')).to.be
+          .true;
         // Avoids loops (ignores previously inserted page)
         expect(
-          service.pages_.filter(page => page.title == 'Title 2').length
+          service.pages_.filter((page) => page.title == 'Title 2').length
         ).to.equal(1);
       });
 
@@ -478,7 +479,7 @@ describes.realWin(
           .be.ok;
 
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
           0 /** index */,
@@ -515,7 +516,7 @@ describes.realWin(
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
           0 /** pausePageCountForTesting */
@@ -525,7 +526,7 @@ describes.realWin(
           VisibilityState.HIDDEN
         );
 
-        service.scrollDirection_ = Direction.DOWN;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
         await service.resumePausedPages_(
           1 /** index */,
           0 /** pausePageCountForTesting */
@@ -645,17 +646,9 @@ describes.realWin(
         const templateRenderStub = env.sandbox
           .stub(service.templates_, 'findAndRenderTemplate')
           .onFirstCall()
-          .resolves(
-            html`
-              <span>Rendered 1</span>
-            `
-          )
+          .resolves(html` <span>Rendered 1</span> `)
           .onSecondCall()
-          .resolves(
-            html`
-              <span>Rendered 2</span>
-            `
-          );
+          .resolves(html` <span>Rendered 2</span> `);
 
         await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
         expect(templateRenderStub).to.have.been.calledWith(
@@ -711,11 +704,7 @@ describes.realWin(
         env.sandbox.stub(service, 'getViewportsAway_').returns(0);
         const templateRenderStub = env.sandbox
           .stub(service.templates_, 'findAndRenderTemplate')
-          .resolves(
-            html`
-              <span>Rendered</span>
-            `
-          );
+          .resolves(html` <span>Rendered</span> `);
 
         await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
         expect(templateRenderStub).to.have.been.calledWith(
@@ -752,7 +741,7 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('should only register pages up to the given limit', async () => {
+      it('should only fetch pages up to the given limit', async () => {
         const element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           maxPages: 1,
@@ -761,7 +750,13 @@ describes.realWin(
         const service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
-        expect(service.pages_.length).to.equal(2);
+        // Try to fetch more pages than necessary to make sure
+        // pages above the maximum are not fetched
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 3);
+
+        expect(
+          service.pages_.filter((page) => !page.isLoaded()).length
+        ).to.equal(1);
         element.parentNode.removeChild(element);
       });
     });

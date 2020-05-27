@@ -15,17 +15,24 @@
  */
 
 import '../amp-carousel';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'SlideScroll',
   {
     amp: {
       extensions: ['amp-carousel'],
+      runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     const SHOW_CLASS = 'i-amphtml-slide-item-show';
     let win, doc;
 
@@ -95,7 +102,7 @@ describes.realWin(
     }
 
     it('should create container and wrappers and show initial slides', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         expect(
           ampSlideScroll.getElementsByClassName('i-amphtml-slides-container')
             .length
@@ -124,7 +131,7 @@ describes.realWin(
     });
 
     it('should go to the correct slide on button click', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
@@ -143,7 +150,7 @@ describes.realWin(
 
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip('should show the correct slide', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
@@ -327,7 +334,7 @@ describes.realWin(
 
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip('should hide the unwanted slides', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
@@ -413,7 +420,7 @@ describes.realWin(
     });
 
     it('should show/hide the correct controls', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
 
         impl.showSlide_(1);
@@ -441,7 +448,7 @@ describes.realWin(
     });
 
     it('should set the correct scrollLeft when there is only one slide', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
 
         impl.noOfSlides_ = 1;
@@ -451,20 +458,20 @@ describes.realWin(
     });
 
     it('should update to the right slide on scroll', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
         impl.vsync_ = {
-          mutatePromise: cb => {
+          mutatePromise: (cb) => {
             cb();
             return {
-              then: cb2 => {
+              then: (cb2) => {
                 cb2();
               },
             };
           },
-          mutate: cb => {
+          mutate: (cb) => {
             cb();
           },
         };
@@ -496,7 +503,7 @@ describes.realWin(
     });
 
     it('should get the correct next slide index for a scrollLeft', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
 
         // Already at slide 0;
@@ -524,7 +531,7 @@ describes.realWin(
     });
 
     it('should custom snap to the correct slide', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const animateScrollLeftSpy = env.sandbox.spy(
           impl,
@@ -592,7 +599,7 @@ describes.realWin(
     });
 
     it('should custom snap to the correct slide - special case', () => {
-      return getAmpSlideScroll(null, 2).then(ampSlideScroll => {
+      return getAmpSlideScroll(null, 2).then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const animateScrollLeftSpy = env.sandbox.spy(
           impl,
@@ -610,13 +617,13 @@ describes.realWin(
     });
 
     it('should handle custom elastic scroll', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const customSnapSpy = env.sandbox
           .stub(impl, 'customSnap_')
           .callsFake(() => {
             return {
-              then: cb => {
+              then: (cb) => {
                 cb();
               },
             };
@@ -668,7 +675,7 @@ describes.realWin(
     });
 
     it('should relayout the current slide on layoutCallback', () => {
-      return getAmpSlideScroll().then(ampSlideScroll => {
+      return getAmpSlideScroll().then((ampSlideScroll) => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
         const scheduleLayoutSpy_ = env.sandbox.spy(owners, 'scheduleLayout');
@@ -690,7 +697,7 @@ describes.realWin(
 
     describe('Looping', () => {
       it('should create container and wrappers and show initial slides', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS)).to.be
             .true;
@@ -703,7 +710,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should show the correct slides when looping', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = env.sandbox.spy(
@@ -855,7 +862,7 @@ describes.realWin(
       });
 
       it('show correct slides when looping with `autoplay` for 2 slides', () => {
-        return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
+        return getAmpSlideScroll(true, 2).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
           const updateInViewportSpy = env.sandbox.spy(
@@ -948,7 +955,7 @@ describes.realWin(
 
       it('do not set `autoplay` status if `autoplay=0` specified', () => {
         return getAmpSlideScroll(false, 3, true, true, 0).then(
-          ampSlideScroll => {
+          (ampSlideScroll) => {
             const impl = ampSlideScroll.implementation_;
             const setupAutoplaySpy = env.sandbox.spy(impl, 'setupAutoplay_');
             expect(setupAutoplaySpy).to.not.have.been.called;
@@ -958,7 +965,7 @@ describes.realWin(
 
       it('removes `autoplay` status after provided loops are made', () => {
         return getAmpSlideScroll(false, 3, true, true, 2).then(
-          ampSlideScroll => {
+          (ampSlideScroll) => {
             const impl = ampSlideScroll.implementation_;
             const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay');
             impl.showSlide_(1);
@@ -976,7 +983,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should hide unwanted slides when looping', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
           const schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
@@ -1088,7 +1095,7 @@ describes.realWin(
       });
 
       it('should show/hide the correct controls when looping', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
 
           impl.showSlide_(1);
@@ -1118,7 +1125,7 @@ describes.realWin(
       });
 
       it('should set the correct scrollLeft when there is only one slide', () => {
-        return getAmpSlideScroll(true, 1).then(ampSlideScroll => {
+        return getAmpSlideScroll(true, 1).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
 
           impl.noOfSlides_ = 1;
@@ -1128,12 +1135,12 @@ describes.realWin(
       });
 
       it('should update to the right slide on scroll', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
           impl.vsync_ = {
-            mutate: cb => {
+            mutate: (cb) => {
               cb();
             },
           };
@@ -1169,7 +1176,7 @@ describes.realWin(
       });
 
       it('should get the correct next slide index for a scrollLeft', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
 
           // Already at slide 0;
@@ -1204,7 +1211,7 @@ describes.realWin(
       });
 
       it('should custom snap to the correct slide', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const animateScrollLeftSpy = env.sandbox.spy(
             impl,
@@ -1234,7 +1241,7 @@ describes.realWin(
       });
 
       it('should go to the correct slide on button click', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
@@ -1254,7 +1261,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should update slide when `slide` attribute is mutated', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
 
           const impl = ampSlideScroll.implementation_;
@@ -1274,7 +1281,7 @@ describes.realWin(
       });
 
       it('should trigger `slideChange` action when user changes slides', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           const impl = ampSlideScroll.implementation_;
           const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
@@ -1296,8 +1303,26 @@ describes.realWin(
         });
       });
 
+      it('should fire `slideChange` DOM event with high trust when user changes slides', () => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
+          let event;
+          win.document.addEventListener('slideChange', (e) => (event = e));
+          const impl = ampSlideScroll.implementation_;
+
+          impl.goCallback(-1, /* animate */ false);
+          expect(win.document.eventListeners.count('slideChange')).to.equal(1);
+          expect(event.data.index).to.equal(4);
+          expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+
+          impl.goCallback(1, /* animate */ false);
+          expect(win.document.eventListeners.count('slideChange')).to.equal(1);
+          expect(event.data.index).to.equal(0);
+          expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        });
+      });
+
       it('should goToSlide on action', () => {
-        return getAmpSlideScroll(true).then(ampSlideScroll => {
+        return getAmpSlideScroll(true).then((ampSlideScroll) => {
           expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
 
           const impl = ampSlideScroll.implementation_;
@@ -1332,7 +1357,7 @@ describes.realWin(
 
       it('should NOT call showSlide_ before layout', () => {
         const promise = getAmpSlideScroll(true, 5, /* opt_attachToDom */ false);
-        return promise.then(ampSlideScroll => {
+        return promise.then((ampSlideScroll) => {
           // Layout happens asynchronously after attaching to DOM, so we can
           // test pre-layoutCallback logic now.
           doc.body.appendChild(ampSlideScroll);
@@ -1359,7 +1384,7 @@ describes.realWin(
       });
 
       it('should NOT call showSlide_ before re-layout', () => {
-        return getAmpSlideScroll(false, 5, false).then(ampSlideScroll => {
+        return getAmpSlideScroll(false, 5, false).then((ampSlideScroll) => {
           doc.body.appendChild(ampSlideScroll);
           return ampSlideScroll.build().then(() => {
             const impl = ampSlideScroll.implementation_;
@@ -1414,7 +1439,7 @@ describes.realWin(
       }
 
       describe('when not looping', () => {
-        it('should have the correct values on the first index', function*() {
+        it('should have the correct values on the first index', function* () {
           const el = yield getAmpSlideScroll(false, 3);
           expect(getPrevTitle(el)).to.equal(
             'Previous item in carousel (1 of 3)'
@@ -1422,7 +1447,7 @@ describes.realWin(
           expect(getNextTitle(el)).to.equal('Next item in carousel (2 of 3)');
         });
 
-        it('should have the correct values on the last index', function*() {
+        it('should have the correct values on the last index', function* () {
           const el = yield getAmpSlideScroll(false, 3);
           el.implementation_.showSlide_(2);
           expect(getPrevTitle(el)).to.equal(
@@ -1433,7 +1458,7 @@ describes.realWin(
       });
 
       describe('when looping', () => {
-        it('should have the correct values on the first index', function*() {
+        it('should have the correct values on the first index', function* () {
           const el = yield getAmpSlideScroll(true, 3);
           expect(getPrevTitle(el)).to.equal(
             'Previous item in carousel (3 of 3)'
@@ -1441,7 +1466,7 @@ describes.realWin(
           expect(getNextTitle(el)).to.equal('Next item in carousel (2 of 3)');
         });
 
-        it('should have the correct values on the last index', function*() {
+        it('should have the correct values on the last index', function* () {
           const el = yield getAmpSlideScroll(true, 3);
           el.implementation_.showSlide_(2);
           expect(getPrevTitle(el)).to.equal(
@@ -1450,6 +1475,63 @@ describes.realWin(
           expect(getNextTitle(el)).to.equal('Next item in carousel (1 of 3)');
         });
       });
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-carousel',
+        {
+          'type': 'slides',
+          'width': '400',
+          'height': '300',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      action.execute(
+        element,
+        'goToSlide',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'goToSlide',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+
+      const userErrorStub = env.sandbox.stub(user(), 'error');
+      action.execute(
+        element,
+        'toggleAutoplay',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.match(
+        /"AMP-CAROUSEL.toggleAutoplay" is not whitelisted/
+      );
     });
   }
 );

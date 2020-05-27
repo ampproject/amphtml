@@ -5,7 +5,7 @@ formats:
   - stories
   - ads
 teaser:
-  text: Replaces the HTML5 `audio` tag.
+  text: Replaces the HTML5 audio tag.
 ---
 
 <!---

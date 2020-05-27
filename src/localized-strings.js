@@ -24,7 +24,7 @@ import {parseJson} from './json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 81
+ * Next ID: 82
  *
  * @const @enum {string}
  */
@@ -47,6 +47,7 @@ export const LocalizedStringId = {
   AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS: '79',
   AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS: '80',
   AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS: '75',
+  AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE: '81',
   AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS: '76',
   AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS: '77',
   AMP_STORY_HAS_NEW_PAGE_TEXT: '64',
@@ -157,7 +158,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     localizedStringBundle
   );
 
-  Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
+  Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
     const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
       localizedStringBundle[localizedStringId].string

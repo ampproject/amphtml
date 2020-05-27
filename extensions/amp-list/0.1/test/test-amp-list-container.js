@@ -31,12 +31,13 @@ describes.realWin(
       extensions: ['amp-list'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;
     let element, list;
     let templates;
+    let lockHeightSpy, unlockHeightSpy;
 
     beforeEach(() => {
       win = env.win;
@@ -70,8 +71,16 @@ describes.realWin(
 
       env.sandbox.stub(list, 'getOverflowElement').returns(null);
       env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-      list.element.changeSize = () => {};
+      list.element.applySize = () => {};
       list.buildCallback();
+
+      lockHeightSpy = env.sandbox.spy(list, 'lockHeightAndMutate_');
+      unlockHeightSpy = env.sandbox.spy(list, 'unlockHeightInsideMutate_');
+    });
+
+    afterEach(() => {
+      expect(lockHeightSpy).not.called;
+      expect(unlockHeightSpy).not.called;
     });
 
     it('should change to layout container', async () => {

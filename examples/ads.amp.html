@@ -114,6 +114,7 @@
         <option>aja</option>
         <option>amoad</option>
         <option>aniview</option>
+        <option>anyclip</option>
         <option>appnexus</option>
         <option>appvador</option>
         <option>atomx</option>
@@ -184,6 +185,7 @@
         <option>loka</option>
         <option>mads</option>
         <option>mantis-display</option>
+        <option>marfeel</option>
         <option>medianet</option>
         <option>mediavine</option>
         <option>meg</option>
@@ -193,6 +195,7 @@
         <option>mixpo</option>
         <option>monetizer101</option>
         <option>mox</option>
+        <option>my6sense</option>
         <option>mytarget</option>
         <option>mywidget</option>
         <option>nativeroll</option>
@@ -221,6 +224,7 @@
         <option>pulsepoint</option>
         <option>puffnetwork</option>
         <option>purch</option>
+        <option>rakutenunifiedads</option>
         <option>rbinfox</option>
         <option>readmo</option>
         <option>realclick</option>
@@ -281,6 +285,7 @@
         <option>wpmedia</option>
         <option>xlift</option>
         <option>yahoo</option>
+        <option>yahoofedads</option>
         <option>yahoojp</option>
         <option>yahoonativeads</option>
         <option>yandex</option>
@@ -798,6 +803,19 @@
           type="aniview"
           data-publisherId="55b88d4a181f465b3e8b4567"
           data-channelId="5a5f17a728a06102d14c2718">
+  </amp-ad>
+
+  <h2>AnyClip</h2>
+  <amp-ad
+    width="480"
+    height="300"
+    layout="responsive"
+    type="anyclip"
+    data-pubname="lre_qa_temp"
+    data-widgetname="amp_test_autoplay"
+    data-ac-embed-mode="plain"
+    data-ourl="https://anyclip.com/"
+  >
   </amp-ad>
 
   <h2>AppNexus with JSON based configuration multi ad</h2>
@@ -1355,7 +1373,8 @@
   <amp-ad width="300" height="250"
       type="invibes"
       data-pid="1234"
-      data-ad-categ="infeed">
+      data-ad-categ="infeed"
+      data-custom-endpoint="https://k.r66net.com/GetAmpLink">
   </amp-ad>
 
   <h2>Jubna widget</h2>
@@ -1450,6 +1469,12 @@
       data-property="demo">
   </amp-embed>
 
+  <h2>Marfeel</h2>
+  <amp-ad width="300" height="250"
+    type="marfeel"
+    data-tenant="demo.marfeel.com">
+  </amp-ad>
+
   <h2>Media.Net Header Bidder Tag</h2>
   <amp-ad width="300" height="250"
       type="medianet"
@@ -1534,6 +1559,16 @@
       data-z="1183"
       data-w="720"
       data-h="405">
+  </amp-ad>
+
+  <h2>My6sense</h2>
+  <amp-ad width="300" height="250"
+          type="my6sense"
+          data-widget-key="cAcl2Tvn4dH2pPBx52Q7SR"
+          data-zone="[ZONE]"
+          data-url="[PAGE_URL]"
+          data-organic-clicks="[ORGANIC_TRACKING_PIXEL]"
+          data-paid-clicks="[PAID_TRACKING_PIXEL]">
   </amp-ad>
 
   <h2>myTarget</h2>
@@ -1799,6 +1834,13 @@
       data-adid="fake">
   </amp-ad>
 
+  <h2>Rakuten Unified Ads</h2>
+  <amp-ad width="300" height="250"
+      type="rakutenunifiedads"
+      data-env="dev"
+      data-id="63">
+  </amp-ad>
+
   <h2>Rambler&Co</h2>
   <amp-ad width="500" height="250"
       type="capirs"
@@ -1855,6 +1897,12 @@
       data-token="D3UMgQWBqleq1tPW"
       data-url="http://bigpicture.ru"
       data-anchorid="i0xMMY1MoliiZWVl">
+  </amp-ad>
+
+  <h2>RelapPro</h2>
+  <amp-ad width="300" height="250"
+    type="relappro"
+    data-slot-id="b1928542-4217-486f-b42c-79f0f3290b39">
   </amp-ad>
 
   <h2>Revcontent Responsive Tag</h2>
@@ -2082,12 +2130,13 @@
   </amp-ad>
 
   <h2>SSP</h2>
-  <amp-ad width="300" height="600"
+  <amp-ad width="480" height="300"
           type="ssp"
-          data-width="480"
-          data-height="300"
-          data-id="cnt-166991"
-          data-zoneid="166991">
+          data-position='{ "id": "cnt-1", "width": "480", "height": "300", "zoneId": "1234" }'>
+  </amp-ad>
+  <amp-ad width="480" height="300"
+          type="ssp"
+          data-position='{ "id": "cnt-2", "width": "480", "height": "300", "zoneId": "1234" }'>
   </amp-ad>
 
   <h2>Strossle</h2>
@@ -2159,14 +2208,7 @@
   <amp-embed width="320" height="320"
     type="temedya"
     layout="responsive"
-    data-title="widget-title"
-    data-siteId="site-id"
-    data-keyId="key-id"
-    data-siteUrl="site-url"
-    data-typeId="ad-type"
-    data-paidItem="paid-item-count"
-    data-organicItem="organic-item-count"
-    data-theme="theme-style"
+    data-widgetId="vidyome"
   >
   </amp-embed>
 
@@ -2276,6 +2318,18 @@
       data-site="news"
       data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
   </amp-ad>
+
+  <h2>Yahoo Native-Display Ads Federation</h2>
+  <amp-embed width="320" height="320"
+    type="yahoofedads"
+    layout="responsive"
+    data-site="finance"
+    data-region="US"
+    data-lang="en-US"
+    data-ad-unit="pencil"
+    data-sa="{&quot;LREC&quot;:&quot;300x250&quot;,&quot;secure&quot;:&quot;true&quot;,&quot;content&quot;:&quot;no_expandable;&quot;,&quot;isSupplySegment&quot;:&quot;false&quot;,&quot;lang&quot;:&quot;en-US&quot;,&quot;region&quot;:&quot;US&quot;,&quot;site_attribute&quot;:&quot;wiki_topics=\&quot;Anthony_Joshua;Tyson_Fury;Eddie_Hearn;Deontay_Wilder;Kubrat_Pulev;Tottenham_Hotspur_Stadium;Dillian_Whyte\&quot; ctopid=\&quot;2074500;2078500;2083000;2212000;13311000\&quot; hashtag=\&quot;2074500;2078500;2083000;2212000;13311000\&quot; rs=\&quot;lmsid:a0ad000000AxDnbAAF;revsp:omnisport.uk;lpstaid:71ee6f14-9c73-3688-b4a9-32e6578057d0;pct:story\&quot;&quot;}"
+    data-url="https://finance.yahoo.com">
+  </amp-embed>
 
   <h2>Yahoo Native Ads</h2>
   <amp-embed width="320" height="320"
