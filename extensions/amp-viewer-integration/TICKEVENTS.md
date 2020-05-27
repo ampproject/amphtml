@@ -55,4 +55,3 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Response Start                           | `responseStart`              | Time immediately after the user agent's HTTP parser receives the first byte of the response from the server                                                                                        |
 
 | Slow element ratio | `ser` | Percentage of elements laid out after entering viewport |
-| Eager element ratio | `eer` | Percentage of elements laid out that never entered viewport |
