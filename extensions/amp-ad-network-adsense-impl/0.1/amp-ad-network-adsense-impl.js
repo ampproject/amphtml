@@ -195,7 +195,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       }
       if (
         this.responsiveState_ != null &&
-        !this.responsiveState_.isFallBackState()
+        !this.responsiveState_.isContainerWidthState()
       ) {
         return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
@@ -204,7 +204,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.divertExperiments();
       this.maybeAddSinglePassExperiment();
     });
-    // }
   }
 
   /** @override */
@@ -294,7 +293,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     if (
       this.responsiveState_ != null &&
-      this.responsiveState_.isFallBackState()
+      this.responsiveState_.isContainerWidthState()
     ) {
       this.size_ = {width, height};
     } else {

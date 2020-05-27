@@ -116,9 +116,9 @@ describes.realWin(
       return ResponsiveState.createIfResponsive(element);
     }
 
-    function createFallBackState(attributes) {
+    function createContainerWidthState(attributes) {
       createElement(attributes);
-      return ResponsiveState.createFallBackState(element);
+      return ResponsiveState.createContainerWidthState(element);
     }
 
     describe('createIfResponsive', () => {
@@ -133,8 +133,8 @@ describes.realWin(
     });
 
     describe('isValidElement', () => {
-      it('should return truee if it is a fall back state', () => {
-        const state = createFallBackState({
+      it('should return true if it is a container width state', () => {
+        const state = createContainerWidthState({
           'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
           'width': '960',
         });

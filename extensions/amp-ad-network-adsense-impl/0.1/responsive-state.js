@@ -64,9 +64,9 @@ export const MAX_HEIGHT_EXP = {
 export class ResponsiveState {
   /**
    * @param {!Element} element
-   * @param {boolean} isFallBackState
+   * @param {boolean} isContainerWidth
    */
-  constructor(element, isFallBackState) {
+  constructor(element, isContainerWidth) {
     /**  @private {!Element}*/
     this.element_ = element;
 
@@ -74,7 +74,7 @@ export class ResponsiveState {
     this.isAlignedToViewport_ = false;
 
     /** @private {boolean} */
-    this.isFallBackState_ = !!isFallBackState;
+    this.isContainerWidth_ = !!isContainerWidth;
 
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
@@ -87,7 +87,7 @@ export class ResponsiveState {
    */
   static createIfResponsive(element) {
     if (
-      !this.isFallBackState_ &&
+      !this.isContainerWidth_ &&
       !hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))
     ) {
       return null;
@@ -99,7 +99,7 @@ export class ResponsiveState {
    * @param {!Element} element to potentially create state for.
    * @return {?ResponsiveState} fall back state.
    */
-  static createFallBackState(element) {
+  static createContainerWidthState(element) {
     return new ResponsiveState(element, true);
   }
 
@@ -115,9 +115,7 @@ export class ResponsiveState {
       element.hasAttribute('data-auto-format') &&
       !ResponsiveState.isLayoutViewportNarrow_(element)
     ) {
-      return Promise.resolve(
-        ResponsiveState.fallBackToContainerWidth_(element)
-      );
+      return ResponsiveState.convertToContainerWidth_(element);
     }
 
     return ResponsiveState.maybeUpgradeToFullWidthResponsive(
@@ -190,21 +188,25 @@ export class ResponsiveState {
    * Convert the element to container width responsive.
    *
    * @param {!Element} element
-   * @return {!ResponsiveState} responsive state
+   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
    * @private
    */
-  static fallBackToContainerWidth_(element) {
-    const width = String(element.parentElement.clientWidth);
+  static convertToContainerWidth_(element) {
+    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
 
-    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-    element.setAttribute('width', width);
-    element.removeAttribute('data-full-width');
-    element.removeAttribute('data-auto-format');
+    return vsync.measurePromise(() => {
+      const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
 
-    const state = ResponsiveState.createFallBackState(element);
-    devAssert(state != null, 'Fall back failed');
-    this.isFallBackState_ = true;
-    return /** @type {!ResponsiveState} */ (state);
+      element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+      element.setAttribute('width', width);
+      element.removeAttribute('data-full-width');
+      element.removeAttribute('data-auto-format');
+
+      const state = ResponsiveState.createContainerWidthState(element);
+      devAssert(state != null, 'Convert to container width state failed');
+      this.isContainerWidth_ = true;
+      return /** @type {!ResponsiveState} */ (state);
+    });
   }
 
   /**
@@ -294,7 +296,8 @@ export class ResponsiveState {
 
   /** @return {boolean} */
   isValidElement() {
-    if (this.isFallBackState_) {
+    // Fall back state
+    if (this.isContainerWidth_) {
       return true;
     }
 
@@ -351,8 +354,8 @@ export class ResponsiveState {
         },
         mutate: (state) => {
           // If it's fall back state, align with the container width. Otherwise,
-          // adjust the mergin for full-width expansion.
-          if (this.isFallBackState_) {
+          // adjust the margin for full-width expansion.
+          if (this.isContainerWidth_) {
             setStyle(this.element_, 'width', '100%');
           } else {
             if (state.direction == 'rtl') {
@@ -368,8 +371,8 @@ export class ResponsiveState {
   }
 
   /** @return {boolean} */
-  isFallBackState() {
-    return this.isFallBackState_;
+  isContainerWidthState() {
+    return this.isContainerWidth_;
   }
 
   /**
