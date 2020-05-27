@@ -74,10 +74,16 @@ const hostname = argv.hostname || 'cdn.ampproject.org';
 
 /**
  * Prints a useful help message prior to the gulp dist task
+ *
+ * @param {!Object} options
  */
-function printDistHelp() {
+function printDistHelp(options) {
+  if (argv.sanitize_vars_for_diff && !argv.pseudo_names) {
+    throw new Error('--sanitize_vars_for_diff requires --pseudo_names');
+  }
+
   let cmd = 'gulp dist';
-  if (argv.fortesting) {
+  if (options.fortesting) {
     cmd = cmd + ' --fortesting';
   }
   if (argv.single_pass) {
@@ -99,42 +105,54 @@ function printDistHelp() {
  * Perform the prerequisite steps before starting the minified build.
  * Used by `gulp` and `gulp dist`.
  *
- * @param {boolean} watch
+ * @param {!Object} options
  */
-async function runPreDistSteps(watch) {
+async function runPreDistSteps(options) {
   cleanupBuildDir();
   await prebuild();
-  await compileCss(watch);
+  await compileCss(options);
   await compileJison();
   await copyCss();
   await copyParsers();
-  await bootstrapThirdPartyFrames(watch, /* minify */ true);
+  await bootstrapThirdPartyFrames(options);
   await startNailgunServer(distNailgunPort, /* detached */ false);
   displayLifecycleDebugging();
 }
 
 /**
- * Dist Build
- * @return {!Promise}
+ * Minified build. Entry point for `gulp dist`.
  */
 async function dist() {
+  await doDist();
+}
+
+/**
+ * Performs a minified build with the given extra args.
+ *
+ * @param {Object=} extraArgs
+ */
+async function doDist(extraArgs = {}) {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
+  const options = {
+    fortesting: extraArgs.fortesting || argv.fortesting,
+    minify: true,
+    watch: argv.watch,
+  };
   printNobuildHelp();
-  printDistHelp();
-
-  await runPreDistSteps(argv.watch);
+  printDistHelp(options);
+  await runPreDistSteps(options);
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
-    await compileCoreRuntime(argv.watch, /* minify */ true);
+    await compileCoreRuntime(options);
   } else {
     await buildExperiments();
     await buildLoginDone('0.1');
     await buildWebPushPublisherFiles();
-    await compileAllJs(/* minify */ true);
-    await buildExtensions({minify: true, watch: argv.watch});
+    await compileAllJs(options);
+    await buildExtensions(options);
   }
   if (!argv.watch) {
     await stopNailgunServer(distNailgunPort);
@@ -431,6 +449,7 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
+  doDist,
   runPreDistSteps,
 };
 
@@ -468,4 +487,6 @@ dist.flags = {
   debug: '  Outputs the file contents during compilation lifecycles',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
+  sanitize_vars_for_diff:
+    '  Sanitize the output to diff build results. Requires --pseudo_names',
 };

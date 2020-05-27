@@ -118,6 +118,11 @@ describes.realWin(
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
         .stub(viewer, 'hasCapability')
@@ -137,11 +142,6 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
-
       AmpStory.isBrowserSupported = () => true;
     });
 
@@ -152,7 +152,6 @@ describes.realWin(
     it('should build with the expected number of pages', async () => {
       const pagesCount = 2;
       await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-
       await story.layoutCallback();
       expect(story.getPageCount()).to.equal(pagesCount);
     });
@@ -1055,6 +1054,26 @@ describes.realWin(
           expect(coverMuteStub).to.have.been.calledOnce;
           expect(firstPageUnmuteStub).to.have.been.calledOnce;
         });
+      });
+
+      it('should remove the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        expect(story.element.hasAttribute('muted')).to.be.true;
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+        expect(story.element.hasAttribute('muted')).to.be.false;
+      });
+
+      it('should add the muted attribute on unmuted state change', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+
+        story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+        expect(story.element.hasAttribute('muted')).to.be.true;
       });
 
       describe('#getMaxMediaElementCounts', () => {

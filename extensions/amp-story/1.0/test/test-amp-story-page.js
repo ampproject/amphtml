@@ -20,6 +20,7 @@ import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
+import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
@@ -48,14 +49,14 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
       }),
     };
 
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     registerServiceBuilder(win, 'performance', function () {
@@ -268,6 +269,21 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
 
     const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
+  it('should preload the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
+    await page.layoutCallback();
+
+    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
   });
 
   it('should wait for media layoutCallback to register it', async () => {

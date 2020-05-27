@@ -57,9 +57,9 @@ describes.sandboxed('CSS parse', {}, () => {
         `<${pseudoArray(n.args_, n.dimensions_)}>`
       );
     }
-    if (n instanceof ast.CssDimSizeNode) {
+    if (n instanceof ast.CssRectNode) {
       return (
-        `DIM<${n.dim_}` +
+        `RECT<${n.field_}` +
         `, ${n.selector_ ? '"' + n.selector_ + '"' : null}` +
         `, ${n.selectionMethod_}>`
       );
@@ -301,24 +301,37 @@ describes.sandboxed('CSS parse', {}, () => {
     ).to.equal('CON<A B>');
   });
 
-  it('should parse a dimension function', () => {
+  it('should parse a rect function', () => {
     // Current.
-    expect(parsePseudo('width()')).to.equal('DIM<w, null, null>');
-    expect(parsePseudo('height()')).to.equal('DIM<h, null, null>');
+    expect(parsePseudo('width()')).to.equal('RECT<w, null, null>');
+    expect(parsePseudo('height()')).to.equal('RECT<h, null, null>');
+    expect(parsePseudo('x()')).to.equal('RECT<x, null, null>');
+    expect(parsePseudo('y()')).to.equal('RECT<y, null, null>');
 
     // Query.
-    expect(parsePseudo('width(".sel")')).to.equal('DIM<w, ".sel", null>');
+    expect(parsePseudo('width(".sel")')).to.equal('RECT<w, ".sel", null>');
     expect(parsePseudo('WIDTH(".sel > div")')).to.equal(
-      'DIM<w, ".sel > div", null>'
+      'RECT<w, ".sel > div", null>'
     );
-    expect(parsePseudo('height(".sel")')).to.equal('DIM<h, ".sel", null>');
+    expect(parsePseudo('height(".sel")')).to.equal('RECT<h, ".sel", null>');
+    expect(parsePseudo('x(".sel")')).to.equal('RECT<x, ".sel", null>');
+    expect(parsePseudo('x(".sel > div")')).to.equal(
+      'RECT<x, ".sel > div", null>'
+    );
+    expect(parsePseudo('y(".sel")')).to.equal('RECT<y, ".sel", null>');
 
     // Closest.
     expect(parsePseudo('width(closest(".sel"))')).to.equal(
-      'DIM<w, ".sel", closest>'
+      'RECT<w, ".sel", closest>'
     );
     expect(parsePseudo('height(closest(".sel"))')).to.equal(
-      'DIM<h, ".sel", closest>'
+      'RECT<h, ".sel", closest>'
+    );
+    expect(parsePseudo('x(closest(".sel"))')).to.equal(
+      'RECT<x, ".sel", closest>'
+    );
+    expect(parsePseudo('y(closest(".sel"))')).to.equal(
+      'RECT<y, ".sel", closest>'
     );
   });
 

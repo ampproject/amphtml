@@ -114,10 +114,12 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
@@ -624,6 +626,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
   'startupChunk\\(': {
@@ -1080,7 +1083,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/0.2/timeago.js',
+      'extensions/amp-timeago/1.0/timeago.js',
     ],
   },
   '\\.expandStringSync\\(': {
