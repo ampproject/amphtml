@@ -192,21 +192,16 @@ export class ResponsiveState {
    * @private
    */
   static convertToContainerWidth_(element) {
-    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+    const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
 
-    return vsync.measurePromise(() => {
-      const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
-
-      element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-      element.setAttribute('width', width);
-      element.removeAttribute('data-full-width');
-      element.removeAttribute('data-auto-format');
-
-      const state = ResponsiveState.createContainerWidthState(element);
-      devAssert(state != null, 'Convert to container width state failed');
-      this.isContainerWidth_ = true;
-      return /** @type {!ResponsiveState} */ (state);
-    });
+    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+    element.setAttribute('width', width);
+    element.removeAttribute('data-full-width');
+    element.removeAttribute('data-auto-format');
+    const state = ResponsiveState.createContainerWidthState(element);
+    devAssert(state != null, 'Convert to container width state failed');
+    this.isContainerWidth_ = true;
+    return /** @type {!ResponsiveState} */ Promise.resolve(state);
   }
 
   /**
