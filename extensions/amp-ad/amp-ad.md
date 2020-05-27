@@ -319,6 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [InMobi](../../ads/inmobi.md)
 - [Innity](../../ads/innity.md)
 - [Invibes](../../ads/invibes.md)
+- [Iprom](../../ads/iprom.md)
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
