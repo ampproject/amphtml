@@ -25,6 +25,9 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
+  checkRenovateConfig,
+} = require('./build-system/tasks/check-renovate-config');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -140,6 +143,7 @@ createTask('caches-json', cachesJson);
 createTask('check-exact-versions', checkExactVersions);
 createTask('check-links', checkLinks);
 createTask('check-owners', checkOwners);
+createTask('check-renovate-config', checkRenovateConfig);
 createTask('check-sourcemaps', checkSourcemaps);
 createTask('check-types', checkTypes);
 createTask('clean', clean);
