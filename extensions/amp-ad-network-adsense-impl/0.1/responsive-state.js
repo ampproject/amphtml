@@ -115,7 +115,7 @@ export class ResponsiveState {
       element.hasAttribute('data-auto-format') &&
       !ResponsiveState.isLayoutViewportNarrow_(element)
     ) {
-      return ResponsiveState.convertToContainerWidth_(element);
+      return Promise.resolve(ResponsiveState.convertToContainerWidth_(element));
     }
 
     return ResponsiveState.maybeUpgradeToFullWidthResponsive(
@@ -188,7 +188,7 @@ export class ResponsiveState {
    * Convert the element to container width responsive.
    *
    * @param {!Element} element
-   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
+   * @return {!ResponsiveState} container width responsive state.
    * @private
    */
   static convertToContainerWidth_(element) {
@@ -201,7 +201,7 @@ export class ResponsiveState {
     const state = ResponsiveState.createContainerWidthState(element);
     devAssert(state != null, 'Convert to container width state failed');
     this.isContainerWidth_ = true;
-    return /** @type {!ResponsiveState} */ Promise.resolve(state);
+    return state;
   }
 
   /**
