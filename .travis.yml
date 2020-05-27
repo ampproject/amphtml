@@ -9,6 +9,9 @@ notifications:
     on_success: change
     on_failure: change
 before_install:
+  # Install the latest version of Yarn (Xenial's built-in version v1.15.2 is outdated)
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
@@ -28,8 +31,6 @@ branches:
     - /^amp-release-.*$/
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
       - expect-dev
@@ -90,6 +91,10 @@ jobs:
       name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
+    - stage: test
+      name: 'Dist Tests'
+      script:
+        - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
       name: 'Remote (Sauce Labs) Tests'
       script:
