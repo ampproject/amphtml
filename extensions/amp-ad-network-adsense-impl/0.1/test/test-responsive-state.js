@@ -47,6 +47,7 @@ describes.realWin(
     let element;
     let storageContent;
     let fakeIframe;
+    let vsyncApi;
 
     beforeEach(async () => {
       win = env.win;
@@ -76,6 +77,13 @@ describes.realWin(
         nodeType: 1,
         style: {},
       };
+
+      vsyncApi = {
+        mutatePromise: () => {},
+      };
+      env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
+        callback();
+      });
     });
 
     function createElement(attributes) {

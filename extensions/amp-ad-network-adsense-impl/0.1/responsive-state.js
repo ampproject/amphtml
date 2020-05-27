@@ -115,7 +115,7 @@ export class ResponsiveState {
       element.hasAttribute('data-auto-format') &&
       !ResponsiveState.isLayoutViewportNarrow_(element)
     ) {
-      return Promise.resolve(ResponsiveState.convertToContainerWidth_(element));
+      return ResponsiveState.convertToContainerWidth_(element);
     }
 
     return ResponsiveState.maybeUpgradeToFullWidthResponsive(
@@ -188,20 +188,26 @@ export class ResponsiveState {
    * Convert the element to container width responsive.
    *
    * @param {!Element} element
-   * @return {!ResponsiveState} container width responsive state.
+   * @return {!Promise<?ResponsiveState>} a promise that return container width responsive state.
    * @private
    */
   static convertToContainerWidth_(element) {
-    const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
+    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
 
-    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-    element.setAttribute('width', width);
-    element.removeAttribute('data-full-width');
-    element.removeAttribute('data-auto-format');
-    const state = ResponsiveState.createContainerWidthState(element);
-    devAssert(state != null, 'Convert to container width state failed');
-    this.isContainerWidth_ = true;
-    return state;
+    return vsync
+      .mutatePromise(() => {
+        const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
+        element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+        element.setAttribute('width', width);
+        element.removeAttribute('data-full-width');
+        element.removeAttribute('data-auto-format');
+      })
+      .then(() => {
+        const state = ResponsiveState.createContainerWidthState(element);
+        devAssert(state != null, 'Convert to container width state failed');
+        this.isContainerWidth_ = true;
+        return /** @type {!ResponsiveState} */ (state);
+      });
   }
 
   /**
