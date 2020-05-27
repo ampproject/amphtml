@@ -21,7 +21,7 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {RefreshIntersectionObserverWrapper} from '../refresh-intersection-observer-wrapper';
+import {RefreshIntersectionObserverPolyfillWrapper} from '../refresh-intersection-observer-polyfill-wrapper';
 import {Services} from '../../../../src/services';
 
 describe('refresh', () => {
@@ -188,7 +188,7 @@ describe('refresh', () => {
     });
   });
 
-  describe('RefreshIntersectionObserverWrapper', () => {
+  describe('RefreshIntersectionObserverPolyfillWrapper', () => {
     let callback;
     let callbackPromise;
     let getRect;
@@ -234,7 +234,7 @@ describe('refresh', () => {
         resolver = resolve;
       });
       callback = (entries) => resolver(entries);
-      observerWrapper = new RefreshIntersectionObserverWrapper(
+      observerWrapper = new RefreshIntersectionObserverPolyfillWrapper(
         callback,
         mockA4a,
         {threshold: 0.5}

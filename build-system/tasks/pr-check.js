@@ -92,6 +92,7 @@ async function prCheck(cb) {
   if (buildTargets.has('RUNTIME')) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
+    runCheck('gulp check-sourcemaps');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
@@ -113,6 +114,11 @@ async function prCheck(cb) {
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
     runCheck('gulp validator');
   }
+
+  // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
+  // if (buildTargets.has('VALIDATOR_JAVA')) {
+  //   runCheck('gulp validator-java');
+  // }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');

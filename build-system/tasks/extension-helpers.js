@@ -15,6 +15,7 @@
  */
 
 const colors = require('ansi-colors');
+const debounce = require('debounce');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
@@ -24,7 +25,7 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {endBuildStep} = require('./helpers');
+const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
@@ -380,7 +381,7 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  watch(path + '/**/*', function () {
+  const watchFunc = function () {
     const bundleComplete = buildExtension(
       name,
       version,
@@ -391,7 +392,8 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
     }
-  });
+  };
+  watch(path + '/**/*', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**

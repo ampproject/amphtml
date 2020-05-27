@@ -36,10 +36,10 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
 
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
@@ -216,7 +216,22 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       expect(sendStub).to.not.have.been.called;
     });
 
-    it('should send canShowScreens for navigation on build', async () => {
+    it('should send canShowScreens ont for navigation on build', async () => {
+      const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // Microtask tick.
+
+      expect(sendStub).to.have.been.calledOnceWith('canShowScreens', {
+        screens: [{screen: 'ont'}],
+      });
+    });
+
+    it('should send canShowScreens ontas for navigation on build', async () => {
+      hasSwipeCap = true;
       const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
       env.sandbox
         .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')

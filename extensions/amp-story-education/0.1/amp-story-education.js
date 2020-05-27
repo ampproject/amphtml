@@ -26,6 +26,7 @@ import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -55,7 +56,8 @@ const buildNavigationEl = (element) => {
 
 /** @enum {string} */
 const Screen = {
-  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas',
+  ONBOARDING_NAVIGATION_TAP: 'ont', // Sent on page load if no "swipe" capability.
+  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas', // Sent on page load if "swipe" capability.
 };
 
 /** @enum */
@@ -73,8 +75,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
     /** @private {!Element} */
     this.containerEl_ = this.win.document.createElement('div');
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win);
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;
@@ -93,7 +95,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.localizationService_ = getLocalizationService(this.element);
     this.containerEl_.classList.add('i-amphtml-story-education');
+    toggle(this.element, false);
     toggle(this.containerEl_, false);
     this.startListening_();
     // Extra host to reset inherited styles and further enforce shadow DOM style
@@ -106,10 +110,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
     const isMobileUI =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
     if (this.viewer_.isEmbedded() && isMobileUI) {
-      this.maybeShowScreen_(
-        Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
-        State.NAVIGATION_TAP
-      );
+      const screen = this.viewer_.hasCapability('swipe')
+        ? Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE
+        : Screen.ONBOARDING_NAVIGATION_TAP;
+      this.maybeShowScreen_(screen, State.NAVIGATION_TAP);
     }
   }
 
@@ -197,6 +201,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
+          toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
             Action.TOGGLE_PAUSED,
@@ -269,6 +274,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
+      toggle(this.element, true);
       toggle(this.containerEl_, true);
       this.containerEl_.appendChild(template);
     });

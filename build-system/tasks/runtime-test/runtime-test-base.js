@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../test-configs/config');
@@ -30,6 +29,7 @@ const {
   runTestInSauceLabs,
 } = require('./helpers');
 const {app} = require('../../server/test-server');
+const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
@@ -129,20 +129,20 @@ function getFiles(testType) {
     case 'unit':
       files = testConfig.commonUnitTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       if (argv.saucelabs) {
         return files.concat(testConfig.unitTestOnSaucePaths);
       }
       if (argv.local_changes) {
-        return files.concat(unitTestsToRun(testConfig.unitTestPaths));
+        return files.concat(unitTestsToRun());
       }
       return files.concat(testConfig.unitTestPaths);
 
     case 'integration':
       files = testConfig.commonIntegrationTestPaths;
       if (argv.files) {
-        return files.concat(argv.files);
+        return files.concat(getFilesFromArgv());
       }
       return files.concat(testConfig.integrationTestPaths);
 
@@ -195,13 +195,6 @@ class RuntimeTestConfig {
           cyan('browserify') + green('...')
         );
       });
-      bundle.on('transform', function (tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function () {
-            process.stdout.write('.');
-          });
-        }
-      });
     };
 
     // c.client is available in test browser via window.parent.karma.config
@@ -224,26 +217,6 @@ class RuntimeTestConfig {
           : ['html', 'text', 'text-summary'],
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
-
-      const instanbulPlugin = [
-        'istanbul',
-        {
-          exclude: [
-            'ads/**/*.js',
-            'build-system/**/*.js',
-            'extensions/**/test/**/*.js',
-            'third_party/**/*.js',
-            'test/**/*.js',
-            'testing/**/*.js',
-          ],
-        },
-      ];
-      // don't overwrite existing plugins
-      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
-
-      this.browserify.transform = [
-        ['babelify', {...this.babelifyConfig, plugins}],
-      ];
     }
   }
 }
@@ -283,7 +256,7 @@ class RuntimeTestRunner {
   }
 
   async teardown() {
-    stopServer();
+    await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
     if (this.exitCode != 0) {

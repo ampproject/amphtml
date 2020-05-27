@@ -19,7 +19,6 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -57,11 +56,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
         vsyncTaskSpec.measure(vsyncState);
         vsyncTaskSpec.mutate(vsyncState);
       },
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', function () {
-      return localizationService;
     });
 
     parentEl = win.document.createElement('div');

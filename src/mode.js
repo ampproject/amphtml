@@ -71,10 +71,9 @@ function getMode_(win) {
   const IS_DEV = true;
   const IS_MINIFIED = false;
 
-  const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests =
-    !!AMP_CONFIG.test || (IS_DEV && !!(win.__AMP_TEST || win.__karma__));
-  const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
+    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+  const isLocalDev = IS_DEV && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.

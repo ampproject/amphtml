@@ -29,6 +29,7 @@ import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -103,6 +104,12 @@ export class ResponsiveState {
     if (element.hasAttribute('data-auto-format')) {
       return Promise.resolve(null);
     }
+
+    // If the user already has a wide viewport layout, we don't upgrade to responsive.
+    if (!ResponsiveState.isLayoutViewportNarrow_(element)) {
+      return Promise.resolve(null);
+    }
+
     return (
       Services.storageForDoc(element)
         .then((storage) =>
@@ -160,9 +167,6 @@ export class ResponsiveState {
    * @return {?Promise} a promise that resolves when ad size settings are updated, or null if no listener was attached.
    */
   static maybeAttachSettingsListener(element, iframe, adClientId) {
-    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
-      return null;
-    }
     let promiseResolver;
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
@@ -170,24 +174,31 @@ export class ResponsiveState {
     const win = toWin(element.ownerDocument.defaultView);
 
     const listener = (event) => {
-      if (event['source'] != iframe.contentWindow) {
+      const data = getData(event);
+      let dataList = null;
+      if (typeof data == 'string') {
+        dataList = tryParseJson(data);
+      } else if (typeof data == 'object') {
+        dataList = data;
+      }
+      if (dataList == null) {
         return;
       }
-      const data = getData(event);
-      // data will look like this:
+
+      // dataList will look like this:
       // {
       //   'googMsgType': 'adsense-settings',
       //   'adClient': 'ca-pub-123',
       //   'enableAutoAdSize': '1'
       // }
-      if (!!data && data['googMsgType'] != 'adsense-settings') {
+      if (!!dataList && dataList['googMsgType'] != 'adsense-settings') {
         return;
       }
-      if (data['adClient'] != adClientId) {
+      if (dataList['adClient'] != adClientId) {
         return;
       }
 
-      const autoAdSizeStatus = data['enableAutoAdSize'] == '1';
+      const autoAdSizeStatus = dataList['enableAutoAdSize'] == '1';
       win.removeEventListener('message', listener);
 
       Services.storageForDoc(element)
@@ -403,5 +414,17 @@ export class ResponsiveState {
       default:
         return 0;
     }
+  }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  static isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    return viewportSize.width < 488;
   }
 }

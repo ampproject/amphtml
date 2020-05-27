@@ -17,6 +17,7 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
@@ -37,6 +38,7 @@ import {
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/utils/array';
+import {parseQueryString} from '../../../../src/url.js';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
@@ -589,7 +591,7 @@ describes.repeated(
             );
           });
           form.setAttribute('action-xhr', 'https://example.com');
-          expect(() => new AmpForm(form)).to.not.throw;
+          expect(() => new AmpForm(form)).to.not.throw();
           document.body.removeChild(form);
         });
 
@@ -1271,6 +1273,87 @@ describes.repeated(
           });
         });
 
+        it('should call fetch with a url encoded string when enctype is "application/x-www-form-urlencoded"', () => {
+          const form = getForm();
+          form.setAttribute('enctype', 'application/x-www-form-urlencoded');
+          return getAmpForm(form).then((ampForm) => {
+            env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: ampForm.form_,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+            expect(event.preventDefault).to.be.calledOnce;
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
+              expect(ampForm.xhr_.fetch).to.be.calledOnce;
+              expect(ampForm.xhr_.fetch).to.be.calledWith(
+                'https://example.com'
+              );
+
+              const xhrCall = ampForm.xhr_.fetch.getCall(0);
+              const config = xhrCall.args[1];
+              expect(config.body).to.be.a('string');
+              expect(config.headers['Content-Type']).to.equal(
+                'application/x-www-form-urlencoded'
+              );
+
+              const entriesInForm = fromIterator(
+                createFormDataWrapper(env.win, getForm()).entries()
+              );
+              expect(
+                Object.entries(parseQueryString(config.body))
+              ).to.have.deep.members(entriesInForm);
+              expect(config.method).to.equal('POST');
+
+              return submitEventPromise;
+            });
+          });
+        });
+
+        it('should call fetch with FormDataWrapper with any other enctype value', () => {
+          const form = getForm();
+          form.setAttribute('enctype', 'anything');
+          return getAmpForm(form).then((ampForm) => {
+            env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: ampForm.form_,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+            expect(event.preventDefault).to.be.calledOnce;
+
+            return whenCalled(ampForm.xhr_.fetch).then(() => {
+              expect(ampForm.xhr_.fetch).to.be.calledOnce;
+              expect(ampForm.xhr_.fetch).to.be.calledWith(
+                'https://example.com'
+              );
+
+              const xhrCall = ampForm.xhr_.fetch.getCall(0);
+              const config = xhrCall.args[1];
+              expect(isFormDataWrapper(config.body)).to.be.true;
+
+              const entriesInForm = fromIterator(
+                createFormDataWrapper(env.win, getForm()).entries()
+              );
+              expect(fromIterator(config.body.entries())).to.have.deep.members(
+                entriesInForm
+              );
+              expect(config.method).to.equal('POST');
+
+              return submitEventPromise;
+            });
+          });
+        });
+
         it('should respect the xssi-prefix option when parsing json', async () => {
           const form = createElement('form');
           form.setAttribute('method', 'GET');
@@ -1453,6 +1536,7 @@ describes.repeated(
           const actions = {
             installActionHandler: () => {},
             trigger: env.sandbox.spy(),
+            addToWhitelist: () => {},
           };
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
@@ -2902,6 +2986,51 @@ describes.repeated(
               });
             });
           });
+        });
+
+        it('should allow default actions in email documents', async () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          const action = new ActionService(env.ampdoc, env.win.document);
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+          const element = getForm();
+          document.body.appendChild(element);
+          const form = new AmpForm(element, 'test-id');
+          const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
+          action.execute(
+            element,
+            'clear',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          expect(clearSpy).to.be.called;
+
+          env.sandbox.stub(form, 'submit_');
+          const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
+          action.execute(
+            element,
+            'submit',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          await whenCalled(submitSpy);
+          expect(submitSpy).to.be.calledWith(
+            env.sandbox.match({
+              actionEventType: '?',
+              args: null,
+              caller: 'caller',
+              event: 'event',
+              method: 'submit',
+              node: element,
+              source: 'source',
+              trust: ActionTrust.HIGH,
+            })
+          );
         });
 
         describe('Async Inputs', () => {

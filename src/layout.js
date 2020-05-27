@@ -233,9 +233,8 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  dev().assertString(length);
   const m = userAssert(
-    length.match(/[a-z]+/i),
+    /[a-z]+/i.exec(length),
     'Failed to read units from %s',
     length
   );

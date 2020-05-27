@@ -42,7 +42,7 @@ export function createSlot(element, name, props) {
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());
-  const ref = useRef(null);
+  const ref = useRef(/** @type {?Element} */ (null));
   const slotProps = {...props, ref};
   useEffect(() => {
     const slot = dev().assertElement(ref.current);
@@ -135,8 +135,9 @@ export function Slot(props) {
   // useEffect, because it must only be run once while the previous needs to
   // run every render.
   useMountEffect(() => {
+    const slot = dev().assertElement(ref.current);
+
     return () => {
-      const slot = dev().assertElement(ref.current);
       const affectedNodes = [];
       getAssignedElements(props, slot).forEach((node) => {
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));

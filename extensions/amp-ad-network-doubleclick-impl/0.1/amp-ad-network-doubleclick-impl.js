@@ -23,12 +23,7 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -48,8 +43,16 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -83,24 +86,29 @@ import {
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
+  getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isCancellation} from '../../../src/error';
+import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
 import {
+  getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {isCancellation} from '../../../src/error';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -108,7 +116,6 @@ import {
 import {parseQueryString} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -139,11 +146,27 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
+/** @const {string} */
+const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
+
+/**
+ * Branches of the random subdomain for SafeFrame experiment.
+ * @const @enum{string}
+ * @visibleForTesting
+ */
+export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
+  CONTROL: '21065817',
+  EXPERIMENT: '21065818',
+};
+
 /**
  * Required size to be sent with fluid requests.
  * @const {string}
  */
 const DUMMY_FLUID_SIZE = '320x50';
+
+/** @const @private {string} attribute indicating if lazy fetch is enabled.*/
+const LAZY_FETCH_ATTRIBUTE = 'data-lazy-fetch';
 
 /**
  * Map of pageview tokens to the instances they belong to.
@@ -276,8 +299,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
 
-    /** @protected {?CONSENT_POLICY_STATE} */
-    this.consentState = null;
+    /** @protected {ConsentTupleDef} */
+    this.consentTuple = {};
+
+    /**
+     * The random subdomain to load SafeFrame from, if SafeFrame is
+     * being loaded from a random subdomain and if the subdomain
+     * has been generated.
+     * @private {?string}
+     */
+    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -402,6 +433,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
+      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+        isTrafficEligible: () => true,
+        branches: [
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
+          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
+        ],
+      },
+      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [AMP_AD_NO_CENTER_CSS_EXP.control],
+          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
+        ],
+      },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -455,18 +507,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  delayAdRequestEnabled() {
+    if (this.element.getAttribute(LAZY_FETCH_ATTRIBUTE) !== 'true') {
+      return false;
+    }
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
+  }
+
+  /** @override */
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
+    const pubEnabledSra = !!this.win.document.querySelector(
+      'meta[name=amp-ad-doubleclick-sra]'
+    );
+    const delayFetchEnabled = !!this.win.document.querySelector(
+      `amp-ad[type=doubleclick][${escapeCssSelectorIdent(
+        LAZY_FETCH_ATTRIBUTE
+      )}=true]`
+    );
+    if (pubEnabledSra && delayFetchEnabled) {
+      user().warn(
+        TAG,
+        'SRA is not compatible with lazy fetching, disabling SRA'
+      );
+    }
     this.useSra =
-      (getMode().localDev &&
+      !delayFetchEnabled &&
+      ((getMode().localDev &&
         /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
-      !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
-      [
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
-      ].some((eid) => this.experimentIds.indexOf(eid) >= 0);
+        pubEnabledSra ||
+        [
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+        ].some((eid) => this.experimentIds.indexOf(eid) >= 0));
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
@@ -491,18 +566,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?ConsentTupleDef} consentTuple
    * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState, instances) {
+  getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
+    const {consentString, gdprApplies} = consentTuple;
+
     return {
       'npa':
-        consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
           ? 1
           : null,
       'gdfp_req': '1',
@@ -510,6 +587,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
     };
   }
 
@@ -574,11 +653,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {ConsentTupleDef} consentTuple
    * @visibleForTesting
    */
-  populateAdUrlState(consentState) {
-    this.consentState = consentState;
+  populateAdUrlState(consentTuple) {
+    this.consentTuple = consentTuple;
     // Allow for pub to override height/width via override attribute.
     const width =
       Number(this.element.getAttribute('data-override-width')) ||
@@ -607,12 +686,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    const consentTuple = opt_consentTuple || {};
     if (
-      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -628,7 +708,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
-    this.populateAdUrlState(consentState);
+    this.populateAdUrlState(consentTuple);
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -650,7 +730,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Object.assign(
           this.getBlockParameters_(),
           this.buildIdentityParams(),
-          this.getPageParameters(consentState),
+          this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
         this.experimentIds
@@ -710,12 +790,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           if (!exclusions) {
             exclusions = {};
             if (this.jsonTargeting['categoryExclusions']) {
-              this.jsonTargeting['categoryExclusions'].forEach((exclusion) => {
+              /** @type {!Array} */ (this.jsonTargeting[
+                'categoryExclusions'
+              ]).forEach((exclusion) => {
                 exclusions[exclusion] = true;
               });
             }
           }
-          rtcResponse.response['categoryExclusions'].forEach((exclusion) => {
+          /** @type {!Array} */ (rtcResponse.response[
+            'categoryExclusions'
+          ]).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
         }
@@ -970,7 +1054,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraDeferred = null;
     this.qqid_ = null;
     this.shouldSandbox_ = false;
-    this.consentState = null;
+    this.consentTuple = {};
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();
   }
@@ -1017,6 +1101,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.destroySafeFrameApi_();
     return super.unlayoutCallback();
+  }
+
+  /** @override */
+  getSafeframePath() {
+    const randomSubdomainExperimentBranch =
+      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
+    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
+      return super.getSafeframePath();
+    }
+    this.safeFrameRandomSubdomain_ =
+      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+
+    return (
+      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `${this.safeframeVersion}/html/container.html`
+    );
   }
 
   /** @visibleForTesting */
@@ -1096,6 +1196,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+
+    // Set the centering CSS if the experiment is off
+    if (
+      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
+      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
+        AMP_AD_NO_CENTER_CSS_EXP.control
+    ) {
+      setStyles(dev().assertElement(this.iframe), {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
+
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
@@ -1574,6 +1688,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().warn(TAG, message, error);
   }
 
+  /**
+   * Generate a 32-byte random string.
+   * Uses the win.crypto when available.
+   * @return {string} The random string
+   * @private
+   */
+  getRandomString_() {
+    // 16 hex characters * 2 bytes per character = 32 bytes
+    const length = 16;
+
+    const randomValues = getCryptoRandomBytesArray(this.win, length);
+
+    let randomSubdomain = '';
+    for (let i = 0; i < length; i++) {
+      // If crypto isn't available, just use Math.random.
+      const randomValue = randomValues
+        ? randomValues[i]
+        : Math.floor(Math.random() * 255);
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
+  }
+
   /** @override */
   getPreconnectUrls() {
     return ['https://securepubads.g.doubleclick.net/'];
@@ -1762,7 +1904,7 @@ function constructSRARequest_(a4a, instances) {
         Object.assign(
           blockParameters,
           googPageLevelParameters,
-          instances[0].getPageParameters(instances[0].consentState, instances)
+          instances[0].getPageParameters(instances[0].consentTuple, instances)
         ),
         startTime
       );

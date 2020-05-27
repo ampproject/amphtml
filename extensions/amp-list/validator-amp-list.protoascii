@@ -117,7 +117,6 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: CONTAINER
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -214,6 +213,7 @@ tags: {  # <amp-list>
     value: "always"
     value: "no"
     value: "refresh"
+    value: "refresh-evaluate" # Experimental.
   }
   attrs: {
     name: "diffable"
@@ -242,7 +242,7 @@ tags: {  # <amp-list>
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: CONTAINER
+    supported_layouts: CONTAINER # Experimental, email-only.
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -308,7 +308,6 @@ tags: {  # <amp-list>
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: CONTAINER
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

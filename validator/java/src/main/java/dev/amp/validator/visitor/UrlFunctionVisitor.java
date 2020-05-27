@@ -10,7 +10,6 @@ import dev.amp.validator.css.Declaration;
 import dev.amp.validator.css.ParsedCssUrl;
 import dev.amp.validator.css.QualifiedRule;
 
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;

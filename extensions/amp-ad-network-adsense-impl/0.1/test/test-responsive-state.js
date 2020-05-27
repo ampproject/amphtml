@@ -51,8 +51,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      const viewport = Services.viewportForDoc(doc);
-      env.sandbox.stub(viewport, 'getSize').returns({width: 375, height: 667});
       lastSizeChangeAttempt = null;
 
       const vsync = Services.vsyncFor(win);
@@ -81,14 +79,7 @@ describes.realWin(
     });
 
     function createElement(attributes) {
-      element = createElementWithAttributes(doc, 'amp-ad', {
-        'type': 'adsense',
-        'data-ad-client': 'ca-pub-123',
-      });
-      addAttributesToElement(element, attributes);
-      const parent = createElementWithAttributes(doc, 'div', {});
-      parent.appendChild(element);
-      doc.body.appendChild(parent);
+      element = createElementWithNoStub(attributes);
       env.sandbox
         .stub(element, 'getLayoutBox')
         .returns(layoutRectLtwh(50, 200, 375, 100));
@@ -102,6 +93,21 @@ describes.realWin(
         })
       );
 
+      const viewport = Services.viewportForDoc(doc);
+      env.sandbox.stub(viewport, 'getSize').returns({width: 375, height: 667});
+
+      return element;
+    }
+
+    function createElementWithNoStub(attributes) {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'type': 'adsense',
+        'data-ad-client': 'ca-pub-123',
+      });
+      addAttributesToElement(element, attributes);
+      const parent = createElementWithAttributes(doc, 'div', {});
+      parent.appendChild(element);
+      doc.body.appendChild(parent);
       return element;
     }
 
@@ -350,6 +356,31 @@ describes.realWin(
         expect(result).to.be.null;
       });
 
+      it('returns null when the viewport is too wide', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElementWithNoStub({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '500',
+          'width': '1024',
+        });
+        const viewport = Services.viewportForDoc(element);
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
+        storageContent[`aas-${AD_CLIENT_ID}`] = true;
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.be.null;
+      });
+
       it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
         forceExperimentBranch(
           win,
@@ -379,29 +410,10 @@ describes.realWin(
       });
     });
     describe('maybeAttachSettingsListener', () => {
-      it("doesn't set up a listener if the experiment is not enabled", () => {
-        const element = createElement({
-          'data-ad-client': AD_CLIENT_ID,
-          'height': '200px',
-          'width': '50vw',
-        });
-        const promise = ResponsiveState.maybeAttachSettingsListener(
-          element,
-          fakeIframe,
-          AD_CLIENT_ID
-        );
-        expect(promise).to.be.null;
-      });
-
       describe('sets up a listener that', () => {
         let promise;
 
         beforeEach(() => {
-          forceExperimentBranch(
-            win,
-            AD_SIZE_OPTIMIZATION_EXP.branch,
-            AD_SIZE_OPTIMIZATION_EXP.experiment
-          );
           const element = createElement({
             'data-ad-client': AD_CLIENT_ID,
             'height': '200px',
@@ -421,7 +433,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(data, '*');
+          win.postMessage(JSON.stringify(data), '*');
 
           await promise;
 
@@ -434,7 +446,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(data, '*');
+          win.postMessage(JSON.stringify(data), '*');
 
           await promise;
 
@@ -449,13 +461,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(badData, '*');
+          win.postMessage(JSON.stringify(badData), '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(goodData, '*');
+          win.postMessage(JSON.stringify(goodData), '*');
 
           await promise;
 
@@ -470,13 +482,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID + 'i',
             'enableAutoAdSize': '1',
           };
-          win.postMessage(badData, '*');
+          win.postMessage(JSON.stringify(badData), '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(goodData, '*');
+          win.postMessage(JSON.stringify(goodData), '*');
 
           await promise;
 

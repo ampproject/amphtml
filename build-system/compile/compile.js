@@ -35,10 +35,11 @@ const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
+const {sanitize} = require('./sanitize');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
-const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
@@ -46,7 +47,7 @@ let inProgress = 0;
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
-  ? 4
+  ? 2
   : parseInt(argv.closure_concurrency, 10) || 1;
 
 // Compiles AMP with the closure compiler. This is intended only for
@@ -145,9 +146,6 @@ function compile(
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
-  if (argv.fortesting) {
-    define.push('FORTESTING=true');
-  }
   if (options.singlePassCompilation) {
     const compilationOptions = {
       define,
@@ -180,14 +178,6 @@ function compile(
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
-    }
-    let sourceMapBase = 'http://localhost:8000/';
-    if (isProdBuild) {
-      // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase =
-        'https://raw.githubusercontent.com/ampproject/amphtml/' +
-        internalRuntimeVersion +
-        '/';
     }
     const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
@@ -276,7 +266,7 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      language_in: 'ECMASCRIPT_2018',
+      language_in: 'ECMASCRIPT_2020',
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
@@ -301,7 +291,6 @@ function compile(
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       // These arrays are filled in below.
       jscomp_error: [],
@@ -326,6 +315,8 @@ function compile(
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
+      compilerOptions.checks_only = true;
+
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
@@ -389,7 +380,7 @@ function compile(
         .on('error', (err) =>
           handleCompilerError(err, outputFilename, options, resolve)
         )
-        .pipe(rename(outputFilename))
+        .pipe(rename(`${outputDir}/${outputFilename}`))
         .pipe(
           gulpIf(
             !argv.pseudo_names && !options.skipUnknownDepsCheck,
@@ -397,15 +388,16 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(sourcemaps.write('.'))
         .pipe(
           gulpIf(
             shouldAppendSourcemappingURLText,
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(postClosureBabel(outputDir, options.esmPassCompilation))
-        .pipe(gulp.dest(outputDir))
+        .pipe(postClosureBabel())
+        .pipe(sanitize())
+        .pipe(writeSourcemaps(options))
+        .pipe(gulp.dest('.'))
         .on('end', resolve);
     }
   });

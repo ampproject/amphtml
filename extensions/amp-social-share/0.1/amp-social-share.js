@@ -75,7 +75,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
     this.platform_ = Services.platformFor(this.win);
 
-    const systemShareSupported = 'share' in navigator;
+    const systemShareSupported = 'share' in this.win.navigator;
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!systemShareSupported) {
@@ -125,6 +125,17 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Do not layout if the component returns before
+    // this.shareEndpoint_ is resolved from buildCallback.
+    if (!this.shareEndpoint_) {
+      return Promise.resolve();
+    }
+
+    const hrefWithVars = addParamsToUrl(
+      dev().assertString(this.shareEndpoint_),
+      this.params_
+    );
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindings = {};
     if (this.bindingVars_) {
       this.bindingVars_.forEach((name) => {
@@ -133,11 +144,6 @@ class AmpSocialShare extends AMP.BaseElement {
       });
     }
 
-    const hrefWithVars = addParamsToUrl(
-      dev().assertString(this.shareEndpoint_),
-      this.params_
-    );
-    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     return urlReplacements
       .expandUrlAsync(hrefWithVars, bindings)
       .then((href) => {
@@ -187,9 +193,13 @@ class AmpSocialShare extends AMP.BaseElement {
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      devAssert(navigator.share !== undefined, 'navigator.share disappeared.');
-      // navigator.share() fails 'gulp check-types' validation on Travis
-      navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
+      const {navigator} = this.win;
+      devAssert(navigator.share);
+      const dataStr = href.substr(href.indexOf('?'));
+      const data = parseQueryString(dataStr);
+      navigator.share(data).catch((e) => {
+        user().warn(TAG, e.message, dataStr);
+      });
     } else {
       const windowFeatures = 'resizable,scrollbars,width=640,height=480';
       openWindowDialog(this.win, href, target, windowFeatures);

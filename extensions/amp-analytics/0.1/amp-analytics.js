@@ -17,7 +17,9 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
+import {Deferred} from '../../../src/utils/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -35,9 +37,10 @@ import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {endsWith, expandTemplate, startsWith} from '../../../src/string';
+import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
+import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
@@ -223,10 +226,21 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then((services) => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
-        return new AnalyticsConfig(this.element).loadConfig();
+        const loadConfigDeferred = new Deferred();
+        const loadConfigTask = () => {
+          const configPromise = new AnalyticsConfig(this.element).loadConfig();
+          loadConfigDeferred.resolve(configPromise);
+        };
+        if (isAnalyticsChunksExperimentOn(this.win)) {
+          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+        } else {
+          loadConfigTask();
+        }
+        return loadConfigDeferred.promise;
       })
       .then((config) => {
         this.config_ = /** @type {!JsonObject} */ (config);
+        // CookieWriter not enabled on proxy origin, do not chunk
         return new CookieWriter(this.win, this.element, this.config_).write();
       })
       .then(() => {
@@ -274,7 +288,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -357,12 +371,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               }
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
-              this.addTrigger_(trigger);
-            } else if (
-              trigger['selector'] &&
-              startsWith(trigger['selector'], '${') &&
-              endsWith(trigger['selector'], '}')
-            ) {
+              return this.addTrigger_(trigger);
+            } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
@@ -372,10 +382,10 @@ export class AmpAnalytics extends AMP.BaseElement {
                 )
                 .then((selector) => {
                   trigger['selector'] = selector;
-                  this.addTrigger_(trigger);
+                  return this.addTrigger_(trigger);
                 });
             } else {
-              this.addTrigger_(trigger);
+              return this.addTrigger_(trigger);
             }
           })
         );
@@ -405,15 +415,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!JsonObject} config
    * @private
    * @noinline
+   * @return {!Promise}
    */
   addTrigger_(config) {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
-      return;
+      return Promise.resolve();
     }
     try {
-      this.analyticsGroup_.addTrigger(
+      return this.analyticsGroup_.addTrigger(
         config,
         this.handleEvent_.bind(this, config)
       );
@@ -421,6 +432,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+      return Promise.resolve();
     }
   }
 
@@ -504,7 +516,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'
@@ -557,6 +569,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Create the linker-manager that will append linker params as necessary.
+   * The initialization is asynchronous and non blocking
    * @private
    */
   initializeLinker_() {
@@ -567,7 +580,14 @@ export class AmpAnalytics extends AMP.BaseElement {
       type,
       this.element
     );
-    this.linkerManager_.init();
+    const linkerTask = () => {
+      this.linkerManager_.init();
+    };
+    if (isAnalyticsChunksExperimentOn(this.win)) {
+      chunk(this.element, linkerTask, ChunkPriority.LOW);
+    } else {
+      linkerTask();
+    }
   }
 
   /**
@@ -678,25 +698,37 @@ export class AmpAnalytics extends AMP.BaseElement {
   isSampledIn_(trigger) {
     /** @const {!JsonObject} */
     const spec = trigger['sampleSpec'];
-    const resolve = Promise.resolve(true);
     const TAG = this.getName_();
     if (!spec) {
-      return resolve;
+      return Promise.resolve(true);
     }
     const sampleOn = spec['sampleOn'];
     if (!sampleOn) {
       this.user().error(TAG, 'Invalid sampleOn value.');
-      return resolve;
+      return Promise.resolve(true);
     }
-    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+    const threshold = parseFloat(spec['threshold']);
     if (threshold >= 0 && threshold <= 100) {
-      const expansionOptions = this.expansionOptions_(dict({}), trigger);
-      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-        .then((key) => this.cryptoService_.uniform(key))
-        .then((digest) => digest * 100 < threshold);
+      const sampleDeferred = new Deferred();
+      const sampleInTask = () => {
+        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const samplePromise = this.expandTemplateWithUrlParams_(
+          sampleOn,
+          expansionOptions
+        )
+          .then((key) => this.cryptoService_.uniform(key))
+          .then((digest) => digest * 100 < threshold);
+        sampleDeferred.resolve(samplePromise);
+      };
+      if (isAnalyticsChunksExperimentOn(this.win)) {
+        chunk(this.element, sampleInTask, ChunkPriority.LOW);
+      } else {
+        sampleInTask();
+      }
+      return sampleDeferred.promise;
     }
     user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
-    return resolve;
+    return Promise.resolve(true);
   }
 
   /**

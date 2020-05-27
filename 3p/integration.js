@@ -105,6 +105,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {aniview} from '../ads/aniview';
+import {anyclip} from '../ads/anyclip';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
@@ -177,6 +178,7 @@ import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaad} from '../ads/mediaad';
+import {marfeel} from '../ads/marfeel';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
@@ -225,6 +227,7 @@ import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
+import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
@@ -280,6 +283,7 @@ import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
+import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
@@ -335,6 +339,7 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   temedya: true,
   whopainfeed: true,
+  yahoofedads: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -393,6 +398,7 @@ register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
 register('aniview', aniview);
+register('anyclip', anyclip);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
@@ -471,6 +477,7 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('marfeel', marfeel);
 register('mathml', mathml);
 register('mediaad', mediaad);
 register('medianet', medianet);
@@ -523,6 +530,7 @@ register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
 register('relap', relap);
+register('relappro', relappro);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
@@ -579,6 +587,7 @@ register('wisteria', wisteria);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);

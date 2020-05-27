@@ -46,8 +46,8 @@ const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn(
  */
 function assertJSONEquals(left, right) {
   assertStrictEqual(
-      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/4),
-      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/4));
+      json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/ 4),
+      json_testutil.renderJSON(right, jsonKeyCmp, /*offset=*/ 4));
 }
 
 /** @type {!Object<string,parse_css.BlockType>} */
@@ -61,7 +61,6 @@ const keyframesCssParsingSpec = {
 };
 
 describe('validateKeyframesCss', () => {
-
   it('validates good keyframes example', () => {
     const css = '@keyframes anim1 {' +
         '0% {transform: translateX(-100%);}' +

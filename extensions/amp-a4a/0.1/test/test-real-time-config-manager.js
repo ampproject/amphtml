@@ -806,25 +806,25 @@ describes.realWin('real-time-config-manager', {amp: true}, (env) => {
     it('should handle empty urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = [];
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle empty vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = {};
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = undefined;
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = undefined;
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should clear just invalid custom URLs', () => {

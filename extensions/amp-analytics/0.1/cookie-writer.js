@@ -15,8 +15,11 @@
  */
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
+import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
+import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '../../../src/types';
 import {setCookie} from '../../../src/cookies';
@@ -50,8 +53,8 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
-    /** @private {?Promise} */
-    this.writePromise_ = null;
+    /** @private {?Deferred} */
+    this.writeDeferred_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
@@ -64,11 +67,18 @@ export class CookieWriter {
    * @return {!Promise}
    */
   write() {
-    if (!this.writePromise_) {
-      this.writePromise_ = this.init_();
+    if (!this.writeDeferred_) {
+      this.writeDeferred_ = new Deferred();
+      const task = () => {
+        this.writeDeferred_.resolve(this.init_());
+      };
+      if (isAnalyticsChunksExperimentOn(this.win_)) {
+        chunk(this.element_, task, ChunkPriority.LOW);
+      } else {
+        task();
+      }
     }
-
-    return this.writePromise_;
+    return this.writeDeferred_.promise;
   }
 
   /**
