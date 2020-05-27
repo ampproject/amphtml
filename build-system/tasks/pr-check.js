@@ -85,6 +85,10 @@ async function prCheck(cb) {
     runCheck('gulp check-owners');
   }
 
+  if (buildTargets.has('RENOVATE_CONFIG')) {
+    runCheck('gulp check-renovate-config');
+  }
+
   if (buildTargets.has('SERVER')) {
     runCheck('gulp server-tests');
   }
