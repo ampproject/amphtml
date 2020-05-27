@@ -8,12 +8,10 @@
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
-  "schedule": "at any time",
+  "schedule": "after 12am every weekday",
 
   "masterIssue": true,
-  "masterIssueApproval": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
-
   "separateMinorPatch": true,
   "packageRules": [
     {
