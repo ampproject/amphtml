@@ -367,6 +367,13 @@ Type attribute value: `reppublika`
 
 Type attribute value: `retargetly`
 
+### RudderStack
+
+Type attribute value: `rudderstack`
+
+Adds support for RudderStack page views and events.
+Find out more on the implementation check our [documentation](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
+
 ### Segment
 
 Type attribute value: `segment`
@@ -457,10 +464,3 @@ Adds support for Webtrekk. Configuration details can be found at [supportcenter.
 Type attribute value: `metrika`
 
 Adds support for Yandex Metrica. Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
-
-### RudderStack
-
-Type attribute value: `rudderstack`
-
-Adds support for Rudderstack page views and events.
-More details can be found at [AMP Analytics with RudderStack](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
