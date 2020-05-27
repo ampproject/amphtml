@@ -32,11 +32,6 @@ import {devAssert} from '../log';
 export let TaskDef;
 
 /**
- * @typedef {Object<string, *>}
- */
-let PeekStateDef;
-
-/**
  * A scheduling queue for Resources.
  *
  * @package
@@ -123,16 +118,15 @@ export class TaskQueue {
   /**
    * Returns the task with the minimal score based on the provided scoring
    * callback.
-   * @param {function(!TaskDef, !PeekStateDef):number} scorer
-   * @param {!PeekStateDef} state
+   * @param {function(!TaskDef):number} scorer
    * @return {?TaskDef}
    */
-  peek(scorer, state) {
+  peek(scorer) {
     let minScore = 1e6;
     let minTask = null;
     for (let i = 0; i < this.tasks_.length; i++) {
       const task = this.tasks_[i];
-      const score = scorer(task, state);
+      const score = scorer(task);
       if (score < minScore) {
         minScore = score;
         minTask = task;
