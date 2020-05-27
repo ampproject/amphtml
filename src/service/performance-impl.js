@@ -111,7 +111,7 @@ export class Performance {
      * True if the ratios have already been ticked.
      * @private {boolean}
      */
-    this.slowAndEagerElementRatiosTicked_ = false;
+    this.slowElementRatioTicked_ = false;
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -467,7 +467,7 @@ export class Performance {
       if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
-      this.tickEagerAndSlowElementRatios_();
+      this.tickSlowElementRatio_();
     }
   }
 
@@ -484,7 +484,7 @@ export class Performance {
       if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
-      this.tickEagerAndSlowElementRatios_();
+      this.tickSlowElementRatio_();
     }
   }
 
@@ -528,24 +528,20 @@ export class Performance {
   /**
    * Tick both the eager and slow element ratios.
    */
-  tickEagerAndSlowElementRatios_() {
-    if (this.slowAndEagerElementRatiosTicked_) {
+  tickSlowElementRatio_() {
+    if (this.slowElementRatioTicked_) {
       return;
     }
     if (!this.resources_) {
       const TAG = 'Performance';
-      dev().error(TAG, 'Failed to tick ser and eer due to null resources');
+      dev().error(TAG, 'Failed to tick ser due to null resources');
       return;
     }
 
-    this.slowAndEagerElementRatiosTicked_ = true;
+    this.slowElementRatioTicked_ = true;
     this.tickDelta(
       TickLabel.SLOW_ELEMENT_RATIO,
       this.resources_.getSlowElementRatio()
-    );
-    this.tickDelta(
-      TickLabel.EAGER_ELEMENT_RATIO,
-      this.resources_.getEagerElementRatio()
     );
   }
 

@@ -877,7 +877,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       getResourcesInRect: () => unresolvedPromise,
       whenFirstPass: () => Promise.resolve(),
       getSlowElementRatio: () => 1,
-      getEagerElementRatio: () => 1,
     });
     env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,

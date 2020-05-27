@@ -797,30 +797,7 @@ export class ResourcesImpl {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
       dev().fine(TAG_, 'signal: ready-scan');
     }
-  }
-
-  /** @override */
-  getEagerElementRatio() {
-    if (this.totalLayoutCount_ === 0) {
-      return 0;
-    }
-    if (this.firstVisibleTime_ === -1) {
-      return 1;
-    }
-
-    let eagerCount = 0;
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      if (
-        r.getState() === ResourceState.LAYOUT_COMPLETE &&
-        !r.hasEnteredViewport()
-      ) {
-        eagerCount++;
-      }
-    }
-
-    return eagerCount / this.totalLayoutCount_;
-  }
+  } 
 
   /** @override */
   getSlowElementRatio() {

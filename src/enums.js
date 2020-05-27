@@ -38,7 +38,6 @@ export const TickLabel = {
   CUMULATIVE_LAYOUT_SHIFT_2: 'cls-2',
   DOCUMENT_READY: 'dr',
   END_INSTALL_STYLES: 'e_is',
-  EAGER_ELEMENT_RATIO: 'eer',
   FIRST_CONTENTFUL_PAINT: 'fcp',
   FIRST_CONTENTFUL_PAINT_VISIBLE: 'fcpv',
   FIRST_PAINT: 'fp',

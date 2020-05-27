@@ -182,13 +182,7 @@ export class ResourcesInterface {
    * https://github.com/ampproject/amphtml/issues/25428
    * @return {boolean}
    */
-  isIntersectionExperimentOn() {}
-
-  /**
-   * Returns the percent of resources that were laid out but never entered viewport.
-   * @return {number}
-   */
-  getEagerElementRatio() {}
+  isIntersectionExperimentOn() {} 
 
   /**
    * Returns the percent of resources that were laid out after entering viewport.

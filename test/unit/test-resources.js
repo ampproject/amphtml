@@ -462,54 +462,7 @@ describe('Resources', () => {
     expect(task.priority).to.equal(LayoutPriority.METADATA);
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
-  });
-
-  describe('eager element ratio (eer)', () => {
-    function getResource({eager}) {
-      return {
-        getState: () => ResourceState.LAYOUT_COMPLETE,
-        hasEnteredViewport: () => !eager,
-      };
-    }
-    const task = {resource: {isInViewport: () => {}}};
-
-    it('0 layouts --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      expect(resources.getEagerElementRatio()).equal(0);
-    });
-
-    it('Elements are all eager if page was never visible', () => {
-      resources.resources_ = [getResource({eager: false})];
-      resources.taskComplete_(task);
-      expect(resources.getEagerElementRatio()).equal(1);
-    });
-
-    it('0 eager / 1 total --> 0', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.resources_ = [getResource({eager: false})];
-      resources.taskComplete_(task);
-      expect(resources.getEagerElementRatio()).equal(0);
-    });
-
-    it('1 eager / 1 total --> 1', () => {
-      resources.firstVisibleTime_ = 1;
-      resources.resources_ = [getResource({eager: true})];
-      resources.taskComplete_(task);
-      expect(resources.getEagerElementRatio()).equal(1);
-    });
-
-    it('9 eager / 10 total --> 0.9', () => {
-      resources.firstVisibleTime_ = 1;
-      for (let i = 0; i < 9; i++) {
-        resources.taskComplete_(task);
-        resources.resources_.push(getResource({eager: true}));
-      }
-      resources.taskComplete_(task);
-      resources.resources_.push(getResource({eager: false}));
-
-      expect(resources.getEagerElementRatio()).equal(0.9);
-    });
-  });
+  }); 
 
   describe('slow element ratio (ser)', () => {
     const slowTask = {resource: {isInViewport: () => true}};
