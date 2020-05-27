@@ -173,7 +173,7 @@ function discoverDistFlavors_() {
  */
 async function compileDistFlavors_(distFlavors, tempDir) {
   for (const {flavorType, command} of distFlavors) {
-    log('Compiling flavor', `${green(flavorType)}:`);
+    log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
     execOrDie('gulp clean');
     execOrDie(command);
