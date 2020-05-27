@@ -517,7 +517,7 @@ export function applyStaticLayout(element) {
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;

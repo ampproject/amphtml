@@ -387,6 +387,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
@@ -406,6 +407,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
