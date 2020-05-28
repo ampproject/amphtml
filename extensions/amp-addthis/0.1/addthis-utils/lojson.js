@@ -142,14 +142,14 @@ export function getLojsonData(jsonData) {
 }
 
 /**
- * @param {!LojsonDataDef} props
+ * @param {!LojsonDataDef} params
  */
-export function callLojson(props) {
-  const data = getLojsonData(props);
+export function callLojson(params) {
+  const data = getLojsonData(params);
   const endpoint = `${API_SERVER}/live/red_lojson/300lo.json`;
 
   callPixelEndpoint({
-    ampDoc: props.ampDoc,
+    ampDoc: params.ampDoc,
     endpoint,
     data,
   });

@@ -909,9 +909,9 @@ export function copyProperties(obj, prototype) {
       break;
     }
 
-    const props = Object.getOwnPropertyNames(current);
-    for (let i = 0; i < props.length; i++) {
-      const prop = props[i];
+    const keys = Object.getOwnPropertyNames(current);
+    for (let i = 0; i < keys.length; i++) {
+      const prop = keys[i];
       if (Object.hasOwnProperty.call(obj, prop)) {
         continue;
       }

@@ -491,13 +491,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return false;
     }
 
-    const props = this.config_['optout'].split('.');
+    const keys = this.config_['optout'].split('.');
     let k = this.win;
-    for (let i = 0; i < props.length; i++) {
+    for (let i = 0; i < keys.length; i++) {
       if (!k) {
         return false;
       }
-      k = k[props[i]];
+      k = k[keys[i]];
     }
     // The actual property being called is controlled by vendor configs only
     // that are approved in code reviews. User customization of the `optout`

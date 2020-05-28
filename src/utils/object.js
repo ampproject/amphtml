@@ -132,12 +132,12 @@ export function deepMerge(target, source, depth = 10) {
 
 /**
  * @param {!Object} o An object to remove properties from
- * @param {!Array<string>} props A list of properties to remove from the Object
+ * @param {!Array<string>} keys A list of properties to remove from the Object
  * @return {!Object} An object with the given properties removed
  */
-export function omit(o, props) {
+export function omit(o, keys) {
   return Object.keys(o).reduce((acc, key) => {
-    if (!props.includes(key)) {
+    if (!keys.includes(key)) {
       acc[key] = o[key];
     }
     return acc;
