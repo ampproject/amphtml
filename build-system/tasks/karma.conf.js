@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -31,6 +32,10 @@ const COMMON_CHROME_FLAGS = [
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
 ];
+
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
 
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
