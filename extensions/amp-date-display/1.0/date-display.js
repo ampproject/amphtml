@@ -66,11 +66,11 @@ let EnhancedVariablesV2Def;
  * @return {PreactDef.Renderable}
  */
 export function DateDisplay(props) {
-  const render = props['render'];
+  const {render} = props;
   const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   useResourcesNotify();
 
-  return render(data, props['children']);
+  return render(data, props.children);
 }
 
 /**
@@ -79,9 +79,9 @@ export function DateDisplay(props) {
  */
 function getDataForTemplate(props) {
   const {
-    'displayIn': displayIn = '',
-    'locale': locale = DEFAULT_LOCALE,
-    'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
+    displayIn = '',
+    locale = DEFAULT_LOCALE,
+    offsetSeconds = DEFAULT_OFFSET_SECONDS,
   } = props;
 
   const epoch = getEpoch(props);
@@ -101,11 +101,7 @@ function getDataForTemplate(props) {
  * @return {number|undefined}
  */
 function getEpoch(props) {
-  const {
-    'datetime': datetime = '',
-    'timestampMs': timestampMs = 0,
-    'timestampSeconds': timestampSeconds = 0,
-  } = props;
+  const {datetime = '', timestampMs = 0, timestampSeconds = 0} = props;
 
   let epoch;
   if (datetime.toLowerCase() === 'now') {

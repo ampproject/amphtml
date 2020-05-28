@@ -286,7 +286,7 @@ function collectProps(Ctor, element, defaultProps) {
 
   // Class.
   if (className) {
-    props['className'] = className;
+    props.className = className;
   }
 
   // Props.
@@ -321,10 +321,10 @@ function collectProps(Ctor, element, defaultProps) {
       !childrenDefs,
       'only one of "passthrough" or "children" may be given'
     );
-    props['children'] = [<Slot />];
+    props.children = [<Slot />];
   } else if (childrenDefs) {
     const children = [];
-    props['children'] = children;
+    props.children = children;
 
     const nodes = element.getRealChildNodes();
     for (let i = 0; i < nodes.length; i++) {

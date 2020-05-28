@@ -58,7 +58,7 @@ export function Slot(props) {
     });
 
     // Retarget slots and content.
-    if (props['retarget']) {
+    if (props.retarget) {
       // TBD: retargetting here is for:
       // 1. `disabled` doesn't apply inside subtrees. This makes it more like
       //    `hidden`. Similarly do other attributes.
@@ -126,8 +126,8 @@ export function Slot(props) {
     }
 
     // Post-rendering cleanup, if any.
-    if (props['postRender']) {
-      props['postRender']();
+    if (props.postRender) {
+      props.postRender();
     }
   });
 
@@ -169,7 +169,7 @@ function getAmpElements(root) {
 }
 
 /**
- * @param {!Object} props
+ * @param {!JsonObject} props
  * @param {!Element} slotElement
  * @return {!Array<!Element>}
  */

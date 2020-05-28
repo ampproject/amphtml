@@ -24,10 +24,10 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  */
 export function Timeago(props) {
   const {
-    'datetime': datetime,
-    'locale': locale,
-    'cutoff': cutoff,
-    'cutoffText': cutoffText,
+    datetime,
+    locale,
+    cutoff,
+    cutoffText,
   } = props;
   const [timestamp, setTimestamp] = useState('');
   const ref = useRef(null);

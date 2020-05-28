@@ -27,9 +27,9 @@ const {LINE_HEIGHT_EM_} = styles;
  */
 export function FitText(props) {
   const {
-    'children': children,
-    'minFontSize': minFontSize = 6,
-    'maxFontSize': maxFontSize = 72,
+    children,
+    minFontSize = 6,
+    maxFontSize = 72,
     ...rest
   } = props;
   const contentRef = useRef(null);
