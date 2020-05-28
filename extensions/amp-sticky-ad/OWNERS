@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'zhouyx'}],
+      owners: [{name: 'ampproject/wg-ads-reviewers'}, {name: 'zhouyx'}],
     },
   ],
 }
