@@ -547,7 +547,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+
+    this.element.dispatchCustomEvent(name, {
+      index: this.currentIndex_,
+      actionTrust: trust,
+    });
+
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
