@@ -74,10 +74,10 @@ For details on the configuration semantics, see [AdOcean documentation](http://w
 ### Optional parameters
 
 - `data-ao-mode` - sync|buffered - processing mode
-- `data-ao-preview` - livepreview configuration id
+- `data-ao-preview` - true|false - whether livepreview is enabled
 - `data-ao-keys` - additional configuration, see adserver documentation, do not define different values for slaves within one master
 - `data-ao-vars` - additional configuration, see adserver documentation, do not define different values for slaves within one master
-- `data-ao-clusters` - additional configuration,see adserver documentation
+- `data-ao-clusters` - additional configuration, see adserver documentation
 - `data-ao-master` - unique id of master placement
 
 ## User Consent Integration
