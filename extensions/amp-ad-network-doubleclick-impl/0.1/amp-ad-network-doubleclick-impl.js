@@ -831,7 +831,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Promise<string>}
    */
   expandString_(string) {
-    return Services.urlReplacementsForDoc(this.element).expandStringAsync(
+    return Services.urlReplacementsForDoc(
+      this.element
+    )./*OK*/ expandStringAsync(
       string,
       null /*opt_bindings*/,
       TARGETING_MACRO_ALLOWLIST
