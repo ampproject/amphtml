@@ -14,27 +14,87 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
+import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getSocialConfig} from './amp-social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {toggle} from '../../../src/style';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
 const DEFAULT_BINDINGS = ['TITLE', 'CANONICAL_URL'];
 
+/**
+ * @private
+ * @param {string} type
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @param {!../../../src/service/platform-impl.Platform} platform
+ * @return {!JsonObject|undefined}
+ */
+const getTypeConfigOrUndefined = (type, viewer, platform) => {
+  if (type === 'system') {
+    // navigator.share unavailable
+    if (!systemShareSupported(viewer, platform)) {
+      return;
+    }
+  } else {
+    // system share wants to be unique
+    const systemOnly =
+      systemShareSupported(viewer, platform) &&
+      !!window.document.querySelector(
+        'amp-social-share[type=system][data-mode=replace]'
+      );
+    if (systemOnly) {
+      return;
+    }
+  }
+  return getSocialConfig(type) || dict();
+};
+
+/**
+ * @private
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @param {!../../../src/service/platform-impl.Platform} platform
+ * @return {boolean}
+ */
+const systemShareSupported = (viewer, platform) => {
+  // Chrome exports navigator.share in WebView but does not implement it.
+  // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
+  const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
+
+  return 'share' in navigator && !isChromeWebview;
+};
+
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    const urlParams = getDataParamsFromAttributes(this.element);
-    const urlReplacements = Services.urlReplacementsForDoc(this.element);
-    urlReplacements.expandBindingsAsync(DEFAULT_BINDINGS).then((bindings) => {
-      this.mutateProps(dict({'bindings': bindings}));
+    const viewer = Services.viewerForDoc(this.element);
+    const platform = Services.platformFor(window);
+    const type = userAssert(
+      this.element.getAttribute('type'),
+      'The type attribute is required. %s',
+      this.element
+    );
+    const typeConfig = getTypeConfigOrUndefined(type, viewer, platform);
+    // Hide/ignore component if typeConfig is undefined
+    if (!typeConfig) {
+      toggle(this.element, false);
+      return;
+    }
+
+    this.renderWithHrefAndTarget_(typeConfig, platform);
+    const responsive =
+      this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
+    return dict({
+      'width': responsive || this.element.getAttribute('width'),
+      'height': responsive || this.element.getAttribute('height'),
     });
-    return {...urlParams};
   }
 
   /** @override */
@@ -44,6 +104,47 @@ class AmpSocialShare extends PreactBaseElement {
       'expected amp-social-share-v2 experiment to be enabled'
     );
     return true;
+  }
+
+  /**
+   * Resolves 'href' and 'target' from data-param attributes using AMP URL services.
+   * Then triggers render on the Component with updated props.
+   * @private
+   * @param {!JsonObject} typeConfig
+   * @param {!../../../src/service/platform-impl.Platform} platform
+   */
+  renderWithHrefAndTarget_(typeConfig, platform) {
+    const shareEndpoint = user().assertString(
+      this.element.getAttribute('data-share-endpoint') ||
+        typeConfig['shareEndpoint'],
+      'The data-share-endpoint attribute is required. %s'
+    );
+    const urlParams = typeConfig['defaultParams'] || dict();
+    Object.assign(urlParams, getDataParamsFromAttributes(this.element));
+    const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
+    const bindingVars = typeConfig['bindings'];
+    const bindings = {};
+    if (bindingVars) {
+      bindingVars.forEach((name) => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = urlParams[name];
+      });
+    }
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((result) => {
+      const href = result;
+      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+      const {protocol} = Services.urlForDoc(this.element).parse(href);
+      const isMailTo = protocol === 'mailto:';
+      const isSms = protocol === 'sms:';
+      const target =
+        platform.isIos() && (isMailTo || isSms)
+          ? '_top'
+          : this.element.getAttribute('data-target') || '_blank';
+      this.mutateProps(
+        dict({'endpoint': href, 'target': target, 'ignoreParams': true})
+      );
+    });
   }
 }
 

@@ -86,41 +86,6 @@ export class Expander {
   }
 
   /**
-   * Takes an array of binding keys and attempts to substitute values.
-   * The key is an all or nothing subsitution (cannot match only part of a key)
-   * Returns a Promise resolving to an object with keys mapped to substituted
-   * values.  If a key in the input array is not matched, it will not be
-   * included in the output.
-   * @param {Array<string>} keys
-   * @return {Promise<Object<string, string|number>>}
-   */
-  expandBindings(keys) {
-    const expr = this.variableSource_.getExpr();
-    const completeMatches = [];
-    keys.forEach((key) => {
-      this.findMatches_(key, expr).forEach((match) => {
-        if (match.start === 0 && match.stop === key.length - 1) {
-          completeMatches.push(match);
-        }
-      });
-    });
-    const values = completeMatches.map((match) =>
-      this.evaluateBinding_({
-        ...this.variableSource_.get(match.name),
-        name: match.name,
-        encode: true,
-      })
-    );
-    return Promise.all(values).then((resolvedValues) => {
-      const result = {};
-      resolvedValues.forEach((value, i) => {
-        result[completeMatches[i].name] = value;
-      });
-      return result;
-    });
-  }
-
-  /**
    * Return any macros that exist in the given url.
    * @param {string} url
    * @return {!Array}
