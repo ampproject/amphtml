@@ -543,6 +543,7 @@ export class Performance {
       TickLabel.SLOW_ELEMENT_RATIO,
       this.resources_.getSlowElementRatio()
     );
+    this.flush();
   }
 
   /**
