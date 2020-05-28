@@ -16,9 +16,9 @@
 
 import {AdSenseNetworkConfig} from './adsense-network-config';
 import {DenakopNetworkConfig} from './denakop-network-config';
-import {PremiumadsNetworkConfig} from './premiumads-network-config';
 import {DoubleclickNetworkConfig} from './doubleclick-network-config';
 import {PingNetworkConfig} from './ping-network-config';
+import {PremiumadsNetworkConfig} from './premiumads-network-config';
 import {getMode} from '../../../src/mode';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */

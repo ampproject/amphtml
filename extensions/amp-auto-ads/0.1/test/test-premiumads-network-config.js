@@ -56,7 +56,9 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
         const configUrl = adNetwork.getConfigUrl();
 
-        expect(configUrl).to.contain(`https://tags.premiumads.com.br/autoads/${PUBLISHER_ID}`);
+        expect(configUrl).to.contain(
+          'https://tags.premiumads.com.br/autoads/' + PUBLISHER_ID
+        );
         expect(configUrl).to.contain('u=https%3A%2F%2Ffoo.bar%2Fbaz');
       });
 

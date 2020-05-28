@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
-import {Layout} from '../../../src/layout';
-import {tryParseJson} from '../../../src/json';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -45,7 +44,12 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    return buildUrl(`https://tags.premiumads.com.br/autoads/${this.autoAmpAdsElement_.getAttribute('data-publisher')}`, {}, 4096);
+    return buildUrl(
+      'https://tags.premiumads.com.br/autoads/' +
+        this.autoAmpAdsElement_.getAttribute('data-publisher'),
+      {},
+      4096
+    );
   }
 
   /** @override */
@@ -57,7 +61,7 @@ export class PremiumadsNetworkConfig {
       'height': 280,
       'layout': Layout.RESPONSIVE,
       'sizes': '(min-width: 320px) 320px, 100vw',
-      'style': 'position:relative!important'
+      'style': 'position:relative!important',
     });
     return attributesObj;
   }
