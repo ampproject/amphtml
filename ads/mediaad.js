@@ -34,7 +34,7 @@ export function mediaad(global, data) {
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (changes) {
-    changes.forEach(function (c) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       if (c.intersectionRect.height) {
         global._mediaad.push({
           medtag: data['medtag'],
