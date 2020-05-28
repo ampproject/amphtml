@@ -72,6 +72,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
+    './build-system/babel-plugins/babel-plugin-transform-preact-props-json-object',
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
