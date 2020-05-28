@@ -64,7 +64,7 @@ export const MAX_HEIGHT_EXP = {
 export class ResponsiveState {
   /**
    * @param {!Element} element
-   * @param {boolean} isContainerWidth
+   * @param {boolean=} isContainerWidth
    */
   constructor(element, isContainerWidth) {
     /**  @private {!Element}*/
