@@ -198,7 +198,7 @@ export class ResourcesImpl {
      * Number of resources that were laid out after entering viewport.
      * @private {number}
      */
-    this.slowElementCount_ = 0;
+    this.slowLayoutCount_ = 0;
 
     /**
      * Total number of laid out resources.
@@ -804,7 +804,7 @@ export class ResourcesImpl {
     if (this.totalLayoutCount_ === 0) {
       return 0;
     }
-    return this.slowElementCount_ / this.totalLayoutCount_;
+    return this.slowLayoutCount_ / this.totalLayoutCount_;
   }
 
   /**
@@ -1617,7 +1617,7 @@ export class ResourcesImpl {
   taskComplete_(task, success, opt_reason) {
     this.totalLayoutCount_++;
     if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
-      this.slowElementCount_++;
+      this.slowLayoutCount_++;
     }
 
     this.exec_.dequeue(task);

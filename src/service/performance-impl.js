@@ -526,7 +526,7 @@ export class Performance {
   }
 
   /**
-   * Tick both the eager and slow element ratios.
+   * Tick the slow element ratio.
    */
   tickSlowElementRatio_() {
     if (this.slowElementRatioTicked_) {

@@ -182,9 +182,6 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {boolean} */
-    this.enteredViewport_ = false;
-
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
@@ -237,14 +234,6 @@ export class Resource {
    */
   getId() {
     return this.id_;
-  }
-
-  /**
-   * Returns whether the resource was ever in viewport.
-   * @return {boolean}
-   */
-  hasEnteredViewport() {
-    return this.enteredViewport_;
   }
 
   /**
@@ -1009,10 +998,6 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    if (inViewport && !this.enteredViewport_) {
-      this.enteredViewport_ = true;
-    }
-
     this.element.viewportCallback(inViewport);
   }
 
