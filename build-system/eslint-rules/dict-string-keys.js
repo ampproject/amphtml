@@ -42,7 +42,7 @@ function checkNode(node, context) {
     node.properties.forEach(function (prop) {
       if (!prop.key.raw && !prop.computed) {
         context.report({
-          node,
+          node: prop,
           message:
             'Found: ' +
             prop.key.name +
