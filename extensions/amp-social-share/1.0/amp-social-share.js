@@ -28,7 +28,6 @@ import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
-const DEFAULT_BINDINGS = ['TITLE', 'CANONICAL_URL'];
 
 /**
  * @private
