@@ -815,14 +815,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Expands json targeting values.
-   * @param {string|Array<string>} value
+   * @param {string|Array<string>|null} value
    * @return {!Promise<string>|!Promise<Array<string>>}
    */
   expandValue_(value) {
-    if (isArray(value)) {
-      return Promise.all(value.map((arrVal) => this.expandString_(arrVal)));
+    if (!value) {
+      return Promise.resolve(value);
     }
-    return this.expandString_(value);
+    if (isArray(value)) {
+      return Promise.all(
+        value.map((arrVal) => this.expandString_(dev().assertString(arrVal)))
+      );
+    }
+    return this.expandString_(dev().assertString(value));
   }
 
   /**
@@ -835,7 +840,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element
     )./*OK*/ expandStringAsync(
       string,
-      null /*opt_bindings*/,
+      undefined /*opt_bindings*/,
       TARGETING_MACRO_ALLOWLIST
     );
   }
