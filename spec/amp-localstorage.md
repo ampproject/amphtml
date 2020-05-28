@@ -22,7 +22,7 @@ AMP relies on the AMP Viewer's support to use localStorage when the AMP page is 
 
 The AMP Viewer declares its support to the localStorage API by setting the the url param `storage` to `true`. If so the AMP Viewer must support the following APIs.
 
-In the case where there the AMP doc is served from origin without an AMP Viewer, or the AMP Viewer doesn't support the localStorage API. `window.localStorage` will be used as fallbck.
+In the case where there the AMP doc is served from origin without an AMP Viewer, or the AMP Viewer doesn't support the localStorage API. `window.localStorage` will be used as fallback.
 
 ### Storage API
 
