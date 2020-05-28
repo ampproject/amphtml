@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {getAdNetworkConfig} from '../ad-network-config';
 
@@ -55,11 +56,9 @@ describes.realWin(
       it('should generate the config fetch URL', () => {
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
         const configUrl = adNetwork.getConfigUrl();
-
         expect(configUrl).to.contain(
           'https://tags.premiumads.com.br/autoads/' + PUBLISHER_ID
         );
-        expect(configUrl).to.contain('u=https%3A%2F%2Ffoo.bar%2Fbaz');
       });
 
       it.skip("should truncate the URL if it's too long", () => {
@@ -76,11 +75,23 @@ describes.realWin(
         expect(url).not.to.contain('shouldnt_be_included');
       });
 
+      it('should have the properties', () => {
+        const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
+        const attrs = adNetwork.getAttributes();
+        expect(attrs).to.have.property('type');
+        expect(attrs).to.have.property('data-ad');
+      });
+
       it('should generate the attributes', () => {
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
         expect(adNetwork.getAttributes()).to.deep.equal({
           'type': 'doubleclick',
           'data-ad': 'premiumads',
+          'width': 336,
+          'height': 280,
+          'layout': Layout.RESPONSIVE,
+          'sizes': '(min-width: 320px) 320px, 100vw',
+          'style': 'position:relative!important',
         });
       });
 
@@ -104,9 +115,9 @@ describes.realWin(
         });
       });
 
-      it('should not be responsive-enabled', () => {
+      it('should be responsive-enabled', () => {
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
-        expect(adNetwork.isResponsiveEnabled()).to.be.false;
+        expect(adNetwork.isResponsiveEnabled()).to.be.true;
       });
     });
   }
