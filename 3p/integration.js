@@ -179,6 +179,7 @@ import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {marfeel} from '../ads/marfeel';
+import {mediaad} from '../ads/mediaad';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
@@ -317,6 +318,7 @@ const AMP_EMBED_ALLOWED = {
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mediaad: true,
   mgid: true,
   miximedia: true,
   mywidget: true,
@@ -479,6 +481,7 @@ register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('marfeel', marfeel);
 register('mathml', mathml);
+register('mediaad', mediaad);
 register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
