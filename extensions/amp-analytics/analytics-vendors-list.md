@@ -163,6 +163,8 @@ Unlike other analytics vendors, Google Tag Manager is a tag management service, 
 
 Type attribute value: `ibeatanalytics`
 
+Adds support for Ibeat Analytics. More details for adding Ibeat support can be found at [Ibeat Integration Support](https://ibeat.indiatimes.com/support.html#h.a5rit14mwie1).
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
