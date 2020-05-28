@@ -16,11 +16,10 @@
 
 import {
   CONSENT_ITEM_STATE,
+  CONSENT_STRING_TYPE,
   ConsentMetadataDef,
   constructMetadata,
-  convertEnumValueToConsentStringType,
   convertEnumValueToState,
-  getConsentMetadataValue,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -597,9 +596,7 @@ export class AmpConsent extends AMP.BaseElement {
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
-          'consentMetadata': getConsentMetadataValue(
-            storedInfo['consentMetadata']
-          ),
+          'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
@@ -730,9 +727,25 @@ export class AmpConsent extends AMP.BaseElement {
       );
       return;
     }
-    return constructMetadata(
-      convertEnumValueToConsentStringType(opt_metadata['consentStringType'])
-    );
+    this.assertMetadataValues(opt_metadata);
+    return constructMetadata(opt_metadata['consentStringType']);
+  }
+
+  /**
+   * Confirm that the metadata values are valid. Remove otherwise.s
+   * @param {JsonObject} metadata
+   */
+  assertMetadataValues(metadata) {
+    const consentStringType = metadata['consentStringType'];
+    if (
+      !(
+        consentStringType === CONSENT_STRING_TYPE.TCF_V1 ||
+        consentStringType === CONSENT_STRING_TYPE.TCF_V2 ||
+        consentStringType === CONSENT_STRING_TYPE.US_PRIVACY_STRING
+      )
+    ) {
+      delete metadata['consentStringType'];
+    }
   }
 }
 

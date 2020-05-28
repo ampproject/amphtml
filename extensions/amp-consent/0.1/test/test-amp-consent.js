@@ -376,7 +376,7 @@ describes.realWin(
             'https://server-test-1/':
               '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType":"us-privacy-string"}}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3}}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -544,7 +544,7 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": "us-privacy-string"}}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3}}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -746,6 +746,23 @@ describes.realWin(
         );
         expect(metadata).to.be.undefined;
       });
+
+      it('should remove invalid consentStringType', () => {
+        const responseMetadata = {'consentStringType': 4};
+        expect(
+          ampConsent.configureMetadataByConsentString_(
+            responseMetadata,
+            'consentString'
+          )
+        ).to.deep.equals(constructMetadata());
+        responseMetadata['consentStringType'] = 2;
+        expect(
+          ampConsent.configureMetadataByConsentString_(
+            responseMetadata,
+            'consentString'
+          )
+        ).to.deep.equals(constructMetadata(2));
+      });
     });
 
     describe('amp-geo integration', () => {
@@ -836,7 +853,7 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'accept',
           'info': 'accept-string',
-          'consentMetadata': {'consentStringType': 'tcf-v1'},
+          'consentMetadata': {'consentStringType': 1},
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
@@ -853,7 +870,7 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'accept',
           'info': 'accept-string',
-          'consentMetadata': {'consentStringType': 'tcf-v1'},
+          'consentMetadata': {'consentStringType': 1},
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
@@ -880,7 +897,7 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'dismiss',
           'info': 'test',
-          'consentMetadata': {'consentStringType': 'tcf-v1'},
+          'consentMetadata': {'consentStringType': 1},
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);

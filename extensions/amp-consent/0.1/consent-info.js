@@ -335,38 +335,6 @@ export function convertEnumValueToState(value) {
 }
 
 /**
- * Helper function to convert response enum value to CONSENT_STRING_TYPE value
- * @param {*} value
- * @return {CONSENT_STRING_TYPE|undefined}
- */
-export function convertEnumValueToConsentStringType(value) {
-  if (value === 'tcf-v1') {
-    return CONSENT_STRING_TYPE.TCF_V1;
-  } else if (value === 'tcf-v2') {
-    return CONSENT_STRING_TYPE.TCF_V2;
-  } else if (value === 'us-privacy-string') {
-    return CONSENT_STRING_TYPE.US_PRIVACY_STRING;
-  }
-  return undefined;
-}
-
-/**
- * Helper function to convert storage CONSENT_STRING_TYPE value to readable string
- * @param {CONSENT_STRING_TYPE=} value
- * @return {string|undefined}
- */
-export function convertConsentStringType(value) {
-  if (value === CONSENT_STRING_TYPE.TCF_V1) {
-    return 'tcf-v1';
-  } else if (value === CONSENT_STRING_TYPE.TCF_V2) {
-    return 'tcf-v2';
-  } else if (value === CONSENT_STRING_TYPE.US_PRIVACY_STRING) {
-    return 'us-privacy-string';
-  }
-  return undefined;
-}
-
-/**
  *
  * @param {!ConsentInfoDef} info
  * @return {boolean}
@@ -396,24 +364,6 @@ export function getConsentStateValue(enumState) {
   }
 
   return 'unknown';
-}
-
-/**
- * Convert the ConsentMetadataDef back to readable object
- * @param {ConsentMetadataDef=} metadata
- * @return {Object|undefined}
- */
-export function getConsentMetadataValue(metadata) {
-  if (!metadata) {
-    return undefined;
-  }
-  const metadataValue = {};
-  if (metadata['consentStringType']) {
-    metadataValue['consentStringType'] = convertConsentStringType(
-      metadata['consentStringType']
-    );
-  }
-  return metadataValue;
 }
 
 /**

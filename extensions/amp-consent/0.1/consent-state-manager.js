@@ -21,7 +21,6 @@ import {
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
-  getConsentMetadataValue,
   getConsentStateValue,
   getStoredConsentInfo,
   hasDirtyBit,
@@ -505,9 +504,7 @@ export class ConsentInstance {
         request['consentString'] = consentInfo['consentString'];
       }
       if (consentInfo['consentMetadata']) {
-        request['consentMetadata'] = getConsentMetadataValue(
-          consentInfo['consentMetadata']
-        );
+        request['consentMetadata'] = consentInfo['consentMetadata'];
       }
       const init = {
         credentials: 'include',

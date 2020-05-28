@@ -22,8 +22,6 @@ import {
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
-  convertConsentStringType,
-  convertEnumValueToConsentStringType,
   convertStorageMetadata,
   getStoredConsentInfo,
   isConsentInfoStoredValueSame,
@@ -343,21 +341,6 @@ describes.fakeWin('ConsentInfo', {}, () => {
       ).to.deep.equal({
         'consentStringType': CONSENT_STRING_TYPE.US_PRIVACY_STRING,
       });
-    });
-
-    it('consentStringType', () => {
-      let enumType = CONSENT_STRING_TYPE.TCF_V1;
-      let value = 'tcf-v1';
-      expect(convertEnumValueToConsentStringType(value)).to.equal(enumType);
-      expect(convertConsentStringType(enumType)).to.equal(value);
-      enumType = CONSENT_STRING_TYPE.TCF_V2;
-      value = 'tcf-v2';
-      expect(convertEnumValueToConsentStringType(value)).to.equal(enumType);
-      expect(convertConsentStringType(enumType)).to.equal(value);
-      enumType = CONSENT_STRING_TYPE.US_PRIVACY_STRING;
-      value = 'us-privacy-string';
-      expect(convertEnumValueToConsentStringType(value)).to.equal(enumType);
-      expect(convertConsentStringType(enumType)).to.equal(value);
     });
   });
 });

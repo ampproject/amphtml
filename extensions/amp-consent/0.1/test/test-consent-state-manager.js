@@ -19,7 +19,6 @@ import {
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
-  convertConsentStringType,
 } from '../consent-info';
 import {
   CONSENT_STRING_MAX_LENGTH,
@@ -514,11 +513,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(requestBody.consentState).to.be.true;
         expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.equal('new');
-        expect(requestBody.consentMetadata).to.deep.equal({
-          'consentStringType': convertConsentStringType(
-            CONSENT_STRING_TYPE.US_PRIVACY_STRING
-          ),
-        });
+        expect(requestBody.consentMetadata).to.deep.equal(
+          constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+        );
       });
 
       it('do not send update request on dismiss/notRequied', function* () {
