@@ -99,6 +99,13 @@ function printDistHelp(options) {
   } else {
     parseExtensionFlags();
   }
+  if (argv.define_experiment_constant) {
+    log(
+      green('Enabling the'),
+      cyan(argv.define_experiment_constant),
+      green('experiment.')
+    );
+  }
 }
 
 /**
