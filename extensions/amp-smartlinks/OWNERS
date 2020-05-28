@@ -9,6 +9,7 @@
         {name: 'pbecotte', requestReviews: false},
         {name: 'c-nichols', requestReviews: false},
         {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'ampproject/wg-ads', requestReview: false},
       ],
     },
   ],

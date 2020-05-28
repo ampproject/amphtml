@@ -6,6 +6,7 @@
     {
       owners: [
         {name: 'ampproject/wg-ads-reviewers'},
+        {name: 'ampproject/wg-ads', requestReview: false},
         {name: 'ampproject/wg-ui-and-a11y'},
       ],
     },
