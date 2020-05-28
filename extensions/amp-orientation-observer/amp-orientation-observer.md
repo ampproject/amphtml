@@ -58,7 +58,7 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-      {
+    {
       "duration": "3s",
       "fill": "both",
       "direction": "alternate",
@@ -66,8 +66,8 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
         {
           "selector": "#clock-scene .clock-hand",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
           ]
         }
       ]

@@ -16,7 +16,7 @@
 
 import {shouldBlockOnConsentByMeta} from '../../src/consent';
 
-describes.fakeWin('consent', {amp: true}, env => {
+describes.fakeWin('consent', {amp: true}, (env) => {
   describe('block by meta tags', () => {
     let doc;
     let head;

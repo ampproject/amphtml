@@ -135,7 +135,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+If no ad is available for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
 In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
@@ -263,6 +263,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AJA](../../ads/aja.md)
 - [AMoAd](../../ads/amoad.md)
 - [Aniview](../../ads/aniview.md)
+- [AnyClip](../../ads/anyclip.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
@@ -284,7 +285,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
-- [Dianomi](../../ads/dianomi.md)
 - [Directadvert](../../ads/directadvert.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
@@ -319,6 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [InMobi](../../ads/inmobi.md)
 - [Innity](../../ads/innity.md)
 - [Invibes](../../ads/invibes.md)
+- [Iprom](../../ads/iprom.md)
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
@@ -330,6 +331,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
+- [Marfeel](../../ads/marfeel.md)
 - [Media.net](../../ads/medianet.md)
 - [Mediavine](../../ads/mediavine.md)
 - [Medyanet](../../ads/medyanet.md)
@@ -340,6 +342,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [mox](../../ads/mox.md)
+- [my6Sense](../../ads/my6sense.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [NativeRoll](../../ads/nativeroll.md)
@@ -368,12 +371,14 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PulsePoint](../../ads/pulsepoint.md)
 - [PuffNetwork](../../ads/puffnetwork.md)
 - [Purch](../../ads/purch.md)
+- [Rakuten Unified Ads](../../ads/rakutenunifiedads.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [RbInfoxSg](../../ads/rbinfox.md)
 - [Realclick](../../ads/realclick.md)
 - [recomAD](../../ads/recomad.md)
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
+- [RelapPro](../../ads/relappro.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)
@@ -452,6 +457,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Taboola](../../ads/taboola.md)
 - [TE Medya](../../ads/temedya.md)
 - [Whopa InFeed](../../ads/whopainfeed.md)
+- [Yahoo Native-Display Ads Federation](../../ads/yahoofedads.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

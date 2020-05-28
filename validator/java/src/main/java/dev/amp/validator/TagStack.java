@@ -34,10 +34,10 @@ import java.util.List;
  * This class keeps track of the tag names and ChildTagMatchers
  * as we enter / exit tags in the document. Closing tags is tricky:
  * - We assume that all end tags are optional and we close, that is, pop off
- *   tags our stack, lazily as we encounter parent closing tags. This part
- *   differs slightly from the behavior per spec: instead of closing an
- *   option tag when a following option tag is seen, we close it when the
- *   parent closing tag (in practice select) is encountered.
+ * tags our stack, lazily as we encounter parent closing tags. This part
+ * differs slightly from the behavior per spec: instead of closing an
+ * option tag when a following option tag is seen, we close it when the
+ * parent closing tag (in practice select) is encountered.
  *
  * @author nhant01
  * @author GeorgeLuo
@@ -57,20 +57,20 @@ public class TagStack {
     /**
      * Returns true if this within lt;style amp-custom gt;.
      *
-     * @throws TagValidationException the TagValidationException.
      * @return returns true if this within lt;style amp-custom gt; Else false.
+     * @throws TagValidationException the TagValidationException.
      */
-    public boolean isStyleAmpCustomChild() throws TagValidationException {
-        return (this.parentStackEntry().getTagSpec() != null)
-                && (this.parentStackEntry().getTagSpec().getSpec().getNamedId()
-                == ValidatorProtos.TagSpec.NamedId.STYLE_AMP_CUSTOM);
+    public boolean countDocCssBytes() throws TagValidationException {
+        final ParsedTagSpec parentSpec = this.parentStackEntry().getTagSpec();
+        return (parentSpec != null) && (parentSpec.getSpec().hasCdata())
+                && (parentSpec.getSpec().getCdata().hasDocCssBytes());
     }
 
     /**
      * The parent of the current stack entry.
      *
-     * @throws TagValidationException the TagValidationException.
      * @return TagStackEntry the TagStackEntry.
+     * @throws TagValidationException the TagValidationException.
      */
     public TagStackEntry parentStackEntry() throws TagValidationException {
         if (this.stack.size() < 1) {
@@ -81,8 +81,9 @@ public class TagStack {
 
     /**
      * Alias to the last element on the tag stack.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return TagStackEntry the TagStackEntry.
+     * @throws TagValidationException the TagValidationException.
      */
     public TagStackEntry back() throws TagValidationException {
         if (this.stack.size() <= 0) {
@@ -93,8 +94,9 @@ public class TagStack {
 
     /**
      * Returns the parent stack entry reference point matcher.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns the parent stack entry reference point matcher.
+     * @throws TagValidationException the TagValidationException.
      */
     public ReferencePointMatcher parentReferencePointMatcher() throws TagValidationException {
         return this.parentStackEntry().getReferencePointMatcher();
@@ -103,6 +105,7 @@ public class TagStack {
     /**
      * Tells the parent of the current stack entry that it can only have 1 child
      * and that child must be me (the current stack entry).
+     *
      * @param tagName The current stack entry's tag name.
      * @param lineCol pair of line/col.
      * @throws TagValidationException the TagValidationException.
@@ -115,26 +118,27 @@ public class TagStack {
 
     /**
      * Returns the parent only child error line col.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns the Locator of the tag that set the rule.
+     * @throws TagValidationException the TagValidationException.
      */
     public Locator parentOnlyChildErrorLineCol() throws TagValidationException {
         return this.parentStackEntry().getOnlyChildErrorLineCol();
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return returns the name of the tag that set the 'no siblings allowed'
      * rule.
+     * @throws TagValidationException the TagValidationException.
      */
     public String parentOnlyChildTagName() throws TagValidationException {
         return this.parentStackEntry().getOnlyChildTagName();
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return returns true if this tag's parent has a child with 'no siblings
      * allowed' rule. Else false.
+     * @throws TagValidationException the TagValidationException.
      */
     public boolean parentHasChildWithNoSiblingRule() throws TagValidationException {
         return this.parentOnlyChildTagName().length() > 0;
@@ -142,8 +146,9 @@ public class TagStack {
 
     /**
      * Returns the Locator of the tag that set the 'last child' rule.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return The Locator of the tag that set the 'last child' rule.
+     * @throws TagValidationException the TagValidationException.
      */
     public Locator parentLastChildErrorLineCol() throws TagValidationException {
         return this.parentStackEntry().getLastChildErrorLineCol();
@@ -151,6 +156,7 @@ public class TagStack {
 
     /**
      * Returns the list of DescendantConstraints.
+     *
      * @return returns the list of DescendantConstraints.
      */
     public List<DescendantConstraints> allowedDescendantsList() {
@@ -160,8 +166,9 @@ public class TagStack {
     /**
      * Tells the parent of the current stack entry that its last child must be me
      * (the current stack entry).
+     *
      * @param tagName The current stack entry's tag name.
-     * @param url The current stack entry's spec url.
+     * @param url     The current stack entry's spec url.
      * @param lineCol a pair line/col.
      * @throws TagValidationException the TagValidationException.
      */
@@ -177,9 +184,10 @@ public class TagStack {
     /**
      * This method is called as we're visiting a tag; so the matcher we
      * need here is the one provided/specified for the tag parent.
+     *
      * @param encounteredTag encountered tag.
-     * @param context the Context object.
-     * @param result validation result.
+     * @param context        the Context object.
+     * @param result         validation result.
      * @throws TagValidationException the TagValidationException.
      */
     public void matchChildTagName(@Nonnull final ParsedHtmlTag encounteredTag,
@@ -194,9 +202,10 @@ public class TagStack {
 
     /**
      * Returns true if this within script type=application/json. Else false.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns true if this within script type=application/json. Else
      * false.
+     * @throws TagValidationException the TagValidationException.
      */
     public boolean isScriptTypeJsonChild() throws TagValidationException {
         return (this.parentStackEntry().getTagName().equals("SCRIPT")
@@ -207,6 +216,7 @@ public class TagStack {
     /**
      * Returns true if the current tag has ancestor with the given tag name or
      * specName.
+     *
      * @param ancestor ancestor tag.
      * @return returns true if the current tag has ancestor with the given tag name or specName.
      */
@@ -226,9 +236,10 @@ public class TagStack {
 
     /**
      * Returns true if the current tag has an ancestor which set the given marker.
+     *
      * @param query the ancestor marker.
-     * @throws TagValidationException the TagValidationException.
      * @return returns true if the current tag has an ancestor which set the given marker.
+     * @throws TagValidationException the TagValidationException.
      */
     public boolean hasAncestorMarker(@Nonnull final ValidatorProtos.AncestorMarker.Marker query) throws TagValidationException {
         if (query == ValidatorProtos.AncestorMarker.Marker.UNKNOWN) {
@@ -254,9 +265,10 @@ public class TagStack {
 
     /**
      * Enter a tag, opening a scope for child tags.
-     * @param tagName the tag name.
+     *
+     * @param tagName              the tag name.
      * @param referencePointResult the reference point result.
-     * @param tagResult the tag result.
+     * @param tagResult            the tag result.
      */
     private void enterTag(@Nonnull final String tagName, @Nonnull final ValidateTagResult referencePointResult,
                           @Nonnull final ValidateTagResult tagResult) {
@@ -270,8 +282,9 @@ public class TagStack {
      * Upon exiting a tag, validation for the current child tag matcher is
      * triggered, e.g. for checking that the tag had some specified number
      * of children.
+     *
      * @param context the context.
-     * @param result the ValidationResult.
+     * @param result  the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void exitTag(@Nonnull final Context context, @Nonnull final ValidatorProtos.ValidationResult.Builder result)
@@ -296,9 +309,10 @@ public class TagStack {
     /**
      * Given a ValidateTagResult, update the tag stack entry at the top of the
      * tag stack to add any constraints from the spec.
-     * @param result the ValidateTagResult.
+     *
+     * @param result      the ValidateTagResult.
      * @param parsedRules the ParsedValidatorRules.
-     * @param lineCol a pair of line/col.
+     * @param lineCol     a pair of line/col.
      * @throws TagValidationException the TagValidationException.
      */
     public void updateStackEntryFromTagResult(@Nonnull final ValidateTagResult result,
@@ -326,11 +340,12 @@ public class TagStack {
     /**
      * Update tagstack state after validating an encountered tag. Called with the
      * best matching specs, even if not a match.
-     * @param encounteredTag the ParsedHtmlTag.
+     *
+     * @param encounteredTag       the ParsedHtmlTag.
      * @param referencePointResult reference point result.
-     * @param tagResult tag result.
-     * @param parsedRules parsed rules.
-     * @param lineCol a pair line/col.
+     * @param tagResult            tag result.
+     * @param parsedRules          parsed rules.
+     * @param lineCol              a pair line/col.
      * @throws TagValidationException the TagValidationException.
      */
     public void updateFromTagResults(
@@ -348,7 +363,7 @@ public class TagStack {
                 throw new TagValidationException("Parent's reference point matcher is null");
             }
             this.parentReferencePointMatcher().recordMatch(
-                    /** @type{!ParsedTagSpec} */ (referencePointResult.getBestMatchTagSpec()));
+                    /** @type{!ParsedTagSpec} */(referencePointResult.getBestMatchTagSpec()));
         }
 
         // The following only add new constraints, not new allowances, so
@@ -379,6 +394,7 @@ public class TagStack {
     /**
      * Updates the allowed descendants list if a tag introduced constraints. This
      * is called when exiting a tag.
+     *
      * @throws TagValidationException the TagValidationException.
      */
     private void unSetDescendantConstraintList() throws TagValidationException {
@@ -390,9 +406,9 @@ public class TagStack {
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return {boolean} true if the tag introduced descendant constraints.
      * Else false.
+     * @throws TagValidationException the TagValidationException.
      */
     private boolean hasDescendantConstraintLists() throws TagValidationException {
         return this.back().getHasDescendantConstraintLists();
@@ -400,18 +416,36 @@ public class TagStack {
 
     /**
      * Setting descendant constraint lists.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @param value a boolean value.
+     * @throws TagValidationException the TagValidationException.
      */
     private void setHasDescendantConstraintLists(final boolean value) throws TagValidationException {
         this.back().setHasDescendantConstraintLists(value);
     }
 
     /**
+     * The spec_name of the parent of the current tag if one exists, otherwise the
+     * tag_name.
+     *
+     * @return The spec_name of the parent of the current tag, or tag_name
+     * @throws TagValidationException the TagValidationException.
+     */
+    public String parentTagSpecName() throws TagValidationException {
+        if ((this.parentStackEntry().getTagSpec() != null)
+                && (this.parentStackEntry().getTagSpec().getSpec().hasSpecName())) {
+            return (
+                    this.parentStackEntry().getTagSpec().getSpec().getSpecName());
+        }
+        return this.parentStackEntry().getTagName();
+    }
+
+    /**
      * The number of children that have been discovered up to now by traversing
      * the stack.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns parent stack's num children.
+     * @throws TagValidationException the TagValidationException.
      */
     public int parentChildCount() throws TagValidationException {
         return this.parentStackEntry().getNumChildren();
@@ -419,6 +453,7 @@ public class TagStack {
 
     /**
      * Sets the reference point matcher for the tag currently on the stack.
+     *
      * @param matcher reference point matcher.
      * @throws TagValidationException the TagValidationException.
      */
@@ -430,6 +465,7 @@ public class TagStack {
 
     /**
      * Sets the child tag matcher for the tag currently on the stack.
+     *
      * @param matcher child tag matcher.
      * @throws TagValidationException the TagValidationException.
      */
@@ -441,6 +477,7 @@ public class TagStack {
 
     /**
      * Sets the cdata matcher for the tag currently on the stack.
+     *
      * @param matcher Cdata matcher.
      * @throws TagValidationException the TagValidationException.
      */
@@ -453,8 +490,9 @@ public class TagStack {
     /**
      * Returns the cdata matcher for the tag currently on the stack. If there
      * is no cdata matcher, returns null.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns the CdataMatcher for the tag currently on the stack.
+     * @throws TagValidationException the TagValidationException.
      */
     public CdataMatcher cdataMatcher() throws TagValidationException {
         return this.back().getCdataMatcher();
@@ -462,33 +500,34 @@ public class TagStack {
 
     /**
      * The name of the parent of the current tag.
-     * @throws TagValidationException the TagValidationException.
+     *
      * @return returns the parent stack entry tag name.
+     * @throws TagValidationException the TagValidationException.
      */
     public String parentTagName() throws TagValidationException {
         return this.parentStackEntry().getTagName();
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return returns the name of the tag with the 'last child' rule.
+     * @throws TagValidationException the TagValidationException.
      */
     public String parentLastChildTagName() throws TagValidationException {
         return this.parentStackEntry().getLastChildTagName();
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return returns the spec url of the last child.
+     * @throws TagValidationException the TagValidationException.
      */
     public String parentLastChildUrl() throws TagValidationException {
         return this.parentStackEntry().getLastChildUrl();
     }
 
     /**
-     * @throws TagValidationException the TagValidationException.
      * @return returns true if this tag's parent has a child with 'last child'
      * rule. Else false.
+     * @throws TagValidationException the TagValidationException.
      */
     public boolean parentHasChildWithLastChildRule() throws TagValidationException {
         return this.parentLastChildTagName().length() > 0;
@@ -496,13 +535,14 @@ public class TagStack {
 
     /**
      * Setting the descendant constraint list.
+     *
      * @param parsedTagSpec the parsed tag spec.
-     * @param parsedRules the parsed rules.
+     * @param parsedRules   the parsed rules.
      * @throws TagValidationException the TagValidationException.
      */
     public void setDescendantConstraintList(@Nonnull final ParsedTagSpec parsedTagSpec,
                                             @Nonnull final ParsedValidatorRules parsedRules)
-                        throws TagValidationException {
+            throws TagValidationException {
         if (parsedTagSpec.getSpec().getDescendantTagList() == null
                 || parsedTagSpec.getSpec().getDescendantTagList().equals("")) {
             return;
@@ -527,13 +567,16 @@ public class TagStack {
         }
     }
 
-    /** The current tag name and its parents. */
+    /**
+     * The current tag name and its parents.
+     */
     @Nonnull
     private LinkedList<TagStackEntry> stack;
 
-    /** Allowed descendant list. */
+    /**
+     * Allowed descendant list.
+     */
     @Nonnull
     private List<DescendantConstraints> allowedDescendantsList = new ArrayList<>();
-
 }
 

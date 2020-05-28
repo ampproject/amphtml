@@ -16,7 +16,7 @@
 
 const router = require('express').Router();
 
-router.use('/form/post/success', function(req, res) {
+router.use('/form/post/success', function (req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     name: 'John Miller',

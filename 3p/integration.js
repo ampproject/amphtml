@@ -105,6 +105,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {aniview} from '../ads/aniview';
+import {anyclip} from '../ads/anyclip';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
@@ -163,6 +164,7 @@ import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
+import {iprom} from '../ads/iprom';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
@@ -176,6 +178,7 @@ import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
+import {marfeel} from '../ads/marfeel';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
@@ -186,6 +189,7 @@ import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
+import {my6sense} from '../ads/my6sense';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -217,11 +221,13 @@ import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rakutenunifiedads} from '../ads/rakutenunifiedads';
 import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
+import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
@@ -277,6 +283,7 @@ import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
+import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
@@ -331,6 +338,7 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   temedya: true,
   whopainfeed: true,
+  yahoofedads: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -389,6 +397,7 @@ register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
 register('aniview', aniview);
+register('anyclip', anyclip);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
@@ -453,6 +462,7 @@ register('inmobi', inmobi);
 register('innity', innity);
 register('insticator', insticator);
 register('invibes', invibes);
+register('iprom', iprom);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);
@@ -467,6 +477,7 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('marfeel', marfeel);
 register('mathml', mathml);
 register('medianet', medianet);
 register('mediavine', mediavine);
@@ -478,6 +489,7 @@ register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
+register('my6sense', my6sense);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
@@ -510,12 +522,14 @@ register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rakutenunifiedads', rakutenunifiedads);
 register('rbinfox', rbinfox);
 register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
 register('relap', relap);
+register('relappro', relappro);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
@@ -572,6 +586,7 @@ register('wisteria', wisteria);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
@@ -638,7 +653,7 @@ export function draw3p(win, data, configCallback) {
     win.context.tagName
   );
   if (configCallback) {
-    configCallback(data, data => {
+    configCallback(data, (data) => {
       userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -659,7 +674,7 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(
+window.draw3p = function (
   opt_configCallback,
   opt_allowed3pTypes,
   opt_allowedEmbeddingOrigins

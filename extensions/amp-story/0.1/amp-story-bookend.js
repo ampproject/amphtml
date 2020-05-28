@@ -111,7 +111,7 @@ const TAG = 'amp-story';
  * @param {?string} consentId
  * @return {!./simple-template.ElementDef}
  */
-const buildPromptConsentTemplate = consentId => {
+const buildPromptConsentTemplate = (consentId) => {
   return /** @type {!./simple-template.ElementDef} */ ({
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
@@ -187,7 +187,7 @@ function buildArticleTemplate(articleData) {
 function buildArticlesContainerTemplate(articleSets) {
   const template = [];
 
-  articleSets.forEach(articleSet => {
+  articleSets.forEach((articleSet) => {
     if (articleSet.heading) {
       template.push({
         tag: 'h3',
@@ -198,7 +198,7 @@ function buildArticlesContainerTemplate(articleSets) {
     template.push({
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
-      children: articleSet.articles.map(article =>
+      children: articleSet.articles.map((article) =>
         buildArticleTemplate(article)
       ),
     });
@@ -286,7 +286,7 @@ export class Bookend {
     this.requestService_ = Services.storyRequestServiceV01(this.win_);
 
     /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(this.win_);
+    this.shareWidget_ = ScrollableShareWidget.create(this.win_, parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
@@ -342,10 +342,10 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.getShadowRoot().addEventListener('click', event =>
+    this.getShadowRoot().addEventListener('click', (event) =>
       this.onClick_(event)
     );
-    this.replayButton_.addEventListener('click', event =>
+    this.replayButton_.addEventListener('click', (event) =>
       this.onReplayButtonClick_(event)
     );
 
@@ -356,7 +356,7 @@ export class Bookend {
       throttle(this.win_, () => this.onScroll_(), 100)
     );
 
-    this.win_.addEventListener('keyup', event => {
+    this.win_.addEventListener('keyup', (event) => {
       if (!this.isActive_()) {
         return;
       }
@@ -366,13 +366,13 @@ export class Bookend {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -380,7 +380,7 @@ export class Bookend {
 
     this.storeService_.subscribe(
       StateProperty.DESKTOP_STATE,
-      isDesktop => {
+      (isDesktop) => {
         this.onDesktopStateUpdate_(isDesktop);
       },
       true /** callToInitialize */
@@ -478,7 +478,7 @@ export class Bookend {
 
     return this.requestService_
       .loadBookendConfig()
-      .then(response => {
+      .then((response) => {
         if (!response) {
           return null;
         }
@@ -507,7 +507,7 @@ export class Bookend {
 
         return this.config_;
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'Error fetching bookend configuration', e.message);
         return null;
       });
@@ -547,7 +547,7 @@ export class Bookend {
    * @return {boolean}
    */
   elementOutsideUsableArea_(el) {
-    return !closest(el, el => el == this.getInnerContainer_());
+    return !closest(el, (el) => el == this.getInnerContainer_());
   }
 
   /**
@@ -560,12 +560,12 @@ export class Bookend {
     }
     this.vsync_.run(
       {
-        measure: state => {
+        measure: (state) => {
           state.shouldBeFullBleed =
             this.getOverflowContainer_()./*OK*/ scrollTop >=
             FULLBLEED_THRESHOLD;
         },
-        mutate: state => {
+        mutate: (state) => {
           this.getShadowRoot().classList.toggle(
             FULLBLEED_CLASSNAME,
             state.shouldBeFullBleed

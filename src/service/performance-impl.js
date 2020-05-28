@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
 import {Services} from '../services';
+import {Signals} from '../utils/signals';
+import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -88,19 +89,8 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    this.fcpDeferred_ = new Deferred();
-    this.fvrDeferred_ = new Deferred();
-    this.mbvDeferred_ = new Deferred();
-
-    // Platform service must be installed before performance serivce is
-    this.platform_ = Services.platformFor(this.win);
-
-    // TODO (micajuineho) change this once all platforms
-    // support PerformancePaintTiming
-    // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
-    if (!this.platform_.isChrome() && !this.platform_.isOpera()) {
-      this.fcpDeferred_.resolve(null);
-    }
+    /** @private {Signals} */
+    this.metrics_ = new Signals();
 
     /**
      * How many times a layout shift metric has been ticked.
@@ -121,6 +111,15 @@ export class Performance {
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
       [];
+
+    // If Paint Timing API is not supported, cannot determine first contentful paint
+    if (!supportedEntryTypes.includes('paint')) {
+      this.metrics_.rejectSignal(
+        TickLabel.FIRST_CONTENTFUL_PAINT,
+        new Error('First Contentful Paint not supported')
+      );
+    }
+
     /**
      * Whether the user agent supports the Layout Instability API that shipped
      * with Chromium 77.
@@ -128,6 +127,13 @@ export class Performance {
      * @private {boolean}
      */
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
+
+    if (!this.supportsLayoutShift_) {
+      this.metrics_.rejectSignal(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
+        new Error('Cumulative Layout Shift not supported')
+      );
+    }
 
     /**
      * Whether the user agent supports the Event Timing API that shipped
@@ -137,6 +143,13 @@ export class Performance {
      */
     this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
+    if (!this.supportsEventTiming_) {
+      this.metrics_.rejectSignal(
+        TickLabel.FIRST_INPUT_DELAY,
+        new Error('First Input Delay not supported')
+      );
+    }
+
     /**
      * Whether the user agent supports the Largest Contentful Paint metric.
      *
@@ -145,6 +158,20 @@ export class Performance {
     this.supportsLargestContentfulPaint_ = supportedEntryTypes.includes(
       'largest-contentful-paint'
     );
+
+    if (!this.supportsLargestContentfulPaint_) {
+      this.metrics_.rejectSignal(
+        TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
+        new Error('Largest Contentful Paint not supported')
+      );
+    }
+
+    /**
+     * Whether the user agent supports the navigation timing API
+     *
+     * @private {boolean}
+     */
+    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
     /**
      * The latest reported largest contentful paint time, where the loadTime
@@ -170,7 +197,7 @@ export class Performance {
 
     // Tick document ready event.
     whenDocumentReady(win.document).then(() => {
-      this.tick('dr');
+      this.tick(TickLabel.DOCUMENT_READY);
       this.flush();
     });
 
@@ -205,7 +232,7 @@ export class Performance {
     const channelPromise = this.viewer_.whenMessagingReady();
 
     this.ampdoc_.whenFirstVisible().then(() => {
-      this.tick('ofv');
+      this.tick(TickLabel.ON_FIRST_VISIBLE);
       this.flush();
     });
 
@@ -234,10 +261,10 @@ export class Performance {
     return channelPromise
       .then(() => {
         // Tick the "messaging ready" signal.
-        this.tickDelta('msr', this.win.performance.now());
+        this.tickDelta(TickLabel.MESSAGING_READY, this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tickDelta('timeOrigin', this.timeOrigin_);
+        this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -260,7 +287,7 @@ export class Performance {
    */
   maybeAddStoryExperimentId_() {
     const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
-    return isStoryDocument(ampdoc).then(isStory => {
+    return isStoryDocument(ampdoc).then((isStory) => {
       if (isStory) {
         this.addEnabledExperiment('story');
       }
@@ -271,7 +298,7 @@ export class Performance {
    * Callback for onload.
    */
   onload_() {
-    this.tick('ol');
+    this.tick(TickLabel.ON_LOAD);
     this.tickLegacyFirstPaintTime_();
     this.flush();
   }
@@ -282,6 +309,14 @@ export class Performance {
    * See https://github.com/WICG/paint-timing
    */
   registerPerformanceObserver_() {
+    // Turn off performanceObserver derived metrics for inabox as there
+    // will never be a viewer to report to.
+    // TODO(ccordry): we are still doing some other unnecessary measurements for
+    // the inabox case, but would need a larger refactor.
+    if (getMode(this.win).runtime === 'inabox') {
+      return;
+    }
+
     // Chromium doesn't implement the buffered flag for PerformanceObserver.
     // That means we need to read existing entries and maintain state
     // as to whether we have reported a value yet, since in the future it may
@@ -290,21 +325,26 @@ export class Performance {
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-    const processEntry = entry => {
+    let recordedNavigation = false;
+    const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
-        this.tickDelta('fp', entry.startTime + entry.duration);
+        this.tickDelta(TickLabel.FIRST_PAINT, entry.startTime + entry.duration);
         recordedFirstPaint = true;
       } else if (
         entry.name == 'first-contentful-paint' &&
         !recordedFirstContentfulPaint
       ) {
-        this.tickDelta('fcp', entry.startTime + entry.duration);
+        const value = entry.startTime + entry.duration;
+        this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
+        this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
         recordedFirstContentfulPaint = true;
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
       ) {
-        this.tickDelta('fid', entry.processingStart - entry.startTime);
+        const value = entry.processingStart - entry.startTime;
+        this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
+        this.tickSinceVisible(TickLabel.FIRST_INPUT_DELAY_VISIBLE, value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -319,6 +359,18 @@ export class Performance {
         if (entry.renderTime) {
           this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
+      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
+        [
+          'domComplete',
+          'domContentLoadedEventEnd',
+          'domContentLoadedEventStart',
+          'domInteractive',
+          'loadEventEnd',
+          'loadEventStart',
+          'requestStart',
+          'responseStart',
+        ].forEach((label) => this.tick(label, entry[label]));
+        recordedNavigation = true;
       }
     };
 
@@ -348,6 +400,11 @@ export class Performance {
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
+    if (this.supportsNavigation_) {
+      const navigationObserver = this.createPerformanceObserver_(processEntry);
+      navigationObserver.observe({type: 'navigation', buffered: true});
+    }
+
     if (entryTypesToObserve.length === 0) {
       return;
     }
@@ -371,7 +428,7 @@ export class Performance {
    * @private
    */
   createPerformanceObserver_(processEntry) {
-    return new this.win.PerformanceObserver(list => {
+    return new this.win.PerformanceObserver((list) => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
@@ -385,8 +442,8 @@ export class Performance {
     if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
       return;
     }
-    this.win.perfMetrics.onFirstInputDelay(delay => {
-      this.tickDelta('fid-polyfill', delay);
+    this.win.perfMetrics.onFirstInputDelay((delay) => {
+      this.tickDelta(TickLabel.FIRST_INPUT_DELAY_POLYFILL, delay);
       this.flush();
     });
   }
@@ -437,11 +494,17 @@ export class Performance {
    */
   tickLayoutShiftScore_() {
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta('cls', this.aggregateShiftScore_);
+      this.tickDelta(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
+        this.aggregateShiftScore_
+      );
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta('cls-2', this.aggregateShiftScore_);
+      this.tickDelta(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT_2,
+        this.aggregateShiftScore_
+      );
       this.flush();
       this.shiftScoresTicked_ = 2;
 
@@ -477,7 +540,7 @@ export class Performance {
         // that is fixed in later Chromium versions.
         return;
       }
-      this.tickDelta('fp', fpTime);
+      this.tickDelta(TickLabel.FIRST_PAINT, fpTime);
     }
   }
 
@@ -485,11 +548,23 @@ export class Performance {
    * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
+    /** @type {number|null} */ let end;
     if (this.largestContentfulPaintLoadTime_ !== null) {
-      this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
+      this.tickDelta(
+        TickLabel.LARGEST_CONTENTFUL_PAINT_LOAD,
+        this.largestContentfulPaintLoadTime_
+      );
+      end = this.largestContentfulPaintLoadTime_;
     }
     if (this.largestContentfulPaintRenderTime_ !== null) {
-      this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
+      this.tickDelta(
+        TickLabel.LARGEST_CONTENTFUL_PAINT_RENDER,
+        this.largestContentfulPaintRenderTime_
+      );
+      end = end || this.largestContentfulPaintRenderTime_;
+    }
+    if (end !== null) {
+      this.tickSinceVisible(TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE, end);
     }
     this.flush();
   }
@@ -521,16 +596,19 @@ export class Performance {
           // since otherwise we heavily skew the metric towards the
           // 0 case, since pre-renders that are never used are highly
           // likely to fully load before they are never used :)
-          this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+          this.tickDelta(
+            TickLabel.FIRST_VIEWPORT_READY,
+            userPerceivedVisualCompletenesssTime
+          );
         });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
         // Mark this instance in the browser timeline.
-        this.mark('pc');
+        this.mark(TickLabel.FIRST_VIEWPORT_READY);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
-        this.tick('pc');
+        this.tick(TickLabel.FIRST_VIEWPORT_READY);
         this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
       }
       this.flush();
@@ -544,10 +622,10 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const {documentElement} = this.win.document;
-    const size = Services.viewportForDoc(documentElement).getSize();
-    const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
+      const {documentElement} = this.win.document;
+      const size = Services.viewportForDoc(documentElement).getSize();
+      const rect = layoutRectLtwh(0, 0, size.width, size.height);
       return whenContentIniLoad(
         documentElement,
         this.win,
@@ -560,24 +638,31 @@ export class Performance {
   /**
    * Ticks a timing event.
    *
-   * @param {string} label The variable name as it will be reported.
+   * @param {TickLabel} label The variable name as it will be reported.
    *     See TICKEVENTS.md for available metrics, and edit this file
    *     when adding a new metric.
    * @param {number=} opt_delta The delta. Call tickDelta instead of setting
    *     this directly.
+   * @param {number=} opt_value The value to use. Overrides default calculation.
    */
-  tick(label, opt_delta) {
+  tick(label, opt_delta, opt_value) {
+    devAssert(
+      opt_delta == undefined || opt_value == undefined,
+      'You may not set both opt_delta and opt_value.'
+    );
+
     const data = dict({'label': label});
     let delta;
 
-    // Absolute value case (not delta).
-    if (opt_delta == undefined) {
-      // Marking only makes sense for non-deltas.
+    if (opt_delta != undefined) {
+      data['delta'] = delta = Math.max(opt_delta, 0);
+    } else if (opt_value != undefined) {
+      data['value'] = opt_value;
+    } else {
+      // Marking only makes sense for non-overridden values (and no deltas).
       this.mark(label);
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
-    } else {
-      data['delta'] = delta = Math.max(opt_delta, 0);
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
@@ -586,17 +671,7 @@ export class Performance {
       this.queueTick_(data);
     }
 
-    switch (label) {
-      case 'fcp':
-        this.fcpDeferred_.resolve(delta);
-        break;
-      case 'pc':
-        this.fvrDeferred_.resolve(delta);
-        break;
-      case 'mbv':
-        this.mbvDeferred_.resolve(delta);
-        break;
-    }
+    this.metrics_.signal(label, delta);
   }
 
   /**
@@ -618,7 +693,7 @@ export class Performance {
   /**
    * Tick a very specific value for the label. Use this method if you
    * measure the time it took to do something yourself.
-   * @param {string} label The variable name as it will be reported.
+   * @param {TickLabel} label The variable name as it will be reported.
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
@@ -627,12 +702,13 @@ export class Performance {
 
   /**
    * Tick time delta since the document has become visible.
-   * @param {string} label The variable name as it will be reported.
+   * @param {TickLabel} label The variable name as it will be reported.
+   * @param {number=} opt_end If present, use this value for end time instead of now()
    */
-  tickSinceVisible(label) {
-    const now = this.timeOrigin_ + this.win.performance.now();
+  tickSinceVisible(label, opt_end) {
+    const end = opt_end || this.timeOrigin_ + this.win.performance.now();
     const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
-    const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
+    const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }
 
@@ -701,7 +777,7 @@ export class Performance {
       return;
     }
 
-    this.events_.forEach(tickEvent => {
+    this.events_.forEach((tickEvent) => {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
@@ -732,24 +808,13 @@ export class Performance {
   }
 
   /**
-   * @return {!Promise<number>}
+   * Retrieve a promise for tick label, resolved with metric. Used by amp-analytics
+   *
+   * @param {TickLabel} label
+   * @return {!Promise<time>}
    */
-  getFirstContentfulPaint() {
-    return this.fcpDeferred_.promise;
-  }
-
-  /**
-   * @return {!Promise<number>}
-   */
-  getMakeBodyVisible() {
-    return this.mbvDeferred_.promise;
-  }
-
-  /**
-   * @return {!Promise<number>}
-   */
-  getFirstViewportReady() {
-    return this.fvrDeferred_.promise;
+  getMetric(label) {
+    return this.metrics_.whenSignal(label);
   }
 }
 

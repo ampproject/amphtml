@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
@@ -22,7 +27,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
-describes.fakeWin('amp-story system layer', {amp: true}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
   let win;
   let storeService;
   let systemLayer;
@@ -32,14 +37,14 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
-      return storeService;
-    });
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
-      return localizationService;
+    storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
     });
 
     progressBarRoot = win.document.createElement('div');
@@ -53,7 +58,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
     env.sandbox.stub(Services, 'vsyncFor').returns({
-      mutate: fn => fn(),
+      mutate: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win, win.document.body);
@@ -140,5 +145,91 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     expect(shareButton.tagName).to.equal('A');
     // Default "canonical"
     expect(shareButton.href).to.equal('http://localhost:9876/context.html');
+  });
+
+  it('should show paused button if story has element with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    expect(systemLayer.getShadowRoot()).to.have.class(
+      'i-amphtml-story-has-playback-ui'
+    );
+  });
+
+  it('should enable paused button if page has element with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.not.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.not.have.attribute('disabled');
+  });
+
+  it('should disable paused button if page does not has elements with playback', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, false);
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-pause-control')
+    ).to.have.attribute('disabled');
+    expect(
+      systemLayer
+        .getShadowRoot()
+        .querySelector('button.i-amphtml-story-play-control')
+    ).to.have.attribute('disabled');
+  });
+
+  it('setting paused state to true should add the paused flag', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
+  });
+
+  it('setting paused state to false should not add the paused flag', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the play button should change state to false', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-play-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
+  });
+
+  it('click on the pause button should change state to true', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+    storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-pause-control')
+      .click();
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+    expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
 });

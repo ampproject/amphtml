@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows users to subscribe to [web push notifications](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/).
+  text: Allows users to subscribe to web push notifications.
 ---
 
 <!--
@@ -73,6 +73,7 @@ The `amp-web-push` component requires extra integration on your site. You will n
 
 ```html
 <amp-web-push
+  layout="nodisplay"
   helper-iframe-url="https://example.com/helper-iframe.html"
   permission-dialog-url="https://example.com/permission-dialog.html"
   service-worker-url="https://example.com/service-worker.js"

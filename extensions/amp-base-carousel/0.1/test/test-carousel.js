@@ -21,7 +21,7 @@ import {Carousel} from '../carousel';
 import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('carousel implementation', {}, env => {
+describes.realWin('carousel implementation', {}, (env) => {
   let win;
   let doc;
   let element;
@@ -40,7 +40,7 @@ describes.realWin('carousel implementation', {}, env => {
    * @return {!Array<!Element>}
    */
   function setSlides(count) {
-    toArray(scrollContainer.querySelectorAll('test-slide')).forEach(slide => {
+    toArray(scrollContainer.querySelectorAll('test-slide')).forEach((slide) => {
       scrollContainer.removeChild(slide);
     });
 
@@ -55,7 +55,7 @@ describes.realWin('carousel implementation', {}, env => {
       return slide;
     });
 
-    slides.forEach(slide => scrollContainer.appendChild(slide));
+    slides.forEach((slide) => scrollContainer.appendChild(slide));
 
     return slides;
   }
@@ -98,6 +98,7 @@ describes.realWin('carousel implementation', {}, env => {
 
     element.appendChild(scrollContainer);
     doc.body.appendChild(element);
+    element.getAmpDoc = () => env.ampdoc;
   });
 
   afterEach(() => {

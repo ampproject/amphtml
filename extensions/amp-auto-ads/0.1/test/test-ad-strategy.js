@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let container;
 
@@ -93,7 +93,7 @@ describes.realWin(
         true
       );
 
-      return adStrategy.run().then(unused => {
+      return adStrategy.run().then((unused) => {
         expect(placeAdSpy).to.be.calledWith(
           attributes,
           sizing,
@@ -153,7 +153,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
         expect(anchor1.childNodes).to.have.lengthOf(1);
         expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -219,7 +219,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
         expect(anchor1.childNodes).to.have.lengthOf(0);
         expect(anchor2.childNodes).to.have.lengthOf(1);
@@ -292,7 +292,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -366,7 +366,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 2, totalAdsOnPage: 2});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(1);
@@ -456,7 +456,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 2});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -528,7 +528,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 0, totalAdsOnPage: 0});
         expect(anchor1.childNodes).to.have.lengthOf(0);
         expect(anchor2.childNodes).to.have.lengthOf(0);

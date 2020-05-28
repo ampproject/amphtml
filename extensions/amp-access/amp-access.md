@@ -179,12 +179,9 @@ Here’s an example of the AMP Access configuration:
 ```html
 <script id="amp-access" type="application/json">
   {
-    "authorization":
-        "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
-    "pingback":
-        "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
-    "login":
-        "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
+    "authorization": "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
+    "pingback": "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
+    "login": "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
     "authorizationFallbackResponse": {"error": true}
   }
 </script>
@@ -203,7 +200,7 @@ It is possible to specify multiple access providers using an array instead of a 
       "namespace": value
     },
     ...
-  [
+  ]
 </script>
 ```
 

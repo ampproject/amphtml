@@ -18,7 +18,7 @@ const appendQueryParamsToUrl = (url, params) =>
   url +
   '?' +
   Object.keys(params)
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 
 const leadingSlashRegex = /^\//;

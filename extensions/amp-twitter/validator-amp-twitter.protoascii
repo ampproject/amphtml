@@ -104,6 +104,10 @@ tags: {  # <amp-twitter>
     name: "data-tweetid"
     mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
   }
+  # <amp-bind>
+  attrs: {
+    name: "[data-tweetid]"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

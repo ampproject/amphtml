@@ -13,8 +13,18 @@
       font-size: 16px;
       line-height: 20px;
     }
+    .scroll {
+      height: 40px;
+      overflow: scroll;
+      border: 1px solid black;
+    }
   </style>
-  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js"></script>
+  <script>	
+  (self.AMP = self.AMP || []).push(function(AMP) {	
+    AMP.toggleExperiment('amp-timeago-bento', true);	
+  });	
+  </script>
+  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-1.0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -28,10 +38,13 @@
     </script>
   </amp-state>
   <h1>Basic example</h1>
-  <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  <div class="scroll">
+    <p>Scroll up and down for updated times</p>
+    <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2020-01-28T20:52:41+00:00" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  </div>
   <h1>amp-bind example</h1>
   <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" [datetime]="myState.datetime" [title]="myState.title" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
-  <button on="tap:AMP.setState({myState: {datetime: '2018-09-01T00:00:00.000Z', title: 'Saturday 1 September 2018 00.00'}})">Set to 1st September 2018</button>
+  <button on="tap:AMP.setState({myState: {datetime: '2020-09-01T00:00:00.000Z', title: 'Saturday 1 September 2018 00.00'}})">Set to 1st September 2020</button>
   <h1>Locale examples</h1>
   <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="be">Saturday 11 April 2018 00.37</amp-timeago>
   <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="bg">Saturday 11 April 2018 00.37</amp-timeago>

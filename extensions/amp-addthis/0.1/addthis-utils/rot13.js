@@ -26,8 +26,8 @@ const CHAR_Z_UPPER = 90;
  * @return {*} TODO(#23582): Specify return type
  * @private
  */
-const rot13 = input => {
-  return input.replace(RE_ALPHA, match => {
+const rot13 = (input) => {
+  return input.replace(RE_ALPHA, (match) => {
     const code = match.charCodeAt(0);
 
     // Get the z character code based on whether the character is
@@ -45,7 +45,7 @@ const rot13 = input => {
  * @param {!Array<string>} input
  * @return {!Object}
  */
-export const rot13Array = input => {
+export const rot13Array = (input) => {
   return input.reduce((rot13Map, str) => {
     rot13Map[rot13(str)] = 1;
     return rot13Map;

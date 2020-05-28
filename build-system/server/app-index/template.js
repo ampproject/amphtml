@@ -53,10 +53,7 @@ const Header = ({isMainPage, links}) => html`
   </header>
 `;
 
-const HeaderBackToMainLink = () =>
-  html`
-    <a href="/">← Back to main</a>
-  `;
+const HeaderBackToMainLink = () => html` <a href="/">← Back to main</a> `;
 
 const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 

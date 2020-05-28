@@ -21,6 +21,7 @@
 
 package dev.amp.validator;
 
+import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
 import dev.amp.validator.utils.AttributeSpecUtils;
@@ -47,7 +48,8 @@ import java.util.regex.Pattern;
 public class ParsedValidatorRules {
     /**
      * Constructor.
-     * @param htmlFormat the HTML format.
+     *
+     * @param htmlFormat          the HTML format.
      * @param ampValidatorManager the AMPValidatorManager instance.
      */
     public ParsedValidatorRules(@Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat,
@@ -63,11 +65,14 @@ public class ParsedValidatorRules {
         this.partialMatchCaseiRegexes = new HashMap<>();
 
         this.typeIdentifiers = new HashMap<>();
-        typeIdentifiers.put("⚡", 0);
+        typeIdentifiers.put("\u26a1", 0);
+        typeIdentifiers.put("\u26a1\ufe0f", 0);
         typeIdentifiers.put("amp", 0);
-        typeIdentifiers.put("⚡4ads", 0);
+        typeIdentifiers.put("\u26a14ads", 0);
+        typeIdentifiers.put("\u26a1\ufe0f4ads", 0);
         typeIdentifiers.put("amp4ads", 0);
-        typeIdentifiers.put("⚡4email", 0);
+        typeIdentifiers.put("\u26a14email", 0);
+        typeIdentifiers.put("\u26a1\ufe0f4email", 0);
         typeIdentifiers.put("amp4email", 0);
         typeIdentifiers.put("actions", 0);
         typeIdentifiers.put("transformed", 0);
@@ -76,6 +81,12 @@ public class ParsedValidatorRules {
         expandExtensionSpec();
 
         this.parsedAttrSpecs = new ParsedAttrSpecs(ampValidatorManager);
+
+        this.parsedCss = new ArrayList<>();
+        for (final ValidatorProtos.DocCssSpec cssSpec : this.ampValidatorManager.getRules().getCssList()) {
+            this.parsedCss.add(
+                    new ParsedDocCssSpec(cssSpec, this.ampValidatorManager.getRules().getDeclarationListList()));
+        }
 
         this.tagSpecIdsToTrack = new HashMap<>();
         final int numTags = this.ampValidatorManager.getRules().getTagsList().size();
@@ -151,6 +162,7 @@ public class ParsedValidatorRules {
 
     /**
      * TODO - verify ALL regex getXXX() to ensure proper implementation
+     *
      * @param regex the regex.
      * @return returns the full match regex pattern.
      */
@@ -158,7 +170,7 @@ public class ParsedValidatorRules {
         String regexEscape = regex.replace("{", "\\{");
 
         for (String fullMatchRegex : fullMatchRegexes.keySet()) {
-            if (fullMatchRegex.equals(regex))  {
+            if (fullMatchRegex.equals(regex)) {
                 return fullMatchRegexes.get(regexEscape);
             }
         }
@@ -177,7 +189,7 @@ public class ParsedValidatorRules {
         String caseiRegexEscape = caseiRegex.replace("{", "\\{");
 
         for (String fullMatchRegex : fullMatchCaseiRegexes.keySet()) {
-            if (fullMatchRegex.equals(caseiRegexEscape))  {
+            if (fullMatchRegex.equals(caseiRegexEscape)) {
                 return fullMatchCaseiRegexes.get(caseiRegexEscape);
             }
         }
@@ -197,7 +209,7 @@ public class ParsedValidatorRules {
         final String caseiRegexEscape = caseiRegex.replace("{", "\\{");
 
         for (String fullMatchRegex : partialMatchCaseiRegexes.keySet()) {
-            if (fullMatchRegex.equals(caseiRegexEscape))  {
+            if (fullMatchRegex.equals(caseiRegexEscape)) {
                 return partialMatchCaseiRegexes.get(caseiRegexEscape);
             }
         }
@@ -211,9 +223,10 @@ public class ParsedValidatorRules {
     /**
      * Computes the name for a given reference point.
      * Used in generating error strings.
+     *
      * @param referencePoint the reference point.
-     * @throws TagValidationException the TagValidationException.
      * @return returns the compute name for a given reference point.
+     * @throws TagValidationException the TagValidationException.
      */
     public String getReferencePointName(@Nonnull final ValidatorProtos.ReferencePoint referencePoint)
             throws TagValidationException {
@@ -227,9 +240,10 @@ public class ParsedValidatorRules {
 
     /**
      * Return the ParsedTagSpec given the reference point spec name.
+     *
      * @param specName the spec name.
-     * @throws TagValidationException the TagValidationException.
      * @return return the ParsedTagSpec given the reference point spec name.
+     * @throws TagValidationException the TagValidationException.
      */
     public ParsedTagSpec getByTagSpecId(final String specName) throws TagValidationException {
         int tagSpecId = this.ampValidatorManager.getTagSpecIdByReferencePointTagSpecName(specName);
@@ -238,6 +252,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the spec id by spec name.
+     *
      * @param specName the spec name.
      * @return returns the spec id if exists.
      */
@@ -247,9 +262,10 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the ParsedTagSpec given the tag spec id.
+     *
      * @param id tag spec id.
-     * @throws TagValidationException the TagValidationException.
      * @return returns the ParsedTagSpec.
+     * @throws TagValidationException the TagValidationException.
      */
     public ParsedTagSpec getByTagSpecId(final int id) throws TagValidationException {
         ParsedTagSpec parsed = this.parsedTagSpecById.get(id);
@@ -272,9 +288,10 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the tag spec id by reference point tag spec name.
+     *
      * @param tagName the reference point tag name.
-     * @throws TagValidationException the TagValidationException.
      * @return returns the tag spec id by reference point tag spec name.
+     * @throws TagValidationException the TagValidationException.
      */
     public int getTagSpecIdByReferencePointTagSpecName(@Nonnull final String tagName) throws TagValidationException {
         return this.ampValidatorManager.getTagSpecIdByReferencePointTagSpecName(tagName);
@@ -282,14 +299,15 @@ public class ParsedValidatorRules {
 
     /**
      * Returns true iff resultA is a better result than resultB.
+     *
      * @param resultA a validation result.
      * @param resultB a validation result.
-     * @throws ValidatorException the ValidatorException.
      * @return returns true iff resultA is a better result than resultB.
+     * @throws ValidatorException the ValidatorException.
      */
     public boolean betterValidationResultThan(@Nonnull final ValidatorProtos.ValidationResult.Builder resultA,
                                               @Nonnull final ValidatorProtos.ValidationResult.Builder resultB)
-                                            throws ValidatorException {
+            throws ValidatorException {
         if (resultA.getStatus() != resultB.getStatus()) {
             return this.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus());
         }
@@ -331,6 +349,7 @@ public class ParsedValidatorRules {
 
     /**
      * Checks if maybeTypeIdentifier is contained in rules' typeIdentifiers.
+     *
      * @param maybeTypeIdentifier identifier to check
      * @return true iff maybeTypeIdentifier is in typeIdentifiers.
      */
@@ -342,10 +361,11 @@ public class ParsedValidatorRules {
      * Validates type identifiers within a set of attributes, adding
      * ValidationErrors as necessary, and sets type identifiers on
      * ValidationResult.typeIdentifier.
-     * @param attrs sax Attributes object from tag.
+     *
+     * @param attrs             sax Attributes object from tag.
      * @param formatIdentifiers html formats
-     * @param context global context of document validation
-     * @param validationResult status of document validation
+     * @param context           global context of document validation
+     * @param validationResult  status of document validation
      */
     public void validateTypeIdentifiers(@Nonnull final Attributes attrs,
                                         @Nonnull final List<String> formatIdentifiers, @Nonnull final Context context,
@@ -359,7 +379,8 @@ public class ParsedValidatorRules {
                 if (formatIdentifiers.contains(attrs.getLocalName(i))) {
                     // Only add the type identifier once per representation. That is, both
                     // "⚡" and "amp", which represent the same type identifier.
-                    final String typeIdentifier = attrs.getLocalName(i).replace("⚡", "amp");
+                    final String typeIdentifier = attrs.getLocalName(i).replace("\u26a1\ufe0f", "amp")
+                            .replace("\u26a1", "amp");
                     if (!validationResult.getTypeIdentifierList().contains(typeIdentifier)) {
                         validationResult.addTypeIdentifier(typeIdentifier);
                         context.recordTypeIdentifier(typeIdentifier);
@@ -386,7 +407,7 @@ public class ParsedValidatorRules {
                                     ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                                     context.getLineCol(),
                                     /*params=*/params,
-                            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
+                                    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
                                     validationResult);
                         }
                     }
@@ -406,7 +427,7 @@ public class ParsedValidatorRules {
                     context.addError(
                             ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                             context.getLineCol(), /*params=*/params,
-                    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
+                            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
                             validationResult);
                 }
             }
@@ -420,15 +441,16 @@ public class ParsedValidatorRules {
             context.addError(
                     ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING,
                     context.getLineCol(), /*params=*/params,
-            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
+                    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup",
                     validationResult);
         }
     }
 
     /**
      * Validates the HTML tag for type identifiers.
-     * @param htmlTag the html tag to validate.
-     * @param context global context of document validation
+     *
+     * @param htmlTag          the html tag to validate.
+     * @param context          global context of document validation
      * @param validationResult status of document validation
      */
     public void validateHtmlTag(@Nonnull final ParsedHtmlTag htmlTag,
@@ -449,7 +471,7 @@ public class ParsedValidatorRules {
                 break;
             case ACTIONS:
                 this.validateTypeIdentifiers(
-                        htmlTag.attrs(), TagSpecUtils.ACTIONS_IDENTIFIERS, context,  validationResult);
+                        htmlTag.attrs(), TagSpecUtils.ACTIONS_IDENTIFIERS, context, validationResult);
 
                 if (!validationResult.getTypeIdentifierList().contains("actions")) {
                     final List<String> params = new ArrayList<>();
@@ -468,6 +490,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the error code specificity.
+     *
      * @param errorCode the validation error code.
      * @return returns the error code specificity.
      */
@@ -478,9 +501,10 @@ public class ParsedValidatorRules {
     /**
      * A helper function which allows us to compare two candidate results
      * in validateTag to report the results which have the most specific errors.
+     *
      * @param errors a list of validation errors.
-     * @throws ValidatorException the TagValidationException.
      * @return returns maximum value of specificity found in all errors.
+     * @throws ValidatorException the TagValidationException.
      */
     public int maxSpecificity(@Nonnull final List<ValidatorProtos.ValidationError> errors) throws ValidatorException {
         int max = 0;
@@ -496,6 +520,7 @@ public class ParsedValidatorRules {
     /**
      * Returns true iff the error codes in errorsB are a subset of the error
      * codes in errorsA.
+     *
      * @param errorsA a list of validation errors.
      * @param errorsB a list of validation errors.
      * @return returns true iff the error codes in errorsB are a subset of the error
@@ -517,19 +542,20 @@ public class ParsedValidatorRules {
         }
 
         // Every code in B is also in A. If they are the same, not a subset.
-        return  codesA.size() > codesB.size();
+        return codesA.size() > codesB.size();
     }
 
     /**
      * Returns true iff statusA is a better status than statusB.
+     *
      * @param statusA validation result status.
      * @param statusB validation result status.
-     * @throws ValidatorException the ValidatorException.
      * @return returns true iff statusA is a better status than statusB.
+     * @throws ValidatorException the ValidatorException.
      */
     public boolean betterValidationStatusThan(@Nonnull final ValidatorProtos.ValidationResult.Status statusA,
                                               @Nonnull final ValidatorProtos.ValidationResult.Status statusB)
-                                            throws ValidatorException {
+            throws ValidatorException {
         // Equal, so not better than.
         if (statusA == statusB) {
             return false;
@@ -557,6 +583,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns a TagSpecDispatch for a give tag name.
+     *
      * @param tagName the tag name.
      * @return returns a TagSpecDispatch if found.
      */
@@ -566,6 +593,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns a styles spec url.
+     *
      * @return returns a styles spec url.
      */
     public String getStylesSpecUrl() {
@@ -574,6 +602,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns a template spec url.
+     *
      * @return returns a template spec url.
      */
     public String getTemplateSpecUrl() {
@@ -582,6 +611,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the script spec url.
+     *
      * @return returns the script spec url.
      */
     public String getScriptSpecUrl() {
@@ -590,14 +620,16 @@ public class ParsedValidatorRules {
 
     /**
      * Returns the list of Css length spec.
+     *
      * @return returns the list of Css length spec.
      */
-    public List<ValidatorProtos.CssLengthSpec> getCssLengthSpec() {
-        return this.ampValidatorManager.getRules().getCssLengthSpecList();
+    public List<ParsedDocCssSpec> getCss() {
+        return this.parsedCss;
     }
 
     /**
      * Returns the descendant tag lists.
+     *
      * @return returns the descendant tag lists.
      */
     public List<ValidatorProtos.DescendantTagList> getDescendantTagLists() {
@@ -606,6 +638,7 @@ public class ParsedValidatorRules {
 
     /**
      * Returns a combined black listed regex.
+     *
      * @param tagSpecId tag spec id.
      * @return returns a combined black listed regex.
      */
@@ -616,13 +649,14 @@ public class ParsedValidatorRules {
     /**
      * Emits any validation errors which require a global view
      * (mandatory tags, tags required by other tags, mandatory alternatives).
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void maybeEmitGlobalTagValidationErrors(@Nonnull final Context context,
                                                    @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
-                            throws TagValidationException {
+            throws TagValidationException {
         this.maybeEmitMandatoryTagValidationErrors(context, validationResult);
         this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
         this.maybeEmitMandatoryAlternativesSatisfiedErrors(
@@ -634,18 +668,19 @@ public class ParsedValidatorRules {
     /**
      * Emits errors when there is a ValueSetRequirement with no matching
      * ValueSetProvision in the document.
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void maybeEmitValueSetMismatchErrors(@Nonnull final Context context,
                                                 @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
-                            throws TagValidationException {
+            throws TagValidationException {
         final Set<String> providedKeys = context.valueSetsProvided();
         for (final String requiredKey : context.valueSetsRequired().keySet()) {
             if (!providedKeys.contains(requiredKey)) {
                 context.valueSetsRequired().get(requiredKey);
-                for (final ValidatorProtos.ValidationError error :  context.valueSetsRequired().get(requiredKey)) {
+                for (final ValidatorProtos.ValidationError error : context.valueSetsRequired().get(requiredKey)) {
                     context.addBuiltError(error, validationResult);
                 }
             }
@@ -654,7 +689,8 @@ public class ParsedValidatorRules {
 
     /**
      * Emits errors for css size limitations across entire document.
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
@@ -669,22 +705,29 @@ public class ParsedValidatorRules {
         }
 
         final int bytesUsed =
-                context.getInlineStyleByteSize() + context.getStyleAmpCustomByteSize();
-
-        for (final ValidatorProtos.CssLengthSpec cssLengthSpec : getCssLengthSpec()) {
-            if (!this.isCssLengthSpecCorrectHtmlFormat(cssLengthSpec)) {
-                continue;
-            }
-            if (cssLengthSpec.hasMaxBytes() && bytesUsed > cssLengthSpec.getMaxBytes()) {
+                context.getInlineStyleByteSize() + context.getStyleTagByteSize();
+        final ParsedDocCssSpec parsedCssSpec = context.matchingDocCssSpec();
+        if (parsedCssSpec != null) {
+            final ValidatorProtos.DocCssSpec cssSpec = parsedCssSpec.getSpec();
+            if (cssSpec.getMaxBytes() != MIN_BYTES && bytesUsed > cssSpec.getMaxBytes()) {
                 final List<String> params = new ArrayList<>();
                 params.add(String.valueOf(bytesUsed));
-                params.add(String.valueOf(cssLengthSpec.getMaxBytes()));
-                context.addError(
-                        ValidatorProtos.ValidationError.Code
-                                .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
-                        context.getLineCol(), /* params */
-                        params,
-                        /* specUrl */ cssLengthSpec.getSpecUrl(), validationResult);
+                params.add(String.valueOf(cssSpec.getMaxBytes()));
+                if (cssSpec.hasMaxBytesIsWarning()) {
+                    context.addWarning(
+                            ValidatorProtos.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+                            context.getLineCol(),
+                            params,
+                            cssSpec.getMaxBytesSpecUrl(),
+                            validationResult);
+                } else {
+                    context.addError(
+                            ValidatorProtos.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+                            context.getLineCol(),
+                            params,
+                            cssSpec.getMaxBytesSpecUrl(),
+                            validationResult);
+                }
             }
         }
     }
@@ -692,13 +735,14 @@ public class ParsedValidatorRules {
     /**
      * Emits errors for tags that are specified as mandatory alternatives.
      * Returns false iff context.Progress(result).complete.
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void maybeEmitMandatoryAlternativesSatisfiedErrors(@Nonnull final Context context,
                                                               @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
-        throws TagValidationException {
+            throws TagValidationException {
         final List<String> satisfied = context.getMandatoryAlternativesSatisfied();
         /** @type {!Array<string>} */
         final List<String> missing = new ArrayList<>();
@@ -730,13 +774,14 @@ public class ParsedValidatorRules {
 
     /**
      * Emits errors for tags that are specified to be mandatory.
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void maybeEmitMandatoryTagValidationErrors(@Nonnull final Context context,
                                                       @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
-                    throws TagValidationException {
+            throws TagValidationException {
         for (int tagSpecId : this.mandatoryTagSpecs) {
             final ParsedTagSpec parsedTagSpec = this.getByTagSpecId(tagSpecId);
             // Skip TagSpecs that aren't used for these type identifiers.
@@ -763,13 +808,14 @@ public class ParsedValidatorRules {
      * Emits errors for tags that specify that another tag is also required or
      * a condition is required to be satisfied.
      * Returns false iff context.Progress(result).complete.
-     * @param context the Context.
+     *
+     * @param context          the Context.
      * @param validationResult the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
     public void maybeEmitAlsoRequiresTagValidationErrors(@Nonnull final Context context,
                                                          @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
-                                    throws TagValidationException {
+            throws TagValidationException {
         for (final int tagSpecId : context.getTagspecsValidated().keySet()) {
             final ParsedTagSpec parsedTagSpec = this.getByTagSpecId(tagSpecId);
             // Skip TagSpecs that aren't used for these type identifiers.
@@ -835,16 +881,26 @@ public class ParsedValidatorRules {
 
 
     /**
-     * Returns true if Css length spec's html format is equal to this html format.
-     * @param cssLengthSpec the CssLengthSpec.
-     * @return returns true of Css length spec's html format is same as this html format.
+     * Returns true if `spec` is usable for the HTML format these rules are
+     * built for.
+     *
+     * @param docCssSpec the DocCssSpec.
+     * @return Returns true if `spec` is usable for the HTML format these rules are
+     * built for.
      */
-    private boolean isCssLengthSpecCorrectHtmlFormat(@Nonnull final ValidatorProtos.CssLengthSpec cssLengthSpec) {
-        return cssLengthSpec.hasHtmlFormat() ? cssLengthSpec.getHtmlFormat() == htmlFormat : false;
+    public boolean isDocCssSpecCorrectHtmlFormat(@Nonnull final ValidatorProtos.DocCssSpec docCssSpec) {
+        for (final ValidatorProtos.HtmlFormat.Code htmlFormatCode : docCssSpec.getHtmlFormatList()) {
+            if (htmlFormatCode == htmlFormat) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * Returns true if TagSpec's html format is the same as this html format.
+     *
      * @param tagSpec the TagSpec.
      * @return returns true if TagSpec's html format is the same as this html format.
      */
@@ -900,29 +956,45 @@ public class ParsedValidatorRules {
         return this.parsedAttrSpecs;
     }
 
-    /** AmpValidatorManager. */
+    /**
+     * AmpValidatorManager.
+     */
     private AMPValidatorManager ampValidatorManager;
 
-    /** The HTML format. */
+    /**
+     * The HTML format.
+     */
     private ValidatorProtos.HtmlFormat.Code htmlFormat;
 
-    /** ParsedTagSpecs in id order. */
+    /**
+     * ParsedTagSpecs in id order.
+     */
     private Map<Integer, ParsedTagSpec> parsedTagSpecById;
 
-    /** ParsedTagSpecs keyed by name. */
+    /**
+     * ParsedTagSpecs keyed by name.
+     */
     private Map<String, TagSpecDispatch> tagSpecByTagName;
 
-    /** Tag ids that are mandatory for a document to legally validate. */
+    /**
+     * Tag ids that are mandatory for a document to legally validate.
+     */
     private List<Integer> mandatoryTagSpecs;
 
-    /** A cache for full match regex instantiations. */
+    /**
+     * A cache for full match regex instantiations.
+     */
     private Map<String, Pattern> fullMatchRegexes;
 
-    /** A cache for full match case insensitive regex instantiation. */
-    private  Map<String, Pattern> fullMatchCaseiRegexes;
+    /**
+     * A cache for full match case insensitive regex instantiation.
+     */
+    private Map<String, Pattern> fullMatchCaseiRegexes;
 
-    /** A cache for partial match case insensitive regex instantiation. */
-    private  Map<String, Pattern> partialMatchCaseiRegexes;
+    /**
+     * A cache for partial match case insensitive regex instantiation.
+     */
+    private Map<String, Pattern> partialMatchCaseiRegexes;
 
     /**
      * Type identifiers which are used to determine the set of validation
@@ -930,18 +1002,38 @@ public class ParsedValidatorRules {
      */
     private Map<String, Integer> typeIdentifiers;
 
-    /** A ParsedAttrSpecs object. */
+    /**
+     * A ParsedAttrSpecs object.
+     */
     private ParsedAttrSpecs parsedAttrSpecs;
 
-    /** A tag spec names to track. */
+    /**
+     * A tag spec names to track.
+     */
     private Map<Object, Boolean> tagSpecIdsToTrack;
 
-    /** ErrorCodeMetadata keyed by error code. */
+    /**
+     * ErrorCodeMetadata keyed by error code.
+     */
     private Map<ValidatorProtos.ValidationError.Code, ErrorCodeMetadata> errorCodes;
 
-    /** Tag spec name to spec id .*/
+    /**
+     * Tag spec name to spec id .
+     */
     private Map<String, Integer> tagSpecNameToSpecId = new HashMap<>();
 
-    /** Transformed value regex pattern. */
+    /**
+     * Transformed value regex pattern.
+     */
     private static final Pattern TRANSFORMED_VALUE_REGEX = Pattern.compile("^\\w+;v=(\\d+)$");
+
+    /**
+     * Minimum bytes length.
+     */
+    private static final int MIN_BYTES = -2;
+
+    /**
+     *
+     */
+    private List<ParsedDocCssSpec> parsedCss;
 }

@@ -61,7 +61,7 @@ export function batchFetchJsonFor(
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, urlReplacement, refresh)
-    .then(data => {
+    .then((data) => {
       if (token !== undefined) {
         data.fetchOpt['method'] = 'POST';
         data.fetchOpt['headers'] = {
@@ -73,14 +73,14 @@ export function batchFetchJsonFor(
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
-    .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
-    .then(data => {
+    .then((res) => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
+    .then((data) => {
       if (data == null) {
         throw new Error('Response is undefined.');
       }
       return getValueForExpr(data, expr || '.');
     })
-    .catch(err => {
+    .catch((err) => {
       throw user().createError('failed fetching JSON data', err);
     });
 }
@@ -104,7 +104,7 @@ export function requestForBatchFetch(element, replacement, refresh) {
       ? urlReplacements.expandUrlAsync(url)
       : Promise.resolve(url);
 
-  return promise.then(xhrUrl => {
+  return promise.then((xhrUrl) => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (replacement == UrlReplacementPolicy.OPT_IN) {

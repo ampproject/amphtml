@@ -23,7 +23,7 @@ describe
   .configure()
   .skipFirefox()
   .skipEdge()
-  .run('amp-recaptcha-input', function() {
+  .run('amp-recaptcha-input', function () {
     describes.integration(
       'with form and amp-mustache',
       {
@@ -116,7 +116,7 @@ describe
         extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
         experiments: ['amp-recaptcha-input'],
       },
-      env => {
+      (env) => {
         let doc;
 
         beforeEach(() => {
@@ -126,8 +126,8 @@ describe
           return browserController.waitForElementLayout('amp-recaptcha-input');
         });
 
-        it('should be able to create the bootstrap frame', function() {
-          return waitForBootstrapFrameToBeCreated(doc).then(frame => {
+        it('should be able to create the bootstrap frame', function () {
+          return waitForBootstrapFrameToBeCreated(doc).then((frame) => {
             expect(frame.src.includes('recaptcha')).to.be.true;
             expect(frame.getAttribute('data-amp-3p-sentinel')).to.be.equal(
               'amp-recaptcha'
@@ -136,13 +136,14 @@ describe
               JSON.stringify({
                 'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
                 'sentinel': 'amp-recaptcha',
+                'global': false,
               })
             );
           });
         });
 
-        it('should load the 3p recaptcha frame', function() {
-          return waitForBootstrapFrameOnLoad(doc).then(frame => {
+        it('should load the 3p recaptcha frame', function () {
+          return waitForBootstrapFrameOnLoad(doc).then((frame) => {
             expect(frame).to.be.ok;
           });
         });
@@ -151,8 +152,8 @@ describe
           'should create a hidden input, ' +
             'with the value resolved from the recaptcha mock, ' +
             ' on submit',
-          function() {
-            return submitForm(doc).then(hiddenInput => {
+          function () {
+            return submitForm(doc).then((hiddenInput) => {
               expect(hiddenInput).to.be.ok;
               expect(hiddenInput.name).to.be.equal('recaptcha-token');
               expect(hiddenInput.value).to.be.equal('recaptcha-mock');
@@ -160,7 +161,7 @@ describe
           }
         );
 
-        it('should show submit-success on successful submit/response', function() {
+        it('should show submit-success on successful submit/response', function () {
           return submitForm(doc).then(() => {
             return poll(
               'submit-success',
@@ -208,7 +209,7 @@ describe
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
-      env => {
+      (env) => {
         let doc;
 
         beforeEach(() => {
@@ -218,9 +219,9 @@ describe
           return browserController.waitForElementLayout('amp-recaptcha-input');
         });
 
-        it('should make a request with correct parameters', function() {
+        it('should make a request with correct parameters', function () {
           return submitForm(doc).then(() => {
-            return RequestBank.withdraw(recaptchaRequestId.GET).then(req => {
+            return RequestBank.withdraw(recaptchaRequestId.GET).then((req) => {
               expect(req.url).to.include('term=recaptcha-search');
               expect(req.url).to.include('recaptcha-token=recaptcha-mock');
               expect(req.headers.host).to.be.ok;
@@ -259,7 +260,7 @@ describe
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
-      env => {
+      (env) => {
         let doc;
 
         beforeEach(() => {
@@ -269,9 +270,9 @@ describe
           return browserController.waitForElementLayout('amp-recaptcha-input');
         });
 
-        it('should make a request with correct parameters', function() {
+        it('should make a request with correct parameters', function () {
           return submitForm(doc).then(() => {
-            return RequestBank.withdraw(recaptchaRequestId.POST).then(req => {
+            return RequestBank.withdraw(recaptchaRequestId.POST).then((req) => {
               expect(req.body).to.be.ok;
               expect(req.body.term).to.be.equal('recaptcha-search');
               expect(req.body['recaptcha-token']).to.be.equal('recaptcha-mock');
@@ -297,7 +298,7 @@ function waitForBootstrapFrameToBeCreated(doc) {
 function waitForBootstrapFrameOnLoad(doc) {
   let bootstrapFrame = undefined;
   return waitForBootstrapFrameToBeCreated(doc)
-    .then(frame => {
+    .then((frame) => {
       bootstrapFrame = frame;
 
       // Create a promise for when the iframe is loaded

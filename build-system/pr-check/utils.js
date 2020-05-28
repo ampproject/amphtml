@@ -40,8 +40,11 @@ const BUILD_OUTPUT_FILE = isTravisBuild()
 const DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_dist_${travisBuildNumber()}.zip`
   : '';
+const ESM_DIST_OUTPUT_FILE = isTravisBuild()
+  ? `amp_esm_dist_${travisBuildNumber()}.zip`
+  : '';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
@@ -259,7 +262,7 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
   exec('echo travis_fold:start:unzip_results && echo');
-  dirsToUnzip.forEach(dir => {
+  dirsToUnzip.forEach((dir) => {
     execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
   });
   exec('echo travis_fold:end:unzip_results');
@@ -333,6 +336,14 @@ function downloadDistOutput(functionName) {
 }
 
 /**
+ * Downloads and unzips esm dist output from storage
+ * @param {string} functionName
+ */
+function downloadEsmDistOutput(functionName) {
+  downloadOutput_(functionName, ESM_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+}
+
+/**
  * Zips and uploads the build output to a remote storage location
  * @param {string} functionName
  */
@@ -347,6 +358,15 @@ function uploadBuildOutput(functionName) {
 function uploadDistOutput(functionName) {
   const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
   uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
+}
+
+/**
+ * Zips and uploads the esm dist output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadEsmDistOutput(functionName) {
+  const esmDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, ESM_DIST_OUTPUT_FILE, esmDistOutputDirs);
 }
 
 /**
@@ -378,6 +398,7 @@ function decryptTravisKey_() {
 module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
+  downloadEsmDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
   startTimer,
@@ -390,4 +411,5 @@ module.exports = {
   timedExecWithError,
   uploadBuildOutput,
   uploadDistOutput,
+  uploadEsmDistOutput,
 };

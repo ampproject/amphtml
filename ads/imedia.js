@@ -39,7 +39,7 @@ export function imedia(global, data) {
   computeInMasterFrame(
     global,
     'imedia-load',
-    done => {
+    (done) => {
       loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
         if (global.im != null) {
           mW.im = global.im;
@@ -47,7 +47,7 @@ export function imedia(global, data) {
 
           // send request to get all ads
           mW.im.getAds(positions, {
-            AMPcallback: ads => {
+            AMPcallback: (ads) => {
               mW.ads = ads;
               done(null);
             },
@@ -56,7 +56,7 @@ export function imedia(global, data) {
       });
     },
     () => {
-      mW.inPagePositions = mW.inPagePositions.filter(inPagePostion => {
+      mW.inPagePositions = mW.inPagePositions.filter((inPagePostion) => {
         let used = true;
         positions.filter((position, index) => {
           // match right element and zone to write advert from adserver

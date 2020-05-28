@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-embedly-card'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 
@@ -50,7 +50,7 @@ describes.realWin(
     it('renders responsively', () => {
       return createEmbedlyCard(
         'https://twitter.com/AMPhtml/status/986750295077040128'
-      ).then(element => {
+      ).then((element) => {
         const iframe = element.querySelector('iframe');
 
         expect(iframe).to.not.be.null;
@@ -67,18 +67,20 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', () => {
-      return createEmbedlyCard('https://twitter.com/AMPhtml').then(element => {
-        const iframe = element.querySelector('iframe');
+      return createEmbedlyCard('https://twitter.com/AMPhtml').then(
+        (element) => {
+          const iframe = element.querySelector('iframe');
 
-        expect(iframe).to.not.be.null;
+          expect(iframe).to.not.be.null;
 
-        const instance = element.implementation_;
+          const instance = element.implementation_;
 
-        instance.unlayoutCallback();
+          instance.unlayoutCallback();
 
-        expect(element.querySelector('iframe')).to.be.null;
-        expect(instance.iframe_).to.be.null;
-      });
+          expect(element.querySelector('iframe')).to.be.null;
+          expect(instance.iframe_).to.be.null;
+        }
+      );
     });
   }
 );

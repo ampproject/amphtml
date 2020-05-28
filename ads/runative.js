@@ -61,7 +61,7 @@ function getInitData(data) {
   const initKeys = requiredParams.concat(optionsParams);
   const initParams = {};
 
-  initKeys.forEach(key => {
+  initKeys.forEach((key) => {
     if (key in data) {
       const initKey = key === 'adType' ? 'type' : key;
 

@@ -22,7 +22,7 @@ import {
 import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-access', {amp: true}, env => {
+describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;
   let accessConfigurationEl;
   let defaultConfig;
@@ -30,14 +30,14 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   let storyAccess;
   let storyEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     accessConfigurationEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -79,7 +79,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     expect(buttonInDrawerEl).to.exist;
   });
 
-  it('should display the access blocking paywall on state update', done => {
+  it('should display the access blocking paywall on state update', (done) => {
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
@@ -92,7 +92,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should show the access notification on state update', done => {
+  it('should show the access notification on state update', (done) => {
     storyAccess.element.setAttribute('type', Type.NOTIFICATION);
     storyAccess.buildCallback();
 

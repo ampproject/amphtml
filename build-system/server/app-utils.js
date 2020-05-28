@@ -40,6 +40,8 @@ function setServeMode(modeOptions) {
 
   if (modeOptions.compiled) {
     serveMode = 'compiled';
+  } else if (modeOptions.esm) {
+    serveMode = 'esm';
   } else if (modeOptions.cdn) {
     serveMode = 'cdn';
   } else if (modeOptions.rtv) {
@@ -61,6 +63,8 @@ function logServeMode() {
   const serveMode = getServeMode();
   if (serveMode == 'compiled') {
     log(green('Serving'), cyan('minified'), green('JS'));
+  } else if (serveMode == 'esm') {
+    log(green('Serving'), cyan('ESM'), green('JS'));
   } else if (serveMode == 'cdn') {
     log(green('Serving'), cyan('current prod'), green('JS'));
   } else if (isRtvMode(serveMode)) {
@@ -74,7 +78,7 @@ function logServeMode() {
  * @param {string} serveMode
  * @return {boolean}
  */
-const isRtvMode = serveMode => {
+const isRtvMode = (serveMode) => {
   return /^\d{15}$/.test(serveMode);
 };
 

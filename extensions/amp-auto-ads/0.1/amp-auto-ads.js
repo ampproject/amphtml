@@ -22,11 +22,10 @@ import {
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
-import {NO_OP_EXP, getPlacementsFromConfigObj} from './placement';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getAdNetworkConfig} from './ad-network-config';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
+import {getPlacementsFromConfigObj} from './placement';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -55,13 +54,12 @@ export class AmpAutoAds extends AMP.BaseElement {
     );
 
     const whenVisible = this.getAmpDoc().whenFirstVisible();
-    this.divertNoOpExperiment(adNetwork.isResponsiveEnabled());
 
     whenVisible
       .then(() => {
         return this.getConfig_(adNetwork.getConfigUrl());
       })
-      .then(configObj => {
+      .then((configObj) => {
         if (!configObj) {
           return;
         }
@@ -97,21 +95,6 @@ export class AmpAutoAds extends AMP.BaseElement {
       });
   }
 
-  /**
-   * Selects branch of the no op experiment.
-   * @param {boolean} isResponsiveEnabled
-   */
-  divertNoOpExperiment(isResponsiveEnabled) {
-    const experimentInfoMap = /** @type {!Object<string,
-				  !../../../src/experiments.ExperimentInfo>} */ ({
-      [[NO_OP_EXP.branch]]: {
-        isTrafficEligible: () => isResponsiveEnabled,
-        branches: [[NO_OP_EXP.control], [NO_OP_EXP.experiment]],
-      },
-    });
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-  }
-
   /** @override */
   isLayoutSupported() {
     return true;
@@ -133,14 +116,14 @@ export class AmpAutoAds extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetchJson(configUrl, xhrInit)
-      .then(res => res.json())
-      .catch(reason => {
+      .then((res) => res.json())
+      .catch((reason) => {
         this.user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
         return null;
       });
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAutoAds);
 });

@@ -172,12 +172,12 @@ export class Mask {
 function convertAmpMaskToInputmask(ampMask) {
   const masks = ampMask
     .split(MASK_SEPARATOR_CHAR)
-    .map(m => m.replace(/_/g, ' '));
-  return masks.map(mask => {
+    .map((m) => m.replace(/_/g, ' '));
+  return masks.map((mask) => {
     let escapeNext = false;
     return mask
       .split('')
-      .map(c => {
+      .map((c) => {
         const escape = escapeNext;
         escapeNext = c == MaskChars.ESCAPE;
 

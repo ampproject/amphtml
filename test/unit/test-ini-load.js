@@ -18,7 +18,7 @@ import {whenContentIniLoad} from '../../src/ini-load';
  * limitations under the License.
  */
 
-describes.realWin('friendly-iframe-embed', {amp: true}, env => {
+describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   let win, doc;
   let ampdoc;
 

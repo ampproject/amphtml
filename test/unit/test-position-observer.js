@@ -22,7 +22,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {macroTask} from '../../testing/yield';
 import {setStyles} from '../../src/style';
 
-describes.realWin('PositionObserver', {amp: 1}, env => {
+describes.realWin('PositionObserver', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   beforeEach(() => {
@@ -38,7 +38,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     beforeEach(() => {
       clock = lolex.install({target: ampdoc.win});
       posOb = new PositionObserver(ampdoc);
-      env.sandbox.stub(posOb.vsync_, 'measure').callsFake(callback => {
+      env.sandbox.stub(posOb.vsync_, 'measure').callsFake((callback) => {
         win.setTimeout(callback, 1);
       });
       elem = win.document.createElement('div');
@@ -94,7 +94,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
             return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
           });
       });
-      it('should update new position with scroll event', function*() {
+      it('should update new position with scroll event', function* () {
         const spy = env.sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         clock.tick(2);
@@ -120,7 +120,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should not update if element position does not change', function*() {
+      it('should not update if element position does not change', function* () {
         const spy = env.sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
@@ -142,7 +142,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           });
       });
 
-      it('overlap with viewport', function*() {
+      it('overlap with viewport', function* () {
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
         const spy = env.sandbox.spy();
@@ -174,7 +174,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
       });
 
-      it('out of viewport', function*() {
+      it('out of viewport', function* () {
         setStyles(elem, {
           'position': 'absolute',
           'top': '1px',

@@ -30,7 +30,7 @@ import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 
 // TODO(ccordry): Refactor all these tests with async/await.
-describes.realWin('Linker Manager', {amp: true}, env => {
+describes.realWin('Linker Manager', {amp: true}, (env) => {
   let ampdoc;
   let win;
   let doc;
@@ -242,7 +242,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     };
 
     const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-    return lm.init().then(expandedIds => {
+    return lm.init().then((expandedIds) => {
       expect(expandedIds[0]).to.eql({yum: '123'});
     });
   });
@@ -646,7 +646,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           href: '#hello',
           hostname: 'amp.source.test',
         };
-        anchorClickHandlers.forEach(handler => handler(a, {type: 'click'}));
+        anchorClickHandlers.forEach((handler) => handler(a, {type: 'click'}));
         expect(a.href).to.not.contain('testLinker');
       });
     });
@@ -658,7 +658,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           href: '/foo',
           hostname: 'amp.source.test',
         };
-        anchorClickHandlers.forEach(handler => handler(a, {type: 'click'}));
+        anchorClickHandlers.forEach((handler) => handler(a, {type: 'click'}));
         expect(a.href).to.not.contain('testLinker');
       });
     });
@@ -791,12 +791,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     };
     a.href = url;
     doc.body.appendChild(a);
-    anchorClickHandlers.forEach(handler => handler(a, event));
+    anchorClickHandlers.forEach((handler) => handler(a, event));
     return a.href;
   }
 
   function navigateTo(url) {
-    navigateToHandlers.forEach(handler => {
+    navigateToHandlers.forEach((handler) => {
       url = handler(url);
     });
     return url;
@@ -1096,7 +1096,7 @@ describe('wildcard matching', () => {
       result: true,
     },
   ];
-  testCases.forEach(test => {
+  testCases.forEach((test) => {
     const {hostname, domain, result} = test;
     it(`wildcard test: ${hostname}, ${domain}, ${result}`, () => {
       expect(isWildCardMatch(hostname, domain)).to.equal(result);

@@ -87,7 +87,7 @@ export class AmpFormTextarea {
     this.unlisteners_ = [];
 
     this.unlisteners_.push(
-      listen(root, 'input', e => {
+      listen(root, 'input', (e) => {
         const element = dev().assertElement(e.target);
         if (
           element.tagName != 'TEXTAREA' ||
@@ -101,7 +101,7 @@ export class AmpFormTextarea {
     );
 
     this.unlisteners_.push(
-      listen(root, 'mousedown', e => {
+      listen(root, 'mousedown', (e) => {
         if (e.which != 1) {
           return;
         }
@@ -125,7 +125,7 @@ export class AmpFormTextarea {
     );
     const throttledResize = throttle(
       this.win_,
-      e => {
+      (e) => {
         if (e.relayoutAll) {
           resizeTextareaElements(cachedTextareaElements);
         }
@@ -141,7 +141,7 @@ export class AmpFormTextarea {
    * Cleanup any consumed resources
    */
   dispose() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
   }
 }
 
@@ -153,8 +153,8 @@ export class AmpFormTextarea {
  */
 export function handleInitialOverflowElements(textareas) {
   return Promise.all(
-    toArray(textareas).map(element => {
-      return getHasOverflow(element).then(hasOverflow => {
+    toArray(textareas).map((element) => {
+      return getHasOverflow(element).then((hasOverflow) => {
         if (hasOverflow) {
           user().warn(
             'AMP-FORM',
@@ -187,7 +187,7 @@ export function getHasOverflow(element) {
  * @param {!IArrayLike<!Element>} elements
  */
 function resizeTextareaElements(elements) {
-  iterateCursor(elements, element => {
+  iterateCursor(elements, (element) => {
     if (
       element.tagName != 'TEXTAREA' ||
       !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)
@@ -211,7 +211,7 @@ function handleTextareaDrag(element) {
   Promise.all([
     mutator.measureElement(() => element./*OK*/ scrollHeight),
     listenOncePromise(element, 'mouseup'),
-  ]).then(results => {
+  ]).then((results) => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
@@ -286,7 +286,7 @@ export function maybeResizeTextarea(element) {
       }
     },
     () => {
-      return minScrollHeightPromise.then(minScrollHeight => {
+      return minScrollHeightPromise.then((minScrollHeight) => {
         const height = minScrollHeight + offset;
         // Prevent the scrollbar from appearing
         // unless the text is beyond the max-height

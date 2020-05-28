@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-connatix-player'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
 
