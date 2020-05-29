@@ -26,12 +26,7 @@ const {LINE_HEIGHT_EM_} = styles;
  * @return {PreactDef.Renderable}
  */
 export function FitText(props) {
-  const {
-    children,
-    minFontSize = 6,
-    maxFontSize = 72,
-    ...rest
-  } = props;
+  const {children, minFontSize = 6, maxFontSize = 72, ...rest} = props;
   const contentRef = useRef(null);
   const measurerRef = useRef(null);
 
