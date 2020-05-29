@@ -824,7 +824,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       PerformanceObserver: env.sandbox.stub(),
       addEventListener: env.sandbox.stub(),
       removeEventListener: env.win.removeEventListener,
-      dispatchEvent: (e) => env.win.dispatchEvent(e),
       document: {
         addEventListener: env.sandbox.stub(),
         hidden: false,

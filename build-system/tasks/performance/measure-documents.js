@@ -53,33 +53,10 @@ function requirePuppeteer_() {
 const setupMeasurement = (page) =>
   page.evaluateOnNewDocument(() => {
     window.longTasks = [];
-    window.cumulativeLayoutShift = 0;
-    window.measureStarted = Date.now();
-    window.largestContentfulPaint = 0;
-
     const longTaskObserver = new PerformanceObserver((list) =>
       list.getEntries().forEach((entry) => window.longTasks.push(entry))
     );
-
     longTaskObserver.observe({entryTypes: ['longtask']});
-
-    const layoutShiftObserver = new PerformanceObserver((list) =>
-      list
-        .getEntries()
-        .forEach((entry) => (window.cumulativeLayoutShift += entry.value))
-    );
-
-    layoutShiftObserver.observe({entryTypes: ['layout-shift']});
-
-    const largestContentfulPaintObserver = new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      const entry = entries[entries.length - 1];
-      window.largestContentfulPaint = entry.renderTime || entry.loadTime;
-    });
-
-    largestContentfulPaintObserver.observe({
-      entryTypes: ['largest-contentful-paint'],
-    });
   });
 
 /**
@@ -138,17 +115,20 @@ function setupDelayBasedOnHandlerOptions(handlerOptions) {
  * @param {Puppeteer.page} page
  * @return {Promise<object>} Resolves with page load metrics
  */
-const readMetrics = (page) =>
-  page.evaluate(() => {
-    const entries = performance.getEntries();
+const readMetrics = async (page) => {
+  // Simulate visibility hidden to trigger cumulative metrics output (cls, fcp, etc).
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', {value: 'hidden'});
+    Object.defineProperty(document, 'hidden', {value: true});
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
 
-    function getMetric(name) {
-      const entry = entries.find((entry) => entry.name === name);
-      return entry ? entry.startTime : 0;
-    }
-
-    const firstPaint = getMetric('first-paint');
-    const firstContentfulPaint = getMetric('first-contentful-paint');
+  return page.evaluate(() => {
+    const marks = Object.fromEntries(
+      performance
+        .getEntriesByType('mark')
+        .map((l) => [l.name, l.detail ?? l.startTime])
+    );
 
     function getMaxFirstInputDelay() {
       let longest = 0;
@@ -166,19 +146,20 @@ const readMetrics = (page) =>
     }
 
     function getTimeToInteractive() {
-      return Date.now() - window.measureStarted;
+      return performance.now();
     }
 
     return {
-      visible: getMetric('visible'),
-      firstPaint,
-      firstContentfulPaint,
-      largestContentfulPaint: window.largestContentfulPaint,
+      visible: marks.visible,
+      firstPaint: marks.fp,
+      firstContentfulPaint: marks.fcp,
+      largestContentfulPaint: marks.lcpr,
+      cumulativeLayoutShift: marks.cls,
       timeToInteractive: getTimeToInteractive(),
       maxFirstInputDelay: getMaxFirstInputDelay(),
-      cumulativeLayoutShift: window.cumulativeLayoutShift * 100,
     };
   });
+};
 
 /**
  * Set up defaults handlers for docs that will be requested
