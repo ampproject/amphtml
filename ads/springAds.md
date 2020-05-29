@@ -29,7 +29,7 @@ limitations under the License.
     "adSlotSizes": {
       "banner": [{
         "minWidth": 1,
-        "sizes": [[320, 50], [320, 160]]
+        "sizes": [[320, 50]]
       }],
       "mrec": [{
         "minWidth": 1,
