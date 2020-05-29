@@ -193,7 +193,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       if (state != null) {
         this.responsiveState_ = state;
       }
-      if (this.responsiveState_ != null) {
+      if (
+        this.responsiveState_ != null &&
+        !this.responsiveState_.isContainerWidthState()
+      ) {
         return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
@@ -288,10 +291,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
 
-    this.size_ =
-      getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+    if (
+      this.responsiveState_ != null &&
+      this.responsiveState_.isContainerWidthState()
+    ) {
+      this.size_ = {width, height};
+    } else {
+      this.size_ =
+        getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
+          ? {width, height}
+          : this.getIntersectionElementLayoutBox();
+    }
+
     const sizeToSend = this.isSinglePageStoryAd
       ? {width: 1, height: 1}
       : this.size_;

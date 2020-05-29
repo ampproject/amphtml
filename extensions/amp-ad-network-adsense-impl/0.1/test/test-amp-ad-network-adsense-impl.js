@@ -54,7 +54,6 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
-      // runtimeOn: true,
     },
   },
   (env) => {
