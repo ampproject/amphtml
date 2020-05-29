@@ -56,19 +56,25 @@ function cherryPickBranchName(version) {
  * Updates tags from the remote and creates a branch at the release commit.
  *
  * @param {string} ref
+ * @param {!Array<string>} commits
  * @param {string} branch
  * @param {string} remote
  */
-function prepareBranch(ref, branch, remote) {
-  const {status} = getOutput(`git rev-parse ${ref}`);
-  // Skip fetching remote tags if the tag is already available.
-  if (status === 0) {
-    log(green('INFO:'), 'Identified ref', cyan(ref), 'in local repository');
-  } else {
-    log(green('INFO:'), 'Fetching latest tags from', cyan(remote));
+function prepareBranch(ref, commits, branch, remote) {
+  const needsFetch = [ref]
+    .concat(commits)
+    .some((r) => getOutput(`git rev-parse ${r}`).status);
+
+  if (needsFetch) {
+    log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
     execOrLog(
-      `git fetch ${remote} "refs/tags/*:refs/tags/*"`,
-      `Failed to fetch updated tags from remote ${cyan(remote)}`
+      `git fetch ${remote}`,
+      `Failed to fetch updates from remote ${cyan(remote)}`
+    );
+  } else {
+    log(
+      green('INFO:'),
+      'Identified tag and all commits available in local repository'
     );
   }
 
@@ -126,7 +132,7 @@ function cherryPick() {
   }
 
   try {
-    prepareBranch(onto, branch, remote);
+    prepareBranch(onto, commits, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {
