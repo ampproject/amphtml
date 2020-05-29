@@ -15,7 +15,8 @@
     }
   },
   "vars": {
-    "anonymousId": "CLIENT_ID(rl_anonymous_id)"
+    "anonymousId": "CLIENT_ID(rl_anonymous_id)",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com"
   },
   "triggers": {
     "pageView": {
