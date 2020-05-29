@@ -400,15 +400,18 @@ describes.realWin(
           .returns({width: 1024, height: 500});
 
         const mockContainerWith = '960';
-        const vsyncMock = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+        const vsyncMock = Services.vsyncFor(
+          toWin(element.ownerDocument.defaultView)
+        );
         env.sandbox.stub(vsyncMock, 'mutatePromise').returns({
           then: () => {
-          element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-          element.setAttribute('width', mockContainerWith);
-          element.removeAttribute('data-full-width');
-          element.removeAttribute('data-auto-format');
-          return ResponsiveState.createContainerWidthState(element);
-        }});
+            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('width', mockContainerWith);
+            element.removeAttribute('data-full-width');
+            element.removeAttribute('data-auto-format');
+            return ResponsiveState.createContainerWidthState(element);
+          },
+        });
 
         const result = await ResponsiveState.maybeUpgradeToResponsive(
           element,
