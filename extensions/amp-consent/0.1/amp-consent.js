@@ -16,8 +16,8 @@
 
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_STRING_TYPE,
   ConsentMetadataDef,
+  assertMetadataValues,
   constructMetadata,
   convertEnumValueToState,
   getConsentStateValue,
@@ -720,6 +720,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {ConsentMetadataDef|undefined}
    */
   configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+    if (!opt_metadata) {
+      return;
+    }
     if (!isObject(opt_metadata) || !opt_consentString) {
       user().error(
         TAG,
@@ -727,25 +730,8 @@ export class AmpConsent extends AMP.BaseElement {
       );
       return;
     }
-    this.assertMetadataValues(opt_metadata);
+    assertMetadataValues(opt_metadata);
     return constructMetadata(opt_metadata['consentStringType']);
-  }
-
-  /**
-   * Confirm that the metadata values are valid. Remove otherwise.s
-   * @param {JsonObject} metadata
-   */
-  assertMetadataValues(metadata) {
-    const consentStringType = metadata['consentStringType'];
-    if (
-      !(
-        consentStringType === CONSENT_STRING_TYPE.TCF_V1 ||
-        consentStringType === CONSENT_STRING_TYPE.TCF_V2 ||
-        consentStringType === CONSENT_STRING_TYPE.US_PRIVACY_STRING
-      )
-    ) {
-      delete metadata['consentStringType'];
-    }
   }
 }
 

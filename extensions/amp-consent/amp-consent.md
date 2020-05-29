@@ -278,20 +278,6 @@ AMP will check client cache and server in parallel to find the previous consent 
 }
 ```
 
-#### consentMetadata
-
-`consentMetadata` allows metadata about the consent instance to be provided by external iframe flow or the CMP (from `checkConsentHref`). This metadata will also be sent in the request to `checkConsentHref` and `onUpdateHref`. It will be also sent along with the client information to the external iframe.
-
-```
-{
-  "consentMetadata": {
-    "consentStringType": {enum} (see mapping below)
-  }
-}
-```
-
-`consentStringType` mapping: `[1: TCF v1.0, 2: TCF v2.0, 3: US Privacy String]`
-
 ## Consent Management
 
 The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.

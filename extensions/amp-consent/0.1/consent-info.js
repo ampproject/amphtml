@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {
+  CONSENT_STRING_TYPE, // eslint-disable-line no-unused-vars
+} from '../../../src/consent-state';
+import {deepEquals} from '../../../src/json';
+import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
+
+const TAG = 'amp-consent';
 
 /**
  * Key values for retriving/storing consent info object.
@@ -57,16 +63,6 @@ export const CONSENT_ITEM_STATE = {
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent
   // requirement state ui_state = {pending, active, complete} consent_state =
   // {unknown, accepted, rejected}
-};
-
-/**
- * Used in ConsentInfoDef
- * @enum {number}
- */
-export const CONSENT_STRING_TYPE = {
-  TCF_V1: 1,
-  TCF_V2: 2,
-  US_PRIVACY_STRING: 3,
 };
 
 /**
@@ -231,30 +227,11 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    const metadataEqual = isMetadataEqual(
+    const metadataEqual = deepEquals(
       infoA['consentMetadata'],
       infoB['consentMetadata']
     );
     return stateEqual && stringEqual && metadataEqual && isDirtyEqual;
-  }
-  return false;
-}
-
-/**
- * Compares metadata values from consentInfo
- *
- * @param {ConsentMetadataDef=} metadataA
- * @param {ConsentMetadataDef=} metadataB
- * @return {boolean}
- */
-function isMetadataEqual(metadataA, metadataB) {
-  if (!metadataA && !metadataB) {
-    return true;
-  }
-  if (metadataA && metadataB) {
-    const consentStringTypeEq =
-      metadataA['consentStringType'] === metadataB['consentStringType'];
-    return consentStringTypeEq;
   }
   return false;
 }
@@ -389,13 +366,26 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
  * {'gdprApplies': true, 'consentStringType': 2}
  *
  * @param {Object|null|undefined} storageMetadata
- * @return {ConsentMetadataDef|undefined}
+ * @return {ConsentMetadataDef}
  */
 export function convertStorageMetadata(storageMetadata) {
-  if (!storageMetadata) {
-    return undefined;
+  const consentStringType =
+    storageMetadata &&
+    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE];
+  return constructMetadata(consentStringType);
+}
+
+/**
+ * Confirm that the metadata values are valid. Remove otherwise.
+ * @param {JsonObject} metadata
+ */
+export function assertMetadataValues(metadata) {
+  const consentStringType = metadata['consentStringType'];
+  if (
+    consentStringType &&
+    !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
+  ) {
+    delete metadata['consentStringType'];
+    user().error(TAG, 'CMP metadata consent string type is invalid.');
   }
-  return constructMetadata(
-    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]
-  );
 }

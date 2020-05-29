@@ -15,7 +15,6 @@
  */
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_STRING_TYPE,
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
@@ -25,6 +24,7 @@ import {
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';
+import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -428,18 +428,20 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         instance.update(CONSENT_ITEM_STATE.ACCEPTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
-        instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test', {});
+        instance.update(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
+        );
         yield macroTask();
         expect(storageSetSpy).to.be.calledTwice;
-        instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test', {});
+        instance.update(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2
+        );
         yield macroTask();
         expect(storageSetSpy).to.be.calledTwice;
-        instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test');
-        yield macroTask();
-        expect(storageSetSpy).to.be.calledThrice;
-        instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test');
-        yield macroTask();
-        expect(storageSetSpy).to.be.calledThrice;
       });
 
       it('should handle race condition store latest value', function* () {
@@ -672,7 +674,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(value).to.deep.equal(
           constructConsentInfo(CONSENT_ITEM_STATE.REJECTED, 'test1')
         );
-        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test2');
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'test2', {});
         yield instance.get().then((v) => (value = v));
         expect(value).to.deep.equal(
