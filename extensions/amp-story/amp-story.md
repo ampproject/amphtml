@@ -339,9 +339,9 @@ These guidelines apply to the story poster image(s):
 - The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
 - If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
 - Each poster image should meet the recommended minimium size:
-  - Portrait: 696px x 928px
-  - Landscape: 928px x 696px
-  - Square: 928px x 928px
+  - Portrait: 640px x 853px
+  - Landscape: 853px x 640px
+  - Square: 640px x 640px
 
 ### Landscape orientation and full bleed desktop experience opt in
 
