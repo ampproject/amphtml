@@ -27,7 +27,7 @@ const {green, cyan, red, yellow} = require('ansi-colors');
  * @param {string} msg
  * @return {!Object}
  */
-function execOrLog(cmd, msg) {
+function execOrThrow(cmd, msg) {
   const result = getOutput(cmd);
   if (result.status) {
     log(yellow('ERROR:'), msg);
@@ -67,7 +67,7 @@ function prepareBranch(ref, commits, branch, remote) {
 
   if (needsFetch) {
     log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrLog(
+    execOrThrow(
       `git fetch ${remote}`,
       `Failed to fetch updates from remote ${cyan(remote)}`
     );
@@ -78,7 +78,7 @@ function prepareBranch(ref, commits, branch, remote) {
     );
   }
 
-  execOrLog(
+  execOrThrow(
     `git checkout -b ${branch} ${ref}`,
     `Failed to checkout new branch at ref ${cyan(ref)}`
   );
@@ -94,7 +94,7 @@ function prepareBranch(ref, commits, branch, remote) {
 function performCherryPick(sha) {
   try {
     log(green('INFO:'), 'Cherry-picking commit', cyan(sha));
-    execOrLog(
+    execOrThrow(
       `git cherry-pick -x ${sha}`,
       `Failed to cherry-pick commit ${cyan(sha)}; aborting`
     );
@@ -143,7 +143,7 @@ function cherryPick() {
         'to remote',
         cyan(remote)
       );
-      execOrLog(
+      execOrThrow(
         `git push --set-upstream ${remote} ${branch}`,
         `Failed to push branch ${cyan(branch)} to remote ${cyan(remote)}`
       );
