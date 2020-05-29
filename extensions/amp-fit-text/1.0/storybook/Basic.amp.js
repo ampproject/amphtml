@@ -25,7 +25,7 @@ storiesOf('amp-fit-text', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-fit-text', version: 0.2}]})
+  .addParameters({extensions: [{name: 'amp-fit-text', version: '1.0'}]})
   .add('Scale up to cover', () => {
     return (
       <amp-fit-text
@@ -80,5 +80,24 @@ storiesOf('amp-fit-text', module)
       >
         Superlongword text
       </amp-fit-text>
+    );
+  })
+  .add('layout=responsive', () => {
+    return (
+      <div
+        style="background-color: #bebebe;
+      width: 40vw;"
+      >
+        <amp-fit-text
+          width="100"
+          height="100"
+          style="border: 1px solid black;"
+          layout="responsive"
+          max-font-size="200"
+        >
+          Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
+          aeque inermis reprehendunt.
+        </amp-fit-text>
+      </div>
     );
   });

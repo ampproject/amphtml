@@ -352,6 +352,9 @@ export function applyStaticLayout(element) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
+      if (element.sizerElement) {
+        element.sizerElement.setAttribute('slot', 'i-amphtml-svc');
+      }
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
@@ -505,6 +508,7 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
       paddingTop:
         (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
@@ -516,7 +520,7 @@ export function applyStaticLayout(element) {
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;

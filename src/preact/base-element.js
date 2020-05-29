@@ -177,6 +177,11 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children" or "passthrough" properties.'
         );
         this.container_ = this.element.attachShadow({mode: 'open'});
+
+        // Create a slot for internal service elements i.e. "i-amphtml-sizer"
+        const serviceSlot = this.win.document.createElement('slot');
+        serviceSlot.setAttribute('name', 'i-amphtml-svc');
+        this.container_.appendChild(serviceSlot);
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
         this.container_ = container;

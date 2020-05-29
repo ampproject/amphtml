@@ -90,4 +90,41 @@ storiesOf('amp-social-share v2', module)
         data-param-app_id={appId}
       ></amp-social-share>
     );
+  })
+  .add('responsive', () => {
+    toggleExperiment(window, 'amp-social-share-v2', true);
+    const typeConfigurations = [
+      'email',
+      'facebook',
+      'linkedin',
+      'pinterest',
+      'tumblr',
+      'twitter',
+      'whatsapp',
+      'line',
+      'sms',
+      'system',
+      'custom',
+    ];
+    const type = select('type', typeConfigurations, typeConfigurations[0]);
+    const customEndpoint = text('data-share-endpoint', undefined);
+    const paramUrl = text('data-param-url', undefined);
+    const paramText = text('data-param-text', undefined);
+    const paramAttribution = text('data-param-attribution', undefined);
+    const paramMedia = text('data-param-media', undefined);
+    const appId = text('data-param-app_id', '254325784911610');
+    return (
+      <amp-social-share
+        type={type}
+        data-share-endpoint={customEndpoint}
+        data-param-text={paramText}
+        data-param-url={paramUrl}
+        data-param-attribution={paramAttribution}
+        data-param-media={paramMedia}
+        data-param-app_id={appId}
+        layout="responsive"
+        width="100"
+        height="100"
+      ></amp-social-share>
+    );
   });
