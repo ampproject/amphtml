@@ -195,13 +195,22 @@ export class ResponsiveState {
     const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
 
     return vsync
-      .mutatePromise(() => {
-        const width = String(element./*OK*/ parentElement./*OK*/ clientWidth);
-        element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-        element.setAttribute('width', width);
-        element.removeAttribute('data-full-width');
-        element.removeAttribute('data-auto-format');
-      })
+      .runPromise(
+        {
+          measure: (state) => {
+            state.clientWidth = String(
+              element./*OK*/ parentElement./*OK*/ clientWidth
+            );
+          },
+          mutate: (state) => {
+            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('width', state.clientWidth);
+            element.removeAttribute('data-full-width');
+            element.removeAttribute('data-auto-format');
+          },
+        },
+        {clientWidth: ''}
+      )
       .then(() => {
         const state = ResponsiveState.createContainerWidthState(element);
         devAssert(state != null, 'Convert to container width state failed');

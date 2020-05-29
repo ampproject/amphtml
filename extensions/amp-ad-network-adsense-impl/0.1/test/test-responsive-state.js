@@ -403,7 +403,7 @@ describes.realWin(
         const vsyncMock = Services.vsyncFor(
           toWin(element.ownerDocument.defaultView)
         );
-        env.sandbox.stub(vsyncMock, 'mutatePromise').returns({
+        env.sandbox.stub(vsyncMock, 'runPromise').returns({
           then: () => {
             element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
             element.setAttribute('width', mockContainerWith);
