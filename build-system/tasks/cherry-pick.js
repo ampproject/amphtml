@@ -20,6 +20,7 @@ const log = require('fancy-log');
 const {getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
 
+// See https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#release-channels
 const RTV_PREFIXES = {
   '00': 'experimental',
   '01': 'stable',
