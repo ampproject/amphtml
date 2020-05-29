@@ -68,6 +68,9 @@ integration.flags = {
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
+  'debug':
+    '  Allow debug statements by auto opening devtools. NOTE: This only ' +
+    'works in non headless mode.',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
