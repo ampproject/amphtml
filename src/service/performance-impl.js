@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
+import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -458,13 +459,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickVariableMetrics_();
     }
   }
 
@@ -475,14 +470,22 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickVariableMetrics_();
     }
+  }
+
+  /**
+   * Tick the metrics whose values change over time.
+   * @private
+   */
+  tickVariableMetrics_() {
+    if (this.supportsLayoutShift_) {
+      this.tickLayoutShiftScore_();
+    }
+    if (this.supportsLargestContentfulPaint_) {
+      this.tickLargestContentfulPaint_();
+    }
+    this.tickSlowElementRatio_();
   }
 
   /**
@@ -689,6 +692,17 @@ export class Performance {
       this.mark(label);
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
+    }
+
+    // Emit events. Used by `gulp performance`.
+    if (getMode().test) {
+      this.win.dispatchEvent(
+        createCustomEvent(
+          this.win,
+          'perf',
+          /** @type {JsonObject} */ ({label, delta})
+        )
+      );
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
