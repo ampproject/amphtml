@@ -41,11 +41,15 @@ function execOrLog(cmd, msg) {
  * Determines the name of the cherry-pick branch.
  *
  * @param {string} version
- * @param {Array<string>} commits
  * @return {string}
  */
-function cherryPickBranchName(version, commits) {
-  return `amp-release-${Number(version) + commits.length}`;
+function cherryPickBranchName(version) {
+  const timestamp = version.slice(0, -3);
+  let suffix = String(Number(version.slice(-3)) + 1);
+  while (suffix.length < 3) {
+    suffix = `0${suffix}`;
+  }
+  return `amp-release-${timestamp}${suffix}`;
 }
 
 /**
@@ -99,6 +103,7 @@ function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
   const onto = String(argv.onto || '');
+  const branch = cherryPickBranchName(onto);
 
   if (!commits.length) {
     log(red('ERROR:'), 'Must provide commit list with --commits');
@@ -119,8 +124,6 @@ function cherryPick() {
     // Be forgiving if someone provides a version instead of a full RTV.
     onto = onto.substr(2);
   }
-
-  const branch = cherryPickBranchName(onto, commits);
 
   try {
     prepareBranch(onto, branch, remote);
