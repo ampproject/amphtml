@@ -17,7 +17,7 @@
 import {dev, devAssert} from '../log';
 import {Observable} from '../observable';
 import {getMode} from '../mode';
-import {pushIfNotExist, remove, removeUniqueItem} from '../utils/array';
+import {findIndex, pushIfNotExist, remove, removeUniqueItem} from '../utils/array';
 import {startsWith} from '../string';
 
 // QQQQ: different types of queues:
@@ -25,17 +25,13 @@ import {startsWith} from '../string';
 // - change calc
 // - subscribers
 // - propagation
+// - fast subscribe responses.
+// - fast prop scheduling.
 
-// - multiple inputs
-// - dependency-only used updates
 // - root, isConnected
 // - observers on roots only
 // - useState/useStateFactory/useStateConstr/useMemo? with unmount option.
-// - deps for used values
 // - reusable objects. e.g. `hasChanged(oldValue, newValue):boolean`.
-
-// - explore full-parent approach where any recursive dep will auto-subscribe
-// to parent for deps and then it will resubscribe whenever parent changes.
 
 const NODE_PROP = '__ampNode';
 const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
@@ -52,31 +48,36 @@ const FRAGMENT_NODE = 11;
 
 /**
  * @typedef {{
- *   handler: function(T):(?Function|undefined),
- *   cleanup: (?Function),
+ *   prop: !ContextPropDef<T>,
+ *   value: (T|undefined),
+ *   calc: (!ContextCalcDef<T>|undefined),
  * }}
  * @template T
  */
-let SubscriberDef;
+let ProviderDef;
 
 /**
  * @typedef {{
  *   prop: !ContextPropDef<T>,
- *   input: T,
- * }}
- * @template T
- */
-let InputDef;
-
-/**
- * @typedef {{
- *   prop: !ContextPropDef<T>,
- *   value: T,
+ *   value: (T|undefined),
+ *   pending: boolean,
+ *   ping: function(),
+ *   calcs: !Array<!ContextCalcDef<T>>,
  *   subscribers: !Array<SubscriberDef>,
  * }}
  * @template T
  */
 let UsedDef;
+
+/**
+ * @typedef {{
+ *   handler: function(T):(?Function|undefined),
+ *   fast: boolean,
+ *   cleanup: (?Function),
+ * }}
+ * @template T
+ */
+let SubscriberDef;
 
 /**
  */
@@ -130,16 +131,10 @@ export class ContextNode {
     return null;
   }
 
-  /**
-   * @param {!Node} node
-   * @param {!ContextPropDef<T>} prop
-   * @param {boolean=} excludeSelf
-   * @return {!Promise<?T>}
-   * @template T
-   */
-  static closestProp(node, prop, excludeSelf = false) {
-    return ContextNode.closest(node, excludeSelf).get(prop);
-  }
+  //QQQ: should it be exposed?
+  // static closestProp(node, prop, excludeSelf = false) {
+  //   return ContextNode.closest(node, excludeSelf).get(prop);
+  // }
 
   /**
    * @param {!Node} node
@@ -150,7 +145,7 @@ export class ContextNode {
       return;
     }
     node[ASSIGNED_SLOT_PROP] = devAssert(slot);
-    ContextNode.forContained(node, cn => cn.discover());
+    forContained(node, cn => cn.discover());
   }
 
   /**
@@ -162,26 +157,7 @@ export class ContextNode {
       return;
     }
     delete node[ASSIGNED_SLOT_PROP];
-    ContextNode.forContained(node, cn => cn.discover());
-  }
-
-  /**
-   * @param {?Node} node
-   * @param {function(!ContextNode)} callback
-   * @param {boolean=} excludeSelf
-   */
-  static forContained(node, callback, excludeSelf = false) {
-    //QQQ: make this a private method?
-    const closest = ContextNode.closest(node, excludeSelf);
-    if (closest.node_ == node) {
-      callback(closest);
-    } else if (closest.children_) {
-      closest.children_.forEach(child => {
-        if (node.contains(child.node_)) {
-          callback(child);
-        }
-      });
-    }
+    forContained(node, cn => cn.discover());
   }
 
   /**
@@ -190,7 +166,7 @@ export class ContextNode {
    */
   static ping(node, ...props) {
     if (props.length > 0) {
-      ContextNode.forContained(node, cn => cn.ping(...props));
+      forContained(node, cn => cn.ping(...props));
     }
   }
 
@@ -213,27 +189,20 @@ export class ContextNode {
     /** @private {?Array<!ContextNode>} */
     this.children_ = null;
 
-    /** @private {?Map<string, !InputDef>} */
-    this.inputsByKey_ = null;
+    /** @private {?Map<string, !ProviderDef>} */
+    this.providersByKey_ = null;
 
     /** @private {?Map<string, !UsedDef>} */
     this.usedByKey_ = null;
-
-    // QQQQ: should be string <key> - Prop is misleading.
-    /** @private {?Array<!ContextPropDef>} */
-    this.checkProps_ = null;
-
-    /** @private {boolean} */
-    this.checkPropsAll_ = false;
 
     /** @private {?Array<function(contextNode: !ContextNode, key: string) */
     this.observers_ = null;
 
     // Schedulers.
     /** @private @const {function()} */
-    this.scheduleDiscover_ = oneAtATime(this.discover_.bind(this), macrotask);
+    this.scheduleDiscover_ = oneAtATime(this.discover_.bind(this));
     /** @private @const {function()} */
-    this.scheduleCheckUpdates_ = oneAtATime(this.checkUpdates_.bind(this), macrotask);
+    this.scheduleCheckUpdates_ = oneAtATime(this.checkUpdates_.bind(this));
 
     if (node.nodeType == ELEMENT_NODE && startsWith(node.tagName, 'AMP-')) {
       // QQQ: automatically assign some properties? Or do this as part of a
@@ -244,7 +213,11 @@ export class ContextNode {
     this.discover();
 
     if (getMode().localDev || getMode().test) {
+      this.debugId = () => debugId(this);
       this.debug = () => debugContextNodeForTesting(this);
+      this.debugValues = () => debugValues(this);
+      this.debugPending = () => debugPending(this);
+      this.debugSet = (key, value) => debugSetForTesting(this, key, value);
     }
   }
 
@@ -310,7 +283,7 @@ export class ContextNode {
    */
   discover() {
     if (this.discoverable_) {
-      this.scheduleDiscover_();
+      this.scheduleDiscover_(macrotask);
     }
   }
 
@@ -329,17 +302,24 @@ export class ContextNode {
    * @param {...!ContextPropDef} props
    */
   ping(...props) {
-    if (props.length == 0) {
+    console.log('ContextNode: ping', this.debugId(), props.map(({key}) => key));
+    // if (props[0]?.key == 'Renderable') {
+    //   debugger;//!!!!!
+    // }
+    const usedByKey = this.usedByKey_;
+    if (props.length == 0 || !usedByKey?.size) {
       return;
     }
-    const checkProps = this.checkProps_ ?? (this.checkProps_ = []);
+    let count = 0;
     props.forEach(prop => {
-      if (!checkProps.some(item => item.key == prop.key)) {
-        checkProps.push(prop);
+      const used = usedByKey.get(prop.key);
+      if (used && !used.pending) {
+        count++;
+        used.pending = true;
       }
     });
-    if (checkProps.length > 0) {
-      this.scheduleCheckUpdates_();
+    if (count > 0) {
+      this.scheduleCheckUpdates_(macrotask);
     }
   }
 
@@ -347,79 +327,54 @@ export class ContextNode {
    * @package TBD to open publically, but performance is a concern.
    */
   pingAll() {
-    this.checkPropsAll_ = true;
-    this.scheduleCheckUpdates_();
+    const usedByKey = this.usedByKey_;
+    if (!usedByKey?.size) {
+      return;
+    }
+    let count = 0;
+    usedByKey.forEach((used) => {
+      if (!used.pending) {
+        count++;
+        used.pending = true;
+      }
+    });
+    if (count > 0) {
+      this.scheduleCheckUpdates_(macrotask);
+    }
   }
 
   /**
    * Sets a prop's "input" value.
    * @param {!ContextPropDef<T>} prop
-   * @param {T|undefined} input
+   * @param {T} value
    * @template T
    */
-  set(prop, input) {
-    const {key} = prop;
-    const inputsByKey = this.inputsByKey_ ?? (this.inputsByKey_ = new Map());
-    const oldInput = inputsByKey.get(key)?.input;
-    if (input !== oldInput) {
-      if (input === undefined) {
-        inputsByKey.delete(key);
-      } else {
-        inputsByKey.set(key, {prop, input});
-        if (oldInput === undefined) {
-          // New input: notify observers.
-          this.notifyObservers_(key);
-        }
-      }
-      this.ping(prop);
-    }
+  set(prop, value) {
+    devAssert(value !== undefined);
+    this.setOrProvide_(prop, value, undefined);
   }
 
   /**
+   * Sets a prop's calculatable provider.
    * @param {!ContextPropDef<T>} prop
-   * @return {!Promise<T|undefined>}
+   * @param {!ContextCalcDef<T>} calc
    * @template T
    */
-  get(prop) {
-    return Promise.resolve(this.getOrCalc_(prop));
+  provide(prop, calc) {
+    devAssert(calc);
+    this.setOrProvide_(prop, undefined, calc);
   }
 
   /**
    * Set up a subscriber.
-   * @param {!ContextPropDef} prop
-   * @param {function(value: *, prop: *)} handler
+   * @param {!ContextPropDef<T>} prop
+   * @param {function(T):(?Function:undefined)} handler
    * @return {!UnsubscribeDef}
+   * @template T
    */
   subscribe(prop, handler) {
-    const {key} = prop;
-    const subscriber = {handler, cleanup: null};
-
-    const usedByKey = this.usedByKey_ ?? (this.usedByKey_ = new Map());
-    const used = getOrCreateInPropMap(this.usedByKey_, prop, emptyUsed);
-    if (used.subscribers.includes(handler)) {
-      // Already a subscriber.
-      return;
-    }
-    used.subscribers.push(subscriber);
-
-    const existingValue = used.value;
-    if (existingValue !== undefined) {
-      // First time a handler is added, it's notify right away if the value
-      // is present.
-      macrotask(() => {
-        // Only proceed with the notification if nothing has been updated.
-        const used = usedByKey.get(key);
-        if (used &&
-            used.subscribers.includes(subscriber) &&
-            used.value === existingValue) {
-          subscriber.cleanup = handler(used.value);
-        }
-      });
-    } else {
-      this.ping(prop);
-    }
-
-    return this.unsubscribe.bind(this, prop, handler);
+    this.subscribe_(prop, handler, /* fast */ false);
+    return this.unsubscribe_.bind(this, prop, handler);
   }
 
   /**
@@ -428,36 +383,7 @@ export class ContextNode {
    * @param {function(value: *, prop: *)} handler
    */
   unsubscribe(prop, handler) {
-    if (!this.usedByKey_) {
-      return;
-    }
-
-    const { key } = prop;
-    const used = this.usedByKey_.get(key);
-    if (!used) {
-      return;
-    }
-
-    const { subscribers } = used;
-    const removed = remove(subscribers, (s) => s.handler == handler);
-
-    // Run cleanups.
-    if (removed.length > 0) {
-      macrotask(() => {
-        removed.forEach(subscriber => {
-          const {cleanup} = subscriber;
-          subscriber.cleanup = null;
-          if (cleanup) {
-            protectedNoInline(cleanup);
-          }
-        });
-      });
-    }
-
-    // Stop monitoring if there are no subscribers.
-    if (subscribers.length == 0) {
-      this.usedByKey_.delete(key);
-    }
+    this.unsubscribe_(prop, handler);
   }
 
   /**
@@ -487,9 +413,21 @@ export class ContextNode {
       return;
     }
 
+    const usedByKey = this.usedByKey_;
+
     // Remove from the old parent.
     if (oldParent && oldParent.children_) {
       removeUniqueItem(oldParent.children_, this);
+      if (usedByKey) {
+        usedByKey.forEach((used) => {
+          const {prop, ping, calcs} = used;
+          calcs.forEach(({recursive}) => {
+            if (recursive) {
+              oldParent.unsubscribe(prop, ping);
+            }
+          });
+        });
+      }
     }
 
     // Add to the new parent.
@@ -498,230 +436,396 @@ export class ContextNode {
       const children = parent.children_ ?? (parent.children_ = []);
       children.push(this);
 
+      if (usedByKey) {
+        usedByKey.forEach((used) => {
+          const {prop, ping, calcs} = used;
+          calcs.forEach(({recursive}) => {
+            if (recursive) {
+              parent.subscribe(prop, ping);
+            }
+          });
+        });
+      }
+
       // QQQ: optimize, but reparenting could look like a new observer appeared.
       deepScan(this, (contextNode) => {
-        const inputsByKey = contextNode.inputsByKey_;
-        if (inputsByKey) {
-          inputsByKey.forEach((_, key) => {
+        const providersByKey = contextNode.providersByKey_;
+        if (providersByKey) {
+          providersByKey.forEach((_, key) => {
             contextNode.notifyObservers_(key);
           });
         }
         return true;
       }, true);
     }
+  }
 
-    // Schedule updates.
-    this.pingAll();
+  /**
+   * @param {!ContextPropDef<T>} prop
+   * @param {T|undefined} value
+   * @param {!ContextCalcDef<T>|undefined} calc
+   * @template T
+   * @private
+   */
+  setOrProvide_(prop, value, calc) {
+    devAssert(value !== undefined || calc !== undefined);
+    devAssert(value === undefined || calc === undefined);
+
+    const {key} = prop;
+    const providersByKey = this.providersByKey_ ?? (this.providersByKey_ = new Map());
+    let providers = providersByKey.get(key);
+    if (!providers) {
+      providers = [];
+      providersByKey.set(key, providers);
+    }
+
+    const index = findIndex(providers, (provider) => provider.calc === calc);
+    if (index == -1) {
+      const provider = {
+        prop,
+        value,
+        calc,
+      };
+      providers.push(provider);
+      if (calc !== undefined) {
+        const used = this.usedByKey_?.get(key);
+        if (used) {
+          this.addUsedCalc_(used, calc);
+        }
+      } else {
+        // New input: notify observers.
+        this.notifyObservers_(key);
+      }
+      this.ping(prop);
+    } else {
+      const provider = providers[index];
+      if (value !== provider.value) {
+        provider.value = value;
+        this.ping(prop);
+      }
+    }
+  }
+
+  /**
+   * Set up a subscriber.
+   * @param {!ContextPropDef<T>} prop
+   * @param {function(T):(?Function:undefined)} handler
+   * @param {boolean} fast
+   * @template T
+   * @private
+   */
+  subscribe_(prop, handler, fast) {
+    const {key, calc} = prop;
+
+    const used = this.startUsed_(prop);
+
+    if (used.subscribers.includes(handler)) {
+      // Already a subscriber.
+      return;
+    }
+
+    const subscriber = {handler, fast, cleanup: null};
+    used.subscribers.push(subscriber);
+
+    // First time a handler is added, it's notify right away if the value
+    // is present.
+    const existingValue = used.value;
+    if (existingValue !== undefined) {
+      if (fast) {
+        subscriber.cleanup = handler(used.value);
+      } else {
+        macrotask(() => {
+          // Only proceed with the notification if nothing has been updated.
+          const used = this.usedByKey_?.get(key);
+          if (used &&
+              used.subscribers.includes(subscriber) &&
+              used.value === existingValue) {
+            subscriber.cleanup = handler(used.value);
+          }
+        });
+      }
+    } else {
+      used.ping();
+    }
+  }
+
+  /**
+   * Set up subscriber.
+   * @param {!ContextPropDef} prop
+   * @param {function(value: *, prop: *)} handler
+   * @private
+   */
+  unsubscribe_(prop, handler) {
+    if (!this.usedByKey_) {
+      return;
+    }
+
+    const { key, calc } = prop;
+    const used = this.usedByKey_.get(key);
+    if (!used) {
+      return;
+    }
+
+    const { subscribers, calcs } = used;
+    const removed = remove(subscribers, (s) => s.handler == handler);
+
+    // Run cleanups.
+    if (removed.length > 0) {
+      macrotask(() => {
+        removed.forEach(subscriber => {
+          const {cleanup} = subscriber;
+          subscriber.cleanup = null;
+          if (cleanup) {
+            protectedNoInline(cleanup);
+          }
+        });
+      });
+    }
+
+    // Stop monitoring if there are no subscribers.
+    if (subscribers.length == 0) {
+      this.stopUsed_(key, used);
+    }
+  }
+
+  /**
+   * @param {!ContextPropDef<T>} prop
+   * @return {!UsedDef}
+   * @template T
+   * @private
+   */
+  startUsed_(prop) {
+    const {key, calc} = prop;
+    const usedByKey = this.usedByKey_ ?? (this.usedByKey_ = new Map());
+    let used = usedByKey.get(key);
+    if (!used) {
+      used = {
+        prop,
+        subscribers: [],
+        value: undefined,
+        ping: () => {
+          if (!used.pending) {
+            used.pending = true;
+            this.scheduleCheckUpdates_(microtask);
+          }
+        },
+        pending: false,
+        calcs: [],
+      };
+      usedByKey.set(key, used);
+
+      // Subscribe call alcs.
+      this.addUsedCalc_(used, calc);
+      const providers = this.providersByKey_?.get(key);
+      if (providers?.length > 0) {
+        providers.forEach(({calc}) => {
+          if (calc) {
+            this.addUsedCalc_(used, calc);
+          }
+        });
+      }
+    }
+    return used;
+  }
+
+  /**
+   * @param {string} key
+   * @param {!UsedDef} used
+   * @private
+   */
+  stopUsed_(key, used) {
+    this.usedByKey_.delete(key);
+
+    // Unsubscribe itself.
+    const { calcs } = used;
+    const toRemove = calcs.slice(0);
+    toRemove.forEach(calc => this.removeUsedCalc_(used, calc));
+  }
+
+  /**
+   * @param {!UsedDef} used
+   * @param {!ContextCalcDef} calc
+   * @private
+   */
+  addUsedCalc_(used, calc) {
+    const {prop, ping, calcs} = used;
+    const {recursive, deps} = calc;
+    if (!pushIfNotExist(calcs, calc)) {
+      // Already been used.
+      return;
+    }
+    if (recursive && this.parent_) {
+      this.parent_.subscribe_(prop, ping, /* fast */ true);
+    }
+    if (deps?.length > 0) {
+      deps.forEach((dep) => this.subscribe_(dep, ping, /* fast */ true));
+    }
+  }
+
+  /**
+   * @param {!UsedDef} used
+   * @param {!ContextCalcDef} calc
+   * @private
+   */
+  removeUsedCalc_(used, calc) {
+    const {prop, ping, calcs} = used;
+    const {recursive, deps} = calc;
+    if (!removeUniqueItem(calcs, calc)) {
+      // Hasn't been used.
+      return;
+    }
+    if (recursive && this.parent_) {
+      this.parent_.unsubscribe(prop, ping);
+    }
+    if (deps?.length > 0) {
+      deps.forEach((dep) => this.unsubscribe(dep, ping));
+    }
   }
 
   /** @private */
   checkUpdates_() {
-    console.log('ContextNode: checkUpdates_: ', this.checkPropsAll_, this.checkProps_ && this.checkProps_.map(prop => prop.key));
-    if (this.checkPropsAll_) {
-      // Check all props.
-      if (this.checkProps_) {
-        this.checkProps_.length = 0;
+    console.log('ContextNode: checkUpdates: ', this.debugId(), this.debugPending());
+    const usedByKey = this.usedByKey_;
+    if (!usedByKey?.size) {
+      return;
+    }
+
+    // QQQ: keep repeating until all resolved? this way we can catch cycles.
+    usedByKey.forEach((used) => {
+      if (used.pending) {
+        this.tryUpdate_(used);
       }
-
-      // Check updates for own props.
-      if (this.usedByKey_) {
-        this.usedByKey_.forEach((used) => {
-          this.calc_(used.prop);
-        });
-      }
-
-      this.checkPropsAll_ = false;
-
-      // Check updates for recursive props.
-      // QQQ: optimizable.
-      deepScan(this, (contextNode, state) => {
-        const hasChildren = contextNode.children_?.length > 0;
-        let handledPropKeys = /** {@type {!Array<string>}} */ state;
-        const usedByKey = contextNode.usedByKey_;
-        if (usedByKey) {
-          if (hasChildren) {
-            handledPropKeys = handledPropKeys.slice(0);
-          }
-          usedByKey.forEach((used) => {
-            const {prop} = used;
-            const {key, value: {recursive}} = prop;
-            if (recursive) {
-              if (hasChildren) {
-                pushIfNotExist(handledPropKeys, key);
-              }
-              if (contextNode != this) {
-                contextNode.ping(prop);
-              }
-            }
-          });
-        }
-        return handledPropKeys;
-      }, []);
-    } else if (this.checkProps_?.length > 0) {
-      // Check a subset of props.
-      const usedByKey = this.usedByKey_;
-      while (this.checkProps_.length > 0) {
-        const prop = this.checkProps_.pop();
-        // QQQ: this doesn't work with value override. prop might be non-recursive,
-        // but value could be recursive still.
-        const {key, value: {recursive}} = prop;
-        if (usedByKey?.has(key)) {
-          // Recalculate an own prop.
-          this.calc_(prop);
-        } else if (recursive) {
-          // This node does not depend on the value. But children might.
-          // Recalculate recursive props.
-          // QQQ: optimizable: we just need to store the node dependencies for
-          // each value and no need to do depth-search over the tree. I.e. if there
-          // are no subscribers, we can just skip this branch entirely.
-          deepScan(this, (contextNode, state) => {
-            const usedByKey = contextNode.usedByKey_;
-            if (usedByKey?.has(key)) {
-              contextNode.ping(prop);
-              return null; // Exit scan.
-            }
-            return true;
-          }, true, /* excludeSelf */ false);
-        }
-
-        const inputsByKey = this.inputsByKey_;
-        if (inputsByKey) {
-          inputsByKey.forEach(({prop, input}) => {
-            if (prop.deps) {
-              debugger;//QQQQQ
-            }
-            if (prop.deps && prop.deps.some(dep => dep.key == prop.key)) {
-              this.ping(prop);
-            }
-          });
-        }
-      }
+    });
+    if (this.debugPending().length > 0) {
+      console.log('QQQQ: pending after cycle: ', this.debugId(), this.debugPending());
     }
   }
 
   /**
-   * @param {!ContextPropDef<T>} prop
-   * @return {T|!Promise<T>|undefined}
+   * @param {!UsedDef<T>} used
+   * @template T
    * @private
    */
-  getOrCalc_(prop) {
-    const {key} = prop;
+  tryUpdate_(used) {
+    const {prop} = used;
+    const {key, calc} = prop;
 
-    const pending = (
-      this.checkPropsAll_ ||
-      this.checkProps_ && this.checkProps_.some(item => item.key == prop.key)
-    );
+    // The value is not pending anymore. If any of the dependencies will remain
+    // unresolved, we will simply need to recomputed it.
+    used.pending = false;
 
-    // If the prop is already defined on a node, return its value.
-    if (!pending && this.usedByKey_) {
-      const existing = this.usedByKey_.get(key);
-      if (existing?.value !== undefined) {
-        return existing.value;
+    const providers = this.providersByKey_?.get(key) || EMPTY_ARRAY;
+    const initialInputIndex = findIndex(providers, ({calc}) => calc === undefined);
+    const initialInput = initialInputIndex != -1 ? providers[initialInputIndex].value : undefined;
+    let newValue = this.resolveCalc_(key, initialInput, calc);
+    providers.forEach(({calc}) => {
+      if (!calc) {
+        return;
       }
-    }
+      if (isPromise(newValue)) {
+        newValue = newValue.then(() => this.resolveCalc_(key, newValue, calc));
+      } else {
+        newValue = this.resolveCalc_(key, newValue, calc);
+      }
+    });
 
-    if (pending && this.checkProps_?.length) {
-      remove(this.checkProps_, item => item.key == prop.key);
+    // Check if the value has been updated.
+    if (isPromise(newValue)) {
+      newValue.then((resolvedValue) => this.maybeUpdated_(used, resolvedValue));
+    } else {
+      this.maybeUpdated_(used, newValue);
     }
-    return this.calc_(prop);
   }
 
   /**
-   * @param {!ContextPropDef<T>} prop
+   * @param {string} key
+   * @param {T|undefined} input
+   * @param {!ContextCalcDef<T>} calc
    * @return {T|!Promise<T>|undefined}
+   * @template T
    * @private
    */
-  calc_(prop) {
-    const {key, value: {deps, recursive, compute, rootDefault}} = prop;
+  resolveCalc_(key, input, calc) {
+    const {recursive, deps, compute, rootDefault} = calc;
 
+    const usedByKey = this.usedByKey_;
     const depValues =
-      deps ?
-      deps.map(dep => this.getOrCalc_(dep)) :
-      EMPTY_ARRAY;
+      deps?.length > 0 ?
+      deps.map(dep => usedByKey?.get(dep.key)?.value) :
+      null;
 
-    let input = this.inputsByKey_?.get(key)?.input;
-
-    // Calculate the used value.
-    let value;
-
-    // We need a parent value for the default value, or if this value
-    // is calculated based on the parent.
-    if (recursive && (input === undefined || compute)) {
-      let parentValue;
-      if (this.isRoot) {
-        input = input ?? resolveRootDefault(prop);
-        parentValue = input;
-      } else if (this.parent_) {
-        // QQQ: optimazable - we don't need to check every node to the parent,
-        // only those that define/use the prop.
-        parentValue = this.parent_.getOrCalc_(prop);
-      }
-      if (parentValue !== undefined &&
-          input !== undefined &&
-          compute) {
-        // Calculate the used value as a function of input and parent values.
-        if (isPromise(parentValue)) {
-          value = parentValue.then(parentValue => compute(input, parentValue, ...depValues));
+    let newValue;
+    if (depValues && depValues.some(isUndefined)) {
+      // Some dependencies are still undefined.
+      newValue = undefined;
+    } else {
+      if (recursive) {
+        let parentValue;
+        if (this.isRoot) {
+          parentValue = resolveRootDefault(calc);
         } else {
-          value = compute(input, parentValue, ...depValues);
+          parentValue = this.parent_?.usedByKey_?.get(key)?.value;
+        }
+        if (compute) {
+          const inputWithDefault = input !== undefined ? input : rootDefault;
+          if (parentValue !== undefined && inputWithDefault !== undefined) {
+            newValue = compute(this, inputWithDefault, parentValue, ...depValues);
+          } else {
+            newValue = undefined;
+          }
+        } else if (input !== undefined) {
+          newValue = input;
+        } else {
+          newValue = parentValue;
         }
       } else {
-        // No input, parentValue is the used value.
-        value = parentValue;
+        newValue = compute ? compute(this, input, ...depValues) : input;
       }
-    } else {
-      // A non-recursive prop or a non-recursive value.
-      value = compute ? compute(input, ...depValues) : input;
     }
-
-    // Check updates.
-    if (isPromise(value)) {
-      value.then(value => this.maybeUpdated_(prop, value));
-    } else {
-      this.maybeUpdated_(prop, value);
-    }
-    return value;
+    return newValue;
   }
 
   /**
-   * @param {!ContextPropDef} prop
-   * @param {*} value
+   * @param {!UsedDef<T>} used
+   * @param {T|undefined} value
+   * @template T
    * @private
    */
-  maybeUpdated_(prop, value) {
-    const {key, value: {recursive}} = prop;//QQQ: check calls on what prop is usually used.
-    const used = this.usedByKey_?.get(key);
-    if (!used) {
-      // No one needs this value anymore.
-      return;
-    }
-    const oldValue = used.value;
-    if (oldValue === value) {
-      // No updates found.
+  maybeUpdated_(used, value) {
+    const {prop, value: oldValue} = used;
+    const {key} = prop;
+    if (oldValue === value ||
+        used !== this.usedByKey_?.get(key)) {
+      // Either the value didn't change, or no one needs this value anymore.
       return;
     }
 
+    console.log('ContextNode: updated: ', this.debugId(), key, ':', oldValue, '->', value);
     used.value = value;
 
     // Notify subscribers.
-    // QQQ: one microtask for all handler or per handler?
     const {subscribers} = used;
-    macrotask(() => {
-      subscribers.forEach(subscriber => {
-        const {cleanup, handler} = subscriber;
-        subscriber.cleanup = null;
-        if (cleanup) {
-          protectedNoInline(cleanup);
-        }
-        subscriber.cleanup = protectedNoInline(() => handler(value));
-      });
+    // QQQ: optimize
+    const execSubscriber = (subscriber) => {
+      const {cleanup, handler} = subscriber;
+      subscriber.cleanup = null;
+      if (cleanup) {
+        protectedNoInline(cleanup);
+      }
+      subscriber.cleanup = protectedNoInline(() => handler(value));
+    };
+    subscribers.forEach(subscriber => {
+      if (subscriber.fast) {
+        execSubscriber(subscriber);
+      } else {
+        macrotask(() => {
+          // QQQQ: check the value hasn't changed, etc.
+          if (subscribers.indexOf(subscriber) != -1) {
+            execSubscriber(subscriber);
+          }
+        });
+      }
     });
-
-    // Propagate to children.
-    if (recursive && this.children_) {
-      // QQQ: optimizable: can propagate only to explicit dependants.
-      this.children_.forEach(child => child.ping(prop));
-    }
   }
 
   /**
@@ -737,6 +841,46 @@ export class ContextNode {
       }
     }
   }
+}
+
+/**
+ * @param {!ContextNode} contextNode
+ * @param {!Array<ContextPropDef>} props
+ * @param {function(!Array)} values
+ * @return {!UnsubscribeDef}
+ */
+export function subscribeAll(contextNode, props, handler) {
+  const values = props.map(() => undefined);
+  let cleanup = null;
+  const updateAllValues = oneAtATime(() => {
+    console.log('QQQQ: update for all', values);
+    if (cleanup) {
+      protectedNoInline(cleanup);
+      cleanup = null;
+    }
+    const allDefined = values.every(v => v !== undefined);
+    if (allDefined) {
+      cleanup = handler(...values);
+    }
+  });
+  const updateValue = (index, value) => {
+    console.log('QQQQ: update for ', index, '=', value);
+    values[index] = value;
+    updateAllValues(macrotask);
+  };
+  const singleHandler = (index, value) => {
+    updateValue(index, value);
+    return () => updateValue(index, undefined);
+  };
+  const unsubscribes = props.map((prop, index) =>
+    contextNode.subscribe(prop, (value) => singleHandler(index, value)));
+  return () => {
+    if (cleanup) {
+      protectedNoInline(cleanup);
+      cleanup = null;
+    }
+    unsubscribes.forEach(unsubscribe => unsubscribe());
+  };
 }
 
 /**
@@ -758,8 +902,7 @@ function isPromise(value) {
  * @return {T}
  * @template T
  */
-function getOrCreateInPropMap(map, prop, factory) {
-  //QQQ: anyone else needs this method?
+function getOrCreateInPropMap(map, prop, factory) {//QQQ: used? should?
   const {key} = prop;
   let value = map.get(key);
   if (!value) {
@@ -774,22 +917,23 @@ function getOrCreateInPropMap(map, prop, factory) {
  * @return {!UsedDef<T>}
  * @template T
  */
-function emptyUsed(prop) {
+function emptyUsed(prop) {//QQQ: used? should?
   return {
     prop,
+    pending: true,
     value: undefined,
     subscribers: [],
   };
 }
 
 /**
- * @param {!ContextPropDef<T>} prop
+ * @param {!ContextCalcDef<T>} calc
  * @param {!ContextNode} rootContextNode
  * @return {T|!Promise<T>|undefined}
  * @template T
  */
-function resolveRootDefault(prop, rootContextNode) {
-  const {value: {rootDefault, rootFactory}} = prop;
+function resolveRootDefault(calc, rootContextNode) {
+  const {rootDefault, rootFactory} = calc;
   if (rootDefault !== undefined) {
     return rootDefault;
   }
@@ -797,6 +941,24 @@ function resolveRootDefault(prop, rootContextNode) {
     return rootFactory(rootContextNode);
   }
   return undefined;
+}
+
+/**
+ * @param {?Node} node
+ * @param {function(!ContextNode)} callback
+ * @param {boolean=} excludeSelf
+ */
+function forContained(node, callback, excludeSelf = false) {
+  const closest = ContextNode.closest(node, excludeSelf);
+  if (closest.node_ == node) {
+    callback(closest);
+  } else if (closest.children_) {
+    closest.children_.forEach(child => {
+      if (node.contains(child.node_)) {
+        callback(child);
+      }
+    });
+  }
 }
 
 /**
@@ -819,6 +981,10 @@ function deepScan(start, callback, iniState, excludeSelf = false) {
   }
 }
 
+function isUndefined(v) {
+  return v === undefined;
+}
+
 function protectedNoInline(callback) {
   try {
     return callback();
@@ -832,17 +998,17 @@ function protectedNoInline(callback) {
  * Creates a function that executes the callback based on the scheduler, but
  * only one task at a time.
  * @param {function()} handler
- * @param {function(function())} scheduler
- * @return {function()}
+ * @return {function(function(!Function))}
  */
-function oneAtATime(handler, scheduler) {
+function oneAtATime(handler) {
   let scheduled = false;
   const handleAndUnschedule = () => {
     scheduled = false;
     handler();
   };
-  const scheduleIfNotScheduled = () => {
+  const scheduleIfNotScheduled = (scheduler) => {
     if (!scheduled) {
+      scheduled = true;
       scheduler(handleAndUnschedule);
     }
   };
@@ -857,30 +1023,75 @@ function macrotask(callback) {
 }
 
 /**
+ * @param {function} callback
+ */
+function microtask(callback) {
+  Promise.resolve().then(callback);
+}
+
+/**
+ * @param {!ContextNode} contextNode
+ * @return {string}
+ */
+function debugId(contextNode) {
+  if (!contextNode) {
+    return null;
+  }
+  const {node} = contextNode;
+  if (node.nodeType == DOCUMENT_NODE) {
+    return '#document';
+  }
+  if (node.nodeType == FRAGMENT_NODE) {
+    return '#shadow-root';
+  }
+  return `${node.tagName.toLowerCase()}${node.id ? '#' + node.id : node.name ? node.name : ''}`;
+}
+
+/**
+ * @param {!ContextNode} contextNode
+ * @return {string}
+ */
+function debugValues(contextNode) {
+  if (!contextNode) {
+    return null;
+  }
+  const usedByKey = contextNode.usedByKey_;
+  const values = {};
+  if (usedByKey) {
+    usedByKey.forEach(({prop, value}) => {
+      values[prop.key] = value;
+    });
+  }
+  return values;
+}
+
+/**
+ * @param {!ContextNode} contextNode
+ * @return {string}
+ */
+function debugPending(contextNode) {
+  if (!contextNode) {
+    return null;
+  }
+  const usedByKey = contextNode.usedByKey_;
+  const values = {};
+  if (usedByKey) {
+    usedByKey.forEach(({prop, pending, value}) => {
+      if (pending) {
+        values[prop.key] = value;
+      }
+    });
+  }
+  return values;
+}
+
+/**
  * @param {!ContextNode} contextNode
  * @return {!JsonObject}
  */
 function debugContextNodeForTesting(contextNode) {
   if (!contextNode) {
     return null;
-  }
-
-  function nodeDebug(node) {
-    if (!node) {
-      return null;
-    }
-    return `${node.node_.tagName.toLowerCase()}${node.node_.id ? '#' + node.node_.id : ''}`;
-  }
-
-  function path(node) {
-    if (!node) {
-      return [];
-    }
-    const p = [];
-    for (let n = node; n; n = n.parent_) {
-      p.push(n);
-    }
-    return p;
   }
 
   function mapDebug(map, getValue) {
@@ -895,10 +1106,26 @@ function debugContextNodeForTesting(contextNode) {
   }
 
   return {
-    node: nodeDebug(contextNode),
+    node: debugId(contextNode),
     childrenCount: contextNode.children_ && contextNode.children_.length || 0,
     parent: debugContextNodeForTesting(contextNode.parent_),
-    inputs: mapDebug(contextNode.inputsByKey_),
+    providers: mapDebug(contextNode.providersByKey_),
     used: mapDebug(contextNode.usedByKey_, (key, {value, subscribers}) => ({value, subscriberCount: subscribers.length})),
   };
+}
+
+function debugSetForTesting(contextNode, key, value) {
+  let prop;
+  if (!prop && contextNode.usedByKey_) {
+    contextNode.usedByKey_.forEach(({prop: p}) => {
+      if (p.key == key) {
+        prop = p;
+      }
+    });
+  }
+  if (!prop) {
+    throw new Error('cannot find definition for ' + key);
+  }
+  contextNode.qqqq = true;
+  contextNode.set(prop, value);
 }

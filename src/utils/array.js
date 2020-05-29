@@ -92,6 +92,9 @@ export function removeUniqueItem(array, item) {
  * @template T
  */
 export function findIndex(array, predicate) {
+  if (typeof array.findIndex == 'function') {
+    return array.findIndex(predicate);
+  }
   for (let i = 0; i < array.length; i++) {
     if (predicate(array[i], i, array)) {
       return i;
@@ -120,12 +123,15 @@ export function fromIterator(iterator) {
  *
  * @param {Array<T>} array
  * @param {T} item
+ * @return {boolean}
  * @template T
  */
 export function pushIfNotExist(array, item) {
   if (array.indexOf(item) < 0) {
     array.push(item);
+    return true;
   }
+  return false;
 }
 
 /**

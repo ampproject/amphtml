@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-export {ContextNode} from './node';
+export {
+  ContextNode,
+  subscribeAll,
+} from './node';
 
 export {
   ContextPropDef,
-  ContextValueDef,
+  ContextCalcDef,
   contextProp,
-  contextValue,
+  contextCalc,
 } from './prop';
 
 export {

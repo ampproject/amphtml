@@ -21,7 +21,7 @@ import {WithAmpContext, AmpContext, AmpContextProp} from './context';
 import {devAssert} from '../log';
 import {matches} from '../dom';
 import {render} from './index';
-import {ContextNode, contextProp, LoadedStateProp, RenderableProp, PlayableProp} from '../context';
+import {ContextNode, subscribeAll, contextProp, LoadedStateProp, RenderableProp, PlayableProp} from '../context';
 import {measure} from './measure';
 
 /**
@@ -105,12 +105,18 @@ export class PreactBaseElement extends AMP.BaseElement {
     //QQQ: reporting only for now.
     const reportUsedValue = (prop) => {
       contextNode.subscribe(prop, (value) => {
-        console.log('BaseElement: used value: ', prop.key, '=', value);
+        console.log('BaseElement: used value ', contextNode.debugId(), ':', prop.key, '=', value);
       });
     };
     reportUsedValue(AmpContextProp);
     reportUsedValue(RenderableProp);
     reportUsedValue(PlayableProp);
+    subscribeAll(
+      contextNode,
+      [RenderableProp, PlayableProp],
+      (renderable, playable) => {
+        console.log('BaseElement: used r+p ', contextNode.debugId(), ':', renderable, playable);
+      });
 
     const consumeContext = (value, prop) => {
       console.log('BaseElement: consumeContext:', prop, '=', value);

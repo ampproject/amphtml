@@ -16,6 +16,16 @@
 
 /**
  * @typedef {
+ *   key: string,
+ *   type: (!Object|undefined),
+ *   calc: !ContextCalcDef,
+ * }
+ * @template T
+ */
+export let ContextPropDef;
+
+/**
+ * @typedef {
  *   recursive: (boolean|undefined),
  *   deps: (!Array<!ContextPropDef>|undefined),
  *   compute: (function():(T|!Promise<T>)|undefined),
@@ -24,47 +34,37 @@
  * }
  * @template T
  */
-export let ContextValueDef;
+export let ContextCalcDef;
 
-/**
- * @typedef {
- *   key: string,
- *   type: (!Object|undefined),
- *   value: !ContextValueDef,
- * }
- * @template T
- */
-export let ContextPropDef;
-
-const DEFAULT_VALUE = {
+const DEFAULT_CALC = {
   recursive: false,
 };
 
 /**
- * @param {string|!ContextValueDef} keyOrSpec
- * @param {!ContextValueDef<T>=} opt_value
+ * @param {string|!ContextCalcDef} keyOrSpec
+ * @param {!ContextCalcDef<T>=} opt_calc
  * @return {!ContextPropDef<T>}
  * @template T
  */
-export function contextProp(keyOrSpec, opt_value) {
+export function contextProp(keyOrSpec, opt_calc) {
   const spec =
     typeof keyOrSpec == 'string' ?
     {key: keyOrSpec, type: null} :
     keyOrSpec;
   return {
     ...spec,
-    value: contextValue(opt_value ?? keyOrSpec.value),
+    calc: contextCalc(opt_calc ?? keyOrSpec.calc),
   };
 }
 
 /**
- * @param {!ContextValueDef<T>=} spec
- * @return {!ContextValueDef<T>}
+ * @param {!ContextCalcDef<T>=} spec
+ * @return {!ContextCalcDef<T>}
  * @template T
  */
-export function contextValue(spec) {
+export function contextCalc(spec) {
   return {
-    ...DEFAULT_VALUE,
+    ...DEFAULT_CALC,
     ...spec,
   };
 }

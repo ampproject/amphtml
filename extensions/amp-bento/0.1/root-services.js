@@ -1,5 +1,5 @@
 
-import {ContextNode, RenderableProp, contextProp} from '../../../src/context';
+import {ContextNode, RenderableProp, contextProp, contextCalc} from '../../../src/context';
 import {Deferred} from '../../../src/utils/promise';
 
 /** @type {!ContextProp<VisibilityState>} */
@@ -15,6 +15,16 @@ export function installRootServices(ampdoc) {
   // Visibility.
   setRootVisibility(contextRoot, ampdoc.getVisibilityState());
   ampdoc.onVisibilityChanged(() => setRootVisibility(contextRoot, ampdoc.getVisibilityState()));
+
+  // <Renderable.Provider value={isVisible}>
+  contextRoot.provide(
+    RenderableProp,
+    contextCalc({
+      deps: [RootVisibilityProp],
+      compute(contextNode, renderable, rootVisibility) {
+        return renderable && rootVisibility == 'visible';
+      },
+    }));
 
   // Base URI.
   // <BaseURI.Provider value={ampdoc.getUrl()}>
@@ -49,7 +59,4 @@ function setRootVisibility(contextRoot, visibilityState) {
 
   // <RootVisibility.Provider value={visibilityState}>
   contextRoot.set(RootVisibilityProp, visibilityState);
-
-  // <Renderable.Provider value={isVisible}>
-  contextRoot.set(RenderableProp, isVisible);
 }

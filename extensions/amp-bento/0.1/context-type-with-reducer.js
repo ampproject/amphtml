@@ -12,70 +12,88 @@ TODO:
 */
 
 
-/** @type {!ContextType<boolean>} */
-const Renderable = contextType(
-  'Renderable',
-  {
-    defRootValue: true,
-    subscribe: [], // Nothing in this case. Otherwise could become a consumer.
-    resolveViaPath(contextNode) {
-      return reducePathAnd(contextNode, Renderable, (acc, v) => acc && v);
-    },
-    resolveViaParent(contextNode) {
-      const selfValue = contextNode.selfValue(Renderable);
-      if (selfValue === false || !context.parent) {
-        return selfValue;
+function scheduler() {
+
+  const tasks = [];
+  const scheduledAt = [];
+  const microtask = Promise.resolve();
+
+  let absTtl = 0;
+  let processing = false;
+
+  const schedule = (ttl) => {
+    // ttl == -1 - now
+    // ttl == 0 - microtask
+    // ttl == 1 - macrotask
+    // ttl == 2 - idle
+    if (ttl < 0 && processing) {
+      // Do nothing.
+      return;
+    }
+    if (ttl <= 0) {
+      if (!scheduledAt[0]) {
+        scheduledAt[0] = true;
+        microtask.then(() => process(0));
       }
-      const subtreeValue = contextNode.parent.subtreeValue(Renderable);
-      return selfValue && subtreeValue;
-    },
-    resolveSelfOnly(contextNode) {
-      return contextNode.selfValue(Renderable);
-    },
-  });
-
-function reducePathAnd(contextNode, contextType, reducer) {
-  let acc = undefined;
-  for (let n = contextNode; n; n = n.parent) {
-    // TODO: self and subtree values.
-    const selfValue = n.selfValue(contextNode);
-    if (selfValue === undefined) {
-      continue;
+      return;
     }
-    if (acc === undefined) {
-      acc = selfValue;
+    if (ttl <= 1) {
+      if (!scheduledAt[1]) {
+        scheduledAt[1] = true;
+        setTimeout(() => process(1));
+      }
+      return;
+    }
+    if (!scheduledAt[2]) {
+      scheduledAt[2] = true;
+      requestIdleCallback(() => process(2), {timeout = 300});
+    }
+  };
+
+  const process = (ttl) => {
+    processing = true;
+    scheduledAt[ttl] = false;
+    absTtl += ttl;
+    while (tasks.length > 0 && tasks[i].ttl < absTtl) {
+      const {task} = tasks.shift();
+      try {
+        task();
+      } catch (e) {
+        setTimeout(() => {throw e;});
+      }
+    }
+    processing = false;
+  };
+
+  return (task, ttl) => {
+    if (tasks.indexOf(task) != -1) {
+      return;
+    }
+
+    if (ttl < 0) {
+      tasks.unshift({task, ttl: -1});
     } else {
-      acc = reducer(acc, selfValue, n);
+      task.push({task, ttl: absTtl + ttl});
     }
-    if (!acc) {
-      // Short-circuit for `and`.
-      break;
-    }
-  }
-  return acc ?? null;
+    schedule(ttl);
+  };
 }
 
-function nodeApis(contextNode) {
 
-  // Provider structure: {contextType, selfValue, lastComputedValue}
+function AmpElement_enhanceWithMeasurement(contextNode) {
 
-  // Renderable.resolve(selfValue) will compute all values.
-  // ~= Renderable.resolve.bind(null, inputValue).
-  contextNode.provide(Renderable, false);
-  contextNode.provideSubtree(Renderable, false);
-
-  // Does this make sense at all?
-  contextNode.provide(Renderable, providerFunction);
-
-  // Simple case.
-  contextNode.subscribe(Renderable, consumerFunction);
-
-  // Multi-case.
-  contextNode.subscribe([Renderable, Other], (renderable, other) => {
-    // The consumerFunction can also be a functional provider.
-    contextNode.provide(NewValue, renderable + other);
+  contextNode.provide(Renderable, {
+    deps: [Measure],
+    compute(contextNode, input, measure) {
+      if (!input) {
+        return false;
+      }
+      return measure(contextNode.element)
+        .then((width, height) => width > 0 && height > 0);
+    },
   });
 }
+
 
 class AmpElement extends HTMLElement {
 
@@ -228,31 +246,4 @@ function useLoader({load: loadProp, onLoad, onLoadError}) {
     loadProp && loadingContext !== 'disabled' ||
     renderable && loadingContext === 'auto';
   return [load, onLoad, onLoadError];
-}
-
-function subscribeAll(contextNode, props, handler) {
-  const values = [];
-  values.length = props.length;
-  let cleanup = null;
-  const updateValue = (prop, value) => {
-    const index = props.indexOf(prop);
-    values[index] = value;
-    const allDefined = values.all(v => v !== undefined);
-    if (cleanup) {
-      cleanup();
-      cleanup = null;
-    }
-    if (allDefined) {
-      cleanup = handler(allDefined);
-    }
-  };
-  const singleHandler = (prop, value) => {
-    updateValue(prop, value);
-    return () => updateValue(prop, undefined);
-  };
-  const unsubscribes = props.map(prop =>
-    contextNode.subscribe(prop, (value) => singleHandler(prop, value)));
-  return () => {
-    unsubscribes.forEach(unsubscribe => unsubscribe());
-  };
 }

@@ -21,17 +21,18 @@ import {contextProp} from './prop';
 export const RenderableProp = contextProp(
   'Renderable',
   {
+    rootDefault: true,
     recursive: true,
-    compute: (thisValue, parentValue) => thisValue && parentValue,
+    compute: (contextNode, thisValue, parentValue) => thisValue && parentValue,
   }
 );
 
 /** @const {!ContextProp<boolean>} */
 export const PlayableProp = contextProp('Playable', {
+  rootDefault: true,
   recursive: true,
   deps: [RenderableProp],
-  compute: (thisValue, parentValue, renderable) => thisValue && parentValue && renderable,
-  rootDefault: true,
+  compute: (contextNode, thisValue, parentValue, renderable) => thisValue && parentValue && renderable,
 });
 
 /** @const {!ContextProp<boolean>} */
