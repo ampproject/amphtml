@@ -31,7 +31,7 @@
       }
     },
     {
-      "handlerName": "defaultHandler",
+      "handlerName": "runtimeHandler",
       "urls": [
         "http://localhost:8000/examples/runtime/article.html",
         "http://localhost:8000/examples/runtime/images.html",
