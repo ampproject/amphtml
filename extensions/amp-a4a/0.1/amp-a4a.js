@@ -738,7 +738,7 @@ export class AmpA4A extends AMP.BaseElement {
       // The following block returns either the response (as a
       // {bytes, headers} object), or null if no response is available /
       // response is empty.
-      /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+      /** @return {!Promise<!Response>} */
       .then((fetchResponse) => {
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
@@ -836,8 +836,8 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Encapsulates logic for validation flow starting with resolving res body
    * to array buffer.
-   * @param {*} fetchResponse
-   * @param {function} checkStillCurrent
+   * @param {!Response} fetchResponse
+   * @param {function()} checkStillCurrent
    * @return {Promise<?CreativeMetaDataDef>}
    */
   startValidationFlow_(fetchResponse, checkStillCurrent) {
