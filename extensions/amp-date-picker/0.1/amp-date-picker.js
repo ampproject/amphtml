@@ -361,6 +361,13 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.warnDaySizeOnce_ = once(this.warnDaySize_.bind(this));
+
+    /**
+     * Queried on buildCallback to detect whether the component is triggered
+     * similarly to overlay mode. (See isFieldOverlayTrigger_)
+     * @private {?Element}
+     */
+    this.lightboxContainer_ = null;
   }
 
   /** @override */
@@ -447,6 +454,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.isRTL_ = isRTL(this.win.document);
 
+    this.lightboxContainer_ = closestAncestorElementBySelector(
+      this.element,
+      'amp-lightbox'
+    );
+
     if (this.type_ === DatePickerType.SINGLE) {
       this.dateField_ = this.setupDateField_(DateFieldType.DATE);
       if (this.mode_ == DatePickerMode.OVERLAY && this.dateField_ === null) {
@@ -505,6 +517,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.todayAction_.bind(this, (d) => this.handleSetDates_(null, d))
     );
 
+    this.setupListeners_();
+
     return this.mutateElement(() => {
       // NOTE(cvializ): There is no standard date format for just the first
       // letter of the week-day. So we hack it in with this CSS class and don't
@@ -551,7 +565,6 @@ export class AmpDatePicker extends AMP.BaseElement {
   layoutCallback() {
     const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
-    this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
       this.maybeTransitionWithFocusChange_(
@@ -897,7 +910,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     if (existingField) {
       if (
         !this.element.hasAttribute('touch-keyboard-editable') &&
-        this.mode_ == DatePickerMode.OVERLAY &&
+        this.isFieldOverlayTrigger_(existingField) &&
         this.input_.isTouchDetected()
       ) {
         setTouchNonValidationReadonly(existingField, true);
@@ -915,6 +928,37 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     return null;
+  }
+
+  /**
+   * Detects whether a field triggers an overlay, or overlay-like datepicker.
+   *
+   * A field triggers the component as "overlay-like" when using a mode
+   * different from [mode=overlay], but behaving similarly.
+   *
+   * For example, [fullscreen] only allows [mode=static], but would be
+   * overlay-like when contained inside a lightbox that's triggered by the
+   * field's tap event, like the example on
+   * https://go.amp.dev/c/amp-date-picker/#fullscreen
+   *
+   * We detect this so we can prevent the virtual keyboard from popping up
+   * when opening the lightbox, since it would visibly cover the field.
+   * @param {!Element} field
+   * @return {boolean}
+   * @private
+   */
+  isFieldOverlayTrigger_(field) {
+    if (this.mode_ == DatePickerMode.OVERLAY) {
+      return true;
+    }
+    if (!this.lightboxContainer_) {
+      return false;
+    }
+    return this.action_.hasResolvableActionForTarget(
+      field,
+      'tap',
+      devAssert(this.lightboxContainer_)
+    );
   }
 
   /**
