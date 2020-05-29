@@ -108,7 +108,7 @@ Below is an example of a configuration:
         // Local service (required)
         "authorizationUrl": "https://pub.com/amp-authorisation?rid=READER_ID&url=SOURCE_URL",
         "pingbackUrl": "https://pub.com/amp-pingback?rid=READER_ID&url=SOURCE_URL",
-        "actions":{
+        "actions": {
           "login": "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
           "subscribe": "https://pub.com/amp-subscribe?rid=READER_ID&url=SOURCE_URL"
         }
@@ -227,6 +227,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
 </table>
 
 In addition to those, the following standard URL substitutions are useful in the context of this component:
+
 <table>
   <tr>
     <td class="col-thirty"><code>SOURCE_URL</code></td>
@@ -274,6 +275,7 @@ The Authorization endpoint must implement the security protocol described in
 The authorization endpoint returns the Entitlements object that can be used by the [Attributes][11] to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
 
 The Entitlement response returned by the authorization endpoint must conform to the predefined specification:
+
 <table>
   <tr>
     <th>Property</th>
@@ -384,12 +386,13 @@ Pingback is an endpoint provided by in the "local" service configuration and cal
 AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. One of the main goals of the Pingback is for the Publisher to update metering information.
 
 Example request:
-```js
+
+```json
 {
-  "service":"local",
-  "granted":true,
-  "grantReason":"METERING",
-  "data":{
+  "service": "local",
+  "granted": true,
+  "grantReason": "METERING",
+  "data": {
     "isLoggedIn": false,
     "articlesRead": 2,
     "articlesLeft": 3,
@@ -513,7 +516,8 @@ All scoring factors have default value of `0`. In the event of a tie the local s
 If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document is unblocked based on this fallback entitlement.
 
 Example fallback entitlement:
-```js
+
+```json
 {
   "fallbackEntitlement": {
     "source": "fallback",
@@ -576,7 +580,8 @@ Below is an example of the markup using Microdata:
   <div
     itemprop="isPartOf"
     itemscope
-    itemtype="http://schema.org/CreativeWork http://schema.org/Product">
+    itemtype="http://schema.org/CreativeWork http://schema.org/Product"
+  >
     <meta itemprop="name" content="The Norcal Tribune" />
     <meta itemprop="productID" content="norcal_tribute.com:basic" />
   </div>
@@ -584,11 +589,13 @@ Below is an example of the markup using Microdata:
 ```
 
 ## Attributes
+
 ### `subscription-action`
 
 In order to present the Reader with specific experiences, the Publisher provides specific actions which are declared in the "actions" configuration and can be marked up using `subscriptions-action` attribute.
 
 Available values:
+
 - `login`: this will trigger the [Login page][4] of the selected service.
 - `subscribe`: this will trigger the [Subscribe page][5] of the selected service.
 
@@ -607,15 +614,17 @@ By default, the actions are hidden and must be explicitly shown using the `subsc
 In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
 
 Available values:
+
 - `local`: this will force the `local` service to be used for a particular action.
 - `{serviceId}` (e.g. `subscribe.google.com`): this will force the service with ID `serviceId` to be used for a particular action.
 
-For example, this button will surface the subscribe page from the `subscribe.google.com`  service, regardless of the [service score factors][9]:
+For example, this button will surface the subscribe page from the `subscribe.google.com` service, regardless of the [service score factors][9]:
 
 ```html
 <button
   subscriptions-action="subscribe"
-  subscriptions-service="subscribe.google.com">
+  subscriptions-service="subscribe.google.com"
+>
   Subscribe
 </button>
 ```
@@ -628,7 +637,8 @@ In addition to delegation of the action to another service, you can also ask ano
 <button
   subscriptions-decorate
   subscriptions-action="subscribe"
-  subscriptions-service="subscribe.google.com">
+  subscriptions-service="subscribe.google.com"
+>
   Subscribe
 </button>
 ```
@@ -638,9 +648,9 @@ In addition to delegation of the action to another service, you can also ask ano
 The premium sections are shown/hidden automatically based on the authorization/entitlements response.
 
 Available values:
-- `content`: this is used to encapsulate the premium content.
-- `content-not-granted`: this is used to  will force the `local` service to be used for a particular action.
 
+- `content`: this is used to encapsulate the premium content.
+- `content-not-granted`: this is used to will force the `local` service to be used for a particular action.
 
 For instance, you should include the premium article contents in the `content` section and any fallback content in the `content-not-granted` section:
 
@@ -656,7 +666,7 @@ For instance, you should include the premium article contents in the `content` s
 </section>
 ```
 
-__Important:__ Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content in the first viewport be allowed to render regardless of subscription state.
+**Important:** Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content in the first viewport be allowed to render regardless of subscription state.
 
 ### `subscriptions-display`
 
@@ -668,7 +678,8 @@ Values in the `data` object of an Entitlements response can be used to build exp
 <section>
   <button
     subscriptions-action="login"
-    subscriptions-display="NOT data.isLoggedIn">
+    subscriptions-display="NOT data.isLoggedIn"
+  >
     Login
   </button>
   <div subscriptions-actions subscriptions-display="data.isLoggedIn">
@@ -677,13 +688,14 @@ Values in the `data` object of an Entitlements response can be used to build exp
   </div>
   <div
     subscriptions-actions
-    subscriptions-display="data.isLoggedIn AND NOT grantReason = 'SUBSCRIBER'">
+    subscriptions-display="data.isLoggedIn AND NOT grantReason = 'SUBSCRIBER'"
+  >
     <a href="...">Upgrade your account</a>
   </div>
 </section>
 ```
 
-__Important:__ Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
+**Important:** Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
 
 #### Using scores to customise content
 
@@ -697,7 +709,8 @@ Sample usage:
   subscriptions-display="factors['subscribe.google.com'].isReadyToPay"
   subscriptions-action="subscribe"
   subscriptions-service="subscribe.google.com"
-  subscriptions-decorate>
+  subscriptions-decorate
+>
   Subscribe with Google
 </button>
 ```
@@ -761,6 +774,7 @@ All actions work the same way: the popup window is opened for the specified URL.
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the `"login"` service to execute `"login"` or `"subscribe"` action.
 
 Example action configuration:
+
 ```js
 "actions":{
   "login": "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
@@ -769,7 +783,9 @@ Example action configuration:
 ```
 
 ### `login`
+
 The `login` action flow is as follows:
+
 1. A request is made to the specified URL of the following format:
    ```http
    https://pub.com/amp-login?
@@ -788,15 +804,17 @@ The `login` action flow is as follows:
 5. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
 The `login` action will be triggered when the Reader clicks on a button with the `subscriptions-action="login"` attribute. For example:
+
 ```html
 <button subscriptions-action="login">
   Already subscribed? Login now
 </button>
 ```
 
-
 ### `subscribe`
+
 The `subscribe` flow is as follows:
+
 1. A request is made to the specified URL of the following format:
    ```http
    https://pub.com/amp-subscribe?
@@ -814,6 +832,7 @@ The `subscribe` flow is as follows:
 4. If the `success=true` signal is returned, the AMP Runtime will repeat calls to the Authorization and Pingback endpoints to update the document’s state and report the "view" with the new access profile.
 
 The `subscribe` action will be triggered when the Reader clicks on a button with the `subscriptions-action="subscribe"` attribute. For example:
+
 ```html
 <button subscriptions-action="subscribe">
   Subscribe now
@@ -903,7 +922,6 @@ The `amp-subscriptions` component triggers the following analytics signals:
 
 - Triggered when a subscription account linking request initiated by the selected service has been cancelled.
 - Data: `serviceId` of the selected service.
-
 
 [1]: #amp-reader-id
 [2]: #local-service
