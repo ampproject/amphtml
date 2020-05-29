@@ -198,13 +198,13 @@ export class ResponsiveState {
       .runPromise(
         {
           measure: (state) => {
-            state.clientWidth = String(
+            state./*OK*/ clientWidth = String(
               element./*OK*/ parentElement./*OK*/ clientWidth
             );
           },
           mutate: (state) => {
             element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
-            element.setAttribute('width', state.clientWidth);
+            element.setAttribute('width', state./*OK*/ clientWidth);
             element.removeAttribute('data-full-width');
             element.removeAttribute('data-auto-format');
           },
