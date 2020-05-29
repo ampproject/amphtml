@@ -105,8 +105,7 @@ function performCherryPick(sha) {
 function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
-  const onto = String(argv.onto || '');
-  const branch = cherryPickBranchName(onto);
+  let onto = String(argv.onto || '');
 
   if (!commits.length) {
     log(red('ERROR:'), 'Must provide commit list with --commits');
@@ -127,7 +126,13 @@ function cherryPick() {
     // Be forgiving if someone provides a version instead of a full RTV.
     onto = onto.substr(2);
   }
+  if (onto.length !== 13) {
+    log(red('ERROR:'), 'Expected 13-digit AMP version; got', cyan(onto));
+    process.exitCode = 1;
+    return;
+  }
 
+  const branch = cherryPickBranchName(onto);
   try {
     prepareBranch(onto, commits, branch, remote);
     commits.forEach(performCherryPick);
