@@ -35,8 +35,8 @@ export function getAmpContext() {
   return (
     context ||
     (context = createContext({
-      'renderable': true,
-      'playable': true,
+      renderable: true,
+      playable: true,
     }))
   );
 }
