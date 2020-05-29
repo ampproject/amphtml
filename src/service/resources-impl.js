@@ -797,7 +797,7 @@ export class ResourcesImpl {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
       dev().fine(TAG_, 'signal: ready-scan');
     }
-  } 
+  }
 
   /** @override */
   getSlowElementRatio() {

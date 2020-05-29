@@ -462,7 +462,7 @@ describe('Resources', () => {
     expect(task.priority).to.equal(LayoutPriority.METADATA);
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
-  }); 
+  });
 
   describe('slow element ratio (ser)', () => {
     const slowTask = {resource: {isInViewport: () => true}};
