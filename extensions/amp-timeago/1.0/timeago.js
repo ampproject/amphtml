@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
