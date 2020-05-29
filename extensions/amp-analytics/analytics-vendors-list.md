@@ -180,6 +180,22 @@ Additionally, the following variables must be defined:
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
 
+### INFOnline anonymous
+
+Type attribute value: `infonline-anonymous`
+
+Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a copy of [infonline-anonymous.html](https://www.infonline.de/amp/infonline-anonymous.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
+
+Additionally, the following variables must be defined:
+
+- `st`: offer ID
+- `co`: comment
+- `cp`: code
+- `url`: HTTPS location of `infonline-anonymous.html`
+- `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
+
 ### ip-label
 
 Type attribute value: `iplabel`
