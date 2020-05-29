@@ -147,6 +147,8 @@ export class SwipeToDismiss {
    * @param {{
    *   swipeElement: !Element,
    *   mask: !Element,
+   *   direction: !Direction,
+   *   orientation: !Orientation,
    * }} config
    */
   startSwipe(config) {

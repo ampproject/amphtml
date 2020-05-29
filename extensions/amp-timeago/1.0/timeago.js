@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {createElement, useEffect, useRef, useState} from '../../../src/preact';
+import * as Preact from '../../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -23,12 +24,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {PreactDef.Renderable}
  */
 export function Timeago(props) {
-  const {
-    datetime,
-    locale,
-    cutoff,
-    cutoffText,
-  } = props;
+  const {datetime, locale, cutoff, cutoffText} = props;
   const [timestamp, setTimestamp] = useState('');
   const ref = useRef(null);
 
@@ -49,7 +45,11 @@ export function Timeago(props) {
   }, [datetime, locale, cutoff, cutoffText]);
 
   useResourcesNotify();
-  return createElement('time', {datetime, ref}, timestamp);
+  return (
+    <time datetime={datetime} ref={ref}>
+      {timestamp}
+    </time>
+  );
 }
 
 /**

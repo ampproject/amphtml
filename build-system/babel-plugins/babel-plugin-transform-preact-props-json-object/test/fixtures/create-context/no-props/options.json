@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "../../../..",
+    [
+      "@babel/plugin-transform-react-jsx", {
+        "pragma": "Preact.createElement",
+        "pragmaFrag": "Preact.Fragment",
+        "useSpread": true
+      }
+    ]
+  ]
+}

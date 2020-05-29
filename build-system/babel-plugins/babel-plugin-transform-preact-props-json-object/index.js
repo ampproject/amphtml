@@ -45,21 +45,64 @@ module.exports = function (babel) {
           return;
         }
 
+        let replace = false;
         const props = path.node.properties.map((prop) => {
-          const {key} = prop;
-          if (prop.computed) {
+          const {computed, key} = prop;
+          if (computed) {
             return;
           }
           if (!t.isIdentifier(key)) {
             return prop;
           }
-          const k = t.inherits(t.stringLiteral(key.name), key);
 
+          replace = true;
+          const k = t.inherits(t.stringLiteral(key.name), key);
           return t.objectProperty(k, prop.value, false, false);
         });
 
+        if (!replace) {
+          return;
+        }
         path.replaceWith(t.objectPattern(props));
-        path.skip();
+      },
+
+      CallExpression(path) {
+        const callee = path.get('callee');
+
+        let argNumber;
+        if (callee.matchesPattern('Preact.createElement')) {
+          argNumber = 1;
+        } else if (
+          callee.isIdentifier({name: 'createContext'}) ||
+          callee.matchesPattern('Preact.createContext')
+        ) {
+          argNumber = 0;
+        } else {
+          return;
+        }
+
+        const propsPath = path.get(`arguments.${argNumber}`);
+        if (!propsPath.isObjectExpression()) {
+          return;
+        }
+
+        const props = propsPath.node.properties.map((prop) => {
+          const {computed, key} = prop;
+          if (computed) {
+            return;
+          }
+          if (!t.isIdentifier(key)) {
+            return prop;
+          }
+
+          const k = t.inherits(t.stringLiteral(key.name), key);
+          return t.objectProperty(k, prop.value, false, false);
+        });
+
+        propsPath.replaceWith(
+          t.parenthesizedExpression(t.objectExpression(props))
+        );
+        propsPath.addComment('leading', `* @type {!JsonObject} `);
       },
     },
   };
