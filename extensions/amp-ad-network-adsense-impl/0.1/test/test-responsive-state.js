@@ -31,6 +31,7 @@ import {
 } from '../../../../src/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toWin} from '../../../../src/types';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 
@@ -47,7 +48,6 @@ describes.realWin(
     let element;
     let storageContent;
     let fakeIframe;
-    let vsyncApi;
 
     beforeEach(async () => {
       win = env.win;
@@ -77,13 +77,6 @@ describes.realWin(
         nodeType: 1,
         style: {},
       };
-
-      vsyncApi = {
-        mutatePromise: () => {},
-      };
-      env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
-        callback();
-      });
     });
 
     function createElement(attributes) {
@@ -393,12 +386,7 @@ describes.realWin(
         expect(result).to.be.null;
       });
 
-      it('returns a fall back state for full-width responsive on desktop site', async () => {
-        forceExperimentBranch(
-          win,
-          AD_SIZE_OPTIMIZATION_EXP.branch,
-          AD_SIZE_OPTIMIZATION_EXP.experiment
-        );
+      it('Fall back to container width state for full-width responsive user on desktop site', async () => {
         const element = createElementWithNoStub({
           'data-ad-client': AD_CLIENT_ID,
           'data-auto-format': [ADSENSE_RSPV_TAG],
@@ -411,6 +399,17 @@ describes.realWin(
           .stub(viewport, 'getSize')
           .returns({width: 1024, height: 500});
 
+        const mockContainerWith = '960';
+        const vsyncMock = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+        env.sandbox.stub(vsyncMock, 'mutatePromise').returns({
+          then: () => {
+          element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+          element.setAttribute('width', mockContainerWith);
+          element.removeAttribute('data-full-width');
+          element.removeAttribute('data-auto-format');
+          return ResponsiveState.createContainerWidthState(element);
+        }});
+
         const result = await ResponsiveState.maybeUpgradeToResponsive(
           element,
           AD_CLIENT_ID
@@ -421,7 +420,7 @@ describes.realWin(
         expect(element.getAttribute('height')).to.be.equal(
           `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
         );
-        expect(element.getAttribute('width')).to.be.not.equal('100vw');
+        expect(element.getAttribute('width')).to.be.equal(mockContainerWith);
         expect(element).to.not.have.attribute('data-full-width');
         expect(element).to.not.have.attribute('data-auto-format');
       });
