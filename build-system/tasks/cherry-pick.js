@@ -45,10 +45,7 @@ function execOrThrow(cmd, msg) {
  */
 function cherryPickBranchName(version) {
   const timestamp = version.slice(0, -3);
-  let suffix = String(Number(version.slice(-3)) + 1);
-  while (suffix.length < 3) {
-    suffix = `0${suffix}`;
-  }
+  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
