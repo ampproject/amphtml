@@ -180,6 +180,10 @@
     "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=pageview",
     "event": "!url?st=!st&ev=!ev&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=event"
   },
+  "infonline_anonymous": {
+    "pageview": "!url?ap=1&dn=!dn&cn=!cn&st=!st&co=!co&cp=!cp&au=_canonical_url_&ar=_document_referrer_&ash=_screen_height_&asw=_screen_width_&tp=pageview",
+    "event": "!url?ap=1&dn=!dn&cn=!cn&ev=!ev&st=!st&co=!co&cp=!cp&au=_canonical_url_&ar=_document_referrer_&ash=_screen_height_&asw=_screen_width_&tp=event"
+  },
   "iplabel": {
     "collectorUrl": "m.col.ip-label.net",
     "endpoint": "https://m.col.ip-label.net/coll/",

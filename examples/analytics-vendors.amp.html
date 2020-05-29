@@ -72,6 +72,7 @@
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>infonline_anonymous</option>
       <option>iplabel</option>
       <option>keen</option>
       <option>kenshoo</option>
@@ -755,6 +756,30 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End INFOnline example -->
+
+<!--
+  INFOnline anonymous example
+  Important: url needs to point to a copy of
+  amp-analytics-infonline-anonymous.html on a different subdomain
+  than your AMP files.
+-->
+<amp-analytics type="infonline_anonymous" id="infonline_anonymous">
+  <script type="application/json">
+    {
+      "vars": {
+        "st":  "site",
+        "co":  "comment",
+        "cp":  "code",
+        "cn": "de",
+        "dn": "relay domain name"
+      },
+      "requests": {
+        "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline-anonymous.html"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End INFOnline anonymous example -->
 
 <!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
 <amp-analytics type="iplabel" id="iplabel" >
