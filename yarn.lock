@@ -10715,10 +10715,10 @@ karma-chrome-launcher@3.1.0:
   dependencies:
     which "^1.2.1"
 
-karma-coverage-istanbul-reporter@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/karma-coverage-istanbul-reporter/-/karma-coverage-istanbul-reporter-3.0.2.tgz#b7f3393b13c7e3dafa5410a68d98d327ae21e807"
-  integrity sha512-pg23tKKF867UIJUIZF252cNbiBnuMIPOMkeiULzjysr9K267Js2O/SoQBL1PCPctJVzvhOkE47yQPUKrWtyl6w==
+karma-coverage-istanbul-reporter@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/karma-coverage-istanbul-reporter/-/karma-coverage-istanbul-reporter-3.0.3.tgz#f3b5303553aadc8e681d40d360dfdc19bc7e9fe9"
+  integrity sha512-wE4VFhG/QZv2Y4CdAYWDbMmcAHeS926ZIji4z+FkB2aF/EposRb6DP6G5ncT/wXhqUfAb/d7kZrNKPonbvsATw==
   dependencies:
     istanbul-lib-coverage "^3.0.0"
     istanbul-lib-report "^3.0.0"
@@ -14844,10 +14844,10 @@ remove-trailing-separator@^1.0.1, remove-trailing-separator@^1.1.0:
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
   integrity sha1-wkvOKig62tW8P1jg1IJJuSN52O8=
 
-renovate@20.10.2:
-  version "20.10.2"
-  resolved "https://registry.yarnpkg.com/renovate/-/renovate-20.10.2.tgz#cc999b21a4e30bc9d169e85103af89dd075bb710"
-  integrity sha512-OkBEhX0wjp718SAD/homJAUwQOm5TSn3T/g7bq8XG53at47zXLzWtkb+bOTO5EPyD3S0e3whO3UKN1P7jgwuDA==
+renovate@20.10.3:
+  version "20.10.3"
+  resolved "https://registry.yarnpkg.com/renovate/-/renovate-20.10.3.tgz#7002efa85464f7e31bd7f6010e8362c48f496ede"
+  integrity sha512-tomxZhNn0B+7BFubQ+6T3IUyoqukoZjn2IumRvQGBo2O0UHIVdYEY1DAFjfrkrZwykReWAIlHKX7oZS6GxAApg==
   dependencies:
     "@renovate/pep440" "0.4.1"
     "@sindresorhus/is" "2.1.1"
