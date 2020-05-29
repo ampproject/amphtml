@@ -26,7 +26,7 @@
       "groupName": "subpackage devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "subpackage-"
+        "managerBranchPrefix": "subpackage/"
       }
     },
 
@@ -37,7 +37,7 @@
       "groupName": "build system devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "build-system-"
+        "managerBranchPrefix": "build-system/"
       }
     },
 
@@ -48,7 +48,7 @@
       "groupName": "validator devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "validator-"
+        "managerBranchPrefix": "validator/"
       }
     },
 
@@ -58,7 +58,7 @@
       "groupName": "core devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "core-"
+        "managerBranchPrefix": "core/"
       }
     },
 
@@ -68,7 +68,7 @@
       "groupName": "linting devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "linting-"
+        "managerBranchPrefix": "linting/"
       }
     },
 
@@ -78,7 +78,7 @@
       "groupName": "babel devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "babel-"
+        "additionalBranchPrefix": "babel/"
       }
     },
 
@@ -103,7 +103,7 @@
       "groupName": "ampproject devDependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
+        "managerBranchPrefix": "ampproject/"
       }
     },
 
@@ -114,7 +114,7 @@
       "groupName": "ampproject dependencies",
       "major": {
         "groupName": null,
-        "additionalBranchPrefix": "ampproject-"
+        "managerBranchPrefix": "ampproject/"
       }
     }
   ]
