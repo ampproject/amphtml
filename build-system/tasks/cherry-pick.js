@@ -27,7 +27,7 @@ const {green, cyan, red, yellow} = require('ansi-colors');
  * @param {string} msg
  * @return {!Object}
  */
-function execOrLog(cmd, msg) {
+function execOrThrow(cmd, msg) {
   const result = getOutput(cmd);
   if (result.status) {
     log(yellow('ERROR:'), msg);
@@ -45,10 +45,7 @@ function execOrLog(cmd, msg) {
  */
 function cherryPickBranchName(version) {
   const timestamp = version.slice(0, -3);
-  let suffix = String(Number(version.slice(-3)) + 1);
-  while (suffix.length < 3) {
-    suffix = `0${suffix}`;
-  }
+  const suffix = String(Number(version.slice(-3)) + 1).padStart(3, '0');
   return `amp-release-${timestamp}${suffix}`;
 }
 
@@ -67,7 +64,7 @@ function prepareBranch(ref, commits, branch, remote) {
 
   if (needsFetch) {
     log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrLog(
+    execOrThrow(
       `git fetch ${remote}`,
       `Failed to fetch updates from remote ${cyan(remote)}`
     );
@@ -78,7 +75,7 @@ function prepareBranch(ref, commits, branch, remote) {
     );
   }
 
-  execOrLog(
+  execOrThrow(
     `git checkout -b ${branch} ${ref}`,
     `Failed to checkout new branch at ref ${cyan(ref)}`
   );
@@ -94,7 +91,7 @@ function prepareBranch(ref, commits, branch, remote) {
 function performCherryPick(sha) {
   try {
     log(green('INFO:'), 'Cherry-picking commit', cyan(sha));
-    execOrLog(
+    execOrThrow(
       `git cherry-pick -x ${sha}`,
       `Failed to cherry-pick commit ${cyan(sha)}; aborting`
     );
@@ -108,8 +105,7 @@ function performCherryPick(sha) {
 function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
-  const onto = String(argv.onto || '');
-  const branch = cherryPickBranchName(onto);
+  let onto = String(argv.onto || '');
 
   if (!commits.length) {
     log(red('ERROR:'), 'Must provide commit list with --commits');
@@ -130,7 +126,13 @@ function cherryPick() {
     // Be forgiving if someone provides a version instead of a full RTV.
     onto = onto.substr(2);
   }
+  if (onto.length !== 13) {
+    log(red('ERROR:'), 'Expected 13-digit AMP version; got', cyan(onto));
+    process.exitCode = 1;
+    return;
+  }
 
+  const branch = cherryPickBranchName(onto);
   try {
     prepareBranch(onto, commits, branch, remote);
     commits.forEach(performCherryPick);
@@ -143,7 +145,7 @@ function cherryPick() {
         'to remote',
         cyan(remote)
       );
-      execOrLog(
+      execOrThrow(
         `git push --set-upstream ${remote} ${branch}`,
         `Failed to push branch ${cyan(branch)} to remote ${cyan(remote)}`
       );
