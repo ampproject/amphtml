@@ -20,16 +20,6 @@ const log = require('fancy-log');
 const {getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
 
-// See https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#release-channels
-const RTV_PREFIXES = {
-  '00': 'experimental',
-  '01': 'stable',
-  '02': 'control',
-  '03': 'beta',
-  '04': 'nightly',
-  '05': 'nightly-control',
-};
-
 /**
  * Executes a shell command, and logs an error message if the command fails.
  *
@@ -50,16 +40,12 @@ function execOrLog(cmd, msg) {
 /**
  * Determines the name of the cherry-pick branch.
  *
- * @param {string} rtv
+ * @param {string} version
  * @param {Array<string>} commits
  * @return {string}
  */
-function cherryPickBranchName(rtv, commits) {
-  const prefix = rtv.substr(0, 2);
-  const channel = RTV_PREFIXES[prefix] || 'unknown';
-  const [date] = new Date().toISOString().split('T');
-
-  return `amp-release-${date}-${channel}+${commits.length}`;
+function cherryPickBranchName(version, commits) {
+  return `amp-release-${Number(version) + commits.length}`;
 }
 
 /**
@@ -112,34 +98,32 @@ function performCherryPick(sha) {
 function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
-  let rtv = String(argv.rtv || '');
+  const onto = String(argv.onto || '');
 
   if (!commits.length) {
     log(red('ERROR:'), 'Must provide commit list with --commits');
     process.exitCode = 1;
     return;
   }
-  if (!rtv) {
-    log(red('ERROR:'), 'Must provide release RTV with --rtv');
+  if (!onto) {
+    log(red('ERROR:'), 'Must provide 13-digit AMP version with --onto');
     process.exitCode = 1;
     return;
   }
-  if (rtv.length === 13) {
+  if (onto.length === 15) {
     log(
       yellow('WARNING:'),
-      'Expected a 15-digit RTV but got a 13-digit AMP version;',
-      'using Stable prefix',
-      cyan('01')
+      'Expected a 13-digit AMP version but got a 15-digit RTV;',
+      'ignoring channel prefix'
     );
     // Be forgiving if someone provides a version instead of a full RTV.
-    rtv = `01${rtv}`;
+    onto = onto.substr(2);
   }
 
-  const tagName = rtv.substr(2);
-  const branch = cherryPickBranchName(rtv, commits);
+  const branch = cherryPickBranchName(onto, commits);
 
   try {
-    prepareBranch(tagName, branch, remote);
+    prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {
@@ -158,7 +142,7 @@ function cherryPick() {
 
     log(
       green('SUCCESS:'),
-      `Cherry-picked ${commits.length} commits onto release ${rtv}`
+      `Cherry-picked ${commits.length} commits onto release ${onto}`
     );
     process.exitCode = 0;
   } catch (e) {
@@ -176,5 +160,5 @@ cherryPick.flags = {
   'commits': '  Comma-delimited list of commit SHAs to cherry-pick',
   'push': '  If set, will push the created branch to the remote',
   'remote': '  Remote to refresh tags from (default: origin)',
-  'rtv': '  15-digit RTV to cherry-pick onto',
+  'onto': '  13-digit AMP version to cherry-pick onto',
 };
