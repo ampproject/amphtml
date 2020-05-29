@@ -1347,6 +1347,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Retargetly example -->
 
+<!-- RudderStack example -->
+<amp-analytics type="rudderstack" id="rudderstack">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com",
+    "pageName": "My Page name"
+  },
+  "extraUrlParams": {
+    "properties.source": "RudderStack AMP"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "eventName": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End RudderStack example -->
+
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
 <script type="application/json">
@@ -1912,33 +1939,6 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- end WebEngage Analytics example -->
-
-<!-- RudderStack example -->
-<amp-analytics type="rudderstack" id="rudderstack">
-  <script type="application/json">
-  {
-    "vars": {
-      "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
-      "dataPlaneUrl": "https://hosted.rudderlabs.com",
-      "pageName": "My Page name"
-    },
-    "extraUrlParams": {
-      "properties.source": "RudderStack"
-    },
-    "triggers": {
-      "click": {
-        "on": "click",
-        "selector": "#test1",
-        "request": "track",
-        "vars": {
-          "eventName": "click"
-        }
-      }
-    }
-  }
-  </script>
-  </amp-analytics>
-<!-- End RudderStack example -->
 </div>
 
 <div class="logo"></div>
