@@ -173,7 +173,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected > .i-amphtml-story-reaction-quiz-answer-choice {
-    border: solid 2px var(--reaction-answer-choice-border) !important;
+    border-width: 0px !important;
     animation: answer-choice-bounce forwards 600ms linear;
     background-color: var(--reaction-answer-choice-background) !important;
 }
