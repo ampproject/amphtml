@@ -70,7 +70,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.ACCEPTED,
           'consentString': undefined,
-          'consentMetadata': undefined,
+          'consentMetadata': constructMetadata(),
           'isDirty': undefined,
         })
       );
@@ -83,7 +83,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         dict({
           'consentState': CONSENT_ITEM_STATE.REJECTED,
           'consentString': 'test',
-          'consentMetadata': undefined,
+          'consentMetadata': constructMetadata(),
           'isDirty': undefined,
         })
       );
@@ -139,7 +139,9 @@ describes.fakeWin('ConsentInfo', {}, () => {
     });
 
     it('construct ConsentMetadataDef from stored value', () => {
-      expect(convertStorageMetadata()).to.be.undefined;
+      expect(convertStorageMetadata()).to.deep.equals({
+        'consentStringType': undefined,
+      });
       expect(
         convertStorageMetadata({
           [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
@@ -160,17 +162,29 @@ describes.fakeWin('ConsentInfo', {}, () => {
   });
 
   it('composeStoreValue/getStoredConsentInfo', () => {
-    let consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED);
+    let consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      undefined,
+      constructMetadata()
+    );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );
 
-    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      constructMetadata()
+    );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );
 
-    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      constructMetadata()
+    );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );

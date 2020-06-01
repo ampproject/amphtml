@@ -17,11 +17,13 @@
 import * as lolex from 'lolex';
 import {
   CONSENT_ITEM_STATE,
-  CONSENT_STRING_TYPE,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,

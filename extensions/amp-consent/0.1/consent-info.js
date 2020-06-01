@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  CONSENT_STRING_TYPE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+import {CONSENT_STRING_TYPE} from '../../../src/consent-state';
 import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/utils/object';

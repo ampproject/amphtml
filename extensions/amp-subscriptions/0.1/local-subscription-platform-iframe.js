@@ -162,11 +162,10 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
   /**
    * @param {string} cmd
    * @param {?Object} unusedPayload
-   * @return {*}
    * @private
    */
   handleCommand_(cmd, unusedPayload) {
-    if (cmd == 'connect') {
+    if (cmd === 'connect') {
       // First ever message. Indicates that the receiver is listening.
       this.configPromise_.then((configJson) => {
         this.messenger_
@@ -182,7 +181,6 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
             }
           });
       });
-      return;
     }
   }
 }

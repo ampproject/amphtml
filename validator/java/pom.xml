@@ -27,7 +27,7 @@
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
 
     <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
-    <protobuf.version>3.12.1</protobuf.version>
+    <protobuf.version>3.12.2</protobuf.version>
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <jdk.version>1.8</jdk.version>
     <main.basedir>${project.basedir}</main.basedir>
@@ -258,7 +258,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.32</version>
+            <version>8.33</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -545,7 +545,7 @@
     <dependency>
       <groupId>com.puppycrawl.tools</groupId>
       <artifactId>checkstyle</artifactId>
-      <version>8.32</version>
+      <version>8.33</version>
       <scope>test</scope>
     </dependency>
     <dependency>
