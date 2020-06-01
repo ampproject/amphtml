@@ -148,7 +148,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -193,6 +193,18 @@ export class ResourcesImpl {
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
+
+    /**
+     * Number of resources that were laid out after entering viewport.
+     * @private {number}
+     */
+    this.slowLayoutCount_ = 0;
+
+    /**
+     * Total number of laid out resources.
+     * @private {number}
+     */
+    this.totalLayoutCount_ = 0;
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
@@ -785,6 +797,14 @@ export class ResourcesImpl {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
       dev().fine(TAG_, 'signal: ready-scan');
     }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    if (this.totalLayoutCount_ === 0) {
+      return 0;
+    }
+    return this.slowLayoutCount_ / this.totalLayoutCount_;
   }
 
   /**
@@ -1402,8 +1422,7 @@ export class ResourcesImpl {
     const now = Date.now();
 
     let timeout = -1;
-    const state = Object.create(null);
-    let task = this.queue_.peek(this.boundTaskScorer_, state);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev().fine(
@@ -1413,7 +1432,7 @@ export class ResourcesImpl {
         'sched at',
         task.scheduleTime,
         'score',
-        this.boundTaskScorer_(task, state),
+        this.boundTaskScorer_(task),
         'timeout',
         timeout
       );
@@ -1469,7 +1488,7 @@ export class ResourcesImpl {
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_, state);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
@@ -1514,11 +1533,10 @@ export class ResourcesImpl {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
-   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task, unusedCache) {
+  calcTaskScore_(task) {
     // TODO(jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
@@ -1597,6 +1615,11 @@ export class ResourcesImpl {
    * @private
    */
   taskComplete_(task, success, opt_reason) {
+    this.totalLayoutCount_++;
+    if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
+      this.slowLayoutCount_++;
+    }
+
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {

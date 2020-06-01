@@ -25,7 +25,7 @@ storiesOf('amp-selector', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-selector', version: 1.0}]})
+  .addParameters({extensions: [{name: 'amp-selector', version: '1.0'}]})
   .add('with <amp-img>', () => {
     return (
       <amp-selector class="sample-selector" layout="container">
@@ -102,5 +102,17 @@ storiesOf('amp-selector', module)
           toggle(index=1, value=true)
         </button>
       </>
+    );
+  })
+  .add('responsive', () => {
+    return (
+      <amp-selector layout="responsive" width="100" height="100">
+        <ul>
+          <li option="1">Option 1</li>
+          <li option="2">Option 2</li>
+          <li option="3">Option 3</li>
+          <li option="4">Option 4</li>
+        </ul>
+      </amp-selector>
     );
   });
