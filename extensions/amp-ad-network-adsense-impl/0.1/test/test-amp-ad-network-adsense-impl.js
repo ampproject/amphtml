@@ -54,7 +54,6 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
-      // runtimeOn: true,
     },
   },
   (env) => {
@@ -692,7 +691,7 @@ describes.realWin(
             /(\?|&)ady=-?\d+(&|$)/,
             /(\?|&)u_aw=\d+(&|$)/,
             /(\?|&)u_ah=\d+(&|$)/,
-            /(\?|&)u_cd=24(&|$)/,
+            /(\?|&)u_cd=(24|30)(&|$)/,
             /(\?|&)u_w=\d+(&|$)/,
             /(\?|&)u_h=\d+(&|$)/,
             /(\?|&)u_tz=-?\d+(&|$)/,

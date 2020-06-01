@@ -33,6 +33,7 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  EXPAND_JSON_TARGETING_EXP,
   RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
@@ -47,7 +48,10 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -704,7 +708,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           /(\?|&)ady=-?[0-9]+(&|$)/,
           /(\?|&)u_aw=[0-9]+(&|$)/,
           /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_cd=(24|30)(&|$)/,
           /(\?|&)u_w=[0-9]+(&|$)/,
           /(\?|&)u_h=[0-9]+(&|$)/,
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
@@ -809,6 +813,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then((url) => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "cid": "CLIENT_ID(foo)"
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting inside array', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "arr": ["cats", "CLIENT_ID(foo)"]
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
       });
     });
 
@@ -1171,15 +1217,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    beforeEach(() => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
+    it('should return false', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
     });
 
-    it('should return false by default', () => {
+    it('should not respect loading strategy', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
+
+    it('should respect loading strategy if fetch attribute present', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'true');
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
+
+    it('should NOT delay due to non-true fetch attribute', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'false');
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });

@@ -112,7 +112,6 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp serve --new_server --esm`                           | Same as `serve`, but serves esm (module) binaries. Requires the new Typescript based transforms. _Still under active development._                                                                                                                       |
 | `gulp serve --quiet`                                      | Same as `serve`, with logging silenced.                                                                                                                                                                                                                  |
 | `gulp serve --port <port>`                                | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                  |
-| `gulp serve --inspect`                                    | Same as `serve`, but runs the server in `node --inspect` mode                                                                                                                                                                                            |
 | `gulp check-types`                                        | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                           |
 | `gulp dep-check`                                          | Runs a dependency check on each module. Run automatically upon push.                                                                                                                                                                                     |
 | `gulp presubmit`                                          | Run validation against files to check for forbidden and required terms. Run automatically upon push.                                                                                                                                                     |
@@ -139,6 +138,14 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp e2e --headless`                                     | Runs end-to-end tests in a headless browser instance.                                                                                                                                                                                                    |
 | `gulp e2e --watch`                                        | Watches for changes in test files, runs tests.                                                                                                                                                                                                           |
 | `gulp check-sourcemaps`                                   | Checks sourcemaps generated during minified compilation for correctness.                                                                                                                                                                                 |
+
+**Pro tip:** All the above commands can be run in debug mode using `node --inspect`. This will make the Chrome debugger stop at `debugger;` statements, after which local state can be inspected using dev tools.
+
+For example, in order to debug `gulp serve`, run the following command:
+
+```sh
+node --inspect $(which gulp) serve
+```
 
 ## Manual testing
 
