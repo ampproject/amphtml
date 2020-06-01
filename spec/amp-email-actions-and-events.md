@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Actions and events in AMP
+# Actions and events in AMP email
 
 [TOC]
+
+[tip type="note"]
+This documentation covers actions and events for the AMP email format. Read [Actions and events](amp-actions-and-events.md) for AMP websites, stories and ads.
+[/tip]
 
 The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
@@ -390,8 +394,6 @@ event.response</pre></td>
 </table>
 
 ### amp-list <a name="amp-list-1"></a>
-
-### amp-list <a name="amp-list"></a>
 
 <table>
   <tr>
