@@ -198,11 +198,12 @@ export class ContextNode {
     /** @private {?Array<function(contextNode: !ContextNode, key: string) */
     this.observers_ = null;
 
+    // QQQ: Have to keep discovery separate, otherwise we get catch-22.
     // Schedulers.
     /** @private @const {function()} */
-    this.scheduleDiscover_ = oneAtATime(this.discover_.bind(this));
+    this.scheduleDiscover_ = oneAtATime(this.discover_.bind(this), macrotask);
     /** @private @const {function()} */
-    this.scheduleCheckUpdates_ = oneAtATime(this.checkUpdates_.bind(this));
+    this.checkUpdatesTask_ = this.checkUpdates_.bind(this);
 
     if (node.nodeType == ELEMENT_NODE && startsWith(node.tagName, 'AMP-')) {
       // QQQ: automatically assign some properties? Or do this as part of a
@@ -230,6 +231,17 @@ export class ContextNode {
     }
     const {nodeType} = this.node_;
     return (nodeType == DOCUMENT_NODE || nodeType == FRAGMENT_NODE);
+  }
+
+  get root() {
+    if (this.isRoot) {
+      return this;
+    }
+    if (this.parent_) {
+      // QQQ: optimize recursion. if not good, cache root.
+      return this.parent_.root;
+    }
+    return null;
   }
 
   /**
@@ -283,7 +295,7 @@ export class ContextNode {
    */
   discover() {
     if (this.discoverable_) {
-      this.scheduleDiscover_(macrotask);
+      this.scheduleDiscover_();
     }
   }
 
@@ -306,6 +318,10 @@ export class ContextNode {
     // if (props[0]?.key == 'Renderable') {
     //   debugger;//!!!!!
     // }
+    const queue = this.getQueue_();
+    if (!queue) {
+      return;
+    }
     const usedByKey = this.usedByKey_;
     if (props.length == 0 || !usedByKey?.size) {
       return;
@@ -319,7 +335,7 @@ export class ContextNode {
       }
     });
     if (count > 0) {
-      this.scheduleCheckUpdates_(macrotask);
+      queue(this.checkUpdatesTask_, false);
     }
   }
 
@@ -327,6 +343,10 @@ export class ContextNode {
    * @package TBD to open publically, but performance is a concern.
    */
   pingAll() {
+    const queue = this.getQueue_();
+    if (!queue) {
+      return;
+    }
     const usedByKey = this.usedByKey_;
     if (!usedByKey?.size) {
       return;
@@ -339,7 +359,7 @@ export class ContextNode {
       }
     });
     if (count > 0) {
-      this.scheduleCheckUpdates_(macrotask);
+      queue(this.checkUpdatesTask_, false);
     }
   }
 
@@ -384,6 +404,23 @@ export class ContextNode {
    */
   unsubscribe(prop, handler) {
     this.unsubscribe_(prop, handler);
+  }
+
+  /**
+   * @return {function(!Function, boolean)}
+   * @private
+   */
+  getQueue_() {
+    // QQQ: what's the value here from limitting where the queue can be defined?
+    const root = this.root;
+    if (root) {
+      // QQQ: use `set()`?
+      if (!root.queue_) {
+        root.queue_ = twoTierQueue();
+      }
+      return root.queue_;
+    }
+    return null;
   }
 
   /**
@@ -529,12 +566,13 @@ export class ContextNode {
 
     // First time a handler is added, it's notify right away if the value
     // is present.
+    const queue = this.getQueue_();
     const existingValue = used.value;
-    if (existingValue !== undefined) {
+    if (existingValue !== undefined && queue) {
       if (fast) {
         subscriber.cleanup = handler(used.value);
       } else {
-        macrotask(() => {
+        queue(() => {
           // Only proceed with the notification if nothing has been updated.
           const used = this.usedByKey_?.get(key);
           if (used &&
@@ -542,7 +580,7 @@ export class ContextNode {
               used.value === existingValue) {
             subscriber.cleanup = handler(used.value);
           }
-        });
+        }, false);
       }
     } else {
       used.ping();
@@ -571,6 +609,8 @@ export class ContextNode {
 
     // Run cleanups.
     if (removed.length > 0) {
+      // QQQQ: have to use a macrotask because not sure if we still have a
+      // queue.
       macrotask(() => {
         removed.forEach(subscriber => {
           const {cleanup} = subscriber;
@@ -605,8 +645,11 @@ export class ContextNode {
         value: undefined,
         ping: () => {
           if (!used.pending) {
-            used.pending = true;
-            this.scheduleCheckUpdates_(microtask);
+            const queue = this.getQueue_();
+            if (queue) {
+              used.pending = true;
+              queue(this.checkUpdatesTask_, true);
+            }
           }
         },
         pending: false,
@@ -803,8 +846,14 @@ export class ContextNode {
     console.log('ContextNode: updated: ', this.debugId(), key, ':', oldValue, '->', value);
     used.value = value;
 
+    const queue = this.getQueue_();
+    if (!queue) {
+      return;
+    }
+
     // Notify subscribers.
     const {subscribers} = used;
+
     // QQQ: optimize
     const execSubscriber = (subscriber) => {
       const {cleanup, handler} = subscriber;
@@ -818,12 +867,12 @@ export class ContextNode {
       if (subscriber.fast) {
         execSubscriber(subscriber);
       } else {
-        macrotask(() => {
+        queue(() => {
           // QQQQ: check the value hasn't changed, etc.
           if (subscribers.indexOf(subscriber) != -1) {
             execSubscriber(subscriber);
           }
-        });
+        }, false);
       }
     });
   }
@@ -866,6 +915,7 @@ export function subscribeAll(contextNode, props, handler) {
   const updateValue = (index, value) => {
     console.log('QQQQ: update for ', index, '=', value);
     values[index] = value;
+    //QQQQ: need to pull in the queue.
     updateAllValues(macrotask);
   };
   const singleHandler = (index, value) => {
@@ -893,37 +943,6 @@ function isPromise(value) {
     typeof value == 'object' &&
     typeof value['then'] == 'function'
   );
-}
-
-/**
- * @param {!Map} map
- * @param {!ContextPropDef<T>} prop
- * @param {function():T} factory
- * @return {T}
- * @template T
- */
-function getOrCreateInPropMap(map, prop, factory) {//QQQ: used? should?
-  const {key} = prop;
-  let value = map.get(key);
-  if (!value) {
-    value = factory(prop);
-    map.set(key, value);
-  }
-  return value;
-}
-
-/**
- * @param {!ContextPropDef<T>} prop
- * @return {!UsedDef<T>}
- * @template T
- */
-function emptyUsed(prop) {//QQQ: used? should?
-  return {
-    prop,
-    pending: true,
-    value: undefined,
-    subscribers: [],
-  };
 }
 
 /**
@@ -998,9 +1017,10 @@ function protectedNoInline(callback) {
  * Creates a function that executes the callback based on the scheduler, but
  * only one task at a time.
  * @param {function()} handler
+ * @param {?function(!Function)} defaultScheduler
  * @return {function(function(!Function))}
  */
-function oneAtATime(handler) {
+function oneAtATime(handler, defaultScheduler = null) {
   let scheduled = false;
   const handleAndUnschedule = () => {
     scheduled = false;
@@ -1009,10 +1029,37 @@ function oneAtATime(handler) {
   const scheduleIfNotScheduled = (scheduler) => {
     if (!scheduled) {
       scheduled = true;
-      scheduler(handleAndUnschedule);
+      (scheduler || defaultScheduler)(handleAndUnschedule);
     }
   };
   return scheduleIfNotScheduled;
+}
+
+function queue(scheduler) {
+  const tasks = [];
+
+  const processor = oneAtATime(() => {
+    const work = tasks.slice(0);
+    tasks.length = 0;
+    work.forEach(protectedNoInline);
+  }, scheduler);
+
+  return (task) => {
+    if (pushIfNotExist(tasks, task)) {
+      processor();
+      return true;
+    }
+    return false;
+  };
+}
+
+function twoTierQueue() {
+  const microQueue = queue(microtask);
+  const macroQueue = queue(macrotask);
+  return (task, fast) => {
+    const queue = fast ? microQueue : macroQueue;
+    return queue(task);
+  };
 }
 
 /**

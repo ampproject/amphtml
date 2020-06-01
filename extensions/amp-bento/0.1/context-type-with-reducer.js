@@ -14,48 +14,65 @@ TODO:
 
 function scheduler() {
 
+  /**
+   * ttl:
+   * - 0 - asap
+   * - 1 - microtask
+   * - 2 - macrotask
+   */
+
   const tasks = [];
-  const scheduledAt = [];
+  const ttls = [];
+
   const microtask = Promise.resolve();
+  const schedulersAtTtl = [
+    null, // No scheduler for a processing queue.
+    oneAtATime(() => process(1), (callback) => microtask.then(callback)),
+    oneAtATime(() => process(2), (callback) => setTimeout(callback)),
+  ];
 
   let absTtl = 0;
   let processing = false;
 
-  const schedule = (ttl) => {
-    // ttl == -1 - now
-    // ttl == 0 - microtask
-    // ttl == 1 - macrotask
-    // ttl == 2 - idle
-    if (ttl < 0 && processing) {
+  /**
+   * @param {Function} task
+   * @param {number} ttl
+   */
+  const scheduleTask = (task, ttl) => {
+    if (tasks.indexOf(task) != -1) {
+      return;
+    }
+
+    ttl = Math.min(Math.max(ttl, 0), 2);
+
+    if (ttl == 0) {
+      tasks.unshift(task);
+      ttls.unshift(absTtl);
+    } else {
+      task.push(task);
+      ttls.push(absTtl + ttl);
+    }
+    schedulePass(ttl);
+  };
+
+  /**
+   * @param {number} ttl
+   */
+  const schedulePass = (ttl) => {
+    if (ttl == 0 && processing) {
       // Do nothing.
       return;
     }
-    if (ttl <= 0) {
-      if (!scheduledAt[0]) {
-        scheduledAt[0] = true;
-        microtask.then(() => process(0));
-      }
-      return;
-    }
-    if (ttl <= 1) {
-      if (!scheduledAt[1]) {
-        scheduledAt[1] = true;
-        setTimeout(() => process(1));
-      }
-      return;
-    }
-    if (!scheduledAt[2]) {
-      scheduledAt[2] = true;
-      requestIdleCallback(() => process(2), {timeout = 300});
-    }
+    // No processing right now. We need to at least schedule a microtask.
+    ttl = Math.min(ttl, 1);
+    schedulersAtTtl[ttl]();
   };
 
-  const process = (ttl) => {
+  const process = (maxTtl) => {
     processing = true;
-    scheduledAt[ttl] = false;
-    absTtl += ttl;
-    while (tasks.length > 0 && tasks[i].ttl < absTtl) {
-      const {task} = tasks.shift();
+    while (ttls.length > 0 && ttls[0].ttl <= maxTtl) {
+      const task = tasks.shift();
+      ttls.shift();
       try {
         task();
       } catch (e) {
@@ -65,19 +82,32 @@ function scheduler() {
     processing = false;
   };
 
-  return (task, ttl) => {
-    if (tasks.indexOf(task) != -1) {
-      return;
-    }
-
-    if (ttl < 0) {
-      tasks.unshift({task, ttl: -1});
-    } else {
-      task.push({task, ttl: absTtl + ttl});
-    }
-    schedule(ttl);
-  };
+  return scheduleTask;
 }
+
+
+/**
+ * Creates a function that executes the callback based on the scheduler, but
+ * only one task at a time.
+ * @param {function()} handler
+ * @param {?function(!Function)} defaultScheduler
+ * @return {function(function(!Function))}
+ */
+function oneAtATime(handler, defaultScheduler = null) {
+  let scheduled = false;
+  const handleAndUnschedule = () => {
+    scheduled = false;
+    handler();
+  };
+  const scheduleIfNotScheduled = (scheduler) => {
+    if (!scheduled) {
+      scheduled = true;
+      (scheduler || defaultScheduler)(handleAndUnschedule);
+    }
+  };
+  return scheduleIfNotScheduled;
+}
+
 
 
 function AmpElement_enhanceWithMeasurement(contextNode) {
