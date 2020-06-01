@@ -32,14 +32,15 @@ export function FitText(props) {
     'maxFontSize': maxFontSize = 72,
     ...rest
   } = props;
-  const contentRef = useRef(null);
+  const containerRef = useRef(null);
   const measurerRef = useRef(null);
+  const contentRef = useRef(null);
 
   const resize = useCallback(() => {
-    if (!measurerRef.current || !contentRef.current) {
+    if (!measurerRef.current || !containerRef.current) {
       return;
     }
-    const {clientHeight, clientWidth} = contentRef.current;
+    const {clientHeight, clientWidth} = containerRef.current;
     const fontSize = calculateFontSize(
       measurerRef.current,
       clientHeight,
@@ -53,8 +54,8 @@ export function FitText(props) {
   // useLayoutEffect is used so intermediary font sizes during calculation
   // are resolved before the component visually updates.
   useLayoutEffect(() => {
-    const container = contentRef.current;
-    const content = measurerRef.current;
+    const container = containerRef.current;
+    const content = contentRef.current;
     if (!container || !content) {
       return;
     }
@@ -67,7 +68,7 @@ export function FitText(props) {
   return (
     <div {...rest}>
       <div
-        ref={contentRef}
+        ref={containerRef}
         style={{
           ...styles.fitTextContent,
           'width': '100%',
@@ -75,7 +76,9 @@ export function FitText(props) {
         }}
       >
         <div ref={measurerRef} style={styles.fitTextContentWrapper}>
-          {children}
+          <div ref={contentRef} style={{height: 'min-content'}}>
+            {children}
+          </div>
         </div>
       </div>
     </div>
