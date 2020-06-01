@@ -714,6 +714,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {?JsonObject|undefined}
    */
   configureMetadataByConsentString_(opt_metadata, opt_consentString) {
+    if (!opt_metadata) {
+      return;
+    }
     if (!isObject(opt_metadata) || !opt_consentString) {
       user().error(
         TAG,
