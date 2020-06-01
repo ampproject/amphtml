@@ -30,27 +30,35 @@ export function getSocialConfig(type) {
  */
 const BUILTINS = dict({
   'twitter': {
-    'shareEndpoint': 'https://twitter.com/intent/tweet',
+    'shareEndpointAmp': 'https://twitter.com/intent/tweet',
+    'shareEndpointPreact': ({paramUrl, paramText}) =>
+      `https://twitter.com/intent/tweet?text=${paramText}&url=${paramUrl}`,
     'defaultParams': {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     },
   },
   'facebook': {
-    'shareEndpoint': 'https://www.facebook.com/dialog/share',
+    'shareEndpointAmp': 'https://www.facebook.com/dialog/share',
+    'shareEndpointPreact': ({paramUrl}) =>
+      `https://www.facebook.com/dialog/share?href=${paramUrl}`,
     'defaultParams': {
       'href': 'CANONICAL_URL',
     },
   },
   'pinterest': {
-    'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
+    'shareEndpointAmp': 'https://www.pinterest.com/pin/create/button/',
+    'shareEndpointPreact': ({paramUrl, paramText}) =>
+      `https://www.pinterest.com/pin/create/button/?url=${paramUrl}&description=${paramText}`,
     'defaultParams': {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
     },
   },
   'linkedin': {
-    'shareEndpoint': 'https://www.linkedin.com/shareArticle',
+    'shareEndpointAmp': 'https://www.linkedin.com/shareArticle',
+    'shareEndpointPreact': ({paramUrl, paramMini}) =>
+      `https://www.linkedin.com/shareArticle?url=${paramUrl}&mini=${paramMini}`,
     'defaultParams': {
       'url': 'CANONICAL_URL',
       'mini': 'true',
@@ -58,7 +66,9 @@ const BUILTINS = dict({
   },
   'email': {
     'bindings': ['recipient'],
-    'shareEndpoint': 'mailto:RECIPIENT',
+    'shareEndpointAmp': 'mailto:RECIPIENT',
+    'shareEndpointPreact': ({paramRecipient, paramText, paramUrl}) =>
+      `mailto:${paramRecipient}?subject=${paramText}&body=${paramUrl}`,
     'defaultParams': {
       'subject': 'TITLE',
       'body': 'CANONICAL_URL',
@@ -66,33 +76,43 @@ const BUILTINS = dict({
     },
   },
   'tumblr': {
-    'shareEndpoint': 'https://www.tumblr.com/share/link',
+    'shareEndpointAmp': 'https://www.tumblr.com/share/link',
+    'shareEndpointPreact': ({paramText, paramUrl}) =>
+      `https://www.tumblr.com/share/link?name=${paramText}&url=${paramUrl}`,
     'defaultParams': {
       'name': 'TITLE',
       'url': 'CANONICAL_URL',
     },
   },
   'whatsapp': {
-    'shareEndpoint': 'https://api.whatsapp.com/send',
+    'shareEndpointAmp': 'https://api.whatsapp.com/send',
+    'shareEndpointPreact': ({paramText}) =>
+      `https://api.whatsapp.com/send?text=${paramText}`,
     'defaultParams': {
       'text': 'TITLE - CANONICAL_URL',
     },
   },
   'line': {
-    'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
+    'shareEndpointAmp': 'https://social-plugins.line.me/lineit/share',
+    'shareEndpointPreact': ({paramText, paramUrl}) =>
+      `https://social-plugins.line.me/lineit/share?text=${paramText}&url=${paramUrl}`,
     'defaultParams': {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     },
   },
   'sms': {
-    'shareEndpoint': 'sms:',
+    'shareEndpointAmp': 'sms:',
+    'shareEndpointPreact': ({paramText, paramUrl}) =>
+      `sms:?body=${paramText} - ${paramUrl}`,
     'defaultParams': {
       'body': 'TITLE - CANONICAL_URL',
     },
   },
   'system': {
-    'shareEndpoint': 'navigator-share:',
+    'shareEndpointAmp': 'navigator-share:',
+    'shareEndpointPreact': ({paramText, paramUrl}) =>
+      `navigator-share:?text=${paramText}&url=${paramUrl}`,
     'defaultParams': {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',

@@ -44,11 +44,17 @@ export const _default = () => {
   ];
   const type = select('type', knobConfigurations, knobConfigurations[0]);
   const href = text('shareEndpoint', 'Not Specified');
-  const params = object('params', {'subject': 'test'});
+  const additionalParams = object('params', {'subject': 'test'});
+  const paramUrl = text('paramUrl', undefined);
+  const paramText = text('paramText', undefined);
+  const paramMini = text('paramMini', undefined);
+  const paramRecipient = text('paramRecipient', undefined);
+  /*
   const bindings = object('bindings', {
     'canonical_url': 'test2',
     'recipient': 'email recipient',
   });
+  */
   const width = text('width', undefined);
   const height = text('height', undefined);
 
@@ -63,8 +69,12 @@ export const _default = () => {
         type={type}
         href={href}
         shareEndpoint={href}
-        {...params}
-        bindings={bindings}
+        paramUrl={paramUrl}
+        paramText={paramText}
+        paramMini={paramMini}
+        paramRecipient={paramRecipient}
+        additionalParams={additionalParams}
+        //bindings={bindings}
         width={width}
         height={height}
       />

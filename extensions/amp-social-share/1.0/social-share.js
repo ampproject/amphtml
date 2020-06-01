@@ -41,11 +41,11 @@ export function SocialShare(props) {
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    params,
+    additionalParams,
   } = checkProps(props);
   let combinedParams = dict();
   if (!props['ignoreParams']) {
-    combinedParams = {...typeConfig['defaultParams'], ...params};
+    combinedParams = additionalParams;
   }
   const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
@@ -93,14 +93,7 @@ function checkProps(props) {
     'target': target,
     'width': width,
     'height': height,
-    // eslint-disable-next-line no-unused-vars
-    'tabIndex': tabIndex,
-    // eslint-disable-next-line no-unused-vars
-    'style': style,
-    // eslint-disable-next-line no-unused-vars
-    'ignoreParams': ignoreParams,
-    // eslint-disable-next-line local/no-rest
-    ...params
+    'additionalParams': additionalParams,
   } = props;
 
   // Verify type is provided
@@ -111,17 +104,18 @@ function checkProps(props) {
   // User must provide endpoint if they choose a type that is not
   // pre-configured
   const typeConfig = getSocialConfig(type) || dict();
-  let baseEndpoint = endpoint || typeConfig['shareEndpoint'];
+  const baseEndpoint = endpoint || typeConfig['shareEndpointPreact'](props);
   if (baseEndpoint === undefined) {
     throw new Error(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
   }
 
+  /*
   // Handle receipient for type = 'email' without custom endpoint
-  if (!endpoint && type === 'email' && params['recipient'] !== undefined) {
+  if (!endpoint && type === 'email' && props['paramRecipient'] !== undefined) {
     baseEndpoint = `${baseEndpoint.split(':', 1)[0]}:${params['recipient']}`;
-  }
+  }*/
 
   // Defaults
   const checkedWidth = width || DEFAULT_WIDTH;
@@ -134,7 +128,7 @@ function checkProps(props) {
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    params,
+    additionalParams,
   };
 }
 
