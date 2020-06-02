@@ -71,7 +71,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
 .i-amphtml-story-reaction-quiz-option-container {
     display: flex !important;
     flex-direction: column;
-    background-color: var(--reaction-theme-background) !important;
+    background-color: var(--reaction-background-color) !important;
     border-radius: var(--reaction-chip-radius) !important;
     padding: 8px 8px 0px 8px !important;
 }
@@ -83,7 +83,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
     align-items: center !important;
     border-radius: var(--reaction-chip-radius) !important;
     padding: 8px 16px 8px 8px !important;
-    background-color: var(--reaction-theme-background) !important;
+    background-color: var(--reaction-background-color) !important;
     margin-bottom: 8px !important;
     color: var(--reaction-option-text-color) !important;
     border: solid 1px var(--reaction-theme-border) !important;
