@@ -122,7 +122,7 @@ class AmpSocialShare extends PreactBaseElement {
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
-    const bindingVars = typeConfig['bindings'];
+    const bindingVars = /** @type {?Array<string>} */ (typeConfig['bindings']);
     const bindings = {};
     if (bindingVars) {
       bindingVars.forEach((name) => {

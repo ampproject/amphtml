@@ -140,7 +140,7 @@ function throwWarning(message) {
 
 /**
  * Opens a new window with the fully processed endpoint
- * @param {string} finalEndpoint
+ * @param {?string} finalEndpoint
  * @param {string} target
  */
 function handleActivation(finalEndpoint, target) {
@@ -187,7 +187,7 @@ function getQueryString(endpoint) {
 /**
  * @param {!Event} event
  * @param {?string} finalEndpoint
- * @param {?string} target
+ * @param {string} target
  */
 function handleKeyPress(event, finalEndpoint, target) {
   const {key} = event;
