@@ -17,10 +17,10 @@
 import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
+import {setStyles} from '../../../src/style';
 
 /**
  * Generates the template for the quiz.
@@ -73,12 +73,7 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
-    createShadowRootWithStyle(
-      this.element,
-      dev().assertElement(this.rootEl_),
-      CSS
-    );
+    super.buildCallback(CSS);
   }
 
   /** @override */
@@ -119,8 +114,6 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
     this.options_.forEach((option, index) =>
       this.configureOption_(option, index)
     );
-
-    devAssert(this.element.children.length == 0, 'Too many children');
   }
 
   /**
@@ -188,14 +181,12 @@ export class AmpStoryReactionQuiz extends AmpStoryReaction {
       ).textContent = `${percentage}%`;
     });
 
-    this.rootEl_.setAttribute(
-      'style',
-      `
-      --option-1-percentage: ${percentages[0]}%;
-      --option-2-percentage: ${percentages[1]}%;
-      --option-3-percentage: ${percentages[2]}%;
-      --option-4-percentage: ${percentages[3]}%;
-    `
-    );
+    // TODO(mszylkowski): split each variable to be applied to the corresponding option.
+    setStyles(dev().assertElement(this.rootEl_), {
+      '--option-1-percentage': percentages[0] + '%',
+      '--option-2-percentage': percentages[1] + '%',
+      '--option-3-percentage': percentages[2] + '%',
+      '--option-4-percentage': percentages[3] + '%',
+    });
   }
 }
