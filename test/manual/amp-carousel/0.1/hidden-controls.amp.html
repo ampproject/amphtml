@@ -19,6 +19,20 @@
     rect.green {
       fill: green;
     }
+    /* 
+     * Mimics [i-amphtml-carousel-hide-buttons] CSS rules. 
+     * This is necessary because the component normally only applies these styles
+     * when a `touch` gesture is detected on the AMP doc. Because e2e test environments
+     * run with `mouse` gesture, the correct styles are not automatically applied in
+     * the test fixture. This simulates the CSS that *would* be applied so we can test
+     * behaviors specific to the `touch` amp-carousel experience.
+     * TODO(wg-infra): This can be removed once a `touch` e2e environment is supported.
+     */
+    .amp-carousel-button-next{
+      opacity: 0;
+      pointer-events: none;
+      visibility: visible !important;
+    }
   </style>
 </head>
 <body>
