@@ -42,8 +42,18 @@ limitations under the License.
   }'
 >
 </amp-ad>
-<amp-ad width="320" height="50" type="springAds" data-adslot="banner"></amp-ad>
-<amp-ad width="100vW" height="fluid" type="springAds" data-adslot="mrec"></amp-ad>
+<amp-ad 
+  width="320" 
+  height="50" 
+  type="springAds" 
+  data-adslot="banner"
+></amp-ad>
+<amp-ad 
+  width="100vW" 
+  height="fluid" 
+  type="springAds" 
+  data-adslot="mrec"
+></amp-ad>
 ```
 For a maintenanced uptodate documentation please refer to our
 [official springAds document](https://github.com/spring-media/adsolutions-implementationReference/blob/master/publisher-amp-reference.md)
