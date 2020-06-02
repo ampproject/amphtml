@@ -118,7 +118,6 @@ class AmpSocialShare extends PreactBaseElement {
         typeConfig['shareEndpointAmp'],
       'The data-share-endpoint attribute is required. %s'
     );
-    console.log(shareEndpoint);
     const urlParams = typeConfig['defaultParams'] || dict();
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);

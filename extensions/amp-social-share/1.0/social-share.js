@@ -35,17 +35,12 @@ const NAME = 'SocialShare';
  */
 export function SocialShare(props) {
   useResourcesNotify();
-  const {
-    typeConfig,
-    baseEndpoint,
-    checkedWidth,
-    checkedHeight,
-    checkedTarget,
-    additionalParams,
-  } = checkProps(props);
+  const {baseEndpoint, checkedWidth, checkedHeight, checkedTarget} = checkProps(
+    props
+  );
   let combinedParams = dict();
   if (!props['ignoreParams']) {
-    combinedParams = additionalParams;
+    combinedParams = props['additionalParams'];
   }
   const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
@@ -79,11 +74,10 @@ export function SocialShare(props) {
 /**
  * @param {!JsonObject} props
  * @return {{
- *   typeConfig: !JsonObject,
  *   baseEndpoint: ?string,
  *   checkedWidth: ?number,
  *   checkedHeight: ?number,
- *   params: !JsonObject,
+ *   additionalParams: !JsonObject,
  * }}
  */
 function checkProps(props) {
@@ -93,7 +87,6 @@ function checkProps(props) {
     'target': target,
     'width': width,
     'height': height,
-    'additionalParams': additionalParams,
   } = props;
 
   // Verify type is provided
@@ -111,24 +104,16 @@ function checkProps(props) {
     );
   }
 
-  /*
-  // Handle receipient for type = 'email' without custom endpoint
-  if (!endpoint && type === 'email' && props['paramRecipient'] !== undefined) {
-    baseEndpoint = `${baseEndpoint.split(':', 1)[0]}:${params['recipient']}`;
-  }*/
-
   // Defaults
   const checkedWidth = width || DEFAULT_WIDTH;
   const checkedHeight = height || DEFAULT_HEIGHT;
   const checkedTarget = target || DEFAULT_TARGET;
 
   return {
-    typeConfig,
     baseEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-    additionalParams,
   };
 }
 
