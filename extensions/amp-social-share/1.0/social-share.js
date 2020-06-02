@@ -87,10 +87,10 @@ export function SocialShare(props) {
 /**
  * @param {!JsonObject} props
  * @return {{
- *   baseEndpoint: ?string,
- *   checkedWidth: ?number,
- *   checkedHeight: ?number,
- *   additionalParams: !JsonObject,
+ *   baseEndpoint: string,
+ *   checkedWidth: number,
+ *   checkedHeight: number,
+ *   checkedTarget: string,
  * }}
  */
 function checkProps(props) {
@@ -140,8 +140,8 @@ function throwWarning(message) {
 
 /**
  * Opens a new window with the fully processed endpoint
- * @param {?string} finalEndpoint
- * @param {?string} target
+ * @param {string} finalEndpoint
+ * @param {string} target
  */
 function handleActivation(finalEndpoint, target) {
   const protocol = finalEndpoint.split(':', 1)[0];
