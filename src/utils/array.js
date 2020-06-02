@@ -101,12 +101,33 @@ export function fromIterator(iterator) {
  *
  * @param {Array<T>} array
  * @param {T} item
+ * @return {boolean}
  * @template T
  */
 export function pushIfNotExist(array, item) {
   if (array.indexOf(item) < 0) {
     array.push(item);
+    return true;
   }
+  return false;
+}
+
+/**
+ * Removes one item in the array. The array is assumed to have unique values
+ * only. Returns `true` if the array changed.
+ *
+ * @param {!Array<T>} array
+ * @param {T} item
+ * @return {boolean}
+ * @template T
+ */
+export function removeUniqueItem(array, item) {
+  const index = array.indexOf(item);
+  if (index == -1) {
+    return false;
+  }
+  array.splice(index, 1);
+  return true;
 }
 
 /**
