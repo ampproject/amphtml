@@ -16,6 +16,9 @@
 
 import {
   CONSENT_ITEM_STATE,
+  ConsentMetadataDef,
+  assertMetadataValues,
+  constructMetadata,
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
@@ -246,7 +249,9 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * TODO(micajuineho) add gdprApplies here
    * Listen to external consent flow iframe's response
+   * with consent string and metadata.
    */
   enableExternalInteractions_() {
     this.win.addEventListener('message', (event) => {
@@ -380,7 +385,7 @@ export class AmpConsent extends AMP.BaseElement {
    *
    * @param {string} action
    * @param {string=} consentString
-   * @param {JsonObject=} opt_consentMetadata
+   * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
   handleAction_(action, consentString, opt_consentMetadata) {
     if (!isEnumValue(ACTION_TYPE, action)) {
@@ -708,10 +713,11 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * If consentString is undefined or invalid, don't
-   * include any metadata in update.
+   * include any metadata in update. Otherwise, convert to
+   * to ConsentMetadataDef
    * @param {JsonObject=} opt_metadata
    * @param {string=} opt_consentString
-   * @return {?JsonObject|undefined}
+   * @return {ConsentMetadataDef|undefined}
    */
   configureMetadataByConsentString_(opt_metadata, opt_consentString) {
     if (!opt_metadata) {
@@ -724,7 +730,8 @@ export class AmpConsent extends AMP.BaseElement {
       );
       return;
     }
-    return opt_metadata;
+    assertMetadataValues(opt_metadata);
+    return constructMetadata(opt_metadata['consentStringType']);
   }
 }
 
