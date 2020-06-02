@@ -178,16 +178,18 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  buildCallback(concreteCSS = '') {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
-    this.element.classList.add('i-amphtml-story-reaction');
+    this.rootEl_.classList.add('i-amphtml-story-reaction');
+    this.element.classList.add('i-amphtml-story-reaction-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
+    devAssert(this.element.children.length == 0, 'Too many children');
     createShadowRootWithStyle(
       this.element,
       dev().assertElement(this.rootEl_),
-      CSS
+      CSS + concreteCSS
     );
   }
 
@@ -473,30 +475,39 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    this.backendDataPromise_.then(() => {
-      if (this.hasUserSelection_) {
-        return;
-      }
-
-      this.triggerAnalytics_(optionEl);
-      this.hasUserSelection_ = true;
-
-      if (this.optionsData_) {
-        this.optionsData_[optionEl.optionIndex_]['totalCount']++;
-        this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
-      }
-
-      this.mutateElement(() => {
-        if (this.optionsData_) {
-          this.updateOptionPercentages_(this.optionsData_);
+    this.backendDataPromise_
+      .then(() => {
+        if (this.hasUserSelection_) {
+          return;
         }
-        this.updateToPostSelectionState_(optionEl);
-      });
 
-      if (this.element.hasAttribute('endpoint')) {
-        this.executeReactionRequest_('POST', optionEl.optionIndex_);
-      }
-    });
+        this.triggerAnalytics_(optionEl);
+        this.hasUserSelection_ = true;
+
+        if (this.optionsData_) {
+          this.optionsData_[optionEl.optionIndex_]['totalCount']++;
+          this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
+        }
+
+        this.mutateElement(() => {
+          if (this.optionsData_) {
+            this.updateOptionPercentages_(this.optionsData_);
+          }
+          this.updateToPostSelectionState_(optionEl);
+        });
+
+        if (this.element.hasAttribute('endpoint')) {
+          this.executeReactionRequest_('POST', optionEl.optionIndex_);
+        }
+      })
+      .catch(() => {
+        // If backend is not properly connected, still update state.
+        this.triggerAnalytics_(optionEl);
+        this.hasUserSelection_ = true;
+        this.mutateElement(() => {
+          this.updateToPostSelectionState_(optionEl);
+        });
+      });
   }
 
   /**
