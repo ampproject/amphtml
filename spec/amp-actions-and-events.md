@@ -18,6 +18,10 @@ limitations under the License.
 
 [TOC]
 
+[tip type="note"]
+This documentation covers actions and events for AMP websites, stories and ads. Read [Actions and events in AMP email](amp-email-actions-and-events.md) for the AMP email format.
+[/tip]
+
 The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
 The value for the syntax is a simple domain-specific language of the form:
