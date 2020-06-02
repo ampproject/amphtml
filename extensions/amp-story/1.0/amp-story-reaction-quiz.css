@@ -173,7 +173,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
 }
 
 .i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-option-selected > .i-amphtml-story-reaction-quiz-answer-choice {
-    border: solid 2px var(--reaction-answer-choice-border) !important;
+    border-color: transparent !important;
     animation: answer-choice-bounce forwards 600ms linear;
     background-color: var(--reaction-answer-choice-background) !important;
 }
@@ -201,8 +201,6 @@ h3.i-amphtml-story-reaction-quiz-prompt {
 .i-amphtml-story-reaction-quiz-option::before {
     content: "" !important;
     position: absolute !important;
-    top: -1px !important;
-    left: -1px !important;
     width: 100% !important;
     height: 100% !important;
     border-radius: var(--reaction-chip-radius) !important;
@@ -254,14 +252,13 @@ h3.i-amphtml-story-reaction-quiz-prompt {
 }
 
 .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data .i-amphtml-story-reaction-quiz-option::before {
-    left: -101% !important;
+    left: -100% !important;
     width: 100% !important;
     height: 100% !important;
     border-radius: 0px !important;
     background: var(--reaction-theme-shading) !important;
     color: var(--reaction-theme-shading) !important;
     transition: transform 1s !important;
-    border: solid 2px !important;
 }
 
 .i-amphtml-story-reaction-post-selection.i-amphtml-story-reaction-has-data[dir=rtl] .i-amphtml-story-reaction-quiz-option::before {
