@@ -17,28 +17,38 @@
 import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 const jsnPrefix = 'https://jsn.24smi.net/';
+const smiJs = `${jsnPrefix}smi.js`;
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function _24smi(global, data) {
-  validateData(data, ['src']);
+  validateData(data, [['blockid', 'src']]);
   const {src} = data;
-  validateSrcPrefix(jsnPrefix, src);
+  let blockId = data['blockid'];
 
-  createContainer(global, getBlockId(src));
-  loadScript(global, src);
+  if (!blockId) {
+    validateSrcPrefix(jsnPrefix, src);
+    blockId = getBlockId(src);
+  }
+
+  const element = createContainer(global);
+  (global.smiq = global.smiq || []).push({
+    element,
+    blockId,
+  });
+  loadScript(global, smiJs);
 }
 
 /**
  * @param {!Window} global
- * @param {string} blockId
+ * @return {Element}
  */
-function createContainer(global, blockId) {
+function createContainer(global) {
   const d = global.document.createElement('div');
-  d.id = `smi_teaser_${blockId}`;
   global.document.getElementById('c').appendChild(d);
+  return d;
 }
 
 /**
