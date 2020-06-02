@@ -6509,10 +6509,10 @@ eslint-plugin-jasmine@4.1.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-4.1.1.tgz#afdf8ca6a91e85041d9e0fb650af446874bf8852"
   integrity sha512-uS7kvt7RPUB/gLDwhJ/Ax0APrmkj7In8VJWkiZLYHafz2Ix74mMRJx82YZZ3zHRa/YOuTL+ig6dW/aKwdNzUuw==
 
-eslint-plugin-jsdoc@25.2.1:
-  version "25.2.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-25.2.1.tgz#f4d1d6e3f4e78dc549ffd3bbb28dacdbd390bda9"
-  integrity sha512-xVf6asIk/Rp4NmX392K72002Dj8GdPW5dKWYu/tzT86H+Yi3Djeee0VF3Y94Wcj7xTH08C3hGpmtJJdtWnMiqQ==
+eslint-plugin-jsdoc@26.0.2:
+  version "26.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-26.0.2.tgz#f65f78f37cbd79c2f65ab9a338b43f92064e57bd"
+  integrity sha512-KtZjqtM3Z8x84vQBFKGUyBbZRGXYHVWSJ2XyYSUTc8KhfFrvzQ/GXPp6f1M1/YCNzP3ImD5RuDNcr+OVvIZcBA==
   dependencies:
     comment-parser "^0.7.4"
     debug "^4.1.1"
@@ -6520,7 +6520,7 @@ eslint-plugin-jsdoc@25.2.1:
     lodash "^4.17.15"
     regextras "^0.7.1"
     semver "^6.3.0"
-    spdx-expression-parse "^3.0.0"
+    spdx-expression-parse "^3.0.1"
 
 eslint-plugin-local@1.0.0:
   version "1.0.0"
@@ -16024,6 +16024,14 @@ spdx-expression-parse@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-3.0.0.tgz#99e119b7a5da00e05491c9fa338b7904823b41d0"
   integrity sha512-Yg6D3XpRD4kkOmTpdgbUiEJFKghJH03fiC1OPll5h/0sO6neh2jqRDVHOQ4o/LMea0tgCkbMgea5ip/e+MkWyg==
+  dependencies:
+    spdx-exceptions "^2.1.0"
+    spdx-license-ids "^3.0.0"
+
+spdx-expression-parse@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-3.0.1.tgz#cf70f50482eefdc98e3ce0a6833e4a53ceeba679"
+  integrity sha512-cbqHunsQWnJNE6KhVSMsMeH5H/L9EpymbzqTQ3uLwNCLZ1Q481oWaofqH7nO6V07xlXwY6PhQdQ2IedWx/ZK4Q==
   dependencies:
     spdx-exceptions "^2.1.0"
     spdx-license-ids "^3.0.0"
