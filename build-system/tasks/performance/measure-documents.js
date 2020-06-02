@@ -150,9 +150,10 @@ const readMetrics = (page) =>
     const firstPaint = getMetric('first-paint');
     const firstContentfulPaint = getMetric('first-contentful-paint');
 
+    console.log('window', window);
+    console.log('longtasks', window.longTask);
     function getMaxFirstInputDelay() {
       let longest = 0;
-
       window.longTasks.forEach((longTask) => {
         if (
           longTask.startTime > firstContentfulPaint &&
@@ -220,6 +221,7 @@ async function setupAdditionalHandlers(
       setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
     case 'defaultHandler':
+    default:
       await setupMeasurement(page);
       break;
   }
@@ -259,6 +261,7 @@ async function addHandlerMetric(handlerOptions, page) {
     case 'analyticsHandler':
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
+    default:
       return await readMetrics(page);
   }
 }
@@ -303,6 +306,7 @@ async function measureDocument(url, version, config) {
       '--enable-blink-features=LayoutInstabilityAPI',
       '--disable-web-security',
     ],
+    devTools: true,
   });
 
   const page = await browser.newPage();

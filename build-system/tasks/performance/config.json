@@ -1,17 +1,14 @@
 {
-  "headless": true,
-  "runs": 50,
+  "headless": false,
+  "runs": 2,
   "handlers": [
     {
       "handlerName": "defaultHandler",
-      "urls": ["http://localhost:8000/examples/bind/basic.amp.html"]
+      "urls": []
     },
     {
       "handlerName": "analyticsHandler",
-      "urls": [
-        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-basic.html",
-        "http://localhost:8000/test/manual/amp-analytics/performance-test-pages/visible-multiple.html"
-      ],
+      "urls": [],
       "timeout": 2000,
       "extraUrlParam": {
         "analytics": "amp-analytics-performance-param"
@@ -19,9 +16,7 @@
     },
     {
       "handlerName": "adsHandler",
-      "urls": [
-        "http://localhost:8000/test/fixtures/performance/amp-ad/hostile-inabox-env.html"
-      ],
+      "urls": [],
       "adsUrls": [
         "http://localhost:8000/test/fixtures/performance/amp-ad/amphtml-ad.html"
       ],
