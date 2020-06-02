@@ -31,6 +31,19 @@ const NAME = 'SocialShare';
 
 /**
  * @param {!JsonObject} props
+ *  type: !string,
+ *  endpoint: ?string,
+ *  paramUrl: ?string,
+ *  paramText: ?string,
+ *  paramMini: ?boolean,
+ *  paramRecipient: ?string,
+ *  ignoreParams: ?boolean,
+ *  additionalParams: ?JsonObject,
+ *  target: ?string,
+ *  width: ?string,
+ *  height: ?string,
+ *  tabIndex: ?string,
+ *  style ?string,
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {

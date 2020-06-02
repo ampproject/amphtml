@@ -43,18 +43,13 @@ export const _default = () => {
     'random',
   ];
   const type = select('type', knobConfigurations, knobConfigurations[0]);
-  const href = text('shareEndpoint', 'Not Specified');
-  const additionalParams = object('params', {'subject': 'test'});
+  const endpoint = text('endpoint', undefined);
   const paramUrl = text('paramUrl', undefined);
   const paramText = text('paramText', undefined);
   const paramMini = text('paramMini', undefined);
   const paramRecipient = text('paramRecipient', undefined);
-  /*
-  const bindings = object('bindings', {
-    'canonical_url': 'test2',
-    'recipient': 'email recipient',
-  });
-  */
+  const ignoreParams = select('ignoreParams', [true, false], false);
+  const additionalParams = object('additionalParams', {'subject': 'test'});
   const width = text('width', undefined);
   const height = text('height', undefined);
 
@@ -67,14 +62,13 @@ export const _default = () => {
       </p>
       <SocialShare
         type={type}
-        href={href}
-        shareEndpoint={href}
+        endpoint={endpoint}
         paramUrl={paramUrl}
         paramText={paramText}
         paramMini={paramMini}
         paramRecipient={paramRecipient}
+        ignoreParams={ignoreParams}
         additionalParams={additionalParams}
-        //bindings={bindings}
         width={width}
         height={height}
       />
