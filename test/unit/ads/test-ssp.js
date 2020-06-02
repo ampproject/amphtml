@@ -89,13 +89,6 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     );
   });
 
-  it('should add positions array on context', () => {
-    ssp(win, commonData);
-
-    expect(win.context.master.positions).to.not.be.undefined;
-    expect(win.context.master.positions).to.be.an('array').that.is.not.empty;
-  });
-
   it('should call computeInMasterFrame()', () => {
     ssp(win, commonData);
 
@@ -119,24 +112,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     );
   });
 
-  it('should call finish work with empty array', () => {
-    _3p.computeInMasterFrame.restore();
-    _3p.loadScript.restore();
-
-    const callbackSpy = sandbox.spy();
-
-    sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => cb());
-    sandbox
-      .stub(_3p, 'computeInMasterFrame')
-      .callsFake((global, id, work) => work(callbackSpy));
-
-    ssp(win, commonData);
-
-    expect(callbackSpy).to.have.been.calledOnce;
-    expect(callbackSpy).to.have.been.calledWith([]);
-  });
-
-  it('should call ssp.config()', () => {
+  it('should call finish work with true', () => {
     _3p.computeInMasterFrame.restore();
     _3p.loadScript.restore();
 
@@ -144,7 +120,6 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
 
     const sssp = {
       config: sandbox.spy(),
-      getAds: sandbox.spy(),
       writeAd: sandbox.spy(),
     };
 
@@ -160,21 +135,44 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
 
     ssp(win, commonData);
 
-    expect(callbackSpy).to.have.not.been.called;
-    expect(sssp.config).to.have.been.calledOnce;
-    expect(sssp.config).to.have.been.calledWith({site: 'https://test.com'});
-    expect(sssp.getAds).to.have.been.calledOnce;
-    expect(sssp.getAds).to.have.been.calledWith([
-      {id: 'id-1', width: '200', height: '200', zoneId: '1234'},
-    ]);
+    expect(callbackSpy).to.have.been.calledOnce;
+    expect(callbackSpy).to.have.been.calledWith(true);
   });
 
-  it('should call context.noContentAvailable() (position withou id)', () => {
+  it('should call ssp.config()', () => {
     _3p.computeInMasterFrame.restore();
+    _3p.loadScript.restore();
+
+    const callbackSpy = sandbox.spy();
+
+    const sssp = {
+      config: sandbox.spy(),
+      writeAd: sandbox.spy(),
+    };
+
+    sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => {
+      // Mock script adding global object
+      window.sssp = sssp;
+
+      cb();
+    });
+    sandbox
+      .stub(_3p, 'computeInMasterFrame')
+      .callsFake((global, id, work) => work(callbackSpy));
+
+    ssp(win, commonData);
+
+    expect(sssp.config).to.have.been.calledOnce;
+    expect(sssp.config).to.have.been.calledWith({site: 'https://test.com'});
+  });
+
+  it('should call context.noContentAvailable() when position is invalid', () => {
+    _3p.computeInMasterFrame.restore();
+    _3p.loadScript.restore();
 
     sandbox
       .stub(_3p, 'computeInMasterFrame')
-      .callsFake((global, id, work, cb) => cb([]));
+      .callsFake((global, id, work, cb) => cb(true));
 
     commonData.position = '{}';
 
@@ -185,26 +183,7 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     expect(win.context.noContentAvailable).to.have.been.calledWith();
   });
 
-  it('should call context.noContentAvailable() in case of invalid zone', () => {
-    _3p.computeInMasterFrame.restore();
-
-    sandbox
-      .stub(_3p, 'computeInMasterFrame')
-      .callsFake((global, id, work, cb) =>
-        cb([
-          {id: 'id-1', type: 'error'},
-          {id: 'id-2', type: 'empty'},
-        ])
-      );
-
-    ssp(win, commonData);
-
-    expect(win.context.renderStart).to.not.have.been.called;
-    expect(win.context.noContentAvailable).to.have.been.calledOnce;
-    expect(win.context.noContentAvailable).to.have.been.calledWith();
-  });
-
-  it('should call context.renderStart() and ssp.writeAd()', () => {
+  it('should call context.noContentAvailable() when script is not loaded', () => {
     _3p.computeInMasterFrame.restore();
     _3p.loadScript.restore();
 
@@ -213,6 +192,40 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
       getAds: sandbox.spy(),
       writeAd: sandbox.spy(),
     };
+    const callbackSpy = sandbox.spy();
+
+    sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => {
+      // Mock script adding global object
+      window.sssp = sssp;
+      window.context.master.ssp = sssp;
+      window.ssp = sssp;
+
+      cb();
+    });
+    sandbox
+      .stub(_3p, 'computeInMasterFrame')
+      .callsFake((global, id, work, cb) => {
+        work(callbackSpy);
+        cb(false);
+      });
+
+    ssp(win, commonData);
+
+    expect(win.context.renderStart).to.not.have.been.called;
+    expect(win.context.noContentAvailable).to.have.been.calledOnce;
+    expect(win.context.noContentAvailable).to.have.been.calledWith();
+  });
+
+  it('should call getAds()', () => {
+    _3p.computeInMasterFrame.restore();
+    _3p.loadScript.restore();
+
+    const sssp = {
+      config: sandbox.spy(),
+      getAds: sandbox.spy(),
+      writeAd: sandbox.spy(),
+    };
+    const callbackSpy = sandbox.spy();
 
     sandbox.stub(_3p, 'loadScript').callsFake((window, url, cb) => {
       // Mock script adding global object
@@ -224,15 +237,15 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     sandbox
       .stub(_3p, 'computeInMasterFrame')
       .callsFake((global, id, work, cb) => {
-        work();
-        cb([{id: 'id-1', type: 'iframe'}]);
+        work(callbackSpy);
+        cb(true);
       });
 
     ssp(win, commonData);
 
-    expect(win.context.renderStart).to.have.been.calledOnce;
-    expect(win.context.renderStart).to.have.been.calledWith();
-
-    expect(sssp.writeAd).to.have.been.calledOnce;
+    expect(sssp.getAds).to.have.been.calledOnce;
+    expect(sssp.getAds).to.have.been.calledWith([
+      {id: 'id-1', width: '200', height: '200', zoneId: '1234'},
+    ]);
   });
 });
