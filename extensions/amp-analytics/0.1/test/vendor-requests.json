@@ -403,6 +403,11 @@
     "host": "https://api.retargetly.com",
     "page": "https://api.retargetly.com/api?id=!accountId&src=!sourceId&url=_source_url_&n=_title_&ref=_document_referrer_&ua=_user_agent_&random=_random_&bl=_browser_language_&source=amp"
   },
+  "rudderstack": {
+    "base": "<ignore for test>",
+    "page": "https://hosted.rudderlabs.com/pixel/v1/page?writeKey=!writeKey&context.library.name=Rudderstack AMP SDK&context.library.version=1.0.0&context.platform=AMP&anonymousId=_client_id(rl_anonymous_id)_&context.locale=_browser_language_&context.userAgent=_user_agent_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&properties.path=_canonical_path_&properties.url=_canonical_url_&properties.referrer=_document_referrer_&properties.title=_title_&name=!pageName",
+    "track": "https://hosted.rudderlabs.com/pixel/v1/track?writeKey=!writeKey&context.library.name=Rudderstack AMP SDK&context.library.version=1.0.0&context.platform=AMP&anonymousId=_client_id(rl_anonymous_id)_&context.locale=_browser_language_&context.userAgent=_user_agent_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=!eventName"
+  },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",
     "base": "?writeKey=!writeKey&context.library.name=amp&anonymousId=_client_id(AMP_ECID_GOOGLE%2C%2C_ga)_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
