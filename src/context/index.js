@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export {ContextProp, contextProp} from './prop';
+
 import {ContextNode} from './node';
 
 /**

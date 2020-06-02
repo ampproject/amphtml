@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Values} from './values';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
@@ -198,6 +199,9 @@ export class ContextNode {
      */
     this.children = null;
 
+    /** @package {!Values} */
+    this.values = new Values(this);
+
     /** @private {boolean} */
     this.parentOverridden_ = false;
 
@@ -256,6 +260,11 @@ export class ContextNode {
     if (root != oldRoot) {
       // The root has changed.
       this.root = root;
+
+      // Make sure the tree changes have been reflected for values.
+      this.values.rootUpdated();
+
+      // Propagate the root to the subtree.
       if (this.children) {
         this.children.forEach((child) => child.updateRoot(root));
       }
@@ -322,6 +331,8 @@ export class ContextNode {
           }
         }
       }
+
+      this.values.parentUpdated();
     }
 
     // Check the root.
