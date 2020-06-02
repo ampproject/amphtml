@@ -385,6 +385,13 @@ Type attribute value: `reppublika`
 
 Type attribute value: `retargetly`
 
+### RudderStack
+
+Type attribute value: `rudderstack`
+
+Adds support for RudderStack page views and events.
+Find out more on the implementation check our [documentation](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
+
 ### Segment
 
 Type attribute value: `segment`
