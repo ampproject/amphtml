@@ -17,6 +17,7 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
+  ConsentMetadataDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -93,7 +94,7 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {Object=} opt_consentMetadata
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    */
   updateConsentInstanceState(state, consentStr, opt_consentMetadata) {
     if (!this.instance_) {
@@ -305,7 +306,7 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
-   * @param {Object=} opt_consentMetadata
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
   update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
