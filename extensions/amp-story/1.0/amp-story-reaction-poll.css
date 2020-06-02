@@ -1,0 +1,110 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+.i-amphtml-story-reaction-poll-container {
+  display: flex !important;
+  justify-content: center !important;
+  height: 90px !important;
+  max-width: 296px !important;
+  border-radius: 16px !important;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
+  color: var(--reaction-accent-color) !important;
+  background: var(--reaction-background-color) !important;
+  overflow: hidden !important;
+  font-family: 'Poppins', sans-serif !important;
+
+  --post-select-scale: 0.5 !important;
+  --post-select-scale-variable: 1 !important;
+}
+
+.i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection) {
+  cursor: pointer !important;
+}
+
+.i-amphtml-story-reaction-option {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  flex-direction: column !important;
+  flex-grow: 50 !important;
+  flex: 100 !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection)
+  .i-amphtml-story-reaction-option-divider {
+  height: 100% !important;
+  width: 1px !important;
+  opacity: 0.3 !important;
+  background-color: var(--reaction-accent-color) !important;
+}
+
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected::before {
+  content: '' !important;
+  background-color: var(--reaction-accent-color) !important;
+  opacity: 0.2 !important;
+  position: absolute !important;
+  left: 0px !important;
+  right: 0px !important;
+  height: 100% !important;
+}
+
+.i-amphtml-story-reaction-option-title {
+  font-weight: 800 !important;
+  font-size: 28px !important;
+  margin: 0 !important;
+  line-height: 36px !important;
+  width: 124px !important;
+  height: 66px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-title {
+  transform: scale(var(--post-select-scale)) !important;
+  height: 33px !important;
+}
+
+.i-amphtml-story-reaction-option-title-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-title-text {
+  transform: scale(var(--post-select-scale-variable)) !important;
+}
+
+.i-amphtml-story-reaction-option-percentage-text {
+  font-weight: 700 !important;
+  font-size: 22px !important;
+  display: none !important;
+}
+
+.i-amphtml-story-reaction-post-selection
+  .i-amphtml-story-reaction-option-percentage-text {
+  display: block !important;
+}
