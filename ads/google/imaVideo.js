@@ -1245,7 +1245,7 @@ function enterFullscreen(global) {
     fullscreenWidth = window.screen.width;
     fullscreenHeight = window.screen.height;
     requestFullscreen.call(global.document.documentElement);
-  } else {
+  } else if (videoPlayer.webkitSupportsFullscreen()) {
     // Use native fullscreen (iPhone)
     videoPlayer.webkitEnterFullscreen();
     // Pause the video when we leave fullscreen. iPhone does this
