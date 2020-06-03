@@ -24,6 +24,7 @@ import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../sr
 import {
   AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
@@ -239,6 +240,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         branches: [
           [FIE_INIT_CHUNKING_EXP.control],
           [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
+      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [RENDER_ON_IDLE_FIX_EXP.control],
+          [RENDER_ON_IDLE_FIX_EXP.experiment],
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
