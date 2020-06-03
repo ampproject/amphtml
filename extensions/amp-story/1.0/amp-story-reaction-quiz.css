@@ -310,10 +310,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
         border: solid 2px var(--reaction-answer-choice-background);
         transform: scale(0);
     }
-    20% {
-        visibility: hidden;
-    }
-    21% { 
+    1% { 
         visibility: visible;
         transform: scale(0.01); 
     }
