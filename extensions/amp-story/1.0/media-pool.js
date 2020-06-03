@@ -277,6 +277,9 @@ export class MediaPool {
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        // In Firefox, cloneNode() does not properly copy the muted property
+        // that was set in the seed. We need to set it again here.
+        mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.enqueueMediaElementTask_(
           mediaEl,
