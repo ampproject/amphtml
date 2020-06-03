@@ -41,6 +41,7 @@ export function lentainform(global, data) {
     changes.forEach(function(c) {
       window['intersectionRect' + data.widget] = c.intersectionRect;
       window['boundingClientRect' + data.widget] = c.boundingClientRect;
+      window['ampOptions' + data.widget] = data.options;
     });
   });
 
