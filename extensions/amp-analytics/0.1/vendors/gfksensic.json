@@ -1,8 +1,9 @@
 {
+  "requestOrigin": "https://${regionID}-config.sensic.net",
   "requests": {
-    "base": "https://${regionID}-config.sensic.net/tp?${page_params}&${client_params}",
+    "base": "/tp?${page_params}&${client_params}",
     "page_params": "r=${r}&ua=${ua}&v=${v}&l=${l}",
-    "client_params": "p=${regionID}&m=${mediaID}",
+    "client_params": "p=${regionID}&m=${mediaID}&ai=${clientId(cid)}",
     "event_params": "ut=${ut}&pr=${pr}&rn=${rn}&c=${contentID}&vt=${vt}&sp=${sp}&st=${st}",
     "audio-play": "${base}&${event_params}&ty=PL&sn=COUNTER(play_${pr})",
     "audio-stop": "${base}&${event_params}&ty=ST&sn=COUNTER(stop_${pr})"
