@@ -126,18 +126,29 @@ function copyToCache(filePath, version = EXPERIMENT) {
 }
 
 /**
- * Copy an image file from example/img to cache/img from filePath,
- * to be used by both control and experiment
+ * Copy an image from absoluteImgPath to cache/img if not present.
+ * To be used by both control and experiment
  *
- * @param {string} filePath
+ * @param {string} configUrl
+ * @param {string} src
  */
-function copyImageToCache(filePath) {
+function maybeCopyImageToCache(configUrl, src) {
+  // Remove `?...` that may be used at the end of the src for uniqueness
+  src = src.split('?')[0];
+  const absoluteFromImgPath = getAbsolutePathFromRelativePath(configUrl, src);
+
+  if (src.startsWith('http') || !fs.existsSync(absoluteFromImgPath)) {
+    return;
+  }
+
   touchDirs();
 
-  const fromPath = path.join(__dirname, '../../../examples/img', filePath);
-  const destPath = path.join(IMG_CACHE_PATH, filePath);
+  const filename = src.split('/').pop();
+  const destPath = path.join(IMG_CACHE_PATH, filename);
 
-  fs.copyFileSync(fromPath, destPath);
+  if (!fs.existsSync(destPath)) {
+    fs.copyFileSync(absoluteFromImgPath, destPath);
+  }
 }
 
 /**
@@ -165,6 +176,31 @@ function getFileFromAbsolutePath(filePath) {
   return Promise.resolve(fs.readFileSync(filePath));
 }
 
+/**
+ * Strip localhost:8000 from url and remove the filename
+ *
+ * @param {string} testPageUrl
+ * @return {string}
+ */
+function getFolderLocation(testPageUrl) {
+  const removedLocalHost = testPageUrl
+    .split('http://localhost:8000')[1]
+    .split('/');
+  removedLocalHost.pop();
+  return removedLocalHost.join('/');
+}
+
+/**
+ * Get the absolute path of the relative src
+ *
+ * @param {string} testPageUrl
+ * @param {string} src
+ * @return {string}
+ */
+function getAbsolutePathFromRelativePath(testPageUrl, src) {
+  return path.join(__dirname, '../../..', getFolderLocation(testPageUrl), src);
+}
+
 module.exports = {
   CDN_URL,
   CONTROL,
@@ -175,11 +211,12 @@ module.exports = {
   RESULTS_PATH,
   V0_PATH,
   copyToCache,
-  copyImageToCache,
+  maybeCopyImageToCache,
   downloadToDisk,
   getFileFromAbsolutePath,
   getLocalPathFromExtension,
   getLocalVendorConfig,
+  getAbsolutePathFromRelativePath,
   localFileToCachePath,
   urlToCachePath,
 };
