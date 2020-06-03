@@ -19,14 +19,19 @@ import {dict} from '../../../src/utils/object';
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
- * @return {!JsonObject}
+ * @return {!SocialShareConfigDef}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
 }
 
 /**
- * @type {!JsonObject}
+ * @typedef {!Object<string, !JsonObject|string|function(!JsonObject):string>}
+ */
+let SocialShareConfigDef;
+
+/**
+ * @type {!Object <string, !SocialShareConfigDef>}
  */
 const BUILTINS = dict({
   'twitter': {

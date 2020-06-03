@@ -53,7 +53,7 @@ const getTypeConfigOrUndefined = (type, viewer, platform) => {
       return;
     }
   }
-  return getSocialConfig(type) || dict();
+  return /** @type {!JsonObject} */ (getSocialConfig(type)) || dict();
 };
 
 /**

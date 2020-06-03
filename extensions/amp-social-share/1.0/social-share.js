@@ -43,7 +43,7 @@ const NAME = 'SocialShare';
  *  width: ?string,
  *  height: ?string,
  *  tabIndex: ?string,
- *  style ?string,
+ *  style: ?string,
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {
@@ -110,7 +110,11 @@ function checkProps(props) {
   // User must provide endpoint if they choose a type that is not
   // pre-configured
   const typeConfig = getSocialConfig(type) || dict();
-  const baseEndpoint = endpoint || typeConfig['shareEndpointPreact'](props);
+  const baseEndpoint =
+    endpoint ||
+    /** @type {function(!JsonObject):string} */ (typeConfig[
+      'shareEndpointPreact'
+    ])(props);
   if (baseEndpoint === undefined) {
     throw new Error(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
