@@ -23,12 +23,15 @@
     "sourceType": "module"
   },
   "globals": {
+    "INTERSECTION_OBSERVER_POLYFILL": "readonly",
+    "INTERSECTION_OBSERVER_POLYFILL_INABOX": "readonly",
+    "MOVE_FIXED_LAYER": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
     "IS_ESM": "readonly",
-
     "AMP": "readonly",
     "context": "readonly",
-    "global": "readonly"
+    "global": "readonly",
+    "globalThis": "readonly"
   },
   "settings": {
     "jsdoc": {

@@ -579,6 +579,12 @@ export class GoogleSubscriptionsPlatform {
         if (messageTextColor) {
           opts.messageTextColor = messageTextColor;
         }
+        const messageNumber = element.getAttribute(
+          'subscriptions-message-number'
+        );
+        if (messageNumber) {
+          opts.messageNumber = messageNumber;
+        }
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
       default:
@@ -653,7 +659,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
     'subscriptions-google',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-     * @return {*} TODO(#23582): Specify return type
+     * @return {!GoogleSubscriptionsPlatformService}
      */
     function (ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
@@ -678,7 +684,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package
  * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof Fetcher}
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
@@ -688,7 +694,7 @@ export function getFetcherClassForTesting() {
  * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
  * @package
  * @visibleForTesting
- * @return {*}
+ * @return {typeof AmpFetcher}
  */
 export function getAmpFetcherClassForTesting() {
   return AmpFetcher;
@@ -698,7 +704,7 @@ export function getAmpFetcherClassForTesting() {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package
  * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof PageConfig}
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
@@ -708,7 +714,7 @@ export function getPageConfigClassForTesting() {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package
  * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof SubscribeResponse}
  */
 export function getSubscribeResponseClassForTesting() {
   return SubscribeResponse;

@@ -29,6 +29,7 @@ import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -63,13 +64,17 @@ export const MAX_HEIGHT_EXP = {
 export class ResponsiveState {
   /**
    * @param {!Element} element
+   * @param {boolean=} isContainerWidth
    */
-  constructor(element) {
+  constructor(element, isContainerWidth) {
     /**  @private {!Element}*/
     this.element_ = element;
 
     /** @private {boolean} */
     this.isAlignedToViewport_ = false;
+
+    /** @private {boolean} */
+    this.isContainerWidth_ = !!isContainerWidth;
 
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
@@ -81,11 +86,42 @@ export class ResponsiveState {
    *  corresponds to a responsive ad, otherwise null.
    */
   static createIfResponsive(element) {
-    const autoFormat = element.getAttribute('data-auto-format');
-    if (!hasOwn(RAFMT_PARAMS, autoFormat)) {
+    if (
+      !this.isContainerWidth_ &&
+      !hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))
+    ) {
       return null;
     }
     return new ResponsiveState(element);
+  }
+
+  /**
+   * @param {!Element} element to potentially create state for.
+   * @return {?ResponsiveState} fall back state.
+   */
+  static createContainerWidthState(element) {
+    return new ResponsiveState(element, true);
+  }
+
+  /**
+   * Upgrades the ad unit to full-width responsive if it does not fall back to container width.
+   * @param {!Element} element
+   * @param {string} adClientId
+   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
+   */
+  static maybeUpgradeToResponsive(element, adClientId) {
+    // For Desktop Full-width Ad request, it should fall back to container width.
+    if (
+      element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow_(element)
+    ) {
+      return ResponsiveState.convertToContainerWidth_(element);
+    }
+
+    return ResponsiveState.maybeUpgradeToFullWidthResponsive(
+      element,
+      adClientId
+    );
   }
 
   /**
@@ -95,7 +131,7 @@ export class ResponsiveState {
    * @param {string} adClientId
    * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
    */
-  static maybeUpgradeToResponsive(element, adClientId) {
+  static maybeUpgradeToFullWidthResponsive(element, adClientId) {
     if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
       return Promise.resolve(null);
     }
@@ -149,6 +185,41 @@ export class ResponsiveState {
   }
 
   /**
+   * Convert the element to container width responsive.
+   *
+   * @param {!Element} element
+   * @return {!Promise<?ResponsiveState>} a promise that return container width responsive state.
+   * @private
+   */
+  static convertToContainerWidth_(element) {
+    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+
+    return vsync
+      .runPromise(
+        {
+          measure: (state) => {
+            state./*OK*/ clientWidth = String(
+              element./*OK*/ parentElement./*OK*/ clientWidth
+            );
+          },
+          mutate: (state) => {
+            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('width', state./*OK*/ clientWidth);
+            element.removeAttribute('data-full-width');
+            element.removeAttribute('data-auto-format');
+          },
+        },
+        {clientWidth: ''}
+      )
+      .then(() => {
+        const state = ResponsiveState.createContainerWidthState(element);
+        devAssert(state != null, 'Convert to container width state failed');
+        this.isContainerWidth_ = true;
+        return /** @type {!ResponsiveState} */ (state);
+      });
+  }
+
+  /**
    * Sets up a listener for a pingback of publisher settings in the ad response and
    * writing such settings to localstorage.
    *
@@ -166,9 +237,6 @@ export class ResponsiveState {
    * @return {?Promise} a promise that resolves when ad size settings are updated, or null if no listener was attached.
    */
   static maybeAttachSettingsListener(element, iframe, adClientId) {
-    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
-      return null;
-    }
     let promiseResolver;
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
@@ -176,24 +244,31 @@ export class ResponsiveState {
     const win = toWin(element.ownerDocument.defaultView);
 
     const listener = (event) => {
-      if (event['source'] != iframe.contentWindow) {
+      const data = getData(event);
+      let dataList = null;
+      if (typeof data == 'string') {
+        dataList = tryParseJson(data);
+      } else if (typeof data == 'object') {
+        dataList = data;
+      }
+      if (dataList == null) {
         return;
       }
-      const data = getData(event);
-      // data will look like this:
+
+      // dataList will look like this:
       // {
       //   'googMsgType': 'adsense-settings',
       //   'adClient': 'ca-pub-123',
       //   'enableAutoAdSize': '1'
       // }
-      if (!!data && data['googMsgType'] != 'adsense-settings') {
+      if (!!dataList && dataList['googMsgType'] != 'adsense-settings') {
         return;
       }
-      if (data['adClient'] != adClientId) {
+      if (dataList['adClient'] != adClientId) {
         return;
       }
 
-      const autoAdSizeStatus = data['enableAutoAdSize'] == '1';
+      const autoAdSizeStatus = dataList['enableAutoAdSize'] == '1';
       win.removeEventListener('message', listener);
 
       Services.storageForDoc(element)
@@ -231,6 +306,11 @@ export class ResponsiveState {
 
   /** @return {boolean} */
   isValidElement() {
+    // Fall back state
+    if (this.isContainerWidth_) {
+      return true;
+    }
+
     if (!this.element_.hasAttribute('data-full-width')) {
       user().warn(
         TAG,
@@ -283,15 +363,26 @@ export class ResponsiveState {
           )['direction'];
         },
         mutate: (state) => {
-          if (state.direction == 'rtl') {
-            setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
+          // If it's fall back state, align with the container width. Otherwise,
+          // adjust the margin for full-width expansion.
+          if (this.isContainerWidth_) {
+            setStyle(this.element_, 'width', '100%');
           } else {
-            setStyle(this.element_, 'marginLeft', -layoutBox.left, 'px');
+            if (state.direction == 'rtl') {
+              setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
+            } else {
+              setStyle(this.element_, 'marginLeft', -layoutBox.left, 'px');
+            }
           }
         },
       },
       {direction: ''}
     );
+  }
+
+  /** @return {boolean} */
+  isContainerWidthState() {
+    return this.isContainerWidth_;
   }
 
   /**

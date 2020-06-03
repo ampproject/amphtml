@@ -1,8 +1,8 @@
 {
   "allow-doc-opt-in": [
     "amp-next-page",
-    "inabox-viewport-friendly",
-    "analytics-chunks"
+    "analytics-chunks",
+    "analytics-chunks-inabox"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
@@ -34,8 +34,11 @@
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
-  "random-subdomain-for-safeframe": 0.02,
+  "random-subdomain-for-safeframe": 0.1,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1
+  "version-locking": 1,
+  "amp-ad-no-center-css": 1,
+  "analytics-chunks": 1,
+  "fie-init-chunking": 0.1
 }

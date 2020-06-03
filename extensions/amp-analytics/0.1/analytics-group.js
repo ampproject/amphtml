@@ -106,8 +106,7 @@ export class AnalyticsGroup {
     };
     if (
       this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
-      !isExperimentOn(this.win_, 'analytics-chunks') ||
-      getMode(this.win_).runtime == 'inabox'
+      !isAnalyticsChunksExperimentOn(this.win_)
     ) {
       task();
     } else {
@@ -120,4 +119,16 @@ export class AnalyticsGroup {
     this.triggerCount_++;
     return deferred.promise;
   }
+}
+
+/**
+ * Determine if the analytics-chunks experiment should be applied
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isAnalyticsChunksExperimentOn(win) {
+  if (getMode(win).runtime == 'inabox') {
+    return isExperimentOn(win, 'analytics-chunks-inabox');
+  }
+  return isExperimentOn(win, 'analytics-chunks');
 }

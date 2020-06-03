@@ -26,12 +26,16 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -49,6 +53,13 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
+
+/** @const {!{id: string, control: string, experiment: string}} */
+const RENDER_ON_IDLE_FIX_EXP = {
+  id: 'render-on-idle-fix',
+  control: '21066311',
+  experiment: '21066312',
+};
 
 /**
  * @implements {ResourcesInterface}
@@ -148,7 +159,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -193,6 +204,18 @@ export class ResourcesImpl {
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
+
+    /**
+     * Number of resources that were laid out after entering viewport.
+     * @private {number}
+     */
+    this.slowLayoutCount_ = 0;
+
+    /**
+     * Total number of laid out resources.
+     * @private {number}
+     */
+    this.totalLayoutCount_ = 0;
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
@@ -647,7 +670,6 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
-    this.maybeChangeHeight_ = true;
     dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }
@@ -686,7 +708,9 @@ export class ResourcesImpl {
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     const firstPassAfterDocumentReady =
-      this.documentReady_ && this.firstPassAfterDocumentReady_;
+      this.documentReady_ &&
+      this.firstPassAfterDocumentReady_ &&
+      this.ampInitialized_;
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
@@ -784,6 +808,14 @@ export class ResourcesImpl {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
       dev().fine(TAG_, 'signal: ready-scan');
     }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    if (this.totalLayoutCount_ === 0) {
+      return 0;
+    }
+    return this.slowLayoutCount_ / this.totalLayoutCount_;
   }
 
   /**
@@ -1126,6 +1158,21 @@ export class ResourcesImpl {
   }
 
   /**
+   * Selects into an experiment for render-on-idle-fix.
+   * @private
+   */
+  divertRenderOnIdleFixExperiment_() {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../experiments.ExperimentInfo>} */ ({
+      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
+        isTrafficEligible: () => true,
+        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
+      },
+    });
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  }
+
+  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1338,19 +1385,40 @@ export class ResourcesImpl {
       }
     }
 
-    // With IntersectionObserver, skip phases 5+.
-    if (this.intersectionObserver_) {
-      return;
-    }
-
+    this.divertRenderOnIdleFixExperiment_();
+    const lastDequeueTime = this.exec_.getLastDequeueTime();
+    // TODO(powerivq): add tests for this fix once ready to launch
     if (
       this.visible_ &&
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
-      now > this.exec_.getLastDequeueTime() + 5000
+      now > lastDequeueTime + 5000 &&
+      (!isExperimentOn(this.win, 'render-on-idle-fix') ||
+        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
+          RENDER_ON_IDLE_FIX_EXP.control ||
+        lastDequeueTime > 0)
     ) {
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
+      // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
-      // Phase 5: Idle layout: layout more if we are otherwise not doing much.
+      for (
+        let i = 0;
+        i < this.resources_.length && idleScheduledCount < 4;
+        i++
+      ) {
+        const r = this.resources_[i];
+        if (
+          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          !r.hasOwner() &&
+          r.isDisplayed() &&
+          r.idleRenderOutsideViewport()
+        ) {
+          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
       // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
       for (
         let i = 0;
@@ -1387,8 +1455,7 @@ export class ResourcesImpl {
     const now = Date.now();
 
     let timeout = -1;
-    const state = Object.create(null);
-    let task = this.queue_.peek(this.boundTaskScorer_, state);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev().fine(
@@ -1398,7 +1465,7 @@ export class ResourcesImpl {
         'sched at',
         task.scheduleTime,
         'score',
-        this.boundTaskScorer_(task, state),
+        this.boundTaskScorer_(task),
         'timeout',
         timeout
       );
@@ -1454,7 +1521,7 @@ export class ResourcesImpl {
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_, state);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
@@ -1499,11 +1566,10 @@ export class ResourcesImpl {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
-   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task, unusedCache) {
+  calcTaskScore_(task) {
     // TODO(jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
@@ -1582,6 +1648,11 @@ export class ResourcesImpl {
    * @private
    */
   taskComplete_(task, success, opt_reason) {
+    this.totalLayoutCount_++;
+    if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
+      this.slowLayoutCount_++;
+    }
+
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
@@ -1628,7 +1699,8 @@ export class ResourcesImpl {
     if (
       !forceOutsideViewport &&
       !resource.isInViewport() &&
-      !resource.renderOutsideViewport()
+      !resource.renderOutsideViewport() &&
+      !resource.idleRenderOutsideViewport()
     ) {
       return false;
     }

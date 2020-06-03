@@ -37,6 +37,11 @@
     "pageview": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
     "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
   },
+  "blueconic": {
+    "event": "https://!tenantId/s/!pixelId.gif?",
+    "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
+    "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo_&userAgent=_user_agent_"
+  },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
     "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
@@ -79,8 +84,8 @@
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
-    "base": "https://sb.scorecardresearch.com/b?",
-    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
+    "base": "https://sb.scorecardresearch.com/p?",
+    "pageview": "https://sb.scorecardresearch.com/p?c1=2&c2=1000001&cs_ucfr=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C)_&cs_amp_consent=_consent_state_&cs_pv=_page_view_id_&c12=_client_id(comScore)_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
   "cxense": {
     "host": "https://scomcluster.cxense.com",
@@ -176,12 +181,16 @@
     "dnsBase": "https://ad.doubleclick.net/ddm/clk/"
   },
   "ibeatanalytics": {
-    "host": "https://ibeat.indiatimes.com",
-    "track": "https://ibeat.indiatimes.com/ping-amp?url=_ampdoc_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&ct=!ct&pt=!pt&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&ctIds=!ctIds"
+    "host": "https://api.ibeat-analytics.com",
+    "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1"
   },
   "infonline": {
     "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=pageview",
     "event": "!url?st=!st&ev=!ev&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=event"
+  },
+  "infonline_anonymous": {
+    "pageview": "!url?ap=1&dn=!dn&cn=!cn&st=!st&co=!co&cp=!cp&au=_canonical_url_&ar=_document_referrer_&ash=_screen_height_&asw=_screen_width_&tp=pageview",
+    "event": "!url?ap=1&dn=!dn&cn=!cn&ev=!ev&st=!st&co=!co&cp=!cp&au=_canonical_url_&ar=_document_referrer_&ash=_screen_height_&asw=_screen_width_&tp=event"
   },
   "iplabel": {
     "collectorUrl": "m.col.ip-label.net",
@@ -401,6 +410,11 @@
   "retargetly": {
     "host": "https://api.retargetly.com",
     "page": "https://api.retargetly.com/api?id=!accountId&src=!sourceId&url=_source_url_&n=_title_&ref=_document_referrer_&ua=_user_agent_&random=_random_&bl=_browser_language_&source=amp"
+  },
+  "rudderstack": {
+    "base": "<ignore for test>",
+    "page": "https://hosted.rudderlabs.com/pixel/v1/page?writeKey=!writeKey&context.library.name=Rudderstack AMP SDK&context.library.version=1.0.0&context.platform=AMP&anonymousId=_client_id(rl_anonymous_id)_&context.locale=_browser_language_&context.userAgent=_user_agent_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&properties.path=_canonical_path_&properties.url=_canonical_url_&properties.referrer=_document_referrer_&properties.title=_title_&name=!pageName",
+    "track": "https://hosted.rudderlabs.com/pixel/v1/track?writeKey=!writeKey&context.library.name=Rudderstack AMP SDK&context.library.version=1.0.0&context.platform=AMP&anonymousId=_client_id(rl_anonymous_id)_&context.locale=_browser_language_&context.userAgent=_user_agent_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=!eventName"
   },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",

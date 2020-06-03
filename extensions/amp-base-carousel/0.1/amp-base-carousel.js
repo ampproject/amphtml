@@ -160,6 +160,11 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
@@ -233,6 +238,10 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * Moves the Carousel to a given index.
    * @param {number} index
+   * @param {{
+   *   smoothScroll: (boolean|undefined),
+   *   actionSource: (!ActionSource|undefined),
+   * }=} options
    */
   goToSlide(index, {smoothScroll = false, actionSource} = {}) {
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});

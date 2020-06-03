@@ -470,7 +470,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -527,6 +527,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-fit-text',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -891,6 +897,7 @@ exports.extensionBundles = [
         'amp-story-hint',
         'amp-story-info-dialog',
         'amp-story-reaction',
+        'amp-story-reaction-poll',
         'amp-story-reaction-quiz',
         'amp-story-share',
         'amp-story-share-menu',
@@ -931,7 +938,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-selector',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1023,13 +1030,13 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-social-share',
-    version: '0.2',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
